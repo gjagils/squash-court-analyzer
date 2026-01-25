@@ -11,6 +11,10 @@
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002; };
 		A1000003 /* CourtView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003; };
 		A1000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000004; };
+		A1000005 /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000005; };
+		A1000006 /* ScoreboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000006; };
+		A1000007 /* PlayerButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000007; };
+		A1000008 /* iPhoneMockupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000008; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -18,6 +22,10 @@
 		A2000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A2000003 /* CourtView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourtView.swift; sourceTree = "<group>"; };
 		A2000004 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A2000005 /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
+		A2000006 /* ScoreboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardView.swift; sourceTree = "<group>"; };
+		A2000007 /* PlayerButtonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerButtonsView.swift; sourceTree = "<group>"; };
+		A2000008 /* iPhoneMockupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPhoneMockupView.swift; sourceTree = "<group>"; };
 		A3000001 /* SquashAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SquashAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -65,6 +73,9 @@
 			children = (
 				A2000002 /* ContentView.swift */,
 				A2000003 /* CourtView.swift */,
+				A2000006 /* ScoreboardView.swift */,
+				A2000007 /* PlayerButtonsView.swift */,
+				A2000008 /* iPhoneMockupView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -72,6 +83,7 @@
 		A5000005 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				A2000005 /* Game.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -155,6 +167,10 @@
 				A1000001 /* SquashAnalyzerApp.swift in Sources */,
 				A1000002 /* ContentView.swift in Sources */,
 				A1000003 /* CourtView.swift in Sources */,
+				A1000005 /* Game.swift in Sources */,
+				A1000006 /* ScoreboardView.swift in Sources */,
+				A1000007 /* PlayerButtonsView.swift in Sources */,
+				A1000008 /* iPhoneMockupView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

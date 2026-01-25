@@ -17,6 +17,8 @@
 		A1000008 /* iPhoneMockupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000008; };
 		A1000009 /* CourtZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000009; };
 		A1000010 /* Point.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010; };
+		A1000011 /* GameSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000011; };
+		A1000012 /* AnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000012; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +32,8 @@
 		A2000008 /* iPhoneMockupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPhoneMockupView.swift; sourceTree = "<group>"; };
 		A2000009 /* CourtZone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourtZone.swift; sourceTree = "<group>"; };
 		A2000010 /* Point.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Point.swift; sourceTree = "<group>"; };
+		A2000011 /* GameSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSetupView.swift; sourceTree = "<group>"; };
+		A2000012 /* AnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisView.swift; sourceTree = "<group>"; };
 		A3000001 /* SquashAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SquashAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -80,6 +84,8 @@
 				A2000006 /* ScoreboardView.swift */,
 				A2000007 /* PlayerButtonsView.swift */,
 				A2000008 /* iPhoneMockupView.swift */,
+				A2000011 /* GameSetupView.swift */,
+				A2000012 /* AnalysisView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -179,6 +185,8 @@
 				A1000008 /* iPhoneMockupView.swift in Sources */,
 				A1000009 /* CourtZone.swift in Sources */,
 				A1000010 /* Point.swift in Sources */,
+				A1000011 /* GameSetupView.swift in Sources */,
+				A1000012 /* AnalysisView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

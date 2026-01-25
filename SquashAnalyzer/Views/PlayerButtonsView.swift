@@ -2,24 +2,26 @@ import SwiftUI
 
 struct PlayerButtonsView: View {
     let game: Game
-    let onScore: (Player) -> Void
+    let onSelectPlayer: (Player) -> Void
 
     var body: some View {
         HStack(spacing: 16) {
             PlayerButton(
                 playerName: game.player1Name,
                 color: .blue,
+                isSelected: game.selectedPlayer == .player1,
                 isDisabled: game.isGameOver
             ) {
-                onScore(.player1)
+                onSelectPlayer(.player1)
             }
 
             PlayerButton(
                 playerName: game.player2Name,
                 color: .red,
+                isSelected: game.selectedPlayer == .player2,
                 isDisabled: game.isGameOver
             ) {
-                onScore(.player2)
+                onSelectPlayer(.player2)
             }
         }
     }
@@ -28,6 +30,7 @@ struct PlayerButtonsView: View {
 struct PlayerButton: View {
     let playerName: String
     let color: Color
+    let isSelected: Bool
     let isDisabled: Bool
     let action: () -> Void
 
@@ -36,7 +39,7 @@ struct PlayerButton: View {
     var body: some View {
         Button(action: action) {
             VStack(spacing: 6) {
-                Text("PUNT")
+                Text(isSelected ? "SCOORT" : "PUNT")
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundColor(.white.opacity(0.8))
 
@@ -54,7 +57,9 @@ struct PlayerButton: View {
                         LinearGradient(
                             colors: isDisabled
                                 ? [Color.gray.opacity(0.5), Color.gray.opacity(0.3)]
-                                : [color, color.opacity(0.7)],
+                                : isSelected
+                                    ? [color.opacity(1), color.opacity(0.9)]
+                                    : [color.opacity(0.8), color.opacity(0.5)],
                             startPoint: .top,
                             endPoint: .bottom
                         )
@@ -62,10 +67,18 @@ struct PlayerButton: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    .stroke(
+                        isSelected ? Color.white : Color.white.opacity(0.2),
+                        lineWidth: isSelected ? 3 : 1
+                    )
             )
-            .scaleEffect(isPressed ? 0.96 : 1.0)
-            .shadow(color: color.opacity(isDisabled ? 0 : 0.4), radius: 8, x: 0, y: 4)
+            .scaleEffect(isPressed ? 0.96 : isSelected ? 1.02 : 1.0)
+            .shadow(
+                color: isSelected ? color.opacity(0.6) : color.opacity(isDisabled ? 0 : 0.3),
+                radius: isSelected ? 12 : 8,
+                x: 0,
+                y: isSelected ? 6 : 4
+            )
         }
         .buttonStyle(PlainButtonStyle())
         .disabled(isDisabled)
@@ -82,6 +95,7 @@ struct PlayerButton: View {
         Color.black.ignoresSafeArea()
 
         VStack(spacing: 40) {
+            // No selection
             PlayerButtonsView(
                 game: {
                     let game = Game()
@@ -89,22 +103,31 @@ struct PlayerButton: View {
                     game.player2Name = "Piet"
                     return game
                 }(),
-                onScore: { player in
-                    print("Score for \(player)")
-                }
+                onSelectPlayer: { _ in }
             )
 
-            // Disabled state
+            // Player 1 selected
             PlayerButtonsView(
                 game: {
                     let game = Game()
                     game.player1Name = "Jan"
                     game.player2Name = "Piet"
-                    game.player1Score = 11
-                    game.player2Score = 5
+                    game.selectedPlayer = .player1
                     return game
                 }(),
-                onScore: { _ in }
+                onSelectPlayer: { _ in }
+            )
+
+            // Player 2 selected
+            PlayerButtonsView(
+                game: {
+                    let game = Game()
+                    game.player1Name = "Jan"
+                    game.player2Name = "Piet"
+                    game.selectedPlayer = .player2
+                    return game
+                }(),
+                onSelectPlayer: { _ in }
             )
         }
         .padding()

@@ -15,6 +15,8 @@
 		A1000006 /* ScoreboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000006; };
 		A1000007 /* PlayerButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000007; };
 		A1000008 /* iPhoneMockupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000008; };
+		A1000009 /* CourtZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000009; };
+		A1000010 /* Point.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,8 @@
 		A2000006 /* ScoreboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardView.swift; sourceTree = "<group>"; };
 		A2000007 /* PlayerButtonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerButtonsView.swift; sourceTree = "<group>"; };
 		A2000008 /* iPhoneMockupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPhoneMockupView.swift; sourceTree = "<group>"; };
+		A2000009 /* CourtZone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourtZone.swift; sourceTree = "<group>"; };
+		A2000010 /* Point.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Point.swift; sourceTree = "<group>"; };
 		A3000001 /* SquashAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SquashAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -84,6 +88,8 @@
 			isa = PBXGroup;
 			children = (
 				A2000005 /* Game.swift */,
+				A2000009 /* CourtZone.swift */,
+				A2000010 /* Point.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -171,6 +177,8 @@
 				A1000006 /* ScoreboardView.swift in Sources */,
 				A1000007 /* PlayerButtonsView.swift in Sources */,
 				A1000008 /* iPhoneMockupView.swift in Sources */,
+				A1000009 /* CourtZone.swift in Sources */,
+				A1000010 /* Point.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

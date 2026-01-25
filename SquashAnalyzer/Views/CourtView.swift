@@ -1,6 +1,9 @@
 import SwiftUI
 
 struct CourtView: View {
+    var game: Game? = nil
+    var onZoneTapped: ((CourtZone) -> Void)? = nil
+
     // Court dimensions in meters (official squash court)
     private let courtWidth: CGFloat = 6.4   // meters (21 feet)
     private let courtLength: CGFloat = 9.75 // meters (32 feet)
@@ -10,6 +13,10 @@ struct CourtView: View {
     // Computed ratio for proper scaling
     private var aspectRatio: CGFloat {
         courtWidth / courtLength
+    }
+
+    private var isInteractive: Bool {
+        game?.selectedPlayer != nil
     }
 
     var body: some View {
@@ -30,16 +37,80 @@ struct CourtView: View {
                 // Court floor with gradient
                 courtFloor(size: courtSize)
 
+                // Interactive zones (when player is selected)
+                if isInteractive {
+                    interactiveZones(size: courtSize)
+                }
+
                 // Court markings
                 courtMarkings(size: courtSize, scale: scale)
 
                 // Wall labels
                 wallLabels(size: courtSize)
+
+                // Instruction overlay when player selected
+                if let player = game?.selectedPlayer, let game = game {
+                    instructionOverlay(size: courtSize, player: player, game: game)
+                }
             }
             .frame(width: courtSize.width, height: courtSize.height)
             .position(x: availableWidth / 2, y: availableHeight / 2)
         }
         .aspectRatio(aspectRatio, contentMode: .fit)
+    }
+
+    // MARK: - Interactive Zones
+    private func interactiveZones(size: CGSize) -> some View {
+        let zoneWidth = size.width / 2
+        let zoneHeight = size.height / 3
+
+        return ZStack {
+            // 6 tappable zones in a 2x3 grid
+            ForEach(0..<3, id: \.self) { row in
+                ForEach(0..<2, id: \.self) { col in
+                    let zone = zoneFor(row: row, col: col)
+                    let xOffset = CGFloat(col) * zoneWidth + zoneWidth / 2
+                    let yOffset = CGFloat(row) * zoneHeight + zoneHeight / 2
+
+                    ZoneTapArea(zone: zone) {
+                        onZoneTapped?(zone)
+                    }
+                    .frame(width: zoneWidth - 4, height: zoneHeight - 4)
+                    .position(x: xOffset, y: yOffset)
+                }
+            }
+        }
+        .frame(width: size.width, height: size.height)
+    }
+
+    private func zoneFor(row: Int, col: Int) -> CourtZone {
+        switch (row, col) {
+        case (0, 0): return .frontLeft
+        case (0, 1): return .frontRight
+        case (1, 0): return .middleLeft
+        case (1, 1): return .middleRight
+        case (2, 0): return .backLeft
+        case (2, 1): return .backRight
+        default: return .middleLeft
+        }
+    }
+
+    // MARK: - Instruction Overlay
+    private func instructionOverlay(size: CGSize, player: Player, game: Game) -> some View {
+        VStack {
+            Text("Tik waar \(game.name(for: player)) scoorde")
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .fill(player == .player1 ? Color.blue : Color.red)
+                )
+                .shadow(radius: 4)
+        }
+        .position(x: size.width / 2, y: size.height / 2)
+        .allowsHitTesting(false)
     }
 
     // MARK: - Court Floor
@@ -48,15 +119,14 @@ struct CourtView: View {
             .fill(
                 LinearGradient(
                     colors: [
-                        Color(red: 0.76, green: 0.60, blue: 0.42), // Lighter wood
-                        Color(red: 0.68, green: 0.52, blue: 0.34)  // Darker wood
+                        Color(red: 0.76, green: 0.60, blue: 0.42),
+                        Color(red: 0.68, green: 0.52, blue: 0.34)
                     ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
             )
             .overlay(
-                // Wood grain effect
                 RoundedRectangle(cornerRadius: 4)
                     .fill(
                         LinearGradient(
@@ -73,7 +143,6 @@ struct CourtView: View {
                     )
             )
             .overlay(
-                // Court border (walls)
                 RoundedRectangle(cornerRadius: 4)
                     .stroke(Color.red.opacity(0.8), lineWidth: 4)
             )
@@ -85,20 +154,19 @@ struct CourtView: View {
         let lineColor = Color.red.opacity(0.9)
         let lineWidth: CGFloat = 2
 
-        // Calculate positions
-        let shortLineY = shortLineDistance * scale // Distance from top (front wall)
+        let shortLineY = shortLineDistance * scale
         let halfCourtX = size.width / 2
         let serviceBoxPixels = serviceBoxSize * scale
 
         return ZStack {
-            // Short line (horizontal line dividing front and back)
+            // Short line
             Path { path in
                 path.move(to: CGPoint(x: 0, y: shortLineY))
                 path.addLine(to: CGPoint(x: size.width, y: shortLineY))
             }
             .stroke(lineColor, lineWidth: lineWidth)
 
-            // Half court line (vertical line in back area)
+            // Half court line
             Path { path in
                 path.move(to: CGPoint(x: halfCourtX, y: shortLineY))
                 path.addLine(to: CGPoint(x: halfCourtX, y: size.height))
@@ -107,7 +175,6 @@ struct CourtView: View {
 
             // Left service box
             Path { path in
-                // Bottom-left corner box
                 path.move(to: CGPoint(x: 0, y: size.height - serviceBoxPixels))
                 path.addLine(to: CGPoint(x: serviceBoxPixels, y: size.height - serviceBoxPixels))
                 path.addLine(to: CGPoint(x: serviceBoxPixels, y: size.height))
@@ -116,15 +183,13 @@ struct CourtView: View {
 
             // Right service box
             Path { path in
-                // Bottom-right corner box
                 path.move(to: CGPoint(x: size.width, y: size.height - serviceBoxPixels))
                 path.addLine(to: CGPoint(x: size.width - serviceBoxPixels, y: size.height - serviceBoxPixels))
                 path.addLine(to: CGPoint(x: size.width - serviceBoxPixels, y: size.height))
             }
             .stroke(lineColor, lineWidth: lineWidth)
 
-            // Service box quarter circles (the curved lines inside service boxes)
-            // Left service box arc
+            // Service box arcs
             Path { path in
                 path.addArc(
                     center: CGPoint(x: halfCourtX, y: size.height),
@@ -136,7 +201,6 @@ struct CourtView: View {
             }
             .stroke(lineColor, lineWidth: lineWidth)
 
-            // Right service box arc
             Path { path in
                 path.addArc(
                     center: CGPoint(x: halfCourtX, y: size.height),
@@ -149,6 +213,7 @@ struct CourtView: View {
             .stroke(lineColor, lineWidth: lineWidth)
         }
         .frame(width: size.width, height: size.height)
+        .allowsHitTesting(false)
     }
 
     // MARK: - Wall Labels
@@ -157,7 +222,6 @@ struct CourtView: View {
         let labelFont = Font.system(size: 10, weight: .semibold, design: .rounded)
 
         return ZStack {
-            // Front wall label (top)
             Text("FRONT WALL")
                 .font(labelFont)
                 .foregroundColor(labelColor)
@@ -167,7 +231,6 @@ struct CourtView: View {
                 .cornerRadius(4)
                 .position(x: size.width / 2, y: 15)
 
-            // Back wall label (bottom)
             Text("BACK WALL")
                 .font(labelFont)
                 .foregroundColor(labelColor)
@@ -176,25 +239,9 @@ struct CourtView: View {
                 .background(Color.red.opacity(0.7))
                 .cornerRadius(4)
                 .position(x: size.width / 2, y: size.height - 15)
-
-            // Short line label
-            Text("Short Line")
-                .font(.system(size: 8, weight: .medium))
-                .foregroundColor(Color.red.opacity(0.7))
-                .position(x: size.width - 35, y: (shortLineDistance / courtLength) * size.height - 10)
-
-            // Service box labels
-            Text("Service")
-                .font(.system(size: 8, weight: .medium))
-                .foregroundColor(Color.red.opacity(0.7))
-                .position(x: 30, y: size.height - 30)
-
-            Text("Service")
-                .font(.system(size: 8, weight: .medium))
-                .foregroundColor(Color.red.opacity(0.7))
-                .position(x: size.width - 30, y: size.height - 30)
         }
         .frame(width: size.width, height: size.height)
+        .allowsHitTesting(false)
     }
 
     // MARK: - Helper
@@ -210,10 +257,57 @@ struct CourtView: View {
     }
 }
 
+// MARK: - Zone Tap Area
+
+struct ZoneTapArea: View {
+    let zone: CourtZone
+    let onTap: () -> Void
+
+    @State private var isPressed = false
+
+    var body: some View {
+        Rectangle()
+            .fill(Color.white.opacity(isPressed ? 0.3 : 0.15))
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.white.opacity(0.4), lineWidth: 1)
+            )
+            .scaleEffect(isPressed ? 0.95 : 1.0)
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.1)) {
+                    isPressed = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    withAnimation {
+                        isPressed = false
+                    }
+                    onTap()
+                }
+            }
+    }
+}
+
+// MARK: - Preview
+
 #Preview {
     ZStack {
         Color.black.ignoresSafeArea()
         CourtView()
             .padding(20)
+    }
+}
+
+#Preview("Interactive - Player Selected") {
+    ZStack {
+        Color.black.ignoresSafeArea()
+
+        let game = Game()
+        let _ = game.selectPlayer(.player1)
+
+        CourtView(game: game) { zone in
+            print("Tapped: \(zone)")
+        }
+        .padding(20)
     }
 }

@@ -112,9 +112,8 @@ struct iPhoneMockupView<Content: View>: View {
 
 // MARK: - Preview with iPhone Mockup
 
-#Preview("iPhone Mockup - Game View") {
+#Preview("iPhone Mockup - Start") {
     ZStack {
-        // Gray background to show the phone
         Color(red: 0.9, green: 0.9, blue: 0.92)
             .ignoresSafeArea()
 
@@ -125,14 +124,13 @@ struct iPhoneMockupView<Content: View>: View {
     }
 }
 
-#Preview("iPhone Mockup - Game in Progress") {
+#Preview("iPhone Mockup - Player Selected") {
     ZStack {
         Color(red: 0.9, green: 0.9, blue: 0.92)
             .ignoresSafeArea()
 
         iPhoneMockupView {
-            // Simulated game state
-            GamePreviewContent(p1Score: 7, p2Score: 5)
+            GamePreviewContent(p1Score: 3, p2Score: 2, selectedPlayer: .player1)
         }
         .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
     }
@@ -144,7 +142,7 @@ struct iPhoneMockupView<Content: View>: View {
             .ignoresSafeArea()
 
         iPhoneMockupView {
-            GamePreviewContent(p1Score: 11, p2Score: 8)
+            GamePreviewContent(p1Score: 11, p2Score: 8, selectedPlayer: nil)
         }
         .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
     }
@@ -154,17 +152,20 @@ struct iPhoneMockupView<Content: View>: View {
 struct GamePreviewContent: View {
     let p1Score: Int
     let p2Score: Int
+    let selectedPlayer: Player?
 
     @State private var game: Game
 
-    init(p1Score: Int, p2Score: Int) {
+    init(p1Score: Int, p2Score: Int, selectedPlayer: Player? = nil) {
         self.p1Score = p1Score
         self.p2Score = p2Score
+        self.selectedPlayer = selectedPlayer
         let g = Game()
         g.player1Name = "Jan"
         g.player2Name = "Piet"
         g.player1Score = p1Score
         g.player2Score = p2Score
+        g.selectedPlayer = selectedPlayer
         _game = State(initialValue: g)
     }
 
@@ -190,11 +191,32 @@ struct GamePreviewContent: View {
                 ScoreboardView(game: game)
                     .padding(.horizontal, 24)
 
-                CourtView()
-                    .padding(.horizontal, 16)
+                // Instruction text
+                Group {
+                    if game.selectedPlayer == nil && !game.isGameOver {
+                        Text("Kies wie scoort")
+                            .foregroundColor(.white.opacity(0.5))
+                    } else if let player = game.selectedPlayer {
+                        Text("Tik op de baan waar het punt gescoord werd")
+                            .foregroundColor(player == .player1 ? .blue : .red)
+                    }
+                }
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .padding(.horizontal, 24)
+
+                CourtView(game: game) { zone in
+                    if let player = game.selectedPlayer {
+                        game.addPoint(to: player, at: zone)
+                    }
+                }
+                .padding(.horizontal, 16)
 
                 PlayerButtonsView(game: game) { player in
-                    game.addPoint(to: player)
+                    if game.selectedPlayer == player {
+                        game.clearSelection()
+                    } else {
+                        game.selectPlayer(player)
+                    }
                 }
                 .padding(.horizontal, 24)
 

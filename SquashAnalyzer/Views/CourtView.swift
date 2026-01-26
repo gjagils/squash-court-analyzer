@@ -61,13 +61,13 @@ struct CourtView: View {
 
     // MARK: - Interactive Zones
     private func interactiveZones(size: CGSize) -> some View {
-        let zoneWidth = size.width / 2
+        let zoneWidth = size.width / 3
         let zoneHeight = size.height / 3
 
         return ZStack {
-            // 6 tappable zones in a 2x3 grid
+            // 9 tappable zones in a 3x3 grid
             ForEach(0..<3, id: \.self) { row in
-                ForEach(0..<2, id: \.self) { col in
+                ForEach(0..<3, id: \.self) { col in
                     let zone = zoneFor(row: row, col: col)
                     let xOffset = CGFloat(col) * zoneWidth + zoneWidth / 2
                     let yOffset = CGFloat(row) * zoneHeight + zoneHeight / 2
@@ -86,12 +86,15 @@ struct CourtView: View {
     private func zoneFor(row: Int, col: Int) -> CourtZone {
         switch (row, col) {
         case (0, 0): return .frontLeft
-        case (0, 1): return .frontRight
+        case (0, 1): return .frontMiddle
+        case (0, 2): return .frontRight
         case (1, 0): return .middleLeft
-        case (1, 1): return .middleRight
+        case (1, 1): return .middleMiddle
+        case (1, 2): return .middleRight
         case (2, 0): return .backLeft
-        case (2, 1): return .backRight
-        default: return .middleLeft
+        case (2, 1): return .backMiddle
+        case (2, 2): return .backRight
+        default: return .middleMiddle
         }
     }
 

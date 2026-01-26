@@ -329,12 +329,12 @@ struct HeatmapCourt: View {
     }
 
     private func heatmapZones(size: CGSize) -> some View {
-        let zoneWidth = size.width / 2
+        let zoneWidth = size.width / 3
         let zoneHeight = size.height / 3
 
         return ZStack {
             ForEach(0..<3, id: \.self) { row in
-                ForEach(0..<2, id: \.self) { col in
+                ForEach(0..<3, id: \.self) { col in
                     let zone = zoneFor(row: row, col: col)
                     let count = showingWins
                         ? game.pointsWon(by: player, in: zone)
@@ -381,12 +381,12 @@ struct HeatmapCourt: View {
     }
 
     private func zoneLabels(size: CGSize) -> some View {
-        let zoneWidth = size.width / 2
+        let zoneWidth = size.width / 3
         let zoneHeight = size.height / 3
 
         return ZStack {
             ForEach(0..<3, id: \.self) { row in
-                ForEach(0..<2, id: \.self) { col in
+                ForEach(0..<3, id: \.self) { col in
                     let zone = zoneFor(row: row, col: col)
                     let count = showingWins
                         ? game.pointsWon(by: player, in: zone)
@@ -394,11 +394,11 @@ struct HeatmapCourt: View {
 
                     VStack(spacing: 2) {
                         Text("\(count)")
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
 
                         Text(zone.shortName)
-                            .font(.system(size: 10, weight: .medium, design: .rounded))
+                            .font(.system(size: 9, weight: .medium, design: .rounded))
                             .foregroundColor(.white.opacity(0.7))
                     }
                     .position(
@@ -414,12 +414,15 @@ struct HeatmapCourt: View {
     private func zoneFor(row: Int, col: Int) -> CourtZone {
         switch (row, col) {
         case (0, 0): return .frontLeft
-        case (0, 1): return .frontRight
+        case (0, 1): return .frontMiddle
+        case (0, 2): return .frontRight
         case (1, 0): return .middleLeft
-        case (1, 1): return .middleRight
+        case (1, 1): return .middleMiddle
+        case (1, 2): return .middleRight
         case (2, 0): return .backLeft
-        case (2, 1): return .backRight
-        default: return .middleLeft
+        case (2, 1): return .backMiddle
+        case (2, 2): return .backRight
+        default: return .middleMiddle
         }
     }
 
@@ -458,12 +461,12 @@ struct HeatmapCourt: View {
     // Add some sample points
     game.points = [
         Point(scorer: .player1, zone: .frontLeft, server: .player1, player1Score: 1, player2Score: 0),
-        Point(scorer: .player1, zone: .frontLeft, server: .player1, player1Score: 2, player2Score: 0),
+        Point(scorer: .player1, zone: .frontMiddle, server: .player1, player1Score: 2, player2Score: 0),
         Point(scorer: .player2, zone: .backRight, server: .player1, player1Score: 2, player2Score: 1),
-        Point(scorer: .player1, zone: .middleRight, server: .player2, player1Score: 3, player2Score: 1),
+        Point(scorer: .player1, zone: .middleMiddle, server: .player2, player1Score: 3, player2Score: 1),
         Point(scorer: .player1, zone: .frontRight, server: .player1, player1Score: 4, player2Score: 1),
         Point(scorer: .player2, zone: .middleLeft, server: .player1, player1Score: 4, player2Score: 2),
-        Point(scorer: .player1, zone: .backLeft, server: .player2, player1Score: 5, player2Score: 2),
+        Point(scorer: .player1, zone: .backMiddle, server: .player2, player1Score: 5, player2Score: 2),
         Point(scorer: .player1, zone: .frontLeft, server: .player1, player1Score: 6, player2Score: 2),
     ]
 

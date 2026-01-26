@@ -225,9 +225,11 @@ struct GamePreviewContent: View {
             .padding(.vertical, 12)
 
             if game.isGameOver {
-                GameOverOverlay(game: game) {
+                GameOverOverlay(game: game, onAnalysis: {
+                    // Preview: do nothing
+                }, onNewGame: {
                     game.reset()
-                }
+                })
             }
         }
     }

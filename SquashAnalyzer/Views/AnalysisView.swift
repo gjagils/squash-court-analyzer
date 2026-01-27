@@ -2,28 +2,33 @@ import SwiftUI
 
 struct AnalysisView: View {
     let game: Game
+    var match: Match? = nil
     let onDismiss: () -> Void
 
     @State private var selectedPlayer: Player = .player1
-    @State private var showingWins: Bool = true // true = wins, false = losses
+    @State private var showingWins: Bool = true
+    @State private var selectedGameIndex: Int = 0
+
+    private var displayedGame: Game {
+        if let match = match, selectedGameIndex < match.games.count {
+            return match.games[selectedGameIndex]
+        }
+        return game
+    }
 
     var body: some View {
         ZStack {
-            // Background
-            LinearGradient(
-                colors: [
-                    Color(red: 0.08, green: 0.08, blue: 0.12),
-                    Color(red: 0.04, green: 0.04, blue: 0.06)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            AppBackground()
 
             ScrollView {
                 VStack(spacing: 20) {
                     // Header
                     header
+
+                    // Game selector (if match with multiple games)
+                    if let match = match, match.games.count > 1 {
+                        gameSelector(match: match)
+                    }
 
                     // Final Score
                     finalScoreCard
@@ -37,6 +42,9 @@ struct AnalysisView: View {
                     // Heatmap
                     heatmapView
 
+                    // Shot type stats
+                    shotTypeStatsCard
+
                     // Stats
                     statsCard
 
@@ -44,14 +52,13 @@ struct AnalysisView: View {
                     recommendationsCard
 
                     // Close button
-                    Button(action: onDismiss) {
-                        Text("Sluiten")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Color.white.opacity(0.1))
-                            .cornerRadius(12)
+                    HardwareButton(
+                        title: "Sluiten",
+                        subtitle: nil,
+                        color: AppColors.steelBlue,
+                        colorDark: AppColors.steelBlueDark
+                    ) {
+                        onDismiss()
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 40)
@@ -64,48 +71,87 @@ struct AnalysisView: View {
     private var header: some View {
         VStack(spacing: 8) {
             Text("ANALYSE")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-                .tracking(3)
+                .font(AppFonts.title(24))
+                .foregroundColor(AppColors.textPrimary)
+                .tracking(4)
 
-            if let winner = game.winner {
-                Text("\(game.name(for: winner)) wint!")
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(.yellow)
+            if let winner = displayedGame.winner {
+                Text("\(displayedGame.name(for: winner)) wint!")
+                    .font(AppFonts.body(16))
+                    .foregroundColor(AppColors.accentGold)
             }
         }
         .padding(.top, 20)
     }
 
-    // MARK: - Final Score
-    private var finalScoreCard: some View {
-        HStack(spacing: 30) {
-            VStack {
-                Text(game.player1Name)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundColor(.blue)
-                Text("\(game.player1Score)")
-                    .font(.system(size: 48, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white)
-            }
+    // MARK: - Game Selector
+    private func gameSelector(match: Match) -> some View {
+        VStack(spacing: 8) {
+            Text("Selecteer game")
+                .font(AppFonts.caption(11))
+                .foregroundColor(AppColors.textMuted)
+                .tracking(1)
 
-            Text("-")
-                .font(.system(size: 36, weight: .bold))
-                .foregroundColor(.white.opacity(0.5))
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(Array(match.games.enumerated()), id: \.element.id) { index, g in
+                        Button(action: { selectedGameIndex = index }) {
+                            VStack(spacing: 4) {
+                                Text("Game \(index + 1)")
+                                    .font(AppFonts.caption(11))
+                                    .foregroundColor(selectedGameIndex == index ? AppColors.textPrimary : AppColors.textMuted)
 
-            VStack {
-                Text(game.player2Name)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundColor(.red)
-                Text("\(game.player2Score)")
-                    .font(.system(size: 48, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white)
+                                Text("\(g.player1Score)-\(g.player2Score)")
+                                    .font(AppFonts.label(14))
+                                    .foregroundColor(selectedGameIndex == index ? AppColors.accentGold : AppColors.textSecondary)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(selectedGameIndex == index ? AppColors.warmOrange.opacity(0.2) : Color.white.opacity(0.05))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(selectedGameIndex == index ? AppColors.warmOrange.opacity(0.5) : Color.clear, lineWidth: 1)
+                            )
+                        }
+                    }
+                }
+                .padding(.horizontal, 24)
             }
         }
-        .padding(.vertical, 20)
-        .padding(.horizontal, 40)
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(16)
+    }
+
+    // MARK: - Final Score
+    private var finalScoreCard: some View {
+        HardwarePanel {
+            HStack(spacing: 20) {
+                VStack(spacing: 4) {
+                    Text(displayedGame.player1Name.uppercased())
+                        .font(AppFonts.caption(12))
+                        .foregroundColor(AppColors.warmOrange)
+                        .tracking(1)
+                    Text("\(displayedGame.player1Score)")
+                        .font(AppFonts.score(44))
+                        .foregroundColor(AppColors.ledActive)
+                }
+
+                LEDColon(size: 44)
+
+                VStack(spacing: 4) {
+                    Text(displayedGame.player2Name.uppercased())
+                        .font(AppFonts.caption(12))
+                        .foregroundColor(AppColors.steelBlue)
+                        .tracking(1)
+                    Text("\(displayedGame.player2Score)")
+                        .font(AppFonts.score(44))
+                        .foregroundColor(AppColors.ledActive)
+                }
+            }
+            .padding(.vertical, 16)
+            .padding(.horizontal, 24)
+        }
         .padding(.horizontal, 24)
     }
 
@@ -113,22 +159,28 @@ struct AnalysisView: View {
     private var playerSelector: some View {
         VStack(spacing: 8) {
             Text("Bekijk analyse voor:")
-                .font(.system(size: 14, weight: .medium, design: .rounded))
-                .foregroundColor(.white.opacity(0.6))
+                .font(AppFonts.body(13))
+                .foregroundColor(AppColors.textSecondary)
 
             HStack(spacing: 12) {
                 ForEach(Player.allCases) { player in
                     Button(action: { selectedPlayer = player }) {
-                        Text(game.name(for: player))
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .foregroundColor(selectedPlayer == player ? .white : .white.opacity(0.5))
+                        Text(displayedGame.name(for: player))
+                            .font(AppFonts.label(14))
+                            .foregroundColor(selectedPlayer == player ? AppColors.textPrimary : AppColors.textMuted)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 10)
                             .background(
                                 RoundedRectangle(cornerRadius: 8)
                                     .fill(selectedPlayer == player
-                                          ? (player == .player1 ? Color.blue : Color.red)
-                                          : Color.white.opacity(0.1))
+                                          ? (player == .player1 ? AppColors.warmOrange.opacity(0.3) : AppColors.steelBlue.opacity(0.3))
+                                          : Color.white.opacity(0.05))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(selectedPlayer == player
+                                            ? (player == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
+                                            : Color.clear, lineWidth: 1)
                             )
                     }
                 }
@@ -141,32 +193,40 @@ struct AnalysisView: View {
     private var heatmapToggle: some View {
         HStack(spacing: 12) {
             Button(action: { showingWins = true }) {
-                HStack {
+                HStack(spacing: 6) {
                     Image(systemName: "checkmark.circle.fill")
-                    Text("Punten gewonnen")
+                    Text("Gewonnen")
                 }
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundColor(showingWins ? .white : .white.opacity(0.5))
-                .padding(.horizontal, 12)
+                .font(AppFonts.caption(11))
+                .foregroundColor(showingWins ? AppColors.textPrimary : AppColors.textMuted)
+                .padding(.horizontal, 14)
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(showingWins ? Color.green.opacity(0.6) : Color.white.opacity(0.1))
+                        .fill(showingWins ? Color.green.opacity(0.3) : Color.white.opacity(0.05))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(showingWins ? Color.green.opacity(0.5) : Color.clear, lineWidth: 1)
                 )
             }
 
             Button(action: { showingWins = false }) {
-                HStack {
+                HStack(spacing: 6) {
                     Image(systemName: "xmark.circle.fill")
-                    Text("Punten verloren")
+                    Text("Verloren")
                 }
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundColor(!showingWins ? .white : .white.opacity(0.5))
-                .padding(.horizontal, 12)
+                .font(AppFonts.caption(11))
+                .foregroundColor(!showingWins ? AppColors.textPrimary : AppColors.textMuted)
+                .padding(.horizontal, 14)
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(!showingWins ? Color.red.opacity(0.6) : Color.white.opacity(0.1))
+                        .fill(!showingWins ? Color.red.opacity(0.3) : Color.white.opacity(0.05))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(!showingWins ? Color.red.opacity(0.5) : Color.clear, lineWidth: 1)
                 )
             }
         }
@@ -175,12 +235,12 @@ struct AnalysisView: View {
     // MARK: - Heatmap View
     private var heatmapView: some View {
         VStack(spacing: 8) {
-            Text(showingWins ? "Waar \(game.name(for: selectedPlayer)) scoorde" : "Waar \(game.name(for: selectedPlayer)) punten verloor")
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundColor(.white.opacity(0.6))
+            Text(showingWins ? "Waar \(displayedGame.name(for: selectedPlayer)) scoorde" : "Waar \(displayedGame.name(for: selectedPlayer)) punten verloor")
+                .font(AppFonts.caption(12))
+                .foregroundColor(AppColors.textSecondary)
 
             HeatmapCourt(
-                game: game,
+                game: displayedGame,
                 player: selectedPlayer,
                 showingWins: showingWins
             )
@@ -189,81 +249,155 @@ struct AnalysisView: View {
         }
     }
 
-    // MARK: - Stats Card
-    private var statsCard: some View {
+    // MARK: - Shot Type Stats
+    private var shotTypeStatsCard: some View {
         VStack(spacing: 12) {
-            Text("Statistieken \(game.name(for: selectedPlayer))")
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+            Text("Slagen van \(displayedGame.name(for: selectedPlayer))")
+                .font(AppFonts.label(14))
+                .foregroundColor(AppColors.textPrimary)
 
-            HStack(spacing: 20) {
-                StatBox(
-                    title: "Gewonnen",
-                    value: "\(game.pointsWon(by: selectedPlayer).count)",
-                    color: .green
-                )
+            LazyVGrid(columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible()),
+                GridItem(.flexible())
+            ], spacing: 10) {
+                ForEach(ShotType.allCases) { shotType in
+                    let count = displayedGame.pointsWon(by: selectedPlayer, with: shotType)
+                    VStack(spacing: 4) {
+                        Image(systemName: shotType.icon)
+                            .font(.system(size: 16))
+                            .foregroundColor(count > 0 ? AppColors.accentGold : AppColors.textMuted)
 
-                StatBox(
-                    title: "Verloren",
-                    value: "\(game.pointsLost(by: selectedPlayer).count)",
-                    color: .red
-                )
+                        Text("\(count)")
+                            .font(AppFonts.score(20))
+                            .foregroundColor(count > 0 ? AppColors.textPrimary : AppColors.textMuted)
 
-                if let bestZone = game.bestZone(for: selectedPlayer) {
-                    StatBox(
-                        title: "Beste zone",
-                        value: bestZone.shortName,
-                        color: .blue
+                        Text(shotType.rawValue)
+                            .font(AppFonts.caption(9))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.white.opacity(count > 0 ? 0.08 : 0.03))
                     )
                 }
             }
         }
         .padding()
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.03))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
+        .padding(.horizontal, 24)
+    }
+
+    // MARK: - Stats Card
+    private var statsCard: some View {
+        VStack(spacing: 12) {
+            Text("Statistieken")
+                .font(AppFonts.label(14))
+                .foregroundColor(AppColors.textPrimary)
+
+            HStack(spacing: 16) {
+                StatBox(
+                    title: "Gewonnen",
+                    value: "\(displayedGame.pointsWon(by: selectedPlayer).count)",
+                    color: .green
+                )
+
+                StatBox(
+                    title: "Verloren",
+                    value: "\(displayedGame.pointsLost(by: selectedPlayer).count)",
+                    color: .red
+                )
+
+                if let bestZone = displayedGame.bestZone(for: selectedPlayer) {
+                    StatBox(
+                        title: "Beste zone",
+                        value: bestZone.shortName,
+                        color: AppColors.accentGold
+                    )
+                }
+
+                if let bestShot = displayedGame.bestShotType(for: selectedPlayer) {
+                    StatBox(
+                        title: "Beste slag",
+                        value: bestShot.shortName,
+                        color: AppColors.warmOrange
+                    )
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.03))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
         .padding(.horizontal, 24)
     }
 
     // MARK: - Recommendations Card
     private var recommendationsCard: some View {
         let opponent = selectedPlayer.opponent
-        let recommended = game.recommendedZones(against: opponent)
+        let recommended = displayedGame.recommendedZones(against: opponent)
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "lightbulb.fill")
-                    .foregroundColor(.yellow)
+                    .foregroundColor(AppColors.accentGold)
                 Text("Tactisch advies")
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(AppFonts.label(14))
+                    .foregroundColor(AppColors.textPrimary)
             }
 
             if recommended.isEmpty {
                 Text("Niet genoeg data voor aanbevelingen.")
-                    .font(.system(size: 13, design: .rounded))
-                    .foregroundColor(.white.opacity(0.6))
+                    .font(AppFonts.body(13))
+                    .foregroundColor(AppColors.textMuted)
             } else {
-                Text("Speel de bal naar deze zones om \(game.name(for: opponent)) onder druk te zetten:")
-                    .font(.system(size: 13, design: .rounded))
-                    .foregroundColor(.white.opacity(0.8))
+                Text("Speel de bal naar deze zones om \(displayedGame.name(for: opponent)) onder druk te zetten:")
+                    .font(AppFonts.body(13))
+                    .foregroundColor(AppColors.textSecondary)
 
                 HStack(spacing: 8) {
                     ForEach(recommended) { zone in
                         Text(zone.rawValue)
-                            .font(.system(size: 11, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(AppFonts.caption(11))
+                            .foregroundColor(AppColors.textPrimary)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
-                            .background(Color.green.opacity(0.4))
-                            .cornerRadius(6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(Color.green.opacity(0.25))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.green.opacity(0.4), lineWidth: 1)
+                            )
                     }
                 }
             }
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.03))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
         .padding(.horizontal, 24)
     }
 }
@@ -278,12 +412,12 @@ struct StatBox: View {
     var body: some View {
         VStack(spacing: 4) {
             Text(value)
-                .font(.system(size: 24, weight: .bold, design: .monospaced))
+                .font(AppFonts.score(22))
                 .foregroundColor(color)
 
             Text(title)
-                .font(.system(size: 10, weight: .medium, design: .rounded))
-                .foregroundColor(.white.opacity(0.6))
+                .font(AppFonts.caption(9))
+                .foregroundColor(AppColors.textMuted)
         }
         .frame(maxWidth: .infinity)
     }
@@ -307,22 +441,33 @@ struct HeatmapCourt: View {
         GeometryReader { geometry in
             let size = calculateSize(geometry.size)
 
-            ZStack {
-                // Court background
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color(red: 0.3, green: 0.25, blue: 0.2))
-                    .frame(width: size.width, height: size.height)
+            HardwarePanel {
+                ZStack {
+                    // Court background with sand texture
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(
+                            LinearGradient(
+                                colors: [AppColors.courtSandLight, AppColors.courtSand, AppColors.courtSandDark],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(width: size.width, height: size.height)
 
-                // Heatmap zones
-                heatmapZones(size: size)
+                    // Heatmap zones
+                    heatmapZones(size: size)
 
-                // Court lines
-                courtLines(size: size)
+                    // Court lines
+                    courtLines(size: size)
 
-                // Zone labels with counts
-                zoneLabels(size: size)
+                    // Zone labels with counts
+                    zoneLabels(size: size)
+                }
+                .frame(width: size.width, height: size.height)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .padding(8)
             }
-            .frame(width: size.width, height: size.height)
+            .frame(width: size.width + 16, height: size.height + 16)
             .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
         }
         .aspectRatio(aspectRatio, contentMode: .fit)
@@ -356,7 +501,7 @@ struct HeatmapCourt: View {
     }
 
     private func courtLines(size: CGSize) -> some View {
-        let lineColor = Color.white.opacity(0.5)
+        let lineColor = AppColors.courtLine
 
         return ZStack {
             // Outer border
@@ -368,14 +513,14 @@ struct HeatmapCourt: View {
                 path.move(to: CGPoint(x: size.width / 2, y: size.height * 0.56))
                 path.addLine(to: CGPoint(x: size.width / 2, y: size.height))
             }
-            .stroke(lineColor, lineWidth: 1)
+            .stroke(lineColor, lineWidth: 1.5)
 
             // Horizontal short line
             Path { path in
                 path.move(to: CGPoint(x: 0, y: size.height * 0.56))
                 path.addLine(to: CGPoint(x: size.width, y: size.height * 0.56))
             }
-            .stroke(lineColor, lineWidth: 1)
+            .stroke(lineColor, lineWidth: 1.5)
         }
         .frame(width: size.width, height: size.height)
     }
@@ -394,12 +539,14 @@ struct HeatmapCourt: View {
 
                     VStack(spacing: 2) {
                         Text("\(count)")
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(AppFonts.score(18))
+                            .foregroundColor(AppColors.textPrimary)
+                            .shadow(color: Color.black.opacity(0.5), radius: 2, x: 0, y: 1)
 
                         Text(zone.shortName)
-                            .font(.system(size: 9, weight: .medium, design: .rounded))
-                            .foregroundColor(.white.opacity(0.7))
+                            .font(AppFonts.caption(9))
+                            .foregroundColor(AppColors.textPrimary.opacity(0.7))
+                            .shadow(color: Color.black.opacity(0.5), radius: 1, x: 0, y: 1)
                     }
                     .position(
                         x: CGFloat(col) * zoneWidth + zoneWidth / 2,
@@ -427,24 +574,26 @@ struct HeatmapCourt: View {
     }
 
     private func intensityFor(count: Int) -> Double {
-        // Scale intensity based on count (0 to max in game)
         let maxCount = max(1, CourtZone.allCases.map { zone in
             showingWins
                 ? game.pointsWon(by: player, in: zone)
                 : game.pointsWon(by: player.opponent, in: zone)
         }.max() ?? 1)
 
-        return count > 0 ? (Double(count) / Double(maxCount)) * 0.7 + 0.1 : 0.05
+        return count > 0 ? (Double(count) / Double(maxCount)) * 0.6 + 0.15 : 0.05
     }
 
     private func calculateSize(_ available: CGSize) -> CGSize {
-        let widthBasedHeight = available.width / aspectRatio
-        let heightBasedWidth = available.height * aspectRatio
+        let adjustedWidth = available.width - 16
+        let adjustedHeight = available.height - 16
 
-        if widthBasedHeight <= available.height {
-            return CGSize(width: available.width, height: widthBasedHeight)
+        let widthBasedHeight = adjustedWidth / aspectRatio
+        let heightBasedWidth = adjustedHeight * aspectRatio
+
+        if widthBasedHeight <= adjustedHeight {
+            return CGSize(width: adjustedWidth, height: widthBasedHeight)
         } else {
-            return CGSize(width: heightBasedWidth, height: available.height)
+            return CGSize(width: heightBasedWidth, height: adjustedHeight)
         }
     }
 }
@@ -453,21 +602,21 @@ struct HeatmapCourt: View {
 
 #Preview("Analysis View") {
     let game = Game()
-    game.player1Name = "Jan"
-    game.player2Name = "Piet"
+    game.player1Name = "Niels"
+    game.player2Name = "Paul"
     game.player1Score = 11
     game.player2Score = 8
 
-    // Add some sample points
+    // Add some sample points with shot types
     game.points = [
-        Point(scorer: .player1, zone: .frontLeft, server: .player1, player1Score: 1, player2Score: 0),
-        Point(scorer: .player1, zone: .frontMiddle, server: .player1, player1Score: 2, player2Score: 0),
-        Point(scorer: .player2, zone: .backRight, server: .player1, player1Score: 2, player2Score: 1),
-        Point(scorer: .player1, zone: .middleMiddle, server: .player2, player1Score: 3, player2Score: 1),
-        Point(scorer: .player1, zone: .frontRight, server: .player1, player1Score: 4, player2Score: 1),
-        Point(scorer: .player2, zone: .middleLeft, server: .player1, player1Score: 4, player2Score: 2),
-        Point(scorer: .player1, zone: .backMiddle, server: .player2, player1Score: 5, player2Score: 2),
-        Point(scorer: .player1, zone: .frontLeft, server: .player1, player1Score: 6, player2Score: 2),
+        Point(scorer: .player1, zone: .frontLeft, shotType: .drop, server: .player1, player1Score: 1, player2Score: 0),
+        Point(scorer: .player1, zone: .frontMiddle, shotType: .drive, server: .player1, player1Score: 2, player2Score: 0),
+        Point(scorer: .player2, zone: .backRight, shotType: .cross, server: .player1, player1Score: 2, player2Score: 1),
+        Point(scorer: .player1, zone: .middleMiddle, shotType: .volley, server: .player2, player1Score: 3, player2Score: 1),
+        Point(scorer: .player1, zone: .frontRight, shotType: .drop, server: .player1, player1Score: 4, player2Score: 1),
+        Point(scorer: .player2, zone: .middleLeft, shotType: .boast, server: .player1, player1Score: 4, player2Score: 2),
+        Point(scorer: .player1, zone: .backMiddle, shotType: .lob, server: .player2, player1Score: 5, player2Score: 2),
+        Point(scorer: .player1, zone: .frontLeft, shotType: .drive, server: .player1, player1Score: 6, player2Score: 2),
     ]
 
     return AnalysisView(game: game) { }

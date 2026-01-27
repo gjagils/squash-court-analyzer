@@ -19,6 +19,9 @@ struct AppColors {
     static let steelBlueDark = Color(red: 0.25, green: 0.32, blue: 0.42)
     static let steelBlueLight = Color(red: 0.50, green: 0.58, blue: 0.68)
 
+    /// Alias for deepBlue (used in some views)
+    static let deepBlue = steelBlue
+
     // MARK: Background Colors
     /// Dark background with warm undertone
     static let backgroundDark = Color(red: 0.06, green: 0.05, blue: 0.04)

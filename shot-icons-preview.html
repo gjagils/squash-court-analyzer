@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shot Icons Preview</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 40px;
+        }
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .icon-card {
+            background: #16213e;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .icon-card:hover,
+        .icon-card.selected {
+            border-color: #4fc3f7;
+            background: #1e3a5f;
+        }
+        .icon-card:hover svg,
+        .icon-card.selected svg {
+            filter: drop-shadow(0 0 8px #4fc3f7);
+        }
+        .icon-card svg {
+            width: 60px;
+            height: 60px;
+            transition: filter 0.3s ease;
+        }
+        .icon-card h3 {
+            margin: 15px 0 0 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .selected-indicator {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Shot Selection Icons</h1>
+
+    <div class="icons-grid">
+        <!-- Drive: Pijl van boven naar beneden -->
+        <div class="icon-card" onclick="selectShot(this, 'Drive')">
+            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="30" y1="10" x2="30" y2="45" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round"/>
+                <polyline points="20,35 30,50 40,35" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <h3>Drive</h3>
+        </div>
+
+        <!-- Cross: Diagonale pijl -->
+        <div class="icon-card" onclick="selectShot(this, 'Cross')">
+            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="12" y1="12" x2="43" y2="43" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round"/>
+                <polyline points="48,33 48,48 33,48" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <h3>Cross</h3>
+        </div>
+
+        <!-- Volley: Snelle horizontale slag -->
+        <div class="icon-card" onclick="selectShot(this, 'Volley')">
+            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="10" y1="30" x2="45" y2="30" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round"/>
+                <polyline points="35,20 50,30 35,40" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <!-- Speed lines -->
+                <line x1="8" y1="22" x2="18" y2="22" stroke="#4fc3f7" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+                <line x1="8" y1="38" x2="18" y2="38" stroke="#4fc3f7" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+            </svg>
+            <h3>Volley</h3>
+        </div>
+
+        <!-- Drop: Bal die naar beneden valt met curve -->
+        <div class="icon-card" onclick="selectShot(this, 'Drop')">
+            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 15 Q35 15, 40 45" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round" fill="none"/>
+                <polyline points="32,40 42,50 47,38" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <h3>Drop</h3>
+        </div>
+
+        <!-- Lob: Boog die op dezelfde hoogte eindigt -->
+        <div class="icon-card" onclick="selectShot(this, 'Lob')">
+            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 40 Q30 5, 50 40" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round" fill="none"/>
+                <polyline points="42,32 52,42 42,47" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <h3>Lob</h3>
+        </div>
+
+        <!-- Boast: Hoek (linkermuur, voormuur, terug) -->
+        <div class="icon-card" onclick="selectShot(this, 'Boast')">
+            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Lijn van rechtsonder naar linksboven (naar linkermuur) -->
+                <line x1="50" y1="50" x2="10" y2="15" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round"/>
+                <!-- Lijn naar voormuur (horizontaal naar rechts bovenaan) -->
+                <line x1="10" y1="15" x2="45" y2="10" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round"/>
+                <!-- Lijn terug (diagonaal naar beneden) -->
+                <line x1="45" y1="10" x2="35" y2="35" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round"/>
+                <!-- Pijlpunt -->
+                <polyline points="28,28 37,38 42,26" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <h3>Boast</h3>
+        </div>
+    </div>
+
+    <div class="selected-indicator">
+        Geselecteerd: <span id="selected">-</span>
+    </div>
+
+    <script>
+        function selectShot(element, name) {
+            // Remove selected from all
+            document.querySelectorAll('.icon-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            // Add selected to clicked
+            element.classList.add('selected');
+            document.getElementById('selected').textContent = name;
+        }
+    </script>
+</body>
+</html>

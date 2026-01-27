@@ -1,84 +1,89 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var game = Game()
+    @State private var match = Match()
     @State private var showingSetup = true
     @State private var showingAnalysis = false
+
+    private var currentGame: Game {
+        match.currentGame
+    }
 
     var body: some View {
         ZStack {
             // Main game view
             gameView
 
+            // Shot type selector overlay
+            if currentGame.selectedZone != nil {
+                shotTypeSelectorOverlay
+            }
+
             // Setup overlay
             if showingSetup {
-                GameSetupView(game: $game, isPresented: $showingSetup)
+                MatchSetupView(match: match, isPresented: $showingSetup)
                     .transition(.opacity)
             }
 
             // Analysis overlay
             if showingAnalysis {
-                AnalysisView(game: game) {
+                AnalysisView(game: currentGame) {
                     showingAnalysis = false
                 }
                 .transition(.opacity)
             }
 
             // Game over overlay (when not showing analysis yet)
-            if game.isGameOver && !showingAnalysis {
-                GameOverOverlay(game: game) {
-                    // Show analysis
-                    showingAnalysis = true
-                } onNewGame: {
-                    showingSetup = true
-                }
+            if currentGame.isGameOver && !showingAnalysis && currentGame.selectedZone == nil {
+                GameOverOverlay(
+                    game: currentGame,
+                    match: match,
+                    onAnalysis: { showingAnalysis = true },
+                    onNextGame: { match.onGameEnd() },
+                    onNewMatch: { showingSetup = true }
+                )
             }
         }
         .animation(.easeInOut(duration: 0.3), value: showingSetup)
         .animation(.easeInOut(duration: 0.3), value: showingAnalysis)
-        .animation(.easeInOut(duration: 0.3), value: game.isGameOver)
+        .animation(.easeInOut(duration: 0.25), value: currentGame.scoringStep)
     }
 
     // MARK: - Game View
     private var gameView: some View {
         ZStack {
-            // Dark background with subtle gradient
-            LinearGradient(
-                colors: [
-                    Color(red: 0.08, green: 0.08, blue: 0.12),
-                    Color(red: 0.04, green: 0.04, blue: 0.06)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            // Warm dark background with glow
+            AppBackground()
 
             VStack(spacing: 12) {
-                // Header with undo button
+                // Header
                 headerView
 
-                // Scoreboard (tennis style - above court)
-                ScoreboardView(game: game)
-                    .padding(.horizontal, 24)
+                // Scoreboard
+                ScoreboardView(game: currentGame, match: match)
+                    .padding(.horizontal, 20)
 
                 // Instruction text
                 instructionText
                     .padding(.horizontal, 24)
 
-                // Court view (interactive when player selected)
-                CourtView(game: game) { zone in
+                // Court view
+                CourtView(game: currentGame) { zone in
                     handleZoneTap(zone)
                 }
                 .padding(.horizontal, 16)
 
-                // Player buttons (below court)
-                PlayerButtonsView(game: game) { player in
-                    handlePlayerSelect(player)
+                // Player buttons (hidden when selecting shot)
+                if currentGame.selectedZone == nil {
+                    PlayerButtonsView(game: currentGame) { player in
+                        handlePlayerSelect(player)
+                    }
+                    .padding(.horizontal, 24)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
-                .padding(.horizontal, 24)
 
-                // Bottom buttons row
-                bottomButtonsRow
+                // Bottom info row
+                bottomInfoRow
 
                 Spacer(minLength: 0)
             }
@@ -86,36 +91,69 @@ struct ContentView: View {
         }
     }
 
+    // MARK: - Shot Type Selector Overlay
+    private var shotTypeSelectorOverlay: some View {
+        ZStack {
+            // Dimmed background
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation {
+                        currentGame.goBackStep()
+                    }
+                }
+
+            VStack {
+                Spacer()
+
+                ShotTypeSelectorView(
+                    game: currentGame,
+                    onShotSelected: { shotType in
+                        handleShotTypeSelect(shotType)
+                    },
+                    onBack: {
+                        withAnimation {
+                            currentGame.goBackStep()
+                        }
+                    }
+                )
+
+                Spacer().frame(height: 60)
+            }
+        }
+        .transition(.opacity)
+    }
+
     // MARK: - Header View
     private var headerView: some View {
         HStack {
-            // New game button
+            // New match button
             Button(action: { showingSetup = true }) {
                 Image(systemName: "plus.circle")
                     .font(.system(size: 20))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(AppColors.textSecondary)
             }
 
             Spacer()
 
             Text("SQUASH ANALYZER")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(.white.opacity(0.9))
-                .tracking(2)
+                .font(AppFonts.title(18))
+                .foregroundColor(AppColors.textPrimary)
+                .tracking(3)
 
             Spacer()
 
             // Undo button
             Button(action: {
                 withAnimation {
-                    game.undoLastPoint()
+                    currentGame.undoLastPoint()
                 }
             }) {
                 Image(systemName: "arrow.uturn.backward.circle")
                     .font(.system(size: 20))
-                    .foregroundColor(game.canUndo ? .white.opacity(0.6) : .white.opacity(0.2))
+                    .foregroundColor(currentGame.canUndo ? AppColors.textSecondary : AppColors.textMuted)
             }
-            .disabled(!game.canUndo)
+            .disabled(!currentGame.canUndo)
         }
         .padding(.horizontal, 24)
         .padding(.top, 8)
@@ -124,50 +162,57 @@ struct ContentView: View {
     // MARK: - Instruction Text
     private var instructionText: some View {
         Group {
-            if game.selectedPlayer == nil {
+            switch currentGame.scoringStep {
+            case .selectPlayer:
                 Text("Kies wie scoort")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(.white.opacity(0.5))
-            } else {
+                    .font(AppFonts.body(14))
+                    .foregroundColor(AppColors.textSecondary)
+            case .selectZone:
                 Text("Tik op de baan waar het punt gescoord werd")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(game.selectedPlayer == .player1 ? .blue : .red)
+                    .font(AppFonts.body(14))
+                    .foregroundColor(currentGame.selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
+            case .selectShot:
+                Text("Kies het type slag")
+                    .font(AppFonts.body(14))
+                    .foregroundColor(currentGame.selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
             }
         }
     }
 
-    // MARK: - Bottom Buttons Row
-    private var bottomButtonsRow: some View {
+    // MARK: - Bottom Info Row
+    private var bottomInfoRow: some View {
         HStack(spacing: 16) {
-            // Undo last point (with text)
-            if game.canUndo {
+            // Undo button (when there are points)
+            if currentGame.canUndo && currentGame.selectedZone == nil {
                 Button(action: {
                     withAnimation {
-                        game.undoLastPoint()
+                        currentGame.undoLastPoint()
                     }
                 }) {
                     HStack(spacing: 6) {
                         Image(systemName: "arrow.uturn.backward")
                         Text("Ongedaan")
                     }
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white.opacity(0.6))
+                    .font(AppFonts.caption(12))
+                    .foregroundColor(AppColors.textSecondary)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(20)
+                    .background(
+                        Capsule()
+                            .fill(Color.white.opacity(0.08))
+                    )
                 }
             }
 
             // Last point indicator
-            if let lastPoint = game.lastPoint {
-                HStack(spacing: 4) {
+            if let lastPoint = currentGame.lastPoint, currentGame.selectedZone == nil {
+                HStack(spacing: 6) {
                     Circle()
-                        .fill(lastPoint.scorer == .player1 ? Color.blue : Color.red)
+                        .fill(lastPoint.scorer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
                         .frame(width: 8, height: 8)
-                    Text("\(game.name(for: lastPoint.scorer)): \(lastPoint.zone.shortName)")
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
-                        .foregroundColor(.white.opacity(0.5))
+                    Text("\(currentGame.name(for: lastPoint.scorer)): \(lastPoint.zone.shortName) (\(lastPoint.shotType.shortName))")
+                        .font(AppFonts.caption(11))
+                        .foregroundColor(AppColors.textMuted)
                 }
             }
         }
@@ -177,98 +222,286 @@ struct ContentView: View {
     // MARK: - Handlers
     private func handlePlayerSelect(_ player: Player) {
         withAnimation(.easeInOut(duration: 0.2)) {
-            if game.selectedPlayer == player {
-                game.clearSelection()
+            if currentGame.selectedPlayer == player {
+                currentGame.clearSelection()
             } else {
-                game.selectPlayer(player)
+                currentGame.selectPlayer(player)
             }
         }
     }
 
     private func handleZoneTap(_ zone: CourtZone) {
-        guard let player = game.selectedPlayer else { return }
+        guard currentGame.selectedPlayer != nil else { return }
 
         withAnimation(.easeInOut(duration: 0.2)) {
-            game.addPoint(to: player, at: zone)
+            currentGame.selectZone(zone)
+        }
+    }
+
+    private func handleShotTypeSelect(_ shotType: ShotType) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            currentGame.addPoint(shotType: shotType)
+        }
+    }
+}
+
+// MARK: - Match Setup View
+struct MatchSetupView: View {
+    let match: Match
+    @Binding var isPresented: Bool
+
+    @State private var player1Name: String = ""
+    @State private var player2Name: String = ""
+    @State private var startingServer: Player = .player1
+
+    var body: some View {
+        ZStack {
+            AppBackground()
+
+            VStack(spacing: 24) {
+                // Header
+                Text("NIEUWE WEDSTRIJD")
+                    .font(AppFonts.title(22))
+                    .foregroundColor(AppColors.textPrimary)
+                    .tracking(3)
+                    .padding(.top, 40)
+
+                Text("Best of 5 games")
+                    .font(AppFonts.body(14))
+                    .foregroundColor(AppColors.textSecondary)
+
+                Spacer()
+
+                // Player names input
+                VStack(spacing: 20) {
+                    PlayerNameInput(
+                        title: "Speler 1",
+                        name: $player1Name,
+                        color: AppColors.warmOrange,
+                        placeholder: "Naam speler 1"
+                    )
+
+                    PlayerNameInput(
+                        title: "Speler 2",
+                        name: $player2Name,
+                        color: AppColors.steelBlue,
+                        placeholder: "Naam speler 2"
+                    )
+                }
+                .padding(.horizontal, 24)
+
+                // Starting server selection
+                VStack(spacing: 12) {
+                    Text("Wie serveert eerst?")
+                        .font(AppFonts.label(14))
+                        .foregroundColor(AppColors.textSecondary)
+
+                    HStack(spacing: 16) {
+                        ServerSelectionButton(
+                            name: player1Name.isEmpty ? "Speler 1" : player1Name,
+                            color: AppColors.warmOrange,
+                            isSelected: startingServer == .player1
+                        ) {
+                            startingServer = .player1
+                        }
+
+                        ServerSelectionButton(
+                            name: player2Name.isEmpty ? "Speler 2" : player2Name,
+                            color: AppColors.steelBlue,
+                            isSelected: startingServer == .player2
+                        ) {
+                            startingServer = .player2
+                        }
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+
+                Spacer()
+
+                // Start button
+                HardwareButton(
+                    title: "Start Wedstrijd",
+                    subtitle: nil,
+                    color: AppColors.warmOrange,
+                    colorDark: AppColors.warmOrangeDark
+                ) {
+                    startMatch()
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 40)
+            }
+        }
+    }
+
+    private func startMatch() {
+        match.setupMatch(
+            player1: player1Name,
+            player2: player2Name,
+            startingServer: startingServer
+        )
+        isPresented = false
+    }
+}
+
+// MARK: - Player Name Input
+struct PlayerNameInput: View {
+    let title: String
+    @Binding var name: String
+    let color: Color
+    let placeholder: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title.uppercased())
+                .font(AppFonts.caption(11))
+                .foregroundColor(color)
+                .tracking(1)
+
+            TextField(placeholder, text: $name)
+                .font(AppFonts.body(16))
+                .foregroundColor(AppColors.textPrimary)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.white.opacity(0.08))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(color.opacity(0.4), lineWidth: 1)
+                )
+        }
+    }
+}
+
+// MARK: - Server Selection Button
+struct ServerSelectionButton: View {
+    let name: String
+    let color: Color
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 24))
+                    .foregroundColor(isSelected ? color : AppColors.textMuted)
+
+                Text(name)
+                    .font(AppFonts.label(13))
+                    .foregroundColor(isSelected ? AppColors.textPrimary : AppColors.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? color.opacity(0.2) : Color.white.opacity(0.05))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? color : Color.white.opacity(0.1), lineWidth: isSelected ? 2 : 1)
+            )
         }
     }
 }
 
 // MARK: - Game Over Overlay
-
 struct GameOverOverlay: View {
     let game: Game
+    let match: Match
     let onAnalysis: () -> Void
-    let onNewGame: () -> Void
+    let onNextGame: () -> Void
+    let onNewMatch: () -> Void
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.8)
+            Color.black.opacity(0.85)
                 .ignoresSafeArea()
 
             VStack(spacing: 24) {
-                Text("GAME OVER")
-                    .font(.system(size: 28, weight: .black, design: .rounded))
-                    .foregroundColor(.white)
+                // Title
+                Text(match.isMatchOver ? "WEDSTRIJD VOORBIJ" : "GAME OVER")
+                    .font(AppFonts.title(26))
+                    .foregroundColor(AppColors.textPrimary)
                     .tracking(4)
 
+                // Winner announcement
                 if let winner = game.winner {
-                    Text("\(game.name(for: winner)) wint!")
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundColor(.yellow)
+                    Text("\(game.name(for: winner)) wint\(match.isMatchOver ? " de wedstrijd!" : " de game!")")
+                        .font(AppFonts.body(18))
+                        .foregroundColor(AppColors.accentGold)
                 }
 
-                Text("\(game.player1Score) - \(game.player2Score)")
-                    .font(.system(size: 56, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white)
+                // Score display
+                HStack(spacing: 12) {
+                    LEDScoreDisplay(score: game.player1Score, size: 60)
+                    LEDColon(size: 60)
+                    LEDScoreDisplay(score: game.player2Score, size: 60)
+                }
+                .padding(16)
+                .background(LEDDisplayBackground())
+
+                // Games score
+                if match.games.count > 1 || match.isMatchOver {
+                    Text("Games: \(match.player1GamesWon) - \(match.player2GamesWon)")
+                        .font(AppFonts.label(14))
+                        .foregroundColor(AppColors.textSecondary)
+                }
 
                 VStack(spacing: 12) {
                     // Analysis button
-                    Button(action: onAnalysis) {
-                        HStack {
-                            Image(systemName: "chart.bar.fill")
-                            Text("Bekijk Analyse")
-                        }
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.yellow)
-                        .cornerRadius(12)
+                    HardwareButton(
+                        title: "Bekijk Analyse",
+                        subtitle: nil,
+                        color: AppColors.accentGold,
+                        colorDark: AppColors.accentGold.opacity(0.7)
+                    ) {
+                        onAnalysis()
                     }
 
-                    // New game button
-                    Button(action: onNewGame) {
-                        HStack {
-                            Image(systemName: "arrow.counterclockwise")
-                            Text("Nieuwe Game")
+                    // Next game or new match button
+                    if match.isMatchOver {
+                        HardwareButton(
+                            title: "Nieuwe Wedstrijd",
+                            subtitle: nil,
+                            color: AppColors.warmOrange,
+                            colorDark: AppColors.warmOrangeDark
+                        ) {
+                            onNewMatch()
                         }
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(Color.white.opacity(0.15))
-                        .cornerRadius(12)
+                    } else {
+                        HardwareButton(
+                            title: "Volgende Game",
+                            subtitle: nil,
+                            color: AppColors.steelBlue,
+                            colorDark: AppColors.steelBlueDark
+                        ) {
+                            onNextGame()
+                        }
                     }
                 }
                 .padding(.horizontal, 40)
             }
             .padding(32)
             .background(
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(Color(red: 0.1, green: 0.1, blue: 0.15))
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(AppColors.backgroundMedium)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 24)
-                    .stroke(Color.yellow.opacity(0.3), lineWidth: 2)
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(AppColors.accentGold.opacity(0.3), lineWidth: 2)
             )
+            .shadow(color: AppColors.warmOrangeGlow.opacity(0.2), radius: 30, x: 0, y: 10)
             .padding(.horizontal, 24)
         }
     }
 }
 
-// MARK: - iPhone Preview
+// MARK: - Preview
 
-#Preview("iPhone 15 Pro") {
+#Preview("Main Game") {
     ContentView()
 }

@@ -24,7 +24,9 @@ enum Player: String, CaseIterable, Identifiable {
 
 /// Represents the current game state
 @Observable
-class Game {
+class Game: Identifiable {
+    let id = UUID()
+
     // MARK: - Properties
     var player1Name: String = "Speler 1"
     var player2Name: String = "Speler 2"
@@ -38,8 +40,11 @@ class Game {
     /// All points scored in this game (for analysis)
     var points: [Point] = []
 
-    /// Currently selected player (for scoring flow)
+    /// Currently selected player (for scoring flow - step 1)
     var selectedPlayer: Player? = nil
+
+    /// Currently selected zone (for scoring flow - step 2)
+    var selectedZone: CourtZone? = nil
 
     /// Track previous server for undo
     private var previousServers: [Player] = []
@@ -63,6 +68,23 @@ class Game {
         points.last
     }
 
+    /// Current step in scoring flow
+    var scoringStep: ScoringStep {
+        if selectedPlayer == nil {
+            return .selectPlayer
+        } else if selectedZone == nil {
+            return .selectZone
+        } else {
+            return .selectShot
+        }
+    }
+
+    enum ScoringStep {
+        case selectPlayer
+        case selectZone
+        case selectShot
+    }
+
     // MARK: - Methods
     func score(for player: Player) -> Int {
         switch player {
@@ -78,19 +100,42 @@ class Game {
         }
     }
 
-    /// Select a player (first step of scoring)
+    /// Select a player (step 1 of scoring)
     func selectPlayer(_ player: Player) {
         guard !isGameOver else { return }
         selectedPlayer = player
+        selectedZone = nil
     }
 
-    /// Clear the selected player
+    /// Select a zone (step 2 of scoring)
+    func selectZone(_ zone: CourtZone) {
+        guard selectedPlayer != nil else { return }
+        selectedZone = zone
+    }
+
+    /// Add a point with shot type (step 3 of scoring)
+    func addPoint(shotType: ShotType) {
+        guard let player = selectedPlayer, let zone = selectedZone else { return }
+        addPoint(to: player, at: zone, with: shotType)
+    }
+
+    /// Clear the current selection
     func clearSelection() {
         selectedPlayer = nil
+        selectedZone = nil
     }
 
-    /// Add a point with location (second step of scoring)
-    func addPoint(to player: Player, at zone: CourtZone) {
+    /// Go back one step in the scoring flow
+    func goBackStep() {
+        if selectedZone != nil {
+            selectedZone = nil
+        } else if selectedPlayer != nil {
+            selectedPlayer = nil
+        }
+    }
+
+    /// Add a point with all details
+    func addPoint(to player: Player, at zone: CourtZone, with shotType: ShotType) {
         guard !isGameOver else { return }
 
         // Save current server for undo
@@ -108,6 +153,7 @@ class Game {
         let point = Point(
             scorer: player,
             zone: zone,
+            shotType: shotType,
             server: currentServer,
             player1Score: player1Score,
             player2Score: player2Score
@@ -121,11 +167,7 @@ class Game {
 
         // Clear selection after scoring
         selectedPlayer = nil
-    }
-
-    /// Legacy method for adding point without location
-    func addPoint(to player: Player) {
-        addPoint(to: player, at: .middleLeft) // Default zone
+        selectedZone = nil
     }
 
     /// Undo the last point
@@ -146,6 +188,7 @@ class Game {
         }
 
         selectedPlayer = nil
+        selectedZone = nil
     }
 
     func reset() {
@@ -155,6 +198,7 @@ class Game {
         points = []
         previousServers = []
         selectedPlayer = nil
+        selectedZone = nil
     }
 
     func setStartingServer(_ player: Player) {
@@ -172,6 +216,11 @@ class Game {
     /// Get points won in a specific zone by a player
     func pointsWon(by player: Player, in zone: CourtZone) -> Int {
         points.filter { $0.scorer == player && $0.zone == zone }.count
+    }
+
+    /// Get points won with a specific shot type
+    func pointsWon(by player: Player, with shotType: ShotType) -> Int {
+        points.filter { $0.scorer == player && $0.shotType == shotType }.count
     }
 
     /// Get all points lost by a player (won by opponent)
@@ -201,6 +250,14 @@ class Game {
         return zoneCounts.max(by: { $0.count < $1.count })?.zone
     }
 
+    /// Get the best shot type for a player
+    func bestShotType(for player: Player) -> ShotType? {
+        let shotCounts = ShotType.allCases.map { shot in
+            (shot: shot, count: pointsWon(by: player, with: shot))
+        }
+        return shotCounts.max(by: { $0.count < $1.count })?.shot
+    }
+
     /// Get the worst zone for a player (most points lost)
     func worstZone(for player: Player) -> CourtZone? {
         let zoneCounts = CourtZone.allCases.map { zone in
@@ -211,7 +268,6 @@ class Game {
 
     /// Get recommendation: zones where opponent is weak
     func recommendedZones(against player: Player) -> [CourtZone] {
-        // Zones where the opponent loses the most points
         let zoneCounts = CourtZone.allCases.map { zone in
             (zone: zone, lostCount: pointsWon(by: player.opponent, in: zone))
         }

@@ -2,131 +2,186 @@ import SwiftUI
 
 struct ScoreboardView: View {
     let game: Game
-
-    private let scoreboardGreen = Color(red: 0.0, green: 0.35, blue: 0.15)
-    private let scoreboardDarkGreen = Color(red: 0.0, green: 0.25, blue: 0.10)
+    var match: Match? = nil
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                Spacer()
-                Text("SQUASH")
-                    .font(.system(size: 12, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.9))
-                    .tracking(4)
-                Spacer()
-            }
-            .padding(.vertical, 6)
-            .background(scoreboardDarkGreen)
+        HardwarePanel {
+            VStack(spacing: 0) {
+                // Header with game count if in match
+                headerSection
 
-            // Score rows
-            VStack(spacing: 1) {
-                PlayerScoreRow(
-                    name: game.player1Name,
-                    score: game.player1Score,
-                    isServing: game.currentServer == .player1,
-                    isWinner: game.winner == .player1
-                )
+                // Main scoreboard content
+                HStack(alignment: .center, spacing: 12) {
+                    // Player names with server indicator
+                    playerNamesSection
 
-                PlayerScoreRow(
-                    name: game.player2Name,
-                    score: game.player2Score,
-                    isServing: game.currentServer == .player2,
-                    isWinner: game.winner == .player2
-                )
+                    Spacer()
+
+                    // LED Score display
+                    scoreDisplay
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 14)
             }
         }
-        .background(scoreboardGreen)
-        .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.white.opacity(0.3), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+    }
+
+    // MARK: - Header Section
+    private var headerSection: some View {
+        HStack {
+            Text("SQUASH")
+                .font(AppFonts.caption(10))
+                .foregroundColor(AppColors.textMuted)
+                .tracking(2)
+
+            if let match = match {
+                Spacer()
+                // Games score (e.g., "2 - 1")
+                Text("GAMES: \(match.player1GamesWon) - \(match.player2GamesWon)")
+                    .font(AppFonts.caption(9))
+                    .foregroundColor(AppColors.textMuted)
+                    .tracking(1)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 10)
+        .padding(.bottom, 6)
+    }
+
+    // MARK: - Player Names
+    private var playerNamesSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            // Player 1
+            HStack(spacing: 8) {
+                ServerIndicator(isServing: game.currentServer == .player1)
+                Text(game.player1Name.uppercased())
+                    .font(AppFonts.playerName(15))
+                    .foregroundColor(AppColors.textPrimary)
+                    .lineLimit(1)
+            }
+
+            // Player 2
+            HStack(spacing: 8) {
+                ServerIndicator(isServing: game.currentServer == .player2)
+                Text(game.player2Name.uppercased())
+                    .font(AppFonts.playerName(15))
+                    .foregroundColor(AppColors.textPrimary)
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    // MARK: - Score Display
+    private var scoreDisplay: some View {
+        HStack(spacing: 6) {
+            // Player 1 score
+            LEDScoreDisplay(score: game.player1Score, size: 44)
+
+            // Colon separator
+            LEDColon(size: 44)
+
+            // Player 2 score
+            LEDScoreDisplay(score: game.player2Score, size: 44)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(LEDDisplayBackground())
     }
 }
 
-struct PlayerScoreRow: View {
-    let name: String
-    let score: Int
-    let isServing: Bool
-    let isWinner: Bool
-
-    private let scoreboardGreen = Color(red: 0.0, green: 0.35, blue: 0.15)
-    private let scoreYellow = Color(red: 1.0, green: 0.85, blue: 0.0)
+// MARK: - Compact Scoreboard (for when shot selector is shown)
+struct CompactScoreboardView: View {
+    let game: Game
 
     var body: some View {
-        HStack(spacing: 0) {
-            // Service indicator
-            ZStack {
-                Circle()
-                    .fill(isServing ? scoreYellow : Color.clear)
-                    .frame(width: 8, height: 8)
+        HStack(spacing: 16) {
+            // Player 1
+            HStack(spacing: 8) {
+                ServerIndicator(isServing: game.currentServer == .player1)
+                Text(game.player1Name)
+                    .font(AppFonts.label(14))
+                    .foregroundColor(AppColors.textPrimary)
             }
-            .frame(width: 24)
-
-            // Player name
-            Text(name.uppercased())
-                .font(.system(size: 14, weight: .semibold, design: .monospaced))
-                .foregroundColor(isWinner ? scoreYellow : .white)
-                .lineLimit(1)
-                .frame(maxWidth: .infinity, alignment: .leading)
 
             // Score
-            Text("\(score)")
-                .font(.system(size: 24, weight: .bold, design: .monospaced))
-                .foregroundColor(isWinner ? scoreYellow : .white)
-                .frame(width: 50)
-                .background(
-                    Rectangle()
-                        .fill(Color.black.opacity(0.2))
-                )
+            HStack(spacing: 4) {
+                Text("\(game.player1Score)")
+                    .font(AppFonts.score(28))
+                    .foregroundColor(AppColors.ledActive)
+                Text("-")
+                    .font(AppFonts.score(24))
+                    .foregroundColor(AppColors.textMuted)
+                Text("\(game.player2Score)")
+                    .font(AppFonts.score(28))
+                    .foregroundColor(AppColors.ledActive)
+            }
+            .shadow(color: AppColors.ledGlow.opacity(0.3), radius: 4, x: 0, y: 0)
+
+            // Player 2
+            HStack(spacing: 8) {
+                Text(game.player2Name)
+                    .font(AppFonts.label(14))
+                    .foregroundColor(AppColors.textPrimary)
+                ServerIndicator(isServing: game.currentServer == .player2)
+            }
         }
-        .padding(.vertical, 8)
-        .padding(.trailing, 0)
-        .background(scoreboardGreen)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(AppColors.backgroundMedium)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                )
+        )
     }
 }
 
-#Preview {
-    ZStack {
-        Color.black.ignoresSafeArea()
+// MARK: - Preview
 
-        VStack(spacing: 20) {
-            // Normal game
-            ScoreboardView(game: {
-                let game = Game()
-                game.player1Name = "Jan"
-                game.player2Name = "Piet"
+#Preview("Scoreboard") {
+    ZStack {
+        AppBackground()
+
+        VStack(spacing: 30) {
+            let game = Game()
+            let _ = {
+                game.player1Name = "Niels"
+                game.player2Name = "Paul"
                 game.player1Score = 7
                 game.player2Score = 5
-                game.currentServer = .player1
-                return game
-            }())
+            }()
 
-            // Game point
-            ScoreboardView(game: {
-                let game = Game()
-                game.player1Name = "Jan"
-                game.player2Name = "Piet"
-                game.player1Score = 10
-                game.player2Score = 8
-                game.currentServer = .player2
-                return game
-            }())
+            ScoreboardView(game: game)
+                .padding(.horizontal, 20)
 
-            // Game over
-            ScoreboardView(game: {
-                let game = Game()
-                game.player1Name = "Jan"
-                game.player2Name = "Piet"
-                game.player1Score = 11
-                game.player2Score = 7
-                game.currentServer = .player1
-                return game
+            ScoreboardView(game: game, match: {
+                let m = Match()
+                m.player1Name = "Niels"
+                m.player2Name = "Paul"
+                return m
             }())
+            .padding(.horizontal, 20)
+
+            CompactScoreboardView(game: game)
         }
-        .padding()
+    }
+}
+
+#Preview("Scoreboard - High Score") {
+    ZStack {
+        AppBackground()
+
+        let game = Game()
+        let _ = {
+            game.player1Name = "Niels"
+            game.player2Name = "Paul"
+            game.player1Score = 11
+            game.player2Score = 9
+        }()
+
+        ScoreboardView(game: game)
+            .padding(.horizontal, 20)
     }
 }

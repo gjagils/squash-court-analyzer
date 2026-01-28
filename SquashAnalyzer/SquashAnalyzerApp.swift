@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct SquashAnalyzerApp: App {
@@ -6,5 +7,6 @@ struct SquashAnalyzerApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [SavedMatch.self, SavedGame.self, SavedPoint.self])
     }
 }

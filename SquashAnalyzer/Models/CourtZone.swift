@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents the zones on a squash court (9 zones - 3x3 grid)
-enum CourtZone: String, CaseIterable, Identifiable {
+enum CourtZone: String, CaseIterable, Identifiable, Codable {
     case frontLeft = "Voor Links"
     case frontMiddle = "Voor Midden"
     case frontRight = "Voor Rechts"

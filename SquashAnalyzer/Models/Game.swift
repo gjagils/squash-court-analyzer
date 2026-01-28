@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents a player in the game
-enum Player: String, CaseIterable, Identifiable {
+enum Player: String, CaseIterable, Identifiable, Codable {
     case player1 = "Speler 1"
     case player2 = "Speler 2"
 

@@ -1,9 +1,13 @@
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var match = Match()
     @State private var showingSetup = true
     @State private var showingAnalysis = false
+    @State private var showingHistory = false
+    @State private var matchSaved = false
 
     private var currentGame: Game {
         match.currentGame
@@ -38,15 +42,39 @@ struct ContentView: View {
                 GameOverOverlay(
                     game: currentGame,
                     match: match,
+                    matchSaved: matchSaved,
                     onAnalysis: { showingAnalysis = true },
                     onNextGame: { match.onGameEnd() },
-                    onNewMatch: { showingSetup = true }
+                    onNewMatch: {
+                        matchSaved = false
+                        showingSetup = true
+                    },
+                    onSaveMatch: { saveMatch() }
                 )
+            }
+
+            // History overlay
+            if showingHistory {
+                MatchHistoryView(
+                    isPresented: $showingHistory,
+                    onSelectMatch: { savedMatch in
+                        // TODO: Could implement viewing saved match details
+                    }
+                )
+                .transition(.opacity)
             }
         }
         .animation(.easeInOut(duration: 0.3), value: showingSetup)
         .animation(.easeInOut(duration: 0.3), value: showingAnalysis)
+        .animation(.easeInOut(duration: 0.3), value: showingHistory)
         .animation(.easeInOut(duration: 0.25), value: currentGame.scoringStep)
+    }
+
+    // MARK: - Save Match
+    private func saveMatch() {
+        _ = SavedMatch.from(match, context: modelContext)
+        try? modelContext.save()
+        matchSaved = true
     }
 
     // MARK: - Game View
@@ -127,12 +155,20 @@ struct ContentView: View {
     // MARK: - Header View
     private var headerView: some View {
         HStack {
+            // History button
+            Button(action: { showingHistory = true }) {
+                Image(systemName: "clock.arrow.circlepath")
+                    .font(.system(size: 20))
+                    .foregroundColor(AppColors.textSecondary)
+            }
+
             // New match button
             Button(action: { showingSetup = true }) {
                 Image(systemName: "plus.circle")
                     .font(.system(size: 20))
                     .foregroundColor(AppColors.textSecondary)
             }
+            .padding(.leading, 8)
 
             Spacer()
 
@@ -412,9 +448,11 @@ struct ServerSelectionButton: View {
 struct GameOverOverlay: View {
     let game: Game
     let match: Match
+    let matchSaved: Bool
     let onAnalysis: () -> Void
     let onNextGame: () -> Void
     let onNewMatch: () -> Void
+    let onSaveMatch: () -> Void
 
     var body: some View {
         ZStack {
@@ -460,6 +498,21 @@ struct GameOverOverlay: View {
                         colorDark: AppColors.accentGold.opacity(0.7)
                     ) {
                         onAnalysis()
+                    }
+
+                    // Save button (only when match is over)
+                    if match.isMatchOver {
+                        HardwareButton(
+                            title: matchSaved ? "Opgeslagen ✓" : "Wedstrijd Opslaan",
+                            subtitle: nil,
+                            color: matchSaved ? AppColors.textMuted : AppColors.steelBlue,
+                            colorDark: matchSaved ? AppColors.textMuted.opacity(0.7) : AppColors.steelBlueDark
+                        ) {
+                            if !matchSaved {
+                                onSaveMatch()
+                            }
+                        }
+                        .disabled(matchSaved)
                     }
 
                     // Next game or new match button

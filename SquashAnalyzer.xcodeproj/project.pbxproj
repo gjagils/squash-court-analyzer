@@ -14,11 +14,22 @@
 		A1000005 /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000005; };
 		A1000006 /* ScoreboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000006; };
 		A1000007 /* PlayerButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000007; };
-		A1000008 /* iPhoneMockupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000008; };
 		A1000009 /* CourtZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000009; };
 		A1000010 /* Point.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010; };
-		A1000011 /* GameSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000011; };
 		A1000012 /* AnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000012; };
+		A1000013 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000013; };
+		A1000014 /* Match.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000014; };
+		A1000015 /* ShotType.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000015; };
+		A1000016 /* SavedMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000016; };
+		A1000017 /* SavedGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000017; };
+		A1000018 /* SavedPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000018; };
+		A1000019 /* ShotTypeSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000019; };
+		A1000020 /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000020; };
+		A1000021 /* MatchHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000021; };
+		A1000022 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000022; };
+		A1000023 /* CoachDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000023; };
+		A1000024 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000024; };
+		A1000025 /* APIKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000025; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,11 +40,22 @@
 		A2000005 /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
 		A2000006 /* ScoreboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardView.swift; sourceTree = "<group>"; };
 		A2000007 /* PlayerButtonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerButtonsView.swift; sourceTree = "<group>"; };
-		A2000008 /* iPhoneMockupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPhoneMockupView.swift; sourceTree = "<group>"; };
 		A2000009 /* CourtZone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourtZone.swift; sourceTree = "<group>"; };
 		A2000010 /* Point.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Point.swift; sourceTree = "<group>"; };
-		A2000011 /* GameSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSetupView.swift; sourceTree = "<group>"; };
 		A2000012 /* AnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisView.swift; sourceTree = "<group>"; };
+		A2000013 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
+		A2000014 /* Match.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Match.swift; sourceTree = "<group>"; };
+		A2000015 /* ShotType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotType.swift; sourceTree = "<group>"; };
+		A2000016 /* SavedMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedMatch.swift; sourceTree = "<group>"; };
+		A2000017 /* SavedGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedGame.swift; sourceTree = "<group>"; };
+		A2000018 /* SavedPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPoint.swift; sourceTree = "<group>"; };
+		A2000019 /* ShotTypeSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotTypeSelectorView.swift; sourceTree = "<group>"; };
+		A2000020 /* AppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconView.swift; sourceTree = "<group>"; };
+		A2000021 /* MatchHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchHistoryView.swift; sourceTree = "<group>"; };
+		A2000022 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A2000023 /* CoachDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachDashboardView.swift; sourceTree = "<group>"; };
+		A2000024 /* OpenAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
+		A2000025 /* APIKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyManager.swift; sourceTree = "<group>"; };
 		A3000001 /* SquashAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SquashAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -60,9 +82,10 @@
 			isa = PBXGroup;
 			children = (
 				A2000001 /* SquashAnalyzerApp.swift */,
+				A2000013 /* DesignSystem.swift */,
 				A5000004 /* Views */,
 				A5000005 /* Models */,
-				A5000006 /* ViewModels */,
+				A5000007 /* Services */,
 				A2000004 /* Assets.xcassets */,
 			);
 			path = SquashAnalyzer;
@@ -83,9 +106,12 @@
 				A2000003 /* CourtView.swift */,
 				A2000006 /* ScoreboardView.swift */,
 				A2000007 /* PlayerButtonsView.swift */,
-				A2000008 /* iPhoneMockupView.swift */,
-				A2000011 /* GameSetupView.swift */,
 				A2000012 /* AnalysisView.swift */,
+				A2000019 /* ShotTypeSelectorView.swift */,
+				A2000020 /* AppIconView.swift */,
+				A2000021 /* MatchHistoryView.swift */,
+				A2000022 /* SettingsView.swift */,
+				A2000023 /* CoachDashboardView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -96,15 +122,22 @@
 				A2000005 /* Game.swift */,
 				A2000009 /* CourtZone.swift */,
 				A2000010 /* Point.swift */,
+				A2000014 /* Match.swift */,
+				A2000015 /* ShotType.swift */,
+				A2000016 /* SavedMatch.swift */,
+				A2000017 /* SavedGame.swift */,
+				A2000018 /* SavedPoint.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
 		};
-		A5000006 /* ViewModels */ = {
+		A5000007 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				A2000024 /* OpenAIService.swift */,
+				A2000025 /* APIKeyManager.swift */,
 			);
-			path = ViewModels;
+			path = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -182,11 +215,22 @@
 				A1000005 /* Game.swift in Sources */,
 				A1000006 /* ScoreboardView.swift in Sources */,
 				A1000007 /* PlayerButtonsView.swift in Sources */,
-				A1000008 /* iPhoneMockupView.swift in Sources */,
 				A1000009 /* CourtZone.swift in Sources */,
 				A1000010 /* Point.swift in Sources */,
-				A1000011 /* GameSetupView.swift in Sources */,
 				A1000012 /* AnalysisView.swift in Sources */,
+				A1000013 /* DesignSystem.swift in Sources */,
+				A1000014 /* Match.swift in Sources */,
+				A1000015 /* ShotType.swift in Sources */,
+				A1000016 /* SavedMatch.swift in Sources */,
+				A1000017 /* SavedGame.swift in Sources */,
+				A1000018 /* SavedPoint.swift in Sources */,
+				A1000019 /* ShotTypeSelectorView.swift in Sources */,
+				A1000020 /* AppIconView.swift in Sources */,
+				A1000021 /* MatchHistoryView.swift in Sources */,
+				A1000022 /* SettingsView.swift in Sources */,
+				A1000023 /* CoachDashboardView.swift in Sources */,
+				A1000024 /* OpenAIService.swift in Sources */,
+				A1000025 /* APIKeyManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

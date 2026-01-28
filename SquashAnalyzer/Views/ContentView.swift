@@ -9,6 +9,9 @@ struct ContentView: View {
     @State private var showingHistory = false
     @State private var showingSettings = false
     @State private var matchSaved = false
+    @State private var showingSavedMatchAnalysis = false
+    @State private var savedMatchForAnalysis: Match? = nil
+    @State private var savedGameForAnalysis: Game? = nil
 
     private var currentGame: Game {
         match.currentGame
@@ -54,12 +57,26 @@ struct ContentView: View {
                 )
             }
 
+            // Saved match analysis overlay
+            if showingSavedMatchAnalysis, let reviewGame = savedGameForAnalysis {
+                CoachDashboardView(game: reviewGame, match: savedMatchForAnalysis) {
+                    showingSavedMatchAnalysis = false
+                    savedMatchForAnalysis = nil
+                    savedGameForAnalysis = nil
+                }
+                .transition(.opacity)
+            }
+
             // History overlay
             if showingHistory {
                 MatchHistoryView(
                     isPresented: $showingHistory,
                     onSelectMatch: { savedMatch in
-                        // TODO: Could implement viewing saved match details
+                        let liveMatch = savedMatch.toMatch()
+                        savedMatchForAnalysis = liveMatch
+                        savedGameForAnalysis = liveMatch.currentGame
+                        showingHistory = false
+                        showingSavedMatchAnalysis = true
                     }
                 )
                 .transition(.opacity)
@@ -74,6 +91,7 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.3), value: showingSetup)
         .animation(.easeInOut(duration: 0.3), value: showingAnalysis)
         .animation(.easeInOut(duration: 0.3), value: showingHistory)
+        .animation(.easeInOut(duration: 0.3), value: showingSavedMatchAnalysis)
         .animation(.easeInOut(duration: 0.3), value: showingSettings)
         .animation(.easeInOut(duration: 0.25), value: currentGame.scoringStep)
     }

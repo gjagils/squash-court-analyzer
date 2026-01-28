@@ -103,18 +103,30 @@ struct ShotTypeButton: View {
     @State private var isPressed = false
 
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            // Trigger highlight effect on tap
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isPressed = true
+            }
+            // Keep highlighted briefly then execute
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                action()
+                withAnimation(.easeOut(duration: 0.2)) {
+                    isPressed = false
+                }
+            }
+        }) {
             VStack(spacing: 6) {
-                // Custom Icon with glow
+                // Icon with glow
                 ZStack {
                     // Glow effect when pressed
                     if isPressed {
-                        ShotIcon(type: shotType, color: color, size: 28)
-                            .blur(radius: 6)
-                            .opacity(0.6)
+                        ShotIconView(type: shotType, color: color, size: 28)
+                            .blur(radius: 8)
+                            .opacity(0.7)
                     }
 
-                    ShotIcon(type: shotType, color: isPressed ? color : AppColors.textPrimary, size: 28)
+                    ShotIconView(type: shotType, color: isPressed ? color : AppColors.textPrimary, size: 28)
                 }
                 .frame(height: 32)
 
@@ -128,49 +140,56 @@ struct ShotTypeButton: View {
             .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isPressed ? color.opacity(0.15) : Color.white.opacity(0.05))
+                    .fill(isPressed ? color.opacity(0.2) : Color.white.opacity(0.05))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(isPressed ? color.opacity(0.6) : Color.white.opacity(0.1), lineWidth: isPressed ? 1.5 : 1)
-                    .shadow(color: isPressed ? color.opacity(0.4) : .clear, radius: 6)
+                    .stroke(isPressed ? color.opacity(0.7) : Color.white.opacity(0.1), lineWidth: isPressed ? 2 : 1)
+                    .shadow(color: isPressed ? color.opacity(0.5) : .clear, radius: 8)
             )
-            .scaleEffect(isPressed ? 0.96 : 1.0)
+            .scaleEffect(isPressed ? 0.95 : 1.0)
         }
         .buttonStyle(.plain)
-        .onLongPressGesture(minimumDuration: .infinity, pressing: { pressing in
-            withAnimation(.easeInOut(duration: 0.15)) {
-                isPressed = pressing
-            }
-        }, perform: {})
     }
 }
 
-// MARK: - Shot Icon Router
-struct ShotIcon: View {
+// MARK: - Shot Icon View (routes to custom or SF Symbol)
+struct ShotIconView: View {
     let type: ShotType
     var color: Color = AppColors.textPrimary
-    var size: CGFloat = 40
+    var size: CGFloat = 28
 
     var body: some View {
         switch type {
         case .drive:
+            // Custom: vertical arrow down
             DriveIcon(color: color, size: size)
         case .cross:
-            CrossIcon(color: color, size: size)
+            // SF Symbol v1
+            Image(systemName: "arrow.left.and.right")
+                .font(.system(size: size * 0.7, weight: .medium))
+                .foregroundColor(color)
         case .volley:
-            VolleyIcon(color: color, size: size)
+            // SF Symbol v1
+            Image(systemName: "bolt.fill")
+                .font(.system(size: size * 0.7, weight: .medium))
+                .foregroundColor(color)
         case .drop:
-            DropIcon(color: color, size: size)
+            // SF Symbol v1
+            Image(systemName: "arrow.down.to.line")
+                .font(.system(size: size * 0.7, weight: .medium))
+                .foregroundColor(color)
         case .lob:
+            // Custom: high arc with arrow point
             LobIcon(color: color, size: size)
         case .boast:
+            // Custom: zigzag like the reference image
             BoastIcon(color: color, size: size)
         }
     }
 }
 
-// MARK: - Custom Shot Icons
+// MARK: - Custom Icons
 
 struct DriveIcon: View {
     var color: Color = AppColors.textPrimary
@@ -198,84 +217,6 @@ struct DriveIcon: View {
     }
 }
 
-struct CrossIcon: View {
-    var color: Color = AppColors.textPrimary
-    var size: CGFloat = 40
-
-    var body: some View {
-        Canvas { context, canvasSize in
-            let w = canvasSize.width
-            let h = canvasSize.height
-            let strokeWidth: CGFloat = 2.5
-
-            // Diagonal line from top-left to bottom-right
-            var path = Path()
-            path.move(to: CGPoint(x: w * 0.15, y: h * 0.15))
-            path.addLine(to: CGPoint(x: w * 0.85, y: h * 0.85))
-
-            // Arrow head
-            path.move(to: CGPoint(x: w * 0.6, y: h * 0.85))
-            path.addLine(to: CGPoint(x: w * 0.85, y: h * 0.85))
-            path.addLine(to: CGPoint(x: w * 0.85, y: h * 0.6))
-
-            context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
-        }
-        .frame(width: size, height: size)
-    }
-}
-
-struct VolleyIcon: View {
-    var color: Color = AppColors.textPrimary
-    var size: CGFloat = 40
-
-    var body: some View {
-        Canvas { context, canvasSize in
-            let w = canvasSize.width
-            let h = canvasSize.height
-            let strokeWidth: CGFloat = 2.5
-
-            // Lightning bolt style for quick volley
-            var path = Path()
-            path.move(to: CGPoint(x: w * 0.6, y: h * 0.05))
-            path.addLine(to: CGPoint(x: w * 0.3, y: h * 0.45))
-            path.addLine(to: CGPoint(x: w * 0.55, y: h * 0.45))
-            path.addLine(to: CGPoint(x: w * 0.35, y: h * 0.95))
-
-            context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
-        }
-        .frame(width: size, height: size)
-    }
-}
-
-struct DropIcon: View {
-    var color: Color = AppColors.textPrimary
-    var size: CGFloat = 40
-
-    var body: some View {
-        Canvas { context, canvasSize in
-            let w = canvasSize.width
-            let h = canvasSize.height
-            let strokeWidth: CGFloat = 2.5
-
-            // Steep downward curve for drop shot
-            var path = Path()
-            path.move(to: CGPoint(x: w * 0.15, y: h * 0.2))
-            path.addQuadCurve(
-                to: CGPoint(x: w * 0.8, y: h * 0.85),
-                control: CGPoint(x: w * 0.25, y: h * 0.85)
-            )
-
-            // Arrow head
-            path.move(to: CGPoint(x: w * 0.58, y: h * 0.78))
-            path.addLine(to: CGPoint(x: w * 0.8, y: h * 0.85))
-            path.addLine(to: CGPoint(x: w * 0.73, y: h * 0.62))
-
-            context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
-        }
-        .frame(width: size, height: size)
-    }
-}
-
 struct LobIcon: View {
     var color: Color = AppColors.textPrimary
     var size: CGFloat = 40
@@ -286,20 +227,23 @@ struct LobIcon: View {
             let h = canvasSize.height
             let strokeWidth: CGFloat = 2.5
 
-            // Arc that starts and ends at same height (parabola)
+            // Higher arc that starts and ends at same height
             var path = Path()
-            path.move(to: CGPoint(x: w * 0.1, y: h * 0.75))
+            path.move(to: CGPoint(x: w * 0.08, y: h * 0.85))
             path.addQuadCurve(
-                to: CGPoint(x: w * 0.9, y: h * 0.75),
-                control: CGPoint(x: w * 0.5, y: h * 0.0)
+                to: CGPoint(x: w * 0.92, y: h * 0.85),
+                control: CGPoint(x: w * 0.5, y: h * -0.15)  // Higher control point
             )
 
-            // Arrow head at end
-            path.move(to: CGPoint(x: w * 0.72, y: h * 0.48))
-            path.addLine(to: CGPoint(x: w * 0.9, y: h * 0.75))
-            path.addLine(to: CGPoint(x: w * 0.62, y: h * 0.78))
-
             context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
+
+            // Proper arrow head at the end (pointing down-right following the curve)
+            var arrowHead = Path()
+            arrowHead.move(to: CGPoint(x: w * 0.70, y: h * 0.58))
+            arrowHead.addLine(to: CGPoint(x: w * 0.92, y: h * 0.85))
+            arrowHead.addLine(to: CGPoint(x: w * 0.62, y: h * 0.82))
+
+            context.stroke(arrowHead, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
         }
         .frame(width: size, height: size)
     }
@@ -315,22 +259,27 @@ struct BoastIcon: View {
             let h = canvasSize.height
             let strokeWidth: CGFloat = 2.5
 
-            // Boast: hits side wall, then front wall, then angles back
+            // Boast like the reference image:
+            // Start bottom-left, go up to top-left, then right along top, then diagonal down-right
             var path = Path()
-            // Start from bottom right, go to left wall (top)
-            path.move(to: CGPoint(x: w * 0.9, y: h * 0.9))
-            path.addLine(to: CGPoint(x: w * 0.1, y: h * 0.2))
-            // Hit front wall (go right)
-            path.addLine(to: CGPoint(x: w * 0.75, y: h * 0.2))
-            // Come back down
-            path.addLine(to: CGPoint(x: w * 0.9, y: h * 0.55))
-
-            // Arrow head
-            path.move(to: CGPoint(x: w * 0.72, y: h * 0.38))
-            path.addLine(to: CGPoint(x: w * 0.9, y: h * 0.55))
-            path.addLine(to: CGPoint(x: w * 0.98, y: h * 0.38))
+            // Start from bottom-left
+            path.move(to: CGPoint(x: w * 0.15, y: h * 0.9))
+            // Go up to top-left corner
+            path.addLine(to: CGPoint(x: w * 0.15, y: h * 0.15))
+            // Go right along top (front wall)
+            path.addLine(to: CGPoint(x: w * 0.7, y: h * 0.15))
+            // Diagonal down-right (ball coming back)
+            path.addLine(to: CGPoint(x: w * 0.92, y: h * 0.55))
 
             context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
+
+            // Arrow head at the end
+            var arrowHead = Path()
+            arrowHead.move(to: CGPoint(x: w * 0.72, y: h * 0.42))
+            arrowHead.addLine(to: CGPoint(x: w * 0.92, y: h * 0.55))
+            arrowHead.addLine(to: CGPoint(x: w * 0.95, y: h * 0.32))
+
+            context.stroke(arrowHead, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
         }
         .frame(width: size, height: size)
     }

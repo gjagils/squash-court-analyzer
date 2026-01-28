@@ -1,0 +1,68 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a26"/>
+      <stop offset="100%" style="stop-color:#0d0d14"/>
+    </linearGradient>
+
+    <!-- Court floor gradient -->
+    <linearGradient id="courtGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#c2996b"/>
+      <stop offset="100%" style="stop-color:#946b3d"/>
+    </linearGradient>
+
+    <!-- Ball gradient -->
+    <radialGradient id="ballGradient" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#1a1a1a"/>
+      <stop offset="100%" style="stop-color:#0d0d0d"/>
+    </radialGradient>
+
+    <!-- Ball highlight -->
+    <radialGradient id="ballHighlight" cx="30%" cy="30%" r="50%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.4)"/>
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0)"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="225" fill="url(#bgGradient)"/>
+
+  <!-- Court -->
+  <g transform="translate(262, 180)">
+    <!-- Court floor -->
+    <rect width="500" height="650" rx="20" fill="url(#courtGradient)"/>
+
+    <!-- Court border -->
+    <rect width="500" height="650" rx="20" fill="none" stroke="#cc3333" stroke-width="14"/>
+
+    <!-- Short line -->
+    <line x1="7" y1="362" x2="493" y2="362" stroke="#cc3333" stroke-width="12"/>
+
+    <!-- Half court line -->
+    <line x1="250" y1="362" x2="250" y2="643" stroke="#cc3333" stroke-width="12"/>
+
+    <!-- Left service box -->
+    <path d="M 7 525 L 130 525 L 130 643" fill="none" stroke="#cc3333" stroke-width="12"/>
+
+    <!-- Right service box -->
+    <path d="M 493 525 L 370 525 L 370 643" fill="none" stroke="#cc3333" stroke-width="12"/>
+  </g>
+
+  <!-- Motion lines -->
+  <g transform="translate(480, 280) rotate(-25)">
+    <rect x="0" y="0" width="80" height="15" rx="7" fill="rgba(255,255,255,0.6)"/>
+    <rect x="-70" y="30" width="65" height="15" rx="7" fill="rgba(255,255,255,0.45)"/>
+    <rect x="-130" y="60" width="50" height="15" rx="7" fill="rgba(255,255,255,0.3)"/>
+  </g>
+
+  <!-- Ball shadow -->
+  <ellipse cx="680" cy="310" rx="110" ry="110" fill="rgba(0,0,0,0.3)" filter="blur(20px)"/>
+
+  <!-- Ball -->
+  <circle cx="665" cy="295" r="110" fill="url(#ballGradient)"/>
+  <circle cx="665" cy="295" r="110" fill="url(#ballHighlight)"/>
+
+  <!-- Yellow dot on ball -->
+  <circle cx="695" cy="315" r="22" fill="#ffdd00"/>
+</svg>

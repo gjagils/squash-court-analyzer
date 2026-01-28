@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var showingSetup = true
     @State private var showingAnalysis = false
     @State private var showingHistory = false
+    @State private var showingSettings = false
     @State private var matchSaved = false
 
     private var currentGame: Game {
@@ -29,9 +30,9 @@ struct ContentView: View {
                     .transition(.opacity)
             }
 
-            // Analysis overlay
+            // Coach Dashboard overlay (replaces old AnalysisView)
             if showingAnalysis {
-                AnalysisView(game: currentGame) {
+                CoachDashboardView(game: currentGame, match: match) {
                     showingAnalysis = false
                 }
                 .transition(.opacity)
@@ -63,10 +64,17 @@ struct ContentView: View {
                 )
                 .transition(.opacity)
             }
+
+            // Settings overlay
+            if showingSettings {
+                SettingsView(isPresented: $showingSettings)
+                    .transition(.opacity)
+            }
         }
         .animation(.easeInOut(duration: 0.3), value: showingSetup)
         .animation(.easeInOut(duration: 0.3), value: showingAnalysis)
         .animation(.easeInOut(duration: 0.3), value: showingHistory)
+        .animation(.easeInOut(duration: 0.3), value: showingSettings)
         .animation(.easeInOut(duration: 0.25), value: currentGame.scoringStep)
     }
 
@@ -190,6 +198,14 @@ struct ContentView: View {
                     .foregroundColor(currentGame.canUndo ? AppColors.textSecondary : AppColors.textMuted)
             }
             .disabled(!currentGame.canUndo)
+
+            // Settings button
+            Button(action: { showingSettings = true }) {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 20))
+                    .foregroundColor(AppColors.textSecondary)
+            }
+            .padding(.leading, 8)
         }
         .padding(.horizontal, 24)
         .padding(.top, 8)

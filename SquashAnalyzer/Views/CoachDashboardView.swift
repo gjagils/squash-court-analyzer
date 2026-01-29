@@ -194,7 +194,7 @@ struct CoachDashboardView: View {
                 QuickStatBadge(icon: "mappin.circle", value: zone.rawValue, label: "Beste zone", color: AppColors.accentGold)
             }
             if let shot = bestShot {
-                QuickStatBadge(icon: shot.icon, value: shot.rawValue, label: "Beste slag", color: AppColors.warmOrange)
+                QuickStatBadge(icon: shot.icon, value: shot.rawValue, label: "Beste slag", color: AppColors.warmOrange, shotType: shot)
             }
         }
         .padding(.horizontal, 20)
@@ -253,10 +253,8 @@ struct CoachDashboardView: View {
             VStack(spacing: 4) {
                 ForEach(topShots(), id: \.0.id) { shot, count in
                     HStack(spacing: 6) {
-                        Image(systemName: shot.icon)
-                            .font(.system(size: 10))
-                            .foregroundColor(AppColors.accentGold)
-                            .frame(width: 14)
+                        ShotIconView(type: shot, color: AppColors.accentGold, size: 14)
+                            .frame(width: 14, height: 14)
 
                         Text(shot.rawValue)
                             .font(AppFonts.caption(10))
@@ -537,12 +535,18 @@ struct QuickStatBadge: View {
     let value: String
     let label: String
     let color: Color
+    var shotType: ShotType? = nil
 
     var body: some View {
         VStack(spacing: 2) {
-            Image(systemName: icon)
-                .font(.system(size: 12))
-                .foregroundColor(color)
+            if let shot = shotType {
+                ShotIconView(type: shot, color: color, size: 14)
+                    .frame(height: 14)
+            } else {
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                    .foregroundColor(color)
+            }
 
             Text(value)
                 .font(AppFonts.score(16))

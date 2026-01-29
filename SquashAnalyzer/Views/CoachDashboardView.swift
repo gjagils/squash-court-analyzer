@@ -191,10 +191,10 @@ struct CoachDashboardView: View {
             QuickStatBadge(icon: "checkmark.circle", value: "\(won)", label: "Gewonnen", color: .green)
             QuickStatBadge(icon: "xmark.circle", value: "\(lost)", label: "Verloren", color: .red)
             if let zone = bestZone {
-                QuickStatBadge(icon: "mappin.circle", value: zone.shortName, label: "Beste zone", color: AppColors.accentGold)
+                QuickStatBadge(icon: "mappin.circle", value: zone.rawValue, label: "Beste zone", color: AppColors.accentGold)
             }
             if let shot = bestShot {
-                QuickStatBadge(icon: shot.icon, value: shot.shortName, label: "Beste slag", color: AppColors.warmOrange)
+                QuickStatBadge(icon: shot.icon, value: shot.rawValue, label: "Beste slag", color: AppColors.warmOrange)
             }
         }
         .padding(.horizontal, 20)
@@ -258,7 +258,7 @@ struct CoachDashboardView: View {
                             .foregroundColor(AppColors.accentGold)
                             .frame(width: 14)
 
-                        Text(shot.shortName)
+                        Text(shot.rawValue)
                             .font(AppFonts.caption(10))
                             .foregroundColor(AppColors.textSecondary)
 
@@ -318,7 +318,7 @@ struct CoachDashboardView: View {
                 if !recommended.isEmpty {
                     AdviceRow(
                         icon: "checkmark.seal",
-                        text: "Aanbevolen zones: \(recommended.map { $0.shortName }.joined(separator: ", "))",
+                        text: "Aanbevolen zones: \(recommended.map { $0.rawValue }.joined(separator: ", "))",
                         type: .success
                     )
                 }
@@ -547,6 +547,8 @@ struct QuickStatBadge: View {
             Text(value)
                 .font(AppFonts.score(16))
                 .foregroundColor(color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
 
             Text(label)
                 .font(AppFonts.caption(8))

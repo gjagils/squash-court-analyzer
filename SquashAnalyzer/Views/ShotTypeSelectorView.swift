@@ -227,21 +227,21 @@ struct LobIcon: View {
             let h = canvasSize.height
             let strokeWidth: CGFloat = 2.5
 
-            // Higher arc that starts and ends at same height
+            // Arc from bottom-left, up and over, ending at right
             var path = Path()
-            path.move(to: CGPoint(x: w * 0.08, y: h * 0.85))
+            path.move(to: CGPoint(x: w * 0.12, y: h * 0.78))
             path.addQuadCurve(
-                to: CGPoint(x: w * 0.92, y: h * 0.85),
-                control: CGPoint(x: w * 0.5, y: h * -0.15)  // Higher control point
+                to: CGPoint(x: w * 0.72, y: h * 0.70),
+                control: CGPoint(x: w * 0.42, y: h * 0.0)
             )
 
             context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
 
-            // Arrow head at the end (same style as boast: open V from endpoint)
+            // Open V arrowhead at end, pointing down-right
             var arrowHead = Path()
-            arrowHead.move(to: CGPoint(x: w * 0.70, y: h * 0.65))
-            arrowHead.addLine(to: CGPoint(x: w * 0.92, y: h * 0.85))
-            arrowHead.addLine(to: CGPoint(x: w * 0.92, y: h * 0.58))
+            arrowHead.move(to: CGPoint(x: w * 0.52, y: h * 0.48))
+            arrowHead.addLine(to: CGPoint(x: w * 0.72, y: h * 0.70))
+            arrowHead.addLine(to: CGPoint(x: w * 0.85, y: h * 0.52))
 
             context.stroke(arrowHead, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
         }

@@ -7,29 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A1000001 /* SquashAnalyzerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001; };
-		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002; };
-		A1000003 /* CourtView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003; };
-		A1000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000004; };
-		A1000005 /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000005; };
-		A1000006 /* ScoreboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000006; };
-		A1000007 /* PlayerButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000007; };
-		A1000009 /* CourtZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000009; };
-		A1000010 /* Point.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010; };
-		A1000012 /* AnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000012; };
-		A1000013 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000013; };
-		A1000014 /* Match.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000014; };
-		A1000015 /* ShotType.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000015; };
-		A1000016 /* SavedMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000016; };
-		A1000017 /* SavedGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000017; };
-		A1000018 /* SavedPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000018; };
-		A1000019 /* ShotTypeSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000019; };
-		A1000020 /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000020; };
-		A1000021 /* MatchHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000021; };
-		A1000022 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000022; };
-		A1000023 /* CoachDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000023; };
-		A1000024 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000024; };
-		A1000025 /* APIKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000025; };
+		A1000001 /* SquashAnalyzerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* SquashAnalyzerApp.swift */; };
+		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
+		A1000003 /* CourtView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003 /* CourtView.swift */; };
+		A1000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000004 /* Assets.xcassets */; };
+		A1000005 /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000005 /* Game.swift */; };
+		A1000006 /* ScoreboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000006 /* ScoreboardView.swift */; };
+		A1000007 /* PlayerButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000007 /* PlayerButtonsView.swift */; };
+		A1000009 /* CourtZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000009 /* CourtZone.swift */; };
+		A1000010 /* Point.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010 /* Point.swift */; };
+		A1000012 /* AnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000012 /* AnalysisView.swift */; };
+		A1000013 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000013 /* DesignSystem.swift */; };
+		A1000014 /* Match.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000014 /* Match.swift */; };
+		A1000015 /* ShotType.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000015 /* ShotType.swift */; };
+		A1000016 /* SavedMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000016 /* SavedMatch.swift */; };
+		A1000017 /* SavedGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000017 /* SavedGame.swift */; };
+		A1000018 /* SavedPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000018 /* SavedPoint.swift */; };
+		A1000019 /* ShotTypeSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000019 /* ShotTypeSelectorView.swift */; };
+		A1000020 /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000020 /* AppIconView.swift */; };
+		A1000021 /* MatchHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000021 /* MatchHistoryView.swift */; };
+		A1000022 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000022 /* SettingsView.swift */; };
+		A1000023 /* CoachDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000023 /* CoachDashboardView.swift */; };
+		A1000024 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000024 /* OpenAIService.swift */; };
+		A1000025 /* APIKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000025 /* APIKeyManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -364,13 +364,14 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 65FAHRU88M;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -392,13 +393,14 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 65FAHRU88M;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

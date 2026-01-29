@@ -237,11 +237,11 @@ struct LobIcon: View {
 
             context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
 
-            // Arrow head at the end (pointing down-right following the curve tangent)
+            // Arrow head at the end (same style as boast: open V from endpoint)
             var arrowHead = Path()
-            arrowHead.move(to: CGPoint(x: w * 0.72, y: h * 0.62))
+            arrowHead.move(to: CGPoint(x: w * 0.70, y: h * 0.65))
             arrowHead.addLine(to: CGPoint(x: w * 0.92, y: h * 0.85))
-            arrowHead.addLine(to: CGPoint(x: w * 0.68, y: h * 0.85))
+            arrowHead.addLine(to: CGPoint(x: w * 0.92, y: h * 0.58))
 
             context.stroke(arrowHead, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
         }

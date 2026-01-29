@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var showingSavedMatchAnalysis = false
     @State private var savedMatchForAnalysis: Match? = nil
     @State private var savedGameForAnalysis: Game? = nil
+    @State private var showingPreviousGameAnalysis = false
 
     private var currentGame: Game {
         match.currentGame
@@ -57,6 +58,14 @@ struct ContentView: View {
                 )
             }
 
+            // Previous game analysis overlay
+            if showingPreviousGameAnalysis, match.currentGameIndex > 0 {
+                CoachDashboardView(game: match.games[match.currentGameIndex - 1], match: match) {
+                    showingPreviousGameAnalysis = false
+                }
+                .transition(.opacity)
+            }
+
             // Saved match analysis overlay
             if showingSavedMatchAnalysis, let reviewGame = savedGameForAnalysis {
                 CoachDashboardView(game: reviewGame, match: savedMatchForAnalysis) {
@@ -91,6 +100,7 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.3), value: showingSetup)
         .animation(.easeInOut(duration: 0.3), value: showingAnalysis)
         .animation(.easeInOut(duration: 0.3), value: showingHistory)
+        .animation(.easeInOut(duration: 0.3), value: showingPreviousGameAnalysis)
         .animation(.easeInOut(duration: 0.3), value: showingSavedMatchAnalysis)
         .animation(.easeInOut(duration: 0.3), value: showingSettings)
         .animation(.easeInOut(duration: 0.25), value: currentGame.scoringStep)
@@ -195,6 +205,16 @@ struct ContentView: View {
                     .foregroundColor(AppColors.textSecondary)
             }
             .padding(.leading, 8)
+
+            // Previous game analysis button
+            if match.currentGameIndex > 0 && !currentGame.isGameOver {
+                Button(action: { showingPreviousGameAnalysis = true }) {
+                    Image(systemName: "chart.bar.xaxis")
+                        .font(.system(size: 20))
+                        .foregroundColor(AppColors.accentGold)
+                }
+                .padding(.leading, 8)
+            }
 
             Spacer()
 

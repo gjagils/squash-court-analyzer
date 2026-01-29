@@ -74,6 +74,22 @@ final class SavedMatch {
         "\(player1GamesWon) - \(player2GamesWon)"
     }
 
+    // MARK: - Conversion to Live Match
+
+    /// Convert this SavedMatch back to a live Match for analysis views
+    func toMatch() -> Match {
+        let match = Match()
+        match.player1Name = player1Name
+        match.player2Name = player2Name
+        match.matchStartingServer = startingServer
+        // Replace the default empty game with converted saved games
+        match.games = games
+            .sorted(by: { $0.gameNumber < $1.gameNumber })
+            .map { $0.toGame() }
+        match.currentGameIndex = max(0, match.games.count - 1)
+        return match
+    }
+
     // MARK: - Factory Method
 
     /// Create a SavedMatch from a live Match

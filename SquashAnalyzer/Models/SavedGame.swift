@@ -73,6 +73,31 @@ final class SavedGame {
         points.filter { $0.scorerPlayer == player && $0.pointShotType == shotType }.count
     }
 
+    // MARK: - Conversion to Live Game
+
+    /// Convert this SavedGame back to a live Game for analysis views
+    func toGame() -> Game {
+        let game = Game()
+        game.player1Name = player1Name
+        game.player2Name = player2Name
+        game.player1Score = player1Score
+        game.player2Score = player2Score
+        game.setStartingServer(gameStartingServer)
+        game.points = points
+            .sorted(by: { $0.pointNumber < $1.pointNumber })
+            .map { sp in
+                Point(
+                    scorer: sp.scorerPlayer,
+                    zone: sp.pointZone,
+                    shotType: sp.pointShotType,
+                    server: sp.serverPlayer,
+                    player1Score: sp.player1Score,
+                    player2Score: sp.player2Score
+                )
+            }
+        return game
+    }
+
     // MARK: - Factory Method
 
     /// Create a SavedGame from a live Game

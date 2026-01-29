@@ -195,9 +195,18 @@ struct MatchHistoryCard: View {
                     }
                 }
 
-                // Delete button row
+                // Action row
                 HStack {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chart.bar.xaxis")
+                            .font(.system(size: 12))
+                        Text("Bekijk analyse")
+                            .font(AppFonts.caption(11))
+                    }
+                    .foregroundColor(AppColors.accentGold)
+
                     Spacer()
+
                     Button(action: { showingDeleteConfirm = true }) {
                         HStack(spacing: 4) {
                             Image(systemName: "trash")

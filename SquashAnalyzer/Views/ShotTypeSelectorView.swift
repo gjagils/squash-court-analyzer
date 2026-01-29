@@ -227,21 +227,21 @@ struct LobIcon: View {
             let h = canvasSize.height
             let strokeWidth: CGFloat = 2.5
 
-            // Higher arc that starts and ends at same height
+            // Arc from bottom-left, up and over, ending at right
             var path = Path()
-            path.move(to: CGPoint(x: w * 0.08, y: h * 0.85))
+            path.move(to: CGPoint(x: w * 0.12, y: h * 0.78))
             path.addQuadCurve(
-                to: CGPoint(x: w * 0.92, y: h * 0.85),
-                control: CGPoint(x: w * 0.5, y: h * -0.15)  // Higher control point
+                to: CGPoint(x: w * 0.72, y: h * 0.70),
+                control: CGPoint(x: w * 0.42, y: h * 0.0)
             )
 
             context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
 
-            // Proper arrow head at the end (pointing down-right following the curve)
+            // Open V arrowhead at end, pointing down-right
             var arrowHead = Path()
-            arrowHead.move(to: CGPoint(x: w * 0.70, y: h * 0.58))
-            arrowHead.addLine(to: CGPoint(x: w * 0.92, y: h * 0.85))
-            arrowHead.addLine(to: CGPoint(x: w * 0.62, y: h * 0.82))
+            arrowHead.move(to: CGPoint(x: w * 0.52, y: h * 0.48))
+            arrowHead.addLine(to: CGPoint(x: w * 0.72, y: h * 0.70))
+            arrowHead.addLine(to: CGPoint(x: w * 0.85, y: h * 0.52))
 
             context.stroke(arrowHead, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
         }
@@ -259,16 +259,16 @@ struct BoastIcon: View {
             let h = canvasSize.height
             let strokeWidth: CGFloat = 2.5
 
-            // Boast like the reference image:
-            // Start bottom-left, go up to top-left, then right along top, then diagonal down-right
+            // Boast: incoming ball hits side wall, then front wall, then comes back diagonally
+            // Incoming line parallel to the outgoing arrow segment
             var path = Path()
-            // Start from bottom-left
-            path.move(to: CGPoint(x: w * 0.15, y: h * 0.9))
-            // Go up to top-left corner
-            path.addLine(to: CGPoint(x: w * 0.15, y: h * 0.15))
-            // Go right along top (front wall)
+            // Start: incoming ball from bottom-right, parallel to outgoing line
+            path.move(to: CGPoint(x: w * 0.55, y: h * 0.9))
+            // Hit left side wall
+            path.addLine(to: CGPoint(x: w * 0.15, y: h * 0.17))
+            // Hit front wall
             path.addLine(to: CGPoint(x: w * 0.7, y: h * 0.15))
-            // Diagonal down-right (ball coming back)
+            // Diagonal down-right (ball coming back) - outgoing with arrow
             path.addLine(to: CGPoint(x: w * 0.92, y: h * 0.55))
 
             context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))

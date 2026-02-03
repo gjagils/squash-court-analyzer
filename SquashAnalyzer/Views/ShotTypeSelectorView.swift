@@ -227,21 +227,22 @@ struct LobIcon: View {
             let h = canvasSize.height
             let strokeWidth: CGFloat = 2.5
 
-            // Arc from bottom-left, up and over, ending at right
+            // Arc from left going up, then curving down to the right
             var path = Path()
-            path.move(to: CGPoint(x: w * 0.12, y: h * 0.78))
-            path.addQuadCurve(
-                to: CGPoint(x: w * 0.72, y: h * 0.70),
-                control: CGPoint(x: w * 0.42, y: h * 0.0)
+            path.move(to: CGPoint(x: w * 0.10, y: h * 0.65))
+            path.addCurve(
+                to: CGPoint(x: w * 0.78, y: h * 0.82),
+                control1: CGPoint(x: w * 0.20, y: h * -0.10),
+                control2: CGPoint(x: w * 0.55, y: h * 0.15)
             )
 
             context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
 
-            // Open V arrowhead at end, pointing down-right
+            // Open V arrowhead pointing downward
             var arrowHead = Path()
-            arrowHead.move(to: CGPoint(x: w * 0.52, y: h * 0.48))
-            arrowHead.addLine(to: CGPoint(x: w * 0.72, y: h * 0.70))
-            arrowHead.addLine(to: CGPoint(x: w * 0.85, y: h * 0.52))
+            arrowHead.move(to: CGPoint(x: w * 0.58, y: h * 0.68))
+            arrowHead.addLine(to: CGPoint(x: w * 0.78, y: h * 0.82))
+            arrowHead.addLine(to: CGPoint(x: w * 0.82, y: h * 0.58))
 
             context.stroke(arrowHead, with: .color(color), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
         }

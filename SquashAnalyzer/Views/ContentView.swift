@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var savedMatchForAnalysis: Match? = nil
     @State private var savedGameForAnalysis: Game? = nil
     @State private var showingPreviousGameAnalysis = false
+    @State private var showingCancelConfirm = false
 
     private var currentGame: Game {
         match.currentGame
@@ -30,7 +31,10 @@ struct ContentView: View {
 
             // Setup overlay
             if showingSetup {
-                MatchSetupView(match: match, isPresented: $showingSetup)
+                MatchSetupView(match: match, isPresented: $showingSetup, onViewHistory: {
+                    showingSetup = false
+                    showingHistory = true
+                })
                     .transition(.opacity)
             }
 
@@ -51,6 +55,7 @@ struct ContentView: View {
                     onAnalysis: { showingAnalysis = true },
                     onNextGame: { match.onGameEnd() },
                     onNewMatch: {
+                        match = Match()
                         matchSaved = false
                         showingSetup = true
                     },
@@ -104,6 +109,16 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.3), value: showingSavedMatchAnalysis)
         .animation(.easeInOut(duration: 0.3), value: showingSettings)
         .animation(.easeInOut(duration: 0.25), value: currentGame.scoringStep)
+        .alert("Wedstrijd stoppen?", isPresented: $showingCancelConfirm) {
+            Button("Annuleren", role: .cancel) { }
+            Button("Stoppen", role: .destructive) {
+                match = Match()
+                matchSaved = false
+                showingSetup = true
+            }
+        } message: {
+            Text("Weet je zeker dat je deze wedstrijd wilt stoppen? De huidige wedstrijd gaat verloren.")
+        }
     }
 
     // MARK: - Save Match
@@ -198,9 +213,9 @@ struct ContentView: View {
                     .foregroundColor(AppColors.textSecondary)
             }
 
-            // New match button
-            Button(action: { showingSetup = true }) {
-                Image(systemName: "plus.circle")
+            // Stop match button
+            Button(action: { showingCancelConfirm = true }) {
+                Image(systemName: "xmark.circle")
                     .font(.system(size: 20))
                     .foregroundColor(AppColors.textSecondary)
             }
@@ -339,6 +354,7 @@ struct ContentView: View {
 struct MatchSetupView: View {
     let match: Match
     @Binding var isPresented: Bool
+    var onViewHistory: (() -> Void)? = nil
 
     @State private var player1Name: String = ""
     @State private var player2Name: String = ""
@@ -350,7 +366,7 @@ struct MatchSetupView: View {
 
             VStack(spacing: 24) {
                 // Header
-                Text("NIEUWE WEDSTRIJD")
+                Text("SQUASH ANALYZER")
                     .font(AppFonts.title(22))
                     .foregroundColor(AppColors.textPrimary)
                     .tracking(3)
@@ -419,7 +435,32 @@ struct MatchSetupView: View {
                     startMatch()
                 }
                 .padding(.horizontal, 24)
-                .padding(.bottom, 40)
+
+                // View saved matches button
+                if let onViewHistory = onViewHistory {
+                    Button(action: onViewHistory) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .font(.system(size: 16))
+                            Text("Opgeslagen wedstrijden")
+                                .font(AppFonts.label(14))
+                        }
+                        .foregroundColor(AppColors.textSecondary)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.white.opacity(0.05))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        )
+                    }
+                    .padding(.horizontal, 24)
+                }
+
+                Spacer().frame(height: 24)
             }
         }
     }

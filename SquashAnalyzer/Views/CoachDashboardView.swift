@@ -2,15 +2,39 @@ import SwiftUI
 
 /// Compact coach dashboard with local + AI-powered tactical advice
 struct CoachDashboardView: View {
-    let game: Game
+    let initialGame: Game
     var match: Match? = nil
     let onDismiss: () -> Void
 
     @State private var selectedPlayer: Player = .player1
+    @State private var selectedGameIndex: Int = 0
     @State private var isLoadingAI = false
     @State private var aiAdvice: TacticalAdvice? = nil
     @State private var aiError: String? = nil
     @State private var showingDetailedAnalysis = false
+
+    private var availableGames: [Game] {
+        guard let match = match else { return [initialGame] }
+        return match.games.filter { $0.isGameOver || $0 === initialGame }
+    }
+
+    private var game: Game {
+        let games = availableGames
+        guard selectedGameIndex < games.count else { return initialGame }
+        return games[selectedGameIndex]
+    }
+
+    init(game: Game, match: Match? = nil, onDismiss: @escaping () -> Void) {
+        self.initialGame = game
+        self.match = match
+        self.onDismiss = onDismiss
+        // Default to the initial game's index
+        if let match = match {
+            let games = match.games.filter { $0.isGameOver || $0 === game }
+            let idx = games.firstIndex(where: { $0 === game }) ?? games.count - 1
+            _selectedGameIndex = State(initialValue: idx)
+        }
+    }
 
     private var hasAIKey: Bool {
         APIKeyManager.shared.hasOpenAIKey
@@ -27,6 +51,11 @@ struct CoachDashboardView: View {
 
                     // Score Card
                     scoreCard
+
+                    // Game Selector (when multiple games)
+                    if availableGames.count > 1 {
+                        gameSelector
+                    }
 
                     // Player Selector
                     playerSelector
@@ -149,6 +178,33 @@ struct CoachDashboardView: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white.opacity(0.05))
         )
+        .padding(.horizontal, 20)
+    }
+
+    // MARK: - Game Selector
+    private var gameSelector: some View {
+        HStack(spacing: 8) {
+            ForEach(availableGames.indices, id: \.self) { index in
+                let g = availableGames[index]
+                Button(action: {
+                    withAnimation { selectedGameIndex = index }
+                }) {
+                    Text("Game \(index + 1) (\(g.player1Score)-\(g.player2Score))")
+                        .font(AppFonts.caption(11))
+                        .foregroundColor(selectedGameIndex == index ? AppColors.textPrimary : AppColors.textMuted)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(selectedGameIndex == index ? AppColors.accentGold.opacity(0.3) : Color.white.opacity(0.05))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(selectedGameIndex == index ? AppColors.accentGold : Color.clear, lineWidth: 1)
+                        )
+                }
+            }
+        }
         .padding(.horizontal, 20)
     }
 

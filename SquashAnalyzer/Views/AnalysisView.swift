@@ -30,11 +30,8 @@ struct AnalysisView: View {
                         gameSelector(match: match)
                     }
 
-                    // Final Score
+                    // Score Card (with integrated player selector)
                     finalScoreCard
-
-                    // Player selector
-                    playerSelector
 
                     // Heatmap toggle
                     heatmapToggle
@@ -131,44 +128,71 @@ struct AnalysisView: View {
         }
     }
 
-    // MARK: - Final Score
+    // MARK: - Score Card (with integrated player selector)
     private var finalScoreCard: some View {
-        ScoreboardView(game: displayedGame, match: match)
-            .padding(.horizontal, 20)
-    }
+        HStack(spacing: 0) {
+            // Player 1 - tappable
+            Button(action: { selectedPlayer = .player1 }) {
+                VStack(spacing: 4) {
+                    Text(displayedGame.player1Name)
+                        .font(AppFonts.label(12))
+                        .foregroundColor(selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.textSecondary)
+                        .lineLimit(1)
 
-    // MARK: - Player Selector
-    private var playerSelector: some View {
-        VStack(spacing: 8) {
-            Text("Bekijk analyse voor:")
-                .font(AppFonts.body(13))
-                .foregroundColor(AppColors.textSecondary)
-
-            HStack(spacing: 12) {
-                ForEach(Player.allCases) { player in
-                    Button(action: { selectedPlayer = player }) {
-                        Text(displayedGame.name(for: player))
-                            .font(AppFonts.label(14))
-                            .foregroundColor(selectedPlayer == player ? AppColors.textPrimary : AppColors.textMuted)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(selectedPlayer == player
-                                          ? (player == .player1 ? AppColors.warmOrange.opacity(0.3) : AppColors.steelBlue.opacity(0.3))
-                                          : Color.white.opacity(0.05))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(selectedPlayer == player
-                                            ? (player == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
-                                            : Color.clear, lineWidth: 1)
-                            )
-                    }
+                    Text("\(displayedGame.player1Score)")
+                        .font(AppFonts.score(36))
+                        .foregroundColor(selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.textPrimary)
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(selectedPlayer == .player1 ? AppColors.warmOrange.opacity(0.15) : Color.clear)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(selectedPlayer == .player1 ? AppColors.warmOrange.opacity(0.5) : Color.clear, lineWidth: 1)
+                )
             }
+            .buttonStyle(.plain)
+
+            Text("-")
+                .font(AppFonts.score(36))
+                .foregroundColor(AppColors.textMuted)
+                .padding(.horizontal, 8)
+
+            // Player 2 - tappable
+            Button(action: { selectedPlayer = .player2 }) {
+                VStack(spacing: 4) {
+                    Text(displayedGame.player2Name)
+                        .font(AppFonts.label(12))
+                        .foregroundColor(selectedPlayer == .player2 ? AppColors.steelBlue : AppColors.textSecondary)
+                        .lineLimit(1)
+
+                    Text("\(displayedGame.player2Score)")
+                        .font(AppFonts.score(36))
+                        .foregroundColor(selectedPlayer == .player2 ? AppColors.steelBlue : AppColors.textPrimary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(selectedPlayer == .player2 ? AppColors.steelBlue.opacity(0.15) : Color.clear)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(selectedPlayer == .player2 ? AppColors.steelBlue.opacity(0.5) : Color.clear, lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
         }
-        .padding(.horizontal, 24)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.05))
+        )
+        .padding(.horizontal, 20)
     }
 
     // MARK: - Heatmap Toggle

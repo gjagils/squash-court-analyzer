@@ -425,6 +425,14 @@ struct CoachDashboardView: View {
         let opponentStrongZone = game.bestZone(for: opponent)
         let tempoAdvice = calculateTempoAdvice()
 
+        // Ace statistics
+        let myAces = game.pointsWon(by: selectedPlayer, with: .ace)
+        let opponentAces = game.pointsWon(by: opponent, with: .ace)
+
+        // Let statistics
+        let letsAgainstMe = game.letsRequested(by: opponent).count  // Opponent asks = I'm blocking
+        let letsForMe = game.letsRequested(by: selectedPlayer).count  // I ask = opponent blocking me
+
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "lightbulb.fill")
@@ -441,6 +449,42 @@ struct CoachDashboardView: View {
                         icon: advice.icon,
                         text: advice.text,
                         type: advice.type
+                    )
+                }
+
+                // Ace advice - opponent scoring aces against you
+                if opponentAces >= 2 {
+                    AdviceRow(
+                        icon: "exclamationmark.circle",
+                        text: "\(game.name(for: opponent)) scoort \(opponentAces) aces - werk aan je return",
+                        type: .warning
+                    )
+                }
+
+                // Ace advice - you're scoring aces
+                if myAces >= 2 {
+                    AdviceRow(
+                        icon: "bolt.fill",
+                        text: "Je hebt \(myAces) aces - je service werkt, blijf zo serveren!",
+                        type: .success
+                    )
+                }
+
+                // Let advice - opponent requesting lets means you're blocking
+                if letsAgainstMe >= 2 {
+                    AdviceRow(
+                        icon: "figure.walk",
+                        text: "\(letsAgainstMe) lets tegen - beweeg sneller weg na je slag",
+                        type: .warning
+                    )
+                }
+
+                // Let advice - you requesting lets means you're moving well
+                if letsForMe >= 2 && letsAgainstMe < 2 {
+                    AdviceRow(
+                        icon: "figure.run",
+                        text: "\(letsForMe) lets mee - je beweegt goed naar de bal",
+                        type: .success
                     )
                 }
 

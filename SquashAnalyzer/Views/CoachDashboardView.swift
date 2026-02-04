@@ -60,11 +60,14 @@ struct CoachDashboardView: View {
                     // Quick Stats Row
                     quickStatsRow
 
-                    // Mini Heatmap + Shot Distribution
-                    HStack(spacing: 12) {
+                    // Mini Heatmap + Shot Distribution (equal heights)
+                    HStack(alignment: .top, spacing: 12) {
                         miniHeatmap
+                            .frame(maxHeight: .infinity)
                         shotDistribution
+                            .frame(maxHeight: .infinity)
                     }
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 20)
 
                     // Local Tactical Advice
@@ -117,21 +120,40 @@ struct CoachDashboardView: View {
 
     // MARK: - Header
     private var header: some View {
-        VStack(spacing: 4) {
-            HStack {
-                Image(systemName: "figure.run")
-                    .foregroundColor(AppColors.accentGold)
-                Text("COACH DASHBOARD")
-                    .font(AppFonts.title(20))
-                    .foregroundColor(AppColors.textPrimary)
-                    .tracking(3)
+        ZStack {
+            // Center content
+            VStack(spacing: 4) {
+                HStack {
+                    Image(systemName: "figure.run")
+                        .foregroundColor(AppColors.accentGold)
+                    Text("COACH DASHBOARD")
+                        .font(AppFonts.title(20))
+                        .foregroundColor(AppColors.textPrimary)
+                        .tracking(3)
+                }
+
+                if let winner = game.winner {
+                    Text("\(game.name(for: winner)) wint!")
+                        .font(AppFonts.body(14))
+                        .foregroundColor(AppColors.accentGold)
+                }
             }
 
-            if let winner = game.winner {
-                Text("\(game.name(for: winner)) wint!")
-                    .font(AppFonts.body(14))
-                    .foregroundColor(AppColors.accentGold)
+            // Close button (top right)
+            HStack {
+                Spacer()
+                Button(action: onDismiss) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(AppColors.textSecondary)
+                        .padding(10)
+                        .background(
+                            Circle()
+                                .fill(Color.white.opacity(0.1))
+                        )
+                }
             }
+            .padding(.horizontal, 20)
         }
         .padding(.top, 16)
     }
@@ -252,13 +274,23 @@ struct CoachDashboardView: View {
                 label: "Verloren",
                 color: .red
             )
-            if let zone = bestZone {
-                QuickStatBadge(icon: "mappin.circle", value: zone.rawValue, label: "Beste zone", color: AppColors.accentGold)
-            }
-            if let shot = bestShot {
-                QuickStatBadge(icon: shot.icon, value: shot.rawValue, label: "Beste slag", color: AppColors.warmOrange, shotType: shot)
-            }
+            // Always show best zone (with placeholder if none)
+            QuickStatBadge(
+                icon: "mappin.circle",
+                value: bestZone?.rawValue ?? "-",
+                label: "Beste zone",
+                color: AppColors.accentGold
+            )
+            // Always show best shot (with placeholder if none)
+            QuickStatBadge(
+                icon: bestShot?.icon ?? "star",
+                value: bestShot?.rawValue ?? "-",
+                label: "Beste slag",
+                color: AppColors.warmOrange,
+                shotType: bestShot
+            )
         }
+        .fixedSize(horizontal: false, vertical: true)
         .padding(.horizontal, 20)
     }
 
@@ -363,9 +395,11 @@ struct CoachDashboardView: View {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(AppColors.courtSand.opacity(0.3))
             )
+
+            Spacer(minLength: 0)
         }
         .padding(12)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white.opacity(0.05))
@@ -409,9 +443,11 @@ struct CoachDashboardView: View {
                     }
                 }
             }
+
+            Spacer(minLength: 0)
         }
         .padding(12)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white.opacity(0.05))

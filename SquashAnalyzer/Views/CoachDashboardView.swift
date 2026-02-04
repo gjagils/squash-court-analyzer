@@ -361,6 +361,63 @@ struct CoachDashboardView: View {
         }
     }
 
+    // MARK: - Tempo Advice Calculation
+    private func calculateTempoAdvice() -> (icon: String, text: String, type: AdviceRow.AdviceType)? {
+        // Need at least 4 points to give meaningful advice
+        guard game.points.count >= 4 else { return nil }
+
+        let shortRallyWin = game.shortRallyWinPercentage(for: selectedPlayer)
+        let longRallyWin = game.longRallyWinPercentage(for: selectedPlayer)
+        let avgWon = game.averageDurationWon(by: selectedPlayer)
+        let avgLost = game.averageDurationLost(by: selectedPlayer)
+
+        // Primary: compare short vs long rally win percentages
+        if let shortWin = shortRallyWin, let longWin = longRallyWin {
+            let difference = abs(shortWin - longWin)
+
+            // Only give advice if there's a meaningful difference (>15%)
+            if difference > 15 {
+                if shortWin > longWin {
+                    return (
+                        icon: "hare.fill",
+                        text: "Versnel het spel! Je wint \(Int(shortWin))% van korte rally's vs \(Int(longWin))% van lange",
+                        type: .success
+                    )
+                } else {
+                    return (
+                        icon: "tortoise.fill",
+                        text: "Vertraag het spel! Je wint \(Int(longWin))% van lange rally's vs \(Int(shortWin))% van korte",
+                        type: .success
+                    )
+                }
+            }
+        }
+
+        // Fallback: compare average duration of won vs lost points
+        if let won = avgWon, let lost = avgLost {
+            let difference = abs(won - lost)
+
+            // Only give advice if there's a meaningful difference (>3 seconds)
+            if difference > 3 {
+                if won < lost {
+                    return (
+                        icon: "hare.fill",
+                        text: "Versnel het spel! Je gewonnen punten duren gem. \(formatDuration(won)), verloren \(formatDuration(lost))",
+                        type: .info
+                    )
+                } else {
+                    return (
+                        icon: "tortoise.fill",
+                        text: "Vertraag het spel! Je gewonnen punten duren gem. \(formatDuration(won)), verloren \(formatDuration(lost))",
+                        type: .info
+                    )
+                }
+            }
+        }
+
+        return nil
+    }
+
     // MARK: - Mini Heatmap
     private var miniHeatmap: some View {
         VStack(spacing: 8) {
@@ -455,6 +512,7 @@ struct CoachDashboardView: View {
         let opponent = selectedPlayer.opponent
         let recommended = game.recommendedZones(against: opponent)
         let weakZone = game.bestZone(for: opponent)
+        let tempoAdvice = calculateTempoAdvice()
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -466,6 +524,15 @@ struct CoachDashboardView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
+                // Tempo advice based on rally duration analysis
+                if let advice = tempoAdvice {
+                    AdviceRow(
+                        icon: advice.icon,
+                        text: advice.text,
+                        type: advice.type
+                    )
+                }
+
                 if let zone = weakZone {
                     AdviceRow(
                         icon: "target",

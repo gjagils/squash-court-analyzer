@@ -44,8 +44,8 @@ final class SavedLet {
 
     // MARK: - Factory Method
 
-    /// Create a SavedLet from a live Let
-    static func from(_ letCall: Let, letNumber: Int) -> SavedLet {
+    /// Create a SavedLet from a live LetCall
+    static func from(_ letCall: LetCall, letNumber: Int) -> SavedLet {
         SavedLet(
             letNumber: letNumber,
             requestedBy: letCall.requestedBy,

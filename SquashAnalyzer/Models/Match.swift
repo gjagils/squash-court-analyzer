@@ -224,7 +224,7 @@ class Match {
     // MARK: - Let Analysis
 
     /// Get all lets from all games
-    var allLets: [Let] {
+    var allLets: [LetCall] {
         games.flatMap { $0.lets }
     }
 
@@ -234,7 +234,7 @@ class Match {
     }
 
     /// Lets requested by a specific player across all games
-    func letsRequested(by player: Player) -> [Let] {
+    func letsRequested(by player: Player) -> [LetCall] {
         allLets.filter { $0.requestedBy == player }
     }
 }

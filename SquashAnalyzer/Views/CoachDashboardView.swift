@@ -422,7 +422,7 @@ struct CoachDashboardView: View {
     private var localAdviceCard: some View {
         let opponent = selectedPlayer.opponent
         let recommended = game.recommendedZones(against: opponent)
-        let weakZone = game.bestZone(for: opponent)
+        let opponentStrongZone = game.bestZone(for: opponent)
         let tempoAdvice = calculateTempoAdvice()
 
         return VStack(alignment: .leading, spacing: 12) {
@@ -444,18 +444,20 @@ struct CoachDashboardView: View {
                     )
                 }
 
-                if let zone = weakZone {
+                // Warn about opponent's strong zone (avoid playing there)
+                if let zone = opponentStrongZone {
                     AdviceRow(
-                        icon: "target",
-                        text: "Speel naar \(zone.rawValue) - daar scoort \(game.name(for: opponent)) vaak",
+                        icon: "exclamationmark.triangle",
+                        text: "Vermijd \(zone.rawValue) - daar is \(game.name(for: opponent)) sterk",
                         type: .warning
                     )
                 }
 
+                // Recommend zones where opponent is weak
                 if !recommended.isEmpty {
                     AdviceRow(
-                        icon: "checkmark.seal",
-                        text: "Aanbevolen zones: \(recommended.map { $0.rawValue }.joined(separator: ", "))",
+                        icon: "target",
+                        text: "Speel naar: \(recommended.map { $0.rawValue }.joined(separator: ", "))",
                         type: .success
                     )
                 }
@@ -463,7 +465,7 @@ struct CoachDashboardView: View {
                 if let bestShot = game.bestShotType(for: selectedPlayer) {
                     AdviceRow(
                         icon: "star",
-                        text: "Je \(bestShot.rawValue) werkt goed, blijf variëren",
+                        text: "Je \(bestShot.rawValue) is effectief, blijf dit gebruiken",
                         type: .info
                     )
                 }

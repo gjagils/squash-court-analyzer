@@ -58,17 +58,44 @@ struct ShotTypeSelectorView: View {
 
     // MARK: - Shot Type Grid
     private var shotTypeGrid: some View {
-        LazyVGrid(columns: [
-            GridItem(.flexible(), spacing: 12),
-            GridItem(.flexible(), spacing: 12),
-            GridItem(.flexible(), spacing: 12)
-        ], spacing: 12) {
-            ForEach(ShotType.allCases) { shotType in
-                ShotTypeButton(
-                    shotType: shotType,
-                    color: playerColor
-                ) {
-                    onShotSelected(shotType)
+        VStack(spacing: 12) {
+            // Row 1: Ace and Stroke (centered)
+            HStack(spacing: 12) {
+                Spacer()
+                ShotTypeButton(shotType: .ace, color: playerColor) {
+                    onShotSelected(.ace)
+                }
+                .frame(maxWidth: 100)
+                ShotTypeButton(shotType: .stroke, color: playerColor) {
+                    onShotSelected(.stroke)
+                }
+                .frame(maxWidth: 100)
+                Spacer()
+            }
+
+            // Row 2: Drive, Cross, Volley
+            HStack(spacing: 12) {
+                ShotTypeButton(shotType: .drive, color: playerColor) {
+                    onShotSelected(.drive)
+                }
+                ShotTypeButton(shotType: .cross, color: playerColor) {
+                    onShotSelected(.cross)
+                }
+                ShotTypeButton(shotType: .volley, color: playerColor) {
+                    onShotSelected(.volley)
+                }
+            }
+
+            // Row 3: Drop, Lob, Boast
+            HStack(spacing: 12) {
+                ShotTypeButton(shotType: .drop, color: playerColor) {
+                    onShotSelected(.drop)
+                }
+                ShotTypeButton(shotType: .lob, color: playerColor) {
+                    onShotSelected(.lob)
+                }
+                ShotTypeButton(shotType: .boast, color: playerColor) {
+                    onShotSelected(.boast)
                 }
             }
         }

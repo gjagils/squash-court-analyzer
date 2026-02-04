@@ -15,6 +15,8 @@ struct ContentView: View {
     @State private var showingPreviousGameAnalysis = false
     @State private var showingCancelConfirm = false
     @State private var showingLetSelector = false
+    @State private var rallyElapsedTime: TimeInterval = 0
+    @State private var rallyTimer: Timer? = nil
 
     private var currentGame: Game {
         match.currentGame
@@ -126,6 +128,27 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.3), value: showingSavedMatchAnalysis)
         .animation(.easeInOut(duration: 0.3), value: showingSettings)
         .animation(.easeInOut(duration: 0.25), value: currentGame.scoringStep)
+        .onAppear {
+            startRallyTimer()
+        }
+        .onDisappear {
+            stopRallyTimer()
+        }
+        .onChange(of: currentGame.points.count) { _, _ in
+            // Reset timer when a point is scored
+            rallyElapsedTime = 0
+        }
+        .onChange(of: currentGame.lets.count) { _, _ in
+            // Reset timer when a let is called
+            rallyElapsedTime = 0
+        }
+        .onChange(of: showingSetup) { _, isShowing in
+            if isShowing {
+                stopRallyTimer()
+            } else {
+                startRallyTimer()
+            }
+        }
         .alert("Wedstrijd stoppen?", isPresented: $showingCancelConfirm) {
             Button("Annuleren", role: .cancel) { }
             Button("Stoppen", role: .destructive) {
@@ -159,9 +182,26 @@ struct ContentView: View {
                 ScoreboardView(game: currentGame, match: match)
                     .padding(.horizontal, 20)
 
-                // Instruction text
-                instructionText
-                    .padding(.horizontal, 24)
+                // Rally timer and instruction text
+                HStack {
+                    // Rally timer
+                    if !currentGame.isGameOver && !showingSetup {
+                        RallyTimerView(elapsedTime: rallyElapsedTime)
+                    }
+
+                    Spacer()
+
+                    instructionText
+
+                    Spacer()
+
+                    // Invisible spacer to balance the timer
+                    if !currentGame.isGameOver && !showingSetup {
+                        RallyTimerView(elapsedTime: rallyElapsedTime)
+                            .opacity(0)
+                    }
+                }
+                .padding(.horizontal, 24)
 
                 // Court view
                 CourtView(game: currentGame) { zone in
@@ -384,6 +424,47 @@ struct ContentView: View {
         withAnimation(.easeInOut(duration: 0.2)) {
             currentGame.addPoint(shotType: shotType)
         }
+    }
+
+    // MARK: - Rally Timer
+    private func startRallyTimer() {
+        stopRallyTimer()
+        rallyElapsedTime = Date().timeIntervalSince(currentGame.lastPointTime)
+        rallyTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            rallyElapsedTime = Date().timeIntervalSince(currentGame.lastPointTime)
+        }
+    }
+
+    private func stopRallyTimer() {
+        rallyTimer?.invalidate()
+        rallyTimer = nil
+    }
+}
+
+// MARK: - Rally Timer View
+struct RallyTimerView: View {
+    let elapsedTime: TimeInterval
+
+    private var formattedTime: String {
+        let minutes = Int(elapsedTime) / 60
+        let seconds = Int(elapsedTime) % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "timer")
+                .font(.system(size: 12))
+            Text(formattedTime)
+                .font(AppFonts.mono(14))
+        }
+        .foregroundColor(AppColors.textMuted)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 4)
+        .background(
+            Capsule()
+                .fill(Color.white.opacity(0.05))
+        )
     }
 }
 

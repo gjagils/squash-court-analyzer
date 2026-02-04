@@ -63,6 +63,9 @@ struct CoachDashboardView: View {
                     // Quick Stats Row
                     quickStatsRow
 
+                    // Rally Duration Stats
+                    rallyDurationStats
+
                     // Mini Heatmap + Shot Distribution
                     HStack(spacing: 12) {
                         miniHeatmap
@@ -254,6 +257,108 @@ struct CoachDashboardView: View {
             }
         }
         .padding(.horizontal, 20)
+    }
+
+    // MARK: - Rally Duration Stats
+    private var rallyDurationStats: some View {
+        let avgWon = game.averageDurationWon(by: selectedPlayer)
+        let avgLost = game.averageDurationLost(by: selectedPlayer)
+
+        return VStack(spacing: 8) {
+            HStack {
+                Image(systemName: "timer")
+                    .foregroundColor(AppColors.textMuted)
+                Text("Puntduur")
+                    .font(AppFonts.caption(10))
+                    .foregroundColor(AppColors.textMuted)
+            }
+
+            HStack(spacing: 12) {
+                // Average duration of won points
+                VStack(spacing: 4) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 10))
+                            .foregroundColor(.green)
+                        Text("Gewonnen")
+                            .font(AppFonts.caption(9))
+                            .foregroundColor(AppColors.textMuted)
+                    }
+
+                    if let avg = avgWon {
+                        Text(formatDuration(avg))
+                            .font(AppFonts.mono(18))
+                            .foregroundColor(.green)
+                    } else {
+                        Text("-")
+                            .font(AppFonts.mono(18))
+                            .foregroundColor(AppColors.textMuted)
+                    }
+
+                    Text("gem. duur")
+                        .font(AppFonts.caption(8))
+                        .foregroundColor(AppColors.textMuted)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.green.opacity(0.1))
+                )
+
+                // Average duration of lost points
+                VStack(spacing: 4) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 10))
+                            .foregroundColor(.red)
+                        Text("Verloren")
+                            .font(AppFonts.caption(9))
+                            .foregroundColor(AppColors.textMuted)
+                    }
+
+                    if let avg = avgLost {
+                        Text(formatDuration(avg))
+                            .font(AppFonts.mono(18))
+                            .foregroundColor(.red)
+                    } else {
+                        Text("-")
+                            .font(AppFonts.mono(18))
+                            .foregroundColor(AppColors.textMuted)
+                    }
+
+                    Text("gem. duur")
+                        .font(AppFonts.caption(8))
+                        .foregroundColor(AppColors.textMuted)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.red.opacity(0.1))
+                )
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.03))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
+        .padding(.horizontal, 20)
+    }
+
+    private func formatDuration(_ seconds: TimeInterval) -> String {
+        if seconds < 60 {
+            return String(format: "%.0fs", seconds)
+        } else {
+            let minutes = Int(seconds) / 60
+            let secs = Int(seconds) % 60
+            return String(format: "%d:%02d", minutes, secs)
+        }
     }
 
     // MARK: - Mini Heatmap

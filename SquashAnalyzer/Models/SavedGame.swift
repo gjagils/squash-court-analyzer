@@ -18,6 +18,9 @@ final class SavedGame {
     @Relationship(deleteRule: .cascade, inverse: \SavedPoint.game)
     var points: [SavedPoint] = []
 
+    @Relationship(deleteRule: .cascade, inverse: \SavedLet.game)
+    var lets: [SavedLet] = []
+
     init(
         id: UUID = UUID(),
         gameNumber: Int,
@@ -73,6 +76,29 @@ final class SavedGame {
         points.filter { $0.scorerPlayer == player && $0.pointShotType == shotType }.count
     }
 
+    // MARK: - Duration Analysis
+
+    /// Average duration of points won by a player
+    func averageDurationWon(by player: Player) -> TimeInterval? {
+        let wonPoints = pointsWon(by: player)
+        guard !wonPoints.isEmpty else { return nil }
+        let totalDuration = wonPoints.reduce(0) { $0 + $1.duration }
+        return totalDuration / Double(wonPoints.count)
+    }
+
+    /// Average duration of points lost by a player
+    func averageDurationLost(by player: Player) -> TimeInterval? {
+        let lostPoints = points.filter { $0.scorerPlayer == player.opponent }
+        guard !lostPoints.isEmpty else { return nil }
+        let totalDuration = lostPoints.reduce(0) { $0 + $1.duration }
+        return totalDuration / Double(lostPoints.count)
+    }
+
+    /// Total game duration (sum of all rally durations)
+    func totalGameDuration() -> TimeInterval {
+        points.reduce(0) { $0 + $1.duration }
+    }
+
     // MARK: - Conversion to Live Game
 
     /// Convert this SavedGame back to a live Game for analysis views
@@ -92,7 +118,18 @@ final class SavedGame {
                     shotType: sp.pointShotType,
                     server: sp.serverPlayer,
                     player1Score: sp.player1Score,
-                    player2Score: sp.player2Score
+                    player2Score: sp.player2Score,
+                    duration: sp.duration
+                )
+            }
+        game.lets = lets
+            .sorted(by: { $0.letNumber < $1.letNumber })
+            .map { sl in
+                Let(
+                    requestedBy: sl.requestedByPlayer,
+                    server: sl.serverPlayer,
+                    player1Score: sl.player1Score,
+                    player2Score: sl.player2Score
                 )
             }
         return game
@@ -122,6 +159,26 @@ final class SavedGame {
             context.insert(savedPoint)
         }
 
+        // Convert and save all lets
+        for (index, letCall) in game.lets.enumerated() {
+            let savedLet = SavedLet.from(letCall, letNumber: index + 1)
+            savedLet.game = savedGame
+            savedGame.lets.append(savedLet)
+            context.insert(savedLet)
+        }
+
         return savedGame
+    }
+
+    // MARK: - Let Analysis
+
+    /// Get all lets requested by a player
+    func letsRequested(by player: Player) -> [SavedLet] {
+        lets.filter { $0.requestedByPlayer == player }
+    }
+
+    /// Total number of lets in this game
+    var totalLets: Int {
+        lets.count
     }
 }

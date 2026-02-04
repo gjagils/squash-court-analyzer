@@ -185,6 +185,16 @@ struct ShotIconView: View {
         case .boast:
             // Custom: zigzag like the reference image
             BoastIcon(color: color, size: size)
+        case .ace:
+            // SF Symbol: star for service winner
+            Image(systemName: "star.fill")
+                .font(.system(size: size * 0.7, weight: .medium))
+                .foregroundColor(color)
+        case .stroke:
+            // SF Symbol: raised fist for obstruction point
+            Image(systemName: "hand.raised.fill")
+                .font(.system(size: size * 0.7, weight: .medium))
+                .foregroundColor(color)
         }
     }
 }

@@ -50,18 +50,7 @@ struct AnalysisView: View {
 
                     // Recommendations
                     recommendationsCard
-
-                    // Close button
-                    HardwareButton(
-                        title: "Sluiten",
-                        subtitle: nil,
-                        color: AppColors.steelBlue,
-                        colorDark: AppColors.steelBlueDark
-                    ) {
-                        onDismiss()
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 40)
+                        .padding(.bottom, 40)
                 }
             }
         }
@@ -69,19 +58,38 @@ struct AnalysisView: View {
 
     // MARK: - Header
     private var header: some View {
-        VStack(spacing: 8) {
-            Text("ANALYSE")
-                .font(AppFonts.title(24))
-                .foregroundColor(AppColors.textPrimary)
-                .tracking(4)
+        ZStack {
+            // Center content
+            VStack(spacing: 8) {
+                Text("ANALYSE")
+                    .font(AppFonts.title(24))
+                    .foregroundColor(AppColors.textPrimary)
+                    .tracking(4)
 
-            if let winner = displayedGame.winner {
-                Text("\(displayedGame.name(for: winner)) wint!")
-                    .font(AppFonts.body(16))
-                    .foregroundColor(AppColors.accentGold)
+                if let winner = displayedGame.winner {
+                    Text("\(displayedGame.name(for: winner)) wint!")
+                        .font(AppFonts.body(16))
+                        .foregroundColor(AppColors.accentGold)
+                }
             }
+
+            // Close button (top right)
+            HStack {
+                Spacer()
+                Button(action: onDismiss) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(AppColors.textSecondary)
+                        .padding(10)
+                        .background(
+                            Circle()
+                                .fill(Color.white.opacity(0.1))
+                        )
+                }
+            }
+            .padding(.horizontal, 20)
         }
-        .padding(.top, 20)
+        .padding(.top, 16)
     }
 
     // MARK: - Game Selector
@@ -125,34 +133,8 @@ struct AnalysisView: View {
 
     // MARK: - Final Score
     private var finalScoreCard: some View {
-        HardwarePanel {
-            HStack(spacing: 20) {
-                VStack(spacing: 4) {
-                    Text(displayedGame.player1Name.uppercased())
-                        .font(AppFonts.caption(12))
-                        .foregroundColor(AppColors.warmOrange)
-                        .tracking(1)
-                    Text("\(displayedGame.player1Score)")
-                        .font(AppFonts.score(44))
-                        .foregroundColor(AppColors.ledActive)
-                }
-
-                LEDColon(size: 44)
-
-                VStack(spacing: 4) {
-                    Text(displayedGame.player2Name.uppercased())
-                        .font(AppFonts.caption(12))
-                        .foregroundColor(AppColors.steelBlue)
-                        .tracking(1)
-                    Text("\(displayedGame.player2Score)")
-                        .font(AppFonts.score(44))
-                        .foregroundColor(AppColors.ledActive)
-                }
-            }
-            .padding(.vertical, 16)
-            .padding(.horizontal, 24)
-        }
-        .padding(.horizontal, 24)
+        ScoreboardView(game: displayedGame, match: match)
+            .padding(.horizontal, 20)
     }
 
     // MARK: - Player Selector

@@ -49,7 +49,7 @@ struct CoachDashboardView: View {
                     // Header
                     header
 
-                    // Score Card
+                    // Score Card (tap player to select)
                     scoreCard
 
                     // Game Selector (when multiple games)
@@ -57,14 +57,8 @@ struct CoachDashboardView: View {
                         gameSelector
                     }
 
-                    // Player Selector
-                    playerSelector
-
                     // Quick Stats Row
                     quickStatsRow
-
-                    // Rally Duration Stats
-                    rallyDurationStats
 
                     // Mini Heatmap + Shot Distribution
                     HStack(spacing: 12) {
@@ -142,41 +136,66 @@ struct CoachDashboardView: View {
         .padding(.top, 16)
     }
 
-    // MARK: - Score Card
+    // MARK: - Score Card (with integrated player selector)
     private var scoreCard: some View {
         HStack(spacing: 0) {
-            // Player 1
-            VStack(spacing: 4) {
-                Text(game.player1Name)
-                    .font(AppFonts.label(12))
-                    .foregroundColor(game.winner == .player1 ? AppColors.warmOrange : AppColors.textSecondary)
-                    .lineLimit(1)
+            // Player 1 - tappable
+            Button(action: { selectedPlayer = .player1 }) {
+                VStack(spacing: 4) {
+                    Text(game.player1Name)
+                        .font(AppFonts.label(12))
+                        .foregroundColor(selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.textSecondary)
+                        .lineLimit(1)
 
-                Text("\(game.player1Score)")
-                    .font(AppFonts.score(36))
-                    .foregroundColor(game.winner == .player1 ? AppColors.warmOrange : AppColors.textPrimary)
+                    Text("\(game.player1Score)")
+                        .font(AppFonts.score(36))
+                        .foregroundColor(selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.textPrimary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(selectedPlayer == .player1 ? AppColors.warmOrange.opacity(0.15) : Color.clear)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(selectedPlayer == .player1 ? AppColors.warmOrange.opacity(0.5) : Color.clear, lineWidth: 1)
+                )
             }
-            .frame(maxWidth: .infinity)
+            .buttonStyle(.plain)
 
             Text("-")
                 .font(AppFonts.score(36))
                 .foregroundColor(AppColors.textMuted)
+                .padding(.horizontal, 8)
 
-            // Player 2
-            VStack(spacing: 4) {
-                Text(game.player2Name)
-                    .font(AppFonts.label(12))
-                    .foregroundColor(game.winner == .player2 ? AppColors.steelBlue : AppColors.textSecondary)
-                    .lineLimit(1)
+            // Player 2 - tappable
+            Button(action: { selectedPlayer = .player2 }) {
+                VStack(spacing: 4) {
+                    Text(game.player2Name)
+                        .font(AppFonts.label(12))
+                        .foregroundColor(selectedPlayer == .player2 ? AppColors.steelBlue : AppColors.textSecondary)
+                        .lineLimit(1)
 
-                Text("\(game.player2Score)")
-                    .font(AppFonts.score(36))
-                    .foregroundColor(game.winner == .player2 ? AppColors.steelBlue : AppColors.textPrimary)
+                    Text("\(game.player2Score)")
+                        .font(AppFonts.score(36))
+                        .foregroundColor(selectedPlayer == .player2 ? AppColors.steelBlue : AppColors.textPrimary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(selectedPlayer == .player2 ? AppColors.steelBlue.opacity(0.15) : Color.clear)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(selectedPlayer == .player2 ? AppColors.steelBlue.opacity(0.5) : Color.clear, lineWidth: 1)
+                )
             }
-            .frame(maxWidth: .infinity)
+            .buttonStyle(.plain)
         }
-        .padding(.vertical, 16)
-        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white.opacity(0.05))
@@ -211,44 +230,28 @@ struct CoachDashboardView: View {
         .padding(.horizontal, 20)
     }
 
-    // MARK: - Player Selector
-    private var playerSelector: some View {
-        HStack(spacing: 12) {
-            ForEach(Player.allCases) { player in
-                Button(action: { selectedPlayer = player }) {
-                    Text(game.name(for: player))
-                        .font(AppFonts.label(13))
-                        .foregroundColor(selectedPlayer == player ? AppColors.textPrimary : AppColors.textMuted)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(selectedPlayer == player
-                                      ? (player == .player1 ? AppColors.warmOrange.opacity(0.3) : AppColors.steelBlue.opacity(0.3))
-                                      : Color.white.opacity(0.05))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(selectedPlayer == player
-                                        ? (player == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
-                                        : Color.clear, lineWidth: 1)
-                        )
-                }
-            }
-        }
-        .padding(.horizontal, 20)
-    }
-
     // MARK: - Quick Stats Row
     private var quickStatsRow: some View {
-        let won = game.pointsWon(by: selectedPlayer).count
-        let lost = game.pointsLost(by: selectedPlayer).count
+        let avgWon = game.averageDurationWon(by: selectedPlayer)
+        let avgLost = game.averageDurationLost(by: selectedPlayer)
         let bestZone = game.bestZone(for: selectedPlayer)
         let bestShot = game.bestShotType(for: selectedPlayer)
 
         return HStack(spacing: 8) {
-            QuickStatBadge(icon: "checkmark.circle", value: "\(won)", label: "Gewonnen", color: .green)
-            QuickStatBadge(icon: "xmark.circle", value: "\(lost)", label: "Verloren", color: .red)
+            // Duration of won points
+            QuickStatBadge(
+                icon: "timer",
+                value: avgWon != nil ? formatDuration(avgWon!) : "-",
+                label: "Gewonnen",
+                color: .green
+            )
+            // Duration of lost points
+            QuickStatBadge(
+                icon: "timer",
+                value: avgLost != nil ? formatDuration(avgLost!) : "-",
+                label: "Verloren",
+                color: .red
+            )
             if let zone = bestZone {
                 QuickStatBadge(icon: "mappin.circle", value: zone.rawValue, label: "Beste zone", color: AppColors.accentGold)
             }
@@ -256,98 +259,6 @@ struct CoachDashboardView: View {
                 QuickStatBadge(icon: shot.icon, value: shot.rawValue, label: "Beste slag", color: AppColors.warmOrange, shotType: shot)
             }
         }
-        .padding(.horizontal, 20)
-    }
-
-    // MARK: - Rally Duration Stats
-    private var rallyDurationStats: some View {
-        let avgWon = game.averageDurationWon(by: selectedPlayer)
-        let avgLost = game.averageDurationLost(by: selectedPlayer)
-
-        return VStack(spacing: 8) {
-            HStack {
-                Image(systemName: "timer")
-                    .foregroundColor(AppColors.textMuted)
-                Text("Puntduur")
-                    .font(AppFonts.caption(10))
-                    .foregroundColor(AppColors.textMuted)
-            }
-
-            HStack(spacing: 12) {
-                // Average duration of won points
-                VStack(spacing: 4) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 10))
-                            .foregroundColor(.green)
-                        Text("Gewonnen")
-                            .font(AppFonts.caption(9))
-                            .foregroundColor(AppColors.textMuted)
-                    }
-
-                    if let avg = avgWon {
-                        Text(formatDuration(avg))
-                            .font(AppFonts.mono(18))
-                            .foregroundColor(.green)
-                    } else {
-                        Text("-")
-                            .font(AppFonts.mono(18))
-                            .foregroundColor(AppColors.textMuted)
-                    }
-
-                    Text("gem. duur")
-                        .font(AppFonts.caption(8))
-                        .foregroundColor(AppColors.textMuted)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.green.opacity(0.1))
-                )
-
-                // Average duration of lost points
-                VStack(spacing: 4) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 10))
-                            .foregroundColor(.red)
-                        Text("Verloren")
-                            .font(AppFonts.caption(9))
-                            .foregroundColor(AppColors.textMuted)
-                    }
-
-                    if let avg = avgLost {
-                        Text(formatDuration(avg))
-                            .font(AppFonts.mono(18))
-                            .foregroundColor(.red)
-                    } else {
-                        Text("-")
-                            .font(AppFonts.mono(18))
-                            .foregroundColor(AppColors.textMuted)
-                    }
-
-                    Text("gem. duur")
-                        .font(AppFonts.caption(8))
-                        .foregroundColor(AppColors.textMuted)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.red.opacity(0.1))
-                )
-            }
-        }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.03))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
-        )
         .padding(.horizontal, 20)
     }
 
@@ -511,7 +422,7 @@ struct CoachDashboardView: View {
     private var localAdviceCard: some View {
         let opponent = selectedPlayer.opponent
         let recommended = game.recommendedZones(against: opponent)
-        let weakZone = game.bestZone(for: opponent)
+        let opponentStrongZone = game.bestZone(for: opponent)
         let tempoAdvice = calculateTempoAdvice()
 
         return VStack(alignment: .leading, spacing: 12) {
@@ -533,18 +444,20 @@ struct CoachDashboardView: View {
                     )
                 }
 
-                if let zone = weakZone {
+                // Warn about opponent's strong zone (avoid playing there)
+                if let zone = opponentStrongZone {
                     AdviceRow(
-                        icon: "target",
-                        text: "Speel naar \(zone.rawValue) - daar scoort \(game.name(for: opponent)) vaak",
+                        icon: "exclamationmark.triangle",
+                        text: "Vermijd \(zone.rawValue) - daar is \(game.name(for: opponent)) sterk",
                         type: .warning
                     )
                 }
 
+                // Recommend zones where opponent is weak
                 if !recommended.isEmpty {
                     AdviceRow(
-                        icon: "checkmark.seal",
-                        text: "Aanbevolen zones: \(recommended.map { $0.rawValue }.joined(separator: ", "))",
+                        icon: "target",
+                        text: "Speel naar: \(recommended.map { $0.rawValue }.joined(separator: ", "))",
                         type: .success
                     )
                 }
@@ -552,7 +465,7 @@ struct CoachDashboardView: View {
                 if let bestShot = game.bestShotType(for: selectedPlayer) {
                     AdviceRow(
                         icon: "star",
-                        text: "Je \(bestShot.rawValue) werkt goed, blijf variëren",
+                        text: "Je \(bestShot.rawValue) is effectief, blijf dit gebruiken",
                         type: .info
                     )
                 }

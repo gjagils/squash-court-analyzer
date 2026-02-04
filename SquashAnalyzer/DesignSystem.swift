@@ -95,6 +95,11 @@ struct AppFonts {
     static func playerName(_ size: CGFloat = 16) -> Font {
         .system(size: size, weight: .bold, design: .default)
     }
+
+    /// Monospace font for timers
+    static func mono(_ size: CGFloat = 14) -> Font {
+        .system(size: size, weight: .medium, design: .monospaced)
+    }
 }
 
 // MARK: - Reusable Components

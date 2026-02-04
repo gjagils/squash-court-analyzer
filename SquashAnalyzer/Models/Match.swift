@@ -164,4 +164,60 @@ class Match {
         }
         return zoneCounts.max(by: { $0.count < $1.count })?.zone
     }
+
+    // MARK: - Duration Analysis
+
+    /// Average duration of points won by a player across all games
+    func averageDurationWon(by player: Player) -> TimeInterval? {
+        let wonPoints = allPoints.filter { $0.scorer == player }
+        guard !wonPoints.isEmpty else { return nil }
+        let totalDuration = wonPoints.reduce(0) { $0 + $1.duration }
+        return totalDuration / Double(wonPoints.count)
+    }
+
+    /// Average duration of points lost by a player across all games
+    func averageDurationLost(by player: Player) -> TimeInterval? {
+        let lostPoints = allPoints.filter { $0.scorer == player.opponent }
+        guard !lostPoints.isEmpty else { return nil }
+        let totalDuration = lostPoints.reduce(0) { $0 + $1.duration }
+        return totalDuration / Double(lostPoints.count)
+    }
+
+    /// Average point duration across all games
+    func averagePointDuration() -> TimeInterval? {
+        guard !allPoints.isEmpty else { return nil }
+        let totalDuration = allPoints.reduce(0) { $0 + $1.duration }
+        return totalDuration / Double(allPoints.count)
+    }
+
+    /// Total match duration (sum of all rally durations)
+    func totalMatchDuration() -> TimeInterval {
+        allPoints.reduce(0) { $0 + $1.duration }
+    }
+
+    /// Win percentage for short rallies across all games
+    func shortRallyWinPercentage(for player: Player) -> Double? {
+        guard allPoints.count >= 2 else { return nil }
+        let sortedDurations = allPoints.map { $0.duration }.sorted()
+        let medianDuration = sortedDurations[sortedDurations.count / 2]
+
+        let shortRallies = allPoints.filter { $0.duration < medianDuration }
+        guard !shortRallies.isEmpty else { return nil }
+
+        let won = shortRallies.filter { $0.scorer == player }.count
+        return Double(won) / Double(shortRallies.count) * 100
+    }
+
+    /// Win percentage for long rallies across all games
+    func longRallyWinPercentage(for player: Player) -> Double? {
+        guard allPoints.count >= 2 else { return nil }
+        let sortedDurations = allPoints.map { $0.duration }.sorted()
+        let medianDuration = sortedDurations[sortedDurations.count / 2]
+
+        let longRallies = allPoints.filter { $0.duration >= medianDuration }
+        guard !longRallies.isEmpty else { return nil }
+
+        let won = longRallies.filter { $0.scorer == player }.count
+        return Double(won) / Double(longRallies.count) * 100
+    }
 }

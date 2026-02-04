@@ -40,6 +40,9 @@ class Game: Identifiable {
     /// All points scored in this game (for analysis)
     var points: [Point] = []
 
+    /// Timestamp of game start or last point (for calculating rally duration)
+    var lastPointTime: Date = Date()
+
     /// Currently selected player (for scoring flow - step 1)
     var selectedPlayer: Player? = nil
 
@@ -48,6 +51,9 @@ class Game: Identifiable {
 
     /// Track previous server for undo
     private var previousServers: [Player] = []
+
+    /// Track previous point times for undo
+    private var previousPointTimes: [Date] = []
 
     var isGameOver: Bool {
         let maxScore = max(player1Score, player2Score)
@@ -138,8 +144,13 @@ class Game: Identifiable {
     func addPoint(to player: Player, at zone: CourtZone, with shotType: ShotType) {
         guard !isGameOver else { return }
 
-        // Save current server for undo
+        // Save current server and point time for undo
         previousServers.append(currentServer)
+        previousPointTimes.append(lastPointTime)
+
+        // Calculate rally duration (time since last point or game start)
+        let now = Date()
+        let duration = now.timeIntervalSince(lastPointTime)
 
         // Update score
         switch player {
@@ -149,16 +160,20 @@ class Game: Identifiable {
             player2Score += 1
         }
 
-        // Record the point
+        // Record the point with duration
         let point = Point(
             scorer: player,
             zone: zone,
             shotType: shotType,
             server: currentServer,
             player1Score: player1Score,
-            player2Score: player2Score
+            player2Score: player2Score,
+            duration: duration
         )
         points.append(point)
+
+        // Update last point time for next rally
+        lastPointTime = now
 
         // In squash, service changes when the receiver wins the rally
         if player != currentServer {
@@ -187,6 +202,11 @@ class Game: Identifiable {
             currentServer = previousServer
         }
 
+        // Restore previous point time
+        if let previousPointTime = previousPointTimes.popLast() {
+            lastPointTime = previousPointTime
+        }
+
         selectedPlayer = nil
         selectedZone = nil
     }
@@ -197,6 +217,8 @@ class Game: Identifiable {
         currentServer = startingServer
         points = []
         previousServers = []
+        previousPointTimes = []
+        lastPointTime = Date()
         selectedPlayer = nil
         selectedZone = nil
     }
@@ -275,5 +297,71 @@ class Game: Identifiable {
         .sorted { $0.lostCount > $1.lostCount }
 
         return zoneCounts.prefix(3).map { $0.zone }
+    }
+
+    // MARK: - Duration Analysis
+
+    /// Average duration of points won by a player (in seconds)
+    func averageDurationWon(by player: Player) -> TimeInterval? {
+        let wonPoints = pointsWon(by: player)
+        guard !wonPoints.isEmpty else { return nil }
+        let totalDuration = wonPoints.reduce(0) { $0 + $1.duration }
+        return totalDuration / Double(wonPoints.count)
+    }
+
+    /// Average duration of points lost by a player (in seconds)
+    func averageDurationLost(by player: Player) -> TimeInterval? {
+        let lostPoints = pointsLost(by: player)
+        guard !lostPoints.isEmpty else { return nil }
+        let totalDuration = lostPoints.reduce(0) { $0 + $1.duration }
+        return totalDuration / Double(lostPoints.count)
+    }
+
+    /// Average duration of all points in the game
+    func averagePointDuration() -> TimeInterval? {
+        guard !points.isEmpty else { return nil }
+        let totalDuration = points.reduce(0) { $0 + $1.duration }
+        return totalDuration / Double(points.count)
+    }
+
+    /// Longest point in the game
+    func longestPoint() -> Point? {
+        points.max(by: { $0.duration < $1.duration })
+    }
+
+    /// Shortest point in the game
+    func shortestPoint() -> Point? {
+        points.min(by: { $0.duration < $1.duration })
+    }
+
+    /// Win percentage for short rallies (below median duration)
+    func shortRallyWinPercentage(for player: Player) -> Double? {
+        guard points.count >= 2 else { return nil }
+        let sortedDurations = points.map { $0.duration }.sorted()
+        let medianDuration = sortedDurations[sortedDurations.count / 2]
+
+        let shortRallies = points.filter { $0.duration < medianDuration }
+        guard !shortRallies.isEmpty else { return nil }
+
+        let won = shortRallies.filter { $0.scorer == player }.count
+        return Double(won) / Double(shortRallies.count) * 100
+    }
+
+    /// Win percentage for long rallies (above median duration)
+    func longRallyWinPercentage(for player: Player) -> Double? {
+        guard points.count >= 2 else { return nil }
+        let sortedDurations = points.map { $0.duration }.sorted()
+        let medianDuration = sortedDurations[sortedDurations.count / 2]
+
+        let longRallies = points.filter { $0.duration >= medianDuration }
+        guard !longRallies.isEmpty else { return nil }
+
+        let won = longRallies.filter { $0.scorer == player }.count
+        return Double(won) / Double(longRallies.count) * 100
+    }
+
+    /// Total game duration (sum of all rally durations)
+    func totalGameDuration() -> TimeInterval {
+        points.reduce(0) { $0 + $1.duration }
     }
 }

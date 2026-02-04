@@ -220,4 +220,21 @@ class Match {
         let won = longRallies.filter { $0.scorer == player }.count
         return Double(won) / Double(longRallies.count) * 100
     }
+
+    // MARK: - Let Analysis
+
+    /// Get all lets from all games
+    var allLets: [Let] {
+        games.flatMap { $0.lets }
+    }
+
+    /// Total number of lets in the match
+    var totalLets: Int {
+        allLets.count
+    }
+
+    /// Lets requested by a specific player across all games
+    func letsRequested(by player: Player) -> [Let] {
+        allLets.filter { $0.requestedBy == player }
+    }
 }

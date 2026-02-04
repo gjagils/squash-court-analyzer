@@ -18,6 +18,9 @@ final class SavedGame {
     @Relationship(deleteRule: .cascade, inverse: \SavedPoint.game)
     var points: [SavedPoint] = []
 
+    @Relationship(deleteRule: .cascade, inverse: \SavedLet.game)
+    var lets: [SavedLet] = []
+
     init(
         id: UUID = UUID(),
         gameNumber: Int,
@@ -119,6 +122,16 @@ final class SavedGame {
                     duration: sp.duration
                 )
             }
+        game.lets = lets
+            .sorted(by: { $0.letNumber < $1.letNumber })
+            .map { sl in
+                Let(
+                    requestedBy: sl.requestedByPlayer,
+                    server: sl.serverPlayer,
+                    player1Score: sl.player1Score,
+                    player2Score: sl.player2Score
+                )
+            }
         return game
     }
 
@@ -146,6 +159,26 @@ final class SavedGame {
             context.insert(savedPoint)
         }
 
+        // Convert and save all lets
+        for (index, letCall) in game.lets.enumerated() {
+            let savedLet = SavedLet.from(letCall, letNumber: index + 1)
+            savedLet.game = savedGame
+            savedGame.lets.append(savedLet)
+            context.insert(savedLet)
+        }
+
         return savedGame
+    }
+
+    // MARK: - Let Analysis
+
+    /// Get all lets requested by a player
+    func letsRequested(by player: Player) -> [SavedLet] {
+        lets.filter { $0.requestedByPlayer == player }
+    }
+
+    /// Total number of lets in this game
+    var totalLets: Int {
+        lets.count
     }
 }

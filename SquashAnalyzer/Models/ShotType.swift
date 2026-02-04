@@ -8,6 +8,8 @@ enum ShotType: String, CaseIterable, Identifiable, Codable {
     case drop = "Drop"
     case lob = "Lob"
     case boast = "Boast"
+    case ace = "Ace"
+    case stroke = "Stroke"
 
     var id: String { rawValue }
 
@@ -20,6 +22,8 @@ enum ShotType: String, CaseIterable, Identifiable, Codable {
         case .drop: return "DRP"
         case .lob: return "LOB"
         case .boast: return "BST"
+        case .ace: return "ACE"
+        case .stroke: return "STR"
         }
     }
 
@@ -32,6 +36,8 @@ enum ShotType: String, CaseIterable, Identifiable, Codable {
         case .drop: return "arrow.down.to.line"
         case .lob: return "arrow.up.forward"
         case .boast: return "arrow.turn.up.right"
+        case .ace: return "star.fill"
+        case .stroke: return "hand.raised.fill"
         }
     }
 
@@ -44,6 +50,8 @@ enum ShotType: String, CaseIterable, Identifiable, Codable {
         case .drop: return "Korte bal naar de voorkant"
         case .lob: return "Hoge bal naar achteren"
         case .boast: return "Slag via de zijmuur"
+        case .ace: return "Service die niet wordt teruggeslagen"
+        case .stroke: return "Punt door obstructie van tegenstander"
         }
     }
 }

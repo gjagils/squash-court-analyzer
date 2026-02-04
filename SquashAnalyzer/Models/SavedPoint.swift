@@ -13,6 +13,7 @@ final class SavedPoint {
     var player1Score: Int
     var player2Score: Int
     var timestamp: Date
+    var duration: Double  // Rally duration in seconds
 
     var game: SavedGame?
 
@@ -25,7 +26,8 @@ final class SavedPoint {
         server: Player,
         player1Score: Int,
         player2Score: Int,
-        timestamp: Date = Date()
+        timestamp: Date = Date(),
+        duration: TimeInterval = 0
     ) {
         self.id = id
         self.pointNumber = pointNumber
@@ -36,6 +38,7 @@ final class SavedPoint {
         self.player1Score = player1Score
         self.player2Score = player2Score
         self.timestamp = timestamp
+        self.duration = duration
     }
 
     // MARK: - Computed Properties
@@ -68,7 +71,8 @@ final class SavedPoint {
             server: point.server,
             player1Score: point.player1Score,
             player2Score: point.player2Score,
-            timestamp: point.timestamp
+            timestamp: point.timestamp,
+            duration: point.duration
         )
     }
 }

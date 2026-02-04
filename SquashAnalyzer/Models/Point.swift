@@ -10,8 +10,9 @@ struct Point: Identifiable {
     let player1Score: Int       // Score after this point
     let player2Score: Int       // Score after this point
     let timestamp: Date         // When the point was scored
+    let duration: TimeInterval  // Duration of the rally in seconds (time since previous point or game start)
 
-    init(scorer: Player, zone: CourtZone, shotType: ShotType, server: Player, player1Score: Int, player2Score: Int) {
+    init(scorer: Player, zone: CourtZone, shotType: ShotType, server: Player, player1Score: Int, player2Score: Int, duration: TimeInterval = 0) {
         self.scorer = scorer
         self.zone = zone
         self.shotType = shotType
@@ -19,5 +20,6 @@ struct Point: Identifiable {
         self.player1Score = player1Score
         self.player2Score = player2Score
         self.timestamp = Date()
+        self.duration = duration
     }
 }

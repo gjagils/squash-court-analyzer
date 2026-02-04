@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var savedGameForAnalysis: Game? = nil
     @State private var showingPreviousGameAnalysis = false
     @State private var showingCancelConfirm = false
+    @State private var showingLetSelector = false
 
     private var currentGame: Game {
         match.currentGame
@@ -101,7 +102,23 @@ struct ContentView: View {
                 SettingsView(isPresented: $showingSettings)
                     .transition(.opacity)
             }
+
+            // Let selector overlay
+            if showingLetSelector {
+                LetSelectorOverlay(
+                    game: currentGame,
+                    onLetSelected: { player in
+                        currentGame.addLet(requestedBy: player)
+                        showingLetSelector = false
+                    },
+                    onCancel: {
+                        showingLetSelector = false
+                    }
+                )
+                .transition(.opacity)
+            }
         }
+        .animation(.easeInOut(duration: 0.3), value: showingLetSelector)
         .animation(.easeInOut(duration: 0.3), value: showingSetup)
         .animation(.easeInOut(duration: 0.3), value: showingAnalysis)
         .animation(.easeInOut(duration: 0.3), value: showingHistory)
@@ -287,6 +304,26 @@ struct ContentView: View {
     // MARK: - Bottom Info Row
     private var bottomInfoRow: some View {
         HStack(spacing: 16) {
+            // Let button
+            if currentGame.selectedZone == nil && !currentGame.isGameOver {
+                Button(action: {
+                    showingLetSelector = true
+                }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.counterclockwise")
+                        Text("Let")
+                    }
+                    .font(AppFonts.caption(12))
+                    .foregroundColor(AppColors.accentGold)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(
+                        Capsule()
+                            .fill(AppColors.accentGold.opacity(0.15))
+                    )
+                }
+            }
+
             // Undo button (when there are points)
             if currentGame.canUndo && currentGame.selectedZone == nil {
                 Button(action: {
@@ -644,6 +681,112 @@ struct GameOverOverlay: View {
             )
             .shadow(color: AppColors.warmOrangeGlow.opacity(0.2), radius: 30, x: 0, y: 10)
             .padding(.horizontal, 24)
+        }
+    }
+}
+
+// MARK: - Let Selector Overlay
+struct LetSelectorOverlay: View {
+    let game: Game
+    let onLetSelected: (Player) -> Void
+    let onCancel: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.7)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    onCancel()
+                }
+
+            VStack(spacing: 20) {
+                Text("LET")
+                    .font(AppFonts.title(22))
+                    .foregroundColor(AppColors.accentGold)
+                    .tracking(3)
+
+                Text("Wie vraagt de let?")
+                    .font(AppFonts.body(14))
+                    .foregroundColor(AppColors.textSecondary)
+
+                HStack(spacing: 16) {
+                    // Player 1 button
+                    Button(action: { onLetSelected(.player1) }) {
+                        VStack(spacing: 8) {
+                            Image(systemName: "arrow.counterclockwise")
+                                .font(.system(size: 24))
+                            Text(game.player1Name)
+                                .font(AppFonts.label(14))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 20)
+                        .foregroundColor(AppColors.textPrimary)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(AppColors.warmOrange.opacity(0.2))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(AppColors.warmOrange, lineWidth: 2)
+                        )
+                    }
+
+                    // Player 2 button
+                    Button(action: { onLetSelected(.player2) }) {
+                        VStack(spacing: 8) {
+                            Image(systemName: "arrow.counterclockwise")
+                                .font(.system(size: 24))
+                            Text(game.player2Name)
+                                .font(AppFonts.label(14))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 20)
+                        .foregroundColor(AppColors.textPrimary)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(AppColors.steelBlue.opacity(0.2))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(AppColors.steelBlue, lineWidth: 2)
+                        )
+                    }
+                }
+
+                // Let count display
+                if game.totalLets > 0 {
+                    Text("Lets deze game: \(game.totalLets)")
+                        .font(AppFonts.caption(12))
+                        .foregroundColor(AppColors.textMuted)
+                }
+
+                // Cancel button
+                Button(action: onCancel) {
+                    Text("Annuleren")
+                        .font(AppFonts.label(14))
+                        .foregroundColor(AppColors.textSecondary)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 10)
+                        .background(
+                            Capsule()
+                                .fill(Color.white.opacity(0.1))
+                        )
+                }
+            }
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(AppColors.backgroundMedium)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(AppColors.accentGold.opacity(0.3), lineWidth: 1)
+            )
+            .padding(.horizontal, 40)
         }
     }
 }

@@ -256,33 +256,26 @@ struct AnalysisView: View {
                 .font(AppFonts.label(14))
                 .foregroundColor(AppColors.textPrimary)
 
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible()),
-                GridItem(.flexible())
-            ], spacing: 10) {
-                ForEach(ShotType.allCases) { shotType in
-                    let count = displayedGame.pointsWon(by: selectedPlayer, with: shotType)
-                    VStack(spacing: 4) {
-                        Image(systemName: shotType.icon)
-                            .font(.system(size: 16))
-                            .foregroundColor(count > 0 ? AppColors.accentGold : AppColors.textMuted)
+            // Row 1: Ace and Stroke (centered)
+            HStack(spacing: 10) {
+                Spacer()
+                shotStatCell(for: .ace)
+                shotStatCell(for: .stroke)
+                Spacer()
+            }
 
-                        Text("\(count)")
-                            .font(AppFonts.score(20))
-                            .foregroundColor(count > 0 ? AppColors.textPrimary : AppColors.textMuted)
+            // Row 2: Drive, Cross, Volley
+            HStack(spacing: 10) {
+                shotStatCell(for: .drive)
+                shotStatCell(for: .cross)
+                shotStatCell(for: .volley)
+            }
 
-                        Text(shotType.rawValue)
-                            .font(AppFonts.caption(9))
-                            .foregroundColor(AppColors.textSecondary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.white.opacity(count > 0 ? 0.08 : 0.03))
-                    )
-                }
+            // Row 3: Drop, Lob, Boast
+            HStack(spacing: 10) {
+                shotStatCell(for: .drop)
+                shotStatCell(for: .lob)
+                shotStatCell(for: .boast)
             }
         }
         .padding()
@@ -297,13 +290,39 @@ struct AnalysisView: View {
         .padding(.horizontal, 24)
     }
 
+    private func shotStatCell(for shotType: ShotType) -> some View {
+        let count = displayedGame.pointsWon(by: selectedPlayer, with: shotType)
+        return VStack(spacing: 4) {
+            ShotIconView(type: shotType, color: count > 0 ? AppColors.accentGold : AppColors.textMuted, size: 20)
+                .frame(height: 20)
+
+            Text("\(count)")
+                .font(AppFonts.score(20))
+                .foregroundColor(count > 0 ? AppColors.textPrimary : AppColors.textMuted)
+
+            Text(shotType.rawValue)
+                .font(AppFonts.caption(9))
+                .foregroundColor(AppColors.textSecondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.white.opacity(count > 0 ? 0.08 : 0.03))
+        )
+    }
+
     // MARK: - Stats Card
     private var statsCard: some View {
-        VStack(spacing: 12) {
+        let avgWon = displayedGame.averageDurationWon(by: selectedPlayer)
+        let avgLost = displayedGame.averageDurationLost(by: selectedPlayer)
+
+        return VStack(spacing: 12) {
             Text("Statistieken")
                 .font(AppFonts.label(14))
                 .foregroundColor(AppColors.textPrimary)
 
+            // Row 1: Points won/lost
             HStack(spacing: 16) {
                 StatBox(
                     title: "Gewonnen",
@@ -316,22 +335,36 @@ struct AnalysisView: View {
                     value: "\(displayedGame.pointsLost(by: selectedPlayer).count)",
                     color: .red
                 )
+            }
 
-                if let bestZone = displayedGame.bestZone(for: selectedPlayer) {
-                    StatBox(
-                        title: "Beste zone",
-                        value: bestZone.shortName,
-                        color: AppColors.accentGold
-                    )
-                }
+            // Row 2: Duration stats
+            HStack(spacing: 16) {
+                StatBox(
+                    title: "Gem. duur gewonnen",
+                    value: avgWon != nil ? formatDuration(avgWon!) : "-",
+                    color: .green
+                )
 
-                if let bestShot = displayedGame.bestShotType(for: selectedPlayer) {
-                    StatBox(
-                        title: "Beste slag",
-                        value: bestShot.shortName,
-                        color: AppColors.warmOrange
-                    )
-                }
+                StatBox(
+                    title: "Gem. duur verloren",
+                    value: avgLost != nil ? formatDuration(avgLost!) : "-",
+                    color: .red
+                )
+            }
+
+            // Row 3: Best zone and shot
+            HStack(spacing: 16) {
+                StatBox(
+                    title: "Beste zone",
+                    value: displayedGame.bestZone(for: selectedPlayer)?.rawValue ?? "-",
+                    color: AppColors.accentGold
+                )
+
+                StatBox(
+                    title: "Beste slag",
+                    value: displayedGame.bestShotType(for: selectedPlayer)?.rawValue ?? "-",
+                    color: AppColors.warmOrange
+                )
             }
         }
         .padding()
@@ -346,10 +379,32 @@ struct AnalysisView: View {
         .padding(.horizontal, 24)
     }
 
+    private func formatDuration(_ seconds: TimeInterval) -> String {
+        if seconds < 60 {
+            return String(format: "%.0fs", seconds)
+        } else {
+            let minutes = Int(seconds) / 60
+            let secs = Int(seconds) % 60
+            return String(format: "%d:%02d", minutes, secs)
+        }
+    }
+
     // MARK: - Recommendations Card
     private var recommendationsCard: some View {
         let opponent = selectedPlayer.opponent
         let recommended = displayedGame.recommendedZones(against: opponent)
+        let opponentStrongZone = displayedGame.bestZone(for: opponent)
+
+        // Ace statistics
+        let myAces = displayedGame.pointsWon(by: selectedPlayer, with: .ace)
+        let opponentAces = displayedGame.pointsWon(by: opponent, with: .ace)
+
+        // Let statistics
+        let letsAgainstMe = displayedGame.letsRequested(by: opponent).count
+        let letsForMe = displayedGame.letsRequested(by: selectedPlayer).count
+
+        // Tempo analysis
+        let tempoAdvice = calculateTempoAdvice()
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -360,31 +415,73 @@ struct AnalysisView: View {
                     .foregroundColor(AppColors.textPrimary)
             }
 
-            if recommended.isEmpty {
-                Text("Niet genoeg data voor aanbevelingen.")
-                    .font(AppFonts.body(13))
-                    .foregroundColor(AppColors.textMuted)
-            } else {
-                Text("Speel de bal naar deze zones om \(displayedGame.name(for: opponent)) onder druk te zetten:")
-                    .font(AppFonts.body(13))
-                    .foregroundColor(AppColors.textSecondary)
+            VStack(alignment: .leading, spacing: 8) {
+                // Tempo advice
+                if let advice = tempoAdvice {
+                    adviceRow(icon: advice.icon, text: advice.text, color: advice.color)
+                }
 
-                HStack(spacing: 8) {
-                    ForEach(recommended) { zone in
-                        Text(zone.rawValue)
-                            .font(AppFonts.caption(11))
-                            .foregroundColor(AppColors.textPrimary)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.green.opacity(0.25))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color.green.opacity(0.4), lineWidth: 1)
-                            )
-                    }
+                // Ace advice - opponent scoring aces
+                if opponentAces >= 2 {
+                    adviceRow(
+                        icon: "exclamationmark.circle",
+                        text: "\(displayedGame.name(for: opponent)) scoort \(opponentAces) aces - werk aan je return",
+                        color: .orange
+                    )
+                }
+
+                // Ace advice - you scoring aces
+                if myAces >= 2 {
+                    adviceRow(
+                        icon: "bolt.fill",
+                        text: "Je hebt \(myAces) aces - je service werkt, blijf zo serveren!",
+                        color: .green
+                    )
+                }
+
+                // Let advice - you're blocking
+                if letsAgainstMe >= 2 {
+                    adviceRow(
+                        icon: "figure.walk",
+                        text: "\(letsAgainstMe) lets tegen - beweeg sneller weg na je slag",
+                        color: .orange
+                    )
+                }
+
+                // Let advice - you're moving well
+                if letsForMe >= 2 && letsAgainstMe < 2 {
+                    adviceRow(
+                        icon: "figure.run",
+                        text: "\(letsForMe) lets mee - je beweegt goed naar de bal",
+                        color: .green
+                    )
+                }
+
+                // Opponent's strong zone warning
+                if let zone = opponentStrongZone {
+                    adviceRow(
+                        icon: "exclamationmark.triangle",
+                        text: "Vermijd \(zone.rawValue) - daar is \(displayedGame.name(for: opponent)) sterk",
+                        color: .orange
+                    )
+                }
+
+                // Recommended zones
+                if !recommended.isEmpty {
+                    adviceRow(
+                        icon: "target",
+                        text: "Speel naar: \(recommended.map { $0.rawValue }.joined(separator: ", "))",
+                        color: .green
+                    )
+                }
+
+                // Best shot advice
+                if let bestShot = displayedGame.bestShotType(for: selectedPlayer) {
+                    adviceRow(
+                        icon: "star",
+                        text: "Je \(bestShot.rawValue) is effectief, blijf dit gebruiken",
+                        color: AppColors.steelBlue
+                    )
                 }
             }
         }
@@ -399,6 +496,48 @@ struct AnalysisView: View {
                 .stroke(Color.white.opacity(0.08), lineWidth: 1)
         )
         .padding(.horizontal, 24)
+    }
+
+    private func adviceRow(icon: String, text: String, color: Color) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 12))
+                .foregroundColor(color)
+                .frame(width: 16)
+
+            Text(text)
+                .font(AppFonts.body(13))
+                .foregroundColor(AppColors.textSecondary)
+        }
+    }
+
+    private func calculateTempoAdvice() -> (icon: String, text: String, color: Color)? {
+        guard displayedGame.points.count >= 4 else { return nil }
+
+        let shortRallyWin = displayedGame.shortRallyWinPercentage(for: selectedPlayer)
+        let longRallyWin = displayedGame.longRallyWinPercentage(for: selectedPlayer)
+
+        if let shortWin = shortRallyWin, let longWin = longRallyWin {
+            let difference = abs(shortWin - longWin)
+
+            if difference > 15 {
+                if shortWin > longWin {
+                    return (
+                        icon: "hare.fill",
+                        text: "Versnel het spel! Je wint \(Int(shortWin))% van korte rally's vs \(Int(longWin))% van lange",
+                        color: .green
+                    )
+                } else {
+                    return (
+                        icon: "tortoise.fill",
+                        text: "Vertraag het spel! Je wint \(Int(longWin))% van lange rally's vs \(Int(shortWin))% van korte",
+                        color: .green
+                    )
+                }
+            }
+        }
+
+        return nil
     }
 }
 

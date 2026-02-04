@@ -125,7 +125,7 @@ final class SavedGame {
         game.lets = lets
             .sorted(by: { $0.letNumber < $1.letNumber })
             .map { sl in
-                Let(
+                LetCall(
                     requestedBy: sl.requestedByPlayer,
                     server: sl.serverPlayer,
                     player1Score: sl.player1Score,

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents a let (replay of rally) in squash
-struct Let: Identifiable {
+struct LetCall: Identifiable {
     let id = UUID()
     let requestedBy: Player     // Who requested the let
     let server: Player          // Who was serving when let was called

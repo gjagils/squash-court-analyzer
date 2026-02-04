@@ -41,7 +41,7 @@ class Game: Identifiable {
     var points: [Point] = []
 
     /// All lets called in this game
-    var lets: [Let] = []
+    var lets: [LetCall] = []
 
     /// Timestamp of game start or last point (for calculating rally duration)
     var lastPointTime: Date = Date()
@@ -229,7 +229,7 @@ class Game: Identifiable {
 
     /// Record a let (replay of rally)
     func addLet(requestedBy player: Player) {
-        let letCall = Let(
+        let letCall = LetCall(
             requestedBy: player,
             server: currentServer,
             player1Score: player1Score,
@@ -251,7 +251,7 @@ class Game: Identifiable {
     }
 
     /// Get all lets requested by a player
-    func letsRequested(by player: Player) -> [Let] {
+    func letsRequested(by player: Player) -> [LetCall] {
         lets.filter { $0.requestedBy == player }
     }
 

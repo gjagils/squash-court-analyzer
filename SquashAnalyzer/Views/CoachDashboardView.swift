@@ -63,9 +63,6 @@ struct CoachDashboardView: View {
                     // Quick Stats Row
                     quickStatsRow
 
-                    // Rally Duration Stats
-                    rallyDurationStats
-
                     // Mini Heatmap + Shot Distribution
                     HStack(spacing: 12) {
                         miniHeatmap
@@ -241,14 +238,26 @@ struct CoachDashboardView: View {
 
     // MARK: - Quick Stats Row
     private var quickStatsRow: some View {
-        let won = game.pointsWon(by: selectedPlayer).count
-        let lost = game.pointsLost(by: selectedPlayer).count
+        let avgWon = game.averageDurationWon(by: selectedPlayer)
+        let avgLost = game.averageDurationLost(by: selectedPlayer)
         let bestZone = game.bestZone(for: selectedPlayer)
         let bestShot = game.bestShotType(for: selectedPlayer)
 
         return HStack(spacing: 8) {
-            QuickStatBadge(icon: "checkmark.circle", value: "\(won)", label: "Gewonnen", color: .green)
-            QuickStatBadge(icon: "xmark.circle", value: "\(lost)", label: "Verloren", color: .red)
+            // Duration of won points
+            QuickStatBadge(
+                icon: "timer",
+                value: avgWon != nil ? formatDuration(avgWon!) : "-",
+                label: "Gewonnen",
+                color: .green
+            )
+            // Duration of lost points
+            QuickStatBadge(
+                icon: "timer",
+                value: avgLost != nil ? formatDuration(avgLost!) : "-",
+                label: "Verloren",
+                color: .red
+            )
             if let zone = bestZone {
                 QuickStatBadge(icon: "mappin.circle", value: zone.rawValue, label: "Beste zone", color: AppColors.accentGold)
             }
@@ -256,98 +265,6 @@ struct CoachDashboardView: View {
                 QuickStatBadge(icon: shot.icon, value: shot.rawValue, label: "Beste slag", color: AppColors.warmOrange, shotType: shot)
             }
         }
-        .padding(.horizontal, 20)
-    }
-
-    // MARK: - Rally Duration Stats
-    private var rallyDurationStats: some View {
-        let avgWon = game.averageDurationWon(by: selectedPlayer)
-        let avgLost = game.averageDurationLost(by: selectedPlayer)
-
-        return VStack(spacing: 8) {
-            HStack {
-                Image(systemName: "timer")
-                    .foregroundColor(AppColors.textMuted)
-                Text("Puntduur")
-                    .font(AppFonts.caption(10))
-                    .foregroundColor(AppColors.textMuted)
-            }
-
-            HStack(spacing: 12) {
-                // Average duration of won points
-                VStack(spacing: 4) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 10))
-                            .foregroundColor(.green)
-                        Text("Gewonnen")
-                            .font(AppFonts.caption(9))
-                            .foregroundColor(AppColors.textMuted)
-                    }
-
-                    if let avg = avgWon {
-                        Text(formatDuration(avg))
-                            .font(AppFonts.mono(18))
-                            .foregroundColor(.green)
-                    } else {
-                        Text("-")
-                            .font(AppFonts.mono(18))
-                            .foregroundColor(AppColors.textMuted)
-                    }
-
-                    Text("gem. duur")
-                        .font(AppFonts.caption(8))
-                        .foregroundColor(AppColors.textMuted)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.green.opacity(0.1))
-                )
-
-                // Average duration of lost points
-                VStack(spacing: 4) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 10))
-                            .foregroundColor(.red)
-                        Text("Verloren")
-                            .font(AppFonts.caption(9))
-                            .foregroundColor(AppColors.textMuted)
-                    }
-
-                    if let avg = avgLost {
-                        Text(formatDuration(avg))
-                            .font(AppFonts.mono(18))
-                            .foregroundColor(.red)
-                    } else {
-                        Text("-")
-                            .font(AppFonts.mono(18))
-                            .foregroundColor(AppColors.textMuted)
-                    }
-
-                    Text("gem. duur")
-                        .font(AppFonts.caption(8))
-                        .foregroundColor(AppColors.textMuted)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.red.opacity(0.1))
-                )
-            }
-        }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.03))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
-        )
         .padding(.horizontal, 20)
     }
 

@@ -49,16 +49,13 @@ struct CoachDashboardView: View {
                     // Header
                     header
 
-                    // Score Card
+                    // Score Card (tap player to select)
                     scoreCard
 
                     // Game Selector (when multiple games)
                     if availableGames.count > 1 {
                         gameSelector
                     }
-
-                    // Player Selector
-                    playerSelector
 
                     // Quick Stats Row
                     quickStatsRow
@@ -139,41 +136,66 @@ struct CoachDashboardView: View {
         .padding(.top, 16)
     }
 
-    // MARK: - Score Card
+    // MARK: - Score Card (with integrated player selector)
     private var scoreCard: some View {
         HStack(spacing: 0) {
-            // Player 1
-            VStack(spacing: 4) {
-                Text(game.player1Name)
-                    .font(AppFonts.label(12))
-                    .foregroundColor(game.winner == .player1 ? AppColors.warmOrange : AppColors.textSecondary)
-                    .lineLimit(1)
+            // Player 1 - tappable
+            Button(action: { selectedPlayer = .player1 }) {
+                VStack(spacing: 4) {
+                    Text(game.player1Name)
+                        .font(AppFonts.label(12))
+                        .foregroundColor(selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.textSecondary)
+                        .lineLimit(1)
 
-                Text("\(game.player1Score)")
-                    .font(AppFonts.score(36))
-                    .foregroundColor(game.winner == .player1 ? AppColors.warmOrange : AppColors.textPrimary)
+                    Text("\(game.player1Score)")
+                        .font(AppFonts.score(36))
+                        .foregroundColor(selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.textPrimary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(selectedPlayer == .player1 ? AppColors.warmOrange.opacity(0.15) : Color.clear)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(selectedPlayer == .player1 ? AppColors.warmOrange.opacity(0.5) : Color.clear, lineWidth: 1)
+                )
             }
-            .frame(maxWidth: .infinity)
+            .buttonStyle(.plain)
 
             Text("-")
                 .font(AppFonts.score(36))
                 .foregroundColor(AppColors.textMuted)
+                .padding(.horizontal, 8)
 
-            // Player 2
-            VStack(spacing: 4) {
-                Text(game.player2Name)
-                    .font(AppFonts.label(12))
-                    .foregroundColor(game.winner == .player2 ? AppColors.steelBlue : AppColors.textSecondary)
-                    .lineLimit(1)
+            // Player 2 - tappable
+            Button(action: { selectedPlayer = .player2 }) {
+                VStack(spacing: 4) {
+                    Text(game.player2Name)
+                        .font(AppFonts.label(12))
+                        .foregroundColor(selectedPlayer == .player2 ? AppColors.steelBlue : AppColors.textSecondary)
+                        .lineLimit(1)
 
-                Text("\(game.player2Score)")
-                    .font(AppFonts.score(36))
-                    .foregroundColor(game.winner == .player2 ? AppColors.steelBlue : AppColors.textPrimary)
+                    Text("\(game.player2Score)")
+                        .font(AppFonts.score(36))
+                        .foregroundColor(selectedPlayer == .player2 ? AppColors.steelBlue : AppColors.textPrimary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(selectedPlayer == .player2 ? AppColors.steelBlue.opacity(0.15) : Color.clear)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(selectedPlayer == .player2 ? AppColors.steelBlue.opacity(0.5) : Color.clear, lineWidth: 1)
+                )
             }
-            .frame(maxWidth: .infinity)
+            .buttonStyle(.plain)
         }
-        .padding(.vertical, 16)
-        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white.opacity(0.05))
@@ -201,34 +223,6 @@ struct CoachDashboardView: View {
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(selectedGameIndex == index ? AppColors.accentGold : Color.clear, lineWidth: 1)
-                        )
-                }
-            }
-        }
-        .padding(.horizontal, 20)
-    }
-
-    // MARK: - Player Selector
-    private var playerSelector: some View {
-        HStack(spacing: 12) {
-            ForEach(Player.allCases) { player in
-                Button(action: { selectedPlayer = player }) {
-                    Text(game.name(for: player))
-                        .font(AppFonts.label(13))
-                        .foregroundColor(selectedPlayer == player ? AppColors.textPrimary : AppColors.textMuted)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(selectedPlayer == player
-                                      ? (player == .player1 ? AppColors.warmOrange.opacity(0.3) : AppColors.steelBlue.opacity(0.3))
-                                      : Color.white.opacity(0.05))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(selectedPlayer == player
-                                        ? (player == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
-                                        : Color.clear, lineWidth: 1)
                         )
                 }
             }

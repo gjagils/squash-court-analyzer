@@ -114,6 +114,7 @@ final class SavedGame {
             .map { sp in
                 Point(
                     scorer: sp.scorerPlayer,
+                    pointType: sp.savedPointType,
                     zone: sp.pointZone,
                     shotType: sp.pointShotType,
                     server: sp.serverPlayer,

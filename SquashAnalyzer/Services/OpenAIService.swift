@@ -13,9 +13,11 @@ actor OpenAIService {
     func generateTacticalAdvice(
         for game: Game,
         player: Player,
-        apiKey: String
+        apiKey: String,
+        coachingFocus: [String] = [],
+        coachingNotes: String = ""
     ) async throws -> TacticalAdvice {
-        let prompt = buildPrompt(for: game, player: player)
+        let prompt = buildPrompt(for: game, player: player, coachingFocus: coachingFocus, coachingNotes: coachingNotes)
 
         let requestBody: [String: Any] = [
             "model": model,
@@ -89,7 +91,7 @@ actor OpenAIService {
         return advice
     }
 
-    private func buildPrompt(for game: Game, player: Player) -> String {
+    private func buildPrompt(for game: Game, player: Player, coachingFocus: [String] = [], coachingNotes: String = "") -> String {
         let opponent = player.opponent
         let playerName = game.name(for: player)
         let opponentName = game.name(for: opponent)
@@ -98,7 +100,13 @@ actor OpenAIService {
         let playerPoints = game.pointsWon(by: player)
         let opponentPoints = game.pointsWon(by: opponent)
 
-        // Zone breakdown
+        // Point type breakdown
+        let playerWinners = game.winners(by: player).count
+        let playerForcedErrors = game.forcedErrors(by: player).count
+        let playerUnforcedErrors = game.unforcedErrors(by: player).count
+        let opponentUnforcedErrors = game.unforcedErrors(by: opponent).count
+
+        // Zone breakdown (winners + forced errors only)
         var zoneStats: [String] = []
         for zone in CourtZone.allCases {
             let won = game.pointsWon(by: player, in: zone)
@@ -122,6 +130,18 @@ actor OpenAIService {
         let bestShot = game.bestShotType(for: player)?.rawValue ?? "geen"
         let worstZone = game.bestZone(for: opponent)?.rawValue ?? "geen"
 
+        // Coaching focus section
+        var coachingSection = ""
+        if !coachingFocus.isEmpty || !coachingNotes.isEmpty {
+            coachingSection = "\nCOACHING AANDACHTSPUNTEN VOOR \(playerName.uppercased()):"
+            if !coachingFocus.isEmpty {
+                coachingSection += "\n- Focus: \(coachingFocus.joined(separator: ", "))"
+            }
+            if !coachingNotes.isEmpty {
+                coachingSection += "\n- Notities: \(coachingNotes)"
+            }
+        }
+
         return """
         SQUASH GAME ANALYSE
 
@@ -133,16 +153,20 @@ actor OpenAIService {
         STATISTIEKEN VOOR \(playerName.uppercased()):
         - Totaal punten gewonnen: \(playerPoints.count)
         - Totaal punten verloren: \(opponentPoints.count)
+        - Winners geslagen: \(playerWinners)
+        - Forced errors afgedwongen: \(playerForcedErrors)
+        - Eigen unforced errors: \(playerUnforcedErrors)
+        - Unforced errors tegenstander: \(opponentUnforcedErrors)
         - Beste zone: \(bestZone)
         - Beste slag: \(bestShot)
         - Zone waar tegenstander scoorde: \(worstZone)
 
-        PUNTEN PER ZONE:
-        \(zoneStats.joined(separator: "\n"))
+        PUNTEN PER ZONE (winners + forced errors):
+        \(zoneStats.isEmpty ? "geen data" : zoneStats.joined(separator: "\n"))
 
         SLAGEN:
-        \(shotStats.joined(separator: "\n"))
-
+        \(shotStats.isEmpty ? "geen data" : shotStats.joined(separator: "\n"))
+        \(coachingSection)
         Geef tactisch advies voor \(playerName) voor de volgende game tegen \(opponentName).
         """
     }

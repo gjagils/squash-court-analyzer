@@ -7,6 +7,12 @@ class Match {
     var player1Name: String = "Speler 1"
     var player2Name: String = "Speler 2"
 
+    /// Coaching focus areas for each player (from saved player profiles)
+    var player1CoachingFocus: [String] = []
+    var player2CoachingFocus: [String] = []
+    var player1CoachingNotes: String = ""
+    var player2CoachingNotes: String = ""
+
     /// All games in this match
     var games: [Game] = []
 
@@ -114,11 +120,33 @@ class Match {
     }
 
     /// Setup match with player names and starting server
-    func setupMatch(player1: String, player2: String, startingServer: Player) {
+    func setupMatch(
+        player1: String,
+        player2: String,
+        startingServer: Player,
+        player1CoachingFocus: [String] = [],
+        player1CoachingNotes: String = "",
+        player2CoachingFocus: [String] = [],
+        player2CoachingNotes: String = ""
+    ) {
         player1Name = player1.isEmpty ? "Speler 1" : player1
         player2Name = player2.isEmpty ? "Speler 2" : player2
         matchStartingServer = startingServer
+        self.player1CoachingFocus = player1CoachingFocus
+        self.player1CoachingNotes = player1CoachingNotes
+        self.player2CoachingFocus = player2CoachingFocus
+        self.player2CoachingNotes = player2CoachingNotes
         resetMatch()
+    }
+
+    /// Get coaching focus for a player
+    func coachingFocus(for player: Player) -> [String] {
+        player == .player1 ? player1CoachingFocus : player2CoachingFocus
+    }
+
+    /// Get coaching notes for a player
+    func coachingNotes(for player: Player) -> String {
+        player == .player1 ? player1CoachingNotes : player2CoachingNotes
     }
 
     // MARK: - Analysis helpers

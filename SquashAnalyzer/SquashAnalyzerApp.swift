@@ -7,6 +7,6 @@ struct SquashAnalyzerApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [SavedMatch.self, SavedGame.self, SavedPoint.self])
+        .modelContainer(for: [SavedMatch.self, SavedGame.self, SavedPoint.self, SavedPlayer.self])
     }
 }

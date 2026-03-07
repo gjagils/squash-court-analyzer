@@ -27,7 +27,12 @@ struct ContentView: View {
             // Main game view
             gameView
 
-            // Shot type selector overlay
+            // Point type selector overlay (shown after player selection)
+            if currentGame.selectedPlayer != nil && currentGame.selectedPointType == nil {
+                pointTypeSelectorOverlay
+            }
+
+            // Shot type selector overlay (shown after zone selection)
             if currentGame.selectedZone != nil {
                 shotTypeSelectorOverlay
             }
@@ -209,8 +214,8 @@ struct ContentView: View {
                 }
                 .padding(.horizontal, 16)
 
-                // Player buttons (hidden when selecting shot)
-                if currentGame.selectedZone == nil {
+                // Player buttons (hidden when point type or shot is being selected)
+                if currentGame.selectedPlayer == nil {
                     PlayerButtonsView(game: currentGame) { player in
                         handlePlayerSelect(player)
                     }
@@ -225,6 +230,34 @@ struct ContentView: View {
             }
             .padding(.vertical, 8)
         }
+    }
+
+    // MARK: - Point Type Selector Overlay
+    private var pointTypeSelectorOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.7)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation {
+                        currentGame.goBackStep()
+                    }
+                }
+
+            PointTypeSelectorOverlay(
+                game: currentGame,
+                onPointTypeSelected: { pointType in
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        currentGame.selectPointType(pointType)
+                    }
+                },
+                onBack: {
+                    withAnimation {
+                        currentGame.goBackStep()
+                    }
+                }
+            )
+        }
+        .transition(.opacity)
     }
 
     // MARK: - Shot Type Selector Overlay
@@ -329,6 +362,10 @@ struct ContentView: View {
                 Text("Kies wie scoort")
                     .font(AppFonts.body(14))
                     .foregroundColor(AppColors.textSecondary)
+            case .selectPointType:
+                Text("Hoe werd het punt gewonnen?")
+                    .font(AppFonts.body(14))
+                    .foregroundColor(currentGame.selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
             case .selectZone:
                 Text("Tik op de baan waar het punt gescoord werd")
                     .font(AppFonts.body(14))
@@ -387,14 +424,20 @@ struct ContentView: View {
             }
 
             // Last point indicator
-            if let lastPoint = currentGame.lastPoint, currentGame.selectedZone == nil {
+            if let lastPoint = currentGame.lastPoint, currentGame.selectedPlayer == nil {
                 HStack(spacing: 6) {
                     Circle()
                         .fill(lastPoint.scorer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
                         .frame(width: 8, height: 8)
-                    Text("\(currentGame.name(for: lastPoint.scorer)): \(lastPoint.zone.shortName) (\(lastPoint.shotType.shortName))")
-                        .font(AppFonts.caption(11))
-                        .foregroundColor(AppColors.textMuted)
+                    if let zone = lastPoint.zone, let shot = lastPoint.shotType {
+                        Text("\(currentGame.name(for: lastPoint.scorer)): \(zone.shortName) (\(shot.shortName)) · \(lastPoint.pointType.shortName)")
+                            .font(AppFonts.caption(11))
+                            .foregroundColor(AppColors.textMuted)
+                    } else {
+                        Text("\(currentGame.name(for: lastPoint.scorer)): \(lastPoint.pointType.shortName)")
+                            .font(AppFonts.caption(11))
+                            .foregroundColor(AppColors.textMuted)
+                    }
                 }
             }
         }
@@ -478,17 +521,36 @@ struct MatchSetupView: View {
     @State private var player2Name: String = ""
     @State private var startingServer: Player = .player1
 
+    @State private var player1CoachingFocus: [String] = []
+    @State private var player1CoachingNotes: String = ""
+    @State private var player2CoachingFocus: [String] = []
+    @State private var player2CoachingNotes: String = ""
+
+    @State private var showingPlayer1Picker = false
+    @State private var showingPlayer2Picker = false
+    @State private var showingPlayerManagement = false
+
     var body: some View {
         ZStack {
             AppBackground()
 
             VStack(spacing: 24) {
                 // Header
-                Text("SQUASH ANALYZER")
-                    .font(AppFonts.title(22))
-                    .foregroundColor(AppColors.textPrimary)
-                    .tracking(3)
-                    .padding(.top, 40)
+                HStack {
+                    Spacer()
+                    Text("SQUASH ANALYZER")
+                        .font(AppFonts.title(22))
+                        .foregroundColor(AppColors.textPrimary)
+                        .tracking(3)
+                    Spacer()
+                    Button(action: { showingPlayerManagement = true }) {
+                        Image(systemName: "person.2.circle")
+                            .font(.system(size: 22))
+                            .foregroundColor(AppColors.accentGold)
+                    }
+                    .padding(.trailing, 24)
+                }
+                .padding(.top, 40)
 
                 Text("Best of 5 games")
                     .font(AppFonts.body(14))
@@ -496,20 +558,24 @@ struct MatchSetupView: View {
 
                 Spacer()
 
-                // Player names input
+                // Player names input with picker
                 VStack(spacing: 20) {
-                    PlayerNameInput(
+                    PlayerNameInputWithPicker(
                         title: "Speler 1",
                         name: $player1Name,
+                        coachingFocus: player1CoachingFocus,
                         color: AppColors.warmOrange,
-                        placeholder: "Naam speler 1"
+                        placeholder: "Naam speler 1",
+                        onPickPlayer: { showingPlayer1Picker = true }
                     )
 
-                    PlayerNameInput(
+                    PlayerNameInputWithPicker(
                         title: "Speler 2",
                         name: $player2Name,
+                        coachingFocus: player2CoachingFocus,
                         color: AppColors.steelBlue,
-                        placeholder: "Naam speler 2"
+                        placeholder: "Naam speler 2",
+                        onPickPlayer: { showingPlayer2Picker = true }
                     )
                 }
                 .padding(.horizontal, 24)
@@ -581,44 +647,99 @@ struct MatchSetupView: View {
                 Spacer().frame(height: 24)
             }
         }
+        .sheet(isPresented: $showingPlayer1Picker) {
+            PlayerManagementView { player in
+                player1Name = player.name
+                player1CoachingFocus = player.coachingFocusAreas
+                player1CoachingNotes = player.coachingNotes
+                showingPlayer1Picker = false
+            }
+        }
+        .sheet(isPresented: $showingPlayer2Picker) {
+            PlayerManagementView { player in
+                player2Name = player.name
+                player2CoachingFocus = player.coachingFocusAreas
+                player2CoachingNotes = player.coachingNotes
+                showingPlayer2Picker = false
+            }
+        }
+        .sheet(isPresented: $showingPlayerManagement) {
+            PlayerManagementView()
+        }
     }
 
     private func startMatch() {
         match.setupMatch(
             player1: player1Name,
             player2: player2Name,
-            startingServer: startingServer
+            startingServer: startingServer,
+            player1CoachingFocus: player1CoachingFocus,
+            player1CoachingNotes: player1CoachingNotes,
+            player2CoachingFocus: player2CoachingFocus,
+            player2CoachingNotes: player2CoachingNotes
         )
         isPresented = false
     }
 }
 
-// MARK: - Player Name Input
-struct PlayerNameInput: View {
+// MARK: - Player Name Input with Picker
+struct PlayerNameInputWithPicker: View {
     let title: String
     @Binding var name: String
+    let coachingFocus: [String]
     let color: Color
     let placeholder: String
+    let onPickPlayer: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title.uppercased())
-                .font(AppFonts.caption(11))
-                .foregroundColor(color)
-                .tracking(1)
+            HStack {
+                Text(title.uppercased())
+                    .font(AppFonts.caption(11))
+                    .foregroundColor(color)
+                    .tracking(1)
+                Spacer()
+                Button(action: onPickPlayer) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "person.crop.circle.badge.checkmark")
+                            .font(.system(size: 12))
+                        Text("Kies speler")
+                            .font(AppFonts.caption(11))
+                    }
+                    .foregroundColor(AppColors.accentGold)
+                }
+            }
 
-            TextField(placeholder, text: $name)
-                .font(AppFonts.body(16))
-                .foregroundColor(AppColors.textPrimary)
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.white.opacity(0.08))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(color.opacity(0.4), lineWidth: 1)
-                )
+            HStack(spacing: 0) {
+                TextField(placeholder, text: $name)
+                    .font(AppFonts.body(16))
+                    .foregroundColor(AppColors.textPrimary)
+                    .padding()
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.white.opacity(0.08))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(color.opacity(0.4), lineWidth: 1)
+            )
+
+            // Show selected coaching focus tags
+            if !coachingFocus.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(coachingFocus, id: \.self) { tag in
+                            Text(tag)
+                                .font(AppFonts.caption(10))
+                                .foregroundColor(color)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Capsule().fill(color.opacity(0.15)))
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -869,6 +990,123 @@ struct LetSelectorOverlay: View {
             )
             .padding(.horizontal, 40)
         }
+    }
+}
+
+// MARK: - Point Type Selector Overlay
+
+struct PointTypeSelectorOverlay: View {
+    let game: Game
+    let onPointTypeSelected: (PointType) -> Void
+    let onBack: () -> Void
+
+    private var playerColor: Color {
+        game.selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.steelBlue
+    }
+
+    var body: some View {
+        VStack(spacing: 20) {
+            // Header
+            if let player = game.selectedPlayer {
+                Text("\(game.name(for: player).uppercased()) SCOORT")
+                    .font(AppFonts.caption(11))
+                    .foregroundColor(playerColor)
+                    .tracking(1.5)
+            }
+
+            Text("Hoe werd het punt gewonnen?")
+                .font(AppFonts.title(18))
+                .foregroundColor(AppColors.textPrimary)
+
+            // Point type buttons
+            VStack(spacing: 12) {
+                PointTypeButton(
+                    pointType: .winner,
+                    color: playerColor,
+                    action: { onPointTypeSelected(.winner) }
+                )
+                PointTypeButton(
+                    pointType: .forcedError,
+                    color: playerColor,
+                    action: { onPointTypeSelected(.forcedError) }
+                )
+                PointTypeButton(
+                    pointType: .unforcedError,
+                    color: playerColor,
+                    action: { onPointTypeSelected(.unforcedError) }
+                )
+            }
+
+            // Back button
+            Button(action: onBack) {
+                HStack(spacing: 6) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("Terug")
+                        .font(AppFonts.caption(12))
+                }
+                .foregroundColor(AppColors.textSecondary)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Capsule().fill(Color.white.opacity(0.1)))
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(AppColors.backgroundMedium.opacity(0.97))
+                .shadow(color: Color.black.opacity(0.5), radius: 20, x: 0, y: 10)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(playerColor.opacity(0.3), lineWidth: 1)
+        )
+        .padding(.horizontal, 24)
+    }
+}
+
+struct PointTypeButton: View {
+    let pointType: PointType
+    let color: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 14) {
+                Image(systemName: pointType.icon)
+                    .font(.system(size: 20))
+                    .foregroundColor(color)
+                    .frame(width: 28)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(pointType.rawValue.uppercased())
+                        .font(AppFonts.label(13))
+                        .foregroundColor(AppColors.textPrimary)
+                        .tracking(0.5)
+                    Text(pointType.description)
+                        .font(AppFonts.caption(11))
+                        .foregroundColor(AppColors.textSecondary)
+                }
+
+                Spacer()
+
+                Text(pointType.shortName)
+                    .font(AppFonts.mono(13))
+                    .foregroundColor(color.opacity(0.7))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.white.opacity(0.05))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 

@@ -734,7 +734,9 @@ struct CoachDashboardView: View {
                 let advice = try await OpenAIService.shared.generateTacticalAdvice(
                     for: game,
                     player: selectedPlayer,
-                    apiKey: apiKey
+                    apiKey: apiKey,
+                    coachingFocus: match?.coachingFocus(for: selectedPlayer) ?? [],
+                    coachingNotes: match?.coachingNotes(for: selectedPlayer) ?? ""
                 )
                 await MainActor.run {
                     self.aiAdvice = advice

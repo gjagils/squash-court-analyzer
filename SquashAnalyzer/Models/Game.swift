@@ -49,7 +49,10 @@ class Game: Identifiable {
     /// Currently selected player (for scoring flow - step 1)
     var selectedPlayer: Player? = nil
 
-    /// Currently selected zone (for scoring flow - step 2)
+    /// Currently selected point type (for scoring flow - step 2)
+    var selectedPointType: PointType? = nil
+
+    /// Currently selected zone (for scoring flow - step 3)
     var selectedZone: CourtZone? = nil
 
     /// Track previous server for undo
@@ -81,7 +84,9 @@ class Game: Identifiable {
     var scoringStep: ScoringStep {
         if selectedPlayer == nil {
             return .selectPlayer
-        } else if selectedZone == nil {
+        } else if selectedPointType == nil {
+            return .selectPointType
+        } else if selectedPointType?.requiresZoneAndShot == true && selectedZone == nil {
             return .selectZone
         } else {
             return .selectShot
@@ -90,6 +95,7 @@ class Game: Identifiable {
 
     enum ScoringStep {
         case selectPlayer
+        case selectPointType
         case selectZone
         case selectShot
     }
@@ -113,24 +119,39 @@ class Game: Identifiable {
     func selectPlayer(_ player: Player) {
         guard !isGameOver else { return }
         selectedPlayer = player
+        selectedPointType = nil
         selectedZone = nil
     }
 
-    /// Select a zone (step 2 of scoring)
-    func selectZone(_ zone: CourtZone) {
+    /// Select a point type (step 2 of scoring)
+    func selectPointType(_ pointType: PointType) {
         guard selectedPlayer != nil else { return }
+        selectedPointType = pointType
+        selectedZone = nil
+
+        // For unforced errors, no zone/shot needed — score immediately
+        if pointType == .unforcedError {
+            addPoint(shotType: nil)
+        }
+    }
+
+    /// Select a zone (step 3 of scoring, only for winner/forcedError)
+    func selectZone(_ zone: CourtZone) {
+        guard selectedPlayer != nil, selectedPointType?.requiresZoneAndShot == true else { return }
         selectedZone = zone
     }
 
-    /// Add a point with shot type (step 3 of scoring)
-    func addPoint(shotType: ShotType) {
-        guard let player = selectedPlayer, let zone = selectedZone else { return }
-        addPoint(to: player, at: zone, with: shotType)
+    /// Add a point with shot type (step 4 of scoring)
+    func addPoint(shotType: ShotType?) {
+        guard let player = selectedPlayer, let pointType = selectedPointType else { return }
+        let zone = selectedZone
+        addPoint(to: player, pointType: pointType, at: zone, with: shotType)
     }
 
     /// Clear the current selection
     func clearSelection() {
         selectedPlayer = nil
+        selectedPointType = nil
         selectedZone = nil
     }
 
@@ -138,13 +159,15 @@ class Game: Identifiable {
     func goBackStep() {
         if selectedZone != nil {
             selectedZone = nil
+        } else if selectedPointType != nil {
+            selectedPointType = nil
         } else if selectedPlayer != nil {
             selectedPlayer = nil
         }
     }
 
     /// Add a point with all details
-    func addPoint(to player: Player, at zone: CourtZone, with shotType: ShotType) {
+    func addPoint(to player: Player, pointType: PointType, at zone: CourtZone?, with shotType: ShotType?) {
         guard !isGameOver else { return }
 
         // Save current server and point time for undo
@@ -166,6 +189,7 @@ class Game: Identifiable {
         // Record the point with duration
         let point = Point(
             scorer: player,
+            pointType: pointType,
             zone: zone,
             shotType: shotType,
             server: currentServer,
@@ -185,6 +209,7 @@ class Game: Identifiable {
 
         // Clear selection after scoring
         selectedPlayer = nil
+        selectedPointType = nil
         selectedZone = nil
     }
 
@@ -211,6 +236,7 @@ class Game: Identifiable {
         }
 
         selectedPlayer = nil
+        selectedPointType = nil
         selectedZone = nil
     }
 
@@ -224,6 +250,7 @@ class Game: Identifiable {
         previousPointTimes = []
         lastPointTime = Date()
         selectedPlayer = nil
+        selectedPointType = nil
         selectedZone = nil
     }
 
@@ -242,6 +269,7 @@ class Game: Identifiable {
 
         // Clear any selection in progress
         selectedPlayer = nil
+        selectedPointType = nil
         selectedZone = nil
     }
 
@@ -272,12 +300,27 @@ class Game: Identifiable {
         points.filter { $0.scorer == player }
     }
 
-    /// Get points won in a specific zone by a player
+    /// Get all winners by a player
+    func winners(by player: Player) -> [Point] {
+        points.filter { $0.scorer == player && $0.pointType == .winner }
+    }
+
+    /// Get all forced errors by a player (opponent's error caused by player's pressure)
+    func forcedErrors(by player: Player) -> [Point] {
+        points.filter { $0.scorer == player && $0.pointType == .forcedError }
+    }
+
+    /// Get all unforced errors by a player (errors not caused by player's shot)
+    func unforcedErrors(by player: Player) -> [Point] {
+        points.filter { $0.scorer == player && $0.pointType == .unforcedError }
+    }
+
+    /// Get points won in a specific zone by a player (winners + forced errors only)
     func pointsWon(by player: Player, in zone: CourtZone) -> Int {
         points.filter { $0.scorer == player && $0.zone == zone }.count
     }
 
-    /// Get points won with a specific shot type
+    /// Get points won with a specific shot type (winners + forced errors only)
     func pointsWon(by player: Player, with shotType: ShotType) -> Int {
         points.filter { $0.scorer == player && $0.shotType == shotType }.count
     }

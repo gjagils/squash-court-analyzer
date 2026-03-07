@@ -39,6 +39,7 @@
 		A1000032 /* SampleDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000032 /* SampleDataService.swift */; };
 		A1000033 /* RefereeMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000033 /* RefereeMatch.swift */; };
 		A1000034 /* RefereeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000034 /* RefereeView.swift */; };
+		A1000035 /* SavedRefereeMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000035 /* SavedRefereeMatch.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -74,6 +75,7 @@
 		A2000032 /* SampleDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleDataService.swift; sourceTree = "<group>"; };
 		A2000033 /* RefereeMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeMatch.swift; sourceTree = "<group>"; };
 		A2000034 /* RefereeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeView.swift; sourceTree = "<group>"; };
+		A2000035 /* SavedRefereeMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedRefereeMatch.swift; sourceTree = "<group>"; };
 		A3000001 /* SquashAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SquashAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -152,6 +154,7 @@
 				A2000028 /* PointType.swift */,
 				A2000029 /* SavedPlayer.swift */,
 				A2000033 /* RefereeMatch.swift */,
+				A2000035 /* SavedRefereeMatch.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -267,6 +270,7 @@
 				A1000032 /* SampleDataService.swift in Sources */,
 				A1000033 /* RefereeMatch.swift in Sources */,
 				A1000034 /* RefereeView.swift in Sources */,
+				A1000035 /* SavedRefereeMatch.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

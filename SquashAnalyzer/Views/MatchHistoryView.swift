@@ -8,6 +8,7 @@ struct MatchHistoryView: View {
     @Query(sort: \SavedMatch.savedAt, order: .reverse) private var savedMatches: [SavedMatch]
     @Query(filter: #Predicate<SavedGame> { $0.match == nil }, sort: \SavedGame.savedAt, order: .reverse)
     private var standaloneGames: [SavedGame]
+    @Query(sort: \SavedRefereeMatch.savedAt, order: .reverse) private var refereeMatches: [SavedRefereeMatch]
     @Query private var allPlayers: [SavedPlayer]
     @Binding var isPresented: Bool
     let onSelectMatch: (SavedMatch) -> Void
@@ -30,7 +31,7 @@ struct MatchHistoryView: View {
             VStack(spacing: 0) {
                 headerView
 
-                if savedMatches.isEmpty && standaloneGames.isEmpty {
+                if savedMatches.isEmpty && standaloneGames.isEmpty && refereeMatches.isEmpty {
                     emptyStateView
                 } else {
                     contentListView
@@ -213,6 +214,18 @@ struct MatchHistoryView: View {
                         HistorySectionHeader(title: "LOSSE GAMES")
                     }
                 }
+
+                if !refereeMatches.isEmpty {
+                    Section {
+                        ForEach(refereeMatches) { match in
+                            RefereeMatchCard(match: match) {
+                                deleteRefereeMatch(match)
+                            }
+                        }
+                    } header: {
+                        HistorySectionHeader(title: "SCHEIDSRECHTER", icon: "whistle.fill")
+                    }
+                }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 8)
@@ -232,6 +245,13 @@ struct MatchHistoryView: View {
     private func deleteGame(_ game: SavedGame) {
         withAnimation {
             modelContext.delete(game)
+            try? modelContext.save()
+        }
+    }
+
+    private func deleteRefereeMatch(_ match: SavedRefereeMatch) {
+        withAnimation {
+            modelContext.delete(match)
             try? modelContext.save()
         }
     }
@@ -326,9 +346,15 @@ struct MatchHistoryView: View {
 
 struct HistorySectionHeader: View {
     let title: String
+    var icon: String? = nil
 
     var body: some View {
-        HStack {
+        HStack(spacing: 6) {
+            if let icon {
+                Image(systemName: icon)
+                    .font(.system(size: 11))
+                    .foregroundColor(AppColors.accentGold)
+            }
             Text(title)
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.accentGold)
@@ -576,6 +602,76 @@ struct MatchHistoryCard: View {
             items.append(url)
         }
         shareItemsToShow = ShareItemsWrapper(items: items)
+    }
+}
+
+// MARK: - Referee Match Card
+
+struct RefereeMatchCard: View {
+    let match: SavedRefereeMatch
+    let onDelete: () -> Void
+
+    var body: some View {
+        HStack(spacing: 14) {
+            // Icon
+            Image(systemName: "whistle.fill")
+                .font(.system(size: 18))
+                .foregroundColor(AppColors.accentGold.opacity(0.8))
+                .frame(width: 36, height: 36)
+                .background(Circle().fill(AppColors.accentGold.opacity(0.12)))
+
+            VStack(alignment: .leading, spacing: 4) {
+                // Names + match score
+                HStack(spacing: 6) {
+                    Text(match.player1Name)
+                        .font(AppFonts.label(14))
+                        .foregroundColor(AppColors.warmOrange)
+                        .lineLimit(1)
+                    Text("vs")
+                        .font(AppFonts.caption(11))
+                        .foregroundColor(AppColors.textMuted)
+                    Text(match.player2Name)
+                        .font(AppFonts.label(14))
+                        .foregroundColor(AppColors.steelBlue)
+                        .lineLimit(1)
+                    Spacer()
+                    Text(match.matchScoreText)
+                        .font(AppFonts.score(16))
+                        .foregroundColor(AppColors.textPrimary)
+                }
+
+                // Game scores + winner
+                HStack(spacing: 8) {
+                    Text(match.gameScoresText)
+                        .font(AppFonts.caption(11))
+                        .foregroundColor(AppColors.textMuted)
+                    if let winner = match.winnerName {
+                        Text("· \(winner) wint")
+                            .font(AppFonts.caption(11))
+                            .foregroundColor(AppColors.accentGold.opacity(0.8))
+                    }
+                }
+
+                // Date
+                Text(match.savedAt.formatted(date: .abbreviated, time: .shortened))
+                    .font(AppFonts.caption(10))
+                    .foregroundColor(AppColors.textMuted.opacity(0.7))
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.white.opacity(0.05))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(AppColors.accentGold.opacity(0.15), lineWidth: 1)
+                )
+        )
+        .contextMenu {
+            Button(role: .destructive, action: onDelete) {
+                Label("Verwijder", systemImage: "trash")
+            }
+        }
     }
 }
 

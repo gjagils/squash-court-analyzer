@@ -2,12 +2,14 @@ import SwiftUI
 
 /// Full-screen referee / scorekeeper view
 struct RefereeView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var match: RefereeMatch
     let onDismiss: () -> Void
 
     @State private var showingNextGameConfirm = false
     @State private var showingMatchOver = false
     @State private var shareItemsToShow: ShareItemsWrapper? = nil
+    @State private var matchSaved = false
 
     // Timers
     @State private var matchStartTime = Date()
@@ -85,6 +87,7 @@ struct RefereeView: View {
         .onChange(of: match.isGameOver) { _, isOver in
             guard isOver else { return }
             if match.isMatchOver {
+                saveMatchIfComplete()
                 showingMatchOver = true
             } else {
                 showingNextGameConfirm = true
@@ -188,70 +191,61 @@ struct RefereeView: View {
                 .foregroundColor(isServer ? color : AppColors.textSecondary)
                 .lineLimit(1)
 
-            // Score + service box badge
-            ZStack(alignment: player == .player1 ? .topTrailing : .topLeading) {
-                Text("\(score)")
-                    .font(.system(size: 80, weight: .bold, design: .rounded))
-                    .foregroundColor(isServer ? color : AppColors.textPrimary)
-                    .contentTransition(.numericText())
-                    .padding(player == .player1 ? .trailing : .leading, isServer ? 18 : 0)
-
-                if isServer {
-                    Text(match.serverSide == .left ? "L" : "R")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(AppColors.backgroundDark)
-                        .frame(width: 20, height: 20)
-                        .background(
-                            RoundedRectangle(cornerRadius: 5)
-                                .fill(color)
-                        )
-                        .offset(y: 6)
-                }
-            }
-
-            // Serving row with side override arrows
+            // Links / Rechts selector (only for server) — above the score
             if isServer {
-                HStack(spacing: 6) {
-                    Button(action: { match.overrideSide(to: .left) }) {
-                        Image(systemName: match.serverSide == .left ? "arrow.left.circle.fill" : "arrow.left.circle")
-                            .font(.system(size: 17))
-                            .foregroundColor(match.serverSide == .left ? color : color.opacity(0.3))
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(match.isGameOver)
+                VStack(spacing: 3) {
+                    Text("SERVICE")
+                        .font(AppFonts.caption(9))
+                        .foregroundColor(color.opacity(0.6))
+                        .tracking(1)
 
-                    VStack(spacing: 1) {
-                        Text("Serving")
-                            .font(AppFonts.caption(10))
-                            .foregroundColor(color.opacity(0.7))
-                        if isOverridden {
-                            HStack(spacing: 2) {
-                                Image(systemName: "pin.fill")
-                                    .font(.system(size: 7))
-                                    .foregroundColor(AppColors.accentGold)
-                                Text(match.serverSide.rawValue)
-                                    .font(AppFonts.caption(9))
-                                    .foregroundColor(AppColors.accentGold)
-                            }
-                        }
+                    HStack(spacing: 6) {
+                        sideChip("Links", side: .left, active: match.serverSide == .left,
+                                 color: color, pinned: isOverridden && match.serverSide == .left)
+                        sideChip("Rechts", side: .right, active: match.serverSide == .right,
+                                 color: color, pinned: isOverridden && match.serverSide == .right)
                     }
-
-                    Button(action: { match.overrideSide(to: .right) }) {
-                        Image(systemName: match.serverSide == .right ? "arrow.right.circle.fill" : "arrow.right.circle")
-                            .font(.system(size: 17))
-                            .foregroundColor(match.serverSide == .right ? color : color.opacity(0.3))
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(match.isGameOver)
                 }
             } else {
-                Text(" ")
-                    .font(AppFonts.caption(10))
+                // Reserve height so non-server column doesn't collapse
+                Color.clear.frame(height: 44)
             }
+
+            // Score
+            Text("\(score)")
+                .font(.system(size: 80, weight: .bold, design: .rounded))
+                .foregroundColor(isServer ? color : AppColors.textPrimary)
+                .contentTransition(.numericText())
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
         .background(isServer ? color.opacity(0.05) : Color.clear)
+    }
+
+    private func sideChip(_ label: String, side: ServerSide, active: Bool, color: Color, pinned: Bool) -> some View {
+        Button(action: { match.overrideSide(to: side) }) {
+            HStack(spacing: 3) {
+                if pinned {
+                    Image(systemName: "pin.fill")
+                        .font(.system(size: 7))
+                }
+                Text(label)
+                    .font(AppFonts.label(12))
+            }
+            .foregroundColor(active ? AppColors.backgroundDark : color.opacity(0.4))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(active ? color : color.opacity(0.1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(color.opacity(active ? 0 : 0.3), lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+        .disabled(active || match.isGameOver)
     }
 
     // MARK: - Server Dot
@@ -419,6 +413,24 @@ struct RefereeView: View {
             Spacer()
         }
         .allowsHitTesting(false)
+    }
+
+    // MARK: - Save
+
+    private func saveMatchIfComplete() {
+        guard match.isMatchOver, !matchSaved else { return }
+        let results = match.allGameResults.map {
+            RefereeGameResult(number: $0.number, player1Score: $0.p1, player2Score: $0.p2, winner: $0.winner)
+        }
+        let saved = SavedRefereeMatch(
+            player1Name: match.player1Name,
+            player2Name: match.player2Name,
+            bestOf: match.bestOf,
+            gameResults: results
+        )
+        modelContext.insert(saved)
+        try? modelContext.save()
+        matchSaved = true
     }
 
     // MARK: - Share

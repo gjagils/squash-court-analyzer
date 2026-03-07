@@ -64,8 +64,26 @@ class RefereeMatch {
     var player1GamesWon: Int { completedGames.filter { $0.winner == .player1 }.count }
     var player2GamesWon: Int { completedGames.filter { $0.winner == .player2 }.count }
     var gamesToWin: Int { (bestOf / 2) + 1 }
-    var isMatchOver: Bool { player1GamesWon >= gamesToWin || player2GamesWon >= gamesToWin }
-    var matchWinner: Player? { isMatchOver ? (player1GamesWon > player2GamesWon ? .player1 : .player2) : nil }
+
+    // Include the current game's result (when isGameOver) so the match-over check is correct
+    // even before confirmNextGame() is called.
+    private var p1TotalGames: Int { player1GamesWon + (currentGameWinner == .player1 ? 1 : 0) }
+    private var p2TotalGames: Int { player2GamesWon + (currentGameWinner == .player2 ? 1 : 0) }
+
+    var isMatchOver: Bool { p1TotalGames >= gamesToWin || p2TotalGames >= gamesToWin }
+    var matchWinner: Player? {
+        guard isMatchOver else { return nil }
+        return p1TotalGames > p2TotalGames ? .player1 : .player2
+    }
+
+    /// All game results including the current game (if finished). Used for saving.
+    var allGameResults: [(number: Int, p1: Int, p2: Int, winner: Player)] {
+        let done = completedGames.map { (number: $0.number, p1: $0.player1Score, p2: $0.player2Score, winner: $0.winner) }
+        if let w = currentGameWinner {
+            return done + [(number: currentGameNumber, p1: player1Score, p2: player2Score, winner: w)]
+        }
+        return done
+    }
 
     var isGameOver: Bool {
         let maxScore = max(player1Score, player2Score)

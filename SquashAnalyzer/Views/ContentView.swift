@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var showingHistory = false
     @State private var showingSettings = false
     @State private var matchSaved = false
+    @State private var currentGameSaved = false
     @State private var showingSavedMatchAnalysis = false
     @State private var savedMatchForAnalysis: Match? = nil
     @State private var savedGameForAnalysis: Game? = nil
@@ -60,14 +61,20 @@ struct ContentView: View {
                     game: currentGame,
                     match: match,
                     matchSaved: matchSaved,
+                    currentGameSaved: currentGameSaved,
                     onAnalysis: { showingAnalysis = true },
-                    onNextGame: { match.onGameEnd() },
+                    onNextGame: {
+                        currentGameSaved = false
+                        match.onGameEnd()
+                    },
                     onNewMatch: {
                         match = Match()
                         matchSaved = false
+                        currentGameSaved = false
                         showingSetup = true
                     },
-                    onSaveMatch: { saveMatch() }
+                    onSaveMatch: { saveMatch() },
+                    onSaveGame: { saveCurrentGame() }
                 )
             }
 
@@ -97,6 +104,12 @@ struct ContentView: View {
                         let liveMatch = savedMatch.toMatch()
                         savedMatchForAnalysis = liveMatch
                         savedGameForAnalysis = liveMatch.currentGame
+                        showingHistory = false
+                        showingSavedMatchAnalysis = true
+                    },
+                    onSelectGame: { savedGame in
+                        savedMatchForAnalysis = nil
+                        savedGameForAnalysis = savedGame.toGame()
                         showingHistory = false
                         showingSavedMatchAnalysis = true
                     }
@@ -171,6 +184,15 @@ struct ContentView: View {
         _ = SavedMatch.from(match, context: modelContext)
         try? modelContext.save()
         matchSaved = true
+    }
+
+    // MARK: - Save Current Game (standalone)
+    private func saveCurrentGame() {
+        let gameIndex = match.currentGameIndex
+        let savedGame = SavedGame.from(currentGame, gameNumber: gameIndex + 1, context: modelContext)
+        savedGame.savedAt = Date()
+        try? modelContext.save()
+        currentGameSaved = true
     }
 
     // MARK: - Game View
@@ -783,10 +805,12 @@ struct GameOverOverlay: View {
     let game: Game
     let match: Match
     let matchSaved: Bool
+    let currentGameSaved: Bool
     let onAnalysis: () -> Void
     let onNextGame: () -> Void
     let onNewMatch: () -> Void
     let onSaveMatch: () -> Void
+    let onSaveGame: () -> Void
 
     var body: some View {
         ZStack {
@@ -834,17 +858,26 @@ struct GameOverOverlay: View {
                         onAnalysis()
                     }
 
-                    // Save button (only when match is over)
+                    // Save this game (always available)
+                    HardwareButton(
+                        title: currentGameSaved ? "Game Opgeslagen ✓" : "Sla Game Op",
+                        subtitle: nil,
+                        color: currentGameSaved ? AppColors.textMuted : AppColors.steelBlue,
+                        colorDark: currentGameSaved ? AppColors.textMuted.opacity(0.7) : AppColors.steelBlueDark
+                    ) {
+                        if !currentGameSaved { onSaveGame() }
+                    }
+                    .disabled(currentGameSaved)
+
+                    // Save full match (only when match is over)
                     if match.isMatchOver {
                         HardwareButton(
-                            title: matchSaved ? "Opgeslagen ✓" : "Wedstrijd Opslaan",
+                            title: matchSaved ? "Wedstrijd Opgeslagen ✓" : "Wedstrijd Opslaan",
                             subtitle: nil,
-                            color: matchSaved ? AppColors.textMuted : AppColors.steelBlue,
-                            colorDark: matchSaved ? AppColors.textMuted.opacity(0.7) : AppColors.steelBlueDark
+                            color: matchSaved ? AppColors.textMuted : AppColors.accentGold.opacity(0.8),
+                            colorDark: matchSaved ? AppColors.textMuted.opacity(0.7) : AppColors.accentGold.opacity(0.5)
                         ) {
-                            if !matchSaved {
-                                onSaveMatch()
-                            }
+                            if !matchSaved { onSaveMatch() }
                         }
                         .disabled(matchSaved)
                     }
@@ -863,8 +896,8 @@ struct GameOverOverlay: View {
                         HardwareButton(
                             title: "Volgende Game",
                             subtitle: nil,
-                            color: AppColors.steelBlue,
-                            colorDark: AppColors.steelBlueDark
+                            color: AppColors.warmOrange,
+                            colorDark: AppColors.warmOrangeDark
                         ) {
                             onNextGame()
                         }

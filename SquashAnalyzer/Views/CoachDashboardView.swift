@@ -12,6 +12,7 @@ struct CoachDashboardView: View {
     @State private var aiAdvice: TacticalAdvice? = nil
     @State private var aiError: String? = nil
     @State private var showingDetailedAnalysis = false
+    @State private var shareItemsToShow: ShareItemsWrapper? = nil
 
     private var availableGames: [Game] {
         guard let match = match else { return [initialGame] }
@@ -116,6 +117,9 @@ struct CoachDashboardView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: showingDetailedAnalysis)
+        .sheet(item: $shareItemsToShow) { wrapper in
+            ShareSheet(items: wrapper.items)
+        }
     }
 
     // MARK: - Header
@@ -139,18 +143,22 @@ struct CoachDashboardView: View {
                 }
             }
 
-            // Close button (top right)
+            // Share button (top left) + Close button (top right)
             HStack {
+                Button(action: shareCurrentGame) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(AppColors.accentGold)
+                        .padding(10)
+                        .background(Circle().fill(Color.white.opacity(0.1)))
+                }
                 Spacer()
                 Button(action: onDismiss) {
                     Image(systemName: "xmark")
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(AppColors.textSecondary)
                         .padding(10)
-                        .background(
-                            Circle()
-                                .fill(Color.white.opacity(0.1))
-                        )
+                        .background(Circle().fill(Color.white.opacity(0.1)))
                 }
             }
             .padding(.horizontal, 20)
@@ -721,6 +729,11 @@ struct CoachDashboardView: View {
             .sorted { $0.1 > $1.1 }
             .prefix(4)
             .map { ($0.0, $0.1) }
+    }
+
+    private func shareCurrentGame() {
+        let text = ExportService.textSummary(from: game)
+        shareItemsToShow = ShareItemsWrapper(items: [text])
     }
 
     private func requestAIAdvice() {

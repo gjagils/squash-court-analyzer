@@ -15,6 +15,9 @@ final class SavedGame {
 
     var match: SavedMatch?
 
+    /// Date this game was saved (used for standalone games not part of a match)
+    var savedAt: Date = Date()
+
     @Relationship(deleteRule: .cascade, inverse: \SavedPoint.game)
     var points: [SavedPoint] = []
 
@@ -60,6 +63,14 @@ final class SavedGame {
 
     var scoreString: String {
         "\(player1Score) - \(player2Score)"
+    }
+
+    var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        formatter.locale = Locale(identifier: "nl_NL")
+        return formatter.string(from: savedAt)
     }
 
     // MARK: - Analysis Methods

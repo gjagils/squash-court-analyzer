@@ -74,7 +74,13 @@ struct ContentView: View {
                         showingSetup = true
                     },
                     onSaveMatch: { saveMatch() },
-                    onSaveGame: { saveCurrentGame() }
+                    onSaveGame: { saveCurrentGame() },
+                    onStop: {
+                        match = Match()
+                        matchSaved = false
+                        currentGameSaved = false
+                        showingSetup = true
+                    }
                 )
             }
 
@@ -551,6 +557,7 @@ struct MatchSetupView: View {
     @State private var showingPlayer1Picker = false
     @State private var showingPlayer2Picker = false
     @State private var showingPlayerManagement = false
+    @State private var showingReferee = false
 
     var body: some View {
         ZStack {
@@ -642,6 +649,28 @@ struct MatchSetupView: View {
                 }
                 .padding(.horizontal, 24)
 
+                // Referee mode button
+                Button(action: { showingReferee = true }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "whistle")
+                            .font(.system(size: 16))
+                        Text("Scheidsrechter modus")
+                            .font(AppFonts.label(14))
+                    }
+                    .foregroundColor(AppColors.accentGold)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(AppColors.accentGold.opacity(0.08))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(AppColors.accentGold.opacity(0.3), lineWidth: 1)
+                    )
+                }
+                .padding(.horizontal, 24)
+
                 // View saved matches button
                 if let onViewHistory = onViewHistory {
                     Button(action: onViewHistory) {
@@ -674,7 +703,6 @@ struct MatchSetupView: View {
                 player1Name = player.name
                 player1CoachingFocus = player.coachingFocusAreas
                 player1CoachingNotes = player.coachingNotes
-                showingPlayer1Picker = false
             }
         }
         .sheet(isPresented: $showingPlayer2Picker) {
@@ -682,11 +710,16 @@ struct MatchSetupView: View {
                 player2Name = player.name
                 player2CoachingFocus = player.coachingFocusAreas
                 player2CoachingNotes = player.coachingNotes
-                showingPlayer2Picker = false
             }
         }
         .sheet(isPresented: $showingPlayerManagement) {
             PlayerManagementView()
+        }
+        .sheet(isPresented: $showingReferee) {
+            RefereeSetupSheet(
+                player1Name: player1Name,
+                player2Name: player2Name
+            )
         }
     }
 
@@ -811,6 +844,7 @@ struct GameOverOverlay: View {
     let onNewMatch: () -> Void
     let onSaveMatch: () -> Void
     let onSaveGame: () -> Void
+    var onStop: (() -> Void)? = nil
 
     var body: some View {
         ZStack {
@@ -900,6 +934,16 @@ struct GameOverOverlay: View {
                             colorDark: AppColors.warmOrangeDark
                         ) {
                             onNextGame()
+                        }
+
+                        // Stop button (mid-match, only visible after game is saved)
+                        if currentGameSaved, let stop = onStop {
+                            Button(action: stop) {
+                                Text("Stop wedstrijd")
+                                    .font(AppFonts.caption(13))
+                                    .foregroundColor(AppColors.textMuted)
+                                    .padding(.top, 4)
+                            }
                         }
                     }
                 }

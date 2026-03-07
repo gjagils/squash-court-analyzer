@@ -11,7 +11,6 @@ struct CoachDashboardView: View {
     @State private var isLoadingAI = false
     @State private var aiAdvice: TacticalAdvice? = nil
     @State private var aiError: String? = nil
-    @State private var showingDetailedAnalysis = false
     @State private var shareItemsToShow: ShareItemsWrapper? = nil
 
     private var availableGames: [Game] {
@@ -71,28 +70,14 @@ struct CoachDashboardView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 20)
 
+                    // Point Type Breakdown
+                    pointTypeCard
+
                     // Local Tactical Advice
                     localAdviceCard
 
                     // AI Coach Section
                     aiCoachCard
-
-                    // Detailed Analysis Button
-                    Button(action: { showingDetailedAnalysis = true }) {
-                        HStack {
-                            Image(systemName: "chart.bar.xaxis")
-                            Text("Gedetailleerde Analyse")
-                        }
-                        .font(AppFonts.label(14))
-                        .foregroundColor(AppColors.textSecondary)
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.white.opacity(0.05))
-                        )
-                    }
-                    .padding(.horizontal, 20)
 
                     // Close Button
                     HardwareButton(
@@ -108,15 +93,7 @@ struct CoachDashboardView: View {
                 }
             }
 
-            // Detailed Analysis Sheet
-            if showingDetailedAnalysis {
-                AnalysisView(game: game, match: match) {
-                    showingDetailedAnalysis = false
-                }
-                .transition(.move(edge: .trailing))
-            }
         }
-        .animation(.easeInOut(duration: 0.3), value: showingDetailedAnalysis)
         .sheet(item: $shareItemsToShow) { wrapper in
             ShareSheet(items: wrapper.items)
         }
@@ -474,8 +451,14 @@ struct CoachDashboardView: View {
         let opponentAces = game.pointsWon(by: opponent, with: .ace)
 
         // Let statistics
-        let letsAgainstMe = game.letsRequested(by: opponent).count  // Opponent asks = I'm blocking
-        let letsForMe = game.letsRequested(by: selectedPlayer).count  // I ask = opponent blocking me
+        let letsAgainstMe = game.letsRequested(by: opponent).count
+        let letsForMe = game.letsRequested(by: selectedPlayer).count
+
+        // Error statistics
+        let totalPoints = game.points.count
+        let ownErrors = game.unforcedErrors(by: opponent).count   // player's own unforced errors
+        let errorRate = totalPoints > 0 ? Double(ownErrors) / Double(totalPoints) : 0
+        let opponentErrors = game.unforcedErrors(by: selectedPlayer).count  // opponent's unforced errors
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -487,25 +470,64 @@ struct CoachDashboardView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                // Tempo advice based on rally duration analysis
+                // Tempo advice
                 if let advice = tempoAdvice {
-                    AdviceRow(
-                        icon: advice.icon,
-                        text: advice.text,
-                        type: advice.type
-                    )
+                    AdviceRow(icon: advice.icon, text: advice.text, type: advice.type)
                 }
 
-                // Ace advice - opponent scoring aces against you
-                if opponentAces >= 2 {
+                // Own unforced errors - concentration
+                if ownErrors >= 3 {
                     AdviceRow(
-                        icon: "exclamationmark.circle",
-                        text: "\(game.name(for: opponent)) scoort \(opponentAces) aces - werk aan je return",
+                        icon: "brain.head.profile",
+                        text: "\(ownErrors) eigen fouten - focus op concentratie en rustig spelen",
+                        type: .warning
+                    )
+                } else if ownErrors >= 2 && errorRate > 0.25 {
+                    AdviceRow(
+                        icon: "brain.head.profile",
+                        text: "Minder haast - neem meer tijd voor je slagen",
                         type: .warning
                     )
                 }
 
-                // Ace advice - you're scoring aces
+                // Racket preparation - forced errors against you
+                let forcedAgainstMe = game.forcedErrors(by: opponent).count
+                if forcedAgainstMe >= 3 {
+                    AdviceRow(
+                        icon: "hand.raised.fill",
+                        text: "\(forcedAgainstMe) forced errors - racket eerder klaar voor je slag",
+                        type: .warning
+                    )
+                }
+
+                // Movement - lets against you
+                if letsAgainstMe >= 2 {
+                    AdviceRow(
+                        icon: "figure.walk",
+                        text: "\(letsAgainstMe) lets tegen - beweeg sneller weg naar de T na je slag",
+                        type: .warning
+                    )
+                }
+
+                // Opponent making many errors - capitalize
+                if opponentErrors >= 3 {
+                    AdviceRow(
+                        icon: "arrow.up.circle",
+                        text: "\(game.name(for: opponent)) maakt \(opponentErrors) fouten - blijf druk zetten",
+                        type: .success
+                    )
+                }
+
+                // Ace advice - opponent scoring aces
+                if opponentAces >= 2 {
+                    AdviceRow(
+                        icon: "exclamationmark.circle",
+                        text: "\(game.name(for: opponent)) scoort \(opponentAces) aces - racket vroeg omhoog bij de return",
+                        type: .warning
+                    )
+                }
+
+                // Ace advice - you scoring aces
                 if myAces >= 2 {
                     AdviceRow(
                         icon: "bolt.fill",
@@ -514,16 +536,7 @@ struct CoachDashboardView: View {
                     )
                 }
 
-                // Let advice - opponent requesting lets means you're blocking
-                if letsAgainstMe >= 2 {
-                    AdviceRow(
-                        icon: "figure.walk",
-                        text: "\(letsAgainstMe) lets tegen - beweeg sneller weg na je slag",
-                        type: .warning
-                    )
-                }
-
-                // Let advice - you requesting lets means you're moving well
+                // Let advice - you requesting lets = moving well
                 if letsForMe >= 2 && letsAgainstMe < 2 {
                     AdviceRow(
                         icon: "figure.run",
@@ -532,7 +545,7 @@ struct CoachDashboardView: View {
                     )
                 }
 
-                // Warn about opponent's strong zone (avoid playing there)
+                // Opponent strong zone
                 if let zone = opponentStrongZone {
                     AdviceRow(
                         icon: "exclamationmark.triangle",
@@ -541,7 +554,7 @@ struct CoachDashboardView: View {
                     )
                 }
 
-                // Recommend zones where opponent is weak
+                // Recommended zones
                 if !recommended.isEmpty {
                     AdviceRow(
                         icon: "target",
@@ -701,6 +714,42 @@ struct CoachDashboardView: View {
         .padding(.horizontal, 20)
     }
 
+    // MARK: - Point Type Breakdown Card
+    private var pointTypeCard: some View {
+        let winners = game.winners(by: selectedPlayer).count
+        let forced = game.forcedErrors(by: selectedPlayer).count
+        let freePoints = game.unforcedErrors(by: selectedPlayer).count   // opponent's mistakes → player's free points
+        let ownErrors = game.unforcedErrors(by: selectedPlayer.opponent).count  // player's mistakes → opponent's points
+
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "chart.pie.fill")
+                    .foregroundColor(AppColors.accentGold)
+                Text("Puntverdeling")
+                    .font(AppFonts.label(14))
+                    .foregroundColor(AppColors.textPrimary)
+            }
+
+            HStack(spacing: 8) {
+                PointTypeBadge(label: "Winners", count: winners, color: .green)
+                PointTypeBadge(label: "Druk", count: forced, color: AppColors.accentGold)
+                PointTypeBadge(label: "Cadeautjes", count: freePoints, color: AppColors.steelBlue)
+                PointTypeBadge(label: "Eigen fouten", count: ownErrors, color: .red)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.03))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
+        .padding(.horizontal, 20)
+    }
+
     // MARK: - Helper Functions
 
     private func zoneFor(row: Int, col: Int) -> CourtZone {
@@ -794,6 +843,32 @@ struct QuickStatBadge: View {
                 .font(AppFonts.caption(8))
                 .foregroundColor(AppColors.textMuted)
                 .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(color.opacity(0.1))
+        )
+    }
+}
+
+// MARK: - Point Type Badge
+struct PointTypeBadge: View {
+    let label: String
+    let count: Int
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Text("\(count)")
+                .font(AppFonts.score(20))
+                .foregroundColor(color)
+            Text(label)
+                .font(AppFonts.caption(8))
+                .foregroundColor(AppColors.textMuted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)

@@ -36,6 +36,9 @@
 		A1000029 /* SavedPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000029 /* SavedPlayer.swift */; };
 		A1000030 /* PlayerManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000030 /* PlayerManagementView.swift */; };
 		A1000031 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000031 /* ExportService.swift */; };
+		A1000032 /* SampleDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000032 /* SampleDataService.swift */; };
+		A1000033 /* RefereeMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000033 /* RefereeMatch.swift */; };
+		A1000034 /* RefereeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000034 /* RefereeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +71,9 @@
 		A2000029 /* SavedPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlayer.swift; sourceTree = "<group>"; };
 		A2000030 /* PlayerManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerManagementView.swift; sourceTree = "<group>"; };
 		A2000031 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
+		A2000032 /* SampleDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleDataService.swift; sourceTree = "<group>"; };
+		A2000033 /* RefereeMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeMatch.swift; sourceTree = "<group>"; };
+		A2000034 /* RefereeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeView.swift; sourceTree = "<group>"; };
 		A3000001 /* SquashAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SquashAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -125,6 +131,7 @@
 				A2000022 /* SettingsView.swift */,
 				A2000023 /* CoachDashboardView.swift */,
 				A2000030 /* PlayerManagementView.swift */,
+				A2000034 /* RefereeView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -144,6 +151,7 @@
 				A2000027 /* SavedLet.swift */,
 				A2000028 /* PointType.swift */,
 				A2000029 /* SavedPlayer.swift */,
+				A2000033 /* RefereeMatch.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -154,6 +162,7 @@
 				A2000024 /* OpenAIService.swift */,
 				A2000025 /* APIKeyManager.swift */,
 				A2000031 /* ExportService.swift */,
+				A2000032 /* SampleDataService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -255,6 +264,9 @@
 				A1000030 /* PlayerManagementView.swift in Sources */,
 				A1000027 /* SavedLet.swift in Sources */,
 				A1000031 /* ExportService.swift in Sources */,
+				A1000032 /* SampleDataService.swift in Sources */,
+				A1000033 /* RefereeMatch.swift in Sources */,
+				A1000034 /* RefereeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -386,7 +398,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 65FAHRU88M;
 				ENABLE_PREVIEWS = YES;
@@ -415,7 +427,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 65FAHRU88M;
 				ENABLE_PREVIEWS = YES;

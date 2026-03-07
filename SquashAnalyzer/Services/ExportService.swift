@@ -2,6 +2,24 @@ import Foundation
 import SwiftData
 import SwiftUI
 
+// MARK: - Full Backup Structures
+
+struct FullBackup: Codable {
+    let version: Int
+    let backupDate: Date
+    let players: [PlayerBackupData]
+    let matches: [MatchExportData]
+    let standaloneGames: [GameExportData]
+}
+
+struct PlayerBackupData: Codable {
+    let id: String
+    let name: String
+    let coachingFocusAreas: [String]
+    let coachingNotes: String
+    let createdAt: Date
+}
+
 // MARK: - Export Data Structures
 
 struct SquashExport: Codable {
@@ -172,6 +190,87 @@ enum ExportService {
         """
 
         return text
+    }
+
+    // MARK: - Full Backup Export
+
+    static func exportFullBackup(
+        players: [SavedPlayer],
+        matches: [SavedMatch],
+        standaloneGames: [SavedGame]
+    ) throws -> Data {
+        let playerData = players.map {
+            PlayerBackupData(
+                id: $0.id.uuidString,
+                name: $0.name,
+                coachingFocusAreas: $0.coachingFocusAreas,
+                coachingNotes: $0.coachingNotes,
+                createdAt: $0.createdAt
+            )
+        }
+        let matchData = matches.map { matchExportData(from: $0) }
+        let gameData = standaloneGames.map { gameExportData(from: $0) }
+        let backup = FullBackup(
+            version: 1,
+            backupDate: Date(),
+            players: playerData,
+            matches: matchData,
+            standaloneGames: gameData
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = .prettyPrinted
+        return try encoder.encode(backup)
+    }
+
+    // MARK: - Full Backup Import
+
+    /// Imports a full backup. Returns counts of (players, matches, standaloneGames) imported.
+    static func importFullBackup(_ data: Data, context: ModelContext) throws -> (players: Int, matches: Int, games: Int) {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let backup = try decoder.decode(FullBackup.self, from: data)
+
+        var playerCount = 0
+        for pd in backup.players {
+            let player = SavedPlayer(
+                id: UUID(uuidString: pd.id) ?? UUID(),
+                name: pd.name,
+                coachingFocusAreas: pd.coachingFocusAreas,
+                coachingNotes: pd.coachingNotes,
+                createdAt: pd.createdAt
+            )
+            context.insert(player)
+            playerCount += 1
+        }
+
+        var matchCount = 0
+        for matchData in backup.matches {
+            importMatch(matchData, context: context)
+            matchCount += 1
+        }
+
+        var gameCount = 0
+        for gameData in backup.standaloneGames {
+            importGame(gameData, context: context, matchRef: nil)
+            gameCount += 1
+        }
+
+        try context.save()
+        return (playerCount, matchCount, gameCount)
+    }
+
+    /// Deletes all existing data then imports the backup (clean restore).
+    static func replaceWithBackup(_ data: Data, context: ModelContext) throws -> (players: Int, matches: Int, games: Int) {
+        // Delete existing data
+        try context.delete(model: SavedPoint.self)
+        try context.delete(model: SavedLet.self)
+        try context.delete(model: SavedGame.self)
+        try context.delete(model: SavedMatch.self)
+        try context.delete(model: SavedPlayer.self)
+        try context.save()
+
+        return try importFullBackup(data, context: context)
     }
 
     // MARK: - Import

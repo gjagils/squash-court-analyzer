@@ -4,6 +4,7 @@ import SwiftData
 /// View for managing saved player profiles
 struct PlayerManagementView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @Query(sort: \SavedPlayer.name) private var players: [SavedPlayer]
 
     /// When set, the view acts as a picker and calls this on selection
@@ -15,82 +16,99 @@ struct PlayerManagementView: View {
     var isPickerMode: Bool { onSelectPlayer != nil }
 
     var body: some View {
-        ZStack {
-            AppBackground()
+        NavigationStack {
+            ZStack {
+                AppBackground()
 
-            VStack(spacing: 0) {
-                // Header
-                HStack {
-                    Text(isPickerMode ? "KIES SPELER" : "SPELERS")
-                        .font(AppFonts.title(18))
-                        .foregroundColor(AppColors.textPrimary)
-                        .tracking(3)
-
-                    Spacer()
-
-                    Button(action: { showingAddPlayer = true }) {
-                        Image(systemName: "plus.circle")
-                            .font(.system(size: 22))
-                            .foregroundColor(AppColors.accentGold)
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 24)
-                .padding(.bottom, 16)
-
-                if players.isEmpty {
-                    Spacer()
-                    VStack(spacing: 12) {
-                        Image(systemName: "person.2")
-                            .font(.system(size: 40))
-                            .foregroundColor(AppColors.textMuted)
-                        Text("Nog geen spelers opgeslagen")
-                            .font(AppFonts.body(16))
-                            .foregroundColor(AppColors.textSecondary)
-                        Text("Tik op + om een speler toe te voegen")
-                            .font(AppFonts.caption(13))
-                            .foregroundColor(AppColors.textMuted)
-                    }
-                    Spacer()
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 10) {
-                            ForEach(players) { player in
-                                PlayerRowView(
-                                    player: player,
-                                    isPickerMode: isPickerMode,
-                                    onSelect: {
-                                        onSelectPlayer?(player)
-                                    },
-                                    onEdit: {
-                                        playerToEdit = player
-                                    },
-                                    onDelete: {
-                                        modelContext.delete(player)
-                                        try? modelContext.save()
-                                    }
-                                )
+                VStack(spacing: 0) {
+                    // Header
+                    HStack {
+                        if isPickerMode {
+                            Button(action: { dismiss() }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "xmark")
+                                    Text("Annuleren")
+                                }
+                                .font(AppFonts.body(14))
+                                .foregroundColor(AppColors.textSecondary)
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 24)
+
+                        Spacer()
+
+                        Text(isPickerMode ? "KIES SPELER" : "SPELERS")
+                            .font(AppFonts.title(18))
+                            .foregroundColor(AppColors.textPrimary)
+                            .tracking(3)
+
+                        Spacer()
+
+                        Button(action: { showingAddPlayer = true }) {
+                            Image(systemName: "plus.circle")
+                                .font(.system(size: 22))
+                                .foregroundColor(AppColors.accentGold)
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.top, 24)
+                    .padding(.bottom, 16)
+
+                    if players.isEmpty {
+                        Spacer()
+                        VStack(spacing: 12) {
+                            Image(systemName: "person.2")
+                                .font(.system(size: 40))
+                                .foregroundColor(AppColors.textMuted)
+                            Text("Nog geen spelers opgeslagen")
+                                .font(AppFonts.body(16))
+                                .foregroundColor(AppColors.textSecondary)
+                            Text("Tik op + om een speler toe te voegen")
+                                .font(AppFonts.caption(13))
+                                .foregroundColor(AppColors.textMuted)
+                        }
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 10) {
+                                ForEach(players) { player in
+                                    PlayerRowView(
+                                        player: player,
+                                        isPickerMode: isPickerMode,
+                                        onSelect: {
+                                            onSelectPlayer?(player)
+                                            dismiss()
+                                        },
+                                        onEdit: {
+                                            playerToEdit = player
+                                        },
+                                        onDelete: {
+                                            modelContext.delete(player)
+                                            try? modelContext.save()
+                                        }
+                                    )
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 24)
+                        }
                     }
                 }
             }
-        }
-        .sheet(isPresented: $showingAddPlayer) {
-            PlayerEditSheet(player: nil) { name, focus, notes in
-                let newPlayer = SavedPlayer(name: name, coachingFocusAreas: focus, coachingNotes: notes)
-                modelContext.insert(newPlayer)
-                try? modelContext.save()
+            .navigationBarHidden(true)
+            .navigationDestination(isPresented: $showingAddPlayer) {
+                PlayerEditSheet(player: nil) { name, focus, notes in
+                    let newPlayer = SavedPlayer(name: name, coachingFocusAreas: focus, coachingNotes: notes)
+                    modelContext.insert(newPlayer)
+                    try? modelContext.save()
+                }
             }
-        }
-        .sheet(item: $playerToEdit) { player in
-            PlayerEditSheet(player: player) { name, focus, notes in
-                player.name = name
-                player.coachingFocusAreas = focus
-                player.coachingNotes = notes
-                try? modelContext.save()
+            .navigationDestination(item: $playerToEdit) { player in
+                PlayerEditSheet(player: player) { name, focus, notes in
+                    player.name = name
+                    player.coachingFocusAreas = focus
+                    player.coachingNotes = notes
+                    try? modelContext.save()
+                }
             }
         }
     }

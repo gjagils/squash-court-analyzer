@@ -6,19 +6,22 @@ import UniformTypeIdentifiers
 struct MatchHistoryView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \SavedMatch.savedAt, order: .reverse) private var savedMatches: [SavedMatch]
-    @Query(sort: \SavedGame.savedAt, order: .reverse) private var allSavedGames: [SavedGame]
+    @Query(filter: #Predicate<SavedGame> { $0.match == nil }, sort: \SavedGame.savedAt, order: .reverse)
+    private var standaloneGames: [SavedGame]
+    @Query private var allPlayers: [SavedPlayer]
     @Binding var isPresented: Bool
     let onSelectMatch: (SavedMatch) -> Void
     var onSelectGame: ((SavedGame) -> Void)? = nil
 
     @State private var showingImporter = false
+    @State private var showingBackupImporter = false
     @State private var importError: String? = nil
     @State private var showingImportError = false
     @State private var showingImportSuccess = false
-
-    private var standaloneGames: [SavedGame] {
-        allSavedGames.filter { $0.match == nil }
-    }
+    @State private var importSuccessMessage = ""
+    @State private var backupShareItems: ShareItemsWrapper? = nil
+    @State private var pendingBackupData: Data? = nil
+    @State private var showingReplaceConfirm = false
 
     var body: some View {
         ZStack {
@@ -41,6 +44,16 @@ struct MatchHistoryView: View {
         ) { result in
             handleImport(result: result)
         }
+        .fileImporter(
+            isPresented: $showingBackupImporter,
+            allowedContentTypes: [UTType.json],
+            allowsMultipleSelection: false
+        ) { result in
+            handleBackupImport(result: result)
+        }
+        .sheet(item: $backupShareItems) { wrapper in
+            ShareSheet(items: wrapper.items)
+        }
         .alert("Import mislukt", isPresented: $showingImportError) {
             Button("OK", role: .cancel) { }
         } message: {
@@ -49,7 +62,21 @@ struct MatchHistoryView: View {
         .alert("Import gelukt!", isPresented: $showingImportSuccess) {
             Button("OK", role: .cancel) { }
         } message: {
-            Text("De game of wedstrijd is succesvol geïmporteerd.")
+            Text(importSuccessMessage)
+        }
+        .alert("Alles vervangen?", isPresented: $showingReplaceConfirm) {
+            Button("Vervang alles", role: .destructive) {
+                if let data = pendingBackupData {
+                    performReplace(data: data)
+                }
+            }
+            Button("Voeg toe", role: .cancel) {
+                if let data = pendingBackupData {
+                    performAdd(data: data)
+                }
+            }
+        } message: {
+            Text("Wil je alle bestaande data verwijderen en vervangen door de backup, of de backup toevoegen aan bestaande data?")
         }
     }
 
@@ -75,9 +102,20 @@ struct MatchHistoryView: View {
 
             Spacer()
 
-            Button(action: { showingImporter = true }) {
-                Image(systemName: "square.and.arrow.down")
-                    .font(.system(size: 18))
+            Menu {
+                Button(action: exportBackup) {
+                    Label("Backup exporteren", systemImage: "icloud.and.arrow.up")
+                }
+                Button(action: { showingBackupImporter = true }) {
+                    Label("Backup importeren", systemImage: "icloud.and.arrow.down")
+                }
+                Divider()
+                Button(action: { showingImporter = true }) {
+                    Label("JSON importeren", systemImage: "square.and.arrow.down")
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .font(.system(size: 20))
                     .foregroundColor(AppColors.accentGold)
             }
         }
@@ -118,7 +156,22 @@ struct MatchHistoryView: View {
                         .stroke(AppColors.accentGold.opacity(0.5), lineWidth: 1)
                 )
             }
-            .padding(.top, 8)
+
+            Button(action: { SampleDataService.createSampleMatch(context: modelContext) }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "wand.and.stars")
+                    Text("Laad voorbeelddata")
+                }
+                .font(AppFonts.label(14))
+                .foregroundColor(AppColors.textMuted)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(AppColors.textMuted.opacity(0.3), lineWidth: 1)
+                )
+            }
+            .padding(.top, 4)
 
             Spacer()
         }
@@ -183,7 +236,7 @@ struct MatchHistoryView: View {
         }
     }
 
-    // MARK: - Import
+    // MARK: - Import (single match/game)
 
     private func handleImport(result: Result<[URL], Error>) {
         do {
@@ -197,6 +250,70 @@ struct MatchHistoryView: View {
             defer { url.stopAccessingSecurityScopedResource() }
             let data = try Data(contentsOf: url)
             try ExportService.importFromJSON(data, context: modelContext)
+            importSuccessMessage = "De game of wedstrijd is succesvol geïmporteerd."
+            showingImportSuccess = true
+        } catch {
+            importError = error.localizedDescription
+            showingImportError = true
+        }
+    }
+
+    // MARK: - Backup Export
+
+    private func exportBackup() {
+        do {
+            let data = try ExportService.exportFullBackup(
+                players: allPlayers,
+                matches: savedMatches,
+                standaloneGames: standaloneGames
+            )
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let filename = "squash-backup-\(formatter.string(from: Date())).json"
+            let url = try ExportService.writeToTempFile(data, filename: filename)
+            backupShareItems = ShareItemsWrapper(items: [url])
+        } catch {
+            importError = "Backup maken mislukt: \(error.localizedDescription)"
+            showingImportError = true
+        }
+    }
+
+    // MARK: - Backup Import
+
+    private func handleBackupImport(result: Result<[URL], Error>) {
+        do {
+            let urls = try result.get()
+            guard let url = urls.first else { return }
+            guard url.startAccessingSecurityScopedResource() else {
+                importError = "Geen toegang tot bestand"
+                showingImportError = true
+                return
+            }
+            defer { url.stopAccessingSecurityScopedResource() }
+            let data = try Data(contentsOf: url)
+            pendingBackupData = data
+            showingReplaceConfirm = true
+        } catch {
+            importError = error.localizedDescription
+            showingImportError = true
+        }
+    }
+
+    private func performReplace(data: Data) {
+        do {
+            let result = try ExportService.replaceWithBackup(data, context: modelContext)
+            importSuccessMessage = "Backup hersteld: \(result.players) spelers, \(result.matches) wedstrijden, \(result.games) losse games."
+            showingImportSuccess = true
+        } catch {
+            importError = error.localizedDescription
+            showingImportError = true
+        }
+    }
+
+    private func performAdd(data: Data) {
+        do {
+            let result = try ExportService.importFullBackup(data, context: modelContext)
+            importSuccessMessage = "Toegevoegd: \(result.players) spelers, \(result.matches) wedstrijden, \(result.games) losse games."
             showingImportSuccess = true
         } catch {
             importError = error.localizedDescription

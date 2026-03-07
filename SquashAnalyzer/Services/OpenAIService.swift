@@ -103,8 +103,8 @@ actor OpenAIService {
         // Point type breakdown
         let playerWinners = game.winners(by: player).count
         let playerForcedErrors = game.forcedErrors(by: player).count
-        let playerUnforcedErrors = game.unforcedErrors(by: player).count
-        let opponentUnforcedErrors = game.unforcedErrors(by: opponent).count
+        let playerOwnErrors = game.unforcedErrors(by: opponent).count   // opponent scored on player's unforced error
+        let freePointsFromOpponent = game.unforcedErrors(by: player).count  // player scored on opponent's unforced error
 
         // Zone breakdown (winners + forced errors only)
         var zoneStats: [String] = []
@@ -155,8 +155,8 @@ actor OpenAIService {
         - Totaal punten verloren: \(opponentPoints.count)
         - Winners geslagen: \(playerWinners)
         - Forced errors afgedwongen: \(playerForcedErrors)
-        - Eigen unforced errors: \(playerUnforcedErrors)
-        - Unforced errors tegenstander: \(opponentUnforcedErrors)
+        - Eigen unforced errors: \(playerOwnErrors)
+        - Cadeautjes (unforced errors tegenstander): \(freePointsFromOpponent)
         - Beste zone: \(bestZone)
         - Beste slag: \(bestShot)
         - Zone waar tegenstander scoorde: \(worstZone)

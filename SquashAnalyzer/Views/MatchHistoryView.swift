@@ -23,6 +23,8 @@ struct MatchHistoryView: View {
     @State private var backupShareItems: ShareItemsWrapper? = nil
     @State private var pendingBackupData: Data? = nil
     @State private var showingReplaceConfirm = false
+    @State private var showingICloudSuccess = false
+    @State private var iCloudSaveMessage = ""
 
     var body: some View {
         ZStack {
@@ -79,6 +81,11 @@ struct MatchHistoryView: View {
         } message: {
             Text("Wil je alle bestaande data verwijderen en vervangen door de backup, of de backup toevoegen aan bestaande data?")
         }
+        .alert("Backup opgeslagen!", isPresented: $showingICloudSuccess) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(iCloudSaveMessage)
+        }
     }
 
     // MARK: - Header
@@ -104,13 +111,16 @@ struct MatchHistoryView: View {
             Spacer()
 
             Menu {
-                Button(action: exportBackup) {
-                    Label("Backup exporteren", systemImage: "icloud.and.arrow.up")
+                Button(action: saveToiCloud) {
+                    Label("Backup naar iCloud", systemImage: "icloud.and.arrow.up")
                 }
                 Button(action: { showingBackupImporter = true }) {
-                    Label("Backup importeren", systemImage: "icloud.and.arrow.down")
+                    Label("Backup herstellen", systemImage: "icloud.and.arrow.down")
                 }
                 Divider()
+                Button(action: exportBackup) {
+                    Label("Backup delen (share)", systemImage: "square.and.arrow.up")
+                }
                 Button(action: { showingImporter = true }) {
                     Label("JSON importeren", systemImage: "square.and.arrow.down")
                 }
@@ -280,6 +290,23 @@ struct MatchHistoryView: View {
 
     // MARK: - Backup Export
 
+    /// Direct iCloud Drive backup — no share sheet needed.
+    private func saveToiCloud() {
+        do {
+            let url = try ExportService.saveBackupToiCloud(
+                players: allPlayers,
+                matches: savedMatches,
+                standaloneGames: standaloneGames
+            )
+            iCloudSaveMessage = "'\(url.lastPathComponent)' is opgeslagen in iCloud Drive. Je kunt het terugvinden in de Bestanden-app onder iCloud Drive → Squash Analyzer."
+            showingICloudSuccess = true
+        } catch {
+            importError = "iCloud backup mislukt: \(error.localizedDescription)"
+            showingImportError = true
+        }
+    }
+
+    /// Share sheet fallback for users without iCloud.
     private func exportBackup() {
         do {
             let data = try ExportService.exportFullBackup(

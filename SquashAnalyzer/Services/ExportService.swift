@@ -351,6 +351,47 @@ enum ExportService {
         return url
     }
 
+    // MARK: - iCloud Backup
+
+    enum iCloudError: LocalizedError {
+        case unavailable
+        var errorDescription: String? {
+            "iCloud Drive is niet beschikbaar. Controleer of je bent ingelogd bij iCloud en iCloud Drive is ingeschakeld in Instellingen → Squash Analyzer."
+        }
+    }
+
+    /// The iCloud container identifier (must match what is configured in Signing & Capabilities).
+    static let iCloudContainerID = "iCloud.com.squashanalyzer.app"
+
+    /// Returns the app's folder inside iCloud Drive (Documents), creating it when needed.
+    static var iCloudDirectory: URL? {
+        guard let base = FileManager.default.url(forUbiquityContainerIdentifier: iCloudContainerID) else {
+            return nil
+        }
+        let dir = base.appendingPathComponent("Documents")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }
+
+    /// Creates a full backup and writes it directly to iCloud Drive.
+    /// Returns the URL of the saved file.
+    static func saveBackupToiCloud(
+        players: [SavedPlayer],
+        matches: [SavedMatch],
+        standaloneGames: [SavedGame]
+    ) throws -> URL {
+        guard let dir = iCloudDirectory else {
+            throw iCloudError.unavailable
+        }
+        let data = try exportFullBackup(players: players, matches: matches, standaloneGames: standaloneGames)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let filename = "squash-backup-\(formatter.string(from: Date())).json"
+        let fileURL = dir.appendingPathComponent(filename)
+        try data.write(to: fileURL)
+        return fileURL
+    }
+
     // MARK: - Private helpers
 
     private static func matchExportData(from match: SavedMatch) -> MatchExportData {

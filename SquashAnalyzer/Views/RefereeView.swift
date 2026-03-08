@@ -527,10 +527,9 @@ struct RefereeSetupSheet: View {
                                 .padding(.vertical, 16)
                                 .background(
                                     RoundedRectangle(cornerRadius: 14)
-                                        .fill(canStart ? AppColors.accentGold : AppColors.textMuted)
+                                        .fill(AppColors.accentGold)
                                 )
                         }
-                        .disabled(!canStart)
                         .padding(.horizontal, 24)
                         .padding(.bottom, 32)
                     }
@@ -555,16 +554,12 @@ struct RefereeSetupSheet: View {
         }
     }
 
-    private var canStart: Bool {
-        !player1Name.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !player2Name.trimmingCharacters(in: .whitespaces).isEmpty
-    }
-
     private func startReferee() {
-        guard canStart else { return }
+        let p1 = player1Name.trimmingCharacters(in: .whitespaces)
+        let p2 = player2Name.trimmingCharacters(in: .whitespaces)
         createdMatch = RefereeMatch(
-            player1Name: player1Name.trimmingCharacters(in: .whitespaces),
-            player2Name: player2Name.trimmingCharacters(in: .whitespaces),
+            player1Name: p1.isEmpty ? "Speler 1" : p1,
+            player2Name: p2.isEmpty ? "Speler 2" : p2,
             bestOf: bestOf,
             startingServer: startingServer
         )

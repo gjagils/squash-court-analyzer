@@ -540,10 +540,15 @@ struct RallyTimerView: View {
 }
 
 // MARK: - Match Setup View
+
+enum SetupMode { case coach, referee }
+
 struct MatchSetupView: View {
     let match: Match
     @Binding var isPresented: Bool
     var onViewHistory: (() -> Void)? = nil
+
+    @State private var selectedMode: SetupMode = .coach
 
     @State private var player1Name: String = ""
     @State private var player2Name: String = ""
@@ -557,51 +562,67 @@ struct MatchSetupView: View {
     @State private var showingPlayer1Picker = false
     @State private var showingPlayer2Picker = false
     @State private var showingPlayerManagement = false
-    @State private var showingReferee = false
+    @State private var createdRefereeMatch: RefereeMatch? = nil
 
     var body: some View {
         ZStack {
             AppBackground()
 
-            VStack(spacing: 24) {
-                // Header
+            VStack(spacing: 0) {
+
+                // ── Header ──────────────────────────────────────────────────
                 HStack {
+                    // History icon — consistent across the whole app
+                    if let onViewHistory = onViewHistory {
+                        Button(action: onViewHistory) {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .font(.system(size: 22))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                    } else {
+                        Color.clear.frame(width: 22)
+                    }
+
                     Spacer()
+
                     Text("SQUASH ANALYZER")
-                        .font(AppFonts.title(22))
+                        .font(AppFonts.title(20))
                         .foregroundColor(AppColors.textPrimary)
                         .tracking(3)
+
                     Spacer()
+
                     Button(action: { showingPlayerManagement = true }) {
                         Image(systemName: "person.2.circle")
                             .font(.system(size: 22))
                             .foregroundColor(AppColors.accentGold)
                     }
-                    .padding(.trailing, 24)
                 }
-                .padding(.top, 40)
+                .padding(.horizontal, 24)
+                .padding(.top, 44)
+                .padding(.bottom, 24)
 
-                Text("Best of 5 games")
-                    .font(AppFonts.body(14))
-                    .foregroundColor(AppColors.textSecondary)
+                // ── Mode toggle ─────────────────────────────────────────────
+                modePicker
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 28)
 
                 Spacer()
 
-                // Player names input with picker
+                // ── Player names ────────────────────────────────────────────
                 VStack(spacing: 20) {
                     PlayerNameInputWithPicker(
                         title: "Speler 1",
                         name: $player1Name,
-                        coachingFocus: player1CoachingFocus,
+                        coachingFocus: selectedMode == .coach ? player1CoachingFocus : [],
                         color: AppColors.warmOrange,
                         placeholder: "Naam speler 1",
                         onPickPlayer: { showingPlayer1Picker = true }
                     )
-
                     PlayerNameInputWithPicker(
                         title: "Speler 2",
                         name: $player2Name,
-                        coachingFocus: player2CoachingFocus,
+                        coachingFocus: selectedMode == .coach ? player2CoachingFocus : [],
                         color: AppColors.steelBlue,
                         placeholder: "Naam speler 2",
                         onPickPlayer: { showingPlayer2Picker = true }
@@ -609,7 +630,7 @@ struct MatchSetupView: View {
                 }
                 .padding(.horizontal, 24)
 
-                // Starting server selection
+                // ── First server ─────────────────────────────────────────────
                 VStack(spacing: 12) {
                     Text("Wie serveert eerst?")
                         .font(AppFonts.label(14))
@@ -620,84 +641,47 @@ struct MatchSetupView: View {
                             name: player1Name.isEmpty ? "Speler 1" : player1Name,
                             color: AppColors.warmOrange,
                             isSelected: startingServer == .player1
-                        ) {
-                            startingServer = .player1
-                        }
+                        ) { startingServer = .player1 }
 
                         ServerSelectionButton(
                             name: player2Name.isEmpty ? "Speler 2" : player2Name,
                             color: AppColors.steelBlue,
                             isSelected: startingServer == .player2
-                        ) {
-                            startingServer = .player2
-                        }
+                        ) { startingServer = .player2 }
                     }
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 20)
+                .padding(.top, 24)
 
                 Spacer()
 
-                // Start button
-                HardwareButton(
-                    title: "Start Wedstrijd",
-                    subtitle: nil,
-                    color: AppColors.warmOrange,
-                    colorDark: AppColors.warmOrangeDark
-                ) {
-                    startMatch()
-                }
-                .padding(.horizontal, 24)
-
-                // Referee mode button
-                Button(action: { showingReferee = true }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "whistle")
-                            .font(.system(size: 16))
-                        Text("Scheidsrechter modus")
-                            .font(AppFonts.label(14))
+                // ── Start button ─────────────────────────────────────────────
+                if selectedMode == .coach {
+                    HardwareButton(
+                        title: "Start Wedstrijd",
+                        subtitle: nil,
+                        color: AppColors.warmOrange,
+                        colorDark: AppColors.warmOrangeDark
+                    ) {
+                        startMatch()
                     }
-                    .foregroundColor(AppColors.accentGold)
-                    .padding(.vertical, 12)
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(AppColors.accentGold.opacity(0.08))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(AppColors.accentGold.opacity(0.3), lineWidth: 1)
-                    )
-                }
-                .padding(.horizontal, 24)
-
-                // View saved matches button
-                if let onViewHistory = onViewHistory {
-                    Button(action: onViewHistory) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .font(.system(size: 16))
-                            Text("Opgeslagen wedstrijden")
-                                .font(AppFonts.label(14))
-                        }
-                        .foregroundColor(AppColors.textSecondary)
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.white.opacity(0.05))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                        )
+                    .padding(.horizontal, 24)
+                } else {
+                    HardwareButton(
+                        title: "Start Scheidsrechter",
+                        subtitle: "Best of 5",
+                        color: AppColors.accentGold,
+                        colorDark: Color(red: 0.70, green: 0.54, blue: 0.20)
+                    ) {
+                        startReferee()
                     }
                     .padding(.horizontal, 24)
                 }
 
-                Spacer().frame(height: 24)
+                Spacer().frame(height: 44)
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: selectedMode)
         .sheet(isPresented: $showingPlayer1Picker) {
             PlayerManagementView { player in
                 player1Name = player.name
@@ -715,13 +699,54 @@ struct MatchSetupView: View {
         .sheet(isPresented: $showingPlayerManagement) {
             PlayerManagementView()
         }
-        .sheet(isPresented: $showingReferee) {
-            RefereeSetupSheet(
-                player1Name: player1Name,
-                player2Name: player2Name
-            )
+        .fullScreenCover(item: $createdRefereeMatch) { m in
+            RefereeView(match: m) { createdRefereeMatch = nil }
         }
     }
+
+    // ── Mode picker ───────────────────────────────────────────────────────────
+
+    private var modePicker: some View {
+        HStack(spacing: 0) {
+            modeTab(mode: .coach,   icon: "chart.bar.xaxis", title: "COACH")
+            modeTab(mode: .referee, icon: "whistle",          title: "SCHEIDSRECHTER")
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.white.opacity(0.05))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.white.opacity(0.10), lineWidth: 1)
+        )
+    }
+
+    private func modeTab(mode: SetupMode, icon: String, title: String) -> some View {
+        let isSelected = selectedMode == mode
+        let color: Color = mode == .coach ? AppColors.warmOrange : AppColors.accentGold
+        return Button {
+            withAnimation(.easeInOut(duration: 0.18)) { selectedMode = mode }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 13, weight: .semibold))
+                Text(title)
+                    .font(AppFonts.label(12))
+                    .tracking(1)
+            }
+            .foregroundColor(isSelected ? AppColors.backgroundDark : color.opacity(0.55))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 13)
+            .background(
+                RoundedRectangle(cornerRadius: 11)
+                    .fill(isSelected ? color : Color.clear)
+            )
+        }
+        .buttonStyle(.plain)
+        .padding(3)
+    }
+
+    // ── Actions ───────────────────────────────────────────────────────────────
 
     private func startMatch() {
         match.setupMatch(
@@ -734,6 +759,17 @@ struct MatchSetupView: View {
             player2CoachingNotes: player2CoachingNotes
         )
         isPresented = false
+    }
+
+    private func startReferee() {
+        let p1 = player1Name.trimmingCharacters(in: .whitespaces)
+        let p2 = player2Name.trimmingCharacters(in: .whitespaces)
+        createdRefereeMatch = RefereeMatch(
+            player1Name: p1.isEmpty ? "Speler 1" : p1,
+            player2Name: p2.isEmpty ? "Speler 2" : p2,
+            bestOf: 5,
+            startingServer: startingServer
+        )
     }
 }
 

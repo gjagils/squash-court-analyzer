@@ -9,11 +9,34 @@ enum ServerSide: String {
     var icon: String {
         self == .left ? "arrow.left" : "arrow.right"
     }
+
+    /// Single-letter code used in the scoring timeline ("4R", "5L")
+    var shortCode: String {
+        self == .left ? "L" : "R"
+    }
+
+    var opposite: ServerSide {
+        self == .left ? .right : .left
+    }
 }
 
 /// A single undo-able action during a referee game
 private enum RefereeAction {
-    case point(scorer: Player, prevServer: Player, prevSide: ServerSide, prevP1Score: Int, prevP2Score: Int, prevP1PreferredSide: ServerSide?, prevP2PreferredSide: ServerSide?)
+    case point(prevServer: Player, prevSide: ServerSide, prevP1Score: Int, prevP2Score: Int)
+    case sideOverride(prevSide: ServerSide)
+}
+
+/// One rally won, as shown in the scoring timeline between the two players
+struct RefereePointEntry: Identifiable, Equatable {
+    let id = UUID()
+    let scorer: Player
+    /// Scorer's score after this rally
+    let score: Int
+    /// Service box the scorer serves from for the next rally
+    var side: ServerSide
+    let isStroke: Bool
+
+    var label: String { "\(score)\(side.shortCode)" }
 }
 
 /// Completed game result
@@ -42,9 +65,8 @@ class RefereeMatch {
     // Completed games
     var completedGames: [CompletedRefereeGame] = []
 
-    // Manually overridden service side per player (persists across games in the match)
-    var player1PreferredSide: ServerSide? = nil
-    var player2PreferredSide: ServerSide? = nil
+    // Rallies won in the current game, oldest first (drives the scoring timeline)
+    var pointHistory: [RefereePointEntry] = []
 
     // Let / stroke flash
     var lastCallText: String? = nil
@@ -56,7 +78,7 @@ class RefereeMatch {
         self.player2Name = player2Name
         self.bestOf = bestOf
         self.currentServer = startingServer
-        self.serverSide = .right  // Always start on right (server score = 0 = even)
+        self.serverSide = .right  // First serve of a game defaults to the right box
     }
 
     // MARK: - Computed
@@ -85,16 +107,13 @@ class RefereeMatch {
         return done
     }
 
-    var isGameOver: Bool {
-        let maxScore = max(player1Score, player2Score)
-        let minScore = min(player1Score, player2Score)
-        return maxScore >= 11 && (maxScore - minScore) >= 2
+    private var currentScore: SquashScore {
+        SquashScore(player1: player1Score, player2: player2Score)
     }
 
-    var currentGameWinner: Player? {
-        guard isGameOver else { return nil }
-        return player1Score > player2Score ? .player1 : .player2
-    }
+    var isGameOver: Bool { ScoringEngine().isGameOver(currentScore) }
+
+    var currentGameWinner: Player? { ScoringEngine().winner(for: currentScore) }
 
     var canUndo: Bool { !undoStack.isEmpty }
 
@@ -104,41 +123,47 @@ class RefereeMatch {
 
     // MARK: - Actions
 
-    func awardPoint(to scorer: Player) {
+    func awardPoint(to scorer: Player, isStroke: Bool = false) {
         guard !isGameOver else { return }
 
         undoStack.append(.point(
-            scorer: scorer,
             prevServer: currentServer,
             prevSide: serverSide,
             prevP1Score: player1Score,
-            prevP2Score: player2Score,
-            prevP1PreferredSide: player1PreferredSide,
-            prevP2PreferredSide: player2PreferredSide
+            prevP2Score: player2Score
         ))
 
         if scorer == .player1 { player1Score += 1 } else { player2Score += 1 }
 
-        // Update server: scorer always becomes/stays server
-        currentServer = scorer
-        let scorerScore = scorer == .player1 ? player1Score : player2Score
-        let autoSide: ServerSide = scorerScore % 2 == 0 ? .right : .left
+        // Service rule: the server who wins a rally keeps serving from the other box.
+        // On a hand-out the new server starts from the right box; the referee can
+        // correct this with the side chips if the player chooses the left box.
+        if scorer == currentServer {
+            serverSide = serverSide.opposite
+        } else {
+            currentServer = scorer
+            serverSide = .right
+        }
 
-        // Use player's manually overridden side if set, otherwise use even/odd rule
-        let preferredSide = scorer == .player1 ? player1PreferredSide : player2PreferredSide
-        serverSide = preferredSide ?? autoSide
+        let scorerScore = scorer == .player1 ? player1Score : player2Score
+        pointHistory.append(RefereePointEntry(
+            scorer: scorer,
+            score: scorerScore,
+            side: serverSide,
+            isStroke: isStroke
+        ))
 
         lastCallText = nil
     }
 
-    /// Override the current server's service side and remember it for the rest of the match.
+    /// Correct the box the current server serves from (e.g. after a hand-out the
+    /// player chose the left box). Alternation continues from the corrected box.
     func overrideSide(to side: ServerSide) {
-        guard !isGameOver else { return }
+        guard !isGameOver, side != serverSide else { return }
+        undoStack.append(.sideOverride(prevSide: serverSide))
         serverSide = side
-        if currentServer == .player1 {
-            player1PreferredSide = side
-        } else {
-            player2PreferredSide = side
+        if let last = pointHistory.last, last.scorer == currentServer {
+            pointHistory[pointHistory.count - 1].side = side
         }
     }
 
@@ -155,19 +180,23 @@ class RefereeMatch {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
             self?.lastCallText = nil
         }
-        awardPoint(to: player)
+        awardPoint(to: player, isStroke: true)
     }
 
     func undo() {
         guard let action = undoStack.popLast() else { return }
         switch action {
-        case .point(_, let prevServer, let prevSide, let prevP1, let prevP2, let prevP1Pref, let prevP2Pref):
+        case .point(let prevServer, let prevSide, let prevP1, let prevP2):
             player1Score = prevP1
             player2Score = prevP2
             currentServer = prevServer
             serverSide = prevSide
-            player1PreferredSide = prevP1Pref
-            player2PreferredSide = prevP2Pref
+            _ = pointHistory.popLast()
+        case .sideOverride(let prevSide):
+            serverSide = prevSide
+            if let last = pointHistory.last, last.scorer == currentServer {
+                pointHistory[pointHistory.count - 1].side = prevSide
+            }
         }
         lastCallText = nil
     }
@@ -183,10 +212,11 @@ class RefereeMatch {
         currentGameNumber += 1
         player1Score = 0
         player2Score = 0
+        pointHistory.removeAll()
         undoStack.removeAll()
         lastCallText = nil
-        // In a best-of-5, the loser serves next game (or winner can choose — simplified: loser serves)
-        currentServer = winner.opponent
+        // The winner of the previous game serves first in the next game.
+        currentServer = winner
         serverSide = .right
     }
 

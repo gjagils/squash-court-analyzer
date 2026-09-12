@@ -33,10 +33,10 @@ struct RefereeView: View {
 
                 Divider().background(Color.white.opacity(0.08))
 
-                // Player columns + server dot
-                HStack(alignment: .center, spacing: 0) {
+                // Player columns with the rally-by-rally scoring line in between
+                HStack(alignment: .top, spacing: 0) {
                     playerColumn(.player1)
-                    serverDot
+                    RefereeScoringTimeline(entries: match.pointHistory, server: match.currentServer)
                     playerColumn(.player2)
                 }
                 .frame(maxHeight: .infinity)
@@ -175,7 +175,6 @@ struct RefereeView: View {
         let isServer = match.currentServer == player
         let color: Color = player == .player1 ? AppColors.warmOrange : AppColors.steelBlue
         let score = player == .player1 ? match.player1Score : match.player2Score
-        let isOverridden = player == .player1 ? match.player1PreferredSide != nil : match.player2PreferredSide != nil
 
         return VStack(spacing: 6) {
             // Avatar circle
@@ -194,25 +193,21 @@ struct RefereeView: View {
                 .foregroundColor(isServer ? color : AppColors.textSecondary)
                 .lineLimit(1)
 
-            // Links / Rechts selector (only for server) — above the score
-            if isServer {
-                VStack(spacing: 3) {
-                    Text("SERVICE")
-                        .font(AppFonts.caption(9))
-                        .foregroundColor(color.opacity(0.6))
-                        .tracking(1)
+            // Links / Rechts selector — always laid out so both scores line up,
+            // only visible and tappable for the current server
+            VStack(spacing: 3) {
+                Text("SERVICE")
+                    .font(AppFonts.caption(9))
+                    .foregroundColor(color.opacity(0.6))
+                    .tracking(1)
 
-                    HStack(spacing: 6) {
-                        sideChip("Links", side: .left, active: match.serverSide == .left,
-                                 color: color, pinned: isOverridden && match.serverSide == .left)
-                        sideChip("Rechts", side: .right, active: match.serverSide == .right,
-                                 color: color, pinned: isOverridden && match.serverSide == .right)
-                    }
+                HStack(spacing: 6) {
+                    sideChip("Links", side: .left, active: match.serverSide == .left, color: color)
+                    sideChip("Rechts", side: .right, active: match.serverSide == .right, color: color)
                 }
-            } else {
-                // Reserve height so non-server column doesn't collapse
-                Color.clear.frame(height: 44)
             }
+            .opacity(isServer ? 1 : 0)
+            .allowsHitTesting(isServer)
 
             // Score
             Text("\(score)")
@@ -220,22 +215,16 @@ struct RefereeView: View {
                 .foregroundColor(isServer ? color : AppColors.textPrimary)
                 .contentTransition(.numericText())
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .padding(.vertical, 12)
         .background(isServer ? color.opacity(0.05) : Color.clear)
     }
 
-    private func sideChip(_ label: String, side: ServerSide, active: Bool, color: Color, pinned: Bool) -> some View {
-        Button(action: { match.overrideSide(to: side) }) {
-            HStack(spacing: 3) {
-                if pinned {
-                    Image(systemName: "pin.fill")
-                        .font(.system(size: 7))
-                }
-                Text(label)
-                    .font(AppFonts.label(12))
-            }
-            .foregroundColor(active ? AppColors.backgroundDark : color.opacity(0.4))
+    private func sideChip(_ label: String, side: ServerSide, active: Bool, color: Color) -> some View {
+        Button(action: { withAnimation(.easeInOut(duration: 0.15)) { match.overrideSide(to: side) } }) {
+            Text(label)
+                .font(AppFonts.label(12))
+                .foregroundColor(active ? AppColors.backgroundDark : color.opacity(0.4))
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(
@@ -249,25 +238,6 @@ struct RefereeView: View {
         }
         .buttonStyle(.plain)
         .disabled(active || match.isGameOver)
-    }
-
-    // MARK: - Server Dot
-
-    private var serverDot: some View {
-        let color: Color = match.currentServer == .player1 ? AppColors.warmOrange : AppColors.steelBlue
-        let offset: CGFloat = match.currentServer == .player1 ? -9 : 9
-
-        return ZStack {
-            Rectangle()
-                .fill(color.opacity(0.2))
-                .frame(width: 1.5)
-            Circle()
-                .fill(color)
-                .frame(width: 13, height: 13)
-                .offset(x: offset)
-        }
-        .frame(width: 22)
-        .animation(.easeInOut(duration: 0.25), value: match.currentServer)
     }
 
     // MARK: - Action Grid
@@ -440,6 +410,125 @@ struct RefereeView: View {
 
     private func shareScore() {
         shareItemsToShow = ShareItemsWrapper(items: [match.whatsAppText])
+    }
+}
+
+// MARK: - Scoring Timeline
+
+/// Vertical rally-by-rally line between the two player columns: newest rally at
+/// the top under the "now" marker, each pill showing the scorer's new score and
+/// the box they serve from next ("4R"). Player 1 pills hang left, player 2 right.
+private struct RefereeScoringTimeline: View {
+    let entries: [RefereePointEntry]   // oldest first
+    let server: Player
+
+    private let width: CGFloat = 100
+    private let rowHeight: CGFloat = 30
+    private let dotSize: CGFloat = 14
+
+    var body: some View {
+        let serverColor = Self.color(for: server)
+
+        VStack(spacing: 0) {
+            nowMarker(color: serverColor)
+                .frame(height: 52)
+
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 0) {
+                    ForEach(entries.reversed()) { entry in
+                        row(entry)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                }
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
+        .background(alignment: .top) {
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        colors: [serverColor.opacity(0.7), serverColor.opacity(0.12)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(width: 1.5)
+                .padding(.top, 26)
+        }
+        .frame(width: width)
+        .padding(.vertical, 12)
+        .animation(.easeInOut(duration: 0.25), value: entries)
+        .animation(.easeInOut(duration: 0.25), value: server)
+    }
+
+    private func nowMarker(color: Color) -> some View {
+        ZStack {
+            Circle()
+                .fill(color.opacity(0.28))
+                .frame(width: 34, height: 34)
+                .blur(radius: 5)
+            Circle()
+                .fill(color)
+                .frame(width: 15, height: 15)
+                .shadow(color: color.opacity(0.9), radius: 6)
+        }
+    }
+
+    private func row(_ entry: RefereePointEntry) -> some View {
+        let color = Self.color(for: entry.scorer)
+        let isLeft = entry.scorer == .player1
+        // Reserve half the width minus the dot radius so the dot sits on the line
+        let inner = width / 2 - dotSize / 2
+
+        return HStack(spacing: 0) {
+            if isLeft {
+                Spacer(minLength: 0)
+                pill(entry, color: color, dotOnRight: true)
+                Color.clear.frame(width: inner)
+            } else {
+                Color.clear.frame(width: inner)
+                pill(entry, color: color, dotOnRight: false)
+                Spacer(minLength: 0)
+            }
+        }
+        .frame(width: width, height: rowHeight)
+    }
+
+    private func pill(_ entry: RefereePointEntry, color: Color, dotOnRight: Bool) -> some View {
+        HStack(spacing: 4) {
+            if !dotOnRight { dot(color: color) }
+            Text(entry.label)
+                .font(AppFonts.label(11))
+                .foregroundColor(.white)
+                .monospacedDigit()
+            if dotOnRight { dot(color: color) }
+        }
+        .padding(.leading, dotOnRight ? 8 : 3)
+        .padding(.trailing, dotOnRight ? 3 : 8)
+        .padding(.vertical, 3)
+        .background(
+            Capsule()
+                .fill(color)
+                .overlay(
+                    // Strokes get a thin light ring so they stand out in the history
+                    Capsule().stroke(Color.white.opacity(entry.isStroke ? 0.7 : 0), lineWidth: 1)
+                )
+        )
+    }
+
+    private func dot(color: Color) -> some View {
+        Circle()
+            .fill(Color.white)
+            .frame(width: dotSize, height: dotSize)
+            .overlay(
+                Circle()
+                    .fill(color)
+                    .frame(width: 5, height: 5)
+            )
+    }
+
+    private static func color(for player: Player) -> Color {
+        player == .player1 ? AppColors.warmOrange : AppColors.steelBlue
     }
 }
 

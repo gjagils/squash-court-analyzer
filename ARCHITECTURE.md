@@ -25,9 +25,11 @@ SwiftData remains the primary store. CloudKit database sync is disabled intentio
 
 ## Domain rules
 
-`ScoringEngine` owns the pure scoring rules. UI code and persistence models should not duplicate those rules. Add new rule behavior to the engine with tests first.
+`ScoringEngine` owns the pure scoring rules (11 points, win by 2). UI code and persistence models should not duplicate those rules; `Game` and `RefereeMatch` both delegate to it. Add new rule behavior to the engine with tests first.
+
+`RefereeMatch` owns the service rules for referee mode: a server who wins the rally alternates service box, a hand-out puts the new server in the right box (the referee can correct this with the side chips), and the winner of a game serves first in the next game. Every rally won is recorded in `pointHistory`, which drives the scoring line between the two players.
 
 ## Tests
 
-`SquashAnalyzerTests` currently covers game completion, extension scoring, service/undo, unforced-error entry, empty statistics, repository upsert/recovery and backup checksum rejection.
+`SquashAnalyzerTests` currently covers game completion, extension scoring, service/undo, unforced-error entry, empty statistics, repository upsert/recovery, backup checksum rejection, and the referee service rules (box alternation, hand-out, side override, undo, next-game server).
 

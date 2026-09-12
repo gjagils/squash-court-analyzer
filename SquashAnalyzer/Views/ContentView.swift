@@ -85,6 +85,11 @@ struct ContentView: View {
                         abandonCurrentMatch()
                         match = Match()
                         showingSetup = true
+                    },
+                    onUndo: {
+                        // Reset status first: the points-count change below re-persists the match.
+                        match.status = .inProgress
+                        withAnimation { currentGame.undoLastPoint() }
                     }
                 )
                 .onAppear {
@@ -210,10 +215,14 @@ struct ContentView: View {
                 }
                 self.recoverableMatch = nil
             }
-            Button("Niet hervatten", role: .destructive) {
+            Button("Afbreken", role: .destructive) {
                 if let recoverableMatch {
                     try? SwiftDataMatchRepository(context: modelContext).markAbandoned(recoverableMatch)
                 }
+                self.recoverableMatch = nil
+            }
+            // Explicit cancel role, otherwise SwiftUI adds an untranslated "Cancel" button
+            Button("Later", role: .cancel) {
                 self.recoverableMatch = nil
             }
         } message: {
@@ -290,25 +299,24 @@ struct ContentView: View {
                     .padding(.horizontal, 20)
 
                 // Rally timer and instruction text
-                HStack {
-                    // Rally timer
-                    if !currentGame.isGameOver && !showingSetup {
-                        RallyTimerView(elapsedTime: rallyElapsedTime)
-                    }
+                HStack(spacing: 8) {
+                    RallyTimerView(elapsedTime: rallyElapsedTime)
+                        .opacity(currentGame.isGameOver || showingSetup ? 0 : 1)
 
-                    Spacer()
+                    Spacer(minLength: 0)
 
                     instructionText
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
 
-                    Spacer()
+                    Spacer(minLength: 0)
 
-                    // Invisible spacer to balance the timer
-                    if !currentGame.isGameOver && !showingSetup {
-                        RallyTimerView(elapsedTime: rallyElapsedTime)
-                            .opacity(0)
-                    }
+                    // Balances the timer so the instruction stays centred
+                    RallyTimerView(elapsedTime: rallyElapsedTime)
+                        .hidden()
                 }
                 .padding(.horizontal, 24)
+                .frame(height: 34)
 
                 // Court view
                 CourtView(game: currentGame) { zone in
@@ -325,8 +333,9 @@ struct ContentView: View {
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
 
-                // Bottom info row
-                bottomInfoRow
+                // Let / Undo row + last point
+                bottomActions
+                    .padding(.horizontal, 24)
 
                 Spacer(minLength: 0)
             }
@@ -395,65 +404,53 @@ struct ContentView: View {
         .transition(.opacity)
     }
 
-    // MARK: - Header View
+    // MARK: - Header View (same layout as the referee top bar)
     private var headerView: some View {
-        HStack {
-            // History button
-            Button(action: { showingHistory = true }) {
-                Image(systemName: "clock.arrow.circlepath")
-                    .font(.system(size: 20))
-                    .foregroundColor(AppColors.textSecondary)
-            }
-
-            // Stop match button
-            Button(action: { showingCancelConfirm = true }) {
-                Image(systemName: "xmark.circle")
-                    .font(.system(size: 20))
-                    .foregroundColor(AppColors.textSecondary)
-            }
-            .padding(.leading, 8)
-
-            // Previous game analysis button
-            if match.currentGameIndex > 0 && !currentGame.isGameOver {
-                Button(action: { showingPreviousGameAnalysis = true }) {
-                    Image(systemName: "chart.bar.xaxis")
-                        .font(.system(size: 20))
-                        .foregroundColor(AppColors.accentGold)
-                }
-                .padding(.leading, 8)
-            }
-
-            Spacer()
-
-            Text("SQUASH ANALYZER")
-                .font(AppFonts.title(18))
+        ZStack {
+            Text("COACH")
+                .font(AppFonts.title(14))
                 .foregroundColor(AppColors.textPrimary)
-                .tracking(3)
+                .tracking(2)
 
-            Spacer()
-
-            // Undo button
-            Button(action: {
-                withAnimation {
-                    currentGame.undoLastPoint()
-                }
-            }) {
-                Image(systemName: "arrow.uturn.backward.circle")
-                    .font(.system(size: 20))
-                    .foregroundColor(currentGame.canUndo ? AppColors.textSecondary : AppColors.textMuted)
-            }
-            .disabled(!currentGame.canUndo)
-
-            // Settings button
-            Button(action: { showingSettings = true }) {
-                Image(systemName: "gearshape")
-                    .font(.system(size: 20))
+            HStack {
+                // Stop match
+                Button(action: { showingCancelConfirm = true }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "xmark")
+                        Text("Stop")
+                    }
+                    .font(AppFonts.body(14))
                     .foregroundColor(AppColors.textSecondary)
+                }
+
+                Spacer()
+
+                HStack(spacing: 16) {
+                    // Previous game analysis
+                    if match.currentGameIndex > 0 && !currentGame.isGameOver {
+                        Button(action: { showingPreviousGameAnalysis = true }) {
+                            Image(systemName: "chart.bar.xaxis")
+                                .font(.system(size: 18))
+                                .foregroundColor(AppColors.accentGold)
+                        }
+                    }
+
+                    Button(action: { showingHistory = true }) {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.system(size: 18))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+
+                    Button(action: { showingSettings = true }) {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 18))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                }
             }
-            .padding(.leading, 8)
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 8)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
     }
 
     // MARK: - Instruction Text
@@ -469,7 +466,7 @@ struct ContentView: View {
                     .font(AppFonts.body(14))
                     .foregroundColor(currentGame.selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
             case .selectZone:
-                Text("Tik op de baan waar het punt gescoord werd")
+                Text("Tik op de baan waar het punt viel")
                     .font(AppFonts.body(14))
                     .foregroundColor(currentGame.selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
             case .selectShot:
@@ -480,70 +477,68 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Bottom Info Row
-    private var bottomInfoRow: some View {
-        HStack(spacing: 16) {
-            // Let button
-            if currentGame.selectedZone == nil && !currentGame.isGameOver {
-                Button(action: {
-                    showingLetSelector = true
-                }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.counterclockwise")
-                        Text("Let")
-                    }
-                    .font(AppFonts.caption(12))
-                    .foregroundColor(AppColors.accentGold)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(
-                        Capsule()
-                            .fill(AppColors.accentGold.opacity(0.15))
-                    )
-                }
-            }
+    // MARK: - Bottom actions (referee-style outlined buttons)
+    private var bottomActions: some View {
+        let selecting = currentGame.selectedZone != nil
+        let letDisabled = selecting || currentGame.isGameOver
+        let undoDisabled = selecting || !currentGame.canUndo
 
-            // Undo button (when there are points)
-            if currentGame.canUndo && currentGame.selectedZone == nil {
-                Button(action: {
-                    withAnimation {
-                        currentGame.undoLastPoint()
-                    }
-                }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.uturn.backward")
-                        Text("Ongedaan")
-                    }
-                    .font(AppFonts.caption(12))
-                    .foregroundColor(AppColors.textSecondary)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(
-                        Capsule()
-                            .fill(Color.white.opacity(0.08))
-                    )
+        return VStack(spacing: 6) {
+            HStack(spacing: 8) {
+                coachActionButton("LET CALL", icon: "arrow.counterclockwise",
+                                  color: AppColors.warmOrange, disabled: letDisabled) {
+                    showingLetSelector = true
+                }
+                coachActionButton("UNDO", icon: "arrow.uturn.backward",
+                                  color: AppColors.textPrimary, disabled: undoDisabled) {
+                    withAnimation { currentGame.undoLastPoint() }
                 }
             }
 
             // Last point indicator
-            if let lastPoint = currentGame.lastPoint, currentGame.selectedPlayer == nil {
-                HStack(spacing: 6) {
+            HStack(spacing: 6) {
+                if let lastPoint = currentGame.lastPoint, currentGame.selectedPlayer == nil {
                     Circle()
                         .fill(lastPoint.scorer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
-                        .frame(width: 8, height: 8)
+                        .frame(width: 6, height: 6)
                     if let zone = lastPoint.zone, let shot = lastPoint.shotType {
                         Text("\(currentGame.name(for: lastPoint.scorer)): \(zone.shortName) (\(shot.shortName)) · \(lastPoint.pointType.shortName)")
-                            .font(AppFonts.caption(11))
-                            .foregroundColor(AppColors.textMuted)
                     } else {
                         Text("\(currentGame.name(for: lastPoint.scorer)): \(lastPoint.pointType.shortName)")
-                            .font(AppFonts.caption(11))
-                            .foregroundColor(AppColors.textMuted)
                     }
                 }
             }
+            .font(AppFonts.caption(11))
+            .foregroundColor(AppColors.textMuted)
+            .lineLimit(1)
+            .frame(height: 16)
         }
-        .frame(height: 36)
+    }
+
+    private func coachActionButton(_ title: String, icon: String, color: Color, disabled: Bool,
+                                   action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .semibold))
+                Text(title)
+                    .font(AppFonts.label(13))
+                    .tracking(1)
+            }
+            .foregroundColor(disabled ? AppColors.textMuted : color)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(color.opacity(disabled ? 0.04 : 0.10))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(color.opacity(disabled ? 0.08 : 0.3), lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+        .disabled(disabled)
     }
 
     // MARK: - Handlers
@@ -593,23 +588,26 @@ struct RallyTimerView: View {
     private var formattedTime: String {
         let minutes = Int(elapsedTime) / 60
         let seconds = Int(elapsedTime) % 60
-        return String(format: "%d:%02d", minutes, seconds)
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 6) {
             Image(systemName: "timer")
                 .font(.system(size: 12))
-            Text(formattedTime)
-                .font(AppFonts.mono(14))
+                .foregroundColor(AppColors.accentGold.opacity(0.5))
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text("RALLY")
+                    .font(AppFonts.caption(8))
+                    .foregroundColor(AppColors.textMuted)
+                    .tracking(1)
+                Text(formattedTime)
+                    .font(AppFonts.score(14))
+                    .foregroundColor(AppColors.textSecondary)
+                    .monospacedDigit()
+            }
         }
-        .foregroundColor(AppColors.textMuted)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 4)
-        .background(
-            Capsule()
-                .fill(Color.white.opacity(0.05))
-        )
     }
 }
 
@@ -951,6 +949,7 @@ struct GameOverOverlay: View {
     let onNextGame: () -> Void
     let onNewMatch: () -> Void
     var onStop: (() -> Void)? = nil
+    var onUndo: (() -> Void)? = nil
 
     var body: some View {
         ZStack {
@@ -959,10 +958,12 @@ struct GameOverOverlay: View {
 
             VStack(spacing: 24) {
                 // Title
-                Text(match.isMatchOver ? "WEDSTRIJD VOORBIJ" : "GAME OVER")
-                    .font(AppFonts.title(26))
+                Text(match.isMatchOver ? "WEDSTRIJD KLAAR" : "GAME \(match.currentGameIndex + 1) KLAAR")
+                    .font(AppFonts.title(22))
                     .foregroundColor(AppColors.textPrimary)
-                    .tracking(4)
+                    .tracking(3)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
 
                 // Winner announcement
                 if let winner = game.winner {
@@ -1028,14 +1029,18 @@ struct GameOverOverlay: View {
                             onNextGame()
                         }
 
-                        // Stop button (mid-match)
-                        if let stop = onStop {
-                            Button(action: stop) {
-                                Text("Stop wedstrijd")
-                                    .font(AppFonts.caption(13))
-                                    .foregroundColor(AppColors.textMuted)
-                                    .padding(.top, 4)
-                            }
+                    }
+
+                    if let undo = onUndo {
+                        OverlayUndoButton(action: undo)
+                    }
+
+                    // Stop button (mid-match)
+                    if !match.isMatchOver, let stop = onStop {
+                        Button(action: stop) {
+                            Text("Stop wedstrijd")
+                                .font(AppFonts.caption(13))
+                                .foregroundColor(AppColors.textMuted)
                         }
                     }
                 }

@@ -5,87 +5,72 @@ struct ScoreboardView: View {
     var match: Match? = nil
 
     var body: some View {
-        HardwarePanel {
-            VStack(spacing: 0) {
-                // Header with game count if in match
-                headerSection
-
-                // Main scoreboard content
-                HStack(alignment: .center, spacing: 12) {
-                    // Player names with server indicator
-                    playerNamesSection
-
-                    Spacer()
-
-                    // LED Score display
-                    scoreDisplay
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 14)
+        SportsPanel {
+            HStack(alignment: .top, spacing: 8) {
+                playerScore(.player1)
+                gameColumn
+                playerScore(.player2)
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
         }
     }
 
-    // MARK: - Header Section
-    private var headerSection: some View {
-        HStack {
-            Text("SQUASH")
+    // MARK: - Game / games column (mirrors the referee game header)
+    private var gameColumn: some View {
+        VStack(spacing: 3) {
+            Text("GAME \((match?.currentGameIndex ?? 0) + 1)")
                 .font(AppFonts.caption(10))
                 .foregroundColor(AppColors.textMuted)
                 .tracking(2)
 
-            if let match = match {
-                Spacer()
-                // Games score (e.g., "2 - 1")
-                Text("GAMES: \(match.player1GamesWon) - \(match.player2GamesWon)")
-                    .font(AppFonts.caption(9))
-                    .foregroundColor(AppColors.textMuted)
-                    .tracking(1)
-            }
+            Text("\(match?.player1GamesWon ?? 0) – \(match?.player2GamesWon ?? 0)")
+                .font(AppFonts.score(22))
+                .foregroundColor(AppColors.textPrimary)
+                .contentTransition(.numericText())
+
+            Text("GAMES")
+                .font(AppFonts.caption(8))
+                .foregroundColor(AppColors.textMuted)
+                .tracking(1.5)
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 10)
-        .padding(.bottom, 6)
+        .frame(width: 84)
+        .padding(.top, 6)
     }
 
-    // MARK: - Player Names
-    private var playerNamesSection: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Player 1
-            HStack(spacing: 8) {
-                ServerIndicator(isServing: game.currentServer == .player1)
-                Text(game.player1Name.uppercased())
-                    .font(AppFonts.playerName(15))
-                    .foregroundColor(AppColors.textPrimary)
-                    .lineLimit(1)
+    // MARK: - Player column (compact version of the referee player column)
+    private func playerScore(_ player: Player) -> some View {
+        let color = player == .player1 ? AppColors.warmOrange : AppColors.steelBlue
+        let score = player == .player1 ? game.player1Score : game.player2Score
+        let isServing = game.currentServer == player
+
+        return VStack(spacing: 4) {
+            ZStack {
+                Circle()
+                    .stroke(color.opacity(isServing ? 1.0 : 0.4), lineWidth: 2)
+                    .frame(width: 34, height: 34)
+                Image(systemName: "person.fill")
+                    .font(.system(size: 14))
+                    .foregroundColor(color.opacity(isServing ? 1.0 : 0.4))
             }
 
-            // Player 2
-            HStack(spacing: 8) {
-                ServerIndicator(isServing: game.currentServer == .player2)
-                Text(game.player2Name.uppercased())
-                    .font(AppFonts.playerName(15))
-                    .foregroundColor(AppColors.textPrimary)
-                    .lineLimit(1)
-            }
+            Text(game.name(for: player))
+                .font(AppFonts.label(13))
+                .foregroundColor(isServing ? color : AppColors.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            Text("\(score)")
+                .font(.system(size: 52, weight: .bold, design: .rounded))
+                .foregroundColor(isServing ? color : AppColors.textPrimary)
+                .contentTransition(.numericText())
         }
-    }
-
-    // MARK: - Score Display
-    private var scoreDisplay: some View {
-        HStack(spacing: 6) {
-            // Player 1 score
-            LEDScoreDisplay(score: game.player1Score, size: 44)
-
-            // Colon separator
-            LEDColon(size: 44)
-
-            // Player 2 score
-            LEDScoreDisplay(score: game.player2Score, size: 44)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(LEDDisplayBackground())
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 4)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(isServing ? color.opacity(0.06) : Color.clear)
+        )
     }
 }
 

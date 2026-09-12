@@ -63,6 +63,15 @@ struct AppColors {
     static let warmNeutralDark = Color(red: 0.22, green: 0.17, blue: 0.11)
 
     static let serverIndicator = Color(red: 1.0, green: 0.60, blue: 0.15)
+
+    // MARK: Cool accents – player 2 column of the referee action grid
+    // (sky → blue → indigo mirrors gold → orange → red on the player 1 side)
+    static let coolSky    = Color(red: 0.56, green: 0.74, blue: 0.92)
+    static let coolBlue   = Color(red: 0.42, green: 0.58, blue: 0.82)
+    static let coolIndigo = Color(red: 0.55, green: 0.47, blue: 0.90)
+
+    /// Stroke / penalty on the player 1 side
+    static let warmRed = Color(red: 0.85, green: 0.30, blue: 0.30)
 }
 
 // MARK: - Typography
@@ -105,6 +114,34 @@ struct AppFonts {
     /// Monospace font for timers
     static func mono(_ size: CGFloat = 14) -> Font {
         .system(size: size, weight: .medium, design: .monospaced)
+    }
+}
+
+// MARK: - Referee-style surfaces
+
+/// The calm, dark card surface used by both referee and coach flows.
+struct SportsPanel<Content: View>: View {
+    var accent: Color? = nil
+    let content: Content
+
+    init(accent: Color? = nil, @ViewBuilder content: () -> Content) {
+        self.accent = accent
+        self.content = content()
+    }
+
+    var body: some View {
+        content
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.white.opacity(0.055))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(
+                                accent?.opacity(0.28) ?? Color.white.opacity(0.10),
+                                lineWidth: 1
+                            )
+                    )
+            )
     }
 }
 

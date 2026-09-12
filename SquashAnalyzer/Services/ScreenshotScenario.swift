@@ -69,13 +69,22 @@ enum ScreenshotScenario: String, CaseIterable {
         return match
     }
 
-    // MARK: - Team import from a host path (simulator only), e.g. `-importTeam /path/team.zip`
+    // MARK: - Team import at launch: `-importTeam /host/path/team.zip` (simulator) or
+    // `-importTeam team.zip` relative to the app's Documents folder (device via devicectl copy)
 
     @MainActor
     static func importTeamIfRequested(context: ModelContext) {
         let args = CommandLine.arguments
-        guard let i = args.firstIndex(of: "-importTeam"), i + 1 < args.count,
-              let data = FileManager.default.contents(atPath: args[i + 1]) else { return }
+        guard let i = args.firstIndex(of: "-importTeam"), i + 1 < args.count else { return }
+        var path = args[i + 1]
+        if !path.hasPrefix("/"),
+           let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            path = documents.appendingPathComponent(path).path
+        }
+        guard let data = FileManager.default.contents(atPath: path) else {
+            print("[importTeam] no file at \(path)")
+            return
+        }
         do {
             let result = try TeamImportService.importTeam(zipData: data, context: context)
             print("[importTeam] \(result.summary)")

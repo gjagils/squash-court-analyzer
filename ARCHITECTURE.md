@@ -16,7 +16,7 @@ SwiftData remains the primary store. CloudKit database sync is disabled intentio
 
 ## Persistence safety
 
-- `SquashAnalyzerSchemaV1` (frozen nested copies of the models as shipped in 2.2 build 5) is the baseline `VersionedSchema`; `SquashAnalyzerSchemaV2` (adds `SavedPlayer.photoData`) references the live classes and is the current schema (`SquashAnalyzerCurrentSchema`).
+- `SquashAnalyzerSchemaV0` is a frozen copy of the models as shipped in App Store 2.0 (build 8, March 2026; unversioned `Schema([...])`). SwiftData matches an existing store to a schema by model shape, so the plan must start there or 2.0 users get "unknown model version" and the in-memory fallback. `SquashAnalyzerSchemaV1` (TestFlight 2.2 build 5: SavedMatch status/updatedAt/coaching fields) is frozen too; `SquashAnalyzerSchemaV2` (adds `SavedPlayer.photoData`) references the live classes and is the current schema (`SquashAnalyzerCurrentSchema`). `MigrationTests` writes a real 2.0-style store and opens it with the plan.
 - Future model changes must add a new `VersionedSchema` (turning the previous current one into frozen nested copies) and a `MigrationStage`; do not edit an already shipped historical schema definition.
 - A failed store open never deletes the store. Store files are copied to `Application Support/Recovery/<timestamp>` and the app starts with a clearly disclosed in-memory fallback.
 - Full backups use a versioned envelope containing schema version, app version and a SHA-256 checksum.

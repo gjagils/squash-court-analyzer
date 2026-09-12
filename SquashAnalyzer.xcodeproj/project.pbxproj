@@ -50,6 +50,7 @@ B1000031 /* ScreenshotScenario.swift in Sources */ = {isa = PBXBuildFile; fileRe
 		B1000003 /* PersistenceSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000003 /* PersistenceSchema.swift */; };
 		B1000010 /* ScoringAndPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000010 /* ScoringAndPersistenceTests.swift */; };
 		B1000021 /* RefereeMatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000021 /* RefereeMatchTests.swift */; };
+		B1000023 /* MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000023 /* MigrationTests.swift */; };
 		B1000022 /* TeamImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000022 /* TeamImportTests.swift */; };
 		F8FD9EFD2F5D73C5008892F1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F8FD9EFC2F5D73C5008892F1 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
@@ -109,6 +110,7 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 		B2000003 /* PersistenceSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceSchema.swift; sourceTree = "<group>"; };
 		B2000010 /* ScoringAndPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoringAndPersistenceTests.swift; sourceTree = "<group>"; };
 		B2000021 /* RefereeMatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeMatchTests.swift; sourceTree = "<group>"; };
+		B2000023 /* MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationTests.swift; sourceTree = "<group>"; };
 		B2000022 /* TeamImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamImportTests.swift; sourceTree = "<group>"; };
 		B3000010 /* SquashAnalyzerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SquashAnalyzerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8FD9EFB2F5D5D94008892F1 /* SquashAnalyzer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SquashAnalyzer.entitlements; sourceTree = "<group>"; };
@@ -230,6 +232,7 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 			children = (
 				B2000010 /* ScoringAndPersistenceTests.swift */,
 				B2000021 /* RefereeMatchTests.swift */,
+				B2000023 /* MigrationTests.swift */,
 				B2000022 /* TeamImportTests.swift */,
 			);
 			path = SquashAnalyzerTests;
@@ -384,6 +387,7 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 			files = (
 				B1000010 /* ScoringAndPersistenceTests.swift in Sources */,
 				B1000021 /* RefereeMatchTests.swift in Sources */,
+				B1000023 /* MigrationTests.swift in Sources */,
 				B1000022 /* TeamImportTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

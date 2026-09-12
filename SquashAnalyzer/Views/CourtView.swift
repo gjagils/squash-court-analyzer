@@ -197,19 +197,19 @@ struct CourtView: View {
             }
             .stroke(lineColor, lineWidth: lineWidth)
 
-            // Left service box (L-shape only, no arc)
+            // Left service box (L-shape only, no arc) — against short line
             Path { path in
-                path.move(to: CGPoint(x: 0, y: size.height - serviceBoxPixels))
-                path.addLine(to: CGPoint(x: serviceBoxPixels, y: size.height - serviceBoxPixels))
-                path.addLine(to: CGPoint(x: serviceBoxPixels, y: size.height))
+                path.move(to: CGPoint(x: 0, y: shortLineY + serviceBoxPixels))
+                path.addLine(to: CGPoint(x: serviceBoxPixels, y: shortLineY + serviceBoxPixels))
+                path.addLine(to: CGPoint(x: serviceBoxPixels, y: shortLineY))
             }
             .stroke(lineColor, lineWidth: lineWidth)
 
-            // Right service box (L-shape only, no arc)
+            // Right service box (L-shape only, no arc) — against short line
             Path { path in
-                path.move(to: CGPoint(x: size.width, y: size.height - serviceBoxPixels))
-                path.addLine(to: CGPoint(x: size.width - serviceBoxPixels, y: size.height - serviceBoxPixels))
-                path.addLine(to: CGPoint(x: size.width - serviceBoxPixels, y: size.height))
+                path.move(to: CGPoint(x: size.width, y: shortLineY + serviceBoxPixels))
+                path.addLine(to: CGPoint(x: size.width - serviceBoxPixels, y: shortLineY + serviceBoxPixels))
+                path.addLine(to: CGPoint(x: size.width - serviceBoxPixels, y: shortLineY))
             }
             .stroke(lineColor, lineWidth: lineWidth)
         }

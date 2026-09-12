@@ -23,7 +23,7 @@ enum ServerSide: String {
 /// A single undo-able action during a referee game
 private enum RefereeAction {
     case point(prevServer: Player, prevSide: ServerSide, prevP1Score: Int, prevP2Score: Int)
-    case sideOverride(prevSide: ServerSide)
+    case sideOverride(prevSide: ServerSide, prevPreferredSide: ServerSide?)
 }
 
 /// One rally won, as shown in the scoring timeline between the two players
@@ -67,6 +67,12 @@ class RefereeMatch {
 
     // Rallies won in the current game, oldest first (drives the scoring timeline)
     var pointHistory: [RefereePointEntry] = []
+
+    // Box a player starts serving from after a hand-out or at the start of a game.
+    // Set by tapping Links/Rechts (e.g. a left-hander who always starts left);
+    // nil means the default right box. Persists for the whole match.
+    var player1PreferredSide: ServerSide? = nil
+    var player2PreferredSide: ServerSide? = nil
 
     // Let / stroke flash
     var lastCallText: String? = nil
@@ -121,6 +127,15 @@ class RefereeMatch {
         player == .player1 ? player1Name : player2Name
     }
 
+    func preferredSide(for player: Player) -> ServerSide? {
+        player == .player1 ? player1PreferredSide : player2PreferredSide
+    }
+
+    /// Box a player serves from when they take over service
+    private func handOutSide(for player: Player) -> ServerSide {
+        preferredSide(for: player) ?? .right
+    }
+
     // MARK: - Actions
 
     func awardPoint(to scorer: Player, isStroke: Bool = false) {
@@ -136,13 +151,13 @@ class RefereeMatch {
         if scorer == .player1 { player1Score += 1 } else { player2Score += 1 }
 
         // Service rule: the server who wins a rally keeps serving from the other box.
-        // On a hand-out the new server starts from the right box; the referee can
-        // correct this with the side chips if the player chooses the left box.
+        // On a hand-out the new server starts from their preferred box (right unless
+        // the referee tapped Links/Rechts for that player earlier in the match).
         if scorer == currentServer {
             serverSide = serverSide.opposite
         } else {
             currentServer = scorer
-            serverSide = .right
+            serverSide = handOutSide(for: scorer)
         }
 
         let scorerScore = scorer == .player1 ? player1Score : player2Score
@@ -156,15 +171,21 @@ class RefereeMatch {
         lastCallText = nil
     }
 
-    /// Correct the box the current server serves from (e.g. after a hand-out the
-    /// player chose the left box). Alternation continues from the corrected box.
+    /// Correct the box the current server serves from and remember it as that
+    /// player's hand-out box for the rest of the match. Alternation continues
+    /// from the corrected box.
     func overrideSide(to side: ServerSide) {
         guard !isGameOver, side != serverSide else { return }
-        undoStack.append(.sideOverride(prevSide: serverSide))
+        undoStack.append(.sideOverride(prevSide: serverSide, prevPreferredSide: preferredSide(for: currentServer)))
         serverSide = side
+        setPreferredSide(side, for: currentServer)
         if let last = pointHistory.last, last.scorer == currentServer {
             pointHistory[pointHistory.count - 1].side = side
         }
+    }
+
+    private func setPreferredSide(_ side: ServerSide?, for player: Player) {
+        if player == .player1 { player1PreferredSide = side } else { player2PreferredSide = side }
     }
 
     func callLet() {
@@ -192,8 +213,9 @@ class RefereeMatch {
             currentServer = prevServer
             serverSide = prevSide
             _ = pointHistory.popLast()
-        case .sideOverride(let prevSide):
+        case .sideOverride(let prevSide, let prevPreferredSide):
             serverSide = prevSide
+            setPreferredSide(prevPreferredSide, for: currentServer)
             if let last = pointHistory.last, last.scorer == currentServer {
                 pointHistory[pointHistory.count - 1].side = prevSide
             }
@@ -217,7 +239,7 @@ class RefereeMatch {
         lastCallText = nil
         // The winner of the previous game serves first in the next game.
         currentServer = winner
-        serverSide = .right
+        serverSide = handOutSide(for: winner)
     }
 
     // MARK: - Export

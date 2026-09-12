@@ -38,6 +38,35 @@ final class RefereeMatchTests: XCTestCase {
         XCTAssertEqual(match.pointHistory.last?.label, "2R")
     }
 
+    func testOverrideBecomesThatPlayersHandOutBoxForTheMatch() {
+        let match = makeMatch()                 // A serves, right
+        match.overrideSide(to: .left)           // left-handed A starts left
+        XCTAssertEqual(match.preferredSide(for: .player1), .left)
+        XCTAssertNil(match.preferredSide(for: .player2))
+
+        match.awardPoint(to: .player1)          // A keeps serving, alternates to right
+        XCTAssertEqual(match.serverSide, .right)
+        match.awardPoint(to: .player2)          // hand-out to B: B has no preference
+        XCTAssertEqual(match.serverSide, .right)
+        match.awardPoint(to: .player1)          // hand-out back to A: starts left again
+        XCTAssertEqual(match.currentServer, .player1)
+        XCTAssertEqual(match.serverSide, .left)
+        XCTAssertEqual(match.pointHistory.last?.label, "2L")
+    }
+
+    func testPreferredBoxIsUsedWhenWinnerServesNextGame() {
+        let match = makeMatch(startingServer: .player1)
+        match.awardPoint(to: .player2)          // B takes service
+        match.overrideSide(to: .left)           // B prefers left
+        for _ in 0..<10 { match.awardPoint(to: .player2) }
+        XCTAssertEqual(match.currentGameWinner, .player2)
+
+        match.confirmNextGame()
+        XCTAssertEqual(match.currentServer, .player2)
+        XCTAssertEqual(match.serverSide, .left)
+        XCTAssertEqual(match.preferredSide(for: .player2), .left)
+    }
+
     func testPointHistoryRecordsScoreAndBoxPerRally() {
         let match = makeMatch()
         match.awardPoint(to: .player1)
@@ -58,6 +87,7 @@ final class RefereeMatchTests: XCTestCase {
 
         match.undo()                            // undo override
         XCTAssertEqual(match.serverSide, .right)
+        XCTAssertNil(match.preferredSide(for: .player2))
         XCTAssertEqual(match.pointHistory.last?.label, "1R")
 
         match.undo()                            // undo B's point

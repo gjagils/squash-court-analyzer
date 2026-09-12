@@ -202,8 +202,10 @@ struct RefereeView: View {
                     .tracking(1)
 
                 HStack(spacing: 6) {
-                    sideChip("Links", side: .left, active: match.serverSide == .left, color: color)
-                    sideChip("Rechts", side: .right, active: match.serverSide == .right, color: color)
+                    sideChip("Links", side: .left, active: match.serverSide == .left,
+                             color: color, pinned: match.preferredSide(for: player) == .left)
+                    sideChip("Rechts", side: .right, active: match.serverSide == .right,
+                             color: color, pinned: match.preferredSide(for: player) == .right)
                 }
             }
             .opacity(isServer ? 1 : 0)
@@ -220,11 +222,18 @@ struct RefereeView: View {
         .background(isServer ? color.opacity(0.05) : Color.clear)
     }
 
-    private func sideChip(_ label: String, side: ServerSide, active: Bool, color: Color) -> some View {
+    /// `pinned` marks the box this player starts from after every hand-out
+    private func sideChip(_ label: String, side: ServerSide, active: Bool, color: Color, pinned: Bool) -> some View {
         Button(action: { withAnimation(.easeInOut(duration: 0.15)) { match.overrideSide(to: side) } }) {
-            Text(label)
-                .font(AppFonts.label(12))
-                .foregroundColor(active ? AppColors.backgroundDark : color.opacity(0.4))
+            HStack(spacing: 3) {
+                if pinned {
+                    Image(systemName: "pin.fill")
+                        .font(.system(size: 7))
+                }
+                Text(label)
+                    .font(AppFonts.label(12))
+            }
+            .foregroundColor(active ? AppColors.backgroundDark : color.opacity(0.4))
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(

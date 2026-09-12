@@ -147,3 +147,6 @@ xcuserdata/
 DerivedData/
 build/
 *.xcresult
+
+# App Store screenshots are regenerated with scripts/screenshots.sh
+screenshots/

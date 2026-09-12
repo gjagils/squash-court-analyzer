@@ -41,6 +41,7 @@
 		A1000034 /* RefereeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000034 /* RefereeView.swift */; };
 		A1000035 /* SavedRefereeMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000035 /* SavedRefereeMatch.swift */; };
 		B1000001 /* ScoringEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000001 /* ScoringEngine.swift */; };
+B1000031 /* ScreenshotScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000031 /* ScreenshotScenario.swift */; };
 		B1000002 /* MatchRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000002 /* MatchRepository.swift */; };
 		B1000003 /* PersistenceSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000003 /* PersistenceSchema.swift */; };
 		B1000010 /* ScoringAndPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000010 /* ScoringAndPersistenceTests.swift */; };
@@ -94,6 +95,7 @@
 		A2000035 /* SavedRefereeMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedRefereeMatch.swift; sourceTree = "<group>"; };
 		A3000001 /* SquashAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SquashAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2000001 /* ScoringEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoringEngine.swift; sourceTree = "<group>"; };
+B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotScenario.swift; sourceTree = "<group>"; };
 		B2000002 /* MatchRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchRepository.swift; sourceTree = "<group>"; };
 		B2000003 /* PersistenceSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceSchema.swift; sourceTree = "<group>"; };
 		B2000010 /* ScoringAndPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoringAndPersistenceTests.swift; sourceTree = "<group>"; };
@@ -198,6 +200,7 @@
 			isa = PBXGroup;
 			children = (
 				B2000001 /* ScoringEngine.swift */,
+				B2000031 /* ScreenshotScenario.swift */,
 				B2000002 /* MatchRepository.swift */,
 				B2000003 /* PersistenceSchema.swift */,
 				A2000024 /* OpenAIService.swift */,
@@ -350,6 +353,7 @@
 				A1000034 /* RefereeView.swift in Sources */,
 				A1000035 /* SavedRefereeMatch.swift in Sources */,
 				B1000001 /* ScoringEngine.swift in Sources */,
+				B1000031 /* ScreenshotScenario.swift in Sources */,
 				B1000002 /* MatchRepository.swift in Sources */,
 				B1000003 /* PersistenceSchema.swift in Sources */,
 			);

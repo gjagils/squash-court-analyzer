@@ -168,6 +168,12 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.25), value: currentGame.scoringStep)
         .onAppear {
             startRallyTimer()
+            #if DEBUG
+            if let scenario = ScreenshotScenario.current {
+                applyScreenshotScenario(scenario)
+                return
+            }
+            #endif
             checkForInterruptedMatch()
             showingStartupPersistenceWarning = startupPersistenceWarning != nil
         }
@@ -242,9 +248,39 @@ struct ContentView: View {
         }
     }
 
+    #if DEBUG
+    // MARK: - App Store screenshots (see scripts/screenshots.sh)
+    private func applyScreenshotScenario(_ scenario: ScreenshotScenario) {
+        switch scenario {
+        case .setup, .referee:
+            break   // handled by MatchSetupView
+        case .coachMatch:
+            match = ScreenshotScenario.makeCoachMatch()
+            showingSetup = false
+        case .coachZone:
+            match = ScreenshotScenario.makeCoachZoneMatch()
+            showingSetup = false
+        case .history:
+            _ = ScreenshotScenario.seededSampleMatch(context: modelContext)
+            showingSetup = false
+            showingHistory = true
+        case .dashboard:
+            guard let saved = ScreenshotScenario.seededSampleMatch(context: modelContext) else { return }
+            let liveMatch = saved.toMatch()
+            savedMatchForAnalysis = liveMatch
+            savedGameForAnalysis = liveMatch.currentGame
+            showingSetup = false
+            showingSavedMatchAnalysis = true
+        }
+    }
+    #endif
+
     // MARK: - Local-first persistence
     private func persistMatch() {
         guard !showingSetup else { return }
+        #if DEBUG
+        if ScreenshotScenario.isActive { return }
+        #endif
         do {
             try SwiftDataMatchRepository(context: modelContext).upsert(match)
         } catch {
@@ -774,6 +810,20 @@ struct MatchSetupView: View {
         .fullScreenCover(item: $createdRefereeMatch) { m in
             RefereeView(match: m) { createdRefereeMatch = nil }
         }
+        #if DEBUG
+        .onAppear {
+            switch ScreenshotScenario.current {
+            case .setup:
+                player1Name = ScreenshotScenario.player1
+                player2Name = ScreenshotScenario.player2
+            case .referee:
+                selectedMode = .referee
+                createdRefereeMatch = ScreenshotScenario.makeRefereeMatch()
+            default:
+                break
+            }
+        }
+        #endif
     }
 
     // ── Mode picker ───────────────────────────────────────────────────────────

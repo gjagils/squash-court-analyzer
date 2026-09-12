@@ -93,8 +93,9 @@ actor OpenAIService {
 
     private func buildPrompt(for game: Game, player: Player, coachingFocus: [String] = [], coachingNotes: String = "") -> String {
         let opponent = player.opponent
-        let playerName = game.name(for: player)
-        let opponentName = game.name(for: opponent)
+        // Never send player names to the external AI provider.
+        let playerName = "Speler"
+        let opponentName = "Tegenstander"
 
         // Gather statistics
         let playerPoints = game.pointsWon(by: player)
@@ -132,13 +133,10 @@ actor OpenAIService {
 
         // Coaching focus section
         var coachingSection = ""
-        if !coachingFocus.isEmpty || !coachingNotes.isEmpty {
-            coachingSection = "\nCOACHING AANDACHTSPUNTEN VOOR \(playerName.uppercased()):"
+        if !coachingFocus.isEmpty {
+            coachingSection = "\nCOACHING AANDACHTSPUNTEN:"
             if !coachingFocus.isEmpty {
                 coachingSection += "\n- Focus: \(coachingFocus.joined(separator: ", "))"
-            }
-            if !coachingNotes.isEmpty {
-                coachingSection += "\n- Notities: \(coachingNotes)"
             }
         }
 

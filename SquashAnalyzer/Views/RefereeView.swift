@@ -9,7 +9,7 @@ struct RefereeView: View {
     @State private var showingNextGameConfirm = false
     @State private var showingMatchOver = false
     @State private var shareItemsToShow: ShareItemsWrapper? = nil
-    @State private var matchSaved = false
+    @State private var savedRefereeMatch: SavedRefereeMatch? = nil
 
     // Timers
     @State private var matchStartTime = Date()
@@ -68,6 +68,10 @@ struct RefereeView: View {
                         match.confirmNextGame()
                         showingNextGameConfirm = false
                     },
+                    onUndo: {
+                        withAnimation(.easeInOut(duration: 0.15)) { match.undo() }
+                        showingNextGameConfirm = false
+                    },
                     onDismiss: { showingNextGameConfirm = false }
                 )
             }
@@ -76,6 +80,12 @@ struct RefereeView: View {
                 RefereeMatchOverOverlay(
                     match: match,
                     onShare: { shareScore(); showingMatchOver = false },
+                    onUndo: {
+                        // The match was auto-saved the moment it ended; take that back too.
+                        unsaveMatch()
+                        withAnimation(.easeInOut(duration: 0.15)) { match.undo() }
+                        showingMatchOver = false
+                    },
                     onDismiss: { onDismiss() }
                 )
             }
@@ -251,6 +261,7 @@ struct RefereeView: View {
 
     // MARK: - Action Grid
 
+    // Left column follows player 1's warm palette, right column player 2's cool palette
     private var actionGrid: some View {
         VStack(spacing: 8) {
             // WON RALLY
@@ -258,7 +269,7 @@ struct RefereeView: View {
                 actionButton("WON RALLY", color: AppColors.accentGold) {
                     withAnimation(.easeInOut(duration: 0.15)) { match.awardPoint(to: .player1) }
                 }
-                actionButton("WON RALLY", color: AppColors.accentGold) {
+                actionButton("WON RALLY", color: AppColors.coolSky) {
                     withAnimation(.easeInOut(duration: 0.15)) { match.awardPoint(to: .player2) }
                 }
             }
@@ -268,17 +279,17 @@ struct RefereeView: View {
                 actionButton("LET CALL", color: AppColors.warmOrange) {
                     match.callLet()
                 }
-                actionButton("LET CALL", color: AppColors.warmOrange) {
+                actionButton("LET CALL", color: AppColors.coolBlue) {
                     match.callLet()
                 }
             }
 
             // STROKE
             HStack(spacing: 8) {
-                actionButton("STROKE", color: Color(red: 0.85, green: 0.3, blue: 0.3)) {
+                actionButton("STROKE", color: AppColors.warmRed) {
                     match.callStroke(to: .player1)
                 }
-                actionButton("STROKE", color: Color(red: 0.85, green: 0.3, blue: 0.3)) {
+                actionButton("STROKE", color: AppColors.coolIndigo) {
                     match.callStroke(to: .player2)
                 }
             }
@@ -400,7 +411,7 @@ struct RefereeView: View {
     // MARK: - Save
 
     private func saveMatchIfComplete() {
-        guard match.isMatchOver, !matchSaved else { return }
+        guard match.isMatchOver, savedRefereeMatch == nil else { return }
         let results = match.allGameResults.map {
             RefereeGameResult(number: $0.number, player1Score: $0.p1, player2Score: $0.p2, winner: $0.winner)
         }
@@ -412,7 +423,14 @@ struct RefereeView: View {
         )
         modelContext.insert(saved)
         try? modelContext.save()
-        matchSaved = true
+        savedRefereeMatch = saved
+    }
+
+    private func unsaveMatch() {
+        guard let saved = savedRefereeMatch else { return }
+        modelContext.delete(saved)
+        try? modelContext.save()
+        savedRefereeMatch = nil
     }
 
     // MARK: - Share
@@ -710,6 +728,7 @@ struct RefereeSetupSheet: View {
 private struct RefereeGameOverOverlay: View {
     let match: RefereeMatch
     let onNextGame: () -> Void
+    let onUndo: () -> Void
     let onDismiss: () -> Void
 
     var body: some View {
@@ -719,9 +738,11 @@ private struct RefereeGameOverOverlay: View {
 
             VStack(spacing: 24) {
                 Text("GAME \(match.currentGameNumber) KLAAR")
-                    .font(AppFonts.title(26))
+                    .font(AppFonts.title(22))
                     .foregroundColor(AppColors.textPrimary)
-                    .tracking(4)
+                    .tracking(3)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
 
                 if let winner = match.currentGameWinner {
                     Text("\(match.name(for: winner)) wint de game!")
@@ -749,11 +770,12 @@ private struct RefereeGameOverOverlay: View {
                         colorDark: AppColors.warmOrangeDark
                     ) { onNextGame() }
 
+                    OverlayUndoButton(action: onUndo)
+
                     Button(action: onDismiss) {
                         Text("Bekijk stand")
                             .font(AppFonts.caption(13))
                             .foregroundColor(AppColors.textMuted)
-                            .padding(.top, 4)
                     }
                 }
                 .padding(.horizontal, 40)
@@ -778,6 +800,7 @@ private struct RefereeGameOverOverlay: View {
 private struct RefereeMatchOverOverlay: View {
     let match: RefereeMatch
     let onShare: () -> Void
+    let onUndo: () -> Void
     let onDismiss: () -> Void
 
     var body: some View {
@@ -787,9 +810,11 @@ private struct RefereeMatchOverOverlay: View {
 
             VStack(spacing: 24) {
                 Text("WEDSTRIJD KLAAR")
-                    .font(AppFonts.title(26))
+                    .font(AppFonts.title(22))
                     .foregroundColor(AppColors.textPrimary)
-                    .tracking(4)
+                    .tracking(3)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
 
                 if let winner = match.matchWinner {
                     Text("🏆 \(match.name(for: winner)) wint!")
@@ -797,7 +822,7 @@ private struct RefereeMatchOverOverlay: View {
                         .foregroundColor(AppColors.accentGold)
                 }
 
-                Text("\(match.player1GamesWon) – \(match.player2GamesWon)")
+                Text("\(match.player1TotalGames) – \(match.player2TotalGames)")
                     .font(.system(size: 64, weight: .bold, design: .rounded))
                     .foregroundColor(AppColors.textPrimary)
 
@@ -819,6 +844,8 @@ private struct RefereeMatchOverOverlay: View {
                         color: AppColors.warmNeutral,
                         colorDark: AppColors.warmNeutralDark
                     ) { onDismiss() }
+
+                    OverlayUndoButton(action: onUndo)
                 }
                 .padding(.horizontal, 40)
             }
@@ -834,6 +861,37 @@ private struct RefereeMatchOverOverlay: View {
             .shadow(color: AppColors.warmOrangeGlow.opacity(0.2), radius: 30, x: 0, y: 10)
             .padding(.horizontal, 24)
         }
+    }
+}
+
+// MARK: - Overlay Undo Button
+
+/// "Undo laatste punt" for game-over / match-over overlays, so a mis-tap on the
+/// final point can still be corrected. Used by referee and coach overlays.
+struct OverlayUndoButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.uturn.backward")
+                    .font(.system(size: 12, weight: .semibold))
+                Text("Undo laatste punt")
+                    .font(AppFonts.label(13))
+            }
+            .foregroundColor(AppColors.textSecondary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white.opacity(0.06))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.14), lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 

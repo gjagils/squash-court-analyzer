@@ -115,6 +115,24 @@ final class RefereeMatchTests: XCTestCase {
         XCTAssertFalse(match.canUndo)
     }
 
+    func testMatchResultCountsTheUnconfirmedFinalGame() {
+        let match = makeMatch()
+        for _ in 0..<2 {
+            for _ in 0..<11 { match.awardPoint(to: .player1) }
+            match.confirmNextGame()
+        }
+        XCTAssertEqual(match.player1GamesWon, 2)
+        XCTAssertFalse(match.isMatchOver)
+
+        for _ in 0..<11 { match.awardPoint(to: .player1) }
+        XCTAssertTrue(match.isMatchOver)
+        XCTAssertEqual(match.matchWinner, .player1)
+        XCTAssertEqual(match.player1TotalGames, 3)
+        XCTAssertEqual(match.player2TotalGames, 0)
+        XCTAssertTrue(match.whatsAppText.contains("(3-0)"))
+        XCTAssertEqual(match.allGameResults.count, 3)
+    }
+
     func testNoPointsAfterGameIsOver() {
         let match = makeMatch()
         for _ in 0..<11 { match.awardPoint(to: .player1) }

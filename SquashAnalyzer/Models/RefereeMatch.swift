@@ -93,15 +93,15 @@ class RefereeMatch {
     var player2GamesWon: Int { completedGames.filter { $0.winner == .player2 }.count }
     var gamesToWin: Int { (bestOf / 2) + 1 }
 
-    // Include the current game's result (when isGameOver) so the match-over check is correct
-    // even before confirmNextGame() is called.
-    private var p1TotalGames: Int { player1GamesWon + (currentGameWinner == .player1 ? 1 : 0) }
-    private var p2TotalGames: Int { player2GamesWon + (currentGameWinner == .player2 ? 1 : 0) }
+    /// Games won including the current game once it is finished. The final game of a
+    /// match is never confirmed via confirmNextGame(), so the match result must use these.
+    var player1TotalGames: Int { player1GamesWon + (currentGameWinner == .player1 ? 1 : 0) }
+    var player2TotalGames: Int { player2GamesWon + (currentGameWinner == .player2 ? 1 : 0) }
 
-    var isMatchOver: Bool { p1TotalGames >= gamesToWin || p2TotalGames >= gamesToWin }
+    var isMatchOver: Bool { player1TotalGames >= gamesToWin || player2TotalGames >= gamesToWin }
     var matchWinner: Player? {
         guard isMatchOver else { return nil }
-        return p1TotalGames > p2TotalGames ? .player1 : .player2
+        return player1TotalGames > player2TotalGames ? .player1 : .player2
     }
 
     /// All game results including the current game (if finished). Used for saving.
@@ -267,9 +267,9 @@ class RefereeMatch {
 
         lines.append("")
         if let winner = matchWinner {
-            lines.append("🏆 Winnaar: \(name(for: winner)) (\(player1GamesWon)-\(player2GamesWon))")
+            lines.append("🏆 Winnaar: \(name(for: winner)) (\(player1TotalGames)-\(player2TotalGames))")
         } else {
-            lines.append("Stand: \(player1Name) \(player1GamesWon) - \(player2GamesWon) \(player2Name)")
+            lines.append("Stand: \(player1Name) \(player1TotalGames) - \(player2TotalGames) \(player2Name)")
         }
 
         return lines.joined(separator: "\n")

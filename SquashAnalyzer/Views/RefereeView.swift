@@ -187,15 +187,7 @@ struct RefereeView: View {
         let score = player == .player1 ? match.player1Score : match.player2Score
 
         return VStack(spacing: 6) {
-            // Avatar circle
-            ZStack {
-                Circle()
-                    .stroke(color.opacity(isServer ? 1.0 : 0.4), lineWidth: 2)
-                    .frame(width: 52, height: 52)
-                Image(systemName: "person.fill")
-                    .font(.system(size: 22))
-                    .foregroundColor(color.opacity(isServer ? 1.0 : 0.4))
-            }
+            PlayerAvatar(name: match.name(for: player), color: color, size: 52, active: isServer)
 
             // Name
             Text(match.name(for: player))

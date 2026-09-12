@@ -16,8 +16,8 @@ SwiftData remains the primary store. CloudKit database sync is disabled intentio
 
 ## Persistence safety
 
-- `SquashAnalyzerSchemaV1` is the baseline `VersionedSchema`.
-- Future model changes must add `SquashAnalyzerSchemaV2` (or later) and a `MigrationStage`; do not edit an already shipped historical schema definition.
+- `SquashAnalyzerSchemaV1` (frozen nested copies of the models as shipped in 2.2 build 5) is the baseline `VersionedSchema`; `SquashAnalyzerSchemaV2` (adds `SavedPlayer.photoData`) references the live classes and is the current schema (`SquashAnalyzerCurrentSchema`).
+- Future model changes must add a new `VersionedSchema` (turning the previous current one into frozen nested copies) and a `MigrationStage`; do not edit an already shipped historical schema definition.
 - A failed store open never deletes the store. Store files are copied to `Application Support/Recovery/<timestamp>` and the app starts with a clearly disclosed in-memory fallback.
 - Full backups use a versioned envelope containing schema version, app version and a SHA-256 checksum.
 - Restore validates and decodes the entire backup before deleting existing records.

@@ -1,0 +1,9 @@
+{
+  "team": "Squash Analyzer testteam",
+  "players": [
+    { "name": "Gerd-Jan van Gils", "photo": "photos/gerd-jan.jpg", "focus": ["Backhand", "Conditie"], "notes": "Linkshandig" },
+    { "name": "Gerrie Ananias", "photo": "photos/gerrie.jpg", "focus": ["Volley"] },
+    { "name": "Niels", "photo": "photos/niels.jpg" },
+    { "name": "Paul" }
+  ]
+}

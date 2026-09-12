@@ -41,11 +41,16 @@
 		A1000034 /* RefereeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000034 /* RefereeView.swift */; };
 		A1000035 /* SavedRefereeMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000035 /* SavedRefereeMatch.swift */; };
 		B1000001 /* ScoringEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000001 /* ScoringEngine.swift */; };
+		B1000044 /* PlayerAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000044 /* PlayerAvatar.swift */; };
+		B1000043 /* TeamImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000043 /* TeamImportService.swift */; };
+		B1000042 /* PlayerPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000042 /* PlayerPhoto.swift */; };
+		B1000041 /* ZipArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000041 /* ZipArchive.swift */; };
 B1000031 /* ScreenshotScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000031 /* ScreenshotScenario.swift */; };
 		B1000002 /* MatchRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000002 /* MatchRepository.swift */; };
 		B1000003 /* PersistenceSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000003 /* PersistenceSchema.swift */; };
 		B1000010 /* ScoringAndPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000010 /* ScoringAndPersistenceTests.swift */; };
 		B1000021 /* RefereeMatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000021 /* RefereeMatchTests.swift */; };
+		B1000022 /* TeamImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000022 /* TeamImportTests.swift */; };
 		F8FD9EFD2F5D73C5008892F1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F8FD9EFC2F5D73C5008892F1 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -95,11 +100,16 @@ B1000031 /* ScreenshotScenario.swift in Sources */ = {isa = PBXBuildFile; fileRe
 		A2000035 /* SavedRefereeMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedRefereeMatch.swift; sourceTree = "<group>"; };
 		A3000001 /* SquashAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SquashAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2000001 /* ScoringEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoringEngine.swift; sourceTree = "<group>"; };
+		B2000044 /* PlayerAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAvatar.swift; sourceTree = "<group>"; };
+		B2000043 /* TeamImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamImportService.swift; sourceTree = "<group>"; };
+		B2000042 /* PlayerPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerPhoto.swift; sourceTree = "<group>"; };
+		B2000041 /* ZipArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipArchive.swift; sourceTree = "<group>"; };
 B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotScenario.swift; sourceTree = "<group>"; };
 		B2000002 /* MatchRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchRepository.swift; sourceTree = "<group>"; };
 		B2000003 /* PersistenceSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceSchema.swift; sourceTree = "<group>"; };
 		B2000010 /* ScoringAndPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoringAndPersistenceTests.swift; sourceTree = "<group>"; };
 		B2000021 /* RefereeMatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeMatchTests.swift; sourceTree = "<group>"; };
+		B2000022 /* TeamImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamImportTests.swift; sourceTree = "<group>"; };
 		B3000010 /* SquashAnalyzerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SquashAnalyzerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8FD9EFB2F5D5D94008892F1 /* SquashAnalyzer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SquashAnalyzer.entitlements; sourceTree = "<group>"; };
 		F8FD9EFC2F5D73C5008892F1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -171,6 +181,7 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 				A2000023 /* CoachDashboardView.swift */,
 				A2000030 /* PlayerManagementView.swift */,
 				A2000034 /* RefereeView.swift */,
+				B2000044 /* PlayerAvatar.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -200,6 +211,9 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 			isa = PBXGroup;
 			children = (
 				B2000001 /* ScoringEngine.swift */,
+				B2000043 /* TeamImportService.swift */,
+				B2000042 /* PlayerPhoto.swift */,
+				B2000041 /* ZipArchive.swift */,
 				B2000031 /* ScreenshotScenario.swift */,
 				B2000002 /* MatchRepository.swift */,
 				B2000003 /* PersistenceSchema.swift */,
@@ -216,6 +230,7 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 			children = (
 				B2000010 /* ScoringAndPersistenceTests.swift */,
 				B2000021 /* RefereeMatchTests.swift */,
+				B2000022 /* TeamImportTests.swift */,
 			);
 			path = SquashAnalyzerTests;
 			sourceTree = "<group>";
@@ -353,6 +368,10 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 				A1000034 /* RefereeView.swift in Sources */,
 				A1000035 /* SavedRefereeMatch.swift in Sources */,
 				B1000001 /* ScoringEngine.swift in Sources */,
+				B1000044 /* PlayerAvatar.swift in Sources */,
+				B1000043 /* TeamImportService.swift in Sources */,
+				B1000042 /* PlayerPhoto.swift in Sources */,
+				B1000041 /* ZipArchive.swift in Sources */,
 				B1000031 /* ScreenshotScenario.swift in Sources */,
 				B1000002 /* MatchRepository.swift in Sources */,
 				B1000003 /* PersistenceSchema.swift in Sources */,
@@ -365,6 +384,7 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 			files = (
 				B1000010 /* ScoringAndPersistenceTests.swift in Sources */,
 				B1000021 /* RefereeMatchTests.swift in Sources */,
+				B1000022 /* TeamImportTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

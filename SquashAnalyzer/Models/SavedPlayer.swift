@@ -25,18 +25,22 @@ final class SavedPlayer {
     var coachingFocusAreas: [String]   // CoachingFocusTag rawValues
     var coachingNotes: String
     var createdAt: Date
+    /// Square JPEG, at most 512px (see PlayerPhoto); nil when no photo is set
+    @Attribute(.externalStorage) var photoData: Data? = nil
 
     init(
         id: UUID = UUID(),
         name: String,
         coachingFocusAreas: [String] = [],
         coachingNotes: String = "",
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        photoData: Data? = nil
     ) {
         self.id = id
         self.name = name
         self.coachingFocusAreas = coachingFocusAreas
         self.coachingNotes = coachingNotes
         self.createdAt = createdAt
+        self.photoData = photoData
     }
 }

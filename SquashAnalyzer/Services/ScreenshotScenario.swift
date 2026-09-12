@@ -69,6 +69,21 @@ enum ScreenshotScenario: String, CaseIterable {
         return match
     }
 
+    // MARK: - Team import from a host path (simulator only), e.g. `-importTeam /path/team.zip`
+
+    @MainActor
+    static func importTeamIfRequested(context: ModelContext) {
+        let args = CommandLine.arguments
+        guard let i = args.firstIndex(of: "-importTeam"), i + 1 < args.count,
+              let data = FileManager.default.contents(atPath: args[i + 1]) else { return }
+        do {
+            let result = try TeamImportService.importTeam(zipData: data, context: context)
+            print("[importTeam] \(result.summary)")
+        } catch {
+            print("[importTeam] failed: \(error.localizedDescription)")
+        }
+    }
+
     // MARK: - Saved data
 
     /// Seeds the Niels–Paul sample match once, for the history and dashboard shots

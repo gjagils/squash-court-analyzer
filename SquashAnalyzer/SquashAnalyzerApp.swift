@@ -10,7 +10,7 @@ struct SquashAnalyzerApp: App {
         // Explicitly disable CloudKit sync: we use iCloud Drive only for file-based
         // backups (ExportService). Without this, SwiftData detects the iCloud entitlements
         // and tries to configure a CloudKit container that doesn't exist yet, causing a crash.
-        let schema = Schema(versionedSchema: SquashAnalyzerSchemaV1.self)
+        let schema = Schema(versionedSchema: SquashAnalyzerCurrentSchema.self)
         let config = ModelConfiguration(cloudKitDatabase: .none)
         do {
             container = try ModelContainer(

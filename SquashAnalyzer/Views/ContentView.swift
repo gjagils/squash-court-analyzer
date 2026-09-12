@@ -169,6 +169,7 @@ struct ContentView: View {
         .onAppear {
             startRallyTimer()
             #if DEBUG
+            ScreenshotScenario.importTeamIfRequested(context: modelContext)
             if let scenario = ScreenshotScenario.current {
                 applyScreenshotScenario(scenario)
                 return

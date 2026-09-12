@@ -1,5 +1,7 @@
 import SwiftUI
 import SwiftData
+import PhotosUI
+import UniformTypeIdentifiers
 
 /// View for managing saved player profiles
 struct PlayerManagementView: View {
@@ -12,6 +14,9 @@ struct PlayerManagementView: View {
 
     @State private var showingAddPlayer = false
     @State private var playerToEdit: SavedPlayer? = nil
+    @State private var showingTeamImporter = false
+    @State private var teamImportMessage: String? = nil
+    @State private var showingTeamImportResult = false
 
     var isPickerMode: Bool { onSelectPlayer != nil }
 
@@ -43,10 +48,19 @@ struct PlayerManagementView: View {
 
                         Spacer()
 
-                        Button(action: { showingAddPlayer = true }) {
-                            Image(systemName: "plus.circle")
-                                .font(.system(size: 22))
-                                .foregroundColor(AppColors.accentGold)
+                        HStack(spacing: 18) {
+                            Button(action: { showingTeamImporter = true }) {
+                                Image(systemName: "square.and.arrow.down")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(AppColors.accentGold)
+                            }
+                            .accessibilityLabel("Importeer team")
+
+                            Button(action: { showingAddPlayer = true }) {
+                                Image(systemName: "plus.circle")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(AppColors.accentGold)
+                            }
                         }
                     }
                     .padding(.horizontal, 24)
@@ -62,9 +76,10 @@ struct PlayerManagementView: View {
                             Text("Nog geen spelers opgeslagen")
                                 .font(AppFonts.body(16))
                                 .foregroundColor(AppColors.textSecondary)
-                            Text("Tik op + om een speler toe te voegen")
+                            Text("Tik op + om een speler toe te voegen,\nof importeer een team (zip met team.json en foto's)")
                                 .font(AppFonts.caption(13))
                                 .foregroundColor(AppColors.textMuted)
+                                .multilineTextAlignment(.center)
                         }
                         Spacer()
                     } else {
@@ -96,21 +111,48 @@ struct PlayerManagementView: View {
             }
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $showingAddPlayer) {
-                PlayerEditSheet(player: nil) { name, focus, notes in
-                    let newPlayer = SavedPlayer(name: name, coachingFocusAreas: focus, coachingNotes: notes)
+                PlayerEditSheet(player: nil) { name, focus, notes, photo in
+                    let newPlayer = SavedPlayer(name: name, coachingFocusAreas: focus, coachingNotes: notes, photoData: photo)
                     modelContext.insert(newPlayer)
                     try? modelContext.save()
                 }
             }
             .navigationDestination(item: $playerToEdit) { player in
-                PlayerEditSheet(player: player) { name, focus, notes in
+                PlayerEditSheet(player: player) { name, focus, notes, photo in
                     player.name = name
                     player.coachingFocusAreas = focus
                     player.coachingNotes = notes
+                    player.photoData = photo
                     try? modelContext.save()
                 }
             }
+            .fileImporter(isPresented: $showingTeamImporter, allowedContentTypes: [.zip]) { result in
+                importTeam(result)
+            }
+            .alert("Team importeren", isPresented: $showingTeamImportResult) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(teamImportMessage ?? "")
+            }
         }
+    }
+
+    // MARK: - Team import (zip with team.json + photos, see TeamImportService)
+
+    private func importTeam(_ result: Result<URL, Error>) {
+        do {
+            let url = try result.get()
+            guard url.startAccessingSecurityScopedResource() else {
+                throw CocoaError(.fileReadNoPermission)
+            }
+            defer { url.stopAccessingSecurityScopedResource() }
+            let data = try Data(contentsOf: url)
+            let imported = try TeamImportService.importTeam(zipData: data, context: modelContext)
+            teamImportMessage = "Geïmporteerd: \(imported.summary)"
+        } catch {
+            teamImportMessage = error.localizedDescription
+        }
+        showingTeamImportResult = true
     }
 }
 
@@ -125,15 +167,19 @@ struct PlayerRowView: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            // Avatar circle
-            Circle()
-                .fill(AppColors.accentGold.opacity(0.2))
-                .frame(width: 42, height: 42)
-                .overlay(
-                    Text(String(player.name.prefix(1)).uppercased())
-                        .font(AppFonts.title(18))
-                        .foregroundColor(AppColors.accentGold)
-                )
+            // Avatar: photo when set, otherwise the initial
+            if let data = player.photoData, let image = UIImage(data: data) {
+                PlayerAvatarImage(photo: image, color: AppColors.accentGold, size: 42)
+            } else {
+                Circle()
+                    .fill(AppColors.accentGold.opacity(0.2))
+                    .frame(width: 42, height: 42)
+                    .overlay(
+                        Text(String(player.name.prefix(1)).uppercased())
+                            .font(AppFonts.title(18))
+                            .foregroundColor(AppColors.accentGold)
+                    )
+            }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(player.name)
@@ -211,19 +257,60 @@ struct PlayerRowView: View {
 
 struct PlayerEditSheet: View {
     let player: SavedPlayer?
-    let onSave: (String, [String], String) -> Void
+    /// name, focus areas, notes, normalised photo
+    let onSave: (String, [String], String, Data?) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var name: String
     @State private var selectedFocusAreas: Set<String>
     @State private var notes: String
+    @State private var photoData: Data?
+    @State private var pickedPhoto: PhotosPickerItem? = nil
 
-    init(player: SavedPlayer?, onSave: @escaping (String, [String], String) -> Void) {
+    init(player: SavedPlayer?, onSave: @escaping (String, [String], String, Data?) -> Void) {
         self.player = player
         self.onSave = onSave
         _name = State(initialValue: player?.name ?? "")
         _selectedFocusAreas = State(initialValue: Set(player?.coachingFocusAreas ?? []))
         _notes = State(initialValue: player?.coachingNotes ?? "")
+        _photoData = State(initialValue: player?.photoData)
+    }
+
+    private var photoImage: UIImage? {
+        photoData.flatMap(UIImage.init(data:))
+    }
+
+    // Photo picker with the avatar as preview
+    private var photoSection: some View {
+        VStack(spacing: 10) {
+            PhotosPicker(selection: $pickedPhoto, matching: .images) {
+                ZStack(alignment: .bottomTrailing) {
+                    PlayerAvatarImage(photo: photoImage, color: AppColors.accentGold, size: 96)
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(AppColors.backgroundDark)
+                        .padding(7)
+                        .background(Circle().fill(AppColors.accentGold))
+                }
+            }
+            .buttonStyle(.plain)
+
+            if photoData != nil {
+                Button(action: { photoData = nil; pickedPhoto = nil }) {
+                    Text("Foto verwijderen")
+                        .font(AppFonts.caption(12))
+                        .foregroundColor(AppColors.textMuted)
+                }
+            }
+        }
+        .onChange(of: pickedPhoto) { _, item in
+            guard let item else { return }
+            Task {
+                if let data = try? await item.loadTransferable(type: Data.self) {
+                    photoData = PlayerPhoto.normalized(data)
+                }
+            }
+        }
     }
 
     private let allTags = CoachingFocusTag.allCases.map { $0.rawValue }
@@ -240,6 +327,8 @@ struct PlayerEditSheet: View {
                         .foregroundColor(AppColors.textPrimary)
                         .tracking(3)
                         .padding(.top, 32)
+
+                    photoSection
 
                     // Name field
                     VStack(alignment: .leading, spacing: 8) {
@@ -324,7 +413,7 @@ struct PlayerEditSheet: View {
 
                         Button(action: {
                             guard !name.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-                            onSave(name.trimmingCharacters(in: .whitespaces), Array(selectedFocusAreas), notes)
+                            onSave(name.trimmingCharacters(in: .whitespaces), Array(selectedFocusAreas), notes, photoData)
                             dismiss()
                         }) {
                             Text("Opslaan")

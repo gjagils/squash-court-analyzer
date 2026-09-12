@@ -41,7 +41,7 @@ final class ScoringAndPersistenceTests: XCTestCase {
     @MainActor
     func testRepositoryUpsertsOneMatchAndRestoresIt() throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
-        let schema = Schema(versionedSchema: SquashAnalyzerSchemaV1.self)
+        let schema = Schema(versionedSchema: SquashAnalyzerCurrentSchema.self)
         let container = try ModelContainer(
             for: schema,
             migrationPlan: SquashAnalyzerMigrationPlan.self,
@@ -82,7 +82,7 @@ final class ScoringAndPersistenceTests: XCTestCase {
         let tamperedData = try encoder.encode(tampered)
 
         let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
-        let schema = Schema(versionedSchema: SquashAnalyzerSchemaV1.self)
+        let schema = Schema(versionedSchema: SquashAnalyzerCurrentSchema.self)
         let container = try ModelContainer(for: schema, configurations: [config])
         XCTAssertThrowsError(try ExportService.importFullBackup(tamperedData, context: container.mainContext))
     }

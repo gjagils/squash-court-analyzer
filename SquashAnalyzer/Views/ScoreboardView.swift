@@ -45,14 +45,7 @@ struct ScoreboardView: View {
         let isServing = game.currentServer == player
 
         return VStack(spacing: 4) {
-            ZStack {
-                Circle()
-                    .stroke(color.opacity(isServing ? 1.0 : 0.4), lineWidth: 2)
-                    .frame(width: 34, height: 34)
-                Image(systemName: "person.fill")
-                    .font(.system(size: 14))
-                    .foregroundColor(color.opacity(isServing ? 1.0 : 0.4))
-            }
+            PlayerAvatar(name: game.name(for: player), color: color, size: 34, active: isServing)
 
             Text(game.name(for: player))
                 .font(AppFonts.label(13))

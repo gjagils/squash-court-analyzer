@@ -42,6 +42,8 @@ struct PlayerBackupData: Codable {
     let coachingFocusAreas: [String]
     let coachingNotes: String
     let createdAt: Date
+    /// Base64 JPEG (absent in backups made before photos existed)
+    let photoBase64: String?
 }
 
 // MARK: - Export Data Structures
@@ -243,7 +245,8 @@ enum ExportService {
                 name: $0.name,
                 coachingFocusAreas: $0.coachingFocusAreas,
                 coachingNotes: $0.coachingNotes,
-                createdAt: $0.createdAt
+                createdAt: $0.createdAt,
+                photoBase64: $0.photoData?.base64EncodedString()
             )
         }
         let matchData = matches.map { matchExportData(from: $0) }
@@ -283,7 +286,8 @@ enum ExportService {
                 name: pd.name,
                 coachingFocusAreas: pd.coachingFocusAreas,
                 coachingNotes: pd.coachingNotes,
-                createdAt: pd.createdAt
+                createdAt: pd.createdAt,
+                photoData: pd.photoBase64.flatMap { Data(base64Encoded: $0) }
             )
             context.insert(player)
             playerCount += 1

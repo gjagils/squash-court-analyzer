@@ -114,7 +114,7 @@ final class SavedGame {
 
     /// Convert this SavedGame back to a live Game for analysis views
     func toGame() -> Game {
-        let game = Game()
+        let game = Game(id: id)
         game.player1Name = player1Name
         game.player2Name = player2Name
         game.player1Score = player1Score
@@ -124,6 +124,7 @@ final class SavedGame {
             .sorted(by: { $0.pointNumber < $1.pointNumber })
             .map { sp in
                 Point(
+                    id: sp.id,
                     scorer: sp.scorerPlayer,
                     pointType: sp.savedPointType,
                     zone: sp.pointZone,
@@ -131,6 +132,7 @@ final class SavedGame {
                     server: sp.serverPlayer,
                     player1Score: sp.player1Score,
                     player2Score: sp.player2Score,
+                    timestamp: sp.timestamp,
                     duration: sp.duration
                 )
             }
@@ -138,10 +140,12 @@ final class SavedGame {
             .sorted(by: { $0.letNumber < $1.letNumber })
             .map { sl in
                 LetCall(
+                    id: sl.id,
                     requestedBy: sl.requestedByPlayer,
                     server: sl.serverPlayer,
                     player1Score: sl.player1Score,
-                    player2Score: sl.player2Score
+                    player2Score: sl.player2Score,
+                    timestamp: sl.timestamp
                 )
             }
         return game
@@ -152,6 +156,7 @@ final class SavedGame {
     /// Create a SavedGame from a live Game
     static func from(_ game: Game, gameNumber: Int, context: ModelContext) -> SavedGame {
         let savedGame = SavedGame(
+            id: game.id,
             gameNumber: gameNumber,
             player1Name: game.player1Name,
             player2Name: game.player2Name,

@@ -10,6 +10,12 @@ final class SavedMatch {
     var matchStartingServer: String  // Player rawValue
     var bestOf: Int
     var savedAt: Date
+    var updatedAt: Date = Date()
+    var status: String = MatchStatus.completed.rawValue
+    var player1CoachingFocus: [String] = []
+    var player2CoachingFocus: [String] = []
+    var player1CoachingNotes: String = ""
+    var player2CoachingNotes: String = ""
 
     @Relationship(deleteRule: .cascade, inverse: \SavedGame.match)
     var games: [SavedGame] = []
@@ -20,7 +26,9 @@ final class SavedMatch {
         player2Name: String,
         matchStartingServer: Player,
         bestOf: Int = 5,
-        savedAt: Date = Date()
+        savedAt: Date = Date(),
+        updatedAt: Date = Date(),
+        status: MatchStatus = .completed
     ) {
         self.id = id
         self.player1Name = player1Name
@@ -28,12 +36,19 @@ final class SavedMatch {
         self.matchStartingServer = matchStartingServer.rawValue
         self.bestOf = bestOf
         self.savedAt = savedAt
+        self.updatedAt = updatedAt
+        self.status = status.rawValue
     }
 
     // MARK: - Computed Properties
 
     var startingServer: Player {
         Player(rawValue: matchStartingServer) ?? .player1
+    }
+
+    var matchStatus: MatchStatus {
+        get { MatchStatus(rawValue: status) ?? .completed }
+        set { status = newValue.rawValue }
     }
 
     var player1GamesWon: Int {
@@ -78,10 +93,16 @@ final class SavedMatch {
 
     /// Convert this SavedMatch back to a live Match for analysis views
     func toMatch() -> Match {
-        let match = Match()
+        let match = Match(id: id)
         match.player1Name = player1Name
         match.player2Name = player2Name
         match.matchStartingServer = startingServer
+        match.status = matchStatus
+        match.updatedAt = updatedAt
+        match.player1CoachingFocus = player1CoachingFocus
+        match.player2CoachingFocus = player2CoachingFocus
+        match.player1CoachingNotes = player1CoachingNotes
+        match.player2CoachingNotes = player2CoachingNotes
         // Replace the default empty game with converted saved games
         match.games = games
             .sorted(by: { $0.gameNumber < $1.gameNumber })
@@ -95,11 +116,19 @@ final class SavedMatch {
     /// Create a SavedMatch from a live Match
     static func from(_ match: Match, context: ModelContext) -> SavedMatch {
         let savedMatch = SavedMatch(
+            id: match.id,
             player1Name: match.player1Name,
             player2Name: match.player2Name,
             matchStartingServer: match.matchStartingServer,
-            bestOf: match.bestOf
+            bestOf: match.bestOf,
+            updatedAt: match.updatedAt,
+            status: match.status
         )
+
+        savedMatch.player1CoachingFocus = match.player1CoachingFocus
+        savedMatch.player2CoachingFocus = match.player2CoachingFocus
+        savedMatch.player1CoachingNotes = match.player1CoachingNotes
+        savedMatch.player2CoachingNotes = match.player2CoachingNotes
 
         context.insert(savedMatch)
 

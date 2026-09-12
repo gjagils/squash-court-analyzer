@@ -1,8 +1,17 @@
 import Foundation
 
+enum MatchStatus: String, Codable, CaseIterable {
+    case inProgress
+    case completed
+    case abandoned
+}
+
 /// Represents a squash match (best of 5 games)
 @Observable
-class Match {
+class Match: Identifiable {
+    let id: UUID
+    var status: MatchStatus = .inProgress
+    var updatedAt: Date = Date()
     // MARK: - Properties
     var player1Name: String = "Speler 1"
     var player2Name: String = "Speler 2"
@@ -68,7 +77,8 @@ class Match {
 
     // MARK: - Initialization
 
-    init() {
+    init(id: UUID = UUID()) {
+        self.id = id
         startNewGame()
     }
 
@@ -103,6 +113,7 @@ class Match {
 
         games.append(game)
         currentGameIndex = games.count - 1
+        updatedAt = Date()
     }
 
     /// Called when current game ends - starts next game if match not over
@@ -117,6 +128,7 @@ class Match {
         games = []
         currentGameIndex = 0
         startNewGame()
+        status = .inProgress
     }
 
     /// Setup match with player names and starting server
@@ -190,7 +202,8 @@ class Match {
         let zoneCounts = CourtZone.allCases.map { zone in
             (zone: zone, count: totalPointsWon(by: player, in: zone))
         }
-        return zoneCounts.max(by: { $0.count < $1.count })?.zone
+        guard let best = zoneCounts.max(by: { $0.count < $1.count }), best.count > 0 else { return nil }
+        return best.zone
     }
 
     // MARK: - Duration Analysis

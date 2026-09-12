@@ -71,6 +71,7 @@ final class SavedPoint {
     /// Create a SavedPoint from a live Point
     static func from(_ point: Point, pointNumber: Int) -> SavedPoint {
         SavedPoint(
+            id: point.id,
             pointNumber: pointNumber,
             scorer: point.scorer,
             pointType: point.pointType,

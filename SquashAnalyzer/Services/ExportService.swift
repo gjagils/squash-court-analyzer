@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 import SwiftUI
+import CryptoKit
 
 // MARK: - Full Backup Structures
 
@@ -10,6 +11,29 @@ struct FullBackup: Codable {
     let players: [PlayerBackupData]
     let matches: [MatchExportData]
     let standaloneGames: [GameExportData]
+}
+
+struct BackupEnvelope: Codable {
+    let formatVersion: Int
+    let schemaVersion: String
+    let appVersion: String
+    let createdAt: Date
+    let checksum: String
+    let payload: FullBackup
+}
+
+enum BackupValidationError: LocalizedError {
+    case unsupportedVersion(Int)
+    case checksumMismatch
+
+    var errorDescription: String? {
+        switch self {
+        case .unsupportedVersion(let version):
+            return "Deze backupversie (\(version)) wordt niet ondersteund."
+        case .checksumMismatch:
+            return "De backup is beschadigd of onvolledig; de checksum klopt niet."
+        }
+    }
 }
 
 struct PlayerBackupData: Codable {
@@ -35,13 +59,23 @@ struct SquashExport: Codable {
 }
 
 struct MatchExportData: Codable {
+    let id: String?
     let player1Name: String
     let player2Name: String
     let savedAt: Date
+    let updatedAt: Date?
+    let matchStartingServer: String?
+    let bestOf: Int?
+    let status: String?
+    let player1CoachingFocus: [String]?
+    let player2CoachingFocus: [String]?
+    let player1CoachingNotes: String?
+    let player2CoachingNotes: String?
     let games: [GameExportData]
 }
 
 struct GameExportData: Codable {
+    let id: String?
     let gameNumber: Int
     let player1Name: String
     let player2Name: String
@@ -55,6 +89,7 @@ struct GameExportData: Codable {
 }
 
 struct PointExportData: Codable {
+    let id: String?
     let pointNumber: Int
     let scorer: String
     let pointType: String
@@ -64,14 +99,17 @@ struct PointExportData: Codable {
     let player1Score: Int
     let player2Score: Int
     let duration: Double
+    let timestamp: Date?
 }
 
 struct LetExportData: Codable {
+    let id: String?
     let letNumber: Int
     let requestedBy: String
     let server: String
     let player1Score: Int
     let player2Score: Int
+    let timestamp: Date?
 }
 
 // MARK: - Export Service
@@ -211,25 +249,32 @@ enum ExportService {
         let matchData = matches.map { matchExportData(from: $0) }
         let gameData = standaloneGames.map { gameExportData(from: $0) }
         let backup = FullBackup(
-            version: 1,
+            version: 2,
             backupDate: Date(),
             players: playerData,
             matches: matchData,
             standaloneGames: gameData
         )
+        let payloadData = try canonicalData(for: backup)
+        let envelope = BackupEnvelope(
+            formatVersion: 2,
+            schemaVersion: "1.0.0",
+            appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown",
+            createdAt: Date(),
+            checksum: SHA256.hash(data: payloadData).map { String(format: "%02x", $0) }.joined(),
+            payload: backup
+        )
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = .prettyPrinted
-        return try encoder.encode(backup)
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return try encoder.encode(envelope)
     }
 
     // MARK: - Full Backup Import
 
     /// Imports a full backup. Returns counts of (players, matches, standaloneGames) imported.
     static func importFullBackup(_ data: Data, context: ModelContext) throws -> (players: Int, matches: Int, games: Int) {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let backup = try decoder.decode(FullBackup.self, from: data)
+        let backup = try decodeAndValidateBackup(data)
 
         var playerCount = 0
         for pd in backup.players {
@@ -262,6 +307,8 @@ enum ExportService {
 
     /// Deletes all existing data then imports the backup (clean restore).
     static func replaceWithBackup(_ data: Data, context: ModelContext) throws -> (players: Int, matches: Int, games: Int) {
+        // Validate completely before touching the user's existing data.
+        _ = try decodeAndValidateBackup(data)
         // Delete existing data
         try context.delete(model: SavedPoint.self)
         try context.delete(model: SavedLet.self)
@@ -385,21 +432,78 @@ enum ExportService {
         }
         let data = try exportFullBackup(players: players, matches: matches, standaloneGames: standaloneGames)
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.dateFormat = "yyyy-MM-dd-HHmmss"
         let filename = "squash-backup-\(formatter.string(from: Date())).json"
         let fileURL = dir.appendingPathComponent(filename)
-        try data.write(to: fileURL)
+        try data.write(to: fileURL, options: .atomic)
+        try data.write(to: dir.appendingPathComponent("latest-backup.json"), options: .atomic)
+        rotateBackups(in: dir, keeping: 7)
         return fileURL
     }
 
     // MARK: - Private helpers
 
+    private static func canonicalData(for backup: FullBackup) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = [.sortedKeys]
+        return try encoder.encode(backup)
+    }
+
+    private static func decodeAndValidateBackup(_ data: Data) throws -> FullBackup {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        if let envelope = try? decoder.decode(BackupEnvelope.self, from: data) {
+            guard envelope.formatVersion == 2 else {
+                throw BackupValidationError.unsupportedVersion(envelope.formatVersion)
+            }
+            let payloadData = try canonicalData(for: envelope.payload)
+            let checksum = SHA256.hash(data: payloadData).map { String(format: "%02x", $0) }.joined()
+            guard checksum == envelope.checksum else {
+                throw BackupValidationError.checksumMismatch
+            }
+            return envelope.payload
+        }
+
+        // Version 1 backups remain importable for existing App Store users.
+        let legacy = try decoder.decode(FullBackup.self, from: data)
+        guard legacy.version == 1 else {
+            throw BackupValidationError.unsupportedVersion(legacy.version)
+        }
+        return legacy
+    }
+
+    private static func rotateBackups(in directory: URL, keeping limit: Int) {
+        guard let files = try? FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: nil
+        ) else { return }
+
+        let datedBackups = files
+            .filter { $0.lastPathComponent.hasPrefix("squash-backup-") && $0.pathExtension == "json" }
+            .sorted { $0.lastPathComponent > $1.lastPathComponent }
+
+        for expired in datedBackups.dropFirst(limit) {
+            try? FileManager.default.removeItem(at: expired)
+        }
+    }
+
     private static func matchExportData(from match: SavedMatch) -> MatchExportData {
         let games = match.games.sorted { $0.gameNumber < $1.gameNumber }.map { gameExportData(from: $0) }
         return MatchExportData(
+            id: match.id.uuidString,
             player1Name: match.player1Name,
             player2Name: match.player2Name,
             savedAt: match.savedAt,
+            updatedAt: match.updatedAt,
+            matchStartingServer: match.matchStartingServer,
+            bestOf: match.bestOf,
+            status: match.status,
+            player1CoachingFocus: match.player1CoachingFocus,
+            player2CoachingFocus: match.player2CoachingFocus,
+            player1CoachingNotes: match.player1CoachingNotes,
+            player2CoachingNotes: match.player2CoachingNotes,
             games: games
         )
     }
@@ -407,6 +511,7 @@ enum ExportService {
     private static func gameExportData(from game: SavedGame) -> GameExportData {
         let points = game.points.sorted { $0.pointNumber < $1.pointNumber }.map {
             PointExportData(
+                id: $0.id.uuidString,
                 pointNumber: $0.pointNumber,
                 scorer: $0.scorer,
                 pointType: $0.pointType,
@@ -415,19 +520,23 @@ enum ExportService {
                 server: $0.server,
                 player1Score: $0.player1Score,
                 player2Score: $0.player2Score,
-                duration: $0.duration
+                duration: $0.duration,
+                timestamp: $0.timestamp
             )
         }
         let lets = game.lets.sorted { $0.letNumber < $1.letNumber }.map {
             LetExportData(
+                id: $0.id.uuidString,
                 letNumber: $0.letNumber,
                 requestedBy: $0.requestedBy,
                 server: $0.server,
                 player1Score: $0.player1Score,
-                player2Score: $0.player2Score
+                player2Score: $0.player2Score,
+                timestamp: $0.timestamp
             )
         }
         return GameExportData(
+            id: game.id.uuidString,
             gameNumber: game.gameNumber,
             player1Name: game.player1Name,
             player2Name: game.player2Name,
@@ -444,12 +553,19 @@ enum ExportService {
     private static func importMatch(_ matchData: MatchExportData, context: ModelContext) {
         // Check for duplicate (same players + savedAt)
         let savedMatch = SavedMatch(
+            id: matchData.id.flatMap { UUID(uuidString: $0) } ?? UUID(),
             player1Name: matchData.player1Name,
             player2Name: matchData.player2Name,
-            matchStartingServer: Player(rawValue: matchData.games.first?.startingServer ?? "") ?? .player1,
-            bestOf: 5,
-            savedAt: matchData.savedAt
+            matchStartingServer: Player(rawValue: matchData.matchStartingServer ?? matchData.games.first?.startingServer ?? "") ?? .player1,
+            bestOf: matchData.bestOf ?? 5,
+            savedAt: matchData.savedAt,
+            updatedAt: matchData.updatedAt ?? matchData.savedAt,
+            status: MatchStatus(rawValue: matchData.status ?? "") ?? .completed
         )
+        savedMatch.player1CoachingFocus = matchData.player1CoachingFocus ?? []
+        savedMatch.player2CoachingFocus = matchData.player2CoachingFocus ?? []
+        savedMatch.player1CoachingNotes = matchData.player1CoachingNotes ?? ""
+        savedMatch.player2CoachingNotes = matchData.player2CoachingNotes ?? ""
         context.insert(savedMatch)
         for gameData in matchData.games {
             importGame(gameData, context: context, matchRef: savedMatch)
@@ -459,6 +575,7 @@ enum ExportService {
     @discardableResult
     private static func importGame(_ gameData: GameExportData, context: ModelContext, matchRef: SavedMatch?) -> SavedGame {
         let savedGame = SavedGame(
+            id: gameData.id.flatMap { UUID(uuidString: $0) } ?? UUID(),
             gameNumber: gameData.gameNumber,
             player1Name: gameData.player1Name,
             player2Name: gameData.player2Name,
@@ -474,6 +591,7 @@ enum ExportService {
 
         for pd in gameData.points {
             let sp = SavedPoint(
+                id: pd.id.flatMap { UUID(uuidString: $0) } ?? UUID(),
                 pointNumber: pd.pointNumber,
                 scorer: Player(rawValue: pd.scorer) ?? .player1,
                 pointType: PointType(rawValue: pd.pointType) ?? .winner,
@@ -482,6 +600,7 @@ enum ExportService {
                 server: Player(rawValue: pd.server) ?? .player1,
                 player1Score: pd.player1Score,
                 player2Score: pd.player2Score,
+                timestamp: pd.timestamp ?? Date(),
                 duration: pd.duration
             )
             sp.game = savedGame
@@ -491,11 +610,13 @@ enum ExportService {
 
         for ld in gameData.lets {
             let sl = SavedLet(
+                id: ld.id.flatMap { UUID(uuidString: $0) } ?? UUID(),
                 letNumber: ld.letNumber,
                 requestedBy: Player(rawValue: ld.requestedBy) ?? .player1,
                 server: Player(rawValue: ld.server) ?? .player1,
                 player1Score: ld.player1Score,
-                player2Score: ld.player2Score
+                player2Score: ld.player2Score,
+                timestamp: ld.timestamp ?? Date()
             )
             sl.game = savedGame
             savedGame.lets.append(sl)

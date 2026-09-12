@@ -3,13 +3,18 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
+    let startupPersistenceWarning: String?
+
+    init(startupPersistenceWarning: String? = nil) {
+        self.startupPersistenceWarning = startupPersistenceWarning
+    }
+
     @State private var match = Match()
     @State private var showingSetup = true
     @State private var showingAnalysis = false
     @State private var showingHistory = false
     @State private var showingSettings = false
-    @State private var matchSaved = false
-    @State private var currentGameSaved = false
     @State private var showingSavedMatchAnalysis = false
     @State private var savedMatchForAnalysis: Match? = nil
     @State private var savedGameForAnalysis: Game? = nil
@@ -18,6 +23,12 @@ struct ContentView: View {
     @State private var showingLetSelector = false
     @State private var rallyElapsedTime: TimeInterval = 0
     @State private var rallyTimer: Timer? = nil
+    @State private var recoverableMatch: Match?
+    @State private var showingRecoveryPrompt = false
+    @State private var hasCheckedForRecovery = false
+    @State private var persistenceErrorMessage: String?
+    @State private var showingPersistenceError = false
+    @State private var showingStartupPersistenceWarning = false
 
     private var currentGame: Game {
         match.currentGame
@@ -60,28 +71,26 @@ struct ContentView: View {
                 GameOverOverlay(
                     game: currentGame,
                     match: match,
-                    matchSaved: matchSaved,
-                    currentGameSaved: currentGameSaved,
                     onAnalysis: { showingAnalysis = true },
                     onNextGame: {
-                        currentGameSaved = false
                         match.onGameEnd()
+                        persistMatch()
                     },
                     onNewMatch: {
+                        finishOrAbandonCurrentMatch()
                         match = Match()
-                        matchSaved = false
-                        currentGameSaved = false
                         showingSetup = true
                     },
-                    onSaveMatch: { saveMatch() },
-                    onSaveGame: { saveCurrentGame() },
                     onStop: {
+                        abandonCurrentMatch()
                         match = Match()
-                        matchSaved = false
-                        currentGameSaved = false
                         showingSetup = true
                     }
                 )
+                .onAppear {
+                    if match.isMatchOver { match.status = .completed }
+                    persistMatch()
+                }
             }
 
             // Previous game analysis overlay
@@ -154,6 +163,8 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.25), value: currentGame.scoringStep)
         .onAppear {
             startRallyTimer()
+            checkForInterruptedMatch()
+            showingStartupPersistenceWarning = startupPersistenceWarning != nil
         }
         .onDisappear {
             stopRallyTimer()
@@ -161,44 +172,107 @@ struct ContentView: View {
         .onChange(of: currentGame.points.count) { _, _ in
             // Reset timer when a point is scored
             rallyElapsedTime = 0
+            persistMatch()
         }
         .onChange(of: currentGame.lets.count) { _, _ in
             // Reset timer when a let is called
             rallyElapsedTime = 0
+            persistMatch()
         }
         .onChange(of: showingSetup) { _, isShowing in
             if isShowing {
                 stopRallyTimer()
             } else {
                 startRallyTimer()
+                if !showingHistory { persistMatch() }
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .inactive || phase == .background {
+                persistMatch()
             }
         }
         .alert("Wedstrijd stoppen?", isPresented: $showingCancelConfirm) {
             Button("Annuleren", role: .cancel) { }
             Button("Stoppen", role: .destructive) {
+                abandonCurrentMatch()
                 match = Match()
-                matchSaved = false
                 showingSetup = true
             }
         } message: {
             Text("Weet je zeker dat je deze wedstrijd wilt stoppen? De huidige wedstrijd gaat verloren.")
         }
+        .alert("Wedstrijd hervatten?", isPresented: $showingRecoveryPrompt) {
+            Button("Hervatten") {
+                if let recoverableMatch {
+                    match = recoverableMatch
+                    showingSetup = false
+                }
+                self.recoverableMatch = nil
+            }
+            Button("Niet hervatten", role: .destructive) {
+                if let recoverableMatch {
+                    try? SwiftDataMatchRepository(context: modelContext).markAbandoned(recoverableMatch)
+                }
+                self.recoverableMatch = nil
+            }
+        } message: {
+            if let recoverableMatch {
+                Text("\(recoverableMatch.player1Name) – \(recoverableMatch.player2Name) is nog niet afgerond.")
+            }
+        }
+        .alert("Opslaan mislukt", isPresented: $showingPersistenceError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(persistenceErrorMessage ?? "Onbekende opslagfout")
+        }
+        .alert("Veilige tijdelijke opslag actief", isPresented: $showingStartupPersistenceWarning) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(startupPersistenceWarning ?? "")
+        }
     }
 
-    // MARK: - Save Match
-    private func saveMatch() {
-        _ = SavedMatch.from(match, context: modelContext)
-        try? modelContext.save()
-        matchSaved = true
+    // MARK: - Local-first persistence
+    private func persistMatch() {
+        guard !showingSetup else { return }
+        do {
+            try SwiftDataMatchRepository(context: modelContext).upsert(match)
+        } catch {
+            persistenceErrorMessage = error.localizedDescription
+            showingPersistenceError = true
+        }
     }
 
-    // MARK: - Save Current Game (standalone)
-    private func saveCurrentGame() {
-        let gameIndex = match.currentGameIndex
-        let savedGame = SavedGame.from(currentGame, gameNumber: gameIndex + 1, context: modelContext)
-        savedGame.savedAt = Date()
-        try? modelContext.save()
-        currentGameSaved = true
+    private func checkForInterruptedMatch() {
+        guard !hasCheckedForRecovery else { return }
+        hasCheckedForRecovery = true
+        do {
+            recoverableMatch = try SwiftDataMatchRepository(context: modelContext).mostRecentInProgressMatch()
+            showingRecoveryPrompt = recoverableMatch != nil
+        } catch {
+            persistenceErrorMessage = error.localizedDescription
+            showingPersistenceError = true
+        }
+    }
+
+    private func finishOrAbandonCurrentMatch() {
+        if match.isMatchOver {
+            match.status = .completed
+            persistMatch()
+        } else {
+            abandonCurrentMatch()
+        }
+    }
+
+    private func abandonCurrentMatch() {
+        guard !showingSetup else { return }
+        do {
+            try SwiftDataMatchRepository(context: modelContext).markAbandoned(match)
+        } catch {
+            persistenceErrorMessage = error.localizedDescription
+            showingPersistenceError = true
+        }
     }
 
     // MARK: - Game View
@@ -669,9 +743,9 @@ struct MatchSetupView: View {
                 } else {
                     HardwareButton(
                         title: "Start Scheidsrechter",
-                        subtitle: "Best of 5",
-                        color: AppColors.accentGold,
-                        colorDark: Color(red: 0.70, green: 0.54, blue: 0.20)
+                        subtitle: nil,
+                        color: AppColors.warmOrange,
+                        colorDark: AppColors.warmOrangeDark
                     ) {
                         startReferee()
                     }
@@ -723,7 +797,7 @@ struct MatchSetupView: View {
 
     private func modeTab(mode: SetupMode, icon: String, title: String) -> some View {
         let isSelected = selectedMode == mode
-        let color: Color = mode == .coach ? AppColors.warmOrange : AppColors.accentGold
+        let color: Color = AppColors.warmOrange
         return Button {
             withAnimation(.easeInOut(duration: 0.18)) { selectedMode = mode }
         } label: {
@@ -873,13 +947,9 @@ struct ServerSelectionButton: View {
 struct GameOverOverlay: View {
     let game: Game
     let match: Match
-    let matchSaved: Bool
-    let currentGameSaved: Bool
     let onAnalysis: () -> Void
     let onNextGame: () -> Void
     let onNewMatch: () -> Void
-    let onSaveMatch: () -> Void
-    let onSaveGame: () -> Void
     var onStop: (() -> Void)? = nil
 
     var body: some View {
@@ -918,38 +988,24 @@ struct GameOverOverlay: View {
                 }
 
                 VStack(spacing: 12) {
+                    // Auto-save indicator
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(.green)
+                        Text(match.isMatchOver ? "Wedstrijd automatisch opgeslagen" : "Game automatisch opgeslagen")
+                            .font(AppFonts.caption(11))
+                            .foregroundColor(AppColors.textMuted)
+                    }
+
                     // Analysis button
                     HardwareButton(
                         title: "Bekijk Analyse",
                         subtitle: nil,
                         color: AppColors.accentGold,
-                        colorDark: AppColors.accentGold.opacity(0.7)
+                        colorDark: AppColors.accentGoldDark
                     ) {
                         onAnalysis()
-                    }
-
-                    // Save this game (always available)
-                    HardwareButton(
-                        title: currentGameSaved ? "Game Opgeslagen ✓" : "Sla Game Op",
-                        subtitle: nil,
-                        color: currentGameSaved ? AppColors.textMuted : AppColors.steelBlue,
-                        colorDark: currentGameSaved ? AppColors.textMuted.opacity(0.7) : AppColors.steelBlueDark
-                    ) {
-                        if !currentGameSaved { onSaveGame() }
-                    }
-                    .disabled(currentGameSaved)
-
-                    // Save full match (only when match is over)
-                    if match.isMatchOver {
-                        HardwareButton(
-                            title: matchSaved ? "Wedstrijd Opgeslagen ✓" : "Wedstrijd Opslaan",
-                            subtitle: nil,
-                            color: matchSaved ? AppColors.textMuted : AppColors.accentGold.opacity(0.8),
-                            colorDark: matchSaved ? AppColors.textMuted.opacity(0.7) : AppColors.accentGold.opacity(0.5)
-                        ) {
-                            if !matchSaved { onSaveMatch() }
-                        }
-                        .disabled(matchSaved)
                     }
 
                     // Next game or new match button
@@ -972,8 +1028,8 @@ struct GameOverOverlay: View {
                             onNextGame()
                         }
 
-                        // Stop button (mid-match, only visible after game is saved)
-                        if currentGameSaved, let stop = onStop {
+                        // Stop button (mid-match)
+                        if let stop = onStop {
                             Button(action: stop) {
                                 Text("Stop wedstrijd")
                                     .font(AppFonts.caption(13))

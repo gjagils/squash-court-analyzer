@@ -25,7 +25,11 @@ enum Player: String, CaseIterable, Identifiable, Codable {
 /// Represents the current game state
 @Observable
 class Game: Identifiable {
-    let id = UUID()
+    let id: UUID
+
+    init(id: UUID = UUID()) {
+        self.id = id
+    }
 
     // MARK: - Properties
     var player1Name: String = "Speler 1"
@@ -62,14 +66,11 @@ class Game: Identifiable {
     private var previousPointTimes: [Date] = []
 
     var isGameOver: Bool {
-        let maxScore = max(player1Score, player2Score)
-        let minScore = min(player1Score, player2Score)
-        return maxScore >= 11 && (maxScore - minScore) >= 2
+        ScoringEngine().isGameOver(SquashScore(player1: player1Score, player2: player2Score))
     }
 
     var winner: Player? {
-        guard isGameOver else { return nil }
-        return player1Score > player2Score ? .player1 : .player2
+        ScoringEngine().winner(for: SquashScore(player1: player1Score, player2: player2Score))
     }
 
     var canUndo: Bool {
@@ -178,13 +179,12 @@ class Game: Identifiable {
         let now = Date()
         let duration = now.timeIntervalSince(lastPointTime)
 
-        // Update score
-        switch player {
-        case .player1:
-            player1Score += 1
-        case .player2:
-            player2Score += 1
-        }
+        let nextScore = ScoringEngine().score(
+            afterPointFor: player,
+            from: SquashScore(player1: player1Score, player2: player2Score)
+        )
+        player1Score = nextScore.player1
+        player2Score = nextScore.player2
 
         // Record the point with duration
         let point = Point(
@@ -349,7 +349,8 @@ class Game: Identifiable {
         let zoneCounts = CourtZone.allCases.map { zone in
             (zone: zone, count: pointsWon(by: player, in: zone))
         }
-        return zoneCounts.max(by: { $0.count < $1.count })?.zone
+        guard let best = zoneCounts.max(by: { $0.count < $1.count }), best.count > 0 else { return nil }
+        return best.zone
     }
 
     /// Get the best shot type for a player
@@ -357,7 +358,8 @@ class Game: Identifiable {
         let shotCounts = ShotType.allCases.map { shot in
             (shot: shot, count: pointsWon(by: player, with: shot))
         }
-        return shotCounts.max(by: { $0.count < $1.count })?.shot
+        guard let best = shotCounts.max(by: { $0.count < $1.count }), best.count > 0 else { return nil }
+        return best.shot
     }
 
     /// Get the worst zone for a player (most points lost)
@@ -365,7 +367,8 @@ class Game: Identifiable {
         let zoneCounts = CourtZone.allCases.map { zone in
             (zone: zone, count: pointsWon(by: player.opponent, in: zone))
         }
-        return zoneCounts.max(by: { $0.count < $1.count })?.zone
+        guard let worst = zoneCounts.max(by: { $0.count < $1.count }), worst.count > 0 else { return nil }
+        return worst.zone
     }
 
     /// Get recommendation: zones where opponent is weak

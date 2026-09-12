@@ -2,7 +2,7 @@ import Foundation
 
 /// Represents a single point scored in a game
 struct Point: Identifiable {
-    let id = UUID()
+    let id: UUID
     let scorer: Player          // Who scored the point
     let pointType: PointType    // How the point was won
     let zone: CourtZone?        // Where the point was won (nil for unforced errors)
@@ -14,6 +14,7 @@ struct Point: Identifiable {
     let duration: TimeInterval  // Duration of the rally in seconds (time since previous point or game start)
 
     init(
+        id: UUID = UUID(),
         scorer: Player,
         pointType: PointType = .winner,
         zone: CourtZone? = nil,
@@ -21,8 +22,10 @@ struct Point: Identifiable {
         server: Player,
         player1Score: Int,
         player2Score: Int,
+        timestamp: Date = Date(),
         duration: TimeInterval = 0
     ) {
+        self.id = id
         self.scorer = scorer
         self.pointType = pointType
         self.zone = zone
@@ -30,7 +33,7 @@ struct Point: Identifiable {
         self.server = server
         self.player1Score = player1Score
         self.player2Score = player2Score
-        self.timestamp = Date()
+        self.timestamp = timestamp
         self.duration = duration
     }
 }

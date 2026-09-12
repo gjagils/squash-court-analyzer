@@ -47,6 +47,7 @@ final class SavedLet {
     /// Create a SavedLet from a live LetCall
     static func from(_ letCall: LetCall, letNumber: Int) -> SavedLet {
         SavedLet(
+            id: letCall.id,
             letNumber: letNumber,
             requestedBy: letCall.requestedBy,
             server: letCall.server,

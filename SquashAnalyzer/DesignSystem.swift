@@ -55,7 +55,13 @@ struct AppColors {
     static let textMuted = Color(red: 0.50, green: 0.48, blue: 0.45)
 
     // MARK: Accent Colors
-    static let accentGold = Color(red: 0.90, green: 0.72, blue: 0.35)
+    static let accentGold     = Color(red: 0.90, green: 0.72, blue: 0.35)
+    static let accentGoldDark = Color(red: 0.70, green: 0.54, blue: 0.22)
+
+    /// Warm neutral – secondary / save buttons (no cold blue)
+    static let warmNeutral     = Color(red: 0.32, green: 0.26, blue: 0.18)
+    static let warmNeutralDark = Color(red: 0.22, green: 0.17, blue: 0.11)
+
     static let serverIndicator = Color(red: 1.0, green: 0.60, blue: 0.15)
 }
 

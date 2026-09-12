@@ -60,26 +60,29 @@ struct RefereeView: View {
             if let call = match.lastCallText {
                 callFlash(text: call)
             }
+
+            if showingNextGameConfirm {
+                RefereeGameOverOverlay(
+                    match: match,
+                    onNextGame: {
+                        match.confirmNextGame()
+                        showingNextGameConfirm = false
+                    },
+                    onDismiss: { showingNextGameConfirm = false }
+                )
+            }
+
+            if showingMatchOver {
+                RefereeMatchOverOverlay(
+                    match: match,
+                    onShare: { shareScore(); showingMatchOver = false },
+                    onDismiss: { onDismiss() }
+                )
+            }
         }
         .onReceive(ticker) { t in now = t }
         .onChange(of: match.currentGameNumber) { _, _ in
             gameStartTime = Date()
-        }
-        .alert("Game klaar!", isPresented: $showingNextGameConfirm) {
-            Button("Volgende game") { match.confirmNextGame() }
-            Button("Bekijk stand", role: .cancel) { }
-        } message: {
-            if let winner = match.currentGameWinner {
-                Text("\(match.name(for: winner)) wint game \(match.currentGameNumber)!\n\(match.player1Score)-\(match.player2Score)")
-            }
-        }
-        .alert("Wedstrijd klaar!", isPresented: $showingMatchOver) {
-            Button("Deel uitslag") { shareScore() }
-            Button("Sluiten", role: .cancel) { onDismiss() }
-        } message: {
-            if let winner = match.matchWinner {
-                Text("🏆 \(match.name(for: winner)) wint!\n\(match.player1GamesWon)-\(match.player2GamesWon)")
-            }
         }
         .sheet(item: $shareItemsToShow) { wrapper in
             ShareSheet(items: wrapper.items)
@@ -600,6 +603,138 @@ struct RefereeSetupSheet: View {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(startingServer == player ? color : Color.white.opacity(0.07))
                 )
+        }
+    }
+}
+
+// MARK: - Referee Game Over Overlay (tussen games)
+
+private struct RefereeGameOverOverlay: View {
+    let match: RefereeMatch
+    let onNextGame: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.85)
+                .ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                Text("GAME \(match.currentGameNumber) KLAAR")
+                    .font(AppFonts.title(26))
+                    .foregroundColor(AppColors.textPrimary)
+                    .tracking(4)
+
+                if let winner = match.currentGameWinner {
+                    Text("\(match.name(for: winner)) wint de game!")
+                        .font(AppFonts.body(18))
+                        .foregroundColor(AppColors.accentGold)
+                }
+
+                HStack(spacing: 12) {
+                    LEDScoreDisplay(score: match.player1Score, size: 60)
+                    LEDColon(size: 60)
+                    LEDScoreDisplay(score: match.player2Score, size: 60)
+                }
+                .padding(16)
+                .background(LEDDisplayBackground())
+
+                Text("Stand: \(match.player1GamesWon) – \(match.player2GamesWon)")
+                    .font(AppFonts.label(14))
+                    .foregroundColor(AppColors.textSecondary)
+
+                VStack(spacing: 12) {
+                    HardwareButton(
+                        title: "Volgende Game",
+                        subtitle: nil,
+                        color: AppColors.warmOrange,
+                        colorDark: AppColors.warmOrangeDark
+                    ) { onNextGame() }
+
+                    Button(action: onDismiss) {
+                        Text("Bekijk stand")
+                            .font(AppFonts.caption(13))
+                            .foregroundColor(AppColors.textMuted)
+                            .padding(.top, 4)
+                    }
+                }
+                .padding(.horizontal, 40)
+            }
+            .padding(32)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(AppColors.backgroundMedium)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(AppColors.accentGold.opacity(0.3), lineWidth: 2)
+            )
+            .shadow(color: AppColors.warmOrangeGlow.opacity(0.2), radius: 30, x: 0, y: 10)
+            .padding(.horizontal, 24)
+        }
+    }
+}
+
+// MARK: - Referee Match Over Overlay
+
+private struct RefereeMatchOverOverlay: View {
+    let match: RefereeMatch
+    let onShare: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.85)
+                .ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                Text("WEDSTRIJD KLAAR")
+                    .font(AppFonts.title(26))
+                    .foregroundColor(AppColors.textPrimary)
+                    .tracking(4)
+
+                if let winner = match.matchWinner {
+                    Text("🏆 \(match.name(for: winner)) wint!")
+                        .font(AppFonts.body(20))
+                        .foregroundColor(AppColors.accentGold)
+                }
+
+                Text("\(match.player1GamesWon) – \(match.player2GamesWon)")
+                    .font(.system(size: 64, weight: .bold, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+
+                Text("\(match.player1Name)  vs  \(match.player2Name)")
+                    .font(AppFonts.label(13))
+                    .foregroundColor(AppColors.textSecondary)
+
+                VStack(spacing: 12) {
+                    HardwareButton(
+                        title: "Deel via WhatsApp",
+                        subtitle: nil,
+                        color: AppColors.warmOrange,
+                        colorDark: AppColors.warmOrangeDark
+                    ) { onShare() }
+
+                    HardwareButton(
+                        title: "Sluiten",
+                        subtitle: nil,
+                        color: AppColors.warmNeutral,
+                        colorDark: AppColors.warmNeutralDark
+                    ) { onDismiss() }
+                }
+                .padding(.horizontal, 40)
+            }
+            .padding(32)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(AppColors.backgroundMedium)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(AppColors.accentGold.opacity(0.3), lineWidth: 2)
+            )
+            .shadow(color: AppColors.warmOrangeGlow.opacity(0.2), radius: 30, x: 0, y: 10)
+            .padding(.horizontal, 24)
         }
     }
 }

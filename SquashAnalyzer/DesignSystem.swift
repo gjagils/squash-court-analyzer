@@ -222,80 +222,62 @@ struct LEDDisplayBackground: View {
 
 /// Hardware-style action button
 struct HardwareButton: View {
+    enum Style {
+        /// Solid accent fill with dark text – primary call to action
+        case filled
+        /// Low-opacity tint with a thin stroke and coloured text – secondary action
+        case outlined
+    }
+
     let title: String
     let subtitle: String?
     let color: Color
-    let colorDark: Color
+    let style: Style
     let action: () -> Void
     var isSelected: Bool = false
 
-    init(title: String, subtitle: String? = nil, color: Color, colorDark: Color? = nil, isSelected: Bool = false, action: @escaping () -> Void) {
+    /// `colorDark` is kept for call-site compatibility; the flat style no longer uses it.
+    init(title: String, subtitle: String? = nil, color: Color, colorDark: Color? = nil,
+         style: Style = .filled, isSelected: Bool = false, action: @escaping () -> Void) {
         self.title = title
         self.subtitle = subtitle
         self.color = color
-        self.colorDark = colorDark ?? color.opacity(0.7)
+        self.style = style
         self.isSelected = isSelected
         self.action = action
     }
 
+    private var foreground: Color {
+        style == .filled ? AppColors.backgroundDark : color
+    }
+
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 1) {
+            VStack(spacing: 2) {
                 if let subtitle = subtitle {
                     Text(subtitle.uppercased())
-                        .font(AppFonts.caption(10))
-                        .foregroundColor(Color.white.opacity(0.85))
+                        .font(AppFonts.caption(9))
+                        .foregroundColor(foreground.opacity(0.7))
                         .tracking(1.5)
                 }
                 Text(title.uppercased())
-                    .font(AppFonts.button(18))
-                    .foregroundColor(.white)
-                    .tracking(0.5)
+                    .font(AppFonts.label(14))
+                    .foregroundColor(foreground)
+                    .tracking(1)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             .background(
-                ZStack {
-                    // Base gradient
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(
-                            LinearGradient(
-                                colors: [color, colorDark],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-
-                    // Top highlight shine
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.white.opacity(0.35), Color.white.opacity(0.1), Color.clear],
-                                startPoint: .top,
-                                endPoint: .center
-                            )
-                        )
-
-                    // Selection glow
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white, lineWidth: 2)
-                            .blur(radius: 3)
-                    }
-                }
-            )
-            .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color.white.opacity(0.4), Color.black.opacity(0.3)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 1
+                    .fill(style == .filled ? color : color.opacity(0.12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(
+                                isSelected ? Color.white.opacity(0.8) : color.opacity(style == .filled ? 0 : 0.35),
+                                lineWidth: 1
+                            )
                     )
             )
-            .shadow(color: color.opacity(0.5), radius: isSelected ? 12 : 6, x: 0, y: 4)
         }
         .buttonStyle(.plain)
     }

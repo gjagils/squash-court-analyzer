@@ -841,8 +841,8 @@ private struct RefereeMatchOverOverlay: View {
                     HardwareButton(
                         title: "Sluiten",
                         subtitle: nil,
-                        color: AppColors.warmNeutral,
-                        colorDark: AppColors.warmNeutralDark
+                        color: AppColors.textSecondary,
+                        style: .outlined
                     ) { onDismiss() }
 
                     OverlayUndoButton(action: onUndo)

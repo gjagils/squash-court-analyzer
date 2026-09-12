@@ -83,8 +83,8 @@ struct CoachDashboardView: View {
                     HardwareButton(
                         title: "Sluiten",
                         subtitle: nil,
-                        color: AppColors.steelBlue,
-                        colorDark: AppColors.steelBlueDark
+                        color: AppColors.textSecondary,
+                        style: .outlined
                     ) {
                         onDismiss()
                     }

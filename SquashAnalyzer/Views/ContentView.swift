@@ -1004,7 +1004,7 @@ struct GameOverOverlay: View {
                         title: "Bekijk Analyse",
                         subtitle: nil,
                         color: AppColors.accentGold,
-                        colorDark: AppColors.accentGoldDark
+                        style: .outlined
                     ) {
                         onAnalysis()
                     }

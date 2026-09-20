@@ -44,6 +44,8 @@ final class SwiftDataMatchRepository: MatchRepository {
             saved.player2CoachingFocus = match.player2CoachingFocus
             saved.player1CoachingNotes = match.player1CoachingNotes
             saved.player2CoachingNotes = match.player2CoachingNotes
+            saved.player1GamesBefore = match.player1GamesBefore
+            saved.player2GamesBefore = match.player2GamesBefore
 
             // A match contains few records. Replacing its child snapshot keeps the
             // write path simple and prevents standalone/linked duplicate games.
@@ -53,7 +55,7 @@ final class SwiftDataMatchRepository: MatchRepository {
             saved.games.removeAll()
 
             for (index, game) in match.games.enumerated() {
-                let savedGame = SavedGame.from(game, gameNumber: index + 1, context: context)
+                let savedGame = SavedGame.from(game, gameNumber: match.gameNumber(at: index), context: context)
                 savedGame.match = saved
                 saved.games.append(savedGame)
             }

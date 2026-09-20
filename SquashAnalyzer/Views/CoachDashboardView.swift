@@ -210,6 +210,12 @@ struct CoachDashboardView: View {
         .padding(.horizontal, 20)
     }
 
+    /// Match game number (accounts for games played before tracking started)
+    private func gameNumber(of g: Game) -> Int {
+        guard let match, let index = match.games.firstIndex(where: { $0 === g }) else { return 1 }
+        return match.gameNumber(at: index)
+    }
+
     // MARK: - Game Selector
     private var gameSelector: some View {
         HStack(spacing: 8) {
@@ -218,7 +224,7 @@ struct CoachDashboardView: View {
                 Button(action: {
                     withAnimation { selectedGameIndex = index }
                 }) {
-                    Text("Game \(index + 1) (\(g.player1Score)-\(g.player2Score))")
+                    Text("Game \(gameNumber(of: g)) (\(g.player1Score)-\(g.player2Score))")
                         .font(AppFonts.caption(11))
                         .foregroundColor(selectedGameIndex == index ? AppColors.textPrimary : AppColors.textMuted)
                         .padding(.horizontal, 12)

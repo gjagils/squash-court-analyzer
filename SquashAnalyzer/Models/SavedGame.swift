@@ -148,6 +148,9 @@ final class SavedGame {
                     timestamp: sl.timestamp
                 )
             }
+        // The winner of the last rally serves next; the service box is not stored,
+        // so it falls back to the hand-out box until Links/Rechts is tapped.
+        game.restoreServiceState()
         return game
     }
 

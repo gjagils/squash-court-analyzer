@@ -31,12 +31,31 @@ class Match: Identifiable {
     /// Starting server for the match
     var matchStartingServer: Player = .player1
 
+    /// Games already won when tracking started at game 2 or later ("later instappen").
+    /// They count towards the stand but have no games of their own.
+    var player1GamesBefore: Int = 0
+    var player2GamesBefore: Int = 0
+
     /// Best of X games (default 5)
     let bestOf: Int = 5
 
     /// Games needed to win
     var gamesToWin: Int {
         (bestOf / 2) + 1 // 3 for best of 5
+    }
+
+    /// Number of the first tracked game (1 unless the match was picked up later)
+    var firstGameNumber: Int { 1 + player1GamesBefore + player2GamesBefore }
+
+    /// Match game number for `games[index]`
+    func gameNumber(at index: Int) -> Int { firstGameNumber + index }
+
+    var currentGameNumber: Int { gameNumber(at: currentGameIndex) }
+
+    /// Neither player may already have won the match, and the games before must fit in best-of
+    static func isValidHeadStart(player1: Int, player2: Int, bestOf: Int = 5) -> Bool {
+        let toWin = (bestOf / 2) + 1
+        return player1 >= 0 && player2 >= 0 && player1 < toWin && player2 < toWin
     }
 
     // MARK: - Computed Properties
@@ -55,11 +74,11 @@ class Match: Identifiable {
     }
 
     var player1GamesWon: Int {
-        games.filter { $0.winner == .player1 }.count
+        player1GamesBefore + games.filter { $0.winner == .player1 }.count
     }
 
     var player2GamesWon: Int {
-        games.filter { $0.winner == .player2 }.count
+        player2GamesBefore + games.filter { $0.winner == .player2 }.count
     }
 
     var isMatchOver: Bool {
@@ -104,6 +123,12 @@ class Match: Identifiable {
         game.player1Name = player1Name
         game.player2Name = player2Name
 
+        // The Links/Rechts hand-out boxes hold for the whole match
+        if let lastGame = games.last {
+            game.player1PreferredSide = lastGame.player1PreferredSide
+            game.player2PreferredSide = lastGame.player2PreferredSide
+        }
+
         // Alternate starting server each game, or winner of previous game serves
         if let lastGame = games.last, let lastWinner = lastGame.winner {
             game.setStartingServer(lastWinner)
@@ -139,7 +164,9 @@ class Match: Identifiable {
         player1CoachingFocus: [String] = [],
         player1CoachingNotes: String = "",
         player2CoachingFocus: [String] = [],
-        player2CoachingNotes: String = ""
+        player2CoachingNotes: String = "",
+        player1GamesBefore: Int = 0,
+        player2GamesBefore: Int = 0
     ) {
         player1Name = player1.isEmpty ? "Speler 1" : player1
         player2Name = player2.isEmpty ? "Speler 2" : player2
@@ -148,6 +175,9 @@ class Match: Identifiable {
         self.player1CoachingNotes = player1CoachingNotes
         self.player2CoachingFocus = player2CoachingFocus
         self.player2CoachingNotes = player2CoachingNotes
+        let validHeadStart = Self.isValidHeadStart(player1: player1GamesBefore, player2: player2GamesBefore, bestOf: bestOf)
+        self.player1GamesBefore = validHeadStart ? player1GamesBefore : 0
+        self.player2GamesBefore = validHeadStart ? player2GamesBefore : 0
         resetMatch()
     }
 
@@ -260,6 +290,42 @@ class Match: Identifiable {
 
         let won = longRallies.filter { $0.scorer == player }.count
         return Double(won) / Double(longRallies.count) * 100
+    }
+
+    // MARK: - Export
+
+    /// Short WhatsApp update for the game-over / match-over overlay: the game just
+    /// played and the stand in games, in the same style as the referee's short text.
+    var whatsAppText: String {
+        let finished = games.enumerated().filter { $0.element.winner != nil }
+        let p1 = player1GamesWon, p2 = player2GamesWon
+        var lines: [String] = []
+
+        if isMatchOver {
+            lines.append("🏸 *Squash · Wedstrijd klaar*")
+            lines.append("🏆 " + boldLeaderLine(p1: p1, p2: p2))
+        } else {
+            let number = finished.last.map { gameNumber(at: $0.offset) } ?? currentGameNumber
+            lines.append("🏸 *Squash · Game \(number) klaar*")
+            if let game = finished.last?.element {
+                lines.append("Game: " + boldLeaderLine(p1: game.player1Score, p2: game.player2Score))
+            }
+            lines.append("Games: " + boldLeaderLine(p1: p1, p2: p2))
+        }
+
+        if !finished.isEmpty {
+            var scores = finished.map { "\($0.element.player1Score)-\($0.element.player2Score)" }.joined(separator: " · ")
+            if firstGameNumber > 1 { scores += " (vanaf game \(firstGameNumber))" }
+            lines.append(scores)
+        }
+        return lines.joined(separator: "\n")
+    }
+
+    /// "Jan 3 – 1 Piet" with the winner (or leader) in bold, in player order
+    private func boldLeaderLine(p1: Int, p2: Int) -> String {
+        let name1 = p1 > p2 ? "*\(player1Name)*" : player1Name
+        let name2 = p2 > p1 ? "*\(player2Name)*" : player2Name
+        return "\(name1) \(p1) – \(p2) \(name2)"
     }
 
     // MARK: - Let Analysis

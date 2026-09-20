@@ -570,6 +570,15 @@ struct MatchHistoryCard: View {
 
                 if !match.games.isEmpty {
                     HStack(spacing: 8) {
+                        // Games played before tracking started have no score
+                        ForEach(0..<(match.player1GamesBefore + match.player2GamesBefore), id: \.self) { _ in
+                            Text("–")
+                                .font(AppFonts.caption(11))
+                                .foregroundColor(AppColors.textMuted.opacity(0.6))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Capsule().fill(Color.white.opacity(0.03)))
+                        }
                         ForEach(match.games.sorted(by: { $0.gameNumber < $1.gameNumber })) { game in
                             Text("\(game.player1Score)-\(game.player2Score)")
                                 .font(AppFonts.caption(11))

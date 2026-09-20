@@ -73,6 +73,9 @@ struct MatchExportData: Codable {
     let player2CoachingFocus: [String]?
     let player1CoachingNotes: String?
     let player2CoachingNotes: String?
+    /// Games won before tracking started (absent in older backups)
+    var player1GamesBefore: Int? = nil
+    var player2GamesBefore: Int? = nil
     let games: [GameExportData]
 }
 
@@ -508,6 +511,8 @@ enum ExportService {
             player2CoachingFocus: match.player2CoachingFocus,
             player1CoachingNotes: match.player1CoachingNotes,
             player2CoachingNotes: match.player2CoachingNotes,
+            player1GamesBefore: match.player1GamesBefore,
+            player2GamesBefore: match.player2GamesBefore,
             games: games
         )
     }
@@ -570,6 +575,8 @@ enum ExportService {
         savedMatch.player2CoachingFocus = matchData.player2CoachingFocus ?? []
         savedMatch.player1CoachingNotes = matchData.player1CoachingNotes ?? ""
         savedMatch.player2CoachingNotes = matchData.player2CoachingNotes ?? ""
+        savedMatch.player1GamesBefore = matchData.player1GamesBefore ?? 0
+        savedMatch.player2GamesBefore = matchData.player2GamesBefore ?? 0
         context.insert(savedMatch)
         for gameData in matchData.games {
             importGame(gameData, context: context, matchRef: savedMatch)

@@ -24,23 +24,30 @@ final class SavedRefereeMatch {
     var bestOf: Int
     var gameResults: [RefereeGameResult]
     var savedAt: Date
+    /// Games already won when scoring started at game 2 or later (0 for a full match)
+    var player1GamesBefore: Int = 0
+    var player2GamesBefore: Int = 0
 
     init(
         player1Name: String,
         player2Name: String,
         bestOf: Int,
         gameResults: [RefereeGameResult],
-        savedAt: Date = Date()
+        savedAt: Date = Date(),
+        player1GamesBefore: Int = 0,
+        player2GamesBefore: Int = 0
     ) {
         self.player1Name = player1Name
         self.player2Name = player2Name
         self.bestOf = bestOf
         self.gameResults = gameResults
         self.savedAt = savedAt
+        self.player1GamesBefore = player1GamesBefore
+        self.player2GamesBefore = player2GamesBefore
     }
 
-    var player1GamesWon: Int { gameResults.filter { $0.winnerRaw == Player.player1.rawValue }.count }
-    var player2GamesWon: Int { gameResults.filter { $0.winnerRaw == Player.player2.rawValue }.count }
+    var player1GamesWon: Int { player1GamesBefore + gameResults.filter { $0.winnerRaw == Player.player1.rawValue }.count }
+    var player2GamesWon: Int { player2GamesBefore + gameResults.filter { $0.winnerRaw == Player.player2.rawValue }.count }
     var gamesToWin: Int { (bestOf / 2) + 1 }
 
     var winnerName: String? {
@@ -49,10 +56,12 @@ final class SavedRefereeMatch {
         return nil
     }
 
+    /// "11-3, 11-8", with a dash per game played before scoring started
     var gameScoresText: String {
-        gameResults.sorted { $0.number < $1.number }
+        let untracked = Array(repeating: "–", count: player1GamesBefore + player2GamesBefore)
+        let scored = gameResults.sorted { $0.number < $1.number }
             .map { "\($0.player1Score)-\($0.player2Score)" }
-            .joined(separator: ", ")
+        return (untracked + scored).joined(separator: ", ")
     }
 
     var matchScoreText: String { "\(player1GamesWon)-\(player2GamesWon)" }

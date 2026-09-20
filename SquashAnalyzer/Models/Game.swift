@@ -41,6 +41,15 @@ class Game: Identifiable {
     var currentServer: Player = .player1
     var startingServer: Player = .player1
 
+    /// Service box the current server serves from (same rules as RefereeMatch)
+    var serverSide: ServerSide = .right
+
+    /// Box a player starts serving from after a hand-out or at the start of a game.
+    /// Set by tapping Links/Rechts on the scoreboard; nil means the default right box.
+    /// Match copies these into the next game so they hold for the whole match.
+    var player1PreferredSide: ServerSide? = nil
+    var player2PreferredSide: ServerSide? = nil
+
     /// All points scored in this game (for analysis)
     var points: [Point] = []
 
@@ -61,6 +70,9 @@ class Game: Identifiable {
 
     /// Track previous server for undo
     private var previousServers: [Player] = []
+
+    /// Track previous service box for undo
+    private var previousSides: [ServerSide] = []
 
     /// Track previous point times for undo
     private var previousPointTimes: [Date] = []
@@ -171,8 +183,9 @@ class Game: Identifiable {
     func addPoint(to player: Player, pointType: PointType, at zone: CourtZone?, with shotType: ShotType?) {
         guard !isGameOver else { return }
 
-        // Save current server and point time for undo
+        // Save current server, service box and point time for undo
         previousServers.append(currentServer)
+        previousSides.append(serverSide)
         previousPointTimes.append(lastPointTime)
 
         // Calculate rally duration (time since last point or game start)
@@ -202,9 +215,14 @@ class Game: Identifiable {
         // Update last point time for next rally
         lastPointTime = now
 
-        // In squash, service changes when the receiver wins the rally
-        if player != currentServer {
+        // Service rule: the server who wins a rally keeps serving from the other box.
+        // On a hand-out the new server starts from their preferred box (right unless
+        // Links/Rechts was tapped for that player earlier in the match).
+        if player == currentServer {
+            serverSide = serverSide.opposite
+        } else {
             currentServer = player
+            serverSide = handOutSide(for: player)
         }
 
         // Clear selection after scoring
@@ -225,9 +243,13 @@ class Game: Identifiable {
             player2Score -= 1
         }
 
-        // Restore previous server
-        if let previousServer = previousServers.popLast() {
+        // Restore previous server and service box
+        if let previousServer = previousServers.popLast(), let previousSide = previousSides.popLast() {
             currentServer = previousServer
+            serverSide = previousSide
+        } else {
+            // Recovered game without undo history: derive the service state from the points
+            restoreServiceState()
         }
 
         // Restore previous point time
@@ -244,9 +266,11 @@ class Game: Identifiable {
         player1Score = 0
         player2Score = 0
         currentServer = startingServer
+        serverSide = handOutSide(for: startingServer)
         points = []
         lets = []
         previousServers = []
+        previousSides = []
         previousPointTimes = []
         lastPointTime = Date()
         selectedPlayer = nil
@@ -291,6 +315,34 @@ class Game: Identifiable {
     func setStartingServer(_ player: Player) {
         startingServer = player
         currentServer = player
+        serverSide = handOutSide(for: player)
+    }
+
+    // MARK: - Service box
+
+    func preferredSide(for player: Player) -> ServerSide? {
+        player == .player1 ? player1PreferredSide : player2PreferredSide
+    }
+
+    /// Box a player serves from when they take over service
+    private func handOutSide(for player: Player) -> ServerSide {
+        preferredSide(for: player) ?? .right
+    }
+
+    /// Correct the box the current server serves from and remember it as that
+    /// player's hand-out box for the rest of the match. Alternation continues
+    /// from the corrected box.
+    func overrideSide(to side: ServerSide) {
+        guard !isGameOver, side != serverSide else { return }
+        serverSide = side
+        if currentServer == .player1 { player1PreferredSide = side } else { player2PreferredSide = side }
+    }
+
+    /// Bring the service state in line with the recorded points, e.g. after a
+    /// game is restored from the store: the winner of the last rally serves next.
+    func restoreServiceState() {
+        currentServer = points.last?.scorer ?? startingServer
+        serverSide = handOutSide(for: currentServer)
     }
 
     // MARK: - Analysis helpers

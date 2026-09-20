@@ -8,14 +8,8 @@ struct RefereeView: View {
 
     @State private var showingNextGameConfirm = false
     @State private var showingMatchOver = false
-    @State private var shareItemsToShow: ShareItemsWrapper? = nil
+    @State private var showingShareSheet = false
     @State private var savedRefereeMatch: SavedRefereeMatch? = nil
-
-    // Timers
-    @State private var matchStartTime = Date()
-    @State private var gameStartTime = Date()
-    @State private var now = Date()
-    private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     init(match: RefereeMatch, onDismiss: @escaping () -> Void) {
         _match = State(initialValue: match)
@@ -90,12 +84,8 @@ struct RefereeView: View {
                 )
             }
         }
-        .onReceive(ticker) { t in now = t }
-        .onChange(of: match.currentGameNumber) { _, _ in
-            gameStartTime = Date()
-        }
-        .sheet(item: $shareItemsToShow) { wrapper in
-            ShareSheet(items: wrapper.items)
+        .sheet(isPresented: $showingShareSheet) {
+            RefereeShareSheet(match: match)
         }
         .onChange(of: match.isGameOver) { _, isOver in
             guard isOver else { return }
@@ -165,8 +155,13 @@ struct RefereeView: View {
                     .lineLimit(1)
             }
 
-            if !match.completedGames.isEmpty {
+            if !match.completedGames.isEmpty || match.firstGameNumber > 1 {
                 HStack(spacing: 10) {
+                    ForEach(1..<match.firstGameNumber, id: \.self) { number in
+                        Text("G\(number): –")
+                            .font(AppFonts.caption(9))
+                            .foregroundColor(AppColors.textMuted)
+                    }
                     ForEach(match.completedGames) { game in
                         let c: Color = game.winner == .player1 ? AppColors.warmOrange : AppColors.steelBlue
                         Text("G\(game.number): \(game.player1Score)-\(game.player2Score)")
@@ -197,18 +192,13 @@ struct RefereeView: View {
 
             // Links / Rechts selector — always laid out so both scores line up,
             // only visible and tappable for the current server
-            VStack(spacing: 3) {
-                Text("SERVICE")
-                    .font(AppFonts.caption(9))
-                    .foregroundColor(color.opacity(0.6))
-                    .tracking(1)
-
-                HStack(spacing: 6) {
-                    sideChip("Links", side: .left, active: match.serverSide == .left,
-                             color: color, pinned: match.preferredSide(for: player) == .left)
-                    sideChip("Rechts", side: .right, active: match.serverSide == .right,
-                             color: color, pinned: match.preferredSide(for: player) == .right)
-                }
+            ServiceSideSelector(
+                side: match.serverSide,
+                preferredSide: match.preferredSide(for: player),
+                color: color,
+                disabled: match.isGameOver
+            ) { side in
+                withAnimation(.easeInOut(duration: 0.15)) { match.overrideSide(to: side) }
             }
             .opacity(isServer ? 1 : 0)
             .allowsHitTesting(isServer)
@@ -222,33 +212,6 @@ struct RefereeView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .padding(.vertical, 12)
         .background(isServer ? color.opacity(0.05) : Color.clear)
-    }
-
-    /// `pinned` marks the box this player starts from after every hand-out
-    private func sideChip(_ label: String, side: ServerSide, active: Bool, color: Color, pinned: Bool) -> some View {
-        Button(action: { withAnimation(.easeInOut(duration: 0.15)) { match.overrideSide(to: side) } }) {
-            HStack(spacing: 3) {
-                if pinned {
-                    Image(systemName: "pin.fill")
-                        .font(.system(size: 7))
-                }
-                Text(label)
-                    .font(AppFonts.label(12))
-            }
-            .foregroundColor(active ? AppColors.backgroundDark : color.opacity(0.4))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(active ? color : color.opacity(0.1))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(color.opacity(active ? 0 : 0.3), lineWidth: 1)
-                    )
-            )
-        }
-        .buttonStyle(.plain)
-        .disabled(active || match.isGameOver)
     }
 
     // MARK: - Action Grid
@@ -311,45 +274,49 @@ struct RefereeView: View {
 
     // MARK: - Timer Row
 
+    // Start times live on the match (the share texts use them); TimelineView
+    // redraws once a second without a timer that restarts on every re-render.
     private var timerRow: some View {
-        HStack {
-            Image(systemName: "timer")
-                .font(.system(size: 12))
-                .foregroundColor(AppColors.accentGold.opacity(0.5))
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            HStack {
+                Image(systemName: "timer")
+                    .font(.system(size: 12))
+                    .foregroundColor(AppColors.accentGold.opacity(0.5))
 
-            VStack(alignment: .leading, spacing: 1) {
-                Text("MATCH")
-                    .font(AppFonts.caption(8))
-                    .foregroundColor(AppColors.textMuted)
-                    .tracking(1)
-                Text(elapsed(since: matchStartTime))
-                    .font(AppFonts.score(16))
-                    .foregroundColor(AppColors.textSecondary)
-                    .monospacedDigit()
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("MATCH")
+                        .font(AppFonts.caption(8))
+                        .foregroundColor(AppColors.textMuted)
+                        .tracking(1)
+                    Text(elapsed(since: match.matchStartedAt, at: context.date))
+                        .font(AppFonts.score(16))
+                        .foregroundColor(AppColors.textSecondary)
+                        .monospacedDigit()
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 1) {
+                    Text("GAME")
+                        .font(AppFonts.caption(8))
+                        .foregroundColor(AppColors.textMuted)
+                        .tracking(1)
+                    Text(elapsed(since: match.gameStartedAt, at: context.date))
+                        .font(AppFonts.score(16))
+                        .foregroundColor(AppColors.textSecondary)
+                        .monospacedDigit()
+                }
+
+                Image(systemName: "timer")
+                    .font(.system(size: 12))
+                    .foregroundColor(AppColors.accentGold.opacity(0.5))
             }
-
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 1) {
-                Text("GAME")
-                    .font(AppFonts.caption(8))
-                    .foregroundColor(AppColors.textMuted)
-                    .tracking(1)
-                Text(elapsed(since: gameStartTime))
-                    .font(AppFonts.score(16))
-                    .foregroundColor(AppColors.textSecondary)
-                    .monospacedDigit()
-            }
-
-            Image(systemName: "timer")
-                .font(.system(size: 12))
-                .foregroundColor(AppColors.accentGold.opacity(0.5))
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 10)
     }
 
-    private func elapsed(since start: Date) -> String {
+    private func elapsed(since start: Date, at now: Date) -> String {
         let secs = max(0, Int(now.timeIntervalSince(start)))
         return String(format: "%02d:%02d", secs / 60, secs % 60)
     }
@@ -411,7 +378,9 @@ struct RefereeView: View {
             player1Name: match.player1Name,
             player2Name: match.player2Name,
             bestOf: match.bestOf,
-            gameResults: results
+            gameResults: results,
+            player1GamesBefore: match.player1GamesBefore,
+            player2GamesBefore: match.player2GamesBefore
         )
         modelContext.insert(saved)
         try? modelContext.save()
@@ -428,7 +397,7 @@ struct RefereeView: View {
     // MARK: - Share
 
     private func shareScore() {
-        shareItemsToShow = ShareItemsWrapper(items: [match.whatsAppText])
+        showingShareSheet = true
     }
 }
 
@@ -723,67 +692,58 @@ private struct RefereeGameOverOverlay: View {
     let onUndo: () -> Void
     let onDismiss: () -> Void
 
+    private var winner: Player? { match.currentGameWinner }
+
     var body: some View {
-        ZStack {
-            Color.black.opacity(0.85)
-                .ignoresSafeArea()
+        ResultOverlayCard(accent: winner.map(RefereeView.color(for:))) {
+            ResultTitle("GAME \(match.currentGameNumber) KLAAR")
 
-            VStack(spacing: 24) {
-                Text("GAME \(match.currentGameNumber) KLAAR")
-                    .font(AppFonts.title(22))
-                    .foregroundColor(AppColors.textPrimary)
-                    .tracking(3)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+            ResultScoreRow(
+                player1Name: match.player1Name,
+                player2Name: match.player2Name,
+                player1Score: match.player1Score,
+                player2Score: match.player2Score,
+                winner: winner
+            )
 
-                if let winner = match.currentGameWinner {
-                    Text("\(match.name(for: winner)) wint de game!")
-                        .font(AppFonts.body(18))
-                        .foregroundColor(AppColors.accentGold)
-                }
-
-                HStack(spacing: 12) {
-                    LEDScoreDisplay(score: match.player1Score, size: 60)
-                    LEDColon(size: 60)
-                    LEDScoreDisplay(score: match.player2Score, size: 60)
-                }
-                .padding(16)
-                .background(LEDDisplayBackground())
-
-                Text("Stand: \(match.player1GamesWon) – \(match.player2GamesWon)")
-                    .font(AppFonts.label(14))
-                    .foregroundColor(AppColors.textSecondary)
-
-                VStack(spacing: 12) {
-                    HardwareButton(
-                        title: "Volgende Game",
-                        subtitle: nil,
-                        color: AppColors.warmOrange,
-                        colorDark: AppColors.warmOrangeDark
-                    ) { onNextGame() }
-
-                    OverlayUndoButton(action: onUndo)
-
-                    Button(action: onDismiss) {
-                        Text("Bekijk stand")
-                            .font(AppFonts.caption(13))
-                            .foregroundColor(AppColors.textMuted)
-                    }
-                }
-                .padding(.horizontal, 40)
+            if let winner {
+                ResultWinnerLine(text: "\(match.name(for: winner)) wint game \(match.currentGameNumber)",
+                                 color: RefereeView.color(for: winner))
             }
-            .padding(32)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(AppColors.backgroundMedium)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(AppColors.accentGold.opacity(0.3), lineWidth: 2)
-            )
-            .shadow(color: AppColors.warmOrangeGlow.opacity(0.2), radius: 30, x: 0, y: 10)
-            .padding(.horizontal, 24)
+
+            VStack(spacing: 10) {
+                GameResultChips(games: match.allGameResults, untracked: match.firstGameNumber - 1)
+                ResultCaption(standText)
+                ResultCaption(gameStatsText, icon: "timer")
+            }
+
+            VStack(spacing: 12) {
+                HardwareButton(title: "Volgende game", color: AppColors.warmOrange) { onNextGame() }
+                OverlayUndoButton(action: onUndo)
+                Button(action: onDismiss) {
+                    Text("Bekijk stand")
+                        .font(AppFonts.caption(13))
+                        .foregroundColor(AppColors.textMuted)
+                }
+                .padding(.top, 2)
+            }
         }
+    }
+
+    /// "Gelijk 1 – 1" or "Jan leidt 2 – 1", games won including this one
+    private var standText: String {
+        let p1 = match.player1TotalGames, p2 = match.player2TotalGames
+        if p1 == p2 { return "Gelijk \(p1) – \(p2)" }
+        let leader: Player = p1 > p2 ? .player1 : .player2
+        return "\(match.name(for: leader)) leidt \(max(p1, p2)) – \(min(p1, p2))"
+    }
+
+    private var gameStatsText: String {
+        let secs = Int(match.currentGameDuration)
+        var parts = [String(format: "%d:%02d", secs / 60, secs % 60), "\(match.pointHistory.count) rallies"]
+        let strokes = match.pointHistory.filter(\.isStroke).count
+        if strokes > 0 { parts.append("\(strokes) stroke\(strokes == 1 ? "" : "s")") }
+        return parts.joined(separator: " · ")
     }
 }
 
@@ -795,64 +755,270 @@ private struct RefereeMatchOverOverlay: View {
     let onUndo: () -> Void
     let onDismiss: () -> Void
 
+    private var winner: Player? { match.matchWinner }
+
+    var body: some View {
+        ResultOverlayCard(accent: winner.map(RefereeView.color(for:))) {
+            ResultTitle("WEDSTRIJD KLAAR")
+
+            ResultScoreRow(
+                player1Name: match.player1Name,
+                player2Name: match.player2Name,
+                player1Score: match.player1TotalGames,
+                player2Score: match.player2TotalGames,
+                winner: winner
+            )
+
+            if let winner {
+                ResultWinnerLine(text: "🏆 \(match.name(for: winner)) wint de wedstrijd",
+                                 color: RefereeView.color(for: winner))
+            }
+
+            VStack(spacing: 10) {
+                GameResultChips(games: match.allGameResults, untracked: match.firstGameNumber - 1)
+                ResultCaption(matchStatsText, icon: "timer")
+            }
+
+            VStack(spacing: 12) {
+                HardwareButton(title: "Deel score", color: AppColors.warmOrange) { onShare() }
+                HardwareButton(title: "Sluiten", color: AppColors.textSecondary, style: .outlined) { onDismiss() }
+                OverlayUndoButton(action: onUndo)
+            }
+        }
+    }
+
+    private var matchStatsText: String {
+        let minutes = max(1, Int((match.matchDuration / 60).rounded()))
+        var parts = ["\(minutes) min", "\(match.totalRallies) rallies"]
+        if match.totalStrokes > 0 { parts.append("\(match.totalStrokes) stroke\(match.totalStrokes == 1 ? "" : "s")") }
+        return parts.joined(separator: " · ")
+    }
+}
+
+extension RefereeView {
+    /// Player colours as used throughout the referee screen
+    static func color(for player: Player) -> Color {
+        player == .player1 ? AppColors.warmOrange : AppColors.steelBlue
+    }
+}
+
+// MARK: - Result overlay building blocks (referee + coach)
+
+/// Dimmed scrim with the flat referee-style result card on top. `accent` tints
+/// the hairline border in the winner's colour.
+struct ResultOverlayCard<Content: View>: View {
+    var accent: Color? = nil
+    @ViewBuilder let content: Content
+
     var body: some View {
         ZStack {
             Color.black.opacity(0.85)
                 .ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                Text("WEDSTRIJD KLAAR")
-                    .font(AppFonts.title(22))
-                    .foregroundColor(AppColors.textPrimary)
-                    .tracking(3)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-
-                if let winner = match.matchWinner {
-                    Text("🏆 \(match.name(for: winner)) wint!")
-                        .font(AppFonts.body(20))
-                        .foregroundColor(AppColors.accentGold)
-                }
-
-                Text("\(match.player1TotalGames) – \(match.player2TotalGames)")
-                    .font(.system(size: 64, weight: .bold, design: .rounded))
-                    .foregroundColor(AppColors.textPrimary)
-
-                Text("\(match.player1Name)  vs  \(match.player2Name)")
-                    .font(AppFonts.label(13))
-                    .foregroundColor(AppColors.textSecondary)
-
-                VStack(spacing: 12) {
-                    HardwareButton(
-                        title: "Deel via WhatsApp",
-                        subtitle: nil,
-                        color: AppColors.warmOrange,
-                        colorDark: AppColors.warmOrangeDark
-                    ) { onShare() }
-
-                    HardwareButton(
-                        title: "Sluiten",
-                        subtitle: nil,
-                        color: AppColors.textSecondary,
-                        style: .outlined
-                    ) { onDismiss() }
-
-                    OverlayUndoButton(action: onUndo)
-                }
-                .padding(.horizontal, 40)
+            VStack(spacing: 22) {
+                content
             }
-            .padding(32)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 28)
+            .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: 20)
                     .fill(AppColors.backgroundMedium)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(AppColors.accentGold.opacity(0.3), lineWidth: 2)
+                    .stroke(accent?.opacity(0.35) ?? Color.white.opacity(0.10), lineWidth: 1)
             )
-            .shadow(color: AppColors.warmOrangeGlow.opacity(0.2), radius: 30, x: 0, y: 10)
             .padding(.horizontal, 24)
         }
+    }
+}
+
+struct ResultTitle: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text)
+            .font(AppFonts.title(20))
+            .foregroundColor(AppColors.textPrimary)
+            .tracking(3)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+    }
+}
+
+/// Avatars, names and the big rounded scores side by side; the winner keeps
+/// their colour, the loser is dimmed – same treatment as the live columns.
+struct ResultScoreRow: View {
+    let player1Name: String
+    let player2Name: String
+    let player1Score: Int
+    let player2Score: Int
+    let winner: Player?
+    var scoreSize: CGFloat = 64
+
+    var body: some View {
+        HStack(alignment: .lastTextBaseline, spacing: 4) {
+            side(.player1, name: player1Name, score: player1Score)
+            Text("–")
+                .font(.system(size: scoreSize * 0.55, weight: .bold, design: .rounded))
+                .foregroundColor(AppColors.textMuted)
+                .baselineOffset(scoreSize * 0.22)   // centre the dash on the digits
+            side(.player2, name: player2Name, score: player2Score)
+        }
+    }
+
+    private func side(_ player: Player, name: String, score: Int) -> some View {
+        let color = RefereeView.color(for: player)
+        let won = winner == nil || winner == player
+        return VStack(spacing: 6) {
+            PlayerAvatar(name: name, color: color, size: 44, active: won)
+            Text(name)
+                .font(AppFonts.label(13))
+                .foregroundColor(won ? color : AppColors.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Text("\(score)")
+                .font(.system(size: scoreSize, weight: .bold, design: .rounded))
+                .foregroundColor(won ? color : AppColors.textPrimary.opacity(0.55))
+                .contentTransition(.numericText())
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+struct ResultWinnerLine: View {
+    let text: String
+    let color: Color
+
+    var body: some View {
+        Text(text)
+            .font(AppFonts.body(16))
+            .foregroundColor(color)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+    }
+}
+
+struct ResultCaption: View {
+    let text: String
+    var icon: String? = nil
+    init(_ text: String, icon: String? = nil) {
+        self.text = text
+        self.icon = icon
+    }
+
+    var body: some View {
+        HStack(spacing: 5) {
+            if let icon {
+                Image(systemName: icon)
+                    .font(.system(size: 11))
+                    .foregroundColor(AppColors.accentGold.opacity(0.6))
+            }
+            Text(text)
+                .font(AppFonts.caption(12))
+                .foregroundColor(AppColors.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+    }
+}
+
+/// "G1 11-13" chips in the winner's colour, like the row under the live header.
+/// `untracked` games (played before scoring started) show as grey "G1 –" chips.
+struct GameResultChips: View {
+    let games: [(number: Int, p1: Int, p2: Int, winner: Player)]
+    var untracked: Int = 0
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<untracked, id: \.self) { index in
+                chip(number: index + 1, score: "–", color: AppColors.textMuted)
+            }
+            ForEach(games, id: \.number) { game in
+                chip(number: game.number, score: "\(game.p1)-\(game.p2)", color: RefereeView.color(for: game.winner))
+            }
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.7)
+    }
+
+    private func chip(number: Int, score: String, color: Color) -> some View {
+        VStack(spacing: 1) {
+            Text("G\(number)")
+                .font(AppFonts.caption(9))
+                .foregroundColor(color.opacity(0.7))
+                .tracking(1)
+            Text(score)
+                .font(AppFonts.label(12))
+                .foregroundColor(color)
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 5)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(color.opacity(0.10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(color.opacity(0.3), lineWidth: 1)
+                )
+        )
+    }
+}
+
+// MARK: - Service side selector (referee + coach)
+
+/// "SERVICE" caption with the Links / Rechts box chips for the current server.
+/// The active chip is filled in the player's colour; a pin marks the box the
+/// player starts from after every hand-out. `compact` is the scoreboard size.
+struct ServiceSideSelector: View {
+    let side: ServerSide
+    let preferredSide: ServerSide?
+    let color: Color
+    var compact: Bool = false
+    var disabled: Bool = false
+    let onSelect: (ServerSide) -> Void
+
+    var body: some View {
+        VStack(spacing: compact ? 2 : 3) {
+            Text("SERVICE")
+                .font(AppFonts.caption(compact ? 8 : 9))
+                .foregroundColor(color.opacity(0.6))
+                .tracking(1)
+
+            HStack(spacing: compact ? 4 : 6) {
+                chip("Links", .left)
+                chip("Rechts", .right)
+            }
+        }
+    }
+
+    private func chip(_ label: String, _ box: ServerSide) -> some View {
+        let active = side == box
+        return Button(action: { onSelect(box) }) {
+            HStack(spacing: 3) {
+                if preferredSide == box {
+                    Image(systemName: "pin.fill")
+                        .font(.system(size: 7))
+                }
+                Text(label)
+                    .font(AppFonts.label(compact ? 11 : 12))
+            }
+            .foregroundColor(active ? AppColors.backgroundDark : color.opacity(0.4))
+            .padding(.horizontal, compact ? 8 : 10)
+            .padding(.vertical, compact ? 4 : 5)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(active ? color : color.opacity(0.1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(color.opacity(active ? 0 : 0.3), lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+        .disabled(active || disabled)
     }
 }
 

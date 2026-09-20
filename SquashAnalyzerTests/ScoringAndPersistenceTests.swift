@@ -22,6 +22,132 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertEqual(game.player2Score, 0)
     }
 
+    func testServiceBoxAlternatesAndHandOutUsesPreferredBox() {
+        let game = Game()
+        game.setStartingServer(.player1)
+        XCTAssertEqual(game.serverSide, .right)
+
+        // The server who wins keeps serving from the other box
+        game.addPoint(to: .player1, pointType: .winner, at: .frontLeft, with: .drop)
+        XCTAssertEqual(game.currentServer, .player1)
+        XCTAssertEqual(game.serverSide, .left)
+
+        // Hand-out: the new server starts from the right box
+        game.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil)
+        XCTAssertEqual(game.currentServer, .player2)
+        XCTAssertEqual(game.serverSide, .right)
+
+        // Tapping Links pins that box as player 2's hand-out box
+        game.overrideSide(to: .left)
+        XCTAssertEqual(game.serverSide, .left)
+        XCTAssertEqual(game.preferredSide(for: .player2), .left)
+        XCTAssertNil(game.preferredSide(for: .player1))
+
+        game.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil)
+        XCTAssertEqual(game.serverSide, .right)
+        game.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil)
+        XCTAssertEqual(game.currentServer, .player1)
+        XCTAssertEqual(game.serverSide, .right)
+        game.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil)
+        XCTAssertEqual(game.currentServer, .player2)
+        XCTAssertEqual(game.serverSide, .left)
+    }
+
+    func testUndoRestoresServiceBox() {
+        let game = Game()
+        game.setStartingServer(.player1)
+        game.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil)
+        game.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil)
+        XCTAssertEqual(game.serverSide, .right)
+
+        game.undoLastPoint()
+        XCTAssertEqual(game.currentServer, .player1)
+        XCTAssertEqual(game.serverSide, .left)
+
+        game.undoLastPoint()
+        XCTAssertEqual(game.currentServer, .player1)
+        XCTAssertEqual(game.serverSide, .right)
+    }
+
+    func testPreferredBoxCarriesOverToNextGameAndWinnerServesFirst() {
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1)
+        let firstGame = match.currentGame
+        firstGame.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil)
+        firstGame.overrideSide(to: .left)
+        for _ in 0..<10 { firstGame.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil) }
+        XCTAssertEqual(firstGame.winner, .player2)
+
+        match.onGameEnd()
+        let secondGame = match.currentGame
+        XCTAssertNotEqual(secondGame.id, firstGame.id)
+        XCTAssertEqual(secondGame.currentServer, .player2)
+        XCTAssertEqual(secondGame.serverSide, .left)
+        XCTAssertEqual(secondGame.preferredSide(for: .player2), .left)
+        XCTAssertNil(secondGame.preferredSide(for: .player1))
+    }
+
+    func testWhatsAppTextShowsGameAndStandInGames() {
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1)
+        for _ in 0..<11 { match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil) }
+
+        // Between games: the finished game plus the stand, before "Volgende game" is tapped
+        let betweenGames = match.whatsAppText
+        XCTAssertTrue(betweenGames.contains("Game 1 klaar"), betweenGames)
+        XCTAssertTrue(betweenGames.contains("Game: *Een* 11 – 0 Twee"), betweenGames)
+        XCTAssertTrue(betweenGames.contains("Games: *Een* 1 – 0 Twee"), betweenGames)
+
+        match.onGameEnd()
+        for _ in 0..<11 { match.currentGame.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil) }
+        let levelled = match.whatsAppText
+        XCTAssertTrue(levelled.contains("Games: Een 1 – 1 Twee"), levelled)
+        XCTAssertTrue(levelled.contains("11-0 · 0-11"), levelled)
+
+        match.onGameEnd()
+        for _ in 0..<11 { match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil) }
+        match.onGameEnd()
+        for _ in 0..<11 { match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil) }
+        XCTAssertTrue(match.isMatchOver)
+        let final = match.whatsAppText
+        XCTAssertTrue(final.contains("Wedstrijd klaar"), final)
+        XCTAssertTrue(final.contains("🏆 *Een* 3 – 1 Twee"), final)
+        XCTAssertTrue(final.contains("11-0 · 0-11 · 11-0 · 11-0"), final)
+    }
+
+    func testHeadStartCountsTowardsTheStandAndGameNumbers() {
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player2, player1GamesBefore: 1, player2GamesBefore: 1)
+        XCTAssertEqual(match.firstGameNumber, 3)
+        XCTAssertEqual(match.currentGameNumber, 3)
+        XCTAssertEqual(match.player1GamesWon, 1)
+        XCTAssertEqual(match.player2GamesWon, 1)
+        XCTAssertEqual(match.currentGame.currentServer, .player2)
+        XCTAssertFalse(match.isMatchOver)
+
+        for _ in 0..<11 { match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil) }
+        XCTAssertEqual(match.player1GamesWon, 2)
+        XCTAssertTrue(match.whatsAppText.contains("Game 3 klaar"), match.whatsAppText)
+        XCTAssertTrue(match.whatsAppText.contains("Games: *Een* 2 – 1 Twee"), match.whatsAppText)
+        XCTAssertTrue(match.whatsAppText.contains("11-0 (vanaf game 3)"), match.whatsAppText)
+
+        match.onGameEnd()
+        XCTAssertEqual(match.currentGameNumber, 4)
+        for _ in 0..<11 { match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil) }
+        XCTAssertTrue(match.isMatchOver)
+        XCTAssertEqual(match.matchWinner, .player1)
+        XCTAssertEqual(match.games.count, 2, "only the tracked games exist")
+    }
+
+    func testHeadStartThatAlreadyDecidesTheMatchIsIgnored() {
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1, player1GamesBefore: 3, player2GamesBefore: 0)
+        XCTAssertEqual(match.player1GamesBefore, 0)
+        XCTAssertEqual(match.firstGameNumber, 1)
+        XCTAssertFalse(Match.isValidHeadStart(player1: 2, player2: 3))
+        XCTAssertTrue(Match.isValidHeadStart(player1: 2, player2: 2))
+    }
+
     func testEmptyStatisticsHaveNoInventedBestResult() {
         let game = Game()
         XCTAssertNil(game.bestZone(for: .player1))
@@ -61,6 +187,65 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertEqual(saved.first?.games.count, 1)
         XCTAssertEqual(saved.first?.games.first?.points.count, 2)
         XCTAssertEqual(try repository.mostRecentInProgressMatch()?.id, match.id)
+    }
+
+    @MainActor
+    func testHeadStartSurvivesPersistenceAndRecovery() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let schema = Schema(versionedSchema: SquashAnalyzerCurrentSchema.self)
+        let container = try ModelContainer(
+            for: schema,
+            migrationPlan: SquashAnalyzerMigrationPlan.self,
+            configurations: [config]
+        )
+        let repository = SwiftDataMatchRepository(context: container.mainContext)
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1, player1GamesBefore: 2, player2GamesBefore: 0)
+        match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil)
+        try repository.upsert(match)
+
+        let saved = try XCTUnwrap(container.mainContext.fetch(FetchDescriptor<SavedMatch>()).first)
+        XCTAssertEqual(saved.player1GamesBefore, 2)
+        XCTAssertEqual(saved.player1GamesWon, 2)
+        XCTAssertEqual(saved.games.first?.gameNumber, 3)
+
+        let restored = try XCTUnwrap(repository.mostRecentInProgressMatch())
+        XCTAssertEqual(restored.player1GamesBefore, 2)
+        XCTAssertEqual(restored.currentGameNumber, 3)
+        XCTAssertEqual(restored.player1GamesWon, 2)
+
+        // Backup round trip keeps it too
+        let backup = try ExportService.exportFullBackup(players: [], matches: [saved], standaloneGames: [])
+        container.mainContext.delete(saved)
+        try container.mainContext.save()
+        _ = try ExportService.importFullBackup(backup, context: container.mainContext)
+        let imported = try XCTUnwrap(container.mainContext.fetch(FetchDescriptor<SavedMatch>()).first)
+        XCTAssertEqual(imported.player1GamesBefore, 2)
+    }
+
+    @MainActor
+    func testRestoredGameServesFromLastRallyWinner() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let schema = Schema(versionedSchema: SquashAnalyzerCurrentSchema.self)
+        let container = try ModelContainer(
+            for: schema,
+            migrationPlan: SquashAnalyzerMigrationPlan.self,
+            configurations: [config]
+        )
+        let repository = SwiftDataMatchRepository(context: container.mainContext)
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1)
+        match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil)
+        match.currentGame.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil)
+        try repository.upsert(match)
+
+        let restored = try XCTUnwrap(repository.mostRecentInProgressMatch())
+        XCTAssertEqual(restored.currentGame.currentServer, .player2)
+        XCTAssertEqual(restored.currentGame.serverSide, .right)
+
+        // Undo without in-memory history derives the server from the remaining points
+        restored.currentGame.undoLastPoint()
+        XCTAssertEqual(restored.currentGame.currentServer, .player1)
     }
 
     @MainActor

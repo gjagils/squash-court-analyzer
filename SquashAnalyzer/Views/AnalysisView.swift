@@ -97,7 +97,7 @@ struct AnalysisView: View {
                     ForEach(Array(match.games.enumerated()), id: \.element.id) { index, g in
                         Button(action: { selectedGameIndex = index }) {
                             VStack(spacing: 4) {
-                                Text("Game \(index + 1)")
+                                Text("Game \(match.gameNumber(at: index))")
                                     .font(AppFonts.caption(11))
                                     .foregroundColor(selectedGameIndex == index ? AppColors.textPrimary : AppColors.textMuted)
 

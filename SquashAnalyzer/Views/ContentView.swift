@@ -261,6 +261,9 @@ struct ContentView: View {
         case .coachZone:
             match = ScreenshotScenario.makeCoachZoneMatch()
             showingSetup = false
+        case .coachGameOver:
+            match = ScreenshotScenario.makeCoachGameOverMatch()
+            showingSetup = false
         case .history:
             _ = ScreenshotScenario.seededSampleMatch(context: modelContext)
             showingSetup = false
@@ -662,6 +665,8 @@ struct MatchSetupView: View {
     @State private var player1Name: String = ""
     @State private var player2Name: String = ""
     @State private var startingServer: Player = .player1
+    @State private var player1GamesBefore: Int = 0
+    @State private var player2GamesBefore: Int = 0
 
     @State private var player1CoachingFocus: [String] = []
     @State private var player1CoachingNotes: String = ""
@@ -761,6 +766,16 @@ struct MatchSetupView: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 24)
+
+                // ── Later instappen (start at game 2–5 with the stand so far) ──
+                HeadStartPicker(
+                    player1Games: $player1GamesBefore,
+                    player2Games: $player2GamesBefore,
+                    player1Name: player1Name.isEmpty ? "Speler 1" : player1Name,
+                    player2Name: player2Name.isEmpty ? "Speler 2" : player2Name
+                )
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
 
                 Spacer()
 
@@ -879,7 +894,9 @@ struct MatchSetupView: View {
             player1CoachingFocus: player1CoachingFocus,
             player1CoachingNotes: player1CoachingNotes,
             player2CoachingFocus: player2CoachingFocus,
-            player2CoachingNotes: player2CoachingNotes
+            player2CoachingNotes: player2CoachingNotes,
+            player1GamesBefore: player1GamesBefore,
+            player2GamesBefore: player2GamesBefore
         )
         isPresented = false
     }
@@ -891,8 +908,110 @@ struct MatchSetupView: View {
             player1Name: p1.isEmpty ? "Speler 1" : p1,
             player2Name: p2.isEmpty ? "Speler 2" : p2,
             bestOf: 5,
-            startingServer: startingServer
+            startingServer: startingServer,
+            player1GamesBefore: player1GamesBefore,
+            player2GamesBefore: player2GamesBefore
         )
+    }
+}
+
+// MARK: - Head start picker ("Later instappen")
+
+/// Collapsed: one muted line. Expanded: a games-won stepper per player, so a
+/// match can be picked up at game 2–5 with the stand so far. Neither player can
+/// already have the games needed to win.
+struct HeadStartPicker: View {
+    @Binding var player1Games: Int
+    @Binding var player2Games: Int
+    let player1Name: String
+    let player2Name: String
+    var bestOf: Int = 5
+
+    @State private var expanded = false
+
+    private var maxPerPlayer: Int { (bestOf / 2) }          // 2 for best of 5
+    private var firstGame: Int { 1 + player1Games + player2Games }
+    private var hasHeadStart: Bool { firstGame > 1 }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Button(action: { withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() } }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "forward.end")
+                        .font(.system(size: 11, weight: .semibold))
+                    Text(summaryText)
+                        .font(AppFonts.caption(12))
+                    Image(systemName: expanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 9, weight: .semibold))
+                }
+                .foregroundColor(hasHeadStart ? AppColors.accentGold : AppColors.textMuted)
+            }
+            .buttonStyle(.plain)
+
+            if expanded {
+                HStack(spacing: 16) {
+                    stepper(name: player1Name, value: $player1Games, color: AppColors.warmOrange)
+                    stepper(name: player2Name, value: $player2Games, color: AppColors.steelBlue)
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+    }
+
+    /// "Later instappen" until a stand is set, then "Start bij game 3 · stand 1 – 1"
+    private var summaryText: String {
+        hasHeadStart ? "Start bij game \(firstGame) · stand \(player1Games) – \(player2Games)" : "Later instappen?"
+    }
+
+    private func stepper(name: String, value: Binding<Int>, color: Color) -> some View {
+        VStack(spacing: 6) {
+            Text(name)
+                .font(AppFonts.caption(11))
+                .foregroundColor(color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            HStack(spacing: 14) {
+                stepButton("minus", color: color, enabled: value.wrappedValue > 0) { value.wrappedValue -= 1 }
+                Text("\(value.wrappedValue)")
+                    .font(AppFonts.score(22))
+                    .foregroundColor(value.wrappedValue > 0 ? color : AppColors.textSecondary)
+                    .frame(minWidth: 22)
+                    .contentTransition(.numericText())
+                stepButton("plus", color: color, enabled: value.wrappedValue < maxPerPlayer) { value.wrappedValue += 1 }
+            }
+
+            Text("GAMES GEWONNEN")
+                .font(AppFonts.caption(8))
+                .foregroundColor(AppColors.textMuted)
+                .tracking(1)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(color.opacity(0.06))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(color.opacity(0.25), lineWidth: 1)
+                )
+        )
+    }
+
+    private func stepButton(_ icon: String, color: Color, enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: { withAnimation(.easeInOut(duration: 0.15)) { action() } }) {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(enabled ? color : AppColors.textMuted.opacity(0.5))
+                .frame(width: 30, height: 30)
+                .background(
+                    Circle()
+                        .fill(color.opacity(enabled ? 0.12 : 0.03))
+                        .overlay(Circle().stroke(color.opacity(enabled ? 0.35 : 0.1), lineWidth: 1))
+                )
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
     }
 }
 
@@ -1002,113 +1121,119 @@ struct GameOverOverlay: View {
     var onStop: (() -> Void)? = nil
     var onUndo: (() -> Void)? = nil
 
+    @State private var shareItems: ShareItemsWrapper? = nil
+
+    private var winner: Player? { match.isMatchOver ? match.matchWinner : game.winner }
+
+    /// Finished games of this match, newest last
+    private var gameResults: [(number: Int, p1: Int, p2: Int, winner: Player)] {
+        match.games.enumerated().compactMap { index, g in
+            g.winner.map { (number: match.gameNumber(at: index), p1: g.player1Score, p2: g.player2Score, winner: $0) }
+        }
+    }
+
     var body: some View {
-        ZStack {
-            Color.black.opacity(0.85)
-                .ignoresSafeArea()
+        ResultOverlayCard(accent: winner.map(RefereeView.color(for:))) {
+            ResultTitle(match.isMatchOver ? "WEDSTRIJD KLAAR" : "GAME \(match.currentGameNumber) KLAAR")
 
-            VStack(spacing: 24) {
-                // Title
-                Text(match.isMatchOver ? "WEDSTRIJD KLAAR" : "GAME \(match.currentGameIndex + 1) KLAAR")
-                    .font(AppFonts.title(22))
-                    .foregroundColor(AppColors.textPrimary)
-                    .tracking(3)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+            if match.isMatchOver {
+                ResultScoreRow(
+                    player1Name: match.player1Name,
+                    player2Name: match.player2Name,
+                    player1Score: match.player1GamesWon,
+                    player2Score: match.player2GamesWon,
+                    winner: winner
+                )
+            } else {
+                ResultScoreRow(
+                    player1Name: game.player1Name,
+                    player2Name: game.player2Name,
+                    player1Score: game.player1Score,
+                    player2Score: game.player2Score,
+                    winner: winner
+                )
+            }
 
-                // Winner announcement
-                if let winner = game.winner {
-                    Text("\(game.name(for: winner)) wint\(match.isMatchOver ? " de wedstrijd!" : " de game!")")
-                        .font(AppFonts.body(18))
-                        .foregroundColor(AppColors.accentGold)
+            if let winner {
+                ResultWinnerLine(
+                    text: "\(game.name(for: winner)) wint\(match.isMatchOver ? " de wedstrijd" : " game \(match.currentGameNumber)")",
+                    color: RefereeView.color(for: winner)
+                )
+            }
+
+            VStack(spacing: 10) {
+                if gameResults.count > 1 || match.isMatchOver || match.firstGameNumber > 1 {
+                    GameResultChips(games: gameResults, untracked: match.firstGameNumber - 1)
+                }
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 11))
+                        .foregroundColor(.green)
+                    Text(match.isMatchOver ? "Wedstrijd automatisch opgeslagen" : "Game automatisch opgeslagen")
+                        .font(AppFonts.caption(11))
+                        .foregroundColor(AppColors.textMuted)
+                }
+            }
+
+            VStack(spacing: 12) {
+                HStack(spacing: 8) {
+                    secondaryButton("Analyse", icon: "chart.bar.xaxis") { onAnalysis() }
+                    secondaryButton("Deel score", icon: "square.and.arrow.up") {
+                        shareItems = ShareItemsWrapper(items: [match.whatsAppText])
+                    }
                 }
 
-                // Score display
-                HStack(spacing: 12) {
-                    LEDScoreDisplay(score: game.player1Score, size: 60)
-                    LEDColon(size: 60)
-                    LEDScoreDisplay(score: game.player2Score, size: 60)
-                }
-                .padding(16)
-                .background(LEDDisplayBackground())
-
-                // Games score
-                if match.games.count > 1 || match.isMatchOver {
-                    Text("Games: \(match.player1GamesWon) - \(match.player2GamesWon)")
-                        .font(AppFonts.label(14))
-                        .foregroundColor(AppColors.textSecondary)
+                if match.isMatchOver {
+                    HardwareButton(title: "Nieuwe wedstrijd", color: AppColors.warmOrange) { onNewMatch() }
+                } else {
+                    HardwareButton(title: "Volgende game", color: AppColors.warmOrange) { onNextGame() }
                 }
 
-                VStack(spacing: 12) {
-                    // Auto-save indicator
-                    HStack(spacing: 6) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(.green)
-                        Text(match.isMatchOver ? "Wedstrijd automatisch opgeslagen" : "Game automatisch opgeslagen")
-                            .font(AppFonts.caption(11))
+                if let undo = onUndo {
+                    OverlayUndoButton(action: undo)
+                }
+
+                if !match.isMatchOver, let stop = onStop {
+                    Button(action: stop) {
+                        Text("Stop wedstrijd")
+                            .font(AppFonts.caption(13))
                             .foregroundColor(AppColors.textMuted)
                     }
-
-                    // Analysis button
-                    HardwareButton(
-                        title: "Bekijk Analyse",
-                        subtitle: nil,
-                        color: AppColors.accentGold,
-                        style: .outlined
-                    ) {
-                        onAnalysis()
-                    }
-
-                    // Next game or new match button
-                    if match.isMatchOver {
-                        HardwareButton(
-                            title: "Nieuwe Wedstrijd",
-                            subtitle: nil,
-                            color: AppColors.warmOrange,
-                            colorDark: AppColors.warmOrangeDark
-                        ) {
-                            onNewMatch()
-                        }
-                    } else {
-                        HardwareButton(
-                            title: "Volgende Game",
-                            subtitle: nil,
-                            color: AppColors.warmOrange,
-                            colorDark: AppColors.warmOrangeDark
-                        ) {
-                            onNextGame()
-                        }
-
-                    }
-
-                    if let undo = onUndo {
-                        OverlayUndoButton(action: undo)
-                    }
-
-                    // Stop button (mid-match)
-                    if !match.isMatchOver, let stop = onStop {
-                        Button(action: stop) {
-                            Text("Stop wedstrijd")
-                                .font(AppFonts.caption(13))
-                                .foregroundColor(AppColors.textMuted)
-                        }
-                    }
+                    .padding(.top, 2)
                 }
-                .padding(.horizontal, 40)
             }
-            .padding(32)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(AppColors.backgroundMedium)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(AppColors.accentGold.opacity(0.3), lineWidth: 2)
-            )
-            .shadow(color: AppColors.warmOrangeGlow.opacity(0.2), radius: 30, x: 0, y: 10)
-            .padding(.horizontal, 24)
         }
+        .sheet(item: $shareItems) { wrapper in
+            ShareSheet(items: wrapper.items)
+        }
+    }
+
+    /// Outlined gold button with an icon, two of them share the row above the primary action
+    private func secondaryButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+        let color = AppColors.accentGold
+        return Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .semibold))
+                Text(title.uppercased())
+                    .font(AppFonts.label(13))
+                    .tracking(1)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .foregroundColor(color)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(color.opacity(0.12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(color.opacity(0.35), lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 

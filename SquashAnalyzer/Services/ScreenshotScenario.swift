@@ -9,6 +9,7 @@ enum ScreenshotScenario: String, CaseIterable {
     case setup
     case coachMatch = "coach-match"
     case coachZone = "coach-zone"
+    case coachGameOver = "coach-gameover"
     case referee
     case history
     case dashboard
@@ -48,6 +49,16 @@ enum ScreenshotScenario: String, CaseIterable {
         let match = makeCoachMatch()
         match.currentGame.selectPlayer(.player1)
         match.currentGame.selectPointType(.winner)
+        return match
+    }
+
+    /// Game 1 just won 11-3 by player 1, so the game-over overlay is showing
+    static func makeCoachGameOverMatch() -> Match {
+        let match = makeCoachMatch()
+        let game = match.currentGame
+        for _ in 0..<7 {
+            game.addPoint(to: .player1, pointType: .winner, at: .frontLeft, with: .drop)
+        }
         return match
     }
 

@@ -53,12 +53,17 @@ final class MigrationTests: XCTestCase {
         XCTAssertEqual(migrated.games.count, 1)
         XCTAssertEqual(migrated.games.first?.points.count, 1)
         XCTAssertEqual(migrated.games.first?.lets.count, 1)
+        XCTAssertEqual(migrated.player1GamesBefore, 0, "V3 head start defaults to a full match")
+        XCTAssertEqual(migrated.player2GamesBefore, 0)
 
         let players = try context.fetch(FetchDescriptor<SavedPlayer>())
         XCTAssertEqual(players.map(\.name), ["Niels"])
         XCTAssertNil(players.first?.photoData)
 
-        XCTAssertEqual(try context.fetch(FetchDescriptor<SavedRefereeMatch>()).count, 1)
+        let refereeMatches = try context.fetch(FetchDescriptor<SavedRefereeMatch>())
+        XCTAssertEqual(refereeMatches.count, 1)
+        XCTAssertEqual(refereeMatches.first?.player2GamesBefore, 0)
+        XCTAssertEqual(refereeMatches.first?.player1GamesWon, 1)
 
         // 3. The migrated store keeps working for new-schema features.
         players.first?.photoData = Data([0xFF, 0xD8])

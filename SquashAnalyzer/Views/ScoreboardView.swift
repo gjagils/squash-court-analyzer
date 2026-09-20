@@ -19,7 +19,7 @@ struct ScoreboardView: View {
     // MARK: - Game / games column (mirrors the referee game header)
     private var gameColumn: some View {
         VStack(spacing: 3) {
-            Text("GAME \((match?.currentGameIndex ?? 0) + 1)")
+            Text("GAME \(match?.currentGameNumber ?? 1)")
                 .font(AppFonts.caption(10))
                 .foregroundColor(AppColors.textMuted)
                 .tracking(2)
@@ -52,6 +52,20 @@ struct ScoreboardView: View {
                 .foregroundColor(isServing ? color : AppColors.textSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+
+            // Links / Rechts service box, same rules as the referee screen. Always
+            // laid out so both scores line up, only visible for the current server.
+            ServiceSideSelector(
+                side: game.serverSide,
+                preferredSide: game.preferredSide(for: player),
+                color: color,
+                compact: true,
+                disabled: game.isGameOver
+            ) { side in
+                withAnimation(.easeInOut(duration: 0.15)) { game.overrideSide(to: side) }
+            }
+            .opacity(isServing ? 1 : 0)
+            .allowsHitTesting(isServing)
 
             Text("\(score)")
                 .font(.system(size: 52, weight: .bold, design: .rounded))

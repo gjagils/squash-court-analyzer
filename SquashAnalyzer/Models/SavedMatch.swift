@@ -16,6 +16,9 @@ final class SavedMatch {
     var player2CoachingFocus: [String] = []
     var player1CoachingNotes: String = ""
     var player2CoachingNotes: String = ""
+    /// Games already won when tracking started at game 2 or later (0 for a full match)
+    var player1GamesBefore: Int = 0
+    var player2GamesBefore: Int = 0
 
     @Relationship(deleteRule: .cascade, inverse: \SavedGame.match)
     var games: [SavedGame] = []
@@ -52,11 +55,11 @@ final class SavedMatch {
     }
 
     var player1GamesWon: Int {
-        games.filter { $0.winner == Player.player1.rawValue }.count
+        player1GamesBefore + games.filter { $0.winner == Player.player1.rawValue }.count
     }
 
     var player2GamesWon: Int {
-        games.filter { $0.winner == Player.player2.rawValue }.count
+        player2GamesBefore + games.filter { $0.winner == Player.player2.rawValue }.count
     }
 
     var gamesToWin: Int {
@@ -103,6 +106,8 @@ final class SavedMatch {
         match.player2CoachingFocus = player2CoachingFocus
         match.player1CoachingNotes = player1CoachingNotes
         match.player2CoachingNotes = player2CoachingNotes
+        match.player1GamesBefore = player1GamesBefore
+        match.player2GamesBefore = player2GamesBefore
         // Replace the default empty game with converted saved games
         match.games = games
             .sorted(by: { $0.gameNumber < $1.gameNumber })
@@ -129,12 +134,14 @@ final class SavedMatch {
         savedMatch.player2CoachingFocus = match.player2CoachingFocus
         savedMatch.player1CoachingNotes = match.player1CoachingNotes
         savedMatch.player2CoachingNotes = match.player2CoachingNotes
+        savedMatch.player1GamesBefore = match.player1GamesBefore
+        savedMatch.player2GamesBefore = match.player2GamesBefore
 
         context.insert(savedMatch)
 
         // Convert and save all games
         for (index, game) in match.games.enumerated() {
-            let savedGame = SavedGame.from(game, gameNumber: index + 1, context: context)
+            let savedGame = SavedGame.from(game, gameNumber: match.gameNumber(at: index), context: context)
             savedGame.match = savedMatch
             savedMatch.games.append(savedGame)
         }

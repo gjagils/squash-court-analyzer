@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-"""Wait for a build to finish processing, then add it to beta groups and submit for beta review.
+"""Wait for a build to finish processing, set its TestFlight notes, add it to beta groups
+and submit for beta review.
 
-    scripts/testflight_distribute.py --version 2.2 --build 6 [--groups Squashteam] [--no-review] [--timeout-minutes 45]
+    scripts/testflight_distribute.py --version 2.2 --build 10 --notes release-notes/2.2-10.md \
+        [--groups Squashteam] [--no-review] [--timeout-minutes 45]
+
+The notes file is plain text (max 4000 characters) and becomes the "What to Test"
+text testers see in TestFlight (locale nl-NL).
 """
 import argparse
 import os
@@ -23,10 +28,29 @@ def find_build(marketing_version, build_number):
     return max(builds, key=lambda b: b["attributes"]["uploadedDate"]) if builds else None
 
 
+def set_test_notes(build_id, text, locale="nl-NL"):
+    """Fill the build's What to Test text (created by App Store Connect, usually empty)."""
+    if len(text) > 4000:
+        sys.exit(f"Notes are {len(text)} characters; TestFlight allows 4000")
+    existing = asc.get(f"/v1/builds/{build_id}/betaBuildLocalizations",
+                       {"fields[betaBuildLocalizations]": "locale,whatsNew"})["data"]
+    match = next((l for l in existing if l["attributes"]["locale"] == locale), None)
+    if match:
+        asc.patch(f"/v1/betaBuildLocalizations/{match['id']}", {"data": {
+            "type": "betaBuildLocalizations", "id": match["id"], "attributes": {"whatsNew": text}}})
+    else:
+        asc.post("/v1/betaBuildLocalizations", {"data": {
+            "type": "betaBuildLocalizations",
+            "attributes": {"locale": locale, "whatsNew": text},
+            "relationships": {"build": {"data": {"type": "builds", "id": build_id}}}}})
+    print(f"  test notes set ({len(text)} chars, {locale})")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--version", required=True, help="marketing version, e.g. 2.2")
     ap.add_argument("--build", required=True, help="build number, e.g. 6")
+    ap.add_argument("--notes", help="text file with the What to Test notes for testers")
     ap.add_argument("--groups", nargs="*", default=["Squashteam"])
     ap.add_argument("--no-review", action="store_true")
     ap.add_argument("--timeout-minutes", type=int, default=45)
@@ -46,6 +70,10 @@ def main():
         time.sleep(120)
 
     build_id = build["id"]
+
+    if args.notes:
+        set_test_notes(build_id, open(args.notes, encoding="utf-8").read().strip())
+
     # Internal groups receive every build automatically and refuse explicit assignment.
     groups = asc.get(f"/v1/apps/{APP_ID}/betaGroups", {"fields[betaGroups]": "name,isInternalGroup"})["data"]
     wanted = [g for g in groups if g["attributes"]["name"] in args.groups and not g["attributes"]["isInternalGroup"]]

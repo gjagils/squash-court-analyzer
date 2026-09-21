@@ -43,23 +43,85 @@ struct ScoreboardView: View {
         .padding(.top, 6)
     }
 
-    /// Rally-by-rally dots for the current game, oldest left, in the scorer's colour.
-    /// Only the last rallies that fit the column are shown; nothing spills outside it.
+    /// Small version of the referee scoring line: newest rally on top under the
+    /// "now" marker, player 1 pills hanging left of the line, player 2 right, each
+    /// showing the scorer's new score. Only the rows that fit the column are shown.
     private var pointsTimeline: some View {
-        let dot: CGFloat = 6
-        let gap: CGFloat = 3
-        let capacity = Int((84 + gap) / (dot + gap))
-        let recent = game.points.suffix(capacity)
-        return HStack(spacing: gap) {
-            ForEach(recent) { point in
+        let width: CGFloat = 84
+        let rowHeight: CGFloat = 15
+        let rows = 5
+        let recent = Array(game.points.suffix(rows).reversed())
+        let serverColor: Color = game.currentServer == .player1 ? AppColors.warmOrange : AppColors.steelBlue
+
+        return VStack(spacing: 0) {
+            ZStack {
                 Circle()
-                    .fill(point.scorer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
-                    .frame(width: dot, height: dot)
+                    .fill(serverColor.opacity(0.28))
+                    .frame(width: 14, height: 14)
+                    .blur(radius: 2)
+                Circle()
+                    .fill(serverColor)
+                    .frame(width: 7, height: 7)
             }
+            .frame(height: 14)
+
+            ForEach(recent) { point in
+                timelineRow(point, width: width, rowHeight: rowHeight)
+            }
+            Spacer(minLength: 0)
         }
-        .frame(width: 84, height: dot, alignment: .trailing)
+        .frame(width: width, height: 14 + CGFloat(rows) * rowHeight, alignment: .top)
+        .background(alignment: .top) {
+            Rectangle()
+                .fill(
+                    LinearGradient(colors: [serverColor.opacity(0.7), serverColor.opacity(0.1)],
+                                   startPoint: .top, endPoint: .bottom)
+                )
+                .frame(width: 1)
+                .padding(.top, 7)
+        }
         .clipped()
         .animation(.easeInOut(duration: 0.2), value: game.points.count)
+    }
+
+    private func timelineRow(_ point: Point, width: CGFloat, rowHeight: CGFloat) -> some View {
+        let isLeft = point.scorer == .player1
+        let color: Color = isLeft ? AppColors.warmOrange : AppColors.steelBlue
+        let score = isLeft ? point.player1Score : point.player2Score
+        let dotSize: CGFloat = 8
+        let inner = width / 2 - dotSize / 2
+
+        return HStack(spacing: 0) {
+            if isLeft {
+                Spacer(minLength: 0)
+                timelinePill("\(score)", color: color, dotOnRight: true, dotSize: dotSize)
+                Color.clear.frame(width: inner)
+            } else {
+                Color.clear.frame(width: inner)
+                timelinePill("\(score)", color: color, dotOnRight: false, dotSize: dotSize)
+                Spacer(minLength: 0)
+            }
+        }
+        .frame(width: width, height: rowHeight)
+    }
+
+    private func timelinePill(_ text: String, color: Color, dotOnRight: Bool, dotSize: CGFloat) -> some View {
+        let dot = Circle()
+            .fill(Color.white)
+            .frame(width: dotSize, height: dotSize)
+            .overlay(Circle().fill(color).frame(width: 3, height: 3))
+        return HStack(spacing: 2) {
+            if !dotOnRight { dot }
+            Text(text)
+                .font(AppFonts.label(8))
+                .foregroundColor(.white)
+                .monospacedDigit()
+            if dotOnRight { dot }
+        }
+        .padding(.leading, dotOnRight ? 5 : 2)
+        .padding(.trailing, dotOnRight ? 2 : 5)
+        .padding(.vertical, 1.5)
+        .background(Capsule().fill(color))
     }
 
     // MARK: - Player column (compact version of the referee player column)

@@ -59,21 +59,7 @@ struct ShotTypeSelectorView: View {
     // MARK: - Shot Type Grid
     private var shotTypeGrid: some View {
         VStack(spacing: 12) {
-            // Row 1: Ace and Stroke (centered)
-            HStack(spacing: 12) {
-                Spacer()
-                ShotTypeButton(shotType: .ace, color: playerColor) {
-                    onShotSelected(.ace)
-                }
-                .frame(maxWidth: 100)
-                ShotTypeButton(shotType: .stroke, color: playerColor) {
-                    onShotSelected(.stroke)
-                }
-                .frame(maxWidth: 100)
-                Spacer()
-            }
-
-            // Row 2: Drive, Cross, Volley
+            // Row 1: Drive, Cross, Volley
             HStack(spacing: 12) {
                 ShotTypeButton(shotType: .drive, color: playerColor) {
                     onShotSelected(.drive)
@@ -86,7 +72,7 @@ struct ShotTypeSelectorView: View {
                 }
             }
 
-            // Row 3: Drop, Lob, Boast
+            // Row 2: Drop, Lob, Boast
             HStack(spacing: 12) {
                 ShotTypeButton(shotType: .drop, color: playerColor) {
                     onShotSelected(.drop)
@@ -212,16 +198,6 @@ struct ShotIconView: View {
         case .boast:
             // Custom: zigzag like the reference image
             BoastIcon(color: color, size: size)
-        case .ace:
-            // SF Symbol: star for service winner
-            Image(systemName: "star.fill")
-                .font(.system(size: size * 0.7, weight: .medium))
-                .foregroundColor(color)
-        case .stroke:
-            // SF Symbol: raised fist for obstruction point
-            Image(systemName: "hand.raised.fill")
-                .font(.system(size: size * 0.7, weight: .medium))
-                .foregroundColor(color)
         }
     }
 }

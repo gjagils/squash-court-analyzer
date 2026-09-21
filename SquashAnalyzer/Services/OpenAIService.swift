@@ -106,6 +106,8 @@ actor OpenAIService {
         let playerForcedErrors = game.forcedErrors(by: player).count
         let playerOwnErrors = game.unforcedErrors(by: opponent).count   // opponent scored on player's unforced error
         let freePointsFromOpponent = game.unforcedErrors(by: player).count  // player scored on opponent's unforced error
+        let playerStrokes = game.strokes(by: player).count
+        let playerServicePoints = game.servicePoints(by: player).count
 
         // Zone breakdown (winners + forced errors only)
         var zoneStats: [String] = []
@@ -155,6 +157,8 @@ actor OpenAIService {
         - Forced errors afgedwongen: \(playerForcedErrors)
         - Eigen unforced errors: \(playerOwnErrors)
         - Cadeautjes (unforced errors tegenstander): \(freePointsFromOpponent)
+        - Strokes toegekend: \(playerStrokes)
+        - Servicepunten (direct uit de service): \(playerServicePoints)
         - Beste zone: \(bestZone)
         - Beste slag: \(bestShot)
         - Zone waar tegenstander scoorde: \(worstZone)

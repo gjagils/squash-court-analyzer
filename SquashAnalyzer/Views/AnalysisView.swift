@@ -256,15 +256,7 @@ struct AnalysisView: View {
                 .font(AppFonts.label(14))
                 .foregroundColor(AppColors.textPrimary)
 
-            // Row 1: Ace and Stroke (centered)
-            HStack(spacing: 10) {
-                Spacer()
-                shotStatCell(for: .ace)
-                shotStatCell(for: .stroke)
-                Spacer()
-            }
-
-            // Row 2: Drive, Cross, Volley
+            // Row 1: Drive, Cross, Volley
             HStack(spacing: 10) {
                 shotStatCell(for: .drive)
                 shotStatCell(for: .cross)
@@ -396,8 +388,8 @@ struct AnalysisView: View {
         let opponentStrongZone = displayedGame.bestZone(for: opponent)
 
         // Ace statistics
-        let myAces = displayedGame.pointsWon(by: selectedPlayer, with: .ace)
-        let opponentAces = displayedGame.pointsWon(by: opponent, with: .ace)
+        let myAces = displayedGame.servicePoints(by: selectedPlayer).count
+        let opponentAces = displayedGame.servicePoints(by: opponent).count
 
         // Let statistics
         let letsAgainstMe = displayedGame.letsRequested(by: opponent).count

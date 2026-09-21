@@ -452,9 +452,9 @@ struct CoachDashboardView: View {
         let opponentStrongZone = game.bestZone(for: opponent)
         let tempoAdvice = calculateTempoAdvice()
 
-        // Ace statistics
-        let myAces = game.pointsWon(by: selectedPlayer, with: .ace)
-        let opponentAces = game.pointsWon(by: opponent, with: .ace)
+        // Service point statistics (points straight from the serve)
+        let myAces = game.servicePoints(by: selectedPlayer).count
+        let opponentAces = game.servicePoints(by: opponent).count
 
         // Let statistics
         let letsAgainstMe = game.letsRequested(by: opponent).count
@@ -528,7 +528,7 @@ struct CoachDashboardView: View {
                 if opponentAces >= 2 {
                     AdviceRow(
                         icon: "exclamationmark.circle",
-                        text: "\(game.name(for: opponent)) scoort \(opponentAces) aces - racket vroeg omhoog bij de return",
+                        text: "\(game.name(for: opponent)) scoort \(opponentAces) servicepunten - racket vroeg omhoog bij de return",
                         type: .warning
                     )
                 }
@@ -537,7 +537,7 @@ struct CoachDashboardView: View {
                 if myAces >= 2 {
                     AdviceRow(
                         icon: "bolt.fill",
-                        text: "Je hebt \(myAces) aces - je service werkt, blijf zo serveren!",
+                        text: "Je hebt \(myAces) servicepunten - je service werkt, blijf zo serveren!",
                         type: .success
                     )
                 }
@@ -726,6 +726,8 @@ struct CoachDashboardView: View {
         let forced = game.forcedErrors(by: selectedPlayer).count
         let freePoints = game.unforcedErrors(by: selectedPlayer).count   // opponent's mistakes → player's free points
         let ownErrors = game.unforcedErrors(by: selectedPlayer.opponent).count  // player's mistakes → opponent's points
+        let strokes = game.strokes(by: selectedPlayer).count
+        let servicePoints = game.servicePoints(by: selectedPlayer).count
 
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -736,11 +738,13 @@ struct CoachDashboardView: View {
                     .foregroundColor(AppColors.textPrimary)
             }
 
-            HStack(spacing: 8) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                 PointTypeBadge(label: "Winners", count: winners, color: .green)
                 PointTypeBadge(label: "Druk", count: forced, color: AppColors.accentGold)
+                PointTypeBadge(label: "Service", count: servicePoints, color: AppColors.warmOrange)
                 PointTypeBadge(label: "Cadeautjes", count: freePoints, color: AppColors.steelBlue)
                 PointTypeBadge(label: "Eigen fouten", count: ownErrors, color: .red)
+                PointTypeBadge(label: "Strokes", count: strokes, color: AppColors.warmRed)
             }
         }
         .padding()

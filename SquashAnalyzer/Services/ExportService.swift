@@ -156,6 +156,10 @@ enum ExportService {
         let p2Forced = game.points.filter { $0.scorerPlayer == .player2 && $0.savedPointType == .forcedError }.count
         let p1Unforced = game.points.filter { $0.scorerPlayer == .player1 && $0.savedPointType == .unforcedError }.count
         let p2Unforced = game.points.filter { $0.scorerPlayer == .player2 && $0.savedPointType == .unforcedError }.count
+        let p1Strokes = game.points.filter { $0.scorerPlayer == .player1 && $0.savedPointType == .stroke }.count
+        let p2Strokes = game.points.filter { $0.scorerPlayer == .player2 && $0.savedPointType == .stroke }.count
+        let p1Service = game.points.filter { $0.scorerPlayer == .player1 && $0.savedPointType == .servicePoint }.count
+        let p2Service = game.points.filter { $0.scorerPlayer == .player2 && $0.savedPointType == .servicePoint }.count
 
         var text = """
         🏸 SQUASH GAME ANALYSE
@@ -165,6 +169,7 @@ enum ExportService {
         📊 \(p1.uppercased()):
         • Gewonnen: \(p1Points.count) punten
         • Winners: \(p1Winners) | Forced errors: \(p1Forced) | Eigen fouten: \(p1Unforced)
+        • Servicepunten: \(p1Service) | Strokes: \(p1Strokes)
         """
 
         let p1BestZone = game.points
@@ -182,6 +187,7 @@ enum ExportService {
         📊 \(p2.uppercased()):
         • Gewonnen: \(p2Points.count) punten
         • Winners: \(p2Winners) | Forced errors: \(p2Forced) | Eigen fouten: \(p2Unforced)
+        • Servicepunten: \(p2Service) | Strokes: \(p2Strokes)
         """
 
         let p2BestZone = game.points
@@ -366,6 +372,10 @@ enum ExportService {
         let p2Forced = game.forcedErrors(by: .player2).count
         let p1Unforced = game.unforcedErrors(by: .player1).count
         let p2Unforced = game.unforcedErrors(by: .player2).count
+        let p1Strokes = game.strokes(by: .player1).count
+        let p2Strokes = game.strokes(by: .player2).count
+        let p1Service = game.servicePoints(by: .player1).count
+        let p2Service = game.servicePoints(by: .player2).count
 
         var text = """
         🏸 SQUASH GAME ANALYSE
@@ -375,6 +385,7 @@ enum ExportService {
         📊 \(p1.uppercased()):
         • Gewonnen: \(p1Points) punten
         • Winners: \(p1Winners) | Forced errors: \(p1Forced) | Eigen fouten: \(p1Unforced)
+        • Servicepunten: \(p1Service) | Strokes: \(p1Strokes)
         """
 
         if let zone = game.bestZone(for: .player1) {
@@ -386,6 +397,7 @@ enum ExportService {
         📊 \(p2.uppercased()):
         • Gewonnen: \(p2Points) punten
         • Winners: \(p2Winners) | Forced errors: \(p2Forced) | Eigen fouten: \(p2Unforced)
+        • Servicepunten: \(p2Service) | Strokes: \(p2Strokes)
         """
 
         if let zone = game.bestZone(for: .player2) {
@@ -605,7 +617,7 @@ enum ExportService {
                 id: pd.id.flatMap { UUID(uuidString: $0) } ?? UUID(),
                 pointNumber: pd.pointNumber,
                 scorer: Player(rawValue: pd.scorer) ?? .player1,
-                pointType: PointType(rawValue: pd.pointType) ?? .winner,
+                pointType: SavedPoint.pointType(raw: pd.pointType, shotType: pd.shotType),
                 zone: CourtZone(rawValue: pd.zone),
                 shotType: ShotType(rawValue: pd.shotType),
                 server: Player(rawValue: pd.server) ?? .player1,

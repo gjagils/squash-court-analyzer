@@ -148,6 +148,63 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertTrue(Match.isValidHeadStart(player1: 2, player2: 2))
     }
 
+    func testStrokeScoresAfterZoneWithoutShot() {
+        let game = Game()
+        game.selectPlayer(.player2)
+        game.selectPointType(.stroke)
+        XCTAssertEqual(game.scoringStep, .selectZone)
+        XCTAssertEqual(game.player2Score, 0, "a stroke still needs the zone")
+
+        game.selectZone(.middleLeft)
+        XCTAssertEqual(game.player2Score, 1)
+        XCTAssertEqual(game.points.last?.pointType, .stroke)
+        XCTAssertEqual(game.points.last?.zone, .middleLeft)
+        XCTAssertNil(game.points.last?.shotType)
+        XCTAssertNil(game.selectedPlayer, "selection is cleared after scoring")
+        XCTAssertEqual(game.strokes(by: .player2).count, 1)
+        XCTAssertEqual(game.pointsWon(by: .player2, in: .middleLeft), 1, "strokes count in the zone map")
+    }
+
+    func testServicePointScoresImmediatelyInTheReceiversBackQuarter() {
+        let game = Game()
+        game.setStartingServer(.player1)
+        XCTAssertEqual(game.serverSide, .right)
+
+        // Serve from the right box lands back left
+        game.selectPlayer(.player1)
+        game.selectPointType(.servicePoint)
+        XCTAssertEqual(game.player1Score, 1)
+        XCTAssertEqual(game.points.last?.pointType, .servicePoint)
+        XCTAssertEqual(game.points.last?.zone, .backLeft)
+        XCTAssertNil(game.points.last?.shotType)
+
+        // Server keeps serving from the left box: lands back right
+        XCTAssertEqual(game.serverSide, .left)
+        game.selectPlayer(.player1)
+        game.selectPointType(.servicePoint)
+        XCTAssertEqual(game.points.last?.zone, .backRight)
+        XCTAssertEqual(game.servicePoints(by: .player1).count, 2)
+
+        // The receiver cannot score a service point
+        game.selectPlayer(.player2)
+        game.selectPointType(.servicePoint)
+        XCTAssertEqual(game.player2Score, 0)
+        XCTAssertEqual(game.scoringStep, .selectPointType)
+    }
+
+    func testLegacyStrokeAndAceShotsLoadAsPointTypes() {
+        let saved = SavedPoint(pointNumber: 1, scorer: .player1, pointType: .winner, zone: .frontRight,
+                               shotType: nil, server: .player1, player1Score: 1, player2Score: 0)
+        saved.shotType = SavedPoint.legacyStrokeShot
+        XCTAssertEqual(saved.savedPointType, .stroke)
+        XCTAssertNil(saved.pointShotType)
+        XCTAssertEqual(saved.pointZone, .frontRight)
+
+        saved.shotType = SavedPoint.legacyAceShot
+        XCTAssertEqual(saved.savedPointType, .servicePoint)
+        XCTAssertNil(saved.pointShotType)
+    }
+
     func testEmptyStatisticsHaveNoInventedBestResult() {
         let game = Game()
         XCTAssertNil(game.bestZone(for: .player1))

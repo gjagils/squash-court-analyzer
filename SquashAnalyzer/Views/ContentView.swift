@@ -541,11 +541,7 @@ struct ContentView: View {
                     Circle()
                         .fill(lastPoint.scorer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
                         .frame(width: 6, height: 6)
-                    if let zone = lastPoint.zone, let shot = lastPoint.shotType {
-                        Text("\(currentGame.name(for: lastPoint.scorer)): \(zone.shortName) (\(shot.shortName)) · \(lastPoint.pointType.shortName)")
-                    } else {
-                        Text("\(currentGame.name(for: lastPoint.scorer)): \(lastPoint.pointType.shortName)")
-                    }
+                    Text(lastPointText(lastPoint))
                 }
             }
             .font(AppFonts.caption(11))
@@ -553,6 +549,14 @@ struct ContentView: View {
             .lineLimit(1)
             .frame(height: 16)
         }
+    }
+
+    /// "Niels: Winner · Drop · Voor Links", "Niels: Stroke · Midden Links" or "Niels: Unforced error"
+    private func lastPointText(_ point: Point) -> String {
+        var parts = [point.pointType.title]
+        if let shot = point.shotType { parts.append(shot.rawValue) }
+        if let zone = point.zone { parts.append(zone.rawValue) }
+        return "\(currentGame.name(for: point.scorer)): " + parts.joined(separator: " · ")
     }
 
     private func coachActionButton(_ title: String, icon: String, color: Color, disabled: Bool,
@@ -1385,6 +1389,19 @@ struct PointTypeSelectorOverlay: View {
                     color: playerColor,
                     action: { onPointTypeSelected(.unforcedError) }
                 )
+                PointTypeButton(
+                    pointType: .stroke,
+                    color: playerColor,
+                    action: { onPointTypeSelected(.stroke) }
+                )
+                // Only the server can score straight from the serve
+                if game.selectedPlayer == game.currentServer {
+                    PointTypeButton(
+                        pointType: .servicePoint,
+                        color: playerColor,
+                        action: { onPointTypeSelected(.servicePoint) }
+                    )
+                }
             }
 
             // Back button
@@ -1430,7 +1447,7 @@ struct PointTypeButton: View {
                     .frame(width: 28)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(pointType.rawValue.uppercased())
+                    Text(pointType.title.uppercased())
                         .font(AppFonts.label(13))
                         .foregroundColor(AppColors.textPrimary)
                         .tracking(0.5)
@@ -1440,10 +1457,6 @@ struct PointTypeButton: View {
                 }
 
                 Spacer()
-
-                Text(pointType.shortName)
-                    .font(AppFonts.mono(13))
-                    .foregroundColor(color.opacity(0.7))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)

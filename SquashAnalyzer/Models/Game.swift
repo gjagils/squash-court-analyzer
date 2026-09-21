@@ -99,7 +99,7 @@ class Game: Identifiable {
             return .selectPlayer
         } else if selectedPointType == nil {
             return .selectPointType
-        } else if selectedPointType?.requiresZoneAndShot == true && selectedZone == nil {
+        } else if selectedPointType?.requiresZone == true && selectedZone == nil {
             return .selectZone
         } else {
             return .selectShot
@@ -138,20 +138,36 @@ class Game: Identifiable {
 
     /// Select a point type (step 2 of scoring)
     func selectPointType(_ pointType: PointType) {
-        guard selectedPlayer != nil else { return }
+        guard let player = selectedPlayer else { return }
+        guard !pointType.serverOnly || player == currentServer else { return }
         selectedPointType = pointType
         selectedZone = nil
 
-        // For unforced errors, no zone/shot needed — score immediately
-        if pointType == .unforcedError {
+        // Unforced error: no zone or shot — score immediately.
+        // Service point: the ball landed in the receiver's back quarter, opposite the
+        // service box, so the zone is known without a tap.
+        if pointType == .servicePoint {
+            selectedZone = Self.serviceLandingZone(from: serverSide)
+            addPoint(shotType: nil)
+        } else if !pointType.requiresZone {
             addPoint(shotType: nil)
         }
     }
 
-    /// Select a zone (step 3 of scoring, only for winner/forcedError)
+    /// Back quarter a serve from `side` lands in (cross-court from the box)
+    static func serviceLandingZone(from side: ServerSide) -> CourtZone {
+        side == .right ? .backLeft : .backRight
+    }
+
+    /// Select a zone (step 3 of scoring, only for winner/forcedError/stroke)
     func selectZone(_ zone: CourtZone) {
-        guard selectedPlayer != nil, selectedPointType?.requiresZoneAndShot == true else { return }
+        guard selectedPlayer != nil, let pointType = selectedPointType, pointType.requiresZone else { return }
         selectedZone = zone
+
+        // A stroke has no winning shot — score as soon as the zone is known
+        if !pointType.requiresShot {
+            addPoint(shotType: nil)
+        }
     }
 
     /// Add a point with shot type (step 4 of scoring)
@@ -365,6 +381,16 @@ class Game: Identifiable {
     /// Get all unforced errors by a player (errors not caused by player's shot)
     func unforcedErrors(by player: Player) -> [Point] {
         points.filter { $0.scorer == player && $0.pointType == .unforcedError }
+    }
+
+    /// Get all strokes awarded to a player
+    func strokes(by player: Player) -> [Point] {
+        points.filter { $0.scorer == player && $0.pointType == .stroke }
+    }
+
+    /// Get all points a player won straight from the serve
+    func servicePoints(by player: Player) -> [Point] {
+        points.filter { $0.scorer == player && $0.pointType == .servicePoint }
     }
 
     /// Get points won in a specific zone by a player (winners + forced errors only)

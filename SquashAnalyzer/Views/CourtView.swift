@@ -238,11 +238,6 @@ struct ZoneTapArea: View {
             // Border
             RoundedRectangle(cornerRadius: 6)
                 .stroke(playerColor.opacity(isPressed ? 0.85 : 0.28), lineWidth: 1)
-
-            // Zone label
-            Text(zone.shortName)
-                .font(AppFonts.caption(10))
-                .foregroundColor(playerColor.opacity(isPressed ? 1 : 0.72))
         }
         .scaleEffect(isPressed ? 0.96 : 1.0)
         .onTapGesture {

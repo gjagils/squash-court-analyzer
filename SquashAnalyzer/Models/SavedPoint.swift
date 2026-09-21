@@ -50,8 +50,21 @@ final class SavedPoint {
         Player(rawValue: scorer) ?? .player1
     }
 
+    /// Shot type values written by versions where "Stroke" and "Ace" were shots rather than point types
+    static let legacyStrokeShot = "Stroke"
+    static let legacyAceShot = "Ace"
+
+    /// Point type for a stored (pointType, shotType) pair, mapping the legacy shots
+    static func pointType(raw: String, shotType: String) -> PointType {
+        switch shotType {
+        case legacyStrokeShot: return .stroke
+        case legacyAceShot: return .servicePoint
+        default: return PointType(rawValue: raw) ?? .winner
+        }
+    }
+
     var savedPointType: PointType {
-        PointType(rawValue: pointType) ?? .winner
+        Self.pointType(raw: pointType, shotType: shotType)
     }
 
     var pointZone: CourtZone? {

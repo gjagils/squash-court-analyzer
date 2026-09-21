@@ -14,24 +14,30 @@ Squash Analyzer is de professionele squash-app voor coaches en scheidsrechters. 
 
 **COACH MODUS**
 Analyseer elke rally tot op het slag- en zoneniveau:
-• Registreer winnaars, forced errors en eigen fouten
-• Klik op het interactieve baandiagram om te markeren waar het punt viel
-• Kies het slagtype: drive, drop, boast, cross, lob en meer
+• Registreer winners, forced errors, eigen fouten, strokes en servicepunten
+• Tik op het interactieve baandiagram om te markeren waar het punt viel
+• Kies het slagtype: drive, cross, volley, drop, lob of boast
+• Wie serveert en vanuit welke box (links/rechts) wordt automatisch bijgehouden
 • Ontvang na elke game tactisch coaching advies gegenereerd door AI (GPT-4o)
-• Sla volledige wedstrijden en losse games op
+• Deel de tussenstand direct via WhatsApp
+• Sla volledige wedstrijden op, hervat een onderbroken wedstrijd en kijk alles terug
 • Bekijk uitgebreide statistieken per speler, zone en slagtype
 
 **SCHEIDSRECHTER MODUS**
 Snel en professioneel scoren zonder afleiding:
-• Best of 5 met automatische service-wisselregel (even/oneven score)
-• Links/Rechts service-box met handmatige override
+• Best of 5 met de officiële serviceregels: de servicebox wisselt na elke gewonnen rally
+• Links/Rechts per speler vast te zetten (bijvoorbeeld voor een linkshandige)
+• Rally-voor-rally scorelijn tussen de spelers
 • Let call en stroke registratie
-• Match- en gametimer
-• Undo laatste punt
-• Deel de uitslag direct via WhatsApp
+• Match- en gametimer, undo laatste punt
+• Deel de uitslag via WhatsApp: kort, als scorekaart of als verslag
+
+**LATER INSTAPPEN**
+• Begin bij game 2, 3 of 4 met de stand tot dan toe, in beide modi
 
 **SPELERSPROFIELEN**
-• Sla spelers op met naam en persoonlijke coaching aandachtspunten
+• Sla spelers op met foto, naam en persoonlijke coaching aandachtspunten
+• Importeer je hele team in één keer
 • Kies snel een speler bij het opstarten van een wedstrijd
 • AI coaching houdt rekening met de aandachtspunten van de speler
 

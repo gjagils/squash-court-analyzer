@@ -10,6 +10,7 @@ text testers see in TestFlight (locale nl-NL).
 """
 import argparse
 import os
+import re
 import sys
 import time
 
@@ -28,8 +29,13 @@ def find_build(marketing_version, build_number):
     return max(builds, key=lambda b: b["attributes"]["uploadedDate"]) if builds else None
 
 
+# TestFlight rejects emoji and pictographs in What to Test ("invalid characters")
+_EMOJI = re.compile("[\U00010000-\U0010FFFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F]")
+
+
 def set_test_notes(build_id, text, locale="nl-NL"):
     """Fill the build's What to Test text (created by App Store Connect, usually empty)."""
+    text = _EMOJI.sub("", text).replace("  ", " ")
     if len(text) > 4000:
         sys.exit(f"Notes are {len(text)} characters; TestFlight allows 4000")
     existing = asc.get(f"/v1/builds/{build_id}/betaBuildLocalizations",

@@ -230,6 +230,29 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertFalse(game.lastPointAwaitsShot)
     }
 
+    func testUnforcedErrorCanRecordTheZoneWhenAsked() {
+        let game = Game()
+        game.zoneForUnforcedErrors = true
+        game.selectPlayer(.player2)
+        game.selectPointType(.unforcedError)
+        XCTAssertEqual(game.player2Score, 0, "waits for the zone")
+        XCTAssertEqual(game.scoringStep, .selectZone)
+
+        game.selectZone(.frontLeft)
+        XCTAssertEqual(game.player2Score, 1)
+        XCTAssertEqual(game.points.last?.pointType, .unforcedError)
+        XCTAssertEqual(game.points.last?.zone, .frontLeft)
+        XCTAssertNil(game.points.last?.shotType)
+        XCTAssertNil(game.selectedPlayer)
+
+        // Default behaviour is unchanged
+        let plain = Game()
+        plain.selectPlayer(.player1)
+        plain.selectPointType(.unforcedError)
+        XCTAssertEqual(plain.player1Score, 1)
+        XCTAssertNil(plain.points.last?.zone)
+    }
+
     func testEmptyStatisticsHaveNoInventedBestResult() {
         let game = Game()
         XCTAssertNil(game.bestZone(for: .player1))

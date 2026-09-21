@@ -29,7 +29,11 @@ struct ContentView: View {
     @State private var persistenceErrorMessage: String?
     @State private var showingPersistenceError = false
     @State private var showingStartupPersistenceWarning = false
-    @AppStorage(CoachInputSettings.quickEntryKey) private var quickEntry = true
+    @AppStorage(CoachInputSettings.modeKey) private var inputModeRaw = CoachInputMode.scoreTap.rawValue
+
+    private var inputMode: CoachInputMode { CoachInputMode(rawValue: inputModeRaw) ?? .scoreTap }
+    private var quickEntry: Bool { inputMode == .quick }
+    private var scoreTapEntry: Bool { inputMode == .scoreTap }
 
     private var currentGame: Game {
         match.currentGame
@@ -40,13 +44,13 @@ struct ContentView: View {
             // Main game view
             gameView
 
-            // Point type selector overlay (shown after player selection)
-            if currentGame.selectedPlayer != nil && currentGame.selectedPointType == nil {
+            // Point type selector overlay (shown after player selection; inline in the score-tap flow)
+            if !scoreTapEntry && currentGame.selectedPlayer != nil && currentGame.selectedPointType == nil {
                 pointTypeSelectorOverlay
             }
 
-            // Shot type selector overlay (shown after zone selection)
-            if currentGame.selectedZone != nil {
+            // Shot type selector overlay (shown after zone selection; inline in the score-tap flow)
+            if !scoreTapEntry && currentGame.selectedZone != nil {
                 shotTypeSelectorOverlay
             }
 
@@ -335,8 +339,9 @@ struct ContentView: View {
                 // Header
                 headerView
 
-                // Scoreboard
-                ScoreboardView(game: currentGame, match: match)
+                // Scoreboard (tapping a score starts a point in the score-tap flow)
+                ScoreboardView(game: currentGame, match: match,
+                               onSelectPlayer: scoreTapEntry ? { player in handleScoreTap(player) } : nil)
                     .padding(.horizontal, 20)
 
                 // Rally timer and instruction text
@@ -365,8 +370,15 @@ struct ContentView: View {
                 }
                 .padding(.horizontal, 16)
 
+                // Score-tap flow: the current step's choices, inline below the court
+                if scoreTapEntry {
+                    inlineStepStrip
+                        .padding(.horizontal, 24)
+                        .frame(height: 78)
+                }
+
                 // Player buttons (hidden when point type or shot is being selected)
-                if currentGame.selectedPlayer == nil {
+                if !scoreTapEntry && currentGame.selectedPlayer == nil {
                     Group {
                         if quickEntry {
                             QuickEntryButtonsView(game: currentGame) { player, action in
@@ -507,7 +519,7 @@ struct ContentView: View {
         Group {
             switch currentGame.scoringStep {
             case .selectPlayer:
-                Text("Kies wie scoort")
+                Text(scoreTapEntry ? "Tik op de score van wie scoort" : "Kies wie scoort")
                     .font(AppFonts.body(14))
                     .foregroundColor(AppColors.textSecondary)
             case .selectPointType:
@@ -535,7 +547,7 @@ struct ContentView: View {
         return VStack(spacing: 6) {
             HStack(spacing: 8) {
                 coachActionButton("LET CALL", icon: "arrow.counterclockwise",
-                                  color: AppColors.warmOrange, disabled: letDisabled) {
+                                  color: AppColors.textPrimary, disabled: letDisabled) {
                     showingLetSelector = true
                 }
                 coachActionButton("UNDO", icon: "arrow.uturn.backward",
@@ -564,6 +576,100 @@ struct ContentView: View {
                 .lineLimit(1)
                 .frame(height: 16)
             }
+        }
+    }
+
+    // MARK: - Score-tap flow (inline steps)
+
+    /// Step-dependent chips in the scoring player's colour; empty in the base state
+    @ViewBuilder
+    private var inlineStepStrip: some View {
+        let color: Color = currentGame.selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.steelBlue
+        switch currentGame.scoringStep {
+        case .selectPlayer:
+            Color.clear
+        case .selectPointType:
+            VStack(spacing: 6) {
+                HStack(spacing: 6) {
+                    inlineChip(PointType.winner.title, color: color) { handleInlinePointType(.winner) }
+                    inlineChip(PointType.forcedError.title, color: color) { handleInlinePointType(.forcedError) }
+                    inlineChip(PointType.unforcedError.title, color: color) { handleInlinePointType(.unforcedError) }
+                }
+                HStack(spacing: 6) {
+                    inlineChip(PointType.stroke.title, color: color) { handleInlinePointType(.stroke) }
+                    if currentGame.selectedPlayer == currentGame.currentServer {
+                        inlineChip(PointType.servicePoint.title, color: color) { handleInlinePointType(.servicePoint) }
+                    }
+                    inlineChip("Annuleer", color: AppColors.textMuted) { cancelInlinePoint() }
+                }
+            }
+            .transition(.opacity)
+        case .selectZone:
+            HStack {
+                Spacer()
+                inlineChip("Annuleer", color: AppColors.textMuted) { cancelInlinePoint() }
+                Spacer()
+            }
+            .transition(.opacity)
+        case .selectShot:
+            VStack(spacing: 6) {
+                HStack(spacing: 6) {
+                    ForEach([ShotType.drive, .cross, .volley]) { shot in
+                        inlineChip(shot.rawValue, color: color) { handleShotTypeSelect(shot) }
+                    }
+                }
+                HStack(spacing: 6) {
+                    ForEach([ShotType.drop, .lob, .boast]) { shot in
+                        inlineChip(shot.rawValue, color: color) { handleShotTypeSelect(shot) }
+                    }
+                }
+            }
+            .transition(.opacity)
+        }
+    }
+
+    private func inlineChip(_ title: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(AppFonts.label(12))
+                .foregroundColor(color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 9)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(color.opacity(0.12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(color.opacity(0.35), lineWidth: 1)
+                        )
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// Tap on a score: start a point for that player, switch player, or cancel on the same one
+    private func handleScoreTap(_ player: Player) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if currentGame.selectedPlayer == player {
+                currentGame.clearSelection()
+            } else {
+                currentGame.zoneForUnforcedErrors = true
+                currentGame.selectPlayer(player)
+            }
+        }
+    }
+
+    private func handleInlinePointType(_ pointType: PointType) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            currentGame.selectPointType(pointType)
+        }
+    }
+
+    private func cancelInlinePoint() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            currentGame.clearSelection()
         }
     }
 

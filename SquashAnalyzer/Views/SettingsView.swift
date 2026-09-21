@@ -2,14 +2,45 @@ import SwiftUI
 
 /// Coach input settings shared between the settings screen and the live coach screen
 enum CoachInputSettings {
-    /// "Snelle invoer": Winner/Fout buttons per player, shot optional afterwards
-    static let quickEntryKey = "coachQuickEntry"
+    static let modeKey = "coachInputMode"
+}
+
+/// How a point is entered on the coach screen
+enum CoachInputMode: String, CaseIterable, Identifiable {
+    /// Wie scoort → type → zone → slag, with pop-ups
+    case classic
+    /// Winner/Fout buttons per player, shot optional afterwards
+    case quick
+    /// Tap the score, then everything inline: type → zone → slag, no pop-ups
+    case scoreTap
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .classic: return "Klassiek"
+        case .quick: return "Snelle invoer"
+        case .scoreTap: return "Tik op de score"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .classic: return "Wie scoort → type punt → zone → slag, elk in een eigen venster."
+        case .quick: return "Winner en Fout per speler; na de zone is het punt binnen, de slag kies je optioneel achteraf."
+        case .scoreTap: return "Tik op de score van wie scoort; type, zone en slag volgen op het scherm zelf. Ook bij een unforced error leg je vast waar."
+        }
+    }
 }
 
 /// Settings view for managing app configuration
 struct SettingsView: View {
     @Binding var isPresented: Bool
-    @AppStorage(CoachInputSettings.quickEntryKey) private var quickEntry = true
+    @AppStorage(CoachInputSettings.modeKey) private var inputModeRaw = CoachInputMode.scoreTap.rawValue
+
+    private var inputMode: CoachInputMode {
+        CoachInputMode(rawValue: inputModeRaw) ?? .scoreTap
+    }
     @State private var apiKey: String = ""
     @State private var showingAPIKey = false
     @State private var showingSaveConfirmation = false
@@ -87,18 +118,39 @@ struct SettingsView: View {
                     .foregroundColor(AppColors.textPrimary)
             }
 
-            Toggle(isOn: $quickEntry) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Snelle invoer")
-                        .font(AppFonts.label(14))
-                        .foregroundColor(AppColors.textPrimary)
-                    Text(quickEntry ? "Winner en Fout per speler; na de zone is het punt binnen, de slag kies je optioneel achteraf."
-                                    : "Klassiek: wie scoort → type punt → zone → slag.")
-                        .font(AppFonts.caption(11))
-                        .foregroundColor(AppColors.textMuted)
+            Text("PUNTINVOER")
+                .font(AppFonts.caption(11))
+                .foregroundColor(AppColors.textMuted)
+                .tracking(1)
+
+            HStack(spacing: 6) {
+                ForEach(CoachInputMode.allCases) { mode in
+                    let active = mode == inputMode
+                    Button(action: { withAnimation(.easeInOut(duration: 0.15)) { inputModeRaw = mode.rawValue } }) {
+                        Text(mode.title)
+                            .font(AppFonts.label(12))
+                            .foregroundColor(active ? AppColors.backgroundDark : AppColors.warmOrange)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(active ? AppColors.warmOrange : AppColors.warmOrange.opacity(0.10))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(AppColors.warmOrange.opacity(active ? 0 : 0.3), lineWidth: 1)
+                                    )
+                            )
+                    }
+                    .buttonStyle(.plain)
                 }
             }
-            .tint(AppColors.warmOrange)
+
+            Text(inputMode.description)
+                .font(AppFonts.caption(11))
+                .foregroundColor(AppColors.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding()
         .background(

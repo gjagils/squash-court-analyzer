@@ -15,8 +15,9 @@ struct CourtView: View {
         courtWidth / courtLength
     }
 
+    /// Zones are tappable only while the flow is actually at the zone step
     private var isInteractive: Bool {
-        game?.selectedPlayer != nil && game?.selectedZone == nil
+        game?.scoringStep == .selectZone
     }
 
     var body: some View {
@@ -45,8 +46,8 @@ struct CourtView: View {
                     // Court markings
                     courtMarkings(size: courtSize, scale: scale)
 
-                    // Instruction overlay when player selected
-                    if let player = game?.selectedPlayer, game?.selectedZone == nil, let game = game {
+                    // Instruction overlay at the zone step
+                    if isInteractive, let game = game, let player = game.selectedPlayer {
                         instructionOverlay(size: courtSize, player: player, game: game)
                     }
                 }

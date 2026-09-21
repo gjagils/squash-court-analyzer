@@ -3,6 +3,8 @@ import SwiftUI
 struct ScoreboardView: View {
     let game: Game
     var match: Match? = nil
+    /// "Tik op de score" flow: tapping a player's column starts (or cancels) a point
+    var onSelectPlayer: ((Player) -> Void)? = nil
 
     var body: some View {
         SportsPanel {
@@ -40,9 +42,23 @@ struct ScoreboardView: View {
 
     // MARK: - Player column (compact version of the referee player column)
     private func playerScore(_ player: Player) -> some View {
+        let column = playerColumn(player)
+        return Group {
+            if let onSelectPlayer {
+                Button(action: { onSelectPlayer(player) }) { column }
+                    .buttonStyle(.plain)
+                    .disabled(game.isGameOver)
+            } else {
+                column
+            }
+        }
+    }
+
+    private func playerColumn(_ player: Player) -> some View {
         let color = player == .player1 ? AppColors.warmOrange : AppColors.steelBlue
         let score = player == .player1 ? game.player1Score : game.player2Score
         let isServing = game.currentServer == player
+        let isScoring = game.selectedPlayer == player
 
         return VStack(spacing: 4) {
             PlayerAvatar(name: game.name(for: player), color: color, size: 34, active: isServing)
@@ -76,7 +92,11 @@ struct ScoreboardView: View {
         .padding(.vertical, 4)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(isServing ? color.opacity(0.06) : Color.clear)
+                .fill(isScoring ? color.opacity(0.18) : (isServing ? color.opacity(0.06) : Color.clear))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(color.opacity(isScoring ? 0.7 : 0), lineWidth: 1)
+                )
         )
     }
 }

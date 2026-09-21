@@ -68,6 +68,10 @@ class Game: Identifiable {
     /// Currently selected zone (for scoring flow - step 3)
     var selectedZone: CourtZone? = nil
 
+    /// Input preference: also record where an unforced error was made (the
+    /// "tik op de score" flow asks for a zone before scoring one)
+    var zoneForUnforcedErrors: Bool = false
+
     /// Track previous server for undo
     private var previousServers: [Player] = []
 
@@ -99,7 +103,7 @@ class Game: Identifiable {
             return .selectPlayer
         } else if selectedPointType == nil {
             return .selectPointType
-        } else if selectedPointType?.requiresZone == true && selectedZone == nil {
+        } else if let type = selectedPointType, needsZone(type), selectedZone == nil {
             return .selectZone
         } else {
             return .selectShot
@@ -143,15 +147,20 @@ class Game: Identifiable {
         selectedPointType = pointType
         selectedZone = nil
 
-        // Unforced error: no zone or shot — score immediately.
+        // Unforced error: no zone or shot — score immediately (unless the zone is wanted).
         // Service point: the ball landed in the receiver's back quarter, opposite the
         // service box, so the zone is known without a tap.
         if pointType == .servicePoint {
             selectedZone = Self.serviceLandingZone(from: serverSide)
             addPoint(shotType: nil)
-        } else if !pointType.requiresZone {
+        } else if !needsZone(pointType) {
             addPoint(shotType: nil)
         }
+    }
+
+    /// Whether this point type asks for a zone in the current input preference
+    func needsZone(_ pointType: PointType) -> Bool {
+        pointType.requiresZone || (pointType == .unforcedError && zoneForUnforcedErrors)
     }
 
     /// Back quarter a serve from `side` lands in (cross-court from the box)
@@ -159,9 +168,9 @@ class Game: Identifiable {
         side == .right ? .backLeft : .backRight
     }
 
-    /// Select a zone (step 3 of scoring, only for winner/forcedError/stroke)
+    /// Select a zone (step 3 of scoring; winner/forcedError/stroke, unforced error when wanted)
     func selectZone(_ zone: CourtZone) {
-        guard selectedPlayer != nil, let pointType = selectedPointType, pointType.requiresZone else { return }
+        guard selectedPlayer != nil, let pointType = selectedPointType, needsZone(pointType) else { return }
         selectedZone = zone
 
         // A stroke has no winning shot — score as soon as the zone is known

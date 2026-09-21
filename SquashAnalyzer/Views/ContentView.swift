@@ -29,6 +29,7 @@ struct ContentView: View {
     @State private var persistenceErrorMessage: String?
     @State private var showingPersistenceError = false
     @State private var showingStartupPersistenceWarning = false
+    @AppStorage(CoachInputSettings.quickEntryKey) private var quickEntry = true
 
     private var currentGame: Game {
         match.currentGame
@@ -366,8 +367,16 @@ struct ContentView: View {
 
                 // Player buttons (hidden when point type or shot is being selected)
                 if currentGame.selectedPlayer == nil {
-                    PlayerButtonsView(game: currentGame) { player in
-                        handlePlayerSelect(player)
+                    Group {
+                        if quickEntry {
+                            QuickEntryButtonsView(game: currentGame) { player, action in
+                                handleQuickEntry(player, action)
+                            }
+                        } else {
+                            PlayerButtonsView(game: currentGame) { player in
+                                handlePlayerSelect(player)
+                            }
+                        }
                     }
                     .padding(.horizontal, 24)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
@@ -535,20 +544,58 @@ struct ContentView: View {
                 }
             }
 
-            // Last point indicator
-            HStack(spacing: 6) {
-                if let lastPoint = currentGame.lastPoint, currentGame.selectedPlayer == nil {
-                    Circle()
-                        .fill(lastPoint.scorer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
-                        .frame(width: 6, height: 6)
-                    Text(lastPointText(lastPoint))
+            // Last point indicator, or the optional shot chips right after a quick-entry point
+            if quickEntry, currentGame.selectedPlayer == nil, currentGame.lastPointAwaitsShot,
+               let lastPoint = currentGame.lastPoint {
+                shotStrip(for: lastPoint)
+                    .frame(height: 28)
+                    .transition(.opacity)
+            } else {
+                HStack(spacing: 6) {
+                    if let lastPoint = currentGame.lastPoint, currentGame.selectedPlayer == nil {
+                        Circle()
+                            .fill(lastPoint.scorer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
+                            .frame(width: 6, height: 6)
+                        Text(lastPointText(lastPoint))
+                    }
                 }
+                .font(AppFonts.caption(11))
+                .foregroundColor(AppColors.textMuted)
+                .lineLimit(1)
+                .frame(height: 16)
             }
-            .font(AppFonts.caption(11))
-            .foregroundColor(AppColors.textMuted)
-            .lineLimit(1)
-            .frame(height: 16)
         }
+    }
+
+    /// "Slag?" plus one chip per shot; tapping one completes the last point
+    private func shotStrip(for point: Point) -> some View {
+        let color: Color = point.scorer == .player1 ? AppColors.warmOrange : AppColors.steelBlue
+        return HStack(spacing: 5) {
+            Text("SLAG?")
+                .font(AppFonts.caption(9))
+                .foregroundColor(color.opacity(0.7))
+                .tracking(1)
+            ForEach(ShotType.allCases) { shot in
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.15)) { currentGame.assignShotToLastPoint(shot) }
+                    persistMatch()
+                }) {
+                    Text(shot.rawValue)
+                        .font(AppFonts.label(11))
+                        .foregroundColor(color)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(
+                            Capsule()
+                                .fill(color.opacity(0.10))
+                                .overlay(Capsule().stroke(color.opacity(0.3), lineWidth: 1))
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
     }
 
     /// "Niels: Winner · Drop · Voor Links", "Niels: Stroke · Midden Links" or "Niels: Unforced error"
@@ -596,11 +643,26 @@ struct ContentView: View {
         }
     }
 
+    private func handleQuickEntry(_ player: Player, _ action: QuickEntryAction) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            currentGame.selectPlayer(player)
+            switch action {
+            case .winner: currentGame.selectPointType(.winner)          // → zone, then scored
+            case .unforcedError: currentGame.selectPointType(.unforcedError)   // scored at once
+            case .more: break                                           // point-type overlay
+            }
+        }
+    }
+
     private func handleZoneTap(_ zone: CourtZone) {
         guard currentGame.selectedPlayer != nil else { return }
 
         withAnimation(.easeInOut(duration: 0.2)) {
             currentGame.selectZone(zone)
+            // Quick entry: the point is in as soon as the zone is known; the shot is optional
+            if quickEntry, currentGame.selectedZone != nil, currentGame.selectedPointType?.requiresShot == true {
+                currentGame.addPoint(shotType: nil)
+            }
         }
     }
 

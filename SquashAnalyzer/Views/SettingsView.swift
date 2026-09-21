@@ -1,8 +1,15 @@
 import SwiftUI
 
+/// Coach input settings shared between the settings screen and the live coach screen
+enum CoachInputSettings {
+    /// "Snelle invoer": Winner/Fout buttons per player, shot optional afterwards
+    static let quickEntryKey = "coachQuickEntry"
+}
+
 /// Settings view for managing app configuration
 struct SettingsView: View {
     @Binding var isPresented: Bool
+    @AppStorage(CoachInputSettings.quickEntryKey) private var quickEntry = true
     @State private var apiKey: String = ""
     @State private var showingAPIKey = false
     @State private var showingSaveConfirmation = false
@@ -17,6 +24,9 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
+                        // Coach input
+                        coachInputSection
+
                         // AI Coach Section
                         aiCoachSection
 
@@ -64,6 +74,41 @@ struct SettingsView: View {
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 16)
+    }
+
+    // MARK: - Coach input Section
+    private var coachInputSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Image(systemName: "hand.tap")
+                    .foregroundColor(AppColors.warmOrange)
+                Text("Coachmodus")
+                    .font(AppFonts.label(16))
+                    .foregroundColor(AppColors.textPrimary)
+            }
+
+            Toggle(isOn: $quickEntry) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Snelle invoer")
+                        .font(AppFonts.label(14))
+                        .foregroundColor(AppColors.textPrimary)
+                    Text(quickEntry ? "Winner en Fout per speler; na de zone is het punt binnen, de slag kies je optioneel achteraf."
+                                    : "Klassiek: wie scoort → type punt → zone → slag.")
+                        .font(AppFonts.caption(11))
+                        .foregroundColor(AppColors.textMuted)
+                }
+            }
+            .tint(AppColors.warmOrange)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.03))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
     }
 
     // MARK: - AI Coach Section

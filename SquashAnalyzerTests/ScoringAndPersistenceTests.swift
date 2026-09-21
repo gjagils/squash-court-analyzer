@@ -205,6 +205,31 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertNil(saved.pointShotType)
     }
 
+    func testShotCanBeAddedToTheLastPointAfterwards() {
+        let game = Game()
+        game.addPoint(to: .player1, pointType: .winner, at: .frontLeft, with: nil)
+        XCTAssertTrue(game.lastPointAwaitsShot)
+
+        game.assignShotToLastPoint(.drop)
+        XCTAssertEqual(game.points.last?.shotType, .drop)
+        XCTAssertFalse(game.lastPointAwaitsShot)
+        XCTAssertEqual(game.pointsWon(by: .player1, with: .drop), 1)
+
+        // Only once, and never for points that take no shot
+        game.assignShotToLastPoint(.drive)
+        XCTAssertEqual(game.points.last?.shotType, .drop)
+        game.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil)
+        XCTAssertFalse(game.lastPointAwaitsShot)
+        game.assignShotToLastPoint(.drive)
+        XCTAssertNil(game.points.last?.shotType)
+
+        // A let after the point closes the window
+        game.addPoint(to: .player1, pointType: .forcedError, at: .backRight, with: nil)
+        XCTAssertTrue(game.lastPointAwaitsShot)
+        game.addLet(requestedBy: .player2)
+        XCTAssertFalse(game.lastPointAwaitsShot)
+    }
+
     func testEmptyStatisticsHaveNoInventedBestResult() {
         let game = Game()
         XCTAssertNil(game.bestZone(for: .player1))

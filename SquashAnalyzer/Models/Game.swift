@@ -247,6 +247,32 @@ class Game: Identifiable {
         selectedZone = nil
     }
 
+    /// Quick entry scores a winner/forced error on the zone tap; the shot can be
+    /// added afterwards until the next rally. Ignored once the point already has one.
+    func assignShotToLastPoint(_ shot: ShotType) {
+        guard let last = points.last, last.pointType.requiresShot, last.shotType == nil else { return }
+        points[points.count - 1] = Point(
+            id: last.id,
+            scorer: last.scorer,
+            pointType: last.pointType,
+            zone: last.zone,
+            shotType: shot,
+            server: last.server,
+            player1Score: last.player1Score,
+            player2Score: last.player2Score,
+            timestamp: last.timestamp,
+            duration: last.duration
+        )
+    }
+
+    /// True while the last point is still waiting for its (optional) shot: a
+    /// winner/forced error without shot, with no let called since.
+    var lastPointAwaitsShot: Bool {
+        guard let last = points.last, last.pointType.requiresShot, last.shotType == nil else { return false }
+        if let lastLet = lets.last, lastLet.timestamp > last.timestamp { return false }
+        return true
+    }
+
     /// Undo the last point
     func undoLastPoint() {
         guard let lastPoint = points.popLast() else { return }

@@ -1347,6 +1347,49 @@ struct LetSelectorOverlay: View {
     }
 }
 
+// MARK: - Fist icon (stroke)
+
+/// Closed fist seen from the front: four knuckles on top, the thumb folded across
+/// the palm. Drawn as a silhouette in the player's colour.
+struct FistIcon: View {
+    let color: Color
+    var size: CGFloat = 22
+
+    var body: some View {
+        Canvas { context, canvasSize in
+            let w = canvasSize.width
+            let h = canvasSize.height
+
+            // Curled fingers: four rounded columns, the outer ones a touch shorter
+            var fingers = Path()
+            let heights: [CGFloat] = [0.34, 0.40, 0.40, 0.36]
+            for i in 0..<4 {
+                let x = (0.10 + CGFloat(i) * 0.2) * w
+                let top = (0.66 - heights[i]) * h
+                fingers.addRoundedRect(
+                    in: CGRect(x: x, y: top, width: 0.18 * w, height: heights[i] * h),
+                    cornerSize: CGSize(width: 0.09 * w, height: 0.09 * w)
+                )
+            }
+            context.fill(fingers, with: .color(color))
+
+            // Palm
+            let palm = Path(roundedRect: CGRect(x: 0.08 * w, y: 0.50 * h, width: 0.84 * w, height: 0.46 * h),
+                            cornerRadius: 0.16 * w)
+            context.fill(palm, with: .color(color))
+
+            // Thumb folded across, with a thin gap so it reads as a separate shape
+            let thumb = Path(roundedRect: CGRect(x: 0.02 * w, y: 0.62 * h, width: 0.58 * w, height: 0.24 * h),
+                             cornerRadius: 0.12 * h)
+            context.blendMode = .destinationOut
+            context.stroke(thumb, with: .color(.black), lineWidth: max(1.2, 0.08 * w))
+            context.blendMode = .normal
+            context.fill(thumb, with: .color(color))
+        }
+        .frame(width: size, height: size)
+    }
+}
+
 // MARK: - Point Type Selector Overlay
 
 struct PointTypeSelectorOverlay: View {
@@ -1438,12 +1481,22 @@ struct PointTypeButton: View {
     let color: Color
     let action: () -> Void
 
+    /// The referee's stroke signal is a closed fist; SF Symbols has none, so it is drawn
+    @ViewBuilder
+    private var icon: some View {
+        if pointType == .stroke {
+            FistIcon(color: color, size: 22)
+        } else {
+            Image(systemName: pointType.icon)
+                .font(.system(size: 20))
+                .foregroundColor(color)
+        }
+    }
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 14) {
-                Image(systemName: pointType.icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(color)
+                icon
                     .frame(width: 28)
 
                 VStack(alignment: .leading, spacing: 2) {

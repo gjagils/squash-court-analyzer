@@ -364,17 +364,16 @@ struct ContentView: View {
                 .padding(.horizontal, 24)
                 .frame(height: 34)
 
-                // Court view
-                CourtView(game: currentGame) { zone in
-                    handleZoneTap(zone)
-                }
-                .padding(.horizontal, 16)
-
-                // Score-tap flow: the current step's choices, inline below the court
                 if scoreTapEntry {
-                    inlineStepStrip
-                        .padding(.horizontal, 24)
-                        .frame(height: 78)
+                    // Score-tap flow: the middle of the screen shows only the current step
+                    scoreTapStage
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    // Court view
+                    CourtView(game: currentGame) { zone in
+                        handleZoneTap(zone)
+                    }
+                    .padding(.horizontal, 16)
                 }
 
                 // Player buttons (hidden when point type or shot is being selected)
@@ -579,72 +578,71 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Score-tap flow (inline steps)
+    // MARK: - Score-tap flow (staged middle area)
 
-    /// Step-dependent chips in the scoring player's colour; empty in the base state
+    /// Empty until a score is tapped, then one step at a time: point types with
+    /// icons → the court for the zone → the shots with icons → empty again.
     @ViewBuilder
-    private var inlineStepStrip: some View {
+    private var scoreTapStage: some View {
         let color: Color = currentGame.selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.steelBlue
         switch currentGame.scoringStep {
         case .selectPlayer:
             Color.clear
         case .selectPointType:
-            VStack(spacing: 6) {
-                HStack(spacing: 6) {
-                    inlineChip(PointType.winner.title, color: color) { handleInlinePointType(.winner) }
-                    inlineChip(PointType.forcedError.title, color: color) { handleInlinePointType(.forcedError) }
-                    inlineChip(PointType.unforcedError.title, color: color) { handleInlinePointType(.unforcedError) }
-                }
-                HStack(spacing: 6) {
-                    inlineChip(PointType.stroke.title, color: color) { handleInlinePointType(.stroke) }
-                    if currentGame.selectedPlayer == currentGame.currentServer {
-                        inlineChip(PointType.servicePoint.title, color: color) { handleInlinePointType(.servicePoint) }
+            VStack(spacing: 8) {
+                Spacer(minLength: 0)
+                ForEach(PointType.allCases) { type in
+                    if !type.serverOnly || currentGame.selectedPlayer == currentGame.currentServer {
+                        PointTypeButton(pointType: type, color: color, compact: true) { handleInlinePointType(type) }
                     }
-                    inlineChip("Annuleer", color: AppColors.textMuted) { cancelInlinePoint() }
                 }
+                cancelButton
+                Spacer(minLength: 0)
             }
+            .padding(.horizontal, 24)
             .transition(.opacity)
         case .selectZone:
-            HStack {
-                Spacer()
-                inlineChip("Annuleer", color: AppColors.textMuted) { cancelInlinePoint() }
-                Spacer()
+            VStack(spacing: 10) {
+                CourtView(game: currentGame) { zone in
+                    handleZoneTap(zone)
+                }
+                .padding(.horizontal, 16)
+                cancelButton
             }
             .transition(.opacity)
         case .selectShot:
-            VStack(spacing: 6) {
-                HStack(spacing: 6) {
+            VStack(spacing: 12) {
+                Spacer(minLength: 0)
+                if let zone = currentGame.selectedZone {
+                    Text(zone.rawValue.uppercased())
+                        .font(AppFonts.caption(11))
+                        .foregroundColor(color)
+                        .tracking(1.5)
+                }
+                HStack(spacing: 12) {
                     ForEach([ShotType.drive, .cross, .volley]) { shot in
-                        inlineChip(shot.rawValue, color: color) { handleShotTypeSelect(shot) }
+                        ShotTypeButton(shotType: shot, color: color) { handleShotTypeSelect(shot) }
                     }
                 }
-                HStack(spacing: 6) {
+                HStack(spacing: 12) {
                     ForEach([ShotType.drop, .lob, .boast]) { shot in
-                        inlineChip(shot.rawValue, color: color) { handleShotTypeSelect(shot) }
+                        ShotTypeButton(shotType: shot, color: color) { handleShotTypeSelect(shot) }
                     }
                 }
+                cancelButton
+                Spacer(minLength: 0)
             }
+            .padding(.horizontal, 24)
             .transition(.opacity)
         }
     }
 
-    private func inlineChip(_ title: String, color: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(AppFonts.label(12))
-                .foregroundColor(color)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 9)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(color.opacity(0.12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(color.opacity(0.35), lineWidth: 1)
-                        )
-                )
+    private var cancelButton: some View {
+        Button(action: cancelInlinePoint) {
+            Text("Annuleer")
+                .font(AppFonts.caption(13))
+                .foregroundColor(AppColors.textMuted)
+                .padding(.vertical, 6)
         }
         .buttonStyle(.plain)
     }
@@ -1622,6 +1620,7 @@ struct PointTypeSelectorOverlay: View {
 struct PointTypeButton: View {
     let pointType: PointType
     let color: Color
+    var compact: Bool = false
     let action: () -> Void
 
     /// The referee's stroke signal is a closed fist; SF Symbols has none, so the ✊ emoji is tinted
@@ -1655,7 +1654,7 @@ struct PointTypeButton: View {
                 Spacer()
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.vertical, compact ? 9 : 14)
             .background(
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color.white.opacity(0.05))

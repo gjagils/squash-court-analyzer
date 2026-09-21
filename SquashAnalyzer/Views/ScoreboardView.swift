@@ -35,9 +35,31 @@ struct ScoreboardView: View {
                 .font(AppFonts.caption(8))
                 .foregroundColor(AppColors.textMuted)
                 .tracking(1.5)
+
+            pointsTimeline
+                .padding(.top, 8)
         }
         .frame(width: 84)
         .padding(.top, 6)
+    }
+
+    /// Rally-by-rally dots for the current game, oldest left, in the scorer's colour.
+    /// Only the last rallies that fit the column are shown; nothing spills outside it.
+    private var pointsTimeline: some View {
+        let dot: CGFloat = 6
+        let gap: CGFloat = 3
+        let capacity = Int((84 + gap) / (dot + gap))
+        let recent = game.points.suffix(capacity)
+        return HStack(spacing: gap) {
+            ForEach(recent) { point in
+                Circle()
+                    .fill(point.scorer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
+                    .frame(width: dot, height: dot)
+            }
+        }
+        .frame(width: 84, height: dot, alignment: .trailing)
+        .clipped()
+        .animation(.easeInOut(duration: 0.2), value: game.points.count)
     }
 
     // MARK: - Player column (compact version of the referee player column)

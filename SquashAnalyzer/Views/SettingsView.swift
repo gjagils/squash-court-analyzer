@@ -5,28 +5,16 @@ enum CoachInputSettings {
     static let modeKey = "coachInputMode"
 }
 
-/// How a point is entered on the coach screen
-enum CoachInputMode: String, CaseIterable, Identifiable {
-    /// Wie scoort → type → zone → slag, with pop-ups
-    case classic
+/// How a point is entered on the coach screen. The stored raw value of the
+/// removed "classic" mode no longer parses and falls back to `.scoreTap`.
+enum CoachInputMode: String {
     /// Winner/Fout buttons per player, shot optional afterwards
     case quick
     /// Tap the score, then everything inline: type → zone → slag, no pop-ups
     case scoreTap
 
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .classic: return "Klassiek"
-        case .quick: return "Snelle invoer"
-        case .scoreTap: return "Tik op de score"
-        }
-    }
-
     var description: String {
         switch self {
-        case .classic: return "Wie scoort → type punt → zone → slag, elk in een eigen venster."
         case .quick: return "Winner en Fout per speler; na de zone is het punt binnen, de slag kies je optioneel achteraf."
         case .scoreTap: return "Tik op de score van wie scoort; type, zone en slag volgen op het scherm zelf. Ook bij een unforced error leg je vast waar."
         }
@@ -123,29 +111,19 @@ struct SettingsView: View {
                 .foregroundColor(AppColors.textMuted)
                 .tracking(1)
 
-            HStack(spacing: 6) {
-                ForEach(CoachInputMode.allCases) { mode in
-                    let active = mode == inputMode
-                    Button(action: { withAnimation(.easeInOut(duration: 0.15)) { inputModeRaw = mode.rawValue } }) {
-                        Text(mode.title)
-                            .font(AppFonts.label(12))
-                            .foregroundColor(active ? AppColors.backgroundDark : AppColors.warmOrange)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(active ? AppColors.warmOrange : AppColors.warmOrange.opacity(0.10))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(AppColors.warmOrange.opacity(active ? 0 : 0.3), lineWidth: 1)
-                                    )
-                            )
+            Toggle(isOn: Binding(
+                get: { inputMode == .quick },
+                set: { quick in
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        inputModeRaw = (quick ? CoachInputMode.quick : .scoreTap).rawValue
                     }
-                    .buttonStyle(.plain)
                 }
+            )) {
+                Text("Snelle invoer")
+                    .font(AppFonts.label(14))
+                    .foregroundColor(AppColors.textPrimary)
             }
+            .tint(AppColors.warmOrange)
 
             Text(inputMode.description)
                 .font(AppFonts.caption(11))

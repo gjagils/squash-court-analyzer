@@ -203,11 +203,36 @@ struct RefereeView: View {
             .opacity(isServer ? 1 : 0)
             .allowsHitTesting(isServer)
 
-            // Score
-            Text("\(score)")
-                .font(.system(size: 80, weight: .bold, design: .rounded))
-                .foregroundColor(isServer ? color : AppColors.textPrimary)
-                .contentTransition(.numericText())
+            // Score: tapping it awards the rally to this player
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.15)) { match.awardPoint(to: player) }
+            }) {
+                VStack(spacing: 2) {
+                    Text("\(score)")
+                        .font(.system(size: 80, weight: .bold, design: .rounded))
+                        .foregroundColor(isServer ? color : AppColors.textPrimary)
+                        .contentTransition(.numericText())
+                    Text("TIK = PUNT")
+                        .font(AppFonts.caption(9))
+                        .foregroundColor(color.opacity(0.55))
+                        .tracking(1.4)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(color.opacity(0.08))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(color.opacity(0.25), lineWidth: 1)
+                        )
+                )
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(match.isGameOver)
+            .padding(.horizontal, 10)
+            .accessibilityLabel("Punt voor \(match.name(for: player))")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .padding(.vertical, 12)
@@ -216,19 +241,10 @@ struct RefereeView: View {
 
     // MARK: - Action Grid
 
-    // Left column follows player 1's warm palette, right column player 2's cool palette
+    // Rallies are awarded by tapping a score; left column follows player 1's
+    // warm palette, right column player 2's cool palette
     private var actionGrid: some View {
         VStack(spacing: 8) {
-            // WON RALLY
-            HStack(spacing: 8) {
-                actionButton("WON RALLY", color: AppColors.accentGold) {
-                    withAnimation(.easeInOut(duration: 0.15)) { match.awardPoint(to: .player1) }
-                }
-                actionButton("WON RALLY", color: AppColors.coolSky) {
-                    withAnimation(.easeInOut(duration: 0.15)) { match.awardPoint(to: .player2) }
-                }
-            }
-
             // LET CALL
             HStack(spacing: 8) {
                 actionButton("LET CALL", color: AppColors.warmOrange) {

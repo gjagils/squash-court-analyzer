@@ -2,6 +2,15 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 
+/// Which kind of saved matches the history shows
+enum HistoryKindFilter: String, CaseIterable, Identifiable {
+    case all = "Alles"
+    case coach = "Coach"
+    case referee = "Scheidsrechter"
+
+    var id: String { rawValue }
+}
+
 /// View for displaying saved match history and standalone games
 struct MatchHistoryView: View {
     @Environment(\.modelContext) private var modelContext
@@ -25,6 +34,9 @@ struct MatchHistoryView: View {
     @State private var showingReplaceConfirm = false
     @State private var showingICloudSuccess = false
     @State private var iCloudSaveMessage = ""
+    @State private var kindFilter: HistoryKindFilter = .all
+    /// Only matches this player took part in; nil shows everyone
+    @State private var playerFilter: String? = nil
 
     var body: some View {
         ZStack {
@@ -191,56 +203,195 @@ struct MatchHistoryView: View {
 
     // MARK: - Content List
 
-    private var contentListView: some View {
-        ScrollView {
-            LazyVStack(spacing: 12, pinnedViews: [.sectionHeaders]) {
-                if !savedMatches.isEmpty {
-                    Section {
-                        ForEach(savedMatches) { match in
-                            MatchHistoryCard(match: match) {
-                                onSelectMatch(match)
-                            } onDelete: {
-                                deleteMatch(match)
-                            }
-                        }
-                    } header: {
-                        HistorySectionHeader(title: "WEDSTRIJDEN")
-                    }
-                }
+    // MARK: - Filters
 
-                if !standaloneGames.isEmpty {
-                    Section {
-                        ForEach(standaloneGames) { game in
-                            StandaloneGameCard(game: game) {
-                                onSelectGame?(game)
-                                if onSelectGame != nil {
-                                    isPresented = false
-                                }
-                            } onDelete: {
-                                deleteGame(game)
-                            }
-                        }
-                    } header: {
-                        HistorySectionHeader(title: "LOSSE GAMES")
-                    }
-                }
+    /// Every player name that appears in a saved match or game, alphabetical
+    private var playerNames: [String] {
+        var names: [String: String] = [:]   // lowercased → as written
+        let pairs = savedMatches.map { ($0.player1Name, $0.player2Name) }
+            + standaloneGames.map { ($0.player1Name, $0.player2Name) }
+            + refereeMatches.map { ($0.player1Name, $0.player2Name) }
+        for (p1, p2) in pairs {
+            for name in [p1, p2] where !name.isEmpty {
+                names[name.lowercased()] = names[name.lowercased()] ?? name
+            }
+        }
+        return names.values.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+    }
 
-                if !refereeMatches.isEmpty {
-                    Section {
-                        ForEach(refereeMatches) { match in
-                            RefereeMatchCard(match: match) {
-                                deleteRefereeMatch(match)
-                            }
-                        }
-                    } header: {
-                        HistorySectionHeader(title: "SCHEIDSRECHTER", icon: "whistle.fill")
+    private func matchesPlayerFilter(_ player1: String, _ player2: String) -> Bool {
+        guard let playerFilter else { return true }
+        return player1.caseInsensitiveCompare(playerFilter) == .orderedSame
+            || player2.caseInsensitiveCompare(playerFilter) == .orderedSame
+    }
+
+    private var filteredMatches: [SavedMatch] {
+        guard kindFilter != .referee else { return [] }
+        return savedMatches.filter { matchesPlayerFilter($0.player1Name, $0.player2Name) }
+    }
+
+    private var filteredGames: [SavedGame] {
+        guard kindFilter != .referee else { return [] }
+        return standaloneGames.filter { matchesPlayerFilter($0.player1Name, $0.player2Name) }
+    }
+
+    private var filteredRefereeMatches: [SavedRefereeMatch] {
+        guard kindFilter != .coach else { return [] }
+        return refereeMatches.filter { matchesPlayerFilter($0.player1Name, $0.player2Name) }
+    }
+
+    private var filterBar: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 6) {
+                ForEach(HistoryKindFilter.allCases) { kind in
+                    let active = kind == kindFilter
+                    Button(action: { withAnimation(.easeInOut(duration: 0.15)) { kindFilter = kind } }) {
+                        Text(kind.rawValue)
+                            .font(AppFonts.label(12))
+                            .foregroundColor(active ? AppColors.backgroundDark : AppColors.accentGold)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 9)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(active ? AppColors.accentGold : AppColors.accentGold.opacity(0.10))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(AppColors.accentGold.opacity(active ? 0 : 0.3), lineWidth: 1)
+                                    )
+                            )
                     }
+                    .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 8)
-            .padding(.bottom, 24)
+
+            Menu {
+                Button(action: { playerFilter = nil }) {
+                    Label("Alle spelers", systemImage: playerFilter == nil ? "checkmark" : "person.2")
+                }
+                Divider()
+                ForEach(playerNames, id: \.self) { name in
+                    Button(action: { playerFilter = name }) {
+                        if playerFilter == name {
+                            Label(name, systemImage: "checkmark")
+                        } else {
+                            Text(name)
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: playerFilter == nil ? "person.2" : "person.fill")
+                        .font(.system(size: 13))
+                    Text(playerFilter ?? "Alle spelers")
+                        .font(AppFonts.label(13))
+                        .lineLimit(1)
+                    Spacer()
+                    if playerFilter != nil {
+                        Button(action: { playerFilter = nil }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 15))
+                                .foregroundColor(AppColors.textMuted)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.system(size: 11))
+                            .foregroundColor(AppColors.textMuted)
+                    }
+                }
+                .foregroundColor(playerFilter == nil ? AppColors.textSecondary : AppColors.textPrimary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.white.opacity(0.05))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.white.opacity(0.10), lineWidth: 1)
+                        )
+                )
+            }
         }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 8)
+    }
+
+    private var noResultsView: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "line.3.horizontal.decrease.circle")
+                .font(.system(size: 36))
+                .foregroundColor(AppColors.textMuted)
+            Text("Geen wedstrijden met dit filter")
+                .font(AppFonts.body(15))
+                .foregroundColor(AppColors.textSecondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 60)
+    }
+
+    private var contentListView: some View {
+        VStack(spacing: 0) {
+            filterBar
+            ScrollView {
+                if filteredMatches.isEmpty && filteredGames.isEmpty && filteredRefereeMatches.isEmpty {
+                    noResultsView
+                } else {
+                    historyList
+                }
+            }
+        }
+    }
+
+    private var historyList: some View {
+        LazyVStack(spacing: 12, pinnedViews: [.sectionHeaders]) {
+            if !filteredMatches.isEmpty {
+                Section {
+                    ForEach(filteredMatches) { match in
+                        MatchHistoryCard(match: match) {
+                            onSelectMatch(match)
+                        } onDelete: {
+                            deleteMatch(match)
+                        }
+                    }
+                } header: {
+                    HistorySectionHeader(title: "COACH", icon: "chart.bar.xaxis")
+                }
+            }
+
+            if !filteredGames.isEmpty {
+                Section {
+                    ForEach(filteredGames) { game in
+                        StandaloneGameCard(game: game) {
+                            onSelectGame?(game)
+                            if onSelectGame != nil {
+                                isPresented = false
+                            }
+                        } onDelete: {
+                            deleteGame(game)
+                        }
+                    }
+                } header: {
+                    HistorySectionHeader(title: "LOSSE GAMES")
+                }
+            }
+
+            if !filteredRefereeMatches.isEmpty {
+                Section {
+                    ForEach(filteredRefereeMatches) { match in
+                        RefereeMatchCard(match: match) {
+                            deleteRefereeMatch(match)
+                        }
+                    }
+                } header: {
+                    HistorySectionHeader(title: "SCHEIDSRECHTER", icon: "whistle.fill")
+                }
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
+        .padding(.bottom, 24)
     }
 
     // MARK: - Delete
@@ -647,6 +798,8 @@ struct RefereeMatchCard: View {
     let match: SavedRefereeMatch
     let onDelete: () -> Void
 
+    @State private var showingDeleteConfirm = false
+
     var body: some View {
         HStack(spacing: 14) {
             // Icon
@@ -688,10 +841,19 @@ struct RefereeMatchCard: View {
                     }
                 }
 
-                // Date
-                Text(match.savedAt.formatted(date: .abbreviated, time: .shortened))
-                    .font(AppFonts.caption(10))
-                    .foregroundColor(AppColors.textMuted.opacity(0.7))
+                // Date + delete
+                HStack {
+                    Text(match.savedAt.formatted(date: .abbreviated, time: .shortened))
+                        .font(AppFonts.caption(10))
+                        .foregroundColor(AppColors.textMuted.opacity(0.7))
+                    Spacer()
+                    Button(action: { showingDeleteConfirm = true }) {
+                        Image(systemName: "trash").font(.system(size: 12))
+                            .foregroundColor(AppColors.textMuted)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Wedstrijd verwijderen")
+                }
             }
         }
         .padding(14)
@@ -704,9 +866,15 @@ struct RefereeMatchCard: View {
                 )
         )
         .contextMenu {
-            Button(role: .destructive, action: onDelete) {
+            Button(role: .destructive, action: { showingDeleteConfirm = true }) {
                 Label("Verwijder", systemImage: "trash")
             }
+        }
+        .alert("Wedstrijd verwijderen?", isPresented: $showingDeleteConfirm) {
+            Button("Annuleren", role: .cancel) { }
+            Button("Verwijderen", role: .destructive) { onDelete() }
+        } message: {
+            Text("Deze actie kan niet ongedaan worden gemaakt.")
         }
     }
 }

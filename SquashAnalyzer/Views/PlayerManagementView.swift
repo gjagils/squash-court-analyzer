@@ -165,6 +165,8 @@ struct PlayerRowView: View {
     let onEdit: () -> Void
     let onDelete: () -> Void
 
+    @State private var showingDeleteConfirm = false
+
     var body: some View {
         HStack(spacing: 14) {
             // Avatar: photo when set, otherwise the initial
@@ -218,11 +220,20 @@ struct PlayerRowView: View {
                         .foregroundColor(AppColors.accentGold)
                 }
             } else {
-                Button(action: onEdit) {
-                    Image(systemName: "pencil")
-                        .font(.system(size: 16))
-                        .foregroundColor(AppColors.textSecondary)
+                HStack(spacing: 18) {
+                    Button(action: onEdit) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 16))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                    Button(action: { showingDeleteConfirm = true }) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 15))
+                            .foregroundColor(AppColors.textMuted)
+                    }
+                    .accessibilityLabel("Verwijder \(player.name)")
                 }
+                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 16)
@@ -235,16 +246,22 @@ struct PlayerRowView: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.white.opacity(0.08), lineWidth: 1)
         )
-        .swipeActions(edge: .trailing) {
-            Button(role: .destructive, action: onDelete) {
-                Label("Verwijderen", systemImage: "trash")
-            }
+        // swipeActions only work inside a List, so offer the actions on long press too
+        .contextMenu {
             if !isPickerMode {
                 Button(action: onEdit) {
                     Label("Bewerken", systemImage: "pencil")
                 }
-                .tint(AppColors.accentGold)
             }
+            Button(role: .destructive, action: { showingDeleteConfirm = true }) {
+                Label("Verwijderen", systemImage: "trash")
+            }
+        }
+        .alert("\(player.name) verwijderen?", isPresented: $showingDeleteConfirm) {
+            Button("Annuleren", role: .cancel) { }
+            Button("Verwijderen", role: .destructive, action: onDelete)
+        } message: {
+            Text("Gespeelde wedstrijden blijven bewaard.")
         }
         .contentShape(Rectangle())
         .onTapGesture {

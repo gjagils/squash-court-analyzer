@@ -56,8 +56,8 @@ struct ContentView: View {
 
             // Setup overlay
             if showingSetup {
+                // History and saved analyses are layered above the setup, so closing them lands back here
                 MatchSetupView(match: match, isPresented: $showingSetup, onViewHistory: {
-                    showingSetup = false
                     showingHistory = true
                 })
                     .transition(.opacity)
@@ -376,18 +376,10 @@ struct ContentView: View {
                     .padding(.horizontal, 16)
                 }
 
-                // Player buttons (hidden when point type or shot is being selected)
-                if !scoreTapEntry && currentGame.selectedPlayer == nil {
-                    Group {
-                        if quickEntry {
-                            QuickEntryButtonsView(game: currentGame) { player, action in
-                                handleQuickEntry(player, action)
-                            }
-                        } else {
-                            PlayerButtonsView(game: currentGame) { player in
-                                handlePlayerSelect(player)
-                            }
-                        }
+                // Quick-entry buttons (hidden when point type or shot is being selected)
+                if quickEntry && currentGame.selectedPlayer == nil {
+                    QuickEntryButtonsView(game: currentGame) { player, action in
+                        handleQuickEntry(player, action)
                     }
                     .padding(.horizontal, 24)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
@@ -737,16 +729,6 @@ struct ContentView: View {
     }
 
     // MARK: - Handlers
-    private func handlePlayerSelect(_ player: Player) {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            if currentGame.selectedPlayer == player {
-                currentGame.clearSelection()
-            } else {
-                currentGame.selectPlayer(player)
-            }
-        }
-    }
-
     private func handleQuickEntry(_ player: Player, _ action: QuickEntryAction) {
         withAnimation(.easeInOut(duration: 0.2)) {
             currentGame.selectPlayer(player)
@@ -972,7 +954,25 @@ struct MatchSetupView: View {
                     .padding(.horizontal, 24)
                 }
 
-                Spacer().frame(height: 44)
+                // ── Finished matches (coach + referee) ──────────────────────
+                if let onViewHistory = onViewHistory {
+                    Button(action: onViewHistory) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .font(.system(size: 13))
+                            Text("Afgeronde wedstrijden")
+                                .font(AppFonts.label(14))
+                        }
+                        .foregroundColor(AppColors.textSecondary)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+                }
+
+                Spacer().frame(height: 28)
             }
         }
         .animation(.easeInOut(duration: 0.2), value: selectedMode)

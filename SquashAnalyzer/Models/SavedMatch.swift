@@ -19,6 +19,9 @@ final class SavedMatch {
     /// Games already won when tracking started at game 2 or later (0 for a full match)
     var player1GamesBefore: Int = 0
     var player2GamesBefore: Int = 0
+    /// Games won after tracking stopped, filled in afterwards (0 unless the result was completed)
+    var player1GamesAfter: Int = 0
+    var player2GamesAfter: Int = 0
 
     @Relationship(deleteRule: .cascade, inverse: \SavedGame.match)
     var games: [SavedGame] = []
@@ -55,11 +58,11 @@ final class SavedMatch {
     }
 
     var player1GamesWon: Int {
-        player1GamesBefore + games.filter { $0.winner == Player.player1.rawValue }.count
+        player1GamesBefore + games.filter { $0.winner == Player.player1.rawValue }.count + player1GamesAfter
     }
 
     var player2GamesWon: Int {
-        player2GamesBefore + games.filter { $0.winner == Player.player2.rawValue }.count
+        player2GamesBefore + games.filter { $0.winner == Player.player2.rawValue }.count + player2GamesAfter
     }
 
     var gamesToWin: Int {
@@ -73,6 +76,22 @@ final class SavedMatch {
     var matchWinner: Player? {
         guard isMatchOver else { return nil }
         return player1GamesWon > player2GamesWon ? .player1 : .player2
+    }
+
+    /// Stopped before either player won the match
+    var isIncomplete: Bool { !isMatchOver }
+
+    /// Score per game for the history card, with "–" for games played before tracking
+    /// started and for games whose winner was filled in afterwards. An unfinished game
+    /// shows its score so far; one without rallies is left out.
+    var gameScoreChips: [String] {
+        let tracked = games
+            .sorted { $0.gameNumber < $1.gameNumber }
+            .filter { $0.winner != nil || !$0.points.isEmpty }
+        let unfinished = tracked.filter { $0.winner == nil }.count
+        let before = Array(repeating: "–", count: player1GamesBefore + player2GamesBefore)
+        let after = Array(repeating: "–", count: max(0, player1GamesAfter + player2GamesAfter - unfinished))
+        return before + tracked.map { "\($0.player1Score)-\($0.player2Score)" } + after
     }
 
     var winnerName: String? {
@@ -108,6 +127,8 @@ final class SavedMatch {
         match.player2CoachingNotes = player2CoachingNotes
         match.player1GamesBefore = player1GamesBefore
         match.player2GamesBefore = player2GamesBefore
+        match.player1GamesAfter = player1GamesAfter
+        match.player2GamesAfter = player2GamesAfter
         // Replace the default empty game with converted saved games
         match.games = games
             .sorted(by: { $0.gameNumber < $1.gameNumber })
@@ -136,6 +157,8 @@ final class SavedMatch {
         savedMatch.player2CoachingNotes = match.player2CoachingNotes
         savedMatch.player1GamesBefore = match.player1GamesBefore
         savedMatch.player2GamesBefore = match.player2GamesBefore
+        savedMatch.player1GamesAfter = match.player1GamesAfter
+        savedMatch.player2GamesAfter = match.player2GamesAfter
 
         context.insert(savedMatch)
 

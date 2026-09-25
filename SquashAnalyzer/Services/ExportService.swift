@@ -76,6 +76,9 @@ struct MatchExportData: Codable {
     /// Games won before tracking started (absent in older backups)
     var player1GamesBefore: Int? = nil
     var player2GamesBefore: Int? = nil
+    /// Games won after tracking stopped, filled in afterwards (absent in older backups)
+    var player1GamesAfter: Int? = nil
+    var player2GamesAfter: Int? = nil
     let games: [GameExportData]
 }
 
@@ -207,19 +210,22 @@ enum ExportService {
     static func textSummary(from match: SavedMatch) -> String {
         let p1 = match.player1Name
         let p2 = match.player2Name
-        let winnerName = match.winnerName ?? "Gelijkspel"
+        let result = match.winnerName.map { "(\($0) wint)" } ?? "(incompleet)"
         let sortedGames = match.games.sorted { $0.gameNumber < $1.gameNumber }
 
         var text = """
         🏸 SQUASH WEDSTRIJD ANALYSE
         \(p1) vs \(p2)
-        Eindstand games: \(match.player1GamesWon)-\(match.player2GamesWon) (\(winnerName) wint)
+        Eindstand games: \(match.player1GamesWon)-\(match.player2GamesWon) \(result)
 
         """
 
         for game in sortedGames {
             let gWinner = game.gameWinner == .player1 ? p1 : (game.gameWinner == .player2 ? p2 : "?")
             text += "Game \(game.gameNumber): \(game.player1Score)-\(game.player2Score) (\(gWinner))\n"
+        }
+        if match.player1GamesAfter + match.player2GamesAfter > 0 {
+            text += "Uitslag achteraf aangevuld: \(p1) \(match.player1GamesAfter) – \(match.player2GamesAfter) \(p2) in games\n"
         }
 
         // Overall stats
@@ -525,6 +531,8 @@ enum ExportService {
             player2CoachingNotes: match.player2CoachingNotes,
             player1GamesBefore: match.player1GamesBefore,
             player2GamesBefore: match.player2GamesBefore,
+            player1GamesAfter: match.player1GamesAfter,
+            player2GamesAfter: match.player2GamesAfter,
             games: games
         )
     }
@@ -589,6 +597,8 @@ enum ExportService {
         savedMatch.player2CoachingNotes = matchData.player2CoachingNotes ?? ""
         savedMatch.player1GamesBefore = matchData.player1GamesBefore ?? 0
         savedMatch.player2GamesBefore = matchData.player2GamesBefore ?? 0
+        savedMatch.player1GamesAfter = matchData.player1GamesAfter ?? 0
+        savedMatch.player2GamesAfter = matchData.player2GamesAfter ?? 0
         context.insert(savedMatch)
         for gameData in matchData.games {
             importGame(gameData, context: context, matchRef: savedMatch)

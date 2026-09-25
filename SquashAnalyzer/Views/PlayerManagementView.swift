@@ -28,15 +28,13 @@ struct PlayerManagementView: View {
                 VStack(spacing: 0) {
                     // Header
                     HStack {
-                        if isPickerMode {
-                            Button(action: { dismiss() }) {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "xmark")
-                                    Text("Annuleren")
-                                }
-                                .font(AppFonts.body(14))
-                                .foregroundColor(AppColors.textSecondary)
+                        Button(action: { dismiss() }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "xmark")
+                                Text(isPickerMode ? "Annuleren" : "Sluiten")
                             }
+                            .font(AppFonts.body(14))
+                            .foregroundColor(AppColors.textSecondary)
                         }
 
                         Spacer()

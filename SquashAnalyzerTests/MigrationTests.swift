@@ -55,6 +55,8 @@ final class MigrationTests: XCTestCase {
         XCTAssertEqual(migrated.games.first?.lets.count, 1)
         XCTAssertEqual(migrated.player1GamesBefore, 0, "V3 head start defaults to a full match")
         XCTAssertEqual(migrated.player2GamesBefore, 0)
+        XCTAssertEqual(migrated.player1GamesAfter, 0, "V4 filled-in result defaults to none")
+        XCTAssertEqual(migrated.player2GamesAfter, 0)
 
         let players = try context.fetch(FetchDescriptor<SavedPlayer>())
         XCTAssertEqual(players.map(\.name), ["Niels"])

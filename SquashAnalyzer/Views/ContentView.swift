@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var savedGameForAnalysis: Game? = nil
     @State private var showingPreviousGameAnalysis = false
     @State private var showingCancelConfirm = false
+    @State private var showingResultCompletion = false
     @State private var showingLetSelector = false
     @State private var rallyElapsedTime: TimeInterval = 0
     @State private var rallyTimer: Timer? = nil
@@ -86,11 +87,7 @@ struct ContentView: View {
                         match = Match()
                         showingSetup = true
                     },
-                    onStop: {
-                        abandonCurrentMatch()
-                        match = Match()
-                        showingSetup = true
-                    },
+                    onStop: { requestStop() },
                     onUndo: {
                         // Reset status first: the points-count change below re-persists the match.
                         match.status = .inProgress
@@ -148,6 +145,21 @@ struct ContentView: View {
                     .transition(.opacity)
             }
 
+            // Fill in the winners of the games that were not tracked
+            if showingResultCompletion {
+                MatchResultCompletionSheet(match: match) { winners in
+                    if match.completeResult(with: winners) {
+                        persistMatch()
+                        match = Match()
+                        showingSetup = true
+                    }
+                    showingResultCompletion = false
+                } onCancel: {
+                    showingResultCompletion = false
+                }
+                .transition(.opacity)
+            }
+
             // Let selector overlay
             if showingLetSelector {
                 LetSelectorOverlay(
@@ -170,6 +182,7 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.3), value: showingPreviousGameAnalysis)
         .animation(.easeInOut(duration: 0.3), value: showingSavedMatchAnalysis)
         .animation(.easeInOut(duration: 0.3), value: showingSettings)
+        .animation(.easeInOut(duration: 0.3), value: showingResultCompletion)
         .animation(.easeInOut(duration: 0.25), value: currentGame.scoringStep)
         .onAppear {
             startRallyTimer()
@@ -209,15 +222,23 @@ struct ContentView: View {
                 persistMatch()
             }
         }
-        .alert("Wedstrijd stoppen?", isPresented: $showingCancelConfirm) {
-            Button("Annuleren", role: .cancel) { }
-            Button("Stoppen", role: .destructive) {
+        .alert("Incomplete wedstrijd opslaan?", isPresented: $showingCancelConfirm) {
+            Button("Opslaan als incompleet") {
                 abandonCurrentMatch()
                 match = Match()
                 showingSetup = true
             }
+            Button("Uitslag aanvullen") {
+                showingResultCompletion = true
+            }
+            Button("Niet opslaan", role: .destructive) {
+                discardCurrentMatch()
+                match = Match()
+                showingSetup = true
+            }
+            Button("Doorspelen", role: .cancel) { }
         } message: {
-            Text("Weet je zeker dat je deze wedstrijd wilt stoppen? De huidige wedstrijd gaat verloren.")
+            Text("\(match.player1Name) – \(match.player2Name) staat \(match.player1GamesWon)-\(match.player2GamesWon) in games en is nog niet afgelopen. Sla hem op als incompleet, vul de winnaars van de gemiste games in, of gooi hem weg.")
         }
         .alert("Wedstrijd hervatten?", isPresented: $showingRecoveryPrompt) {
             Button("Hervatten") {
@@ -316,6 +337,31 @@ struct ContentView: View {
             persistMatch()
         } else {
             abandonCurrentMatch()
+        }
+    }
+
+    /// Stopping a match that is not over asks whether to keep it; one without any
+    /// recorded rally is discarded straight away.
+    private func requestStop() {
+        if match.isMatchOver {
+            finishOrAbandonCurrentMatch()
+        } else if match.allPoints.isEmpty && match.allLets.isEmpty && match.firstGameNumber == 1 {
+            discardCurrentMatch()
+        } else {
+            showingCancelConfirm = true
+            return
+        }
+        match = Match()
+        showingSetup = true
+    }
+
+    private func discardCurrentMatch() {
+        guard !showingSetup else { return }
+        do {
+            try SwiftDataMatchRepository(context: modelContext).delete(match)
+        } catch {
+            persistenceErrorMessage = error.localizedDescription
+            showingPersistenceError = true
         }
     }
 
@@ -466,7 +512,7 @@ struct ContentView: View {
 
             HStack {
                 // Stop match
-                Button(action: { showingCancelConfirm = true }) {
+                Button(action: { requestStop() }) {
                     HStack(spacing: 4) {
                         Image(systemName: "xmark")
                         Text("Stop")

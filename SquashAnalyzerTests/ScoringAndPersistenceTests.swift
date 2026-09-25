@@ -328,6 +328,112 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertEqual(imported.player1GamesBefore, 2)
     }
 
+    func testCompletingResultFillsInOnlyTheMissedGameWinners() {
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1)
+        for winner in [Player.player1, .player2, .player1] {
+            for _ in 0..<11 { match.currentGame.addPoint(to: winner, pointType: .unforcedError, at: nil, with: nil) }
+            match.onGameEnd()
+        }
+        XCTAssertEqual(match.games.count, 4, "game 4 was started but not played")
+        XCTAssertEqual(match.firstUnrecordedGameNumber, 4)
+
+        XCTAssertFalse(match.isValidResultCompletion([.player2]), "2-2 does not decide the match")
+        XCTAssertFalse(match.isValidResultCompletion([.player1, .player2]), "no games after the match is decided")
+        XCTAssertTrue(match.isValidResultCompletion([.player2, .player1]))
+        XCTAssertFalse(match.completeResult(with: [.player2]))
+        XCTAssertFalse(match.isMatchOver)
+
+        XCTAssertTrue(match.completeResult(with: [.player2, .player1]))
+        XCTAssertEqual(match.games.count, 3, "the unplayed game 4 is dropped")
+        XCTAssertEqual(match.player1GamesAfter, 1)
+        XCTAssertEqual(match.player2GamesAfter, 1)
+        XCTAssertEqual(match.player1GamesWon, 3)
+        XCTAssertEqual(match.player2GamesWon, 2)
+        XCTAssertEqual(match.matchWinner, .player1)
+        XCTAssertEqual(match.status, .completed)
+    }
+
+    func testCompletingResultKeepsTheRalliesOfAnUnfinishedGame() {
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1, player1GamesBefore: 1, player2GamesBefore: 1)
+        for _ in 0..<5 { match.currentGame.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil) }
+        XCTAssertEqual(match.firstUnrecordedGameNumber, 3)
+
+        XCTAssertFalse(match.completeResult(with: [.player2]), "1-2 does not decide the match")
+        XCTAssertTrue(match.completeResult(with: [.player2, .player2]))
+        XCTAssertEqual(match.games.count, 1)
+        XCTAssertEqual(match.games.first?.points.count, 5, "the rallies of game 3 stay for analysis")
+        XCTAssertEqual(match.player2GamesWon, 3, "one before + two filled in")
+        XCTAssertEqual(match.matchWinner, .player2)
+    }
+
+    @MainActor
+    func testCompletedResultSurvivesPersistenceAndBackup() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let schema = Schema(versionedSchema: SquashAnalyzerCurrentSchema.self)
+        let container = try ModelContainer(
+            for: schema,
+            migrationPlan: SquashAnalyzerMigrationPlan.self,
+            configurations: [config]
+        )
+        let repository = SwiftDataMatchRepository(context: container.mainContext)
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1)
+        for _ in 0..<11 { match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil) }
+        match.onGameEnd()
+        for _ in 0..<4 { match.currentGame.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil) }
+        try repository.markAbandoned(match)
+
+        let saved = try XCTUnwrap(container.mainContext.fetch(FetchDescriptor<SavedMatch>()).first)
+        XCTAssertTrue(saved.isIncomplete)
+        XCTAssertEqual(saved.matchStatus, .abandoned)
+        XCTAssertEqual(saved.gameScoreChips, ["11-0", "0-4"])
+
+        // Filled in later from the history
+        let live = saved.toMatch()
+        XCTAssertTrue(live.completeResult(with: [.player2, .player1, .player1]))
+        try repository.upsert(live)
+
+        XCTAssertFalse(saved.isIncomplete)
+        XCTAssertEqual(saved.matchStatus, .completed)
+        XCTAssertEqual(saved.player1GamesAfter, 2)
+        XCTAssertEqual(saved.player2GamesAfter, 1)
+        XCTAssertEqual(saved.winnerName, "Een")
+        XCTAssertEqual(saved.gameScoreChips, ["11-0", "0-4", "–", "–"], "game 2 keeps its rallies, games 3-4 have no score")
+        XCTAssertEqual(saved.games.first(where: { $0.gameNumber == 2 })?.points.count, 4)
+
+        let backup = try ExportService.exportFullBackup(players: [], matches: [saved], standaloneGames: [])
+        container.mainContext.delete(saved)
+        try container.mainContext.save()
+        _ = try ExportService.importFullBackup(backup, context: container.mainContext)
+        let imported = try XCTUnwrap(container.mainContext.fetch(FetchDescriptor<SavedMatch>()).first)
+        XCTAssertEqual(imported.player1GamesAfter, 2)
+        XCTAssertEqual(imported.player2GamesAfter, 1)
+        XCTAssertFalse(imported.isIncomplete)
+    }
+
+    @MainActor
+    func testStoppedMatchCanBeDiscarded() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let schema = Schema(versionedSchema: SquashAnalyzerCurrentSchema.self)
+        let container = try ModelContainer(
+            for: schema,
+            migrationPlan: SquashAnalyzerMigrationPlan.self,
+            configurations: [config]
+        )
+        let repository = SwiftDataMatchRepository(context: container.mainContext)
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1)
+        match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil)
+        try repository.upsert(match)
+        XCTAssertEqual(try container.mainContext.fetchCount(FetchDescriptor<SavedMatch>()), 1)
+
+        try repository.delete(match)
+        XCTAssertEqual(try container.mainContext.fetchCount(FetchDescriptor<SavedMatch>()), 0)
+        XCTAssertEqual(try container.mainContext.fetchCount(FetchDescriptor<SavedGame>()), 0)
+    }
+
     @MainActor
     func testRestoredGameServesFromLastRallyWinner() throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)

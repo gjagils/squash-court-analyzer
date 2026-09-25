@@ -5,6 +5,7 @@ protocol MatchRepository {
     @MainActor func upsert(_ match: Match) throws
     @MainActor func mostRecentInProgressMatch() throws -> Match?
     @MainActor func markAbandoned(_ match: Match) throws
+    @MainActor func delete(_ match: Match) throws
 }
 
 enum PersistenceError: LocalizedError {
@@ -46,6 +47,8 @@ final class SwiftDataMatchRepository: MatchRepository {
             saved.player2CoachingNotes = match.player2CoachingNotes
             saved.player1GamesBefore = match.player1GamesBefore
             saved.player2GamesBefore = match.player2GamesBefore
+            saved.player1GamesAfter = match.player1GamesAfter
+            saved.player2GamesAfter = match.player2GamesAfter
 
             // A match contains few records. Replacing its child snapshot keeps the
             // write path simple and prevents standalone/linked duplicate games.
@@ -82,6 +85,23 @@ final class SwiftDataMatchRepository: MatchRepository {
     func markAbandoned(_ match: Match) throws {
         match.status = .abandoned
         try upsert(match)
+    }
+
+    /// Removes a match that should not be kept (a stopped match the user chose not to save)
+    func delete(_ match: Match) throws {
+        do {
+            let matchID = match.id
+            let descriptor = FetchDescriptor<SavedMatch>(
+                predicate: #Predicate { $0.id == matchID }
+            )
+            for saved in try context.fetch(descriptor) {
+                context.delete(saved)
+            }
+            try context.save()
+        } catch {
+            context.rollback()
+            throw PersistenceError.saveFailed(error)
+        }
     }
 
     private func makeMatch(from match: Match) -> SavedMatch {

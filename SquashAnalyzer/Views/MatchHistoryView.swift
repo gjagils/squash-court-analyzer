@@ -37,6 +37,8 @@ struct MatchHistoryView: View {
     @State private var kindFilter: HistoryKindFilter = .all
     /// Only matches this player took part in; nil shows everyone
     @State private var playerFilter: String? = nil
+    @State private var matchToComplete: SavedMatch? = nil
+    @State private var saveErrorMessage: String? = nil
 
     var body: some View {
         ZStack {
@@ -92,6 +94,23 @@ struct MatchHistoryView: View {
             }
         } message: {
             Text("Wil je alle bestaande data verwijderen en vervangen door de backup, of de backup toevoegen aan bestaande data?")
+        }
+        .fullScreenCover(item: $matchToComplete) { saved in
+            let live = saved.toMatch()
+            MatchResultCompletionSheet(match: live) { winners in
+                completeResult(of: live, with: winners)
+                matchToComplete = nil
+            } onCancel: {
+                matchToComplete = nil
+            }
+        }
+        .alert("Opslaan mislukt", isPresented: Binding(
+            get: { saveErrorMessage != nil },
+            set: { if !$0 { saveErrorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(saveErrorMessage ?? "")
         }
         .alert("Backup opgeslagen!", isPresented: $showingICloudSuccess) {
             Button("OK", role: .cancel) { }
@@ -353,6 +372,8 @@ struct MatchHistoryView: View {
                             onSelectMatch(match)
                         } onDelete: {
                             deleteMatch(match)
+                        } onCompleteResult: {
+                            matchToComplete = match
                         }
                     }
                 } header: {
@@ -400,6 +421,15 @@ struct MatchHistoryView: View {
         withAnimation {
             modelContext.delete(match)
             try? modelContext.save()
+        }
+    }
+
+    private func completeResult(of match: Match, with winners: [Player]) {
+        guard match.completeResult(with: winners) else { return }
+        do {
+            try SwiftDataMatchRepository(context: modelContext).upsert(match)
+        } catch {
+            saveErrorMessage = error.localizedDescription
         }
     }
 
@@ -665,6 +695,7 @@ struct MatchHistoryCard: View {
     let match: SavedMatch
     let onTap: () -> Void
     let onDelete: () -> Void
+    var onCompleteResult: (() -> Void)? = nil
 
     @State private var showingDeleteConfirm = false
     @State private var shareItemsToShow: ShareItemsWrapper? = nil
@@ -676,6 +707,16 @@ struct MatchHistoryCard: View {
                     Text(match.formattedDate)
                         .font(AppFonts.caption(11))
                         .foregroundColor(AppColors.textMuted)
+
+                    if match.isIncomplete {
+                        Text("INCOMPLEET")
+                            .font(AppFonts.label(9))
+                            .tracking(1)
+                            .foregroundColor(AppColors.warmRed)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Capsule().stroke(AppColors.warmRed.opacity(0.6), lineWidth: 1))
+                    }
 
                     Spacer()
 
@@ -719,26 +760,37 @@ struct MatchHistoryCard: View {
                     .frame(maxWidth: .infinity)
                 }
 
-                if !match.games.isEmpty {
+                let chips = match.gameScoreChips
+                if !chips.isEmpty {
                     HStack(spacing: 8) {
-                        // Games played before tracking started have no score
-                        ForEach(0..<(match.player1GamesBefore + match.player2GamesBefore), id: \.self) { _ in
-                            Text("–")
+                        // Games played before or after tracking have no score
+                        ForEach(Array(chips.enumerated()), id: \.offset) { _, chip in
+                            let untracked = chip == "–"
+                            Text(chip)
                                 .font(AppFonts.caption(11))
-                                .foregroundColor(AppColors.textMuted.opacity(0.6))
+                                .foregroundColor(untracked ? AppColors.textMuted.opacity(0.6) : AppColors.textMuted)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Capsule().fill(Color.white.opacity(0.03)))
-                        }
-                        ForEach(match.games.sorted(by: { $0.gameNumber < $1.gameNumber })) { game in
-                            Text("\(game.player1Score)-\(game.player2Score)")
-                                .font(AppFonts.caption(11))
-                                .foregroundColor(AppColors.textMuted)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Capsule().fill(Color.white.opacity(0.05)))
+                                .background(Capsule().fill(Color.white.opacity(untracked ? 0.03 : 0.05)))
                         }
                     }
+                }
+
+                if match.isIncomplete, let complete = onCompleteResult {
+                    Button(action: complete) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "flag.checkered").font(.system(size: 12))
+                            Text("Uitslag aanvullen").font(AppFonts.caption(11))
+                        }
+                        .foregroundColor(AppColors.accentGold)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(AppColors.accentGold.opacity(0.4), lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 HStack {
@@ -876,6 +928,165 @@ struct RefereeMatchCard: View {
         } message: {
             Text("Deze actie kan niet ongedaan worden gemaakt.")
         }
+    }
+}
+
+// MARK: - Complete result ("Uitslag aanvullen")
+
+/// Fills in only the winners of the games that were not tracked, one game at a time,
+/// until the match is decided. Counterpart of "Later instappen" at the end of a match.
+struct MatchResultCompletionSheet: View {
+    let match: Match
+    let onSave: ([Player]) -> Void
+    let onCancel: () -> Void
+
+    @State private var winners: [Player] = []
+
+    private var player1Won: Int { match.player1GamesWon + winners.filter { $0 == .player1 }.count }
+    private var player2Won: Int { match.player2GamesWon + winners.filter { $0 == .player2 }.count }
+    private var isDecided: Bool { player1Won >= match.gamesToWin || player2Won >= match.gamesToWin }
+    private var nextGameNumber: Int { match.firstUnrecordedGameNumber + winners.count }
+
+    /// Score so far of the unfinished tracked game, shown next to the first game to fill in
+    private var unfinishedScore: String? {
+        guard let last = match.games.last, last.winner == nil, !last.points.isEmpty else { return nil }
+        return "\(last.player1Score)-\(last.player2Score)"
+    }
+
+    var body: some View {
+        ZStack {
+            AppBackground()
+
+            VStack(spacing: 20) {
+                Text("UITSLAG AANVULLEN")
+                    .font(AppFonts.title(18))
+                    .foregroundColor(AppColors.textPrimary)
+                    .tracking(3)
+                    .padding(.top, 28)
+
+                Text("Kies per gemiste game wie hem won.")
+                    .font(AppFonts.caption(13))
+                    .foregroundColor(AppColors.textMuted)
+
+                HStack(spacing: 16) {
+                    standColumn(name: match.player1Name, games: player1Won, color: AppColors.warmOrange)
+                    Text("–").font(AppFonts.title(32)).foregroundColor(AppColors.textMuted)
+                    standColumn(name: match.player2Name, games: player2Won, color: AppColors.steelBlue)
+                }
+                .padding(.horizontal, 24)
+
+                ScrollView {
+                    VStack(spacing: 10) {
+                        ForEach(Array(winners.enumerated()), id: \.offset) { index, winner in
+                            filledRow(number: match.firstUnrecordedGameNumber + index, winner: winner)
+                        }
+                        if !isDecided {
+                            pickerRow(number: nextGameNumber)
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                }
+
+                VStack(spacing: 12) {
+                    if !winners.isEmpty {
+                        Button(action: { winners.removeLast() }) {
+                            Label("Laatste game wissen", systemImage: "arrow.uturn.backward")
+                                .font(AppFonts.caption(13))
+                                .foregroundColor(AppColors.textMuted)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    HardwareButton(title: "Opslaan", color: AppColors.warmOrange) {
+                        onSave(winners)
+                    }
+                    .opacity(isDecided ? 1 : 0.4)
+                    .disabled(!isDecided)
+
+                    Button(action: onCancel) {
+                        Text("Annuleren")
+                            .font(AppFonts.caption(13))
+                            .foregroundColor(AppColors.textMuted)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: winners)
+    }
+
+    private func standColumn(name: String, games: Int, color: Color) -> some View {
+        VStack(spacing: 4) {
+            Text(name)
+                .font(AppFonts.label(14))
+                .foregroundColor(AppColors.textPrimary)
+                .lineLimit(1)
+            Text("\(games)")
+                .font(AppFonts.title(32))
+                .foregroundColor(color)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func gameLabel(number: Int) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("GAME \(number)")
+                .font(AppFonts.label(12))
+                .foregroundColor(AppColors.textSecondary)
+                .tracking(1)
+            if number == match.firstUnrecordedGameNumber, let score = unfinishedScore {
+                Text("gestopt bij \(score)")
+                    .font(AppFonts.caption(10))
+                    .foregroundColor(AppColors.textMuted)
+            }
+        }
+        .frame(width: 84, alignment: .leading)
+    }
+
+    private func filledRow(number: Int, winner: Player) -> some View {
+        HStack(spacing: 12) {
+            gameLabel(number: number)
+            Image(systemName: "crown.fill")
+                .font(.system(size: 11))
+                .foregroundColor(RefereeView.color(for: winner))
+            Text(match.name(for: winner))
+                .font(AppFonts.label(14))
+                .foregroundColor(RefereeView.color(for: winner))
+                .lineLimit(1)
+            Spacer()
+        }
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.04)))
+    }
+
+    private func pickerRow(number: Int) -> some View {
+        HStack(spacing: 10) {
+            gameLabel(number: number)
+            ForEach([Player.player1, Player.player2], id: \.self) { player in
+                Button(action: { winners.append(player) }) {
+                    Text(match.name(for: player))
+                        .font(AppFonts.label(13))
+                        .foregroundColor(RefereeView.color(for: player))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(RefereeView.color(for: player).opacity(0.12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(RefereeView.color(for: player).opacity(0.4), lineWidth: 1)
+                                )
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: 10).stroke(AppColors.accentGold.opacity(0.25), lineWidth: 1))
     }
 }
 

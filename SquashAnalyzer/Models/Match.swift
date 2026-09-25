@@ -36,6 +36,11 @@ class Match: Identifiable {
     var player1GamesBefore: Int = 0
     var player2GamesBefore: Int = 0
 
+    /// Games won after tracking stopped, filled in afterwards ("uitslag aanvullen").
+    /// Like the games before, they count towards the stand but have no games of their own.
+    var player1GamesAfter: Int = 0
+    var player2GamesAfter: Int = 0
+
     /// Best of X games (default 5)
     let bestOf: Int = 5
 
@@ -74,11 +79,11 @@ class Match: Identifiable {
     }
 
     var player1GamesWon: Int {
-        player1GamesBefore + games.filter { $0.winner == .player1 }.count
+        player1GamesBefore + games.filter { $0.winner == .player1 }.count + player1GamesAfter
     }
 
     var player2GamesWon: Int {
-        player2GamesBefore + games.filter { $0.winner == .player2 }.count
+        player2GamesBefore + games.filter { $0.winner == .player2 }.count + player2GamesAfter
     }
 
     var isMatchOver: Bool {
@@ -141,6 +146,41 @@ class Match: Identifiable {
         updatedAt = Date()
     }
 
+    /// Number of the first game without a tracked result (an unfinished game counts as untracked)
+    var firstUnrecordedGameNumber: Int {
+        firstGameNumber + games.filter { $0.winner != nil }.count
+    }
+
+    /// Whether `winners` (one per game from `firstUnrecordedGameNumber` on) decide the
+    /// match exactly with their last game
+    func isValidResultCompletion(_ winners: [Player]) -> Bool {
+        guard !isMatchOver, !winners.isEmpty else { return false }
+        var p1 = player1GamesWon, p2 = player2GamesWon
+        for (index, winner) in winners.enumerated() {
+            if winner == .player1 { p1 += 1 } else { p2 += 1 }
+            let decided = p1 >= gamesToWin || p2 >= gamesToWin
+            if decided != (index == winners.count - 1) { return false }
+        }
+        return true
+    }
+
+    /// Finish an incomplete match with only the winners of the games that were not
+    /// tracked. An unfinished game without rallies is dropped; one with rallies keeps
+    /// them for analysis and its winner is the first of `winners`.
+    @discardableResult
+    func completeResult(with winners: [Player]) -> Bool {
+        guard isValidResultCompletion(winners) else { return false }
+        if let last = games.last, last.winner == nil, last.points.isEmpty, last.lets.isEmpty {
+            games.removeLast()
+        }
+        player1GamesAfter = winners.filter { $0 == .player1 }.count
+        player2GamesAfter = winners.count - player1GamesAfter
+        currentGameIndex = max(0, games.count - 1)
+        status = .completed
+        updatedAt = Date()
+        return true
+    }
+
     /// Called when current game ends - starts next game if match not over
     func onGameEnd() {
         if !isMatchOver {
@@ -152,6 +192,8 @@ class Match: Identifiable {
     func resetMatch() {
         games = []
         currentGameIndex = 0
+        player1GamesAfter = 0
+        player2GamesAfter = 0
         startNewGame()
         status = .inProgress
     }

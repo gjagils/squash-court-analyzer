@@ -71,4 +71,55 @@ final class MigrationTests: XCTestCase {
         players.first?.photoData = Data([0xFF, 0xD8])
         try context.save()
     }
+
+    /// TestFlight builds 11–12 wrote version 4; opening it must keep the data and
+    /// leave the new badge fields empty.
+    @MainActor
+    func testStoreFromVersion4MigratesToBadges() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("v4-\(UUID().uuidString).store")
+        defer {
+            for suffix in ["", "-shm", "-wal"] { try? FileManager.default.removeItem(atPath: url.path + suffix) }
+        }
+        let matchId = UUID()
+
+        do {
+            typealias V4 = SquashAnalyzerSchemaV4
+            let container = try ModelContainer(
+                for: Schema(versionedSchema: V4.self),
+                configurations: [ModelConfiguration(url: url, cloudKitDatabase: .none)]
+            )
+            let context = container.mainContext
+            let match = V4.SavedMatch(id: matchId, player1Name: "Paul", player2Name: "Kristian", matchStartingServer: "Speler 1", bestOf: 5, savedAt: Date())
+            match.player1GamesAfter = 2
+            context.insert(match)
+            context.insert(V4.SavedPlayer(id: UUID(), name: "Paul", coachingFocusAreas: [], coachingNotes: "", createdAt: Date()))
+            context.insert(V4.SavedRefereeMatch(player1Name: "A", player2Name: "B", bestOf: 5, gameResults: [], savedAt: Date()))
+            try context.save()
+        }
+
+        let container = try ModelContainer(
+            for: Schema(versionedSchema: SquashAnalyzerCurrentSchema.self),
+            migrationPlan: SquashAnalyzerMigrationPlan.self,
+            configurations: [ModelConfiguration(url: url, cloudKitDatabase: .none)]
+        )
+        let context = container.mainContext
+
+        let match = try XCTUnwrap(context.fetch(FetchDescriptor<SavedMatch>()).first)
+        XCTAssertEqual(match.id, matchId)
+        XCTAssertEqual(match.player1GamesAfter, 2)
+        XCTAssertNil(match.player1Id)
+        XCTAssertNil(match.player2Id)
+
+        let player = try XCTUnwrap(context.fetch(FetchDescriptor<SavedPlayer>()).first)
+        XCTAssertNil(player.cardId)
+        XCTAssertEqual(player.badgeCardId, player.id)
+
+        let referee = try XCTUnwrap(context.fetch(FetchDescriptor<SavedRefereeMatch>()).first)
+        XCTAssertNil(referee.matchId)
+
+        context.insert(SavedBadgeAward(cardId: player.id, badge: .fiveInARow, matchId: matchId,
+                                       earnedAt: Date(), opponentName: "Kristian", awardedBy: "test"))
+        try context.save()
+        XCTAssertEqual(try context.fetch(FetchDescriptor<SavedBadgeAward>()).count, 1)
+    }
 }

@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["65FAHRU88M.com.squashanalyzer.app"],
+        "components": [
+          { "/": "/kaart*", "comment": "Player badge cards" }
+        ]
+      }
+    ]
+  }
+}

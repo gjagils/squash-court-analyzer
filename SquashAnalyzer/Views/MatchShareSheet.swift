@@ -1,17 +1,17 @@
 import SwiftUI
 
-/// Lets the referee pick one of the WhatsApp layouts, shows how it will read in
-/// the chat and hands the text to the system share sheet. The last used layout
-/// is remembered.
-struct RefereeShareSheet: View {
-    let match: RefereeMatch
+/// Lets the coach or referee pick one of the WhatsApp layouts, shows how it will
+/// read in the chat and hands the text to the system share sheet. The last used
+/// layout is remembered (one setting for both modes).
+struct MatchShareSheet: View {
+    let report: MatchShareReport
 
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("refereeShareStyle") private var storedStyle = RefereeShareStyle.compact.rawValue
+    @AppStorage("refereeShareStyle") private var storedStyle = MatchShareStyle.compact.rawValue
     @State private var shareItems: ShareItemsWrapper? = nil
 
-    private var style: RefereeShareStyle {
-        RefereeShareStyle(rawValue: storedStyle) ?? .compact
+    private var style: MatchShareStyle {
+        MatchShareStyle(rawValue: storedStyle) ?? .compact
     }
 
     var body: some View {
@@ -30,7 +30,7 @@ struct RefereeShareSheet: View {
 
                 // The preview hugs its text like a chat bubble; long reports scroll
                 ScrollView {
-                    WhatsAppPreview(text: match.shareText(style: style))
+                    WhatsAppPreview(text: report.text(style: style))
                         .padding(16)
                         .background(
                             RoundedRectangle(cornerRadius: 16)
@@ -45,7 +45,7 @@ struct RefereeShareSheet: View {
                 .scrollBounceBehavior(.basedOnSize)
 
                 HardwareButton(title: "Delen", color: AppColors.warmOrange) {
-                    shareItems = ShareItemsWrapper(items: [match.shareText(style: style)])
+                    shareItems = ShareItemsWrapper(items: [report.text(style: style)])
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 24)
@@ -88,7 +88,7 @@ struct RefereeShareSheet: View {
 
     private var styleTabs: some View {
         HStack(spacing: 8) {
-            ForEach(RefereeShareStyle.allCases) { option in
+            ForEach(MatchShareStyle.allCases) { option in
                 let active = option == style
                 Button(action: { withAnimation(.easeInOut(duration: 0.15)) { storedStyle = option.rawValue } }) {
                     Text(option.title)

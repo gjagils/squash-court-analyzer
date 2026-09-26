@@ -85,8 +85,13 @@ struct RefereeGameSummary {
 /// Live referee match state
 @Observable
 class RefereeMatch {
+    /// Stored as `SavedRefereeMatch.matchId`; badge awards refer to it
+    let id = UUID()
     var player1Name: String
     var player2Name: String
+    /// `SavedPlayer.id` of a player picked from "Kies speler"; only those earn badges
+    var player1Id: UUID? = nil
+    var player2Id: UUID? = nil
     var bestOf: Int
 
     // Games already won when scoring started at game 2 or later ("later instappen")
@@ -343,174 +348,25 @@ class RefereeMatch {
     /// Default WhatsApp text (the short style); the share sheet lets the user pick another
     var whatsAppText: String { shareText(style: .compact) }
 
-    func shareText(style: RefereeShareStyle) -> String {
-        switch style {
-        case .compact: return compactShareText
-        case .scorecard: return scorecardShareText
-        case .report: return reportShareText
-        }
-    }
+    func shareText(style: MatchShareStyle) -> String { shareReport.text(style: style) }
 
-    // Shared building blocks -------------------------------------------------
-
-    private static let dutch = Locale(identifier: "nl_NL")
-
-    private var shortDateText: String {
-        matchStartedAt.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).locale(Self.dutch))
-    }
-
-    private var longDateText: String {
-        matchStartedAt.formatted(.dateTime.weekday(.wide).day().month(.wide).year().locale(Self.dutch))
-    }
-
-    private func minutesText(_ seconds: TimeInterval) -> String {
-        let minutes = Int((seconds / 60).rounded())
-        if minutes >= 60 { return "\(minutes / 60) u \(String(format: "%02d", minutes % 60)) min" }
-        return "\(max(minutes, 1)) min"
-    }
-
-    /// "best of 5", with "· vanaf game 3" when scoring started later
-    private var bestOfText: String {
-        firstGameNumber > 1 ? "best of \(bestOf) · vanaf game \(firstGameNumber)" : "best of \(bestOf)"
-    }
-
-    /// "3 – 1" games score, in player order
-    private var gamesScoreText: String { "\(player1TotalGames) – \(player2TotalGames)" }
-
-    /// "Jan 3 – 1 Piet" with the winner (or leader) in bold, in player order
-    private var namesAndGamesLine: String {
-        let p1 = player1TotalGames, p2 = player2TotalGames
-        let name1 = p1 > p2 ? "*\(player1Name)*" : player1Name
-        let name2 = p2 > p1 ? "*\(player2Name)*" : player2Name
-        return "\(name1) \(p1) – \(p2) \(name2)"
-    }
-
-    /// Match result or, mid-match, the current stand
-    private var resultLine: String {
-        if let winner = matchWinner {
-            let score = winner == .player1 ? "\(player1TotalGames)–\(player2TotalGames)" : "\(player2TotalGames)–\(player1TotalGames)"
-            return "🏆 *\(name(for: winner)) wint met \(score)*"
-        }
-        if player1TotalGames == player2TotalGames {
-            return "Stand: gelijk \(gamesScoreText)"
-        }
-        let leader: Player = player1TotalGames > player2TotalGames ? .player1 : .player2
-        let score = leader == .player1 ? "\(player1TotalGames)–\(player2TotalGames)" : "\(player2TotalGames)–\(player1TotalGames)"
-        return "Stand: \(name(for: leader)) leidt met \(score)"
-    }
-
-    /// "11-13 · 11-4 · 11-3", an unfinished game shown as "5-3…"
-    private var gameScoresInline: String {
-        gameSummaries.map { g in
-            "\(g.player1Score)-\(g.player2Score)" + (g.winner == nil ? "…" : "")
-        }.joined(separator: " · ")
-    }
-
-    // 1. Kort ---------------------------------------------------------------
-
-    /// Three lines for a quick group-chat update
-    private var compactShareText: String {
-        var lines: [String] = []
-        lines.append("🏸 *Squash · \(bestOfText)*")
-        lines.append((matchWinner != nil ? "🏆 " : "") + namesAndGamesLine)
-        if !gameSummaries.isEmpty { lines.append(gameScoresInline) }
-        lines.append("⏱ \(minutesText(matchDuration)) · \(shortDateText)")
-        return lines.joined(separator: "\n")
-    }
-
-    // 2. Scorekaart ---------------------------------------------------------
-
-    /// Monospace score table, one column per game
-    private var scorecardShareText: String {
-        let games = gameSummaries
-        let nameWidth = 10
-        func pad(_ s: String, _ w: Int, right: Bool = false) -> String {
-            let t = String(s.prefix(w))
-            let fill = String(repeating: " ", count: max(0, w - t.count))
-            return right ? fill + t : t + fill
-        }
-
-        var lines: [String] = []
-        lines.append("🏸 *SQUASH SCOREKAART*")
-        lines.append("\(shortDateText) · \(bestOfText) · ⏱ \(minutesText(matchDuration))")
-        lines.append("")
-
-        if !games.isEmpty {
-            var header = pad("", nameWidth)
-            var row1 = pad(player1Name, nameWidth)
-            var row2 = pad(player2Name, nameWidth)
-            for g in games {
-                header += pad("G\(g.number)", 4, right: true)
-                row1 += pad("\(g.player1Score)", 4, right: true)
-                row2 += pad("\(g.player2Score)", 4, right: true)
-            }
-            lines.append("```")
-            lines.append(header)
-            lines.append(row1)
-            lines.append(row2)
-            lines.append("```")
-        }
-
-        lines.append(resultLine)
-        return lines.joined(separator: "\n")
-    }
-
-    // 3. Verslag ------------------------------------------------------------
-
-    /// Game-by-game report with durations and match stats
-    private var reportShareText: String {
-        var lines: [String] = []
-        lines.append("🏸 *SQUASH WEDSTRIJD*")
-        lines.append("📅 \(longDateText)")
-        lines.append("👥 \(player1Name) – \(player2Name) · \(bestOfText)")
-        lines.append("")
-
-        for g in gameSummaries {
-            var parts = ["*Game \(g.number)*", "\(g.player1Score)-\(g.player2Score)"]
-            if let w = g.winner {
-                parts.append("✅ \(name(for: w))")
-            } else {
-                parts.append("bezig")
-            }
-            if let d = g.duration { parts.append(minutesText(d)) }
-            if g.strokes > 0 { parts.append("\(g.strokes) stroke\(g.strokes == 1 ? "" : "s")") }
-            lines.append(parts.joined(separator: " · "))
-        }
-        if !gameSummaries.isEmpty { lines.append("") }
-
-        lines.append(resultLine)
-
-        var stats = ["⏱ \(minutesText(matchDuration))", "🎾 \(totalRallies) rallies"]
-        if totalStrokes > 0 { stats.append("⚡ \(totalStrokes) stroke\(totalStrokes == 1 ? "" : "s")") }
-        if let run = longestRun, run.length >= 3 {
-            stats.append("🔥 langste reeks \(run.length) (\(name(for: run.player)))")
-        }
-        lines.append(stats.joined(separator: " · "))
-        lines.append("")
-        lines.append("_Gescoord met Squash Analyzer_")
-        return lines.joined(separator: "\n")
-    }
-}
-
-/// The three WhatsApp layouts offered by the referee share sheet
-enum RefereeShareStyle: String, CaseIterable, Identifiable {
-    case compact, scorecard, report
-
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .compact: return "Kort"
-        case .scorecard: return "Scorekaart"
-        case .report: return "Verslag"
-        }
-    }
-
-    var subtitle: String {
-        switch self {
-        case .compact: return "Drie regels voor de groepsapp"
-        case .scorecard: return "Tabel met alle games"
-        case .report: return "Per game, met tijden en statistieken"
-        }
+    /// The match as the share texts see it (shared with coach mode)
+    var shareReport: MatchShareReport {
+        MatchShareReport(
+            player1Name: player1Name,
+            player2Name: player2Name,
+            bestOf: bestOf,
+            firstGameNumber: firstGameNumber,
+            player1Games: player1TotalGames,
+            player2Games: player2TotalGames,
+            matchWinner: matchWinner,
+            games: gameSummaries.map {
+                MatchShareReport.Game(number: $0.number, player1Score: $0.player1Score, player2Score: $0.player2Score,
+                                      winner: $0.winner, duration: $0.duration,
+                                      rallyWinners: $0.points.map(\.scorer), strokes: $0.strokes)
+            },
+            startedAt: matchStartedAt,
+            duration: matchDuration
+        )
     }
 }

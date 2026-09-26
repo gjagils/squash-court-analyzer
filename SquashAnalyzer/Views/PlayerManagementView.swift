@@ -8,12 +8,15 @@ struct PlayerManagementView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \SavedPlayer.name) private var players: [SavedPlayer]
+    @Query(filter: #Predicate<SavedBadgeAward> { $0.deletedAt == nil }) private var activeAwards: [SavedBadgeAward]
 
     /// When set, the view acts as a picker and calls this on selection
     var onSelectPlayer: ((SavedPlayer) -> Void)? = nil
 
     @State private var showingAddPlayer = false
     @State private var playerToEdit: SavedPlayer? = nil
+    @State private var playerForBadges: SavedPlayer? = nil
+    @State private var showingBadgeCatalog = false
     @State private var showingTeamImporter = false
     @State private var teamImportMessage: String? = nil
     @State private var showingTeamImportResult = false
@@ -47,6 +50,13 @@ struct PlayerManagementView: View {
                         Spacer()
 
                         HStack(spacing: 18) {
+                            Button(action: { showingBadgeCatalog = true }) {
+                                Image(systemName: "medal")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(AppColors.accentGold)
+                            }
+                            .accessibilityLabel("Alle badges")
+
                             Button(action: { showingTeamImporter = true }) {
                                 Image(systemName: "square.and.arrow.down")
                                     .font(.system(size: 20))
@@ -87,9 +97,13 @@ struct PlayerManagementView: View {
                                     PlayerRowView(
                                         player: player,
                                         isPickerMode: isPickerMode,
+                                        badgeCount: activeAwards.filter { $0.cardId == player.badgeCardId }.count,
                                         onSelect: {
                                             onSelectPlayer?(player)
                                             dismiss()
+                                        },
+                                        onShowBadges: {
+                                            playerForBadges = player
                                         },
                                         onEdit: {
                                             playerToEdit = player
@@ -114,6 +128,12 @@ struct PlayerManagementView: View {
                     modelContext.insert(newPlayer)
                     try? modelContext.save()
                 }
+            }
+            .navigationDestination(isPresented: $showingBadgeCatalog) {
+                BadgeCatalogView()
+            }
+            .navigationDestination(item: $playerForBadges) { player in
+                PlayerBadgesView(player: player)
             }
             .navigationDestination(item: $playerToEdit) { player in
                 PlayerEditSheet(player: player) { name, focus, notes, photo in
@@ -159,7 +179,9 @@ struct PlayerManagementView: View {
 struct PlayerRowView: View {
     let player: SavedPlayer
     let isPickerMode: Bool
+    var badgeCount = 0
     let onSelect: () -> Void
+    var onShowBadges: () -> Void = {}
     let onEdit: () -> Void
     let onDelete: () -> Void
 
@@ -182,9 +204,22 @@ struct PlayerRowView: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(player.name)
-                    .font(AppFonts.label(15))
-                    .foregroundColor(AppColors.textPrimary)
+                HStack(spacing: 8) {
+                    Text(player.name)
+                        .font(AppFonts.label(15))
+                        .foregroundColor(AppColors.textPrimary)
+                    if badgeCount > 0 {
+                        HStack(spacing: 3) {
+                            Image(systemName: "medal.fill")
+                                .font(.system(size: 10))
+                            Text("\(badgeCount)")
+                                .font(AppFonts.caption(11))
+                        }
+                        .foregroundColor(AppColors.accentGold)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("\(badgeCount) badges")
+                    }
+                }
 
                 if !player.coachingFocusAreas.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -247,6 +282,9 @@ struct PlayerRowView: View {
         // swipeActions only work inside a List, so offer the actions on long press too
         .contextMenu {
             if !isPickerMode {
+                Button(action: onShowBadges) {
+                    Label("Badges", systemImage: "medal")
+                }
                 Button(action: onEdit) {
                     Label("Bewerken", systemImage: "pencil")
                 }
@@ -263,7 +301,7 @@ struct PlayerRowView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            if isPickerMode { onSelect() }
+            if isPickerMode { onSelect() } else { onShowBadges() }
         }
     }
 }

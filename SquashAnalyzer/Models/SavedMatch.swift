@@ -22,6 +22,9 @@ final class SavedMatch {
     /// Games won after tracking stopped, filled in afterwards (0 unless the result was completed)
     var player1GamesAfter: Int = 0
     var player2GamesAfter: Int = 0
+    /// `SavedPlayer.id` of a player picked from "Kies speler" (nil for a typed-in name)
+    var player1Id: UUID? = nil
+    var player2Id: UUID? = nil
 
     @Relationship(deleteRule: .cascade, inverse: \SavedGame.match)
     var games: [SavedGame] = []
@@ -129,6 +132,8 @@ final class SavedMatch {
         match.player2GamesBefore = player2GamesBefore
         match.player1GamesAfter = player1GamesAfter
         match.player2GamesAfter = player2GamesAfter
+        match.player1Id = player1Id
+        match.player2Id = player2Id
         // Replace the default empty game with converted saved games
         match.games = games
             .sorted(by: { $0.gameNumber < $1.gameNumber })
@@ -159,6 +164,8 @@ final class SavedMatch {
         savedMatch.player2GamesBefore = match.player2GamesBefore
         savedMatch.player1GamesAfter = match.player1GamesAfter
         savedMatch.player2GamesAfter = match.player2GamesAfter
+        savedMatch.player1Id = match.player1Id
+        savedMatch.player2Id = match.player2Id
 
         context.insert(savedMatch)
 

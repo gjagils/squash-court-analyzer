@@ -11,6 +11,18 @@ struct FullBackup: Codable {
     let players: [PlayerBackupData]
     let matches: [MatchExportData]
     let standaloneGames: [GameExportData]
+    /// Badge awards including deleted ones (absent in backups made before badges)
+    var badgeAwards: [BadgeAwardBackupData]? = nil
+}
+
+struct BadgeAwardBackupData: Codable {
+    let cardId: String
+    let badge: String
+    let matchId: String
+    let earnedAt: Date
+    let opponentName: String
+    let awardedBy: String
+    let deletedAt: Date?
 }
 
 struct BackupEnvelope: Codable {
@@ -44,6 +56,8 @@ struct PlayerBackupData: Codable {
     let createdAt: Date
     /// Base64 JPEG (absent in backups made before photos existed)
     let photoBase64: String?
+    /// Linked player card (absent when the player uses their own card, and in older backups)
+    var cardId: String? = nil
 }
 
 // MARK: - Export Data Structures
@@ -79,6 +93,9 @@ struct MatchExportData: Codable {
     /// Games won after tracking stopped, filled in afterwards (absent in older backups)
     var player1GamesAfter: Int? = nil
     var player2GamesAfter: Int? = nil
+    /// Players picked from "Kies speler" (absent for typed-in names and in older backups)
+    var player1Id: String? = nil
+    var player2Id: String? = nil
     let games: [GameExportData]
 }
 
@@ -252,7 +269,8 @@ enum ExportService {
     static func exportFullBackup(
         players: [SavedPlayer],
         matches: [SavedMatch],
-        standaloneGames: [SavedGame]
+        standaloneGames: [SavedGame],
+        badgeAwards: [SavedBadgeAward] = []
     ) throws -> Data {
         let playerData = players.map {
             PlayerBackupData(
@@ -261,7 +279,19 @@ enum ExportService {
                 coachingFocusAreas: $0.coachingFocusAreas,
                 coachingNotes: $0.coachingNotes,
                 createdAt: $0.createdAt,
-                photoBase64: $0.photoData?.base64EncodedString()
+                photoBase64: $0.photoData?.base64EncodedString(),
+                cardId: $0.cardId?.uuidString
+            )
+        }
+        let awardData = badgeAwards.map {
+            BadgeAwardBackupData(
+                cardId: $0.cardId.uuidString,
+                badge: $0.badge,
+                matchId: $0.matchId.uuidString,
+                earnedAt: $0.earnedAt,
+                opponentName: $0.opponentName,
+                awardedBy: $0.awardedBy,
+                deletedAt: $0.deletedAt
             )
         }
         let matchData = matches.map { matchExportData(from: $0) }
@@ -271,7 +301,8 @@ enum ExportService {
             backupDate: Date(),
             players: playerData,
             matches: matchData,
-            standaloneGames: gameData
+            standaloneGames: gameData,
+            badgeAwards: awardData.isEmpty ? nil : awardData
         )
         let payloadData = try canonicalData(for: backup)
         let envelope = BackupEnvelope(
@@ -304,6 +335,7 @@ enum ExportService {
                 createdAt: pd.createdAt,
                 photoData: pd.photoBase64.flatMap { Data(base64Encoded: $0) }
             )
+            player.cardId = pd.cardId.flatMap(UUID.init(uuidString:))
             context.insert(player)
             playerCount += 1
         }
@@ -320,6 +352,8 @@ enum ExportService {
             gameCount += 1
         }
 
+        try importBadgeAwards(backup.badgeAwards ?? [], context: context)
+
         try context.save()
         return (playerCount, matchCount, gameCount)
     }
@@ -334,6 +368,7 @@ enum ExportService {
         try context.delete(model: SavedGame.self)
         try context.delete(model: SavedMatch.self)
         try context.delete(model: SavedPlayer.self)
+        try context.delete(model: SavedBadgeAward.self)
         try context.save()
 
         return try importFullBackup(data, context: context)
@@ -450,12 +485,13 @@ enum ExportService {
     static func saveBackupToiCloud(
         players: [SavedPlayer],
         matches: [SavedMatch],
-        standaloneGames: [SavedGame]
+        standaloneGames: [SavedGame],
+        badgeAwards: [SavedBadgeAward] = []
     ) throws -> URL {
         guard let dir = iCloudDirectory else {
             throw iCloudError.unavailable
         }
-        let data = try exportFullBackup(players: players, matches: matches, standaloneGames: standaloneGames)
+        let data = try exportFullBackup(players: players, matches: matches, standaloneGames: standaloneGames, badgeAwards: badgeAwards)
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd-HHmmss"
         let filename = "squash-backup-\(formatter.string(from: Date())).json"
@@ -533,6 +569,8 @@ enum ExportService {
             player2GamesBefore: match.player2GamesBefore,
             player1GamesAfter: match.player1GamesAfter,
             player2GamesAfter: match.player2GamesAfter,
+            player1Id: match.player1Id?.uuidString,
+            player2Id: match.player2Id?.uuidString,
             games: games
         )
     }
@@ -579,6 +617,27 @@ enum ExportService {
         )
     }
 
+    /// Merges awards by their deterministic id: an existing award is kept, and a
+    /// deletion in either the store or the backup wins.
+    private static func importBadgeAwards(_ awards: [BadgeAwardBackupData], context: ModelContext) throws {
+        for data in awards {
+            guard let cardId = UUID(uuidString: data.cardId),
+                  let matchId = UUID(uuidString: data.matchId),
+                  let kind = BadgeKind(rawValue: data.badge) else { continue }
+            let id = SavedBadgeAward.awardId(cardId: cardId, badge: kind, matchId: matchId)
+            var descriptor = FetchDescriptor<SavedBadgeAward>(predicate: #Predicate { $0.id == id })
+            descriptor.fetchLimit = 1
+            if let existing = try context.fetch(descriptor).first {
+                if existing.deletedAt == nil { existing.deletedAt = data.deletedAt }
+                continue
+            }
+            let award = SavedBadgeAward(cardId: cardId, badge: kind, matchId: matchId, earnedAt: data.earnedAt,
+                                        opponentName: data.opponentName, awardedBy: data.awardedBy)
+            award.deletedAt = data.deletedAt
+            context.insert(award)
+        }
+    }
+
     private static func importMatch(_ matchData: MatchExportData, context: ModelContext) {
         // Check for duplicate (same players + savedAt)
         let savedMatch = SavedMatch(
@@ -599,6 +658,8 @@ enum ExportService {
         savedMatch.player2GamesBefore = matchData.player2GamesBefore ?? 0
         savedMatch.player1GamesAfter = matchData.player1GamesAfter ?? 0
         savedMatch.player2GamesAfter = matchData.player2GamesAfter ?? 0
+        savedMatch.player1Id = matchData.player1Id.flatMap(UUID.init(uuidString:))
+        savedMatch.player2Id = matchData.player2Id.flatMap(UUID.init(uuidString:))
         context.insert(savedMatch)
         for gameData in matchData.games {
             importGame(gameData, context: context, matchRef: savedMatch)

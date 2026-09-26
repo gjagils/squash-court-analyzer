@@ -49,6 +49,8 @@ final class SwiftDataMatchRepository: MatchRepository {
             saved.player2GamesBefore = match.player2GamesBefore
             saved.player1GamesAfter = match.player1GamesAfter
             saved.player2GamesAfter = match.player2GamesAfter
+            saved.player1Id = match.player1Id
+            saved.player2Id = match.player2Id
 
             // A match contains few records. Replacing its child snapshot keeps the
             // write path simple and prevents standalone/linked duplicate games.
@@ -62,6 +64,13 @@ final class SwiftDataMatchRepository: MatchRepository {
                 savedGame.match = saved
                 saved.games.append(savedGame)
             }
+
+            try BadgeAwarder(context: context).syncAwards(
+                matchId: match.id,
+                playerIds: match.playerIds,
+                playerNames: [.player1: match.player1Name, .player2: match.player2Name],
+                input: match.badgeInput
+            )
 
             try context.save()
             match.updatedAt = saved.updatedAt
@@ -97,6 +106,7 @@ final class SwiftDataMatchRepository: MatchRepository {
             for saved in try context.fetch(descriptor) {
                 context.delete(saved)
             }
+            try BadgeAwarder(context: context).removeAwards(forMatch: matchID)
             try context.save()
         } catch {
             context.rollback()

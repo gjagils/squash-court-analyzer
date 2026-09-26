@@ -30,6 +30,7 @@ struct ContentView: View {
     @State private var persistenceErrorMessage: String?
     @State private var showingPersistenceError = false
     @State private var showingStartupPersistenceWarning = false
+    @State private var cardSync = CardSync.shared
     @AppStorage(CoachInputSettings.modeKey) private var inputModeRaw = CoachInputMode.scoreTap.rawValue
 
     private var inputMode: CoachInputMode { CoachInputMode(rawValue: inputModeRaw) ?? .scoreTap }
@@ -220,7 +221,27 @@ struct ContentView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .inactive || phase == .background {
                 persistMatch()
+            } else if phase == .active {
+                Task { await cardSync.fetchChanges() }
             }
+        }
+        // A player card link (website or squashanalyzer://kaart#…)
+        .onOpenURL { url in
+            if let snapshot = CardSnapshot(url: url) {
+                cardSync.inbox = PendingCard(cardId: snapshot.cardId, name: snapshot.name,
+                                             awards: snapshot.awards, source: .snapshot)
+            }
+        }
+        .onChange(of: cardSync.inbox?.id) { _, id in
+            if id != nil, let pending = cardSync.inbox {
+                CardImportPresenter.present(pending, container: modelContext.container)
+            }
+        }
+        .alert("Spelerskaart", isPresented: Binding(get: { cardSync.lastError != nil },
+                                                   set: { if !$0 { cardSync.lastError = nil } })) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(cardSync.lastError ?? "")
         }
         .alert("Incomplete wedstrijd opslaan?", isPresented: $showingCancelConfirm) {
             Button("Opslaan als incompleet") {
@@ -294,6 +315,9 @@ struct ContentView: View {
             _ = ScreenshotScenario.seededSampleMatch(context: modelContext)
             showingSetup = false
             showingHistory = true
+        case .badges:
+            match = ScreenshotScenario.makeCoachBadgesMatch(context: modelContext)
+            showingSetup = false
         case .dashboard:
             guard let saved = ScreenshotScenario.seededSampleMatch(context: modelContext) else { return }
             let liveMatch = saved.toMatch()
@@ -871,6 +895,10 @@ struct MatchSetupView: View {
     @State private var player2CoachingFocus: [String] = []
     @State private var player2CoachingNotes: String = ""
 
+    /// Players picked from "Kies speler"; they only count while the name is unchanged
+    @State private var player1Pick: PickedPlayer? = nil
+    @State private var player2Pick: PickedPlayer? = nil
+
     @State private var showingPlayer1Picker = false
     @State private var showingPlayer2Picker = false
     @State private var showingPlayerManagement = false
@@ -1024,6 +1052,7 @@ struct MatchSetupView: View {
         .animation(.easeInOut(duration: 0.2), value: selectedMode)
         .sheet(isPresented: $showingPlayer1Picker) {
             PlayerManagementView { player in
+                player1Pick = PickedPlayer(id: player.id, name: player.name)
                 player1Name = player.name
                 player1CoachingFocus = player.coachingFocusAreas
                 player1CoachingNotes = player.coachingNotes
@@ -1031,6 +1060,7 @@ struct MatchSetupView: View {
         }
         .sheet(isPresented: $showingPlayer2Picker) {
             PlayerManagementView { player in
+                player2Pick = PickedPlayer(id: player.id, name: player.name)
                 player2Name = player.name
                 player2CoachingFocus = player.coachingFocusAreas
                 player2CoachingNotes = player.coachingNotes
@@ -1112,7 +1142,9 @@ struct MatchSetupView: View {
             player2CoachingFocus: player2CoachingFocus,
             player2CoachingNotes: player2CoachingNotes,
             player1GamesBefore: player1GamesBefore,
-            player2GamesBefore: player2GamesBefore
+            player2GamesBefore: player2GamesBefore,
+            player1Id: player1Pick?.id(for: player1Name),
+            player2Id: player2Pick?.id(for: player2Name)
         )
         isPresented = false
     }
@@ -1128,6 +1160,19 @@ struct MatchSetupView: View {
             player1GamesBefore: player1GamesBefore,
             player2GamesBefore: player2GamesBefore
         )
+        createdRefereeMatch?.player1Id = player1Pick?.id(for: player1Name)
+        createdRefereeMatch?.player2Id = player2Pick?.id(for: player2Name)
+    }
+}
+
+/// A player chosen in "Kies speler". Editing the name afterwards makes it a
+/// typed-in player again, which earns no badges.
+struct PickedPlayer: Equatable {
+    let id: UUID
+    let name: String
+
+    func id(for currentName: String) -> UUID? {
+        currentName.trimmingCharacters(in: .whitespaces) == name.trimmingCharacters(in: .whitespaces) ? id : nil
     }
 }
 
@@ -1337,9 +1382,16 @@ struct GameOverOverlay: View {
     var onStop: (() -> Void)? = nil
     var onUndo: (() -> Void)? = nil
 
-    @State private var shareItems: ShareItemsWrapper? = nil
+    @State private var showingShareSheet = false
+    @State private var showingBadges = false
 
     private var winner: Player? { match.isMatchOver ? match.matchWinner : game.winner }
+
+    private var badgeEarnings: [MatchBadgeEarning] {
+        guard match.isMatchOver else { return [] }
+        return BadgeEngine().earnings(for: match.badgeInput, playerIds: match.playerIds,
+                                      names: [.player1: match.player1Name, .player2: match.player2Name])
+    }
 
     /// Finished games of this match, newest last
     private var gameResults: [(number: Int, p1: Int, p2: Int, winner: Player)] {
@@ -1391,11 +1443,16 @@ struct GameOverOverlay: View {
                 }
             }
 
+            let earnings = badgeEarnings
+            if !earnings.isEmpty {
+                MatchBadgesStrip(earnings: earnings) { showingBadges = true }
+            }
+
             VStack(spacing: 12) {
                 HStack(spacing: 8) {
                     secondaryButton("Analyse", icon: "chart.bar.xaxis") { onAnalysis() }
                     secondaryButton("Deel score", icon: "square.and.arrow.up") {
-                        shareItems = ShareItemsWrapper(items: [match.whatsAppText])
+                        showingShareSheet = true
                     }
                 }
 
@@ -1419,8 +1476,11 @@ struct GameOverOverlay: View {
                 }
             }
         }
-        .sheet(item: $shareItems) { wrapper in
-            ShareSheet(items: wrapper.items)
+        .sheet(isPresented: $showingShareSheet) {
+            MatchShareSheet(report: match.shareReport)
+        }
+        .sheet(isPresented: $showingBadges) {
+            MatchBadgesSheet(earnings: badgeEarnings, matchId: match.id)
         }
     }
 

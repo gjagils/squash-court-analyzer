@@ -22,6 +22,10 @@ class Match: Identifiable {
     var player1CoachingNotes: String = ""
     var player2CoachingNotes: String = ""
 
+    /// `SavedPlayer.id` of a player picked from "Kies speler"; only those earn badges
+    var player1Id: UUID? = nil
+    var player2Id: UUID? = nil
+
     /// All games in this match
     var games: [Game] = []
 
@@ -208,8 +212,12 @@ class Match: Identifiable {
         player2CoachingFocus: [String] = [],
         player2CoachingNotes: String = "",
         player1GamesBefore: Int = 0,
-        player2GamesBefore: Int = 0
+        player2GamesBefore: Int = 0,
+        player1Id: UUID? = nil,
+        player2Id: UUID? = nil
     ) {
+        self.player1Id = player1Id
+        self.player2Id = player2Id
         player1Name = player1.isEmpty ? "Speler 1" : player1
         player2Name = player2.isEmpty ? "Speler 2" : player2
         matchStartingServer = startingServer
@@ -336,38 +344,35 @@ class Match: Identifiable {
 
     // MARK: - Export
 
-    /// Short WhatsApp update for the game-over / match-over overlay: the game just
-    /// played and the stand in games, in the same style as the referee's short text.
-    var whatsAppText: String {
-        let finished = games.enumerated().filter { $0.element.winner != nil }
-        let p1 = player1GamesWon, p2 = player2GamesWon
-        var lines: [String] = []
+    /// Default WhatsApp text (the short style); the share sheet lets the user pick another
+    var whatsAppText: String { shareText(style: .compact) }
 
-        if isMatchOver {
-            lines.append("🏸 *Squash · Wedstrijd klaar*")
-            lines.append("🏆 " + boldLeaderLine(p1: p1, p2: p2))
-        } else {
-            let number = finished.last.map { gameNumber(at: $0.offset) } ?? currentGameNumber
-            lines.append("🏸 *Squash · Game \(number) klaar*")
-            if let game = finished.last?.element {
-                lines.append("Game: " + boldLeaderLine(p1: game.player1Score, p2: game.player2Score))
-            }
-            lines.append("Games: " + boldLeaderLine(p1: p1, p2: p2))
-        }
+    func shareText(style: MatchShareStyle) -> String { shareReport.text(style: style) }
 
-        if !finished.isEmpty {
-            var scores = finished.map { "\($0.element.player1Score)-\($0.element.player2Score)" }.joined(separator: " · ")
-            if firstGameNumber > 1 { scores += " (vanaf game \(firstGameNumber))" }
-            lines.append(scores)
-        }
-        return lines.joined(separator: "\n")
-    }
-
-    /// "Jan 3 – 1 Piet" with the winner (or leader) in bold, in player order
-    private func boldLeaderLine(p1: Int, p2: Int) -> String {
-        let name1 = p1 > p2 ? "*\(player1Name)*" : player1Name
-        let name2 = p2 > p1 ? "*\(player2Name)*" : player2Name
-        return "\(name1) \(p1) – \(p2) \(name2)"
+    /// The match as the share texts see it (shared with referee mode). Games
+    /// before tracking started and filled-in games count in the stand only.
+    var shareReport: MatchShareReport {
+        let played = games.enumerated().filter { !$0.element.points.isEmpty || $0.element.winner != nil }
+        let firstPoint = allPoints.min { $0.timestamp < $1.timestamp }
+        return MatchShareReport(
+            player1Name: player1Name,
+            player2Name: player2Name,
+            bestOf: bestOf,
+            firstGameNumber: firstGameNumber,
+            player1Games: player1GamesWon,
+            player2Games: player2GamesWon,
+            matchWinner: matchWinner,
+            games: played.map { index, game in
+                let duration = game.points.reduce(0) { $0 + $1.duration }
+                return MatchShareReport.Game(number: gameNumber(at: index), player1Score: game.player1Score,
+                                             player2Score: game.player2Score, winner: game.winner,
+                                             duration: duration > 0 ? duration : nil,
+                                             rallyWinners: game.points.map(\.scorer),
+                                             strokes: game.points.filter { $0.pointType == .stroke }.count)
+            },
+            startedAt: firstPoint.map { $0.timestamp.addingTimeInterval(-$0.duration) } ?? Date(),
+            duration: totalMatchDuration()
+        )
     }
 
     // MARK: - Let Analysis

@@ -87,21 +87,21 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertNil(secondGame.preferredSide(for: .player1))
     }
 
-    func testWhatsAppTextShowsGameAndStandInGames() {
+    func testCoachShareTextUsesTheSharedLayouts() {
         let match = Match()
         match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1)
         for _ in 0..<11 { match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil) }
 
         // Between games: the finished game plus the stand, before "Volgende game" is tapped
         let betweenGames = match.whatsAppText
-        XCTAssertTrue(betweenGames.contains("Game 1 klaar"), betweenGames)
-        XCTAssertTrue(betweenGames.contains("Game: *Een* 11 – 0 Twee"), betweenGames)
-        XCTAssertTrue(betweenGames.contains("Games: *Een* 1 – 0 Twee"), betweenGames)
+        XCTAssertTrue(betweenGames.contains("*Een* 1 – 0 Twee"), betweenGames)
+        XCTAssertTrue(betweenGames.contains("11-0"), betweenGames)
+        XCTAssertFalse(betweenGames.contains("🏆"), betweenGames)
 
         match.onGameEnd()
         for _ in 0..<11 { match.currentGame.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil) }
         let levelled = match.whatsAppText
-        XCTAssertTrue(levelled.contains("Games: Een 1 – 1 Twee"), levelled)
+        XCTAssertTrue(levelled.contains("Een 1 – 1 Twee"), levelled)
         XCTAssertTrue(levelled.contains("11-0 · 0-11"), levelled)
 
         match.onGameEnd()
@@ -110,8 +110,9 @@ final class ScoringAndPersistenceTests: XCTestCase {
         for _ in 0..<11 { match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil) }
         XCTAssertTrue(match.isMatchOver)
         let final = match.whatsAppText
-        XCTAssertTrue(final.contains("Wedstrijd klaar"), final)
         XCTAssertTrue(final.contains("🏆 *Een* 3 – 1 Twee"), final)
+        XCTAssertTrue(match.shareText(style: .report).contains("🏆 *Een wint met 3–1*"))
+        XCTAssertTrue(match.shareText(style: .scorecard).contains("G4"))
         XCTAssertTrue(final.contains("11-0 · 0-11 · 11-0 · 11-0"), final)
     }
 
@@ -127,9 +128,9 @@ final class ScoringAndPersistenceTests: XCTestCase {
 
         for _ in 0..<11 { match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil) }
         XCTAssertEqual(match.player1GamesWon, 2)
-        XCTAssertTrue(match.whatsAppText.contains("Game 3 klaar"), match.whatsAppText)
-        XCTAssertTrue(match.whatsAppText.contains("Games: *Een* 2 – 1 Twee"), match.whatsAppText)
-        XCTAssertTrue(match.whatsAppText.contains("11-0 (vanaf game 3)"), match.whatsAppText)
+        XCTAssertTrue(match.whatsAppText.contains("vanaf game 3"), match.whatsAppText)
+        XCTAssertTrue(match.whatsAppText.contains("*Een* 2 – 1 Twee"), match.whatsAppText)
+        XCTAssertTrue(match.shareText(style: .scorecard).contains("G3"), match.shareText(style: .scorecard))
 
         match.onGameEnd()
         XCTAssertEqual(match.currentGameNumber, 4)

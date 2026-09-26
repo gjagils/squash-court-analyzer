@@ -27,6 +27,11 @@ final class SavedRefereeMatch {
     /// Games already won when scoring started at game 2 or later (0 for a full match)
     var player1GamesBefore: Int = 0
     var player2GamesBefore: Int = 0
+    /// Identifies the match for its badge awards (nil for matches saved before badges)
+    var matchId: UUID? = nil
+    /// `SavedPlayer.id` of a player picked from "Kies speler" (nil for a typed-in name)
+    var player1Id: UUID? = nil
+    var player2Id: UUID? = nil
 
     init(
         player1Name: String,

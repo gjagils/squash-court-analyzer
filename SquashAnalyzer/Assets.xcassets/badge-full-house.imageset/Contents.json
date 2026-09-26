@@ -1,0 +1,6 @@
+{
+  "images" : [
+    { "filename" : "badge-full-house.png", "idiom" : "universal" }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}

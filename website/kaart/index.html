@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Badgekaart – Squash Analyzer</title>
+  <meta name="description" content="Badgekaart van een squashspeler, gedeeld vanuit Squash Analyzer." />
+  <meta name="robots" content="noindex" />
+  <meta property="og:title" content="Badgekaart – Squash Analyzer" />
+  <meta property="og:description" content="Bekijk de badges die in squashwedstrijden zijn verdiend." />
+  <meta property="og:image" content="https://www.squashanalyzer.com/logo.png?v=4" />
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="icon" href="../logo.png?v=4" />
+  <style>
+    .card-page { max-width: 480px; margin: 0 auto; padding: 32px 20px 56px; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+    .card-label { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+    .card-name { font-size: 28px; font-weight: 700; margin: 6px 0 20px; overflow-wrap: anywhere; }
+    .badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 18px 12px; }
+    .badge { text-align: center; }
+    .medal { width: 76px; height: 76px; margin: 0 auto 6px; border-radius: 50%; display: flex;
+             align-items: center; justify-content: center; font-size: 40px; background: rgba(232,144,42,0.12); }
+    .medal img { width: 100%; height: 100%; display: block; }
+    .badge.locked .medal { filter: grayscale(1); opacity: 0.35; }
+    .badge.locked .badge-title { color: var(--text-3); }
+    .badge-detail { font-size: 11px; color: var(--text-3); line-height: 1.3; }
+    .badge-title { font-size: 13px; color: var(--text-1); }
+    .badge-count { font-size: 14px; font-weight: 700; color: var(--gold); }
+    .moments { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px; }
+    .moments h2 { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+    .moment { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; font-size: 14px; border-bottom: 1px solid var(--border); }
+    .moment:last-child { border-bottom: 0; }
+    .moment span:last-child { color: var(--text-3); white-space: nowrap; }
+    .actions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+    .actions[hidden] { display: none; }
+    .actions a { display: block; text-align: center; padding: 14px; border-radius: var(--radius-sm); font-weight: 600; }
+    .open-app { background: var(--orange); color: #000; }
+    .get-app { border: 1px solid var(--border); color: var(--text-2); }
+    .note { margin-top: 20px; font-size: 13px; color: var(--text-3); }
+    .error { color: var(--text-2); }
+  </style>
+</head>
+<body>
+  <main class="card-page">
+    <div class="card" id="card">
+      <p class="error" id="status">Kaart laden…</p>
+    </div>
+    <div class="actions" id="actions" hidden>
+      <a class="open-app" id="open-app" href="#">Open in Squash Analyzer</a>
+      <a class="get-app" href="https://apps.apple.com/app/squash-analyzer/id6758676921" target="_blank" rel="noopener">Download de app</a>
+    </div>
+    <p class="note">De kaart staat in de link zelf. Deze pagina stuurt niets naar een server en bewaart niets.</p>
+  </main>
+
+  <script>
+    // Badge ids and texts as in BadgeKind (the app); unknown ids are skipped.
+    // Artwork lives in ../badges/<id>.png; a badge without artwork gets a medal.
+    const BADGES = {
+      "five-in-a-row": ["5 points in a row", "5 punten achter elkaar"],
+      "eleven-nil": ["Alles is voor Bassie", "Win een game met 11-0"],
+      "drop-it": ["Drop it like it's hot", "4 drops in één game"],
+      "kriss-cross": ["Kriss Kross", "4 crosses in één game"],
+      "back-from-the-death": ["Back from the dead", "Win een game na 5 punten achterstand"],
+      "going-the-distance": ["Going the distance", "Win de wedstrijd na 0-2 in games"],
+      "ace-of-pace": ["Ace of pace", "4 servicewinners in één game"],
+      "lob-story": ["Lob story", "4 lobwinners in één game"],
+      "volleywood": ["Volleywood", "4 volleywinners in één game"],
+      "clean-sweep": ["Clean sweep", "Win de wedstrijd met 3-0"],
+      "cool-under-pressure": ["Cool under pressure", "Win een game na 10-10"],
+      "drive-me-crazy": ["Drive me crazy", "4 drivewinners in één game"],
+      "boast-buster": ["Boast buster", "4 boastwinners in één game"],
+      "full-house": ["Full house", "Scoor met alle 6 slagtypes in één wedstrijd"],
+      "hat-trick": ["Hat trick", "Win 3 wedstrijden op rij"],
+      "houdini": ["Houdini", "Werk 3 matchpoints weg en win de wedstrijd"],
+      "marathon-man": ["Marathon man", "Win een game met minstens 20 punten"],
+      "off-the-mark": ["Off the mark", "Win je eerste wedstrijd"],
+      "centurion": ["Centurion", "Scoor in totaal 100 punten"],
+      "double-trouble": ["Double trouble", "Win 2 games na 10-10 in één wedstrijd"],
+      "ten-out-of-ten": ["Ten out of ten", "Win in totaal 10 wedstrijden"],
+      "brick-wall": ["Brick wall", "Win een game zonder unforced errors"],
+      "front-row-king": ["Front row king", "5 winners vanuit de voorste zones in één game"],
+      "endurance": ["Endurance", "Win een rally van minstens 60 seconden"],
+      "perfect-ten": ["Perfect ten", "10 punten achter elkaar"],
+      "unbreakable": ["Unbreakable", "Win een game zonder ooit achter te staan"],
+      "photo-finish": ["Photo finish", "Win een wedstrijd met 3-2"],
+      "stroke-of-genius": ["Stroke of genius", "Krijg 3 strokes toegekend in één game"],
+      "iron-man": ["Iron man", "Speel een wedstrijd van minstens 60 minuten uit"],
+      "nemesis": ["Nemesis", "Win 5 keer van dezelfde tegenstander"],
+      "veteran": ["Veteran", "Speel 25 wedstrijden, gewonnen of niet"]
+    };
+
+    function decodeBase64Url(text) {
+      const base64 = text.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((text.length + 3) % 4);
+      const binary = atob(base64);
+      return Uint8Array.from(binary, c => c.charCodeAt(0));
+    }
+
+    async function inflate(bytes) {
+      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+      return await new Response(stream).text();
+    }
+
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function render(card, payload) {
+      const box = document.getElementById("card");
+      box.replaceChildren();
+      box.append(el("div", "card-label", "Badgekaart"), el("div", "card-name", card.n));
+
+      const active = (card.a || []).filter(a => a.d == null && BADGES[a.b]);
+      const badges = el("div", "badges");
+      for (const [id, [title, detail]] of Object.entries(BADGES)) {
+        const count = active.filter(a => a.b === id).length;
+        const item = el("div", count > 0 ? "badge" : "badge locked");
+        const medal = el("div", "medal");
+        const img = document.createElement("img");
+        img.src = "../badges/" + id + ".png";
+        img.alt = "";
+        img.onerror = () => { img.remove(); medal.textContent = "🏅"; };
+        medal.append(img);
+        item.append(medal, el("div", "badge-title", title));
+        item.append(count > 0 ? el("div", "badge-count", count + "×") : el("div", "badge-detail", detail));
+        badges.append(item);
+      }
+      box.append(badges);
+
+      if (active.length > 0) {
+        const moments = el("div", "moments");
+        moments.append(el("h2", null, "Verdiend"));
+        const formatter = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "short", year: "numeric" });
+        for (const award of active.sort((x, y) => y.t - x.t)) {
+          const row = el("div", "moment");
+          const what = BADGES[award.b][0] + (award.o ? " · tegen " + award.o : "");
+          row.append(el("span", null, what), el("span", null, formatter.format(new Date(award.t * 1000))));
+          moments.append(row);
+        }
+        box.append(moments);
+      } else {
+        box.append(el("p", "note", "Nog geen badges verdiend."));
+      }
+
+      document.title = "Badgekaart " + card.n + " – Squash Analyzer";
+      document.getElementById("open-app").href = "squashanalyzer://kaart#" + payload;
+      document.getElementById("actions").hidden = false;
+    }
+
+    (async () => {
+      const payload = location.hash.slice(1);
+      const status = document.getElementById("status");
+      if (!payload) { status.textContent = "Deze link bevat geen kaart."; return; }
+      try {
+        const card = JSON.parse(await inflate(decodeBase64Url(payload)));
+        if (!card || typeof card.n !== "string") throw new Error("geen kaart");
+        render(card, payload);
+      } catch (e) {
+        status.textContent = "Deze kaart kan niet worden gelezen. Vraag om een nieuwe link.";
+      }
+    })();
+  </script>
+</body>
+</html>

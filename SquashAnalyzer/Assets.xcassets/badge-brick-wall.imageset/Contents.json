@@ -1,0 +1,6 @@
+{
+  "images" : [
+    { "filename" : "badge-brick-wall.png", "idiom" : "universal" }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}

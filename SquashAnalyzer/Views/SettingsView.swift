@@ -3,6 +3,7 @@ import SwiftUI
 /// Coach input settings shared between the settings screen and the live coach screen
 enum CoachInputSettings {
     static let modeKey = "coachInputMode"
+    static let teamURLKey = "sbnTeamURL"
 }
 
 /// How a point is entered on the coach screen. The stored raw value of the
@@ -32,6 +33,8 @@ struct SettingsView: View {
     @State private var apiKey: String = ""
     @State private var showingAPIKey = false
     @State private var showingSaveConfirmation = false
+    @AppStorage(CoachInputSettings.teamURLKey) private var teamURL = ""
+    @State private var teamSaveMessage: String?
 
     var body: some View {
         ZStack {
@@ -45,6 +48,8 @@ struct SettingsView: View {
                     VStack(spacing: 24) {
                         // Coach input
                         coachInputSection
+
+                        teamSection
 
                         // AI Coach Section
                         aiCoachSection
@@ -60,6 +65,23 @@ struct SettingsView: View {
         .onAppear {
             apiKey = APIKeyManager.shared.openAIAPIKey ?? ""
         }
+    }
+
+    private var teamSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack { Image(systemName: "person.3.fill").foregroundColor(AppColors.warmOrange); Text("Mijn team").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary) }
+            Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
+                .font(AppFonts.body(13)).foregroundColor(AppColors.textSecondary)
+            TextField("https://sbn.toernooi.nl/league/.../team/...", text: $teamURL)
+                .font(AppFonts.body(13)).foregroundColor(AppColors.textPrimary)
+                .textInputAutocapitalization(.never).autocorrectionDisabled()
+                .padding().background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
+            HardwareButton(title: "Bewaar teamlink", subtitle: nil, color: AppColors.warmOrange, colorDark: AppColors.warmOrangeDark) {
+                do { _ = try LeagueTeamLink(teamURL); teamSaveMessage = "Teamlink opgeslagen" }
+                catch { teamSaveMessage = error.localizedDescription }
+            }
+            if let teamSaveMessage { Text(teamSaveMessage).font(AppFonts.caption(12)).foregroundColor(teamSaveMessage.contains("opgeslagen") ? .green : AppColors.warmRed) }
+        }.padding().background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03))).overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
     }
 
     // MARK: - Header

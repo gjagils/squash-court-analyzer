@@ -41,9 +41,25 @@
 		A1000034 /* RefereeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000034 /* RefereeView.swift */; };
 		A1000035 /* SavedRefereeMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000035 /* SavedRefereeMatch.swift */; };
 		B1000001 /* ScoringEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000001 /* ScoringEngine.swift */; };
+		B1000060 /* BadgeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000060 /* BadgeEngine.swift */; };
+		B1000073 /* MatchShareReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000073 /* MatchShareReport.swift */; };
+		B1000071 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000071 /* AppDelegate.swift */; };
+		B1000070 /* CardSharingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000070 /* CardSharingViews.swift */; };
+		B1000069 /* CardSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000069 /* CardSnapshot.swift */; };
+		B1000068 /* CardSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000068 /* CardSync.swift */; };
+		B1000067 /* SavedPlayerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000067 /* SavedPlayerCard.swift */; };
+		B1000065 /* PlayerBadgesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000065 /* PlayerBadgesView.swift */; };
+		B1000064 /* BadgeAwarder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000064 /* BadgeAwarder.swift */; };
+		B1000063 /* SavedBadgeAward.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000063 /* SavedBadgeAward.swift */; };
+		B1000061 /* BadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000061 /* BadgeView.swift */; };
+		B1000062 /* BadgeEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000062 /* BadgeEngineTests.swift */; };
+		B1000072 /* PlayerCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000072 /* PlayerCardTests.swift */; };
+		B1000066 /* BadgeAwardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000066 /* BadgeAwardTests.swift */; };
 		B1000044 /* PlayerAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000044 /* PlayerAvatar.swift */; };
-		B1000045 /* RefereeShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000045 /* RefereeShareSheet.swift */; };
+		B1000045 /* MatchShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000045 /* MatchShareSheet.swift */; };
 		B1000043 /* TeamImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000043 /* TeamImportService.swift */; };
+		B1000080 /* LeagueTeamService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000080 /* LeagueTeamService.swift */; };
+		B1000081 /* LeagueTeamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000081 /* LeagueTeamView.swift */; };
 		B1000042 /* PlayerPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000042 /* PlayerPhoto.swift */; };
 		B1000041 /* ZipArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000041 /* ZipArchive.swift */; };
 B1000031 /* ScreenshotScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000031 /* ScreenshotScenario.swift */; };
@@ -102,9 +118,25 @@ B1000031 /* ScreenshotScenario.swift in Sources */ = {isa = PBXBuildFile; fileRe
 		A2000035 /* SavedRefereeMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedRefereeMatch.swift; sourceTree = "<group>"; };
 		A3000001 /* SquashAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SquashAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2000001 /* ScoringEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoringEngine.swift; sourceTree = "<group>"; };
+		B2000060 /* BadgeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeEngine.swift; sourceTree = "<group>"; };
+		B2000073 /* MatchShareReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchShareReport.swift; sourceTree = "<group>"; };
+		B2000071 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		B2000070 /* CardSharingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSharingViews.swift; sourceTree = "<group>"; };
+		B2000069 /* CardSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSnapshot.swift; sourceTree = "<group>"; };
+		B2000068 /* CardSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSync.swift; sourceTree = "<group>"; };
+		B2000067 /* SavedPlayerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlayerCard.swift; sourceTree = "<group>"; };
+		B2000065 /* PlayerBadgesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerBadgesView.swift; sourceTree = "<group>"; };
+		B2000064 /* BadgeAwarder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeAwarder.swift; sourceTree = "<group>"; };
+		B2000063 /* SavedBadgeAward.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBadgeAward.swift; sourceTree = "<group>"; };
+		B2000061 /* BadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeView.swift; sourceTree = "<group>"; };
+		B2000062 /* BadgeEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeEngineTests.swift; sourceTree = "<group>"; };
+		B2000072 /* PlayerCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerCardTests.swift; sourceTree = "<group>"; };
+		B2000066 /* BadgeAwardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeAwardTests.swift; sourceTree = "<group>"; };
 		B2000044 /* PlayerAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAvatar.swift; sourceTree = "<group>"; };
-		B2000045 /* RefereeShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeShareSheet.swift; sourceTree = "<group>"; };
+		B2000045 /* MatchShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchShareSheet.swift; sourceTree = "<group>"; };
 		B2000043 /* TeamImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamImportService.swift; sourceTree = "<group>"; };
+		B2000080 /* LeagueTeamService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeagueTeamService.swift; sourceTree = "<group>"; };
+		B2000081 /* LeagueTeamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeagueTeamView.swift; sourceTree = "<group>"; };
 		B2000042 /* PlayerPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerPhoto.swift; sourceTree = "<group>"; };
 		B2000041 /* ZipArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipArchive.swift; sourceTree = "<group>"; };
 B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotScenario.swift; sourceTree = "<group>"; };
@@ -182,11 +214,15 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 				A2000020 /* AppIconView.swift */,
 				A2000021 /* MatchHistoryView.swift */,
 				A2000022 /* SettingsView.swift */,
+				B2000081 /* LeagueTeamView.swift */,
 				A2000023 /* CoachDashboardView.swift */,
 				A2000030 /* PlayerManagementView.swift */,
 				A2000034 /* RefereeView.swift */,
 				B2000044 /* PlayerAvatar.swift */,
-				B2000045 /* RefereeShareSheet.swift */,
+				B2000061 /* BadgeView.swift */,
+				B2000065 /* PlayerBadgesView.swift */,
+				B2000070 /* CardSharingViews.swift */,
+				B2000045 /* MatchShareSheet.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -206,6 +242,8 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 				A2000027 /* SavedLet.swift */,
 				A2000028 /* PointType.swift */,
 				A2000029 /* SavedPlayer.swift */,
+				B2000063 /* SavedBadgeAward.swift */,
+				B2000067 /* SavedPlayerCard.swift */,
 				A2000033 /* RefereeMatch.swift */,
 				A2000035 /* SavedRefereeMatch.swift */,
 			);
@@ -216,7 +254,14 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 			isa = PBXGroup;
 			children = (
 				B2000001 /* ScoringEngine.swift */,
+				B2000060 /* BadgeEngine.swift */,
+				B2000073 /* MatchShareReport.swift */,
+				B2000064 /* BadgeAwarder.swift */,
+				B2000071 /* AppDelegate.swift */,
+				B2000069 /* CardSnapshot.swift */,
+				B2000068 /* CardSync.swift */,
 				B2000043 /* TeamImportService.swift */,
+				B2000080 /* LeagueTeamService.swift */,
 				B2000042 /* PlayerPhoto.swift */,
 				B2000041 /* ZipArchive.swift */,
 				B2000031 /* ScreenshotScenario.swift */,
@@ -235,6 +280,9 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 			children = (
 				B2000010 /* ScoringAndPersistenceTests.swift */,
 				B2000021 /* RefereeMatchTests.swift */,
+				B2000062 /* BadgeEngineTests.swift */,
+				B2000072 /* PlayerCardTests.swift */,
+				B2000066 /* BadgeAwardTests.swift */,
 				B2000023 /* MigrationTests.swift */,
 				B2000022 /* TeamImportTests.swift */,
 			);
@@ -374,9 +422,22 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 				A1000034 /* RefereeView.swift in Sources */,
 				A1000035 /* SavedRefereeMatch.swift in Sources */,
 				B1000001 /* ScoringEngine.swift in Sources */,
+				B1000060 /* BadgeEngine.swift in Sources */,
+				B1000073 /* MatchShareReport.swift in Sources */,
+				B1000071 /* AppDelegate.swift in Sources */,
+				B1000070 /* CardSharingViews.swift in Sources */,
+				B1000069 /* CardSnapshot.swift in Sources */,
+				B1000068 /* CardSync.swift in Sources */,
+				B1000067 /* SavedPlayerCard.swift in Sources */,
+				B1000065 /* PlayerBadgesView.swift in Sources */,
+				B1000064 /* BadgeAwarder.swift in Sources */,
+				B1000063 /* SavedBadgeAward.swift in Sources */,
 				B1000044 /* PlayerAvatar.swift in Sources */,
-				B1000045 /* RefereeShareSheet.swift in Sources */,
+				B1000061 /* BadgeView.swift in Sources */,
+				B1000045 /* MatchShareSheet.swift in Sources */,
 				B1000043 /* TeamImportService.swift in Sources */,
+				B1000080 /* LeagueTeamService.swift in Sources */,
+				B1000081 /* LeagueTeamView.swift in Sources */,
 				B1000042 /* PlayerPhoto.swift in Sources */,
 				B1000041 /* ZipArchive.swift in Sources */,
 				B1000031 /* ScreenshotScenario.swift in Sources */,
@@ -391,6 +452,9 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 			files = (
 				B1000010 /* ScoringAndPersistenceTests.swift in Sources */,
 				B1000021 /* RefereeMatchTests.swift in Sources */,
+				B1000062 /* BadgeEngineTests.swift in Sources */,
+				B1000072 /* PlayerCardTests.swift in Sources */,
+				B1000066 /* BadgeAwardTests.swift in Sources */,
 				B1000023 /* MigrationTests.swift in Sources */,
 				B1000022 /* TeamImportTests.swift in Sources */,
 			);
@@ -525,8 +589,9 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = SquashAnalyzer/SquashAnalyzer.entitlements;
+				INFOPLIST_FILE = SquashAnalyzer/Info.plist;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 65FAHRU88M;
 				ENABLE_PREVIEWS = YES;
@@ -561,8 +626,9 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = SquashAnalyzer/SquashAnalyzer.entitlements;
+				INFOPLIST_FILE = SquashAnalyzer/Info.plist;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 65FAHRU88M;
 				ENABLE_PREVIEWS = YES;

@@ -19,6 +19,8 @@ struct MatchHistoryView: View {
     private var standaloneGames: [SavedGame]
     @Query(sort: \SavedRefereeMatch.savedAt, order: .reverse) private var refereeMatches: [SavedRefereeMatch]
     @Query private var allPlayers: [SavedPlayer]
+    /// Including deleted ones: they go into the backup so a deletion survives a restore
+    @Query private var badgeAwards: [SavedBadgeAward]
     @Binding var isPresented: Bool
     let onSelectMatch: (SavedMatch) -> Void
     var onSelectGame: ((SavedGame) -> Void)? = nil
@@ -363,12 +365,14 @@ struct MatchHistoryView: View {
         }
     }
 
+    private var matchIdsWithBadges: Set<UUID> { Set(badgeAwards.filter(\.isActive).map(\.matchId)) }
+
     private var historyList: some View {
         LazyVStack(spacing: 12, pinnedViews: [.sectionHeaders]) {
             if !filteredMatches.isEmpty {
                 Section {
                     ForEach(filteredMatches) { match in
-                        MatchHistoryCard(match: match) {
+                        MatchHistoryCard(match: match, hasBadges: matchIdsWithBadges.contains(match.id)) {
                             onSelectMatch(match)
                         } onDelete: {
                             deleteMatch(match)
@@ -401,7 +405,7 @@ struct MatchHistoryView: View {
             if !filteredRefereeMatches.isEmpty {
                 Section {
                     ForEach(filteredRefereeMatches) { match in
-                        RefereeMatchCard(match: match) {
+                        RefereeMatchCard(match: match, hasBadges: match.matchId.map(matchIdsWithBadges.contains) ?? false) {
                             deleteRefereeMatch(match)
                         }
                     }
@@ -419,6 +423,7 @@ struct MatchHistoryView: View {
 
     private func deleteMatch(_ match: SavedMatch) {
         withAnimation {
+            try? BadgeAwarder(context: modelContext).markAwardsDeleted(forMatch: match.id)
             modelContext.delete(match)
             try? modelContext.save()
         }
@@ -442,6 +447,9 @@ struct MatchHistoryView: View {
 
     private func deleteRefereeMatch(_ match: SavedRefereeMatch) {
         withAnimation {
+            if let matchId = match.matchId {
+                try? BadgeAwarder(context: modelContext).markAwardsDeleted(forMatch: matchId)
+            }
             modelContext.delete(match)
             try? modelContext.save()
         }
@@ -477,7 +485,8 @@ struct MatchHistoryView: View {
             let url = try ExportService.saveBackupToiCloud(
                 players: allPlayers,
                 matches: savedMatches,
-                standaloneGames: standaloneGames
+                standaloneGames: standaloneGames,
+                badgeAwards: badgeAwards
             )
             iCloudSaveMessage = "'\(url.lastPathComponent)' is opgeslagen in iCloud Drive. Je kunt het terugvinden in de Bestanden-app onder iCloud Drive → Squash Analyzer."
             showingICloudSuccess = true
@@ -493,7 +502,8 @@ struct MatchHistoryView: View {
             let data = try ExportService.exportFullBackup(
                 players: allPlayers,
                 matches: savedMatches,
-                standaloneGames: standaloneGames
+                standaloneGames: standaloneGames,
+                badgeAwards: badgeAwards
             )
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
@@ -693,6 +703,7 @@ struct StandaloneGameCard: View {
 
 struct MatchHistoryCard: View {
     let match: SavedMatch
+    var hasBadges = false
     let onTap: () -> Void
     let onDelete: () -> Void
     var onCompleteResult: (() -> Void)? = nil
@@ -716,6 +727,10 @@ struct MatchHistoryCard: View {
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
                             .background(Capsule().stroke(AppColors.warmRed.opacity(0.6), lineWidth: 1))
+                    }
+
+                    if hasBadges {
+                        BadgeMedalIcon()
                     }
 
                     Spacer()
@@ -846,8 +861,19 @@ struct MatchHistoryCard: View {
 
 // MARK: - Referee Match Card
 
+/// Small medal on a history card for a match in which a badge was earned
+struct BadgeMedalIcon: View {
+    var body: some View {
+        Image(systemName: "medal.fill")
+            .font(.system(size: 11))
+            .foregroundColor(AppColors.accentGold)
+            .accessibilityLabel("Badge verdiend")
+    }
+}
+
 struct RefereeMatchCard: View {
     let match: SavedRefereeMatch
+    var hasBadges = false
     let onDelete: () -> Void
 
     @State private var showingDeleteConfirm = false
@@ -876,6 +902,9 @@ struct RefereeMatchCard: View {
                         .foregroundColor(AppColors.steelBlue)
                         .lineLimit(1)
                     Spacer()
+                    if hasBadges {
+                        BadgeMedalIcon()
+                    }
                     Text(match.matchScoreText)
                         .font(AppFonts.score(16))
                         .foregroundColor(AppColors.textPrimary)

@@ -3,13 +3,14 @@ import SwiftData
 
 @main
 struct SquashAnalyzerApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     let container: ModelContainer
     let persistenceWarning: String?
 
     init() {
-        // Explicitly disable CloudKit sync: we use iCloud Drive only for file-based
-        // backups (ExportService). Without this, SwiftData detects the iCloud entitlements
-        // and tries to configure a CloudKit container that doesn't exist yet, causing a crash.
+        // Explicitly disable SwiftData's CloudKit mirroring: the store stays local.
+        // iCloud Drive holds the file backups (ExportService) and only shared player
+        // cards go to CloudKit, through CardSync.
         let schema = Schema(versionedSchema: SquashAnalyzerCurrentSchema.self)
         let config = ModelConfiguration(cloudKitDatabase: .none)
         do {
@@ -33,6 +34,17 @@ struct SquashAnalyzerApp: App {
             }
             let location = recoveryURL?.path ?? "de Application Support-map"
             persistenceWarning = "De lokale database kon niet worden geopend. De originele bestanden zijn behouden in \(location). Deze sessie gebruikt tijdelijke opslag; exporteer geen vervangende backup voordat de database is hersteld."
+        }
+
+        // Shared player cards (CloudKit); not in unit tests or screenshot runs
+        let isTesting = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+        #if DEBUG
+        let isScreenshot = ScreenshotScenario.isActive
+        #else
+        let isScreenshot = false
+        #endif
+        if !isTesting && !isScreenshot && persistenceWarning == nil {
+            CardSync.shared.start(modelContainer: container)
         }
     }
 

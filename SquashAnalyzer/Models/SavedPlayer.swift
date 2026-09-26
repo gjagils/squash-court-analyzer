@@ -27,6 +27,8 @@ final class SavedPlayer {
     var createdAt: Date
     /// Square JPEG, at most 512px (see PlayerPhoto); nil when no photo is set
     @Attribute(.externalStorage) var photoData: Data? = nil
+    /// Player card this player is linked to; nil means the player's own card (`id`)
+    var cardId: UUID? = nil
 
     init(
         id: UUID = UUID(),
@@ -43,4 +45,7 @@ final class SavedPlayer {
         self.createdAt = createdAt
         self.photoData = photoData
     }
+
+    /// Card the player's badges are recorded on
+    var badgeCardId: UUID { cardId ?? id }
 }

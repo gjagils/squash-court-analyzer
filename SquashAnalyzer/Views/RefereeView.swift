@@ -85,7 +85,7 @@ struct RefereeView: View {
             }
         }
         .sheet(isPresented: $showingShareSheet) {
-            RefereeShareSheet(match: match)
+            MatchShareSheet(report: match.shareReport)
         }
         .onChange(of: match.isGameOver) { _, isOver in
             guard isOver else { return }
@@ -176,6 +176,8 @@ struct RefereeView: View {
 
     // MARK: - Player Column
 
+    /// The server's column stands out: tinted background with name, score and
+    /// "tik = punt" in white; the receiver keeps the player colour.
     private func playerColumn(_ player: Player) -> some View {
         let isServer = match.currentServer == player
         let color: Color = player == .player1 ? AppColors.warmOrange : AppColors.steelBlue
@@ -187,7 +189,7 @@ struct RefereeView: View {
             // Name
             Text(match.name(for: player))
                 .font(AppFonts.label(14))
-                .foregroundColor(isServer ? color : AppColors.textSecondary)
+                .foregroundColor(isServer ? AppColors.textPrimary : color)
                 .lineLimit(1)
 
             // Links / Rechts selector — always laid out so both scores line up,
@@ -210,11 +212,11 @@ struct RefereeView: View {
                 VStack(spacing: 2) {
                     Text("\(score)")
                         .font(.system(size: 80, weight: .bold, design: .rounded))
-                        .foregroundColor(isServer ? color : AppColors.textPrimary)
+                        .foregroundColor(isServer ? AppColors.textPrimary : color)
                         .contentTransition(.numericText())
                     Text("TIK = PUNT")
                         .font(AppFonts.caption(9))
-                        .foregroundColor(color.opacity(0.55))
+                        .foregroundColor(isServer ? AppColors.textPrimary.opacity(0.8) : color.opacity(0.55))
                         .tracking(1.4)
                 }
                 .frame(maxWidth: .infinity)
@@ -398,7 +400,16 @@ struct RefereeView: View {
             player1GamesBefore: match.player1GamesBefore,
             player2GamesBefore: match.player2GamesBefore
         )
+        saved.matchId = match.id
+        saved.player1Id = match.player1Id
+        saved.player2Id = match.player2Id
         modelContext.insert(saved)
+        try? BadgeAwarder(context: modelContext).syncAwards(
+            matchId: match.id,
+            playerIds: match.playerIds,
+            playerNames: [.player1: match.player1Name, .player2: match.player2Name],
+            input: match.badgeInput
+        )
         try? modelContext.save()
         savedRefereeMatch = saved
     }
@@ -406,6 +417,7 @@ struct RefereeView: View {
     private func unsaveMatch() {
         guard let saved = savedRefereeMatch else { return }
         modelContext.delete(saved)
+        try? BadgeAwarder(context: modelContext).removeAwards(forMatch: match.id)
         try? modelContext.save()
         savedRefereeMatch = nil
     }
@@ -771,7 +783,14 @@ private struct RefereeMatchOverOverlay: View {
     let onUndo: () -> Void
     let onDismiss: () -> Void
 
+    @State private var showingBadges = false
+
     private var winner: Player? { match.matchWinner }
+
+    private var badgeEarnings: [MatchBadgeEarning] {
+        BadgeEngine().earnings(for: match.badgeInput, playerIds: match.playerIds,
+                               names: [.player1: match.player1Name, .player2: match.player2Name])
+    }
 
     var body: some View {
         ResultOverlayCard(accent: winner.map(RefereeView.color(for:))) {
@@ -795,11 +814,19 @@ private struct RefereeMatchOverOverlay: View {
                 ResultCaption(matchStatsText, icon: "timer")
             }
 
+            let earnings = badgeEarnings
+            if !earnings.isEmpty {
+                MatchBadgesStrip(earnings: earnings) { showingBadges = true }
+            }
+
             VStack(spacing: 12) {
                 HardwareButton(title: "Deel score", color: AppColors.warmOrange) { onShare() }
                 HardwareButton(title: "Sluiten", color: AppColors.textSecondary, style: .outlined) { onDismiss() }
                 OverlayUndoButton(action: onUndo)
             }
+        }
+        .sheet(isPresented: $showingBadges) {
+            MatchBadgesSheet(earnings: badgeEarnings, matchId: match.id)
         }
     }
 
@@ -1070,6 +1097,4 @@ struct OverlayUndoButton: View {
 }
 
 // Make RefereeMatch Identifiable for fullScreenCover(item:)
-extension RefereeMatch: Identifiable {
-    var id: String { "\(player1Name)-\(player2Name)-\(bestOf)" }
-}
+extension RefereeMatch: Identifiable {}

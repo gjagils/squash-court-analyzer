@@ -61,6 +61,8 @@ struct ContentView: View {
                 // History and saved analyses are layered above the setup, so closing them lands back here
                 MatchSetupView(match: match, isPresented: $showingSetup, onViewHistory: {
                     showingHistory = true
+                }, onOpenSettings: {
+                    showingSettings = true
                 })
                     .transition(.opacity)
             }
@@ -881,6 +883,7 @@ struct MatchSetupView: View {
     let match: Match
     @Binding var isPresented: Bool
     var onViewHistory: (() -> Void)? = nil
+    var onOpenSettings: (() -> Void)? = nil
 
     @State private var selectedMode: SetupMode = .coach
 
@@ -912,30 +915,48 @@ struct MatchSetupView: View {
 
                 // ── Header ──────────────────────────────────────────────────
                 HStack {
-                    // History icon — consistent across the whole app
-                    if let onViewHistory = onViewHistory {
-                        Button(action: onViewHistory) {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .font(.system(size: 22))
-                                .foregroundColor(AppColors.textSecondary)
+                    // History icon — consistent across the whole app; the empty
+                    // slot balances the two icons on the right so the title stays centred
+                    HStack(spacing: 18) {
+                        if let onViewHistory = onViewHistory {
+                            Button(action: onViewHistory) {
+                                Image(systemName: "clock.arrow.circlepath")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(AppColors.textSecondary)
+                            }
+                        } else {
+                            Color.clear.frame(width: 22)
                         }
-                    } else {
-                        Color.clear.frame(width: 22)
+                        Color.clear.frame(width: 22, height: 22)
                     }
 
                     Spacer()
 
                     Text("SQUASH ANALYZER")
-                        .font(AppFonts.title(20))
+                        .font(AppFonts.title(18))
                         .foregroundColor(AppColors.textPrimary)
-                        .tracking(3)
+                        .tracking(2)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
 
                     Spacer()
 
-                    Button(action: { showingPlayerManagement = true }) {
-                        Image(systemName: "person.2.circle")
-                            .font(.system(size: 22))
-                            .foregroundColor(AppColors.accentGold)
+                    HStack(spacing: 18) {
+                        if let onOpenSettings {
+                            Button(action: onOpenSettings) {
+                                Image(systemName: "gearshape")
+                                    .font(.system(size: 21))
+                                    .foregroundColor(AppColors.textSecondary)
+                            }
+                            .accessibilityLabel("Instellingen")
+                        } else {
+                            Color.clear.frame(width: 22)
+                        }
+                        Button(action: { showingPlayerManagement = true }) {
+                            Image(systemName: "person.2.circle")
+                                .font(.system(size: 22))
+                                .foregroundColor(AppColors.accentGold)
+                        }
                     }
                 }
                 .padding(.horizontal, 24)

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		A1000001 /* SquashAnalyzerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* SquashAnalyzerApp.swift */; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
+		B1000082 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000082 /* HomeView.swift */; };
 		A1000003 /* CourtView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003 /* CourtView.swift */; };
 		A1000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000004 /* Assets.xcassets */; };
 		A1000005 /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000005 /* Game.swift */; };
@@ -85,6 +86,7 @@ B1000031 /* ScreenshotScenario.swift in Sources */ = {isa = PBXBuildFile; fileRe
 /* Begin PBXFileReference section */
 		A2000001 /* SquashAnalyzerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquashAnalyzerApp.swift; sourceTree = "<group>"; };
 		A2000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B2000082 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		A2000003 /* CourtView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourtView.swift; sourceTree = "<group>"; };
 		A2000004 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A2000005 /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
@@ -206,6 +208,7 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 			isa = PBXGroup;
 			children = (
 				A2000002 /* ContentView.swift */,
+				B2000082 /* HomeView.swift */,
 				A2000003 /* CourtView.swift */,
 				A2000006 /* ScoreboardView.swift */,
 				A2000007 /* PlayerButtonsView.swift */,
@@ -391,6 +394,7 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 			files = (
 				A1000001 /* SquashAnalyzerApp.swift in Sources */,
 				A1000002 /* ContentView.swift in Sources */,
+				B1000082 /* HomeView.swift in Sources */,
 				A1000003 /* CourtView.swift in Sources */,
 				A1000005 /* Game.swift in Sources */,
 				A1000006 /* ScoreboardView.swift in Sources */,

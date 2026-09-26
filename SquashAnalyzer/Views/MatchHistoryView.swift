@@ -410,7 +410,7 @@ struct MatchHistoryView: View {
                         }
                     }
                 } header: {
-                    HistorySectionHeader(title: "SCHEIDSRECHTER", icon: "whistle.fill")
+                    HistorySectionHeader(title: "SCHEIDSRECHTER", icon: "hand.raised.fill")
                 }
             }
         }
@@ -881,7 +881,7 @@ struct RefereeMatchCard: View {
     var body: some View {
         HStack(spacing: 14) {
             // Icon
-            Image(systemName: "whistle.fill")
+            Image(systemName: "hand.raised.fill")
                 .font(.system(size: 18))
                 .foregroundColor(AppColors.accentGold.opacity(0.8))
                 .frame(width: 36, height: 36)

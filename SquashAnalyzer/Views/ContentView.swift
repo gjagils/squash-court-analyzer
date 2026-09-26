@@ -947,6 +947,9 @@ struct MatchSetupView: View {
                     .padding(.horizontal, 24)
                     .padding(.bottom, 28)
 
+                LeagueTeamCard()
+                    .padding(.bottom, 12)
+
                 Spacer()
 
                 // ── Player names ────────────────────────────────────────────

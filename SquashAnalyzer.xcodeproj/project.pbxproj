@@ -595,7 +595,7 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 				CODE_SIGN_ENTITLEMENTS = SquashAnalyzer/SquashAnalyzer.entitlements;
 				INFOPLIST_FILE = SquashAnalyzer/Info.plist;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 65FAHRU88M;
 				ENABLE_PREVIEWS = YES;
@@ -632,7 +632,7 @@ B2000031 /* ScreenshotScenario.swift */ = {isa = PBXFileReference; lastKnownFile
 				CODE_SIGN_ENTITLEMENTS = SquashAnalyzer/SquashAnalyzer.entitlements;
 				INFOPLIST_FILE = SquashAnalyzer/Info.plist;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 65FAHRU88M;
 				ENABLE_PREVIEWS = YES;

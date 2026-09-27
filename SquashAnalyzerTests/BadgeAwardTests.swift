@@ -1,6 +1,7 @@
 import XCTest
 import SwiftData
 @testable import SquashAnalyzer
+import SquashAnalyzerCore
 
 final class BadgeAwardTests: XCTestCase {
     @MainActor

@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
+import SquashAnalyzerCore
 
 /// Which kind of saved matches the history shows
 enum HistoryKindFilter: String, CaseIterable, Identifiable {

@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import SquashAnalyzerCore
 
 // MARK: - "Badges verdiend" strip on the match-over screen (coach + referee)
 

@@ -1,4 +1,5 @@
 import Foundation
+import SquashAnalyzerCore
 
 /// Represents a single point scored in a game
 struct Point: Identifiable {

@@ -2,6 +2,7 @@ import Foundation
 import CloudKit
 import SwiftData
 import os
+import SquashAnalyzerCore
 
 /// A card that arrived from outside (an accepted CloudKit share or a snapshot
 /// link) and waits for the coach to link it to a local player.

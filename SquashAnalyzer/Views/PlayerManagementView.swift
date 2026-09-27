@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import PhotosUI
 import UniformTypeIdentifiers
+import SquashAnalyzerCore
 
 /// View for managing saved player profiles
 struct PlayerManagementView: View {

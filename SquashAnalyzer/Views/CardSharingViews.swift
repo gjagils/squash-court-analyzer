@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import SquashAnalyzerCore
 
 // MARK: - Share buttons on the badge screen
 

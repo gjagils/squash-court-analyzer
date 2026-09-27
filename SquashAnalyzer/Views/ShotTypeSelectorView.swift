@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerCore
 
 /// View for selecting the type of shot after zone selection
 struct ShotTypeSelectorView: View {

@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerCore
 
 // MARK: - Design System
 /// Digital Classic Sports Interface - Design System

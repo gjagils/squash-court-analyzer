@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 import CryptoKit
+import SquashAnalyzerCore
 
 /// One moment a player earned a badge: at most one per player card, badge and
 /// match. The id is derived from those three, so every device that computes the

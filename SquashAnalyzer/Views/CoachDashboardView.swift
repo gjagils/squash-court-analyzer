@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerCore
 
 /// Compact coach dashboard with local + AI-powered tactical advice
 struct CoachDashboardView: View {

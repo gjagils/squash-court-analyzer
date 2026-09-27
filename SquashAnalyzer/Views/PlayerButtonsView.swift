@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerCore
 
 // MARK: - Quick entry (setting "Snelle invoer")
 

@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerCore
 
 struct CourtView: View {
     var game: Game? = nil

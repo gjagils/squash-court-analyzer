@@ -1,6 +1,7 @@
 #if DEBUG
 import Foundation
 import SwiftData
+import SquashAnalyzerCore
 
 /// Deterministic app states for App Store screenshots. Selected with the launch
 /// argument `-screenshot <name>`; see scripts/screenshots.sh. Debug builds only,

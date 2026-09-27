@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SquashAnalyzerCore
 
 /// Server side (left or right service box)
 enum ServerSide: String {

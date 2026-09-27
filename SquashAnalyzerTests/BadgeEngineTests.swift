@@ -1,5 +1,6 @@
 import XCTest
 @testable import SquashAnalyzer
+import SquashAnalyzerCore
 
 final class BadgeEngineTests: XCTestCase {
     private let engine = BadgeEngine()

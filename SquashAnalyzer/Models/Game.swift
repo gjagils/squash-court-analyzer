@@ -1,26 +1,5 @@
 import Foundation
-
-/// Represents a player in the game
-enum Player: String, CaseIterable, Identifiable, Codable {
-    case player1 = "Speler 1"
-    case player2 = "Speler 2"
-
-    var id: String { rawValue }
-
-    var shortName: String {
-        switch self {
-        case .player1: return "S1"
-        case .player2: return "S2"
-        }
-    }
-
-    var opponent: Player {
-        switch self {
-        case .player1: return .player2
-        case .player2: return .player1
-        }
-    }
-}
+import SquashAnalyzerCore
 
 /// Represents the current game state
 @Observable

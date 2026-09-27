@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SquashAnalyzerCore
 
 /// Keeps the stored badge awards of one match in line with its rallies. Called
 /// on every save of a match, so an undone rally also takes back a badge that was

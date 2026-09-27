@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SquashAnalyzerCore
 
 /// Generates realistic sample match data for testing and demonstration
 enum SampleDataService {

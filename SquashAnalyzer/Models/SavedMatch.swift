@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SquashAnalyzerCore
 
 /// Persisted match model for SwiftData
 @Model

@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerCore
 
 /// Which live-scoring mode a match starts in
 enum SetupMode: Equatable {

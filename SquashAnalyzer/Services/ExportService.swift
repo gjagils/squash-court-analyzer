@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 import SwiftUI
 import CryptoKit
+import SquashAnalyzerCore
 
 // MARK: - Full Backup Structures
 

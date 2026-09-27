@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SquashAnalyzerCore
 
 /// One badge award as it travels between devices, in a snapshot link or a
 /// CloudKit record.

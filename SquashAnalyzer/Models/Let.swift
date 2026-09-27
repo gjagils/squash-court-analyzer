@@ -1,4 +1,5 @@
 import Foundation
+import SquashAnalyzerCore
 
 /// Represents a let (replay of rally) in squash
 struct LetCall: Identifiable {

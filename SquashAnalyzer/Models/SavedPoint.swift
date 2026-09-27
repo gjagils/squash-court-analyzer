@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SquashAnalyzerCore
 
 /// Persisted point model for SwiftData
 @Model

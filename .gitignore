@@ -150,3 +150,4 @@ build/
 
 # App Store screenshots are regenerated with scripts/screenshots.sh
 screenshots/
+Packages/*/.build/

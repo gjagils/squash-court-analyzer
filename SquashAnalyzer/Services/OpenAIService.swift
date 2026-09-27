@@ -1,4 +1,5 @@
 import Foundation
+import SquashAnalyzerCore
 
 /// Service for generating tactical advice using OpenAI's GPT API
 actor OpenAIService {

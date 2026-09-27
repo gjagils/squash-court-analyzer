@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerCore
 
 /// Lets the coach or referee pick one of the WhatsApp layouts, shows how it will
 /// read in the chat and hands the text to the system share sheet. The last used

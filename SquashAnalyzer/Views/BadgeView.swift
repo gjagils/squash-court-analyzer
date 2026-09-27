@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerCore
 
 /// A badge medallion: the artwork in colour once earned, greyed out while it is
 /// still to earn. A badge without artwork yet gets a plain gold medallion.

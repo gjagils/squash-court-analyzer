@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SquashAnalyzerCore
 
 /// One game result inside a saved referee match
 struct RefereeGameResult: Codable {

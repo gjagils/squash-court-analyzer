@@ -1,5 +1,6 @@
 import XCTest
 @testable import SquashAnalyzer
+import SquashAnalyzerCore
 
 final class RefereeMatchTests: XCTestCase {
     private func makeMatch(startingServer: Player = .player1) -> RefereeMatch {

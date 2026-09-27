@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SquashAnalyzerCore
 
 /// Available coaching focus area tags
 enum CoachingFocusTag: String, CaseIterable {

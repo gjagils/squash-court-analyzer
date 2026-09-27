@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerCore
 
 /// Full-screen referee / scorekeeper view
 struct RefereeView: View {

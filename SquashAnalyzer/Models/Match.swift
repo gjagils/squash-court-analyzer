@@ -1,4 +1,5 @@
 import Foundation
+import SquashAnalyzerCore
 
 enum MatchStatus: String, Codable, CaseIterable {
     case inProgress

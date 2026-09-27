@@ -334,6 +334,11 @@ public struct CoachScoringView: View {
                     .font(.system(size: 36, weight: .bold, design: .monospaced))
                     .foregroundColor(CoachPalette.textPrimary)
             }
+            SharedMatchBadgesStrip(earnings: SharedMatchBadgesStrip.earnings(
+                player1Id: match.player1Id, player1Name: match.player1Name,
+                player2Id: match.player2Id, player2Name: match.player2Name,
+                badgeInput: match.badgeInput
+            ))
             Button(action: onExit) {
                 Text("KLAAR")
                     .font(.system(size: 14, weight: .bold, design: .rounded))

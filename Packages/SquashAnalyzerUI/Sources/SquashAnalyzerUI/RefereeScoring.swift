@@ -226,6 +226,11 @@ public struct RefereeScoringView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(RoundedRectangle(cornerRadius: 12).fill(CoachPalette.textPrimary.opacity(0.10)))
+                SharedMatchBadgesStrip(earnings: SharedMatchBadgesStrip.earnings(
+                    player1Id: match.player1Id, player1Name: match.player1Name,
+                    player2Id: match.player2Id, player2Name: match.player2Name,
+                    badgeInput: match.badgeInput
+                ))
             }
         }
         .padding(.horizontal, 16)

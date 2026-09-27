@@ -111,8 +111,12 @@ itself, backs a badge-count pill on each row of `PlayerDirectoryView`
 (Android's "Spelers" screen) and a new shared `SharedPlayerBadgesView`
 (a `BadgeMedallion` grid) it taps through to — named `Shared...`, not
 `PlayerBadgesView`, for the same reason as `SharedBadgeCatalogView`: the
-iOS app target already has its own, richer `PlayerBadgesView`. There is no
-"Badges verdiend" strip on the game/match-over screen yet.
+iOS app target already has its own, richer `PlayerBadgesView`. A "Badges
+verdiend" strip now shows on the match-over screen too: `SharedMatchBadgesStrip`
+computes earnings the same way `BadgeAwardStore` does (running `BadgeEngine`
+over the match's `badgeInput`), but purely for display, no store needed —
+wired into both `CoachScoringView.matchOverBanner` and `RefereeScoringView`'s
+match-over block.
 
 Android also now has a read-only history browser: a shared
 `MatchHistoryStore` protocol (`loadHistory() -> [MatchHistorySummary]`,

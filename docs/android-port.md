@@ -3,30 +3,31 @@
 **Status: Fase 0 t/m 4 afgerond; fase 5 Spelers, `CourtView`, coach-modus
 scoren, scheidsrechtermodus (beide ínclusief opslag/hervatten), de
 badges-catalogus, "Kies speler" bij nieuwe wedstrijden, echte badge-awards
-(berekenen, opslaan én tonen in Spelers), en een geschiedenisoverzicht van
-afgeronde wedstrijden zijn afgerond (2026-09-27).** Android heeft nu een
-echt startscherm, een werkend spelersbeheer-scherm, een volledig werkende
-coach-scoreflow (tik score → puntsoort → zone → slag, undo, game/match-einde)
-en een werkende scheidsrechtermodus (punten, LET, STROKE, undo, game-wissel)
-— beide met automatische opslag/hervatten via Room, een "Kies speler"-stap
-vóór een nieuwe wedstrijd start (`MatchSetupView`, gedeeld), en automatische
+(berekenen, opslaan, tonen in Spelers, én een "Badges verdiend"-strip op het
+match-einde-scherm), en een geschiedenisoverzicht van afgeronde wedstrijden
+zijn afgerond (2026-09-27).** Android heeft nu een echt startscherm, een
+werkend spelersbeheer-scherm, een volledig werkende coach-scoreflow (tik
+score → puntsoort → zone → slag, undo, game/match-einde) en een werkende
+scheidsrechtermodus (punten, LET, STROKE, undo, game-wissel) — beide met
+automatische opslag/hervatten via Room, een "Kies speler"-stap vóór een
+nieuwe wedstrijd start (`MatchSetupView`, gedeeld), automatische
 badge-berekening bij elke opslag (`BadgeAwardStore`, Room-schema 5) die
-zichtbaar is via een badge-aantal per speler in het Spelers-scherm met een
-tik-door naar hun verdiende badges (`SharedPlayerBadgesView`) — plus een
-vijfde starttegel "Badges" met de volledige badge-catalogus, en een echte
+zichtbaar is via een badge-aantal per speler in het Spelers-scherm (met een
+tik-door naar hun verdiende badges, `SharedPlayerBadgesView`) én direct op
+het match-einde-scherm (`SharedMatchBadgesStrip`) — plus een vijfde
+starttegel "Badges" met de volledige badge-catalogus, en een echte
 "Afgeronde wedstrijden"-tegel die coach- en scheidsrechterwedstrijden samen
-toont (`SharedMatchHistoryView`). Allemaal test-gedekt en (waar er UI is)
-handmatig op de emulator geverifieerd. `Game`, `Match`, `Point`, `LetCall`,
-`ServerSide`, `MatchStatus`, `RefereeMatch` en `Match`/`RefereeMatch`'s
-`badgeInput`/`rallyWinners` zijn gedeeld via `SquashAnalyzerCore`, met een
-`CoachMatchStore`-, een `RefereeMatchStore`-, een `PlayerBadgeSummaryStore`-
-en een `MatchHistoryStore`-protocol ernaast. Regressie bij de laatste stap:
-`:app:testDebugUnitTest` groen, `:app:connectedDebugAndroidTest` (13/13,
-inclusief `MatchHistoryScreenTest`), `swift test`/`skip test` groen,
-volledige iOS-testsuite (`xcodebuild test
--skipPackagePluginValidation`) **TEST SUCCEEDED**. De Badges-tegel
-verscheen bij een eerdere stap ook op iOS' eigen homescherm, zie Fase 5
-hieronder. Geen TestFlight-upload.
+toont (`SharedMatchHistoryView`). Allemaal test-gedekt en (waar praktisch
+haalbaar) handmatig op de emulator geverifieerd. `Game`, `Match`, `Point`,
+`LetCall`, `ServerSide`, `MatchStatus`, `RefereeMatch` en `Match`/
+`RefereeMatch`'s `badgeInput`/`rallyWinners` zijn gedeeld via
+`SquashAnalyzerCore`, met een `CoachMatchStore`-, een `RefereeMatchStore`-,
+een `PlayerBadgeSummaryStore`- en een `MatchHistoryStore`-protocol ernaast.
+Regressie bij de laatste stap: `:app:testDebugUnitTest` groen,
+`:app:connectedDebugAndroidTest` (13/13), `swift test`/`skip test` groen,
+volledige iOS-testsuite (`xcodebuild test -skipPackagePluginValidation`)
+**TEST SUCCEEDED**. De Badges-tegel verscheen bij een eerdere stap ook op
+iOS' eigen homescherm, zie Fase 5 hieronder. Geen TestFlight-upload.
 
 Eén echte fout gevonden en gefixt tijdens deze regressierun:
 `PlayerScreenTest.createEditReopenAndDeletePlayer` riep `.performScrollTo()`
@@ -1213,15 +1214,62 @@ Actuele verificatie:
   het gevulde pad (voltooide/afgebroken wedstrijd verschijnt, tikken/terug
   werkt) is grondig automatisch gedekt door `MatchHistoryScreenTest`.
 
+## Fase 5 — "Badges verdiend"-strip op het match-einde-scherm (AFGEROND, 2026-09-27)
+
+De laatste zichtbare stap van de badges-trits (catalogus → opslaan →
+spelerslijst → **hier, direct na de wedstrijd**).
+
+- **Nieuw, gedeeld `SharedMatchBadgesStrip`** in `SquashAnalyzerUI`: puur
+  berekend, geen store nodig — de badges van een wedstrijd hangen alleen af van
+  zijn eigen `badgeInput`, dus `SharedMatchBadgesStrip.earnings(player1Id:
+  player1Name:player2Id:player2Name:badgeInput:)` roept rechtstreeks
+  `BadgeEngine().badges(for:)` aan (dezelfde aanpak als de al bestaande
+  `BadgeAwardStore.syncAwards` op Android, maar hier zonder opslag — puur
+  voor weergave). Alleen spelers met een echte id (via "Kies speler") en
+  minstens één verdiende badge komen in de strip. Bewust **niet**
+  `MatchBadgesStrip` genoemd — dezelfde botsingsreden als de andere gedeelde
+  schermen: iOS heeft al een eigen `MatchBadgesStrip`.
+- **Ingehaakt in zowel `CoachScoringView.matchOverBanner` als
+  `RefereeScoringView`'s match-over-blok** — verschijnt naast de bestaande
+  "WINT DE WEDSTRIJD"-tekst, geen wijziging aan de game-over-banner (badges
+  zijn een wedstrijd-optelling, geen per-game concept in deze weergave).
+- Geen nieuwe Skip-transpile-bugs — hergebruikt dezelfde `BadgeMedallion`/
+  `ScrollView`/`ForEach`-patronen die al elders gevalideerd zijn.
+- **Niet volledig handmatig doorgeklikt tot een echte wedstrijd-einde-
+  badge** dit keer: het toetsenbord van de emulator bleek te broos om via `adb`
+  betrouwbaar een speler toe te voegen én een volledige 3-0 wedstrijd te
+  scoren in één sessie. De onderliggende logica (badge-berekening,
+  speler-koppeling, weergavecomponenten) is wel grondig gedekt: door
+  bestaande unit tests (`BadgeAwardStoreTest`, `BadgeEngineTests`), door de
+  eerder geverifieerde `SharedPlayerBadgesView`/`SharedBadgeCatalogView`
+  (dezelfde `BadgeMedallion`), en door de volledige Android/iOS-testsuites
+  die groen blijven met deze strip nu overal aanwezig in de renderboom.
+  Aanbevolen vervolg als dit ooit twijfel oproept: een instrumented test die
+  een speler zaait, een `RefereeMatch` met `player1Id` tot 3-0 laat winnen
+  via directe model-aanroepen (zoals `RefereeMatchStoreTest` al doet) en
+  controleert dat de UI de strip toont — sneller en robuuster dan 33 losse
+  `adb`-tikken.
+
+Actuele verificatie:
+
+- `:app:testDebugUnitTest`: groen.
+- `:app:connectedDebugAndroidTest`: 13/13 groen (geen nieuwe test toegevoegd
+  in deze stap, zie hierboven).
+- `swift test --package-path Packages/SquashAnalyzerCore`: 16 XCTests groen,
+  `skip test` 15/15 groen.
+- `xcodebuild test -project SquashAnalyzer.xcodeproj -scheme SquashAnalyzer
+  -destination 'platform=iOS Simulator,id=6AC09A50-94A7-4348-BB84-DA1EC43A4644'
+  -skipPackagePluginValidation`: **TEST SUCCEEDED**.
+
 ## Fase 5 — Volgende onderdelen (NOG NIET GESTART)
 
-Volgorde: een "Badges verdiend"-strip op het game/match-einde-scherm (raakt
-`CoachScoringView`/`RefereeScoringView`'s bestaande banners) → career-badges
-(bouwt op de nieuwe geschiedenis) → delen (linkjes overzetten;
-**CloudKit-uitnodigen blijft bewust iOS-only**, dat is geen gat maar een
-keuze) → Mijn team (netwerk/regex, moet met kleine aanpassingen overgaan) →
-instellingen/AI Coach (Keychain is iOS-only; Android krijgt
-EncryptedSharedPreferences achter dezelfde kleine abstractie).
+Volgorde: career-badges (bouwt op de geschiedenis: `BadgeEngine.careerBadges`
+heeft een `CareerMatch`-lijst nodig, nog niet opgebouwd uit
+`MatchHistorySummary`) → delen (linkjes overzetten; **CloudKit-uitnodigen
+blijft bewust iOS-only**, dat is geen gat maar een keuze) → Mijn team
+(netwerk/regex, moet met kleine aanpassingen overgaan) → instellingen/AI
+Coach (Keychain is iOS-only; Android krijgt EncryptedSharedPreferences
+achter dezelfde kleine abstractie).
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 

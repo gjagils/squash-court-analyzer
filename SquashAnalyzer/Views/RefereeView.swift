@@ -1,5 +1,6 @@
 import SwiftUI
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 
 /// Full-screen referee / scorekeeper view
 struct RefereeView: View {
@@ -1016,56 +1017,6 @@ struct GameResultChips: View {
 /// "SERVICE" caption with the Links / Rechts box chips for the current server.
 /// The active chip is filled in the player's colour; a pin marks the box the
 /// player starts from after every hand-out. `compact` is the scoreboard size.
-struct ServiceSideSelector: View {
-    let side: ServerSide
-    let preferredSide: ServerSide?
-    let color: Color
-    var compact: Bool = false
-    var disabled: Bool = false
-    let onSelect: (ServerSide) -> Void
-
-    var body: some View {
-        VStack(spacing: compact ? 2 : 3) {
-            Text("SERVICE")
-                .font(AppFonts.caption(compact ? 8 : 9))
-                .foregroundColor(color.opacity(0.6))
-                .tracking(1)
-
-            HStack(spacing: compact ? 4 : 6) {
-                chip("Links", .left)
-                chip("Rechts", .right)
-            }
-        }
-    }
-
-    private func chip(_ label: String, _ box: ServerSide) -> some View {
-        let active = side == box
-        return Button(action: { onSelect(box) }) {
-            HStack(spacing: 3) {
-                if preferredSide == box {
-                    Image(systemName: "pin.fill")
-                        .font(.system(size: 7))
-                }
-                Text(label)
-                    .font(AppFonts.label(compact ? 11 : 12))
-            }
-            .foregroundColor(active ? AppColors.backgroundDark : color.opacity(0.4))
-            .padding(.horizontal, compact ? 8 : 10)
-            .padding(.vertical, compact ? 4 : 5)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(active ? color : color.opacity(0.1))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(color.opacity(active ? 0 : 0.3), lineWidth: 1)
-                    )
-            )
-        }
-        .buttonStyle(.plain)
-        .disabled(active || disabled)
-    }
-}
-
 // MARK: - Overlay Undo Button
 
 /// "Undo laatste punt" for game-over / match-over overlays, so a mis-tap on the

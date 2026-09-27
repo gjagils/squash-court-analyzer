@@ -1,18 +1,18 @@
 # Android port (one Swift codebase, via Skip)
 
-**Status: Fase 0 t/m 4 afgerond; fase 5 Spelers én `CourtView` afgerond en
-geverifieerd (2026-09-27).** Android heeft nu een echt startscherm
-(`SquashAnalyzerUI` + Skip), een werkend spelersbeheer-scherm (Room-backed),
-en `CourtView` — coach-modus' interactieve baandiagram, het hoogste
-transpile-risico in de hele app — is gedeeld en getranspileerd naar Compose,
-met drie echte Skip-bugs gevonden en gefixt onderweg (zie Fase 5 hieronder).
-Regressie: `:app:assembleDebug` groen, 11/11 Android-unittests groen,
-5/5 instrumentatietests groen op de emulator (incl. 2 nieuwe CourtView-tests),
-`skip test` 15/15 groen op Darwin en Android, volledige iOS-testsuite
-(`xcodebuild test -skipPackagePluginValidation`) groen. `CourtView` is nog
-niet aan een echt Android-scherm gekoppeld (dat vereist ook `Game`'s state
-machine en de andere coach-mode views — zie "nog niet gedaan" in Fase 5).
-Geen TestFlight-upload.
+**Status: Fase 0 t/m 4 afgerond; fase 5 Spelers, `CourtView` én coach-modus
+scoren afgerond (2026-09-27).** Android heeft nu een echt startscherm, een
+werkend spelersbeheer-scherm, en een volledig werkende coach-scoreflow (tik
+score → puntsoort → zone → slag, undo, game/match-einde) — handmatig op de
+emulator geverifieerd met screenshots. `Game`, `Match`, `Point`, `LetCall`,
+`ServerSide` en `MatchStatus` zijn nu allemaal gedeeld via
+`SquashAnalyzerCore`. Zes nieuwe echte Skip-bugs gevonden en gefixt tijdens
+deze stap (bovenop de drie uit de `CourtView`-stap) — zie Fase 5 hieronder.
+Regressie: `:app:testDebugUnitTest` (11/11), `:app:connectedDebugAndroidTest`
+(5/5), `skip test` (15/15 op Darwin en Android), volledige iOS-testsuite
+(`xcodebuild test -skipPackagePluginValidation`) — allemaal groen. Nog open:
+de Coach-tegel gebruikt een los `Match()` per bezoek, nog niet gekoppeld aan
+`MatchStore` (fase 3) voor echte opslag. Geen TestFlight-upload.
 
 Eén echte fout gevonden en gefixt tijdens deze regressierun:
 `PlayerScreenTest.createEditReopenAndDeletePlayer` riep `.performScrollTo()`
@@ -27,7 +27,9 @@ SkipUI die semantics wel blootgeeft.
 
 Dit document is het naslagwerk voor de Android-port. Werk je hieraan verder,
 houd dit bestand bij: fase-status, nieuwe transpile-eigenaardigheden en
-beslissingen. Volgende: **fase 5, coachmodus en wedstrijdscoring**.
+beslissingen. Volgende: **fase 5, scheidsrechtermodus (kan `ServiceSideSelector`/
+`ServerIndicator`/`Game`/`Match` hergebruiken) en de `MatchStore`-koppeling
+voor coach-modus**.
 
 ## Doel en harde eisen (van Gerd-Jan, 2026-09-26/27)
 
@@ -619,24 +621,157 @@ op Darwin en Android, en de volledige iOS-testsuite
 de app verwijderd en volledig vervangen door de gedeelde versie, geen
 gedragsverandering op iOS.
 
-**Nog niet gedaan:** `CourtView` is nog niet aan een echt Android-scherm
-gekoppeld (`AndroidHomeView`'s "Coach"-tegel toont nog steeds de
-"nog niet beschikbaar"-melding) — dat vereist ook `Game`'s state machine,
-`PlayerButtonsView`, `ShotTypeSelectorView` en de `MatchStore`-koppeling uit
-fase 3, wat samen de eigenlijke "coach-modus scoren"-fase vormt. Deze stap
-bewees alleen dat het risicovolste stukje tekenwerk zelf overweg kan met
-Skip — de rest van coach-modus is nu aanzienlijk minder risicovol.
+## Fase 5 — Coach-modus scoren (AFGEROND, 2026-09-27)
+
+Coach-modus' volledige score-tap-flow (het standaard invoerpatroon — zie de
+memory-notitie "coach default is 'Tik op de score'") draait nu écht op
+Android: speler kiezen (tik op score) → puntsoort → zone (`CourtView`) →
+slag, met undo en game/match-einde. Bewust een kleinere set dan iOS'
+`ContentView.swift`: geen quick-entry, geen lets, geen coachingnotities,
+badges, vorige-game-analyse of share sheet — dezelfde soort scope-cut als
+Spelers zonder foto's/badges/team-import in fase 5.
+
+### Wat er gedeeld is
+
+- **`Game`, `Match`, `Point`, `LetCall`, `ServerSide`, `MatchStatus`**
+  verhuisd naar `SquashAnalyzerCore` (waren app-only in `SquashAnalyzer/Models`).
+  Alle drie waren al 100% puur (`Foundation` + eigen Core-types, geen
+  SwiftData/UIKit), dus dit was een rechttoe-rechtaan Fase-1-achtige
+  verplaatsing: `public` overal, expliciete inits waar nodig, dubbels uit de
+  app verwijderd (`Game.swift`, `Match.swift`, `Point.swift`, `Let.swift`),
+  `import SquashAnalyzerCore` toegevoegd waar het ontbrak
+  (`MatchRepository.swift`, `PersistenceSchema.swift`). `~34` app-bestanden
+  hadden het al via eerdere fases.
+- **`ServiceSideSelector`, `ServerIndicator`** verhuisd naar
+  `SquashAnalyzerUI` (waren resp. in `RefereeView.swift` en
+  `DesignSystem.swift`) — nu de ENIGE versie, ook door iOS' referee- en
+  coachscherm gebruikt (geen duplicaat meer op geen van beide platforms).
+  **`PlayerAvatarPlaceholder`** (nieuw, gedeeld): het "geen foto"-pad van
+  iOS' `PlayerAvatarImage`, want de echte `PlayerAvatar` leunt op een
+  SwiftData `@Query` en kan niet mee — zelfde foto-scope-cut als Spelers.
+- **`PointTypeButton`/`FistIcon`, `ShotTypeSelectorView`/`ShotTypeButton`**
+  (nieuw, gedeeld): net als bij `CourtView` moesten de drie custom
+  slag-iconen (Drive/Lob/Boast) van `Canvas` naar `Path` + `.stroke()` —
+  Skip heeft geen `Canvas` (zie Fase 4). Dezelfde coördinaten, alleen
+  declaratief in plaats van imperatief getekend.
+- **`SharedScoreboardView`, `CoachScoringView`** (nieuw, gedeeld): de
+  orchestratie van de score-tap-flow, zie hierboven.
+
+### Drie nieuwe, echte Skip-bugs (bovenop de drie uit de `CourtView`-stap)
+
+1. **`SquashAnalyzerCore` had geen `skip-model`-dependency.** Zolang niets in
+   het package `@Observable` gebruikte kwam dit niet aan het licht (`Game`
+   en `Match` waren de eersten). Zonder de dependency resolveert
+   `import skip.model.*` in de gegenereerde Kotlin naar niets
+   ("Unresolved reference 'model'"/'wrappedValue'"), specifiek in de
+   `SquashAnalyzerCoreTests`-Gradle-aggregatie (de losse `swift build`-variant
+   miste 'm ook stil, zonder het meteen te melden). **Fix:**
+   `.package(url: ".../skip-model.git", ...)` + `.product(name: "SkipModel", ...)`
+   toegevoegd aan `Package.swift`.
+2. **Een `@Observable`-klasse heeft `import Observation` nodig in het
+   bestand zelf**, ook al compileert het zonder in Swift (via impliciete
+   beschikbaarheid). Zonder die import genereert Skip voor DIE klasse een
+   ander (ouder?) backing-mechanisme (`skip.model.Observed<T>` met expliciete
+   property-wrappers) in plaats van het gebruikelijke
+   `androidx.compose.runtime.mutableStateOf`-pad, en dat eerste pad mist dan
+   zelf weer de juiste `import skip.model.*`-regel in zijn eigen
+   gegenereerde bestand. **Vuistregel: zet `import Observation` in elk
+   bestand met een `@Observable`-klasse, punt uit.**
+3. **Een property en een gelijknamige methode botsen op JVM-niveau.**
+   `Game.startingServer: Player` (property) en `Game.setStartingServer(_:)`
+   (methode) transpileerden allebei naar een JVM-signatuur
+   `setStartingServer(Player)V` — Kotlin's automatische bean-setter voor de
+   property botst met de expliciete methode ("Platform declaration clash").
+   Dit bestond al vóór de verhuizing maar kwam pas aan het licht zodra `Game`
+   getranspileerd werd. **Fix:** de methode hernoemd naar
+   `assignStartingServer(_:)`. **Vuistregel: op Kotlin/JVM mag een methode
+   nooit `set<PropertyName>` heten als er ook een property `<propertyName>`
+   bestaat.**
+
+Daarnaast, in de nieuwe gedeelde UI zelf:
+
+4. **Ternaire expressies met integer-literals in beide takken verliezen hun
+   `Double`-type**, zelfs waar een los literal op dezelfde plek wél goed
+   zou gaan. `.font(.system(size: compact ? 8 : 9, ...))` gaf
+   "Argument type mismatch: actual type is 'Int', but 'Double' was
+   expected" — de conditie zelf (niet de context) breekt de
+   type-doorgifte. Trof zeven plekken in de nieuwe bestanden (padding,
+   spacing, lineWidth, opacity). **Vuistregel: schrijf bij een ternaire
+   `Double`/`CGFloat`-waarde ALTIJD `.0` op beide takken, ook als een van de
+   twee al een expliciet decimaal getal is** (`isScoring ? 0.7 : 0` faalde
+   ook, ondanks dat Swift dit zelf al als `Double` unificeert vóór transpile).
+5. **Een `Button` binnen een `if let optionalClosure { Button(...) } else { column }`-
+   vertakking kreeg een geldig ogende semantics-node (`OnClick` stond in de
+   boom) waarvan de klik-actie nooit de echte handler aanriep** — noch via
+   Compose's `performClick()`, noch via `performTouchInput { click() }` op
+   diezelfde node of op exact dezelfde coördinaat via `onRoot()`. Een
+   handmatige tik op precies dezelfde plek op het draaiende toestel werkte
+   wél. **Fix:** zoals bij `CourtView`'s `onTap: onZoneTapped ?? { _ in }` —
+   nooit een Button conditioneel tussen twee takken opsplitsen; altijd één
+   vaste `Button` met een optioneel aangeroepen closure
+   (`onSelectPlayer?(player)` / `guard let onSelectPlayer else { return }`).
+   Dit loste de *productie*code op, maar **de bijbehorende geautomatiseerde
+   UI-test (`CoachScreenTest.kt`) bleef falen op exact hetzelfde symptoom en
+   is daarom niet meegenomen** — zie "Open testprobleem" hieronder.
+
+### Handmatig geverifieerd op de emulator (Medium_Phone_API_36.1)
+
+Volledige flow met screenshots gecontroleerd: Home → Coach → tik score
+Speler 1 → puntsoort WINNER → zone (via `CourtView`, correct herkend als
+"Voor Links") → slag DRIVE → score wordt 1–0, service wisselt correct naar
+"Links". `PointTypeButton`'s Path-iconen (WINNER=ster, STROKE=vuist) en
+`ShotTypeButton`'s Path-iconen (Drive/Lob/Boast) renderen allemaal correct.
+
+**Drie SF Symbols vallen terug op een generiek waarschuwingsdriehoekje**
+(niet leeg, wel niet het bedoelde icoon): `arrow.triangle.2.circlepath`
+(Forced error), `xmark.circle` (Unforced error), `figure.tennis`
+(Servicepunt) — én, onverwacht, ook een paar simpele shot-iconen:
+`arrow.left.and.right` (Cross), `bolt.fill` (Volley),
+`arrow.down.to.line` (Drop). Skip's ingebouwde SF Symbol-dekking is dus
+kleiner dan voorheen aangenomen. Puur cosmetisch (de tekstlabel blijft
+duidelijk leesbaar, niets is onklikbaar) — bij gelegenheid eigen
+`Path`-iconen toevoegen voor deze zes, net als eerder gedaan voor
+`hand.raised.fill`/`clock.arrow.circlepath`/`person.2.fill` in
+`HomeMenu.swift`.
+
+### Open testprobleem (niet blokkerend)
+
+Een geautomatiseerde instrumentatietest voor de volledige score-tap-flow
+(`CoachScreenTest.kt`) is geschreven maar weer verwijderd: het tikken op de
+score van Speler 1 riep de handler niet aan via **geen enkele** Compose-
+testmethode (`performClick()`, `performTouchInput { click() }` op de node,
+of op `onRoot()` op exact dezelfde coördinaat) — terwijl een echte tik op
+hetzelfde punt op het draaiende (niet-test-harness) toestel wél gewoon
+werkte, herhaaldelijk bevestigd. Dit wijst op een verschil tussen hoe
+`ActivityScenarioRule`/`createAndroidComposeRule` de host-Activity opstart
+versus een normale app-launch, niet op een echte functionele bug — vandaar
+"niet blokkerend". Als dit later terugkomt bij een ander scherm: probeer
+`androidx.compose.ui.test.junit4.v2.createAndroidComposeRule` (de nieuwere,
+niet-deprecated variant met `StandardTestDispatcher`) voordat je verder
+zoekt, want de huidige (`v1`) rule's deprecatiewaarschuwing wijst zelf al in
+die richting.
+
+### Geverifieerd
+
+`:app:testDebugUnitTest` (11/11), `:app:connectedDebugAndroidTest` (5/5,
+`CourtViewTest` blijft de automatische dekking voor het risicovolste
+tekenwerk), `skip test` (15/15 op Darwin en Android), volledige iOS-testsuite
+(`xcodebuild test -skipPackagePluginValidation`) — allemaal groen. Geen
+gedragsverandering op iOS; `Game`/`Match`/`Point`/`LetCall` heten en werken
+overal exact hetzelfde, nu vanuit een ander (gedeeld) module.
 
 ## Fase 5 — Volgende onderdelen (NOG NIET GESTART)
 
-Volgorde: coach-modus scoren afmaken (`Game`'s state machine,
-`PlayerButtonsView`, `ShotTypeSelectorView`, koppelen aan `MatchStore` uit
-fase 3 en aan de nu al gedeelde `CourtView`) → scheidsrechtermodus →
+Volgorde: scheidsrechtermodus (kan nu veel hergebruiken:
+`ServiceSideSelector`, `ServerIndicator`, `Game`/`Match` zijn al gedeeld) →
 badges-UI → geschiedenis → delen (linkjes overzetten; **CloudKit-uitnodigen
 blijft bewust iOS-only**, dat is geen gat maar een keuze) → Mijn team
 (netwerk/regex, moet met kleine aanpassingen overgaan) → instellingen/AI
 Coach (Keychain is iOS-only; Android krijgt EncryptedSharedPreferences
-achter dezelfde kleine abstractie).
+achter dezelfde kleine abstractie). Ook nog open: `CoachScoringView`
+koppelen aan `MatchStore` (fase 3) zodat een gescoorde wedstrijd op Android
+ook echt bewaard blijft — nu gebruikt de Coach-tegel een los, ongepersisteerd
+`Match()` per bezoek.
 
 ## Branching
 

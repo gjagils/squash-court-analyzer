@@ -120,7 +120,7 @@ final class SavedGame {
         game.player2Name = player2Name
         game.player1Score = player1Score
         game.player2Score = player2Score
-        game.setStartingServer(gameStartingServer)
+        game.assignStartingServer(gameStartingServer)
         game.points = points
             .sorted(by: { $0.pointNumber < $1.pointNumber })
             .map { sp in

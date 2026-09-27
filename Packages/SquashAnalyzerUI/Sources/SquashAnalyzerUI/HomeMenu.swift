@@ -164,6 +164,15 @@ public struct AndroidHomeView: View {
 
     private let playerStore: any PlayerProfileStore
     @State private var showingPlayers = false
+    @State private var showingCoach = false
+    // `nil` until the Coach tile is actually tapped: constructing `Match()`
+    // there, in a discrete event handler, keeps its one `Match.init()` call
+    // (which itself mutates state via `startNewGame()`) out of view-body
+    // evaluation. Building it eagerly as a plain `@State` initial value, or
+    // inline inside `.navigationDestination`'s closure, both destabilized
+    // recomposition badly enough on Android to make the whole home screen
+    // (including unrelated destinations like Spelers) time out in tests.
+    @State private var coachMatch: Match? = nil
 
     public init(playerStore: any PlayerProfileStore) { self.playerStore = playerStore }
 
@@ -172,6 +181,16 @@ public struct AndroidHomeView: View {
             homeContent
                 .navigationDestination(isPresented: $showingPlayers) {
                     PlayerDirectoryView(store: playerStore)
+                }
+                .navigationDestination(isPresented: $showingCoach) {
+                    if let coachMatch {
+                        CoachScoringView(
+                            match: coachMatch,
+                            onMatchChanged: { _ in },
+                            onExit: { showingCoach = false }
+                        )
+                        .navigationBarBackButtonHidden(true)
+                    }
                 }
         }
         .preferredColorScheme(.dark)
@@ -188,7 +207,7 @@ public struct AndroidHomeView: View {
                 ScrollView {
                     VStack(spacing: 20) {
                         HomeMenuTiles(
-                            onCoach: { showAvailability("Coach") },
+                            onCoach: { coachMatch = Match(); showingCoach = true },
                             onReferee: { showAvailability("Scheidsrechter") },
                             onHistory: { showAvailability("Afgeronde wedstrijden") },
                             onPlayers: { showingPlayers = true }

@@ -16,10 +16,16 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/skiptools/skip.git", from: "1.9.11"),
         .package(url: "https://github.com/skiptools/skip-foundation.git", from: "1.0.0"),
+        // Needed once Game/Match (both @Observable) were added: without this,
+        // the generated Kotlin's `import skip.model.*` resolves to nothing
+        // ("Unresolved reference 'model'") because no Gradle module actually
+        // provides that package.
+        .package(url: "https://github.com/skiptools/skip-model.git", from: "1.0.0"),
     ],
     targets: [
         .target(name: "SquashAnalyzerCore", dependencies: [
             .product(name: "SkipFoundation", package: "skip-foundation"),
+            .product(name: "SkipModel", package: "skip-model"),
         ], plugins: [.plugin(name: "skipstone", package: "skip")]),
         .testTarget(name: "SquashAnalyzerCoreTests", dependencies: [
             "SquashAnalyzerCore",

@@ -35,7 +35,7 @@ enum ScreenshotScenario: String, CaseIterable {
         let match = Match()
         match.setupMatch(player1: player1, player2: player2, startingServer: .player1)
         let game = match.currentGame
-        game.setStartingServer(.player1)
+        game.assignStartingServer(.player1)
         game.addPoint(to: .player1, pointType: .winner, at: .frontLeft, with: .drop)
         game.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil)
         game.addPoint(to: .player1, pointType: .winner, at: .backRight, with: .drive)

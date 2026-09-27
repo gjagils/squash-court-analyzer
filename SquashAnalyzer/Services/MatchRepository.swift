@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SquashAnalyzerCore
 
 protocol MatchRepository {
     @MainActor func upsert(_ match: Match) throws

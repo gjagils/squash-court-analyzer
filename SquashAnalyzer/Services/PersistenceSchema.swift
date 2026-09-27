@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SquashAnalyzerCore
 
 // MARK: - Version 0 (App Store 2.0, build 8, March 2026 — unversioned store)
 

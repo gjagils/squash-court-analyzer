@@ -1,55 +1,55 @@
 import Foundation
-import SquashAnalyzerCore
+import Observation
 
 /// Represents the current game state
 @Observable
-class Game: Identifiable {
-    let id: UUID
+public class Game: Identifiable {
+    public let id: UUID
 
-    init(id: UUID = UUID()) {
+    public init(id: UUID = UUID()) {
         self.id = id
     }
 
     // MARK: - Properties
-    var player1Name: String = "Speler 1"
-    var player2Name: String = "Speler 2"
+    public var player1Name: String = "Speler 1"
+    public var player2Name: String = "Speler 2"
 
-    var player1Score: Int = 0
-    var player2Score: Int = 0
+    public var player1Score: Int = 0
+    public var player2Score: Int = 0
 
-    var currentServer: Player = .player1
-    var startingServer: Player = .player1
+    public var currentServer: Player = .player1
+    public var startingServer: Player = .player1
 
     /// Service box the current server serves from (same rules as RefereeMatch)
-    var serverSide: ServerSide = .right
+    public var serverSide: ServerSide = .right
 
     /// Box a player starts serving from after a hand-out or at the start of a game.
     /// Set by tapping Links/Rechts on the scoreboard; nil means the default right box.
     /// Match copies these into the next game so they hold for the whole match.
-    var player1PreferredSide: ServerSide? = nil
-    var player2PreferredSide: ServerSide? = nil
+    public var player1PreferredSide: ServerSide? = nil
+    public var player2PreferredSide: ServerSide? = nil
 
     /// All points scored in this game (for analysis)
-    var points: [Point] = []
+    public var points: [Point] = []
 
     /// All lets called in this game
-    var lets: [LetCall] = []
+    public var lets: [LetCall] = []
 
     /// Timestamp of game start or last point (for calculating rally duration)
-    var lastPointTime: Date = Date()
+    public var lastPointTime: Date = Date()
 
     /// Currently selected player (for scoring flow - step 1)
-    var selectedPlayer: Player? = nil
+    public var selectedPlayer: Player? = nil
 
     /// Currently selected point type (for scoring flow - step 2)
-    var selectedPointType: PointType? = nil
+    public var selectedPointType: PointType? = nil
 
     /// Currently selected zone (for scoring flow - step 3)
-    var selectedZone: CourtZone? = nil
+    public var selectedZone: CourtZone? = nil
 
     /// Input preference: also record where an unforced error was made (the
     /// "tik op de score" flow asks for a zone before scoring one)
-    var zoneForUnforcedErrors: Bool = false
+    public var zoneForUnforcedErrors: Bool = false
 
     /// Track previous server for undo
     private var previousServers: [Player] = []
@@ -60,24 +60,24 @@ class Game: Identifiable {
     /// Track previous point times for undo
     private var previousPointTimes: [Date] = []
 
-    var isGameOver: Bool {
+    public var isGameOver: Bool {
         ScoringEngine().isGameOver(SquashScore(player1: player1Score, player2: player2Score))
     }
 
-    var winner: Player? {
+    public var winner: Player? {
         ScoringEngine().winner(for: SquashScore(player1: player1Score, player2: player2Score))
     }
 
-    var canUndo: Bool {
+    public var canUndo: Bool {
         !points.isEmpty
     }
 
-    var lastPoint: Point? {
+    public var lastPoint: Point? {
         points.last
     }
 
     /// Current step in scoring flow
-    var scoringStep: ScoringStep {
+    public var scoringStep: ScoringStep {
         if selectedPlayer == nil {
             return .selectPlayer
         } else if selectedPointType == nil {
@@ -89,7 +89,7 @@ class Game: Identifiable {
         }
     }
 
-    enum ScoringStep {
+    public enum ScoringStep {
         case selectPlayer
         case selectPointType
         case selectZone
@@ -97,14 +97,14 @@ class Game: Identifiable {
     }
 
     // MARK: - Methods
-    func score(for player: Player) -> Int {
+    public func score(for player: Player) -> Int {
         switch player {
         case .player1: return player1Score
         case .player2: return player2Score
         }
     }
 
-    func name(for player: Player) -> String {
+    public func name(for player: Player) -> String {
         switch player {
         case .player1: return player1Name
         case .player2: return player2Name
@@ -112,7 +112,7 @@ class Game: Identifiable {
     }
 
     /// Select a player (step 1 of scoring)
-    func selectPlayer(_ player: Player) {
+    public func selectPlayer(_ player: Player) {
         guard !isGameOver else { return }
         selectedPlayer = player
         selectedPointType = nil
@@ -120,7 +120,7 @@ class Game: Identifiable {
     }
 
     /// Select a point type (step 2 of scoring)
-    func selectPointType(_ pointType: PointType) {
+    public func selectPointType(_ pointType: PointType) {
         guard let player = selectedPlayer else { return }
         guard !pointType.serverOnly || player == currentServer else { return }
         selectedPointType = pointType
@@ -138,17 +138,17 @@ class Game: Identifiable {
     }
 
     /// Whether this point type asks for a zone in the current input preference
-    func needsZone(_ pointType: PointType) -> Bool {
+    public func needsZone(_ pointType: PointType) -> Bool {
         pointType.requiresZone || (pointType == .unforcedError && zoneForUnforcedErrors)
     }
 
     /// Back quarter a serve from `side` lands in (cross-court from the box)
-    static func serviceLandingZone(from side: ServerSide) -> CourtZone {
+    public static func serviceLandingZone(from side: ServerSide) -> CourtZone {
         side == .right ? .backLeft : .backRight
     }
 
     /// Select a zone (step 3 of scoring; winner/forcedError/stroke, unforced error when wanted)
-    func selectZone(_ zone: CourtZone) {
+    public func selectZone(_ zone: CourtZone) {
         guard selectedPlayer != nil, let pointType = selectedPointType, needsZone(pointType) else { return }
         selectedZone = zone
 
@@ -159,21 +159,21 @@ class Game: Identifiable {
     }
 
     /// Add a point with shot type (step 4 of scoring)
-    func addPoint(shotType: ShotType?) {
+    public func addPoint(shotType: ShotType?) {
         guard let player = selectedPlayer, let pointType = selectedPointType else { return }
         let zone = selectedZone
         addPoint(to: player, pointType: pointType, at: zone, with: shotType)
     }
 
     /// Clear the current selection
-    func clearSelection() {
+    public func clearSelection() {
         selectedPlayer = nil
         selectedPointType = nil
         selectedZone = nil
     }
 
     /// Go back one step in the scoring flow
-    func goBackStep() {
+    public func goBackStep() {
         if selectedZone != nil {
             selectedZone = nil
         } else if selectedPointType != nil {
@@ -184,7 +184,7 @@ class Game: Identifiable {
     }
 
     /// Add a point with all details
-    func addPoint(to player: Player, pointType: PointType, at zone: CourtZone?, with shotType: ShotType?) {
+    public func addPoint(to player: Player, pointType: PointType, at zone: CourtZone?, with shotType: ShotType?) {
         guard !isGameOver else { return }
 
         // Save current server, service box and point time for undo
@@ -237,7 +237,7 @@ class Game: Identifiable {
 
     /// Quick entry scores a winner/forced error on the zone tap; the shot can be
     /// added afterwards until the next rally. Ignored once the point already has one.
-    func assignShotToLastPoint(_ shot: ShotType) {
+    public func assignShotToLastPoint(_ shot: ShotType) {
         guard let last = points.last, last.pointType.requiresShot, last.shotType == nil else { return }
         points[points.count - 1] = Point(
             id: last.id,
@@ -255,14 +255,14 @@ class Game: Identifiable {
 
     /// True while the last point is still waiting for its (optional) shot: a
     /// winner/forced error without shot, with no let called since.
-    var lastPointAwaitsShot: Bool {
+    public var lastPointAwaitsShot: Bool {
         guard let last = points.last, last.pointType.requiresShot, last.shotType == nil else { return false }
         if let lastLet = lets.last, lastLet.timestamp > last.timestamp { return false }
         return true
     }
 
     /// Undo the last point
-    func undoLastPoint() {
+    public func undoLastPoint() {
         guard let lastPoint = points.popLast() else { return }
 
         // Restore score
@@ -292,7 +292,7 @@ class Game: Identifiable {
         selectedZone = nil
     }
 
-    func reset() {
+    public func reset() {
         player1Score = 0
         player2Score = 0
         currentServer = startingServer
@@ -309,7 +309,7 @@ class Game: Identifiable {
     }
 
     /// Record a let (replay of rally)
-    func addLet(requestedBy player: Player) {
+    public func addLet(requestedBy player: Player) {
         let letCall = LetCall(
             requestedBy: player,
             server: currentServer,
@@ -328,21 +328,25 @@ class Game: Identifiable {
     }
 
     /// Undo the last let
-    func undoLastLet() {
+    public func undoLastLet() {
         _ = lets.popLast()
     }
 
     /// Get all lets requested by a player
-    func letsRequested(by player: Player) -> [LetCall] {
+    public func letsRequested(by player: Player) -> [LetCall] {
         lets.filter { $0.requestedBy == player }
     }
 
     /// Total number of lets in this game
-    var totalLets: Int {
+    public var totalLets: Int {
         lets.count
     }
 
-    func setStartingServer(_ player: Player) {
+    /// Not `setStartingServer`: Kotlin auto-generates a JVM bean setter of that
+    /// exact name for the `startingServer` property, and a method with the
+    /// same name/signature is a hard "platform declaration clash" once
+    /// transpiled.
+    public func assignStartingServer(_ player: Player) {
         startingServer = player
         currentServer = player
         serverSide = handOutSide(for: player)
@@ -350,7 +354,7 @@ class Game: Identifiable {
 
     // MARK: - Service box
 
-    func preferredSide(for player: Player) -> ServerSide? {
+    public func preferredSide(for player: Player) -> ServerSide? {
         player == .player1 ? player1PreferredSide : player2PreferredSide
     }
 
@@ -362,7 +366,7 @@ class Game: Identifiable {
     /// Correct the box the current server serves from and remember it as that
     /// player's hand-out box for the rest of the match. Alternation continues
     /// from the corrected box.
-    func overrideSide(to side: ServerSide) {
+    public func overrideSide(to side: ServerSide) {
         guard !isGameOver, side != serverSide else { return }
         serverSide = side
         if currentServer == .player1 { player1PreferredSide = side } else { player2PreferredSide = side }
@@ -370,7 +374,7 @@ class Game: Identifiable {
 
     /// Bring the service state in line with the recorded points, e.g. after a
     /// game is restored from the store: the winner of the last rally serves next.
-    func restoreServiceState() {
+    public func restoreServiceState() {
         currentServer = points.last?.scorer ?? startingServer
         serverSide = handOutSide(for: currentServer)
     }
@@ -378,52 +382,52 @@ class Game: Identifiable {
     // MARK: - Analysis helpers
 
     /// Get all points won by a player
-    func pointsWon(by player: Player) -> [Point] {
+    public func pointsWon(by player: Player) -> [Point] {
         points.filter { $0.scorer == player }
     }
 
     /// Get all winners by a player
-    func winners(by player: Player) -> [Point] {
+    public func winners(by player: Player) -> [Point] {
         points.filter { $0.scorer == player && $0.pointType == .winner }
     }
 
     /// Get all forced errors by a player (opponent's error caused by player's pressure)
-    func forcedErrors(by player: Player) -> [Point] {
+    public func forcedErrors(by player: Player) -> [Point] {
         points.filter { $0.scorer == player && $0.pointType == .forcedError }
     }
 
     /// Get all unforced errors by a player (errors not caused by player's shot)
-    func unforcedErrors(by player: Player) -> [Point] {
+    public func unforcedErrors(by player: Player) -> [Point] {
         points.filter { $0.scorer == player && $0.pointType == .unforcedError }
     }
 
     /// Get all strokes awarded to a player
-    func strokes(by player: Player) -> [Point] {
+    public func strokes(by player: Player) -> [Point] {
         points.filter { $0.scorer == player && $0.pointType == .stroke }
     }
 
     /// Get all points a player won straight from the serve
-    func servicePoints(by player: Player) -> [Point] {
+    public func servicePoints(by player: Player) -> [Point] {
         points.filter { $0.scorer == player && $0.pointType == .servicePoint }
     }
 
     /// Get points won in a specific zone by a player (winners + forced errors only)
-    func pointsWon(by player: Player, in zone: CourtZone) -> Int {
+    public func pointsWon(by player: Player, in zone: CourtZone) -> Int {
         points.filter { $0.scorer == player && $0.zone == zone }.count
     }
 
     /// Get points won with a specific shot type (winners + forced errors only)
-    func pointsWon(by player: Player, with shotType: ShotType) -> Int {
+    public func pointsWon(by player: Player, with shotType: ShotType) -> Int {
         points.filter { $0.scorer == player && $0.shotType == shotType }.count
     }
 
     /// Get all points lost by a player (won by opponent)
-    func pointsLost(by player: Player) -> [Point] {
+    public func pointsLost(by player: Player) -> [Point] {
         points.filter { $0.scorer == player.opponent }
     }
 
     /// Get win percentage for a player in a specific zone
-    func winPercentage(for player: Player, in zone: CourtZone) -> Double {
+    public func winPercentage(for player: Player, in zone: CourtZone) -> Double {
         let won = points.filter { $0.scorer == player && $0.zone == zone }.count
         let lost = points.filter { $0.scorer == player.opponent && $0.zone == zone }.count
         let total = won + lost
@@ -432,12 +436,12 @@ class Game: Identifiable {
     }
 
     /// Get total points played in a zone
-    func totalPoints(in zone: CourtZone) -> Int {
+    public func totalPoints(in zone: CourtZone) -> Int {
         points.filter { $0.zone == zone }.count
     }
 
     /// Get the best zone for a player (highest win count)
-    func bestZone(for player: Player) -> CourtZone? {
+    public func bestZone(for player: Player) -> CourtZone? {
         let zoneCounts = CourtZone.allCases.map { zone in
             (zone: zone, count: pointsWon(by: player, in: zone))
         }
@@ -446,7 +450,7 @@ class Game: Identifiable {
     }
 
     /// Get the best shot type for a player
-    func bestShotType(for player: Player) -> ShotType? {
+    public func bestShotType(for player: Player) -> ShotType? {
         let shotCounts = ShotType.allCases.map { shot in
             (shot: shot, count: pointsWon(by: player, with: shot))
         }
@@ -455,7 +459,7 @@ class Game: Identifiable {
     }
 
     /// Get the worst zone for a player (most points lost)
-    func worstZone(for player: Player) -> CourtZone? {
+    public func worstZone(for player: Player) -> CourtZone? {
         let zoneCounts = CourtZone.allCases.map { zone in
             (zone: zone, count: pointsWon(by: player.opponent, in: zone))
         }
@@ -464,7 +468,7 @@ class Game: Identifiable {
     }
 
     /// Get recommendation: zones where opponent is weak
-    func recommendedZones(against player: Player) -> [CourtZone] {
+    public func recommendedZones(against player: Player) -> [CourtZone] {
         let zoneCounts = CourtZone.allCases.map { zone in
             (zone: zone, lostCount: pointsWon(by: player.opponent, in: zone))
         }
@@ -477,40 +481,40 @@ class Game: Identifiable {
     // MARK: - Duration Analysis
 
     /// Average duration of points won by a player (in seconds)
-    func averageDurationWon(by player: Player) -> TimeInterval? {
+    public func averageDurationWon(by player: Player) -> TimeInterval? {
         let wonPoints = pointsWon(by: player)
         guard !wonPoints.isEmpty else { return nil }
-        let totalDuration = wonPoints.reduce(0) { $0 + $1.duration }
+        let totalDuration = wonPoints.reduce(0.0) { $0 + $1.duration }
         return totalDuration / Double(wonPoints.count)
     }
 
     /// Average duration of points lost by a player (in seconds)
-    func averageDurationLost(by player: Player) -> TimeInterval? {
+    public func averageDurationLost(by player: Player) -> TimeInterval? {
         let lostPoints = pointsLost(by: player)
         guard !lostPoints.isEmpty else { return nil }
-        let totalDuration = lostPoints.reduce(0) { $0 + $1.duration }
+        let totalDuration = lostPoints.reduce(0.0) { $0 + $1.duration }
         return totalDuration / Double(lostPoints.count)
     }
 
     /// Average duration of all points in the game
-    func averagePointDuration() -> TimeInterval? {
+    public func averagePointDuration() -> TimeInterval? {
         guard !points.isEmpty else { return nil }
-        let totalDuration = points.reduce(0) { $0 + $1.duration }
+        let totalDuration = points.reduce(0.0) { $0 + $1.duration }
         return totalDuration / Double(points.count)
     }
 
     /// Longest point in the game
-    func longestPoint() -> Point? {
+    public func longestPoint() -> Point? {
         points.max(by: { $0.duration < $1.duration })
     }
 
     /// Shortest point in the game
-    func shortestPoint() -> Point? {
+    public func shortestPoint() -> Point? {
         points.min(by: { $0.duration < $1.duration })
     }
 
     /// Win percentage for short rallies (below median duration)
-    func shortRallyWinPercentage(for player: Player) -> Double? {
+    public func shortRallyWinPercentage(for player: Player) -> Double? {
         guard points.count >= 2 else { return nil }
         let sortedDurations = points.map { $0.duration }.sorted()
         let medianDuration = sortedDurations[sortedDurations.count / 2]
@@ -523,7 +527,7 @@ class Game: Identifiable {
     }
 
     /// Win percentage for long rallies (above median duration)
-    func longRallyWinPercentage(for player: Player) -> Double? {
+    public func longRallyWinPercentage(for player: Player) -> Double? {
         guard points.count >= 2 else { return nil }
         let sortedDurations = points.map { $0.duration }.sorted()
         let medianDuration = sortedDurations[sortedDurations.count / 2]
@@ -536,7 +540,7 @@ class Game: Identifiable {
     }
 
     /// Total game duration (sum of all rally durations)
-    func totalGameDuration() -> TimeInterval {
-        points.reduce(0) { $0 + $1.duration }
+    public func totalGameDuration() -> TimeInterval {
+        points.reduce(0.0) { $0 + $1.duration }
     }
 }

@@ -1,5 +1,6 @@
 import SwiftUI
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 
 // MARK: - Design System
 /// Digital Classic Sports Interface - Design System
@@ -304,17 +305,6 @@ struct CapsuleLabel: View {
     }
 }
 
-/// Server indicator dot
-struct ServerIndicator: View {
-    var isServing: Bool = true
-
-    var body: some View {
-        Circle()
-            .fill(isServing ? AppColors.serverIndicator : Color.clear)
-            .frame(width: 8, height: 8)
-            .shadow(color: isServing ? AppColors.serverIndicator.opacity(0.8) : .clear, radius: 4, x: 0, y: 0)
-    }
-}
 
 /// Seven-segment LED digit display
 struct LEDDigit: View {

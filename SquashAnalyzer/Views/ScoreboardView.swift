@@ -1,5 +1,6 @@
 import SwiftUI
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 
 struct ScoreboardView: View {
     let game: Game

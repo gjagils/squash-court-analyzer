@@ -16,7 +16,11 @@ class HomeScreenTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
 
     @Test fun allDestinationsExplainAvailabilityAndReturnHome() {
-        for (label in listOf("Coach", "Scheidsrechter", "Afgeronde wedstrijden", "Instellingen")) {
+        // "Coach" now opens a real screen (manually verified, see
+        // docs/android-port.md — an automated UI test for it hit a known,
+        // documented click-dispatch issue); the rest are
+        // still placeholders.
+        for (label in listOf("Scheidsrechter", "Afgeronde wedstrijden", "Instellingen")) {
             compose.onNodeWithContentDescription(label).assertIsDisplayed().performClick()
             compose.onNodeWithText("Deze functie is nog niet beschikbaar op Android. We voegen de onderdelen stap voor stap toe.").assertIsDisplayed()
             compose.onNodeWithText("Begrepen").performClick()
@@ -26,7 +30,7 @@ class HomeScreenTest {
 
     @Test fun homeSurvivesActivityRecreation() {
         compose.activityRule.scenario.recreate()
-        compose.onNodeWithContentDescription("Coach").assertIsDisplayed().performClick()
+        compose.onNodeWithContentDescription("Scheidsrechter").assertIsDisplayed().performClick()
         compose.onNodeWithText("Begrepen").assertIsDisplayed().performClick()
         compose.onNodeWithContentDescription("Spelers").assertIsDisplayed()
     }

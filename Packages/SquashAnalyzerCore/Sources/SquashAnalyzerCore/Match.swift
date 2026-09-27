@@ -1,7 +1,7 @@
 import Foundation
-import SquashAnalyzerCore
+import Observation
 
-enum MatchStatus: String, Codable, CaseIterable {
+public enum MatchStatus: String, Codable, CaseIterable {
     case inProgress
     case completed
     case abandoned
@@ -9,118 +9,118 @@ enum MatchStatus: String, Codable, CaseIterable {
 
 /// Represents a squash match (best of 5 games)
 @Observable
-class Match: Identifiable {
-    let id: UUID
-    var status: MatchStatus = .inProgress
-    var updatedAt: Date = Date()
+public class Match: Identifiable {
+    public let id: UUID
+    public var status: MatchStatus = .inProgress
+    public var updatedAt: Date = Date()
     // MARK: - Properties
-    var player1Name: String = "Speler 1"
-    var player2Name: String = "Speler 2"
+    public var player1Name: String = "Speler 1"
+    public var player2Name: String = "Speler 2"
 
     /// Coaching focus areas for each player (from saved player profiles)
-    var player1CoachingFocus: [String] = []
-    var player2CoachingFocus: [String] = []
-    var player1CoachingNotes: String = ""
-    var player2CoachingNotes: String = ""
+    public var player1CoachingFocus: [String] = []
+    public var player2CoachingFocus: [String] = []
+    public var player1CoachingNotes: String = ""
+    public var player2CoachingNotes: String = ""
 
     /// `SavedPlayer.id` of a player picked from "Kies speler"; only those earn badges
-    var player1Id: UUID? = nil
-    var player2Id: UUID? = nil
+    public var player1Id: UUID? = nil
+    public var player2Id: UUID? = nil
 
     /// All games in this match
-    var games: [Game] = []
+    public var games: [Game] = []
 
     /// Index of current game being played
-    var currentGameIndex: Int = 0
+    public var currentGameIndex: Int = 0
 
     /// Starting server for the match
-    var matchStartingServer: Player = .player1
+    public var matchStartingServer: Player = .player1
 
     /// Games already won when tracking started at game 2 or later ("later instappen").
     /// They count towards the stand but have no games of their own.
-    var player1GamesBefore: Int = 0
-    var player2GamesBefore: Int = 0
+    public var player1GamesBefore: Int = 0
+    public var player2GamesBefore: Int = 0
 
     /// Games won after tracking stopped, filled in afterwards ("uitslag aanvullen").
     /// Like the games before, they count towards the stand but have no games of their own.
-    var player1GamesAfter: Int = 0
-    var player2GamesAfter: Int = 0
+    public var player1GamesAfter: Int = 0
+    public var player2GamesAfter: Int = 0
 
     /// Best of X games (default 5)
-    let bestOf: Int = 5
+    public let bestOf: Int = 5
 
     /// Games needed to win
-    var gamesToWin: Int {
+    public var gamesToWin: Int {
         (bestOf / 2) + 1 // 3 for best of 5
     }
 
     /// Number of the first tracked game (1 unless the match was picked up later)
-    var firstGameNumber: Int { 1 + player1GamesBefore + player2GamesBefore }
+    public var firstGameNumber: Int { 1 + player1GamesBefore + player2GamesBefore }
 
     /// Match game number for `games[index]`
-    func gameNumber(at index: Int) -> Int { firstGameNumber + index }
+    public func gameNumber(at index: Int) -> Int { firstGameNumber + index }
 
-    var currentGameNumber: Int { gameNumber(at: currentGameIndex) }
+    public var currentGameNumber: Int { gameNumber(at: currentGameIndex) }
 
     /// Neither player may already have won the match, and the games before must fit in best-of
-    static func isValidHeadStart(player1: Int, player2: Int, bestOf: Int = 5) -> Bool {
+    public static func isValidHeadStart(player1: Int, player2: Int, bestOf: Int = 5) -> Bool {
         let toWin = (bestOf / 2) + 1
         return player1 >= 0 && player2 >= 0 && player1 < toWin && player2 < toWin
     }
 
     // MARK: - Computed Properties
 
-    var currentGame: Game {
+    public var currentGame: Game {
         guard currentGameIndex < games.count else {
             // Create first game if none exists
             let game = Game()
             game.player1Name = player1Name
             game.player2Name = player2Name
-            game.setStartingServer(matchStartingServer)
+            game.assignStartingServer(matchStartingServer)
             games.append(game)
             return game
         }
         return games[currentGameIndex]
     }
 
-    var player1GamesWon: Int {
+    public var player1GamesWon: Int {
         player1GamesBefore + games.filter { $0.winner == .player1 }.count + player1GamesAfter
     }
 
-    var player2GamesWon: Int {
+    public var player2GamesWon: Int {
         player2GamesBefore + games.filter { $0.winner == .player2 }.count + player2GamesAfter
     }
 
-    var isMatchOver: Bool {
+    public var isMatchOver: Bool {
         player1GamesWon >= gamesToWin || player2GamesWon >= gamesToWin
     }
 
-    var matchWinner: Player? {
+    public var matchWinner: Player? {
         guard isMatchOver else { return nil }
         return player1GamesWon > player2GamesWon ? .player1 : .player2
     }
 
-    var completedGames: [Game] {
+    public var completedGames: [Game] {
         games.filter { $0.isGameOver }
     }
 
     // MARK: - Initialization
 
-    init(id: UUID = UUID()) {
+    public init(id: UUID = UUID()) {
         self.id = id
         startNewGame()
     }
 
     // MARK: - Methods
 
-    func name(for player: Player) -> String {
+    public func name(for player: Player) -> String {
         switch player {
         case .player1: return player1Name
         case .player2: return player2Name
         }
     }
 
-    func gamesWon(by player: Player) -> Int {
+    public func gamesWon(by player: Player) -> Int {
         switch player {
         case .player1: return player1GamesWon
         case .player2: return player2GamesWon
@@ -128,7 +128,7 @@ class Match: Identifiable {
     }
 
     /// Start a new game in the match
-    func startNewGame() {
+    public func startNewGame() {
         let game = Game()
         game.player1Name = player1Name
         game.player2Name = player2Name
@@ -141,9 +141,9 @@ class Match: Identifiable {
 
         // Alternate starting server each game, or winner of previous game serves
         if let lastGame = games.last, let lastWinner = lastGame.winner {
-            game.setStartingServer(lastWinner)
+            game.assignStartingServer(lastWinner)
         } else {
-            game.setStartingServer(matchStartingServer)
+            game.assignStartingServer(matchStartingServer)
         }
 
         games.append(game)
@@ -152,13 +152,13 @@ class Match: Identifiable {
     }
 
     /// Number of the first game without a tracked result (an unfinished game counts as untracked)
-    var firstUnrecordedGameNumber: Int {
+    public var firstUnrecordedGameNumber: Int {
         firstGameNumber + games.filter { $0.winner != nil }.count
     }
 
     /// Whether `winners` (one per game from `firstUnrecordedGameNumber` on) decide the
     /// match exactly with their last game
-    func isValidResultCompletion(_ winners: [Player]) -> Bool {
+    public func isValidResultCompletion(_ winners: [Player]) -> Bool {
         guard !isMatchOver, !winners.isEmpty else { return false }
         var p1 = player1GamesWon, p2 = player2GamesWon
         for (index, winner) in winners.enumerated() {
@@ -173,7 +173,7 @@ class Match: Identifiable {
     /// tracked. An unfinished game without rallies is dropped; one with rallies keeps
     /// them for analysis and its winner is the first of `winners`.
     @discardableResult
-    func completeResult(with winners: [Player]) -> Bool {
+    public func completeResult(with winners: [Player]) -> Bool {
         guard isValidResultCompletion(winners) else { return false }
         if let last = games.last, last.winner == nil, last.points.isEmpty, last.lets.isEmpty {
             games.removeLast()
@@ -187,14 +187,14 @@ class Match: Identifiable {
     }
 
     /// Called when current game ends - starts next game if match not over
-    func onGameEnd() {
+    public func onGameEnd() {
         if !isMatchOver {
             startNewGame()
         }
     }
 
     /// Reset the entire match
-    func resetMatch() {
+    public func resetMatch() {
         games = []
         currentGameIndex = 0
         player1GamesAfter = 0
@@ -204,7 +204,7 @@ class Match: Identifiable {
     }
 
     /// Setup match with player names and starting server
-    func setupMatch(
+    public func setupMatch(
         player1: String,
         player2: String,
         startingServer: Player,
@@ -233,53 +233,54 @@ class Match: Identifiable {
     }
 
     /// Get coaching focus for a player
-    func coachingFocus(for player: Player) -> [String] {
+    public func coachingFocus(for player: Player) -> [String] {
         player == .player1 ? player1CoachingFocus : player2CoachingFocus
     }
 
     /// Get coaching notes for a player
-    func coachingNotes(for player: Player) -> String {
+    public func coachingNotes(for player: Player) -> String {
         player == .player1 ? player1CoachingNotes : player2CoachingNotes
     }
 
     // MARK: - Analysis helpers
 
     /// Get all points from all games
-    var allPoints: [Point] {
+    public var allPoints: [Point] {
         games.flatMap { $0.points }
     }
 
     /// Get points for a specific game
-    func points(forGame index: Int) -> [Point] {
+    public func points(forGame index: Int) -> [Point] {
         guard index < games.count else { return [] }
         return games[index].points
     }
 
     /// Total points won by player across all games
-    func totalPointsWon(by player: Player) -> Int {
+    public func totalPointsWon(by player: Player) -> Int {
         games.reduce(0) { $0 + $1.pointsWon(by: player).count }
     }
 
     /// Points won by player in a specific zone across all games
-    func totalPointsWon(by player: Player, in zone: CourtZone) -> Int {
+    public func totalPointsWon(by player: Player, in zone: CourtZone) -> Int {
         games.reduce(0) { $0 + $1.pointsWon(by: player, in: zone) }
     }
 
     /// Points won by player with a specific shot type across all games
-    func totalPointsWon(by player: Player, with shotType: ShotType) -> Int {
+    public func totalPointsWon(by player: Player, with shotType: ShotType) -> Int {
         allPoints.filter { $0.scorer == player && $0.shotType == shotType }.count
     }
 
     /// Most effective shot type for a player
-    func mostEffectiveShot(for player: Player) -> ShotType? {
+    public func mostEffectiveShot(for player: Player) -> ShotType? {
         let shotCounts = ShotType.allCases.map { shotType in
             (shotType: shotType, count: totalPointsWon(by: player, with: shotType))
         }
-        return shotCounts.max(by: { $0.count < $1.count })?.shotType
+        guard let best = shotCounts.max(by: { $0.count < $1.count }) else { return nil }
+        return best.shotType
     }
 
     /// Best zone for a player across all games
-    func bestZone(for player: Player) -> CourtZone? {
+    public func bestZone(for player: Player) -> CourtZone? {
         let zoneCounts = CourtZone.allCases.map { zone in
             (zone: zone, count: totalPointsWon(by: player, in: zone))
         }
@@ -290,35 +291,35 @@ class Match: Identifiable {
     // MARK: - Duration Analysis
 
     /// Average duration of points won by a player across all games
-    func averageDurationWon(by player: Player) -> TimeInterval? {
+    public func averageDurationWon(by player: Player) -> TimeInterval? {
         let wonPoints = allPoints.filter { $0.scorer == player }
         guard !wonPoints.isEmpty else { return nil }
-        let totalDuration = wonPoints.reduce(0) { $0 + $1.duration }
+        let totalDuration = wonPoints.reduce(0.0) { $0 + $1.duration }
         return totalDuration / Double(wonPoints.count)
     }
 
     /// Average duration of points lost by a player across all games
-    func averageDurationLost(by player: Player) -> TimeInterval? {
+    public func averageDurationLost(by player: Player) -> TimeInterval? {
         let lostPoints = allPoints.filter { $0.scorer == player.opponent }
         guard !lostPoints.isEmpty else { return nil }
-        let totalDuration = lostPoints.reduce(0) { $0 + $1.duration }
+        let totalDuration = lostPoints.reduce(0.0) { $0 + $1.duration }
         return totalDuration / Double(lostPoints.count)
     }
 
     /// Average point duration across all games
-    func averagePointDuration() -> TimeInterval? {
+    public func averagePointDuration() -> TimeInterval? {
         guard !allPoints.isEmpty else { return nil }
-        let totalDuration = allPoints.reduce(0) { $0 + $1.duration }
+        let totalDuration = allPoints.reduce(0.0) { $0 + $1.duration }
         return totalDuration / Double(allPoints.count)
     }
 
     /// Total match duration (sum of all rally durations)
-    func totalMatchDuration() -> TimeInterval {
-        allPoints.reduce(0) { $0 + $1.duration }
+    public func totalMatchDuration() -> TimeInterval {
+        allPoints.reduce(0.0) { $0 + $1.duration }
     }
 
     /// Win percentage for short rallies across all games
-    func shortRallyWinPercentage(for player: Player) -> Double? {
+    public func shortRallyWinPercentage(for player: Player) -> Double? {
         guard allPoints.count >= 2 else { return nil }
         let sortedDurations = allPoints.map { $0.duration }.sorted()
         let medianDuration = sortedDurations[sortedDurations.count / 2]
@@ -331,7 +332,7 @@ class Match: Identifiable {
     }
 
     /// Win percentage for long rallies across all games
-    func longRallyWinPercentage(for player: Player) -> Double? {
+    public func longRallyWinPercentage(for player: Player) -> Double? {
         guard allPoints.count >= 2 else { return nil }
         let sortedDurations = allPoints.map { $0.duration }.sorted()
         let medianDuration = sortedDurations[sortedDurations.count / 2]
@@ -346,13 +347,13 @@ class Match: Identifiable {
     // MARK: - Export
 
     /// Default WhatsApp text (the short style); the share sheet lets the user pick another
-    var whatsAppText: String { shareText(style: .compact) }
+    public var whatsAppText: String { shareText(style: .compact) }
 
-    func shareText(style: MatchShareStyle) -> String { shareReport.text(style: style) }
+    public func shareText(style: MatchShareStyle) -> String { shareReport.text(style: style) }
 
     /// The match as the share texts see it (shared with referee mode). Games
     /// before tracking started and filled-in games count in the stand only.
-    var shareReport: MatchShareReport {
+    public var shareReport: MatchShareReport {
         let played = games.enumerated().filter { !$0.element.points.isEmpty || $0.element.winner != nil }
         let firstPoint = allPoints.min { $0.timestamp < $1.timestamp }
         return MatchShareReport(
@@ -364,7 +365,7 @@ class Match: Identifiable {
             player2Games: player2GamesWon,
             matchWinner: matchWinner,
             games: played.map { index, game in
-                let duration = game.points.reduce(0) { $0 + $1.duration }
+                let duration = game.points.reduce(0.0) { $0 + $1.duration }
                 return MatchShareReport.Game(number: gameNumber(at: index), player1Score: game.player1Score,
                                              player2Score: game.player2Score, winner: game.winner,
                                              duration: duration > 0 ? duration : nil,
@@ -379,17 +380,17 @@ class Match: Identifiable {
     // MARK: - Let Analysis
 
     /// Get all lets from all games
-    var allLets: [LetCall] {
+    public var allLets: [LetCall] {
         games.flatMap { $0.lets }
     }
 
     /// Total number of lets in the match
-    var totalLets: Int {
+    public var totalLets: Int {
         allLets.count
     }
 
     /// Lets requested by a specific player across all games
-    func letsRequested(by player: Player) -> [LetCall] {
+    public func letsRequested(by player: Player) -> [LetCall] {
         allLets.filter { $0.requestedBy == player }
     }
 }

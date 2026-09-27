@@ -2,25 +2,6 @@ import Foundation
 import Observation
 import SquashAnalyzerCore
 
-/// Server side (left or right service box)
-enum ServerSide: String {
-    case left = "Links"
-    case right = "Rechts"
-
-    var icon: String {
-        self == .left ? "arrow.left" : "arrow.right"
-    }
-
-    /// Single-letter code used in the scoring timeline ("4R", "5L")
-    var shortCode: String {
-        self == .left ? "L" : "R"
-    }
-
-    var opposite: ServerSide {
-        self == .left ? .right : .left
-    }
-}
-
 /// A single undo-able action during a referee game
 private enum RefereeAction {
     case point(prevServer: Player, prevSide: ServerSide, prevP1Score: Int, prevP2Score: Int, prevLastPointAt: Date?)

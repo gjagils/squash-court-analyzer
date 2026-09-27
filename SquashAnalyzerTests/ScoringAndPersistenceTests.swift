@@ -13,7 +13,7 @@ final class ScoringAndPersistenceTests: XCTestCase {
 
     func testServiceChangesAndUndoRestoresIt() {
         let game = Game()
-        game.setStartingServer(.player1)
+        game.assignStartingServer(.player1)
         game.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil)
         XCTAssertEqual(game.currentServer, .player2)
         XCTAssertEqual(game.player2Score, 1)
@@ -25,7 +25,7 @@ final class ScoringAndPersistenceTests: XCTestCase {
 
     func testServiceBoxAlternatesAndHandOutUsesPreferredBox() {
         let game = Game()
-        game.setStartingServer(.player1)
+        game.assignStartingServer(.player1)
         XCTAssertEqual(game.serverSide, .right)
 
         // The server who wins keeps serving from the other box
@@ -56,7 +56,7 @@ final class ScoringAndPersistenceTests: XCTestCase {
 
     func testUndoRestoresServiceBox() {
         let game = Game()
-        game.setStartingServer(.player1)
+        game.assignStartingServer(.player1)
         game.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil)
         game.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil)
         XCTAssertEqual(game.serverSide, .right)
@@ -169,7 +169,7 @@ final class ScoringAndPersistenceTests: XCTestCase {
 
     func testServicePointScoresImmediatelyInTheReceiversBackQuarter() {
         let game = Game()
-        game.setStartingServer(.player1)
+        game.assignStartingServer(.player1)
         XCTAssertEqual(game.serverSide, .right)
 
         // Serve from the right box lands back left

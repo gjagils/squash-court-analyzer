@@ -1,11 +1,13 @@
 # Android port (one Swift codebase, via Skip)
 
-**Status: Fase 0, 1 en 2 afgerond (2026-09-27) — `SquashAnalyzerCore` is
-geëxtraheerd, aan de app gekoppeld, in gebruik, én transpileert nu echt naar
-Kotlin: `skip test` geeft 15/15 groen op zowel Darwin (XCTest) als Android
-(Robolectric/JUnit). `xcodebuild test -skipPackagePluginValidation` op het
-iOS-schema is ook groen. Volgende: Fase 3 (opslag-abstractie voor
-Android).** Dit document is
+**Status: Fase 0 t/m 3 afgerond (2026-09-27) — `SquashAnalyzerCore`
+transpileert naar Kotlin (`skip test`: 15/15 groen op Darwin én Android), en
+er is nu ook een kaal Android-app-project (`Android/`) met een Room-backed
+`MatchStore` die dezelfde vier bewerkingen als `MatchRepository` aanbiedt (6
+Robolectric-tests, allemaal groen). `xcodebuild test
+-skipPackagePluginValidation` op het iOS-schema blijft groen — dit raakt de
+iOS-app op geen enkele manier. Volgende: Fase 4 (eerste echt scherm).** Dit
+document is
 het naslagwerk voor de Android-poging — voor wie er ook aan werkt (Claude of
 Codex), zodat niemand blind begint. Werk je hieraan verder, houd dit bestand
 bij: fase-status, nieuwe transpile-eigenaardigheden, en genomen beslissingen.
@@ -330,13 +332,109 @@ Geverifieerd: `xcodebuild test -skipPackagePluginValidation` op het
 bestaande iOS-schema is groen, en `skip test` geeft 15/15 op zowel Darwin als
 Android.
 
-## Fase 3 — Opslag-abstractie (NOG NIET GESTART)
+## Fase 3 — Opslag-abstractie (AFGEROND, 2026-09-27)
 
 `MatchRepository`-protocol bestaat al op iOS
 ([`MatchRepository.swift`](../SquashAnalyzer/Services/MatchRepository.swift),
 geïmplementeerd door `SwiftDataMatchRepository`). Voor Android komt een tweede
 implementatie van datzelfde protocol op SQLite/Room. Dit is het stuk waarvoor
 Gerd-Jan al vooraf akkoord gaf dat er losse code per platform mag komen.
+
+### Waarom dit geen Swift/Skip-code is
+
+`SwiftDataMatchRepository` leunt volledig op SwiftData (`ModelContext`,
+`@Model`, `#Predicate`) — dat transpileert niet naar Android en zal dat ook
+nooit doen. Er is dus geen gedeeld Swift-protocol dat naar Kotlin overgaat
+zoals bij `SquashAnalyzerCore`; Android krijgt een **losstaande, met de hand
+geschreven Kotlin-implementatie** die dezelfde vier bewerkingen aanbiedt
+(`upsert`, `mostRecentInProgressMatch`, `markAbandoned`, `delete`) op
+dezelfde manier (kind-records altijd volledig vervangen, niet diffen). Alleen
+het *concept* is gedeeld, niet de code.
+
+### Waarom er eerst een kaal Android-app-project bij kwam
+
+Zonder een echte Android-`application`-module kan Kotlin/Room-code wel
+geschreven, maar niet gebouwd of getest worden — `swift test`/`skip test`
+draaien alleen de Swift-getranspileerde package, niet met de hand geschreven
+Kotlin. Gerd-Jan koos ervoor dit kale app-projectje nu al op te zetten (een
+klein stukje van fase 4 naar voren getrokken) zodat de opslaglaag hieronder
+ook echt getest kon worden, in plaats van blind Kotlin te schrijven.
+
+### Wat er staat
+
+Nieuwe map **[`Android/`](../Android)** in de repo-root: een eigen, met de
+hand opgezet Gradle-project (bewust NIET gegenereerd via `skip init
+--transpiled-app`, want dat genereert er ook een eigen Xcode-project bij —
+dat zou een tweede, parallelle iOS-app naast `SquashAnalyzer.xcodeproj`
+betekenen, wat haaks staat op "één codebase"). Dit raakt
+`SquashAnalyzer.xcodeproj` en `Packages/SquashAnalyzerCore` op geen enkele
+manier — geverifieerd met `git status` en een schone `xcodebuild
+test -skipPackagePluginValidation` na afloop.
+
+- **`Android/app`**: één Android-`application`-module.
+  - `MainActivity.kt`: een kale placeholder (`TextView` met "Squash Analyzer
+    — Android (fase 3: opslag)"). Geen echt scherm — dat is fase 4.
+  - `data/MatchEntities.kt`: Room-`@Entity`-tabellen `matches`/`games`/
+    `points`/`lets`, met foreign keys (`onDelete = CASCADE`) die de
+    SwiftData-relaties (`SavedMatch` → `SavedGame` → `SavedPoint`/`SavedLet`)
+    spiegelen. Elk enum-veld (Player, PointType, ShotType, CourtZone,
+    MatchStatus) staat als de rauwe string-waarde erin, exact zoals SwiftData
+    dat ook al deed — zodat een record er op beide platforms hetzelfde
+    uitziet, mocht er ooit synchronisatie komen.
+  - `data/MatchRecord.kt`: platte, Room-onafhankelijke `MatchRecord`/
+    `GameRecord`/`PointRecord`/`LetRecord` — de Kotlin-tegenhanger van
+    `Match`/`Game`/`Point`/`LetCall`. `MatchStore` neemt en geeft altijd
+    deze, nooit de Room-entities rechtstreeks (dezelfde reden waarom
+    `MatchRepository` op iOS `Match` neemt, niet `SavedMatch`).
+  - `data/MatchDao.kt` + `AppDatabase.kt`: Room-boilerplate. De
+    `@Transaction upsertMatchWithChildren` vervangt alle kind-records in één
+    transactie — dezelfde aanpak als `SwiftDataMatchRepository.upsert`
+    ("A match contains few records...").
+  - `data/MatchStore.kt`: de vier `MatchRepository`-bewerkingen, met
+    JSON-encoding voor de `coachingFocus`-stringlijsten (`org.json`, net als
+    Foundation's `JSONEncoder` op iOS voor vergelijkbare velden).
+  - `data/MatchStoreTest.kt`: 6 Robolectric-tests op een in-memory
+    Room-database — round-trip van match+games+points+lets, "replace niet
+    accumuleren" bij een tweede upsert, `mostRecentInProgressMatch` die
+    completed/abandoned negeert en de laatste op `updatedAt` pakt,
+    `markAbandoned`, en cascade-delete. **Alle 6 groen.**
+- **Alleen coach-matches (`Match`/`Game`/`Point`/`Let`)** zijn overgezet.
+  `SavedPlayer`, `SavedBadgeAward` en `SavedRefereeMatch` zijn nog niet in
+  Android-vorm gegoten — dat komt bij de features die ze nodig hebben in
+  fase 5 (Spelers, badges, scheidsrechter).
+
+### Draaien
+
+```bash
+cd Android
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+./gradlew testDebugUnitTest   # Room/Robolectric-tests, geen emulator nodig
+./gradlew assembleDebug       # bouwt de kale placeholder-app
+```
+
+**Gebruik expliciet de Android Studio JBR (JDK 21) als `JAVA_HOME`, niet het
+systeem-Homebrew-openjdk (27).** Met JDK 27 compileert alles nog wel, maar
+Robolectric's ASM-versie in 4.16.1 kan de resulterende classfiles niet lezen
+(`java.lang.IllegalArgumentException` in `ClassReader`) — dat is puur een
+tool-compatibiliteitsprobleem met een hele nieuwe JDK, niet iets in onze
+code. `local.properties` (Android-SDK-pad) is machine-specifiek en bewust
+niet gecommit (zie `Android/.gitignore`).
+
+### Twee Gradle/Kotlin-eigenaardigheden voor de volgende keer
+
+1. **AGP 9's ingebouwde Kotlin-ondersteuning (`android.builtInKotlin=true`,
+   de default) is nog niet compatibel met KSP.** Room heeft KSP nodig voor
+   zijn annotation processor. `Android/gradle.properties` zet daarom
+   `android.builtInKotlin=false` én `android.newDsl=false` (die twee horen
+   bij elkaar) en het app-module past de klassieke
+   `org.jetbrains.kotlin.android`-plugin toe. Zodra KSP dit ondersteunt, is
+   dit een opruimtaak (en dan kan `kotlinOptions { jvmTarget = ... }` ook
+   weer terug, zie hieronder).
+2. **De verouderde `android.kotlinOptions { jvmTarget = ... }`-DSL is nu een
+   harde compile-fout, geen waarschuwing meer.** Vervangen door een
+   `tasks.withType<KotlinJvmCompile>().configureEach { compilerOptions { ... } }`-
+   blok in `app/build.gradle.kts` (dezelfde vorm die Skip's eigen
+   gegenereerde `build.gradle.kts` voor `SquashAnalyzerCore` ook gebruikt).
 
 ## Fase 4 — Eerste echt scherm (NOG NIET GESTART)
 

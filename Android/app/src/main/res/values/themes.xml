@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.SquashAnalyzer" parent="Theme.AppCompat.DayNight.NoActionBar" />
+</resources>

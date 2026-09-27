@@ -1,16 +1,18 @@
 # Android port (one Swift codebase, via Skip)
 
-**Status: Fase 0 t/m 4 afgerond; fase 5 Spelers afgerond en geverifieerd
-(2026-09-27).** Android heeft nu een echt startscherm, opgebouwd uit dezelfde
-SwiftUI-kop en -tegels als iOS via `SquashAnalyzerUI` + Skip, plus een
-werkend spelersbeheer-scherm (aanmaken/bewerken/verwijderen, Room-backed).
-Volledige regressierun met Android Studio JBR (JDK 21) als `JAVA_HOME`:
-`:app:assembleDebug` groen, 11/11 Android-unittests groen
-(`MatchStoreTest` + `PlayerStoreTest`), 3/3 instrumentatietests groen op de
-emulator (`HomeScreenTest` + `PlayerScreenTest`), `skip test` 15/15 groen op
-zowel Darwin als Android, en de volledige iOS-testsuite (`xcodebuild test
--skipPackagePluginValidation`) groen. De bestemmingen (Mijn team, coach,
-scheidsrechter, geschiedenis) volgen in fase 5. Geen TestFlight-upload.
+**Status: Fase 0 t/m 4 afgerond; fase 5 Spelers én `CourtView` afgerond en
+geverifieerd (2026-09-27).** Android heeft nu een echt startscherm
+(`SquashAnalyzerUI` + Skip), een werkend spelersbeheer-scherm (Room-backed),
+en `CourtView` — coach-modus' interactieve baandiagram, het hoogste
+transpile-risico in de hele app — is gedeeld en getranspileerd naar Compose,
+met drie echte Skip-bugs gevonden en gefixt onderweg (zie Fase 5 hieronder).
+Regressie: `:app:assembleDebug` groen, 11/11 Android-unittests groen,
+5/5 instrumentatietests groen op de emulator (incl. 2 nieuwe CourtView-tests),
+`skip test` 15/15 groen op Darwin en Android, volledige iOS-testsuite
+(`xcodebuild test -skipPackagePluginValidation`) groen. `CourtView` is nog
+niet aan een echt Android-scherm gekoppeld (dat vereist ook `Game`'s state
+machine en de andere coach-mode views — zie "nog niet gedaan" in Fase 5).
+Geen TestFlight-upload.
 
 Eén echte fout gevonden en gefixt tijdens deze regressierun:
 `PlayerScreenTest.createEditReopenAndDeletePlayer` riep `.performScrollTo()`
@@ -545,15 +547,96 @@ stabiel, sortering is op naam, aanpassen bewaart bestaande metadata, verwijderen
 laat wedstrijdhistorie intact en lege namen worden geweigerd. Foto's,
 badgecatalogus en teamimport volgen later.
 
+## Fase 5 — `CourtView` gedeeld en geverifieerd (AFGEROND, 2026-09-27)
+
+`CourtView` (coach-modus' interactieve baandiagram — het stuk met eigen
+`Path`-tekenwerk, gradients en een tap-gesture, al vanaf fase 0 aangemerkt als
+het hoogste transpile-risico in de app) is overgezet naar
+`Packages/SquashAnalyzerUI` en getranspileerd naar Compose. **Drie echte
+Skip-bugs gevonden en gefixt** — geen van drie was zichtbaar in `swift build`
+alleen, pas bij het Kotlin-compileren en/of écht draaien op de emulator:
+
+1. **Skip's gesynthetiseerde memberwise-init nam een `@State`-property mee
+   als constructor-argument**, iets wat Swift's eigen memberwise-init altijd
+   uitsluit. `ZoneTapArea(zone:playerColor:onTap:)` kreeg er zo een vierde,
+   verplichte `isPressed: Boolean`-parameter bij in de Kotlin-constructor,
+   waardoor een trailing closure op de aanroepplek (bedoeld voor `onTap`)
+   per ongeluk op `isPressed` terechtkwam
+   ("Argument type mismatch: actual type is 'Function0<Unit?>', but
+   'Boolean' was expected"). **Fix:** een expliciete `init` op elke SwiftUI-
+   struct met een `@State`-property zodra die struct ook door iets anders
+   dan zichzelf geïnstantieerd wordt met een trailing closure — laat Skip
+   nooit de memberwise-init synthetiseren voor zo'n type.
+2. **Een tap-closure die een `let` uit een geneste `ForEach`-loop
+   vastlegt, gaf op Android de verkeerde waarde terug** (elke tik meldde
+   dezelfde — verkeerde — zone, ongeacht welke cel was aangeraakt).
+   **Fix:** geef de callback het getikte item als parameter mee
+   (`onTap: (CourtZone) -> Void`) zodat de kindview zijn EIGEN, altijd
+   correcte, opgeslagen property doorgeeft (`onTap(zone)` met `self.zone`)
+   in plaats van dat de aanroeper een lus-lokale `let` laat vastleggen in de
+   closure. Vuistregel: geef bij herhaalde child-views (ForEach) de waarde
+   altijd terug via een closure-parameter, nooit via capture van de
+   loop-variabele.
+3. **Modifier-volgorde bepaalt of `.accessibilityLabel(...)` de juiste
+   (kleine, per-cel) bounds krijgt, of de bounds van een voorouder-container
+   overneemt.** Met `.frame().position().accessibilityLabel()` rapporteerde
+   Compose voor ALLE negen zones exact dezelfde (te grote) bounds — zichtbaar
+   via `compose.onRoot().printToLog(...)`, waar elk "Zone X"-node dezelfde
+   `(26,104)-(1054,1669)`-bounds had terwijl zijn kind-node wél de juiste
+   per-cel bounds toonde. Omdat Compose UI Testing's `performClick()` het
+   midden van de gerapporteerde bounds gebruikt, tikte de test altijd op het
+   midden van de hele 3×3-grid (dat toevallig binnen de Midden-Midden-cel
+   viel), ongeacht welke zone was opgevraagd. De echte layout/rendering was
+   dus altijd correct — dit trof alleen semantics/toegankelijkheid (en
+   daarmee ook UI-tests en TalkBack). **Fix:** `.accessibilityLabel(...)`
+   vóór `.frame()`/`.position()` zetten. Vuistregel: zet
+   `.accessibilityLabel` direct op de view zelf, niet na frame/position-
+   modifiers, zeker bij absoluut gepositioneerde grid-cellen.
+
+`CourtView` is verplaatst zonder dat het van `Game` (app-only, `@Observable`)
+afhangt: de publieke API is teruggebracht tot `isInteractive: Bool` en
+`selectedPlayer: Player?` (beide al puur/gedeeld), dus geen omweg nodig om
+`Game` zelf ook maar deels te delen. `ContentView.swift` roept `CourtView`
+nu aan met `isInteractive: currentGame.scoringStep == .selectZone,
+selectedPlayer: currentGame.selectedPlayer` in plaats van `game: currentGame`.
+
+**`CourtViewTest.kt`** (nieuw, `Android/app/src/androidTest`) monteert
+`CourtView` los van `MainActivity`/`AndroidHomeView` (coach-modus heeft nog
+geen eigen Android-scherm — dat is de volgende stap), via `createComposeRule()`
++ hetzelfde `PresentationRoot`/`ComposeContext`-patroon als `MainActivity`.
+Dit vereiste ook `debugImplementation("androidx.compose.ui:ui-test-manifest")`
+in `app/build.gradle.kts` (zonder die dependency heeft `createComposeRule()`
+geen host-`ComponentActivity` om in te starten: "Unable to resolve activity
+for ... ComponentActivity"). Test dekt: negen zones renderen en tikbaar zijn,
+tik meldt de juiste zone terug, en niet-interactieve modus toont geen zones/
+instructietekst.
+
+Geverifieerd: `swift build`/Kotlin-compile van het package groen,
+`:app:testDebugUnitTest` (11/11) en `:app:connectedDebugAndroidTest` (5/5,
+incl. de 2 nieuwe CourtView-tests) groen op de emulator, `skip test` 15/15
+op Darwin en Android, en de volledige iOS-testsuite
+(`xcodebuild test -skipPackagePluginValidation`) groen — `CourtView` is uit
+de app verwijderd en volledig vervangen door de gedeelde versie, geen
+gedragsverandering op iOS.
+
+**Nog niet gedaan:** `CourtView` is nog niet aan een echt Android-scherm
+gekoppeld (`AndroidHomeView`'s "Coach"-tegel toont nog steeds de
+"nog niet beschikbaar"-melding) — dat vereist ook `Game`'s state machine,
+`PlayerButtonsView`, `ShotTypeSelectorView` en de `MatchStore`-koppeling uit
+fase 3, wat samen de eigenlijke "coach-modus scoren"-fase vormt. Deze stap
+bewees alleen dat het risicovolste stukje tekenwerk zelf overweg kan met
+Skip — de rest van coach-modus is nu aanzienlijk minder risicovol.
+
 ## Fase 5 — Volgende onderdelen (NOG NIET GESTART)
 
-Volgorde: startscherm/navigatie → Spelers (heeft fase 3 nodig) → coach-modus
-scoren (`CourtView`'s eigen tekenwerk = hoogste transpile-risico) →
-scheidsrechtermodus → badges-UI → geschiedenis → delen (linkjes overzetten;
-**CloudKit-uitnodigen blijft bewust iOS-only**, dat is geen gat maar een
-keuze) → Mijn team (netwerk/regex, moet met kleine aanpassingen overgaan) →
-instellingen/AI Coach (Keychain is iOS-only; Android krijgt
-EncryptedSharedPreferences achter dezelfde kleine abstractie).
+Volgorde: coach-modus scoren afmaken (`Game`'s state machine,
+`PlayerButtonsView`, `ShotTypeSelectorView`, koppelen aan `MatchStore` uit
+fase 3 en aan de nu al gedeelde `CourtView`) → scheidsrechtermodus →
+badges-UI → geschiedenis → delen (linkjes overzetten; **CloudKit-uitnodigen
+blijft bewust iOS-only**, dat is geen gat maar een keuze) → Mijn team
+(netwerk/regex, moet met kleine aanpassingen overgaan) → instellingen/AI
+Coach (Keychain is iOS-only; Android krijgt EncryptedSharedPreferences
+achter dezelfde kleine abstractie).
 
 ## Branching
 

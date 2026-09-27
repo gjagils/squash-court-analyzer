@@ -1,9 +1,23 @@
 import SwiftUI
 import SquashAnalyzerCore
 
-struct CourtView: View {
-    var game: Game? = nil
-    var onZoneTapped: ((CourtZone) -> Void)? = nil
+/// Coach mode's interactive court diagram — shared between iOS and Android.
+///
+/// This was flagged in docs/android-port.md as the highest transpile-risk
+/// view in the app (custom `Path` drawing, gradients, a tap gesture). It only
+/// needs `isInteractive` and `selectedPlayer` from the app's `Game` view
+/// model, not `Game` itself, so it stays decoupled from that (app-only,
+/// `@Observable`) type and lives here as a plain, stateless presentation.
+public struct CourtView: View {
+    public var isInteractive: Bool
+    public var selectedPlayer: Player?
+    public var onZoneTapped: ((CourtZone) -> Void)?
+
+    public init(isInteractive: Bool = false, selectedPlayer: Player? = nil, onZoneTapped: ((CourtZone) -> Void)? = nil) {
+        self.isInteractive = isInteractive
+        self.selectedPlayer = selectedPlayer
+        self.onZoneTapped = onZoneTapped
+    }
 
     // Court dimensions in meters (official squash court)
     private let courtWidth: CGFloat = 6.4   // meters (21 feet)
@@ -16,12 +30,7 @@ struct CourtView: View {
         courtWidth / courtLength
     }
 
-    /// Zones are tappable only while the flow is actually at the zone step
-    private var isInteractive: Bool {
-        game?.scoringStep == .selectZone
-    }
-
-    var body: some View {
+    public var body: some View {
         GeometryReader { geometry in
             let availableWidth = geometry.size.width
             let availableHeight = geometry.size.height
@@ -35,7 +44,7 @@ struct CourtView: View {
             // Scale factor: pixels per meter
             let scale = courtSize.height / courtLength
 
-            SportsPanel(accent: isInteractive ? playerColor : nil) {
+            CourtPanel(accent: isInteractive ? playerColor : nil) {
                 ZStack {
                     courtFloor(size: courtSize)
 
@@ -48,8 +57,8 @@ struct CourtView: View {
                     courtMarkings(size: courtSize, scale: scale)
 
                     // Instruction overlay at the zone step
-                    if isInteractive, let game = game, let player = game.selectedPlayer {
-                        instructionOverlay(size: courtSize, player: player, game: game)
+                    if isInteractive, let player = selectedPlayer {
+                        instructionOverlay(size: courtSize, player: player)
                     }
                 }
                 .frame(width: courtSize.width, height: courtSize.height)
@@ -75,9 +84,8 @@ struct CourtView: View {
                     let xOffset = CGFloat(col) * zoneWidth + zoneWidth / 2
                     let yOffset = CGFloat(row) * zoneHeight + zoneHeight / 2
 
-                    ZoneTapArea(zone: zone, playerColor: playerColor) {
-                        onZoneTapped?(zone)
-                    }
+                    ZoneTapArea(zone: zone, playerColor: playerColor, onTap: onZoneTapped ?? { _ in })
+                    .accessibilityLabel("Zone \(zone.rawValue)")
                     .frame(width: zoneWidth - 6, height: zoneHeight - 6)
                     .position(x: xOffset, y: yOffset)
                 }
@@ -87,8 +95,8 @@ struct CourtView: View {
     }
 
     private var playerColor: Color {
-        guard let player = game?.selectedPlayer else { return AppColors.warmOrange }
-        return player == .player1 ? AppColors.warmOrange : AppColors.deepBlue
+        guard let selectedPlayer else { return CourtPalette.warmOrange }
+        return selectedPlayer == .player1 ? CourtPalette.warmOrange : CourtPalette.deepBlue
     }
 
     private func zoneFor(row: Int, col: Int) -> CourtZone {
@@ -107,12 +115,12 @@ struct CourtView: View {
     }
 
     // MARK: - Instruction Overlay
-    private func instructionOverlay(size: CGSize, player: Player, game: Game) -> some View {
-        let color = player == .player1 ? AppColors.warmOrange : AppColors.deepBlue
+    private func instructionOverlay(size: CGSize, player: Player) -> some View {
+        let color = player == .player1 ? CourtPalette.warmOrange : CourtPalette.deepBlue
 
         return VStack {
             Text("KIES EEN ZONE")
-                .font(AppFonts.caption(11))
+                .font(.system(size: 11, weight: .medium, design: .rounded))
                 .foregroundColor(color)
                 .tracking(1.5)
                 .padding(.horizontal, 12)
@@ -146,7 +154,7 @@ struct CourtView: View {
             RoundedRectangle(cornerRadius: 6)
                 .fill(
                     RadialGradient(
-                        colors: [AppColors.accentGold.opacity(0.055), .clear],
+                        colors: [CourtPalette.accentGold.opacity(0.055), .clear],
                         center: .center,
                         startRadius: 10,
                         endRadius: size.height * 0.65
@@ -158,7 +166,7 @@ struct CourtView: View {
 
     // MARK: - Court Markings (no arcs)
     private func courtMarkings(size: CGSize, scale: CGFloat) -> some View {
-        let lineColor = AppColors.accentGold.opacity(0.62)
+        let lineColor = CourtPalette.accentGold.opacity(0.62)
         let lineWidth: CGFloat = 1.5
 
         let shortLineY = shortLineDistance * scale
@@ -222,14 +230,69 @@ struct CourtView: View {
     }
 }
 
+// MARK: - Shared visual chrome (small private copies, same pattern as
+// HomeMenu.swift's HomePalette / PlayerDirectory.swift's PlayerStyle: the
+// app's DesignSystem.swift stays app-only, so shared views keep their own
+// minimal, matching color/panel constants instead of pulling in the whole
+// design system).
+
+private enum CourtPalette {
+    static let warmOrange = Color(red: 0.95, green: 0.55, blue: 0.15)
+    static let deepBlue = Color(red: 0.35, green: 0.45, blue: 0.55)
+    static let accentGold = Color(red: 0.90, green: 0.72, blue: 0.35)
+}
+
+private struct CourtPanel<Content: View>: View {
+    var accent: Color? = nil
+    let content: Content
+
+    init(accent: Color? = nil, @ViewBuilder content: () -> Content) {
+        self.accent = accent
+        self.content = content()
+    }
+
+    var body: some View {
+        content
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.white.opacity(0.055))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(
+                                accent?.opacity(0.28) ?? Color.white.opacity(0.10),
+                                lineWidth: 1
+                            )
+                    )
+            )
+    }
+}
+
 // MARK: - Zone Tap Area
 
-struct ZoneTapArea: View {
+private struct ZoneTapArea: View {
     let zone: CourtZone
-    var playerColor: Color = AppColors.warmOrange
-    let onTap: () -> Void
+    var playerColor: Color
+    // Takes the tapped zone as a parameter rather than the caller closing
+    // over a `let zone = ...` from the enclosing (nested) ForEach loop: Skip
+    // transpiled such a capture incorrectly (every tap reported the same
+    // wrong zone, not tied to which cell was actually tapped — see
+    // docs/android-port.md). Reading `self.zone`, this view's own always-
+    // correct stored property, instead of a captured loop variable sidesteps
+    // the bug entirely.
+    let onTap: (CourtZone) -> Void
 
     @State private var isPressed = false
+
+    // Explicit init: Skip's synthesized memberwise init incorrectly picked up
+    // `isPressed` (an @State-backed property, which Swift's own memberwise
+    // init always excludes) as a trailing constructor parameter, breaking a
+    // trailing-closure call site (`onTap`'s value landed on `isPressed`
+    // instead). Spelling the init out ourselves sidesteps the bug.
+    init(zone: CourtZone, playerColor: Color = CourtPalette.warmOrange, onTap: @escaping (CourtZone) -> Void) {
+        self.zone = zone
+        self.playerColor = playerColor
+        self.onTap = onTap
+    }
 
     var body: some View {
         ZStack {
@@ -250,7 +313,7 @@ struct ZoneTapArea: View {
                 withAnimation {
                     isPressed = false
                 }
-                onTap()
+                onTap(zone)
             }
         }
     }
@@ -259,37 +322,23 @@ struct ZoneTapArea: View {
 // MARK: - Preview
 
 #Preview("Court - Default") {
-    ZStack {
-        AppBackground()
-        CourtView()
-            .padding(20)
-    }
+    CourtView()
+        .padding(20)
+        .background(Color.black)
 }
 
 #Preview("Court - Player Selected") {
-    ZStack {
-        AppBackground()
-
-        let game = Game()
-        let _ = game.selectPlayer(.player1)
-
-        CourtView(game: game) { zone in
-            print("Tapped: \(zone)")
-        }
-        .padding(20)
+    CourtView(isInteractive: true, selectedPlayer: .player1) { zone in
+        print("Tapped: \(zone)")
     }
+    .padding(20)
+    .background(Color.black)
 }
 
 #Preview("Court - Player 2 Selected") {
-    ZStack {
-        AppBackground()
-
-        let game = Game()
-        let _ = game.selectPlayer(.player2)
-
-        CourtView(game: game) { zone in
-            print("Tapped: \(zone)")
-        }
-        .padding(20)
+    CourtView(isInteractive: true, selectedPlayer: .player2) { zone in
+        print("Tapped: \(zone)")
     }
+    .padding(20)
+    .background(Color.black)
 }

@@ -71,6 +71,10 @@ dependencies {
 
     androidTestImplementation(platform("androidx.compose:compose-bom:2026.05.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    // createComposeRule() (no host Activity, used by CourtViewTest to mount a
+    // view in isolation) needs a plain ComponentActivity to launch into; this
+    // pulls in the generated test-only manifest that declares one.
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
     // Compose's older transitive Espresso uses a removed InputManager API on API 36.
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
     androidTestImplementation("androidx.test:runner:1.7.0")

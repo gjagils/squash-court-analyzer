@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -443,7 +444,7 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     // Court view
-                    CourtView(game: currentGame) { zone in
+                    CourtView(isInteractive: currentGame.scoringStep == .selectZone, selectedPlayer: currentGame.selectedPlayer) { zone in
                         handleZoneTap(zone)
                     }
                     .padding(.horizontal, 16)
@@ -668,7 +669,7 @@ struct ContentView: View {
             .transition(.opacity)
         case .selectZone:
             VStack(spacing: 10) {
-                CourtView(game: currentGame) { zone in
+                CourtView(isInteractive: currentGame.scoringStep == .selectZone, selectedPlayer: currentGame.selectedPlayer) { zone in
                     handleZoneTap(zone)
                 }
                 .padding(.horizontal, 16)

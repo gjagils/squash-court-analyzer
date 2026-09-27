@@ -1,5 +1,6 @@
 import SwiftUI
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 
 /// Which live-scoring mode a match starts in
 enum SetupMode: Equatable {
@@ -73,93 +74,17 @@ struct HomeView: View {
         }
     }
 
-    // ── Header ───────────────────────────────────────────────────────────────
-
     private var header: some View {
-        HStack {
-            Color.clear.frame(width: 22, height: 22)
-
-            Spacer()
-
-            Text("SQUASH ANALYZER")
-                .font(AppFonts.title(18))
-                .foregroundColor(AppColors.textPrimary)
-                .tracking(2)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-
-            Spacer()
-
-            if let onOpenSettings {
-                Button(action: onOpenSettings) {
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 21))
-                        .foregroundColor(AppColors.textSecondary)
-                }
-                .accessibilityLabel("Instellingen")
-            } else {
-                Color.clear.frame(width: 22, height: 22)
-            }
-        }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 16)
+        HomeMenuHeader(onSettings: onOpenSettings)
     }
-
-    // ── Tiles ────────────────────────────────────────────────────────────────
 
     private var tileGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible())], spacing: 14) {
-            HomeTile(title: "Coach", icon: "chart.bar.xaxis", color: AppColors.warmOrange) {
-                withAnimation(.easeInOut(duration: 0.2)) { startMode = .coach }
-            }
-            HomeTile(title: "Scheidsrechter", icon: "hand.raised.fill", color: AppColors.warmOrange) {
-                withAnimation(.easeInOut(duration: 0.2)) { startMode = .referee }
-            }
-            HomeTile(title: "Afgeronde wedstrijden", icon: "clock.arrow.circlepath", color: AppColors.steelBlue) {
-                onViewHistory?()
-            }
-            HomeTile(title: "Spelers", icon: "person.2.fill", color: AppColors.accentGold) {
-                showingPlayerManagement = true
-            }
-        }
-        .padding(.horizontal, 24)
-    }
-}
-
-/// One flat, tinted tile on the home screen
-private struct HomeTile: View {
-    let title: String
-    let icon: String
-    let color: Color
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 10) {
-                Image(systemName: icon)
-                    .font(.system(size: 26, weight: .semibold))
-                    .foregroundColor(color)
-                Text(title.uppercased())
-                    .font(AppFonts.label(13))
-                    .tracking(1)
-                    .foregroundColor(AppColors.textPrimary)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.85)
-            }
-            .padding(.horizontal, 8)
-            .frame(maxWidth: .infinity)
-            .frame(height: 110)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(color.opacity(0.10))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(color.opacity(0.35), lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
+        HomeMenuTiles(
+            onCoach: { withAnimation(.easeInOut(duration: 0.2)) { startMode = .coach } },
+            onReferee: { withAnimation(.easeInOut(duration: 0.2)) { startMode = .referee } },
+            onHistory: { onViewHistory?() },
+            onPlayers: { showingPlayerManagement = true }
+        )
     }
 }
 

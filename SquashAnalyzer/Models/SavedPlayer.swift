@@ -2,22 +2,6 @@ import Foundation
 import SwiftData
 import SquashAnalyzerCore
 
-/// Available coaching focus area tags
-enum CoachingFocusTag: String, CaseIterable {
-    case conditie = "Conditie"
-    case voorhand = "Voorhand"
-    case backhand = "Backhand"
-    case serve = "Serve"
-    case volley = "Volley"
-    case drop = "Drop"
-    case boast = "Boast"
-    case beweging = "Beweging"
-    case achterwand = "Achterwand"
-    case mentaal = "Mentaal"
-    case tactiek = "Tactiek"
-    case snelheid = "Snelheid"
-}
-
 /// Persisted player profile for SwiftData
 @Model
 final class SavedPlayer {

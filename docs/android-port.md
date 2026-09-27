@@ -1,16 +1,31 @@
 # Android port (one Swift codebase, via Skip)
 
-**Status: Fase 0 t/m 3 afgerond (2026-09-27) — `SquashAnalyzerCore`
-transpileert naar Kotlin (`skip test`: 15/15 groen op Darwin én Android), en
-er is nu ook een kaal Android-app-project (`Android/`) met een Room-backed
-`MatchStore` die dezelfde vier bewerkingen als `MatchRepository` aanbiedt (6
-Robolectric-tests, allemaal groen). `xcodebuild test
--skipPackagePluginValidation` op het iOS-schema blijft groen — dit raakt de
-iOS-app op geen enkele manier. Volgende: Fase 4 (eerste echt scherm).** Dit
-document is
-het naslagwerk voor de Android-poging — voor wie er ook aan werkt (Claude of
-Codex), zodat niemand blind begint. Werk je hieraan verder, houd dit bestand
-bij: fase-status, nieuwe transpile-eigenaardigheden, en genomen beslissingen.
+**Status: Fase 0 t/m 4 afgerond; fase 5 Spelers afgerond en geverifieerd
+(2026-09-27).** Android heeft nu een echt startscherm, opgebouwd uit dezelfde
+SwiftUI-kop en -tegels als iOS via `SquashAnalyzerUI` + Skip, plus een
+werkend spelersbeheer-scherm (aanmaken/bewerken/verwijderen, Room-backed).
+Volledige regressierun met Android Studio JBR (JDK 21) als `JAVA_HOME`:
+`:app:assembleDebug` groen, 11/11 Android-unittests groen
+(`MatchStoreTest` + `PlayerStoreTest`), 3/3 instrumentatietests groen op de
+emulator (`HomeScreenTest` + `PlayerScreenTest`), `skip test` 15/15 groen op
+zowel Darwin als Android, en de volledige iOS-testsuite (`xcodebuild test
+-skipPackagePluginValidation`) groen. De bestemmingen (Mijn team, coach,
+scheidsrechter, geschiedenis) volgen in fase 5. Geen TestFlight-upload.
+
+Eén echte fout gevonden en gefixt tijdens deze regressierun:
+`PlayerScreenTest.createEditReopenAndDeletePlayer` riep `.performScrollTo()`
+aan op de naam-/notitievelden, maar Skip's `ScrollView`-implementatie op
+Android hangt (nog) geen Compose scroll-semantics-actie aan zijn kinderen
+("Semantic Node has no parent layout with a Scroll SemanticsAction"). Dat is
+een SkipUI-beperking, geen app-bug: het formulier past ruim op het
+testtoestel zonder te hoeven scrollen. Fix: de `.performScrollTo()`-aanroepen
+uit de test verwijderd; als het spelersformulier ooit te lang wordt voor een
+klein scherm, moet scrollen op Android apart geverifieerd worden zodra
+SkipUI die semantics wel blootgeeft.
+
+Dit document is het naslagwerk voor de Android-port. Werk je hieraan verder,
+houd dit bestand bij: fase-status, nieuwe transpile-eigenaardigheden en
+beslissingen. Volgende: **fase 5, coachmodus en wedstrijdscoring**.
 
 ## Doel en harde eisen (van Gerd-Jan, 2026-09-26/27)
 
@@ -436,13 +451,101 @@ niet gecommit (zie `Android/.gitignore`).
    blok in `app/build.gradle.kts` (dezelfde vorm die Skip's eigen
    gegenereerde `build.gradle.kts` voor `SquashAnalyzerCore` ook gebruikt).
 
-## Fase 4 — Eerste echt scherm (NOG NIET GESTART)
+## Fase 4 — Eerste echte scherm (AFGEROND, 2026-09-27)
 
-Kandidaat: het beginscherm (`HomeView`'s tegels) of het badge-overzicht
-(`BadgeCatalogView`) — simpel, geen gebaren, goede eerste visuele check.
-**Hier pas een fysiek Android-toestel aanschaffen/regelen.**
+Gekozen: het **startscherm met de vier tegels**. De Android-placeholder is
+vervangen door een SwiftUI-scherm dat via Skip naar Compose transpileert.
 
-## Fase 5 — Rest van de features, één voor één (NOG NIET GESTART)
+### Gedeelde UI, bestaande iOS-acties
+
+- Nieuw lokaal package `Packages/SquashAnalyzerUI`, met `skip-ui` en het
+  `skipstone`-plugin. `HomeMenuHeader` en `HomeMenuTiles` zijn de gezamenlijke
+  SwiftUI-componenten voor iOS én Android. De warme kleuren, afgeronde tegels,
+  typografie en labels volgen het bestaande iOS-startscherm.
+- Het bestaande iOS-`HomeView` gebruikt deze componenten. De Mijn team-kaart,
+  coach- en scheidsrechtersetup, geschiedenis, spelersbeheer en instellingen
+  blijven aan dezelfde iOS-acties gekoppeld. Het package is op projectniveau
+  geregistreerd en expliciet aan app én testtarget gelinkt.
+- `AndroidHomeView` is de Android-compositie in datzelfde Swift-package:
+  donkere achtergrond, kop met instellingen, vier tegels en een korte melding
+  over de functies die nog volgen. Elke tegel en de instellingenknop opent
+  een sluitbare beschikbaarheidsmelding. Er wordt nog geen wedstrijd gestart.
+- Mijn team en de echte bestemmingen volgen in fase 5. Dit is dus een werkend
+  startscherm, nog geen volledige Android-versie van de app.
+- De Android-`MainActivity` bevat alleen de lifecycle/Compose-host;
+  `SquashApplication` initialiseert SkipFoundation. Er is geen tweede
+  handgeschreven Kotlin-versie van het startscherm.
+
+### Bouwkoppeling en aandachtspunten
+
+`Android/settings.gradle.kts` voert eerst `swift build` uit voor het UI-package
+(incrementeel), en neemt de door Skip gegenereerde Gradle-build op als
+composite build. `app` gebruikt `squash.analyzer.ui:SquashAnalyzerUI` als
+library. Dit werkt met het bestaande Xcode-project; er is geen tweede
+Xcode-project of nieuw iOS-app-target aangemaakt.
+
+- Ook de opgenomen Gradle-build moet het Android-SDK-pad kennen. De lokale,
+  niet-gecommitte `Android/local.properties` wordt daarom naar zijn tijdelijke
+  buildmap gekopieerd. Als alternatief kan `ANDROID_HOME` worden ingesteld.
+- Blijf **Android Studio JBR / JDK 21** gebruiken voor Gradle en Room-tests.
+  De Skip-modules gebruiken hun gegenereerde AGP-configuratie; de bestaande
+  KSP-uitzondering blijft beperkt tot de Android-host.
+- Skip heeft geen standaardmapping voor `hand.raised.fill`,
+  `clock.arrow.circlepath` en `person.2.fill`. Kleine eigen SwiftUI-vectorpaden
+  leveren de Android-symbolen onder `#if SKIP`; iOS behoudt SF Symbols.
+- De Android-host gebruikt Skip `PresentationRoot` en saveable state voor
+  correcte safe areas, dialogs en hercreatie van de activity.
+- De instrumentatietests gebruiken expliciet Espresso 3.7.0: de oudere
+  transitieve versie gebruikt een verwijderde `InputManager.getInstance`-API
+  op Android 16. Zie de [AndroidX Test release notes](https://developer.android.com/jetpack/androidx/releases/test#espresso-3.7.0).
+- Skip exporteert ook AndroidX-testbibliotheken transitief. De app-dependency
+  sluit de groepen `androidx.test`, `androidx.test.ext` en
+  `androidx.test.espresso` uit; tests krijgen hun eigen expliciete dependencies.
+  Anders ontbreken klassen in het aparte ActivityScenario-bootstrapproces,
+  ondanks geslaagde tests, met crashes en lange wachttijden als gevolg.
+- De nieuwe package en Xcode dependency lockfiles worden bijgehouden;
+  `.build` en gegenereerde Kotlin blijven buiten git.
+
+### Verificatie / lokaal draaien
+
+```bash
+cd Android
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+./gradlew :app:assembleDebug :app:testDebugUnitTest
+# Met een draaiende emulator of verbonden Android-toestel:
+./gradlew :app:connectedDebugAndroidTest
+./gradlew :app:installDebug
+~/Library/Android/sdk/platform-tools/adb shell am start -n com.squashanalyzer.android/.MainActivity
+```
+
+`HomeScreenTest` test de getranspileerde UI; de tegel Spelers opent de echte
+directory. `PlayerScreenTest` maakt een speler aan, bewaart focus en notities,
+herstart de activity, bewerkt en verwijdert de speler. De opslagtests testen
+Room-migratie, sortering, dubbele namen, blanco namen en het bewaren van
+wedstrijdhistorie.
+
+Volledig geverifieerd op 2026-09-27 met Android Studio JBR (JDK 21) als
+`JAVA_HOME`: `:app:assembleDebug` groen, `:app:testDebugUnitTest` 11/11 groen,
+`:app:connectedDebugAndroidTest` 3/3 groen op een lokale emulator
+(`Medium_Phone_API_36.1`). Zie de status bovenaan dit document voor de ene
+echte fout die daarbij naar boven kwam (Skip's `ScrollView` mist
+scroll-semantics voor Compose UI-tests) en de fix.
+
+## Fase 5 — Spelers (AFGEROND EN GEVERIFIEERD, 2026-09-27)
+
+`SquashAnalyzerCore` bevat `PlayerProfile`, coachingfocus-tags en het async
+`PlayerProfileStore`-protocol. `SquashAnalyzerUI` bevat de gedeelde directory,
+editor en velden voor naam, coachingfocus en notities. Via Skip wordt dit naar
+Kotlin/Compose vertaald. iOS gebruikt dezelfde velden en behoudt foto-, badge-
+en teamimport.
+
+Android gebruikt een Room `players`-tabel met databaseversie 2 en een expliciete
+1→2-migratie. `RoomPlayerStore` is de Android-opslagimplementatie. IDs blijven
+stabiel, sortering is op naam, aanpassen bewaart bestaande metadata, verwijderen
+laat wedstrijdhistorie intact en lege namen worden geweigerd. Foto's,
+badgecatalogus en teamimport volgen later.
+
+## Fase 5 — Volgende onderdelen (NOG NIET GESTART)
 
 Volgorde: startscherm/navigatie → Spelers (heeft fase 3 nodig) → coach-modus
 scoren (`CourtView`'s eigen tekenwerk = hoogste transpile-risico) →
@@ -454,22 +557,16 @@ EncryptedSharedPreferences achter dezelfde kleine abstractie).
 
 ## Branching
 
-- Fase 1 (pure refactors): direct op `main`, want gedragsloos.
-- Alles Android-specifiek (Gradle/Kotlin-scaffolding, het Skip-app-project,
-  gedeeltelijke UI): op een langlevende branch `feature/android`, tot er een
-  presenteerbare mijlpaal is. Zo blijft `main` een schone iOS-only geschiedenis
-  zolang Android nog niet op eigen benen staat.
+Fases 1–3 staan inmiddels op `main` (de eerdere afspraak over een aparte
+Android-branch is in die stappen niet gevolgd). Fase 4 wordt ontwikkeld op
+`codex/android-phase4`. Verdere Android-UI-uitbreiding blijft op een aparte
+branch tot een presenteerbare mijlpaal; samenvoegen is een afzonderlijke stap.
 
-## Wat hier nog niet in zit
+## Wat nog niet is overgezet
 
-- Er is nog geen `feature/android`-branch en geen Skip-project **in deze
-  repo** — de fase-0-proef stond in een scratch-map buiten git en is
-  weggegooid na gebruik (het was wegwerpwerk, geen onderdeel van de app).
-- `Packages/SquashAnalyzerCore` staat er en is zelfstandig groen (`swift
-  test` binnen de package-map), maar hangt nog **niet** aan
-  `SquashAnalyzer.xcodeproj` — zie "De hobbel" hierboven. De app gebruikt dus
-  nog de oorspronkelijke, dubbele bestanden; er is nog niets verwijderd uit
-  de app en er is nog geen `import SquashAnalyzerCore` ergens in de app.
-- Nog te doen zodra de package gekoppeld is: de dubbele originelen uit de app
-  verwijderen, imports toevoegen, en fase 2 (dit package als Skip-Android-
-  target).
+- Android-bestemmingen achter de starttegels: scoren, scheidsrechter,
+  badges, geschiedenis, delen, Mijn team en instellingen/AI Coach (fase 5).
+- Android-opslag voor badge-awards en scheidsrechterwedstrijden.
+- Foto's, badgecatalogus en teamimport in het Android-spelersscherm.
+- CloudKit-uitnodigingen blijven bewust iOS-only.
+- Een fysiek Android-toestel is nog nodig voor aanvullende praktijktests.

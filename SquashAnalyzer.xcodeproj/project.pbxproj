@@ -68,6 +68,8 @@
 		F8B8AB9A30691B0A0098B973 /* SquashAnalyzerCore in Frameworks */ = {isa = PBXBuildFile; productRef = F8B8AB9930691B0A0098B973 /* SquashAnalyzerCore */; };
 		F8B8AB9B30691B0A0098B973 /* SquashAnalyzerCore in Frameworks */ = {isa = PBXBuildFile; productRef = F8B8AB9930691B0A0098B973 /* SquashAnalyzerCore */; };
 		F8FD9EFD2F5D73C5008892F1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F8FD9EFC2F5D73C5008892F1 /* PrivacyInfo.xcprivacy */; };
+		A40000000000000000000001 /* SquashAnalyzerUI in Frameworks */ = {isa = PBXBuildFile; productRef = A40000000000000000000003 /* SquashAnalyzerUI */; };
+		A40000000000000000000002 /* SquashAnalyzerUI in Frameworks */ = {isa = PBXBuildFile; productRef = A40000000000000000000003 /* SquashAnalyzerUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -151,6 +153,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F8B8AB9A30691B0A0098B973 /* SquashAnalyzerCore in Frameworks */,
+				A40000000000000000000001 /* SquashAnalyzerUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -159,6 +162,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F8B8AB9B30691B0A0098B973 /* SquashAnalyzerCore in Frameworks */,
+				A40000000000000000000002 /* SquashAnalyzerUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -307,6 +311,7 @@
 			name = SquashAnalyzer;
 			packageProductDependencies = (
 				F8B8AB9930691B0A0098B973 /* SquashAnalyzerCore */,
+				A40000000000000000000003 /* SquashAnalyzerUI */,
 			);
 			productName = SquashAnalyzer;
 			productReference = A3000001 /* SquashAnalyzer.app */;
@@ -328,6 +333,7 @@
 			name = SquashAnalyzerTests;
 			packageProductDependencies = (
 				F8B8AB9930691B0A0098B973 /* SquashAnalyzerCore */,
+				A40000000000000000000003 /* SquashAnalyzerUI */,
 			);
 			productName = SquashAnalyzerTests;
 			productReference = B3000010 /* SquashAnalyzerTests.xctest */;
@@ -363,6 +369,7 @@
 			mainGroup = A5000001;
 			packageReferences = (
 				F8B8AB9730691A9E0098B973 /* XCLocalSwiftPackageReference "Packages/SquashAnalyzerCore" */,
+				A40000000000000000000004 /* XCLocalSwiftPackageReference "Packages/SquashAnalyzerUI" */,
 			);
 			productRefGroup = A5000003 /* Products */;
 			projectDirPath = "";
@@ -738,6 +745,7 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/SquashAnalyzerCore;
 		};
+		A40000000000000000000004 /* XCLocalSwiftPackageReference "Packages/SquashAnalyzerUI" */ = {isa = XCLocalSwiftPackageReference; relativePath = Packages/SquashAnalyzerUI; };
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -746,6 +754,7 @@
 			package = F8B8AB9730691A9E0098B973 /* XCLocalSwiftPackageReference "Packages/SquashAnalyzerCore" */;
 			productName = SquashAnalyzerCore;
 		};
+		A40000000000000000000003 /* SquashAnalyzerUI */ = {isa = XCSwiftPackageProductDependency; package = A40000000000000000000004 /* XCLocalSwiftPackageReference "Packages/SquashAnalyzerUI" */; productName = SquashAnalyzerUI; };
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A8000001 /* Project object */;

@@ -1,4 +1,5 @@
 import Foundation
+import SquashAnalyzerCore
 import SwiftData
 
 // MARK: - Import format

@@ -3,6 +3,7 @@ import SwiftData
 import PhotosUI
 import UniformTypeIdentifiers
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 
 /// View for managing saved player profiles
 struct PlayerManagementView: View {
@@ -367,8 +368,6 @@ struct PlayerEditSheet: View {
         }
     }
 
-    private let allTags = CoachingFocusTag.allCases.map { $0.rawValue }
-
     var body: some View {
         ZStack {
             AppBackground()
@@ -384,74 +383,14 @@ struct PlayerEditSheet: View {
 
                     photoSection
 
-                    // Name field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("NAAM")
-                            .font(AppFonts.caption(11))
-                            .foregroundColor(AppColors.accentGold)
-                            .tracking(1)
-
-                        TextField("Naam speler", text: $name)
-                            .font(AppFonts.body(16))
-                            .foregroundColor(AppColors.textPrimary)
-                            .padding()
-                            .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
-                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.accentGold.opacity(0.4), lineWidth: 1))
-                    }
-                    .padding(.horizontal, 24)
-
-                    // Focus tags
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("COACHING FOCUS")
-                            .font(AppFonts.caption(11))
-                            .foregroundColor(AppColors.accentGold)
-                            .tracking(1)
-
-                        FlowLayout(spacing: 8) {
-                            ForEach(allTags, id: \.self) { tag in
-                                let isSelected = selectedFocusAreas.contains(tag)
-                                Button(action: {
-                                    if isSelected {
-                                        selectedFocusAreas.remove(tag)
-                                    } else {
-                                        selectedFocusAreas.insert(tag)
-                                    }
-                                }) {
-                                    Text(tag)
-                                        .font(AppFonts.caption(12))
-                                        .foregroundColor(isSelected ? AppColors.backgroundDark : AppColors.textSecondary)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 7)
-                                        .background(
-                                            Capsule()
-                                                .fill(isSelected ? AppColors.accentGold : Color.white.opacity(0.08))
-                                        )
-                                        .overlay(
-                                            Capsule()
-                                                .stroke(isSelected ? AppColors.accentGold : Color.white.opacity(0.15), lineWidth: 1)
-                                        )
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 24)
-
-                    // Notes field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("NOTITIES")
-                            .font(AppFonts.caption(11))
-                            .foregroundColor(AppColors.accentGold)
-                            .tracking(1)
-
-                        TextField("Extra coaching aandachtspunten...", text: $notes, axis: .vertical)
-                            .font(AppFonts.body(14))
-                            .foregroundColor(AppColors.textPrimary)
-                            .lineLimit(3...6)
-                            .padding()
-                            .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
-                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.15), lineWidth: 1))
-                    }
+                    PlayerProfileFields(
+                        name: $name,
+                        focus: Binding(
+                            get: { Array(selectedFocusAreas).sorted() },
+                            set: { selectedFocusAreas = Set($0) }
+                        ),
+                        notes: $notes
+                    )
                     .padding(.horizontal, 24)
 
                     // Save / Cancel

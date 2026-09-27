@@ -11,7 +11,7 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.iOS(.v17), .macOS(.v14)],
     products: [
-        .library(name: "SquashAnalyzerCore", type: .dynamic, targets: ["SquashAnalyzerCore"]),
+        .library(name: "SquashAnalyzerCore", targets: ["SquashAnalyzerCore"]),
     ],
     dependencies: [
         .package(url: "https://github.com/skiptools/skip.git", from: "1.9.11"),

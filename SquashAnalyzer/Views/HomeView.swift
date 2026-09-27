@@ -21,6 +21,7 @@ struct HomeView: View {
 
     @State private var startMode: SetupMode? = nil
     @State private var showingPlayerManagement = false
+    @State private var showingBadgeCatalog = false
     @State private var createdRefereeMatch: RefereeMatch? = nil
 
     var body: some View {
@@ -37,6 +38,9 @@ struct HomeView: View {
         .animation(.easeInOut(duration: 0.2), value: startMode)
         .sheet(isPresented: $showingPlayerManagement) {
             PlayerManagementView()
+        }
+        .sheet(isPresented: $showingBadgeCatalog) {
+            NavigationStack { BadgeCatalogView() }
         }
         .fullScreenCover(item: $createdRefereeMatch) { m in
             RefereeView(match: m) { createdRefereeMatch = nil }
@@ -83,7 +87,8 @@ struct HomeView: View {
             onCoach: { withAnimation(.easeInOut(duration: 0.2)) { startMode = .coach } },
             onReferee: { withAnimation(.easeInOut(duration: 0.2)) { startMode = .referee } },
             onHistory: { onViewHistory?() },
-            onPlayers: { showingPlayerManagement = true }
+            onPlayers: { showingPlayerManagement = true },
+            onBadges: { showingBadgeCatalog = true }
         )
     }
 }

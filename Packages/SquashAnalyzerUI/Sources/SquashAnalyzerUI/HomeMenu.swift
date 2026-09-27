@@ -43,13 +43,15 @@ public struct HomeMenuTiles: View {
     private let onReferee: () -> Void
     private let onHistory: () -> Void
     private let onPlayers: () -> Void
+    private let onBadges: () -> Void
 
     public init(onCoach: @escaping () -> Void, onReferee: @escaping () -> Void,
-                onHistory: @escaping () -> Void, onPlayers: @escaping () -> Void) {
+                onHistory: @escaping () -> Void, onPlayers: @escaping () -> Void, onBadges: @escaping () -> Void) {
         self.onCoach = onCoach
         self.onReferee = onReferee
         self.onHistory = onHistory
         self.onPlayers = onPlayers
+        self.onBadges = onBadges
     }
 
     public var body: some View {
@@ -58,6 +60,7 @@ public struct HomeMenuTiles: View {
             HomeMenuTile(title: "Scheidsrechter", icon: "hand.raised.fill", color: HomePalette.orange, action: onReferee)
             HomeMenuTile(title: "Afgeronde wedstrijden", icon: "clock.arrow.circlepath", color: HomePalette.blue, action: onHistory)
             HomeMenuTile(title: "Spelers", icon: "person.2.fill", color: HomePalette.gold, action: onPlayers)
+            HomeMenuTile(title: "Badges", icon: "medal.fill", color: HomePalette.gold, action: onBadges)
         }
         .padding(.horizontal, 24)
     }
@@ -146,6 +149,11 @@ private struct HomeMenuIcon: View {
                 path.addQuadCurve(to: CGPoint(x: 18, y: 25), control: CGPoint(x: 22, y: 25))
                 path.closeSubpath()
             }.fill().frame(width: 26, height: 26)
+        } else if name == "medal.fill" {
+            ZStack {
+                Circle().stroke(lineWidth: 2)
+                Circle().frame(width: 9, height: 9)
+            }.frame(width: 26, height: 26)
         } else {
             Image(systemName: name)
         }
@@ -166,6 +174,7 @@ public struct AndroidHomeView: View {
     @State private var showingPlayers = false
     @State private var showingCoach = false
     @State private var showingReferee = false
+    @State private var showingBadges = false
     private let matchStore: any CoachMatchStore
     private let refereeMatchStore: any RefereeMatchStore
 
@@ -189,6 +198,9 @@ public struct AndroidHomeView: View {
                     RefereeSessionView(store: refereeMatchStore, onExit: { showingReferee = false })
                         .navigationBarBackButtonHidden(true)
                 }
+                .navigationDestination(isPresented: $showingBadges) {
+                    SharedBadgeCatalogView()
+                }
         }
         .preferredColorScheme(.dark)
     }
@@ -207,7 +219,8 @@ public struct AndroidHomeView: View {
                             onCoach: { showingCoach = true },
                             onReferee: { showingReferee = true },
                             onHistory: { showAvailability("Afgeronde wedstrijden") },
-                            onPlayers: { showingPlayers = true }
+                            onPlayers: { showingPlayers = true },
+                            onBadges: { showingBadges = true }
                         )
                         Text("Coach- en scheidsrechterwedstrijden worden automatisch opgeslagen en kunnen worden hervat.")
                             .font(.system(size: 13, design: .rounded))

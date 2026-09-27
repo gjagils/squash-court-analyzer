@@ -1,20 +1,23 @@
 # Android port (one Swift codebase, via Skip)
 
 **Status: Fase 0 t/m 4 afgerond; fase 5 Spelers, `CourtView`, coach-modus
-scoren en scheidsrechtermodus zijn allebei volledig afgerond ínclusief opslag
-en hervatten (2026-09-27).** Android heeft nu een echt startscherm, een
-werkend spelersbeheer-scherm, een volledig werkende coach-scoreflow (tik
-score → puntsoort → zone → slag, undo, game/match-einde) én een werkende
-scheidsrechtermodus (punten, LET, STROKE, undo, game-wissel) — beide met
-automatische opslag/hervatten via Room, allemaal handmatig op de emulator
+scoren, scheidsrechtermodus (beide ínclusief opslag/hervatten) en de
+badges-catalogus zijn afgerond (2026-09-27).** Android heeft nu een echt
+startscherm, een werkend spelersbeheer-scherm, een volledig werkende
+coach-scoreflow (tik score → puntsoort → zone → slag, undo, game/match-einde)
+en een werkende scheidsrechtermodus (punten, LET, STROKE, undo, game-wissel)
+— beide met automatische opslag/hervatten via Room — plus een vijfde
+starttegel "Badges" met de volledige badge-catalogus (nog geen echte
+awards/spelersdata, zie Fase 5 hieronder). Allemaal handmatig op de emulator
 geverifieerd. `Game`, `Match`, `Point`, `LetCall`, `ServerSide`,
-`MatchStatus` en `RefereeMatch` zijn nu allemaal gedeeld via
-`SquashAnalyzerCore`, met een `CoachMatchStore`- en een `RefereeMatchStore`-
-protocol ernaast. Regressie bij de laatste stap: `:app:testDebugUnitTest`
-groen, `:app:connectedDebugAndroidTest` (9/9, inclusief
-`RefereePersistenceTest`), `swift test`/`skip test` groen, volledige
-iOS-testsuite (`xcodebuild test -skipPackagePluginValidation`)
-**TEST SUCCEEDED**. Geen TestFlight-upload.
+`MatchStatus`, `RefereeMatch` en nu ook `Match`/`RefereeMatch`'s
+`badgeInput`/`rallyWinners` zijn gedeeld via `SquashAnalyzerCore`, met een
+`CoachMatchStore`- en een `RefereeMatchStore`-protocol ernaast. Regressie bij
+de laatste stap: `:app:testDebugUnitTest` groen, `:app:connectedDebugAndroidTest`
+(10/10, inclusief `BadgeCatalogScreenTest`), `swift test`/`skip test` groen,
+volledige iOS-testsuite (`xcodebuild test -skipPackagePluginValidation`)
+**TEST SUCCEEDED** (de nieuwe Badges-tegel verscheen daarbij ook op iOS'
+eigen homescherm, zie Fase 5 hieronder). Geen TestFlight-upload.
 
 Eén echte fout gevonden en gefixt tijdens deze regressierun:
 `PlayerScreenTest.createEditReopenAndDeletePlayer` riep `.performScrollTo()`
@@ -890,16 +893,87 @@ Actuele verificatie:
   -destination 'platform=iOS Simulator,id=6AC09A50-94A7-4348-BB84-DA1EC43A4644'
   -skipPackagePluginValidation`: **TEST SUCCEEDED**.
 
+## Fase 5 — Badges-UI: alleen de catalogus (AFGEROND, 2026-09-27)
+
+Kleinste zinnige eerste plak van "badges-UI", zelfde aanpak als coach-/
+scheidsrechtermodus: eerst het stuk zonder afhankelijkheden bouwen, daarna
+pas de kant met echte spelersdata. `BadgeEngine`/`BadgeKind` stonden al
+100% puur in `SquashAnalyzerCore` en draaiden al via `skip test` (15/15) —
+daar is niets aan veranderd. Wat wél nieuw is:
+
+- **`Match.badgeInput`/`rallyWinners` en `RefereeMatch.badgeInput`/
+  `rallyWinners`** verhuisd van `SquashAnalyzer/Services/BadgeEngine.swift`
+  (app-only) naar `Packages/SquashAnalyzerCore/Sources/SquashAnalyzerCore/BadgeInput.swift`
+  — waren al 100% puur, dus een rechttoe-rechtaan verplaatsing (net als
+  `Game`/`Match`/`Point`/`LetCall` eerder). De app-file is nu een verwijzende
+  stub, zelfde patroon als `RefereeMatch.swift`.
+- **`BadgeMedallion`** (nieuw, gedeeld, in `SquashAnalyzerUI`): vervangt
+  iOS' `BadgeView` voor Android — Android heeft geen badge-artwork (geen
+  `UIImage(named:)`-pad), dus dit rendert altijd het gouden medaillon met
+  een SF Symbol-fallback. Zelfde scope-cut als `PlayerAvatarPlaceholder`
+  voor spelersfoto's.
+- **`SharedBadgeCatalogView`** (nieuw, gedeeld): de volledige badge-catalogus
+  (alle 31 badges, geen speler- of award-data nodig, dus zonder enige setup
+  bereikbaar). Bewust **niet** `BadgeCatalogView` genoemd: de iOS-app heeft
+  al een eigen `BadgeCatalogView` met echte artwork-pogingen
+  (`SquashAnalyzer/Views/PlayerBadgesView.swift:325`), en beide types zouden
+  botsen zodra `SquashAnalyzerUI` en dat app-bestand allebei in scope zijn.
+- **`HomeMenuTiles` kreeg een vijfde tegel ("Badges")** — dit component is
+  al gedeeld tussen iOS' `HomeView` en Android's `AndroidHomeView`, dus de
+  tegel verschijnt nu op **beide platforms**. Op Android opent hij de nieuwe
+  `SharedBadgeCatalogView`; op iOS opent hij de bestaande, eigen
+  `BadgeCatalogView` in een sheet (`HomeView.swift`) — een kleine, bewuste
+  toevoeging aan iOS, geen functieverlies.
+- Twee nieuwe, echte Skip-bugs gevonden en gefixt:
+  1. **Geneste closures met `$0`/keypath-shorthand transpileren verkeerd.**
+     `games.map { $0.points.map { BadgeRally(winner: $0.scorer, ...) } }`
+     (twee geneste `map`-closures die allebei `$0` gebruiken) gaf in de
+     gegenereerde Kotlin `Unresolved reference 'shotType'`/`'zone'`,
+     `None of the following candidates is applicable: val String.count`
+     en een `Tuple2<E0,E1>.element: it is internal`-fout bij een
+     `.map(\.scorer)`-keypath. Fix: named closure-parameters overal in plaats
+     van `$0` zodra een closure een andere closure bevat die ook `$0`
+     gebruikt (`game.points.map { point in ... }` i.p.v. `game.points.map { ... $0 ... }`),
+     en keypaths (`\.scorer`) vervangen door `{ point in point.scorer }`.
+     **Vuistregel**: gebruik nooit `$0` in een closure die genest zit in een
+     andere closure die ook `$0` gebruikt — expliciete parameter­namen altijd.
+  2. **Bekende ternary/literal-gotcha (#4 uit eerdere fases) opnieuw
+     geraakt**, ditmaal gekopieerd uit iOS' eigen `BadgeView.swift`:
+     `.grayscale(isLocked ? 1 : 0)` en `.opacity(isLocked ? 0.35 : 1)` gaven
+     "Argument type mismatch: actual type is 'Int', but 'Double' was
+     expected" — gefixt met `1.0 : 0.0` en `0.35 : 1.0`. Ook een `CGFloat`
+     property-default (`var size: CGFloat = 64`) moest naar `64.0`.
+- Handmatig geverifieerd op de emulator: Badges-tegel op home → catalogus
+  toont alle categorieën/badges met Coach/Eén-keer-labels → terug-knop keert
+  terug naar home. `medal.fill` valt (zoals eerder gedocumenteerd voor andere
+  SF Symbols) terug op het generieke waarschuwingsdriehoekje, dat wél
+  netjes binnen het zelfgetekende gouden cirkel-medaillon verschijnt.
+
+Actuele verificatie:
+
+- `:app:testDebugUnitTest`: groen.
+- `:app:connectedDebugAndroidTest`: 10/10 groen, inclusief de nieuwe
+  `BadgeCatalogScreenTest`.
+- `swift test --package-path Packages/SquashAnalyzerCore`: 16 XCTests groen,
+  `skip test` 15/15 groen.
+- `xcodebuild test -project SquashAnalyzer.xcodeproj -scheme SquashAnalyzer
+  -destination 'platform=iOS Simulator,id=6AC09A50-94A7-4348-BB84-DA1EC43A4644'
+  -skipPackagePluginValidation`: **TEST SUCCEEDED** (ook na de nieuwe
+  Badges-tegel op iOS' eigen homescherm).
+
 ## Fase 5 — Volgende onderdelen (NOG NIET GESTART)
 
-Volgorde: badges-UI → geschiedenis (overzicht van opgeslagen coach- én
-scheidsrechterwedstrijden) → delen (linkjes overzetten; **CloudKit-uitnodigen
-blijft bewust iOS-only**, dat is geen gat maar een keuze) → Mijn team
-(netwerk/regex, moet met kleine aanpassingen overgaan) → instellingen/AI
-Coach (Keychain is iOS-only; Android krijgt EncryptedSharedPreferences achter
-dezelfde kleine abstractie). Coach- én scheidsrechterwedstrijden worden nu
-allebei automatisch opgeslagen en hervat; alleen het overzicht van die
-opgeslagen wedstrijden moet nog worden gebouwd.
+Volgorde: echte badge-awards (Slice B — vereist eerst een "Kies speler"-stap
+in Android's coach-/scheidsrechter-setup, die nu nog helemaal ontbreekt:
+zonder gekozen speler-id verdient geen enkele Android-wedstrijd ooit een
+badge, ongeacht hoeveel UI/opslag er is; daarna een `BadgeAwardEntity`/
+`RoomBadgeAwardStore` op Room-schema 5, en een Kotlin-herimplementatie van
+`BadgeAwarder.syncAwards`'s diff-logica zonder CloudKit) → geschiedenis
+(overzicht van opgeslagen coach- én scheidsrechterwedstrijden) → delen
+(linkjes overzetten; **CloudKit-uitnodigen blijft bewust iOS-only**, dat is
+geen gat maar een keuze) → Mijn team (netwerk/regex, moet met kleine
+aanpassingen overgaan) → instellingen/AI Coach (Keychain is iOS-only;
+Android krijgt EncryptedSharedPreferences achter dezelfde kleine abstractie).
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 

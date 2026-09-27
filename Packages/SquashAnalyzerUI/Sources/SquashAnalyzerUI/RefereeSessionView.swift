@@ -6,17 +6,20 @@ import SquashAnalyzerCore
 /// retry succeeds.
 public struct RefereeSessionView: View {
     let store: any RefereeMatchStore
+    let playerStore: any PlayerProfileStore
     let onExit: @MainActor () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var match: RefereeMatch? = nil
     @State private var pending: RefereeMatch? = nil
+    @State private var showingSetup = false
     @State private var busy = true
     @State private var failed = false
     @State private var confirmingNew = false
     @State private var exitAfterSave = false
 
-    public init(store: any RefereeMatchStore, onExit: @escaping @MainActor () -> Void) {
+    public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, onExit: @escaping @MainActor () -> Void) {
         self.store = store
+        self.playerStore = playerStore
         self.onExit = onExit
     }
 
@@ -41,6 +44,11 @@ public struct RefereeSessionView: View {
                 .foregroundColor(CoachPalette.textPrimary)
                 .padding(24)
                 .disabled(busy || failed)
+            } else if showingSetup {
+                MatchSetupView(playerStore: playerStore, title: "Nieuwe scheidsrechterwedstrijd", onCancel: { close() }) { player1, player2, player1Id, player2Id in
+                    startNewMatch(player1: player1, player2: player2, player1Id: player1Id, player2Id: player2Id)
+                }
+                .disabled(busy || failed)
             }
             if busy {
                 ProgressView("Even opslaan…")
@@ -63,7 +71,7 @@ public struct RefereeSessionView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16)).padding(20)
             }
         }
-        .task { if match == nil && pending == nil { await load() } }
+        .task { if match == nil && pending == nil && !showingSetup { await load() } }
         .alert("Nieuwe wedstrijd starten?", isPresented: $confirmingNew) {
             Button("Annuleren", role: .cancel) {}
             Button("Nieuwe wedstrijd", role: .destructive) {
@@ -72,9 +80,7 @@ public struct RefereeSessionView: View {
                     do {
                         if let pending { try await store.abandon(pending) }
                         pending = nil
-                        let fresh = RefereeSessionView.freshMatch()
-                        match = fresh
-                        try await store.save(fresh)
+                        showingSetup = true
                     } catch { failed = true }
                     busy = false
                 }
@@ -89,13 +95,23 @@ public struct RefereeSessionView: View {
         failed = false
         do {
             if let saved = try await store.loadInProgress() { pending = saved }
-            else {
-                let fresh = RefereeSessionView.freshMatch()
-                match = fresh
-                try await store.save(fresh)
-            }
+            else { showingSetup = true }
         } catch { failed = true }
         busy = false
+    }
+
+    private func startNewMatch(player1: String, player2: String, player1Id: String?, player2Id: String?) {
+        showingSetup = false
+        busy = true
+        failed = false
+        Task { @MainActor in
+            let fresh = RefereeMatch(player1Name: player1, player2Name: player2, bestOf: 5, startingServer: .player1)
+            fresh.player1Id = player1Id.flatMap { UUID(uuidString: $0) }
+            fresh.player2Id = player2Id.flatMap { UUID(uuidString: $0) }
+            match = fresh
+            do { try await store.save(fresh) } catch { failed = true }
+            busy = false
+        }
     }
 
     private func persist(_ value: RefereeMatch, exit: Bool) {
@@ -118,9 +134,5 @@ public struct RefereeSessionView: View {
     @MainActor private func close() {
         onExit()
         dismiss()
-    }
-
-    private static func freshMatch() -> RefereeMatch {
-        RefereeMatch(player1Name: "Speler 1", player2Name: "Speler 2", bestOf: 5, startingServer: .player1)
     }
 }

@@ -78,16 +78,24 @@ also now has a badges destination: `SharedBadgeCatalogView`/`BadgeMedallion`
 in `SquashAnalyzerUI` render the full `BadgeKind` catalog (already pure and
 shared via `BadgeEngine.swift` in `SquashAnalyzerCore`) with a placeholder
 medallion instead of real artwork, the same scope-cut `PlayerAvatarPlaceholder`
-made for photos. It needs no player or match data, so it ships before real
-per-player badge awards (which need a "Kies speler" step in match setup,
-still missing on Android, plus an Android-side award store — badges cannot
-be earned on Android yet, only browsed). `Match`/`RefereeMatch`'s
-`badgeInput`/`rallyWinners` extensions live in `SquashAnalyzerCore`
-(`BadgeInput.swift`) for the same reason. The `HomeMenuTiles` grid is shared
-between platforms, so this added a fifth tile to iOS' own home screen too,
-wired there to iOS' existing, separate `BadgeCatalogView` (real artwork
-attempts) rather than the Android placeholder. The history browser and
-badge-award persistence on Android are still future work.
+made for photos. It needs no player or match data, so it shipped before real
+per-player badge awards. `Match`/`RefereeMatch`'s `badgeInput`/`rallyWinners`
+extensions live in `SquashAnalyzerCore` (`BadgeInput.swift`) for the same
+reason. The `HomeMenuTiles` grid is shared between platforms, so this added a
+fifth tile to iOS' own home screen too, wired there to iOS' existing,
+separate `BadgeCatalogView` (real artwork attempts) rather than the Android
+placeholder. Real per-player badge awards need a real player id on the
+match, so Android's coach/referee match setup now has a "Kies speler" step
+too: a new, shared `MatchSetupView` (a much smaller version of iOS' full
+`MatchStartView` — two names, each optionally picked from the existing
+player list, no head-start/coaching-focus setup) shown by `CoachSessionView`/
+`RefereeSessionView` before a brand-new match is created, mirroring iOS'
+`PickedPlayer` rule that editing the name after picking drops the id.
+`PlayerProfile.id` (a `String`) bridges to `Match`/`RefereeMatch.player1Id`/
+`player2Id` (`UUID?`) via `UUID(uuidString:)` at that point — no Core type
+change needed. The history browser and badge-award persistence itself
+(an Android award store plus a Kotlin reimplementation of
+`BadgeAwarder.syncAwards` without CloudKit) are still future work.
 Full plan, phase status, toolchain setup and transpile gotchas found so far:
 see [`docs/android-port.md`](docs/android-port.md). Read that file before
 touching anything Android-related, and keep it updated as phases complete.

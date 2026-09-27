@@ -191,11 +191,11 @@ public struct AndroidHomeView: View {
                     PlayerDirectoryView(store: playerStore)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
-                    CoachSessionView(store: matchStore, onExit: { showingCoach = false })
+                    CoachSessionView(store: matchStore, playerStore: playerStore, onExit: { showingCoach = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingReferee) {
-                    RefereeSessionView(store: refereeMatchStore, onExit: { showingReferee = false })
+                    RefereeSessionView(store: refereeMatchStore, playerStore: playerStore, onExit: { showingReferee = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingBadges) {

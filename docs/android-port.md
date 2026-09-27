@@ -1,22 +1,25 @@
 # Android port (one Swift codebase, via Skip)
 
 **Status: Fase 0 t/m 4 afgerond; fase 5 Spelers, `CourtView`, coach-modus
-scoren, scheidsrechtermodus (beide ínclusief opslag/hervatten) en de
-badges-catalogus zijn afgerond (2026-09-27).** Android heeft nu een echt
-startscherm, een werkend spelersbeheer-scherm, een volledig werkende
-coach-scoreflow (tik score → puntsoort → zone → slag, undo, game/match-einde)
-en een werkende scheidsrechtermodus (punten, LET, STROKE, undo, game-wissel)
-— beide met automatische opslag/hervatten via Room — plus een vijfde
+scoren, scheidsrechtermodus (beide ínclusief opslag/hervatten), de
+badges-catalogus én "Kies speler" bij nieuwe wedstrijden zijn afgerond
+(2026-09-27).** Android heeft nu een echt startscherm, een werkend
+spelersbeheer-scherm, een volledig werkende coach-scoreflow (tik score →
+puntsoort → zone → slag, undo, game/match-einde) en een werkende
+scheidsrechtermodus (punten, LET, STROKE, undo, game-wissel) — beide met
+automatische opslag/hervatten via Room én een "Kies speler"-stap vóór een
+nieuwe wedstrijd start (`MatchSetupView`, gedeeld) — plus een vijfde
 starttegel "Badges" met de volledige badge-catalogus (nog geen echte
-awards/spelersdata, zie Fase 5 hieronder). Allemaal handmatig op de emulator
-geverifieerd. `Game`, `Match`, `Point`, `LetCall`, `ServerSide`,
-`MatchStatus`, `RefereeMatch` en nu ook `Match`/`RefereeMatch`'s
-`badgeInput`/`rallyWinners` zijn gedeeld via `SquashAnalyzerCore`, met een
-`CoachMatchStore`- en een `RefereeMatchStore`-protocol ernaast. Regressie bij
-de laatste stap: `:app:testDebugUnitTest` groen, `:app:connectedDebugAndroidTest`
-(10/10, inclusief `BadgeCatalogScreenTest`), `swift test`/`skip test` groen,
-volledige iOS-testsuite (`xcodebuild test -skipPackagePluginValidation`)
-**TEST SUCCEEDED** (de nieuwe Badges-tegel verscheen daarbij ook op iOS'
+awards, zie Fase 5 hieronder — dat kan nu wel, dankzij "Kies speler").
+Allemaal handmatig op de emulator geverifieerd. `Game`, `Match`, `Point`,
+`LetCall`, `ServerSide`, `MatchStatus`, `RefereeMatch` en `Match`/
+`RefereeMatch`'s `badgeInput`/`rallyWinners` zijn gedeeld via
+`SquashAnalyzerCore`, met een `CoachMatchStore`- en een
+`RefereeMatchStore`-protocol ernaast. Regressie bij de laatste stap:
+`:app:testDebugUnitTest` groen, `:app:connectedDebugAndroidTest` (11/11,
+inclusief `MatchSetupTest`), `swift test`/`skip test` groen, volledige
+iOS-testsuite (`xcodebuild test -skipPackagePluginValidation`)
+**TEST SUCCEEDED**. De Badges-tegel verscheen bij die stap ook op iOS'
 eigen homescherm, zie Fase 5 hieronder). Geen TestFlight-upload.
 
 Eén echte fout gevonden en gefixt tijdens deze regressierun:
@@ -961,14 +964,75 @@ Actuele verificatie:
   -skipPackagePluginValidation`: **TEST SUCCEEDED** (ook na de nieuwe
   Badges-tegel op iOS' eigen homescherm).
 
+## Fase 5 — "Kies speler" bij nieuwe wedstrijden (AFGEROND, 2026-09-27)
+
+Voorwaarde voor echte badge-awards (Slice B uit de vorige stap): zonder een
+gekozen speler-id verdient geen enkele Android-wedstrijd ooit een badge,
+ongeacht hoeveel award-opslag er zou zijn. Android's coach-/scheidsrechter-
+setup had helemaal geen "Kies speler"-stap — een tegel tikken maakte altijd
+direct een `Match()`/`RefereeMatch()` met de hardcoded namen "Speler 1"/
+"Speler 2" en `nil` speler-ids.
+
+- **Nieuw, gedeeld `MatchSetupView`** in `SquashAnalyzerUI`: een sterk
+  verkleinde versie van iOS' volledige `MatchStartView` — alleen twee
+  naamvelden met een "Kies speler"-knop die een lijst van bestaande spelers
+  toont (uit `playerStore.loadPlayers()`), geen "Later instappen"/head-start,
+  geen coaching-focus/notities overnemen. Zelfde regel als iOS' `PickedPlayer`:
+  een gekozen speler-id telt alleen mee zolang de naam nadien niet is
+  aangepast (`pickedId(_:currentName:)` vergelijkt de huidige tekst met de
+  naam op het moment van kiezen).
+- **`CoachSessionView`/`RefereeSessionView` kregen een nieuwe `showingSetup`-
+  stap**: als er niets te hervatten is, tonen ze nu eerst `MatchSetupView` in
+  plaats van meteen een lege wedstrijd aan te maken en op te slaan. Pas na
+  "Start" wordt de match aangemaakt (`Match().setupMatch(...)` resp.
+  `RefereeMatch(player1Name:player2Name:...)`) met de opgeloste namen en
+  (indien gekozen) speler-ids, en pas dan opgeslagen. Beide views kregen
+  daarvoor een nieuwe `playerStore: any PlayerProfileStore`-parameter,
+  doorgegeven vanuit `AndroidHomeView` (die de store al had voor het
+  Spelers-scherm).
+- **`PlayerProfile.id` (`String`) → `Match`/`RefereeMatch.player1Id`/
+  `player2Id` (`UUID?`) bridging**: gebeurt met `UUID(uuidString:)` op het
+  punt waar de wedstrijd wordt aangemaakt. Geen Core-typewijziging nodig
+  (`PlayerProfile.id` is altijd een `UUID().uuidString`-vormige string, dus
+  dit slaagt altijd voor spelers aangemaakt via de normale editor).
+- Bewust **niet** `PlayerDirectoryView` (het bestaande Spelers-scherm)
+  hergebruikt met een "pick mode" erbij — dat zou een al geverifieerd,
+  gedeeld scherm aanraken voor functionaliteit die de setup-stap niet nodig
+  heeft (add/edit/delete). Een nieuw, klein component is hier de veiligere
+  keuze, zelfde afweging als eerder bij `PlayerAvatarPlaceholder` en
+  `SharedBadgeCatalogView`.
+- `RefereeScreenTest` moest een `Start`-tik krijgen vóór het scherm scoort
+  (de setup-stap zit er nu tussen); `CoachPersistenceTest`/
+  `RefereePersistenceTest` bleven ongewijzigd omdat die altijd een
+  wedstrijd vooraf zaaien, dus meteen het hervat-scherm zien.
+- Nieuwe test **`MatchSetupTest`**: zaait een echte speler in Room, doorloopt
+  de UI (tegel → Kies speler → speler selecteren → Start), en verifieert via
+  `RoomRefereeMatchStore.loadInProgress()` dat de opgeslagen wedstrijd zowel
+  de juiste naam als de juiste (naar UUID gebridgede) speler-id heeft — het
+  eerste echte bewijs dat een Android-wedstrijd voortaan badge-waardig kan
+  worden aangemaakt.
+- Geen nieuwe Skip-transpile-bugs.
+
+Actuele verificatie:
+
+- `:app:testDebugUnitTest`: groen.
+- `:app:connectedDebugAndroidTest`: 11/11 groen, inclusief de nieuwe
+  `MatchSetupTest`.
+- `swift test --package-path Packages/SquashAnalyzerCore`: 16 XCTests groen,
+  `skip test` 15/15 groen.
+- `xcodebuild test -project SquashAnalyzer.xcodeproj -scheme SquashAnalyzer
+  -destination 'platform=iOS Simulator,id=6AC09A50-94A7-4348-BB84-DA1EC43A4644'
+  -skipPackagePluginValidation`: **TEST SUCCEEDED** (`MatchSetupView` wordt
+  alleen door Android's sessieviews gebruikt; iOS behoudt zijn eigen, rijkere
+  `MatchStartView`).
+
 ## Fase 5 — Volgende onderdelen (NOG NIET GESTART)
 
-Volgorde: echte badge-awards (Slice B — vereist eerst een "Kies speler"-stap
-in Android's coach-/scheidsrechter-setup, die nu nog helemaal ontbreekt:
-zonder gekozen speler-id verdient geen enkele Android-wedstrijd ooit een
-badge, ongeacht hoeveel UI/opslag er is; daarna een `BadgeAwardEntity`/
-`RoomBadgeAwardStore` op Room-schema 5, en een Kotlin-herimplementatie van
-`BadgeAwarder.syncAwards`'s diff-logica zonder CloudKit) → geschiedenis
+Volgorde: echte badge-awards (nu de "Kies speler"-voorwaarde is vervuld —
+een `BadgeAwardEntity`/`RoomBadgeAwardStore` op Room-schema 5, en een
+Kotlin-herimplementatie van `BadgeAwarder.syncAwards`'s diff-logica zonder
+CloudKit, plus een Android-versie van `PlayerBadgesView`/`MatchBadgesStrip`
+die echte awards toont in plaats van alleen de catalogus) → geschiedenis
 (overzicht van opgeslagen coach- én scheidsrechterwedstrijden) → delen
 (linkjes overzetten; **CloudKit-uitnodigen blijft bewust iOS-only**, dat is
 geen gat maar een keuze) → Mijn team (netwerk/regex, moet met kleine

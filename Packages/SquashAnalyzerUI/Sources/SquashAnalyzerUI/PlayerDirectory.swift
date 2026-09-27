@@ -78,7 +78,9 @@ private enum PlayerStyle {
 
 public struct PlayerDirectoryView: View {
     private let store: any PlayerProfileStore
+    private let badgeStore: any PlayerBadgeSummaryStore
     @State private var players: [PlayerProfile] = []
+    @State private var badgeCounts: [String: Int] = [:]
     @State private var isLoading = true
     @State private var loadFailed = false
     @State private var isDeleting = false
@@ -87,8 +89,12 @@ public struct PlayerDirectoryView: View {
     @State private var confirmDelete = false
     @State private var errorMessage = ""
     @State private var showingError = false
+    @State private var badgesForPlayer: PlayerProfile? = nil
 
-    public init(store: any PlayerProfileStore) { self.store = store }
+    public init(store: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore) {
+        self.store = store
+        self.badgeStore = badgeStore
+    }
 
     public var body: some View {
         ZStack {
@@ -148,6 +154,19 @@ public struct PlayerDirectoryView: View {
                                         }
                                     }
                                     Spacer()
+                                    if let count = badgeCounts[player.id], count > 0 {
+                                        Button { badgesForPlayer = player } label: {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "medal.fill")
+                                                Text("\(count)")
+                                            }
+                                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                            .foregroundColor(PlayerStyle.gold)
+                                            .padding(.horizontal, 10).padding(.vertical, 8)
+                                            .background(Capsule().fill(PlayerStyle.gold.opacity(0.12)))
+                                        }
+                                        .accessibilityLabel("\(count) badges van \(player.name)")
+                                    }
                                     Button { editing = player } label: {
                                         Image(systemName: "pencil").frame(width: 44, height: 44)
                                     }.accessibilityLabel("Bewerk \(player.name)")
@@ -173,6 +192,11 @@ public struct PlayerDirectoryView: View {
         .task { await reload() }
         .sheet(item: $editing) { player in
             PlayerProfileEditor(player: player, store: store) { await reload() }
+        }
+        .navigationDestination(isPresented: Binding(get: { badgesForPlayer != nil }, set: { if !$0 { badgesForPlayer = nil } })) {
+            if let player = badgesForPlayer {
+                SharedPlayerBadgesView(playerId: player.id, playerName: player.name, badgeStore: badgeStore)
+            }
         }
         .alert("Speler verwijderen?", isPresented: $confirmDelete) {
             Button("Annuleren", role: .cancel) { deleting = nil }
@@ -202,6 +226,11 @@ public struct PlayerDirectoryView: View {
         do {
             players = try await store.loadPlayers()
             loadFailed = false
+            var counts: [String: Int] = [:]
+            for player in players {
+                counts[player.id] = (try? await badgeStore.badges(forPlayer: player.id))?.count ?? 0
+            }
+            badgeCounts = counts
         } catch {
             loadFailed = true
             showError("De opgeslagen spelers konden niet worden geladen. Probeer het opnieuw.")

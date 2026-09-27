@@ -171,6 +171,7 @@ public struct AndroidHomeView: View {
     @State private var selectedFeature = ""
 
     private let playerStore: any PlayerProfileStore
+    private let badgeStore: any PlayerBadgeSummaryStore
     @State private var showingPlayers = false
     @State private var showingCoach = false
     @State private var showingReferee = false
@@ -178,8 +179,10 @@ public struct AndroidHomeView: View {
     private let matchStore: any CoachMatchStore
     private let refereeMatchStore: any RefereeMatchStore
 
-    public init(playerStore: any PlayerProfileStore, matchStore: any CoachMatchStore, refereeMatchStore: any RefereeMatchStore) {
+    public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
+                matchStore: any CoachMatchStore, refereeMatchStore: any RefereeMatchStore) {
         self.playerStore = playerStore
+        self.badgeStore = badgeStore
         self.matchStore = matchStore
         self.refereeMatchStore = refereeMatchStore
     }
@@ -188,7 +191,7 @@ public struct AndroidHomeView: View {
         NavigationStack {
             homeContent
                 .navigationDestination(isPresented: $showingPlayers) {
-                    PlayerDirectoryView(store: playerStore)
+                    PlayerDirectoryView(store: playerStore, badgeStore: badgeStore)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
                     CoachSessionView(store: matchStore, playerStore: playerStore, onExit: { showingCoach = false })

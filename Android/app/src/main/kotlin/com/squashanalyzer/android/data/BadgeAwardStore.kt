@@ -1,8 +1,11 @@
 package com.squashanalyzer.android.data
 
+import skip.lib.Array as SwiftArray
 import squash.analyzer.core.BadgeEngine
+import squash.analyzer.core.BadgeKind
 import squash.analyzer.core.BadgeMatchInput
 import squash.analyzer.core.Player
+import squash.analyzer.core.PlayerBadgeSummaryStore
 
 /**
  * Kotlin reimplementation of `BadgeAwarder.syncAwards`'s diff logic, without
@@ -11,9 +14,14 @@ import squash.analyzer.core.Player
  * Career badges (`BadgeKind.isCareer`) are out of scope here — they need
  * cross-match history, which the Android history browser doesn't have yet.
  */
-class BadgeAwardStore(private val dao: BadgeAwardDao) {
+class BadgeAwardStore(private val dao: BadgeAwardDao) : PlayerBadgeSummaryStore {
     suspend fun activeAwards(playerId: String): List<BadgeAwardRecord> =
         dao.activeForPlayer(playerId).map { BadgeAwardRecord(it.id, it.playerId, it.badge, it.matchId, it.earnedAt) }
+
+    override suspend fun badges(forPlayer: String): SwiftArray<BadgeKind> {
+        val kinds = activeAwards(forPlayer).map { it.badge }.distinct().mapNotNull { BadgeKind.init(rawValue = it) }
+        return SwiftArray(kinds)
+    }
 
     /** `players` maps each picked player id (from "Kies speler") to their [Player] slot. */
     suspend fun syncAwards(matchId: String, players: List<Pair<String, Player>>, input: BadgeMatchInput) {

@@ -104,9 +104,16 @@ replaces that match's award rows with exactly what's currently earned, so
 undoing the winning rally retracts the badge the same way `BadgeAwarder`
 does. Career badges (`BadgeKind.isCareer`) are out of scope until the
 history browser exists, since they need cross-match data
-(`BadgeEngine.careerBadges(in:history:earnedElsewhere:)`). There is no UI
-yet to show a player's earned badges — that, and the history browser, are
-still future work.
+(`BadgeEngine.careerBadges(in:history:earnedElsewhere:)`). Earned badges are
+now visible too: a shared `PlayerBadgeSummaryStore` protocol
+(`badges(forPlayer:) -> [BadgeKind]`), implemented by `BadgeAwardStore`
+itself, backs a badge-count pill on each row of `PlayerDirectoryView`
+(Android's "Spelers" screen) and a new shared `SharedPlayerBadgesView`
+(a `BadgeMedallion` grid) it taps through to — named `Shared...`, not
+`PlayerBadgesView`, for the same reason as `SharedBadgeCatalogView`: the
+iOS app target already has its own, richer `PlayerBadgesView`. There is no
+"Badges verdiend" strip on the game/match-over screen yet, and the history
+browser (needed for career badges) is still future work.
 Full plan, phase status, toolchain setup and transpile gotchas found so far:
 see [`docs/android-port.md`](docs/android-port.md). Read that file before
 touching anything Android-related, and keep it updated as phases complete.

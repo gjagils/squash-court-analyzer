@@ -52,6 +52,13 @@ Players earn badges during a match, in coach and referee mode, but only players 
 - **Share permission.** The CKShare has `publicPermission = .readWrite`: anyone with the invitation link can join, which is what a WhatsApp group needs. Stopping sharing deletes the zone.
 - **App Store / privacy.** No accounts (no in-app account deletion or Sign in with Apple needed), nothing public or searchable (no user-generated content moderation), and the developer cannot read iCloud data, so the privacy label can stay "Data Not Collected" (verify when filling it in). The privacy policy gets a paragraph on shared player cards, and the share flow asks to share only with the player's consent.
 
+## Android port
+
+A Skip-based (Swift → Kotlin/Compose) Android port is planned and in progress.
+Full plan, phase status, toolchain setup and transpile gotchas found so far:
+see [`docs/android-port.md`](docs/android-port.md). Read that file before
+touching anything Android-related, and keep it updated as phases complete.
+
 ## Sharing a score
 
 `MatchShareReport` holds the three WhatsApp layouts (Kort, Scorekaart, Verslag, `MatchShareStyle`). Coach mode (`Match.shareReport`) and referee mode (`RefereeMatch.shareReport`) both build one, and both match-over / game-over screens open the same `MatchShareSheet`, so a change to the texts or the sheet applies to both modes.

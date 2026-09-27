@@ -50,7 +50,7 @@ interface MatchDao {
      */
     @Transaction
     suspend fun upsertMatchWithChildren(match: MatchEntity, games: List<GameEntity>, points: List<PointEntity>, lets: List<LetEntity>) {
-        insertMatch(match)
+        insertMatch(match.copy(savedAt = matchById(match.id)?.savedAt ?: match.savedAt))
         deleteGamesForMatch(match.id) // cascades to points/lets for the old games
         if (games.isNotEmpty()) insertGames(games)
         if (points.isNotEmpty()) insertPoints(points)

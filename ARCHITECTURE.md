@@ -55,6 +55,14 @@ Players earn badges during a match, in coach and referee mode, but only players 
 ## Android port
 
 A Skip-based (Swift → Kotlin/Compose) Android port is planned and in progress.
+Android coach scoring now uses the shared `CoachMatchStore` boundary and
+`CoachSessionView` to serialize edits with durable writes. `RoomCoachMatchStore`
+maps live Swift models to the existing transactional `MatchStore`. Room schema
+3 adds optional per-game service state through migration 2→3 (1→2 remains
+available). Each point, undo, service-side change, game transition and explicit
+exit saves; completed matches are retained but excluded from resume. Starting
+over marks the previous match abandoned instead of deleting its history.
+The history browser and Android referee mode are still separate future work.
 Full plan, phase status, toolchain setup and transpile gotchas found so far:
 see [`docs/android-port.md`](docs/android-port.md). Read that file before
 touching anything Android-related, and keep it updated as phases complete.

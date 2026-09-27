@@ -56,6 +56,7 @@ data class GameEntity(
     val startingServer: String, // Player raw value
     val winner: String?, // Player raw value, null while unfinished
     val savedAt: Long,
+    @ColumnInfo(defaultValue = "NULL") val serviceState: String? = null,
 )
 
 @Entity(

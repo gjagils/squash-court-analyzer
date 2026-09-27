@@ -8,11 +8,13 @@ public struct SharedScoreboardView: View {
     let game: Game
     let match: Match?
     var onSelectPlayer: ((Player) -> Void)? = nil
+    var onServiceChanged: () -> Void
 
-    public init(game: Game, match: Match? = nil, onSelectPlayer: ((Player) -> Void)? = nil) {
+    public init(game: Game, match: Match? = nil, onServiceChanged: @escaping () -> Void = {}, onSelectPlayer: ((Player) -> Void)? = nil) {
         self.game = game
         self.match = match
         self.onSelectPlayer = onSelectPlayer
+        self.onServiceChanged = onServiceChanged
     }
 
     public var body: some View {
@@ -48,21 +50,10 @@ public struct SharedScoreboardView: View {
         .padding(.top, 6)
     }
 
-    // Always a real Button (never a conditional Group/if-else branch): Skip's
-    // handling of an `if let optionalClosure { Button(...) } else { ... }`
-    // pattern silently produced a tappable-looking node whose click never
-    // reached the handler (found while writing CoachScreenTest — a manual
-    // on-device tap worked, but Compose's performClick() didn't, meaning the
-    // registered action was stale/absent even though OnClick was listed in
-    // the semantics tree). Calling `onSelectPlayer?(player)` unconditionally,
-    // same fix shape as CourtView's `onZoneTapped ?? { _ in }`, sidesteps it.
+    // The score button must not contain the separate service-side buttons.
+    // Nested buttons merge competing click actions in Android semantics.
     private func playerScore(_ player: Player) -> some View {
-        Button(action: {
-            guard let onSelectPlayer else { return }
-            onSelectPlayer(player)
-        }) { playerColumn(player) }
-            .buttonStyle(.plain)
-            .disabled(game.isGameOver)
+        playerColumn(player)
     }
 
     private func playerColumn(_ player: Player) -> some View {
@@ -88,13 +79,20 @@ public struct SharedScoreboardView: View {
                 disabled: game.isGameOver
             ) { side in
                 withAnimation(.easeInOut(duration: 0.15)) { game.overrideSide(to: side) }
+                onServiceChanged()
             }
             .opacity(isServing ? 1.0 : 0.0)
             .allowsHitTesting(isServing)
 
-            Text("\(score)")
-                .font(.system(size: 52, weight: .bold, design: .rounded))
-                .foregroundColor(isServing ? color : CoachPalette.textPrimary)
+            Button(action: { onSelectPlayer?(player) }) {
+                Text("\(score)")
+                    .font(.system(size: 52, weight: .bold, design: .rounded))
+                    .foregroundColor(isServing ? color : CoachPalette.textPrimary)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.plain)
+            .disabled(game.isGameOver)
+            .accessibilityLabel("Punt voor \(game.name(for: player))")
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 4)
@@ -148,7 +146,7 @@ public struct CoachScoringView: View {
 
             VStack(spacing: 12) {
                 header
-                SharedScoreboardView(game: game, match: match) { player in handleScoreTap(player) }
+                SharedScoreboardView(game: game, match: match, onServiceChanged: { onMatchChanged(match) }) { player in handleScoreTap(player) }
                     .padding(.horizontal, 20)
 
                 instructionText
@@ -185,7 +183,7 @@ public struct CoachScoringView: View {
                 Button(action: onExit) {
                     HStack(spacing: 4) {
                         Image(systemName: "xmark")
-                        Text("Stop")
+                        Text("Bewaar & sluit")
                     }
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(CoachPalette.textSecondary)

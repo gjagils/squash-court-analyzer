@@ -46,6 +46,7 @@ class MatchStore(private val dao: MatchDao) {
                 startingServer = game.startingServer,
                 winner = game.winner,
                 savedAt = game.savedAt,
+                serviceState = game.serviceState,
             )
         }
         val points = match.games.flatMap { game ->
@@ -106,6 +107,7 @@ class MatchStore(private val dao: MatchDao) {
                 startingServer = game.startingServer,
                 winner = game.winner,
                 savedAt = game.savedAt,
+                serviceState = game.serviceState,
                 points = dao.pointsForGame(game.id).map {
                     PointRecord(
                         id = it.id,

@@ -41,6 +41,7 @@ data class GameRecord(
     val savedAt: Long,
     val points: List<PointRecord> = emptyList(),
     val lets: List<LetRecord> = emptyList(),
+    val serviceState: String? = null,
 )
 
 data class PointRecord(

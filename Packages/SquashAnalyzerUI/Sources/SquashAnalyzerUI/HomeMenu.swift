@@ -165,16 +165,12 @@ public struct AndroidHomeView: View {
     private let playerStore: any PlayerProfileStore
     @State private var showingPlayers = false
     @State private var showingCoach = false
-    // `nil` until the Coach tile is actually tapped: constructing `Match()`
-    // there, in a discrete event handler, keeps its one `Match.init()` call
-    // (which itself mutates state via `startNewGame()`) out of view-body
-    // evaluation. Building it eagerly as a plain `@State` initial value, or
-    // inline inside `.navigationDestination`'s closure, both destabilized
-    // recomposition badly enough on Android to make the whole home screen
-    // (including unrelated destinations like Spelers) time out in tests.
-    @State private var coachMatch: Match? = nil
+    private let matchStore: any CoachMatchStore
 
-    public init(playerStore: any PlayerProfileStore) { self.playerStore = playerStore }
+    public init(playerStore: any PlayerProfileStore, matchStore: any CoachMatchStore) {
+        self.playerStore = playerStore
+        self.matchStore = matchStore
+    }
 
     public var body: some View {
         NavigationStack {
@@ -183,14 +179,8 @@ public struct AndroidHomeView: View {
                     PlayerDirectoryView(store: playerStore)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
-                    if let coachMatch {
-                        CoachScoringView(
-                            match: coachMatch,
-                            onMatchChanged: { _ in },
-                            onExit: { showingCoach = false }
-                        )
+                    CoachSessionView(store: matchStore, onExit: { showingCoach = false })
                         .navigationBarBackButtonHidden(true)
-                    }
                 }
         }
         .preferredColorScheme(.dark)
@@ -207,12 +197,12 @@ public struct AndroidHomeView: View {
                 ScrollView {
                     VStack(spacing: 20) {
                         HomeMenuTiles(
-                            onCoach: { coachMatch = Match(); showingCoach = true },
+                            onCoach: { showingCoach = true },
                             onReferee: { showAvailability("Scheidsrechter") },
                             onHistory: { showAvailability("Afgeronde wedstrijden") },
                             onPlayers: { showingPlayers = true }
                         )
-                        Text("Beheer je spelers alvast. Wedstrijden bijhouden komt binnenkort beschikbaar.")
+                        Text("Coachwedstrijden worden automatisch opgeslagen. Open Coach om een lopende wedstrijd te hervatten.")
                             .font(.system(size: 13, design: .rounded))
                             .foregroundColor(HomePalette.secondary)
                             .multilineTextAlignment(.center)

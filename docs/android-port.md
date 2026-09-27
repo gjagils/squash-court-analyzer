@@ -10,9 +10,10 @@ emulator geverifieerd met screenshots. `Game`, `Match`, `Point`, `LetCall`,
 deze stap (bovenop de drie uit de `CourtView`-stap) — zie Fase 5 hieronder.
 Regressie: `:app:testDebugUnitTest` (11/11), `:app:connectedDebugAndroidTest`
 (5/5), `skip test` (15/15 op Darwin en Android), volledige iOS-testsuite
-(`xcodebuild test -skipPackagePluginValidation`) — allemaal groen. Nog open:
-de Coach-tegel gebruikt een los `Match()` per bezoek, nog niet gekoppeld aan
-`MatchStore` (fase 3) voor echte opslag. Geen TestFlight-upload.
+(`xcodebuild test -skipPackagePluginValidation`) — allemaal groen bij die stap.
+De Coach-tegel is inmiddels gekoppeld aan `MatchStore` voor automatische opslag
+en hervatten; zie de nieuwe opslagstap hieronder voor actuele verificatie.
+Geen TestFlight-upload.
 
 Eén echte fout gevonden en gefixt tijdens deze regressierun:
 `PlayerScreenTest.createEditReopenAndDeletePlayer` riep `.performScrollTo()`
@@ -28,8 +29,7 @@ SkipUI die semantics wel blootgeeft.
 Dit document is het naslagwerk voor de Android-port. Werk je hieraan verder,
 houd dit bestand bij: fase-status, nieuwe transpile-eigenaardigheden en
 beslissingen. Volgende: **fase 5, scheidsrechtermodus (kan `ServiceSideSelector`/
-`ServerIndicator`/`Game`/`Match` hergebruiken) en de `MatchStore`-koppeling
-voor coach-modus**.
+`ServerIndicator`/`Game`/`Match` hergebruiken), daarna wedstrijdgeschiedenis**.
 
 ## Doel en harde eisen (van Gerd-Jan, 2026-09-26/27)
 
@@ -710,9 +710,10 @@ Daarnaast, in de nieuwe gedeelde UI zelf:
    nooit een Button conditioneel tussen twee takken opsplitsen; altijd één
    vaste `Button` met een optioneel aangeroepen closure
    (`onSelectPlayer?(player)` / `guard let onSelectPlayer else { return }`).
-   Dit loste de *productie*code op, maar **de bijbehorende geautomatiseerde
-   UI-test (`CoachScreenTest.kt`) bleef falen op exact hetzelfde symptoom en
-   is daarom niet meegenomen** — zie "Open testprobleem" hieronder.
+   De scorekolommen in `SharedScoreboardView` zijn daarna nog verder
+   vereenvoudigd: de spelerkolom bevat nu alleen een score-`Button`, en de
+   servicekant-selector is geen geneste knop meer. Daarmee is ook de
+   geautomatiseerde scoreklik betrouwbaar geworden.
 
 ### Handmatig geverifieerd op de emulator (Medium_Phone_API_36.1)
 
@@ -734,22 +735,13 @@ duidelijk leesbaar, niets is onklikbaar) — bij gelegenheid eigen
 `hand.raised.fill`/`clock.arrow.circlepath`/`person.2.fill` in
 `HomeMenu.swift`.
 
-### Open testprobleem (niet blokkerend)
+### Teststatus van de scoreklik
 
-Een geautomatiseerde instrumentatietest voor de volledige score-tap-flow
-(`CoachScreenTest.kt`) is geschreven maar weer verwijderd: het tikken op de
-score van Speler 1 riep de handler niet aan via **geen enkele** Compose-
-testmethode (`performClick()`, `performTouchInput { click() }` op de node,
-of op `onRoot()` op exact dezelfde coördinaat) — terwijl een echte tik op
-hetzelfde punt op het draaiende (niet-test-harness) toestel wél gewoon
-werkte, herhaaldelijk bevestigd. Dit wijst op een verschil tussen hoe
-`ActivityScenarioRule`/`createAndroidComposeRule` de host-Activity opstart
-versus een normale app-launch, niet op een echte functionele bug — vandaar
-"niet blokkerend". Als dit later terugkomt bij een ander scherm: probeer
-`androidx.compose.ui.test.junit4.v2.createAndroidComposeRule` (de nieuwere,
-niet-deprecated variant met `StandardTestDispatcher`) voordat je verder
-zoekt, want de huidige (`v1`) rule's deprecatiewaarschuwing wijst zelf al in
-die richting.
+De scoreklik is inmiddels wel automatisch gedekt. `CoachPersistenceTest`
+gebruikt `androidx.compose.ui.test.junit4.v2.createAndroidComposeRule`, opent
+Coach, hervat een opgeslagen wedstrijd, scoort via **Punt voor CoachTest** en
+**SERVICEPUNT**, sluit met **Bewaar & sluit**, herstart de Activity, hervat
+opnieuw en controleert dat undo ook duurzaam is.
 
 ### Geverifieerd
 
@@ -760,6 +752,48 @@ tekenwerk), `skip test` (15/15 op Darwin en Android), volledige iOS-testsuite
 gedragsverandering op iOS; `Game`/`Match`/`Point`/`LetCall` heten en werken
 overal exact hetzelfde, nu vanuit een ander (gedeeld) module.
 
+## Fase 5 — Coachwedstrijden opslaan en hervatten (2026-09-27)
+
+De Coach-tegel opent nu `CoachSessionView`. Die zoekt eerst een lopende wedstrijd.
+Bij een gevonden wedstrijd kies je **Hervatten** of **Nieuwe wedstrijd**.
+Een nieuwe wedstrijd beginnen vereist bevestiging: de vorige blijft als
+afgebroken wedstrijd bewaard. Zonder lopende wedstrijd wordt een nieuwe aangemaakt
+en direct opgeslagen. **Bewaar & sluit** bewaart de huidige stand en keert terug
+naar home. Een afgeronde wedstrijd blijft opgeslagen, maar wordt niet meer als
+lopend aangeboden. Het terugkijken van die wedstrijden volgt met de geschiedenis.
+
+- Gedeeld Swift-protocol `CoachMatchStore`, met laden, opslaan en afbreken.
+- Android `RoomCoachMatchStore` vertaalt de gedeelde `Match`/`Game`/`Point`/
+  `LetCall` naar de al bestaande `MatchStore`; er is geen tweede wedstrijdopslag.
+- Elk punt, undo, servicekant-aanpassing en overgang naar de volgende game wordt
+  opgeslagen. De UI wacht op een afgeronde opslagactie voordat er verder gescoord
+  kan worden. Bij een fout blijft de stand zichtbaar en kun je opnieuw proberen.
+- Room versie **3**, expliciete migratie **2→3** naast **1→2**. Eén optioneel
+  `serviceState`-veld per game bewaart Links/Rechts en hand-outvoorkeuren.
+  Oudere games zonder dit veld gebruiken de bestaande serviceherstelregel.
+- Wedstrijd-, game-, punt- en speler-IDs blijven behouden. `savedAt` blijft de
+  oorspronkelijke datum; `updatedAt` verandert bij opslaan. Geen duplicaten na
+  herhaald opslaan. Tijd terwijl de app gesloten is telt niet als rallyduur.
+- Hervatten herstelt de laatste game, ook als die net afgelopen is; de volgende
+  game wordt pas aangemaakt via **VOLGENDE GAME**. Afgeronde en afgebroken
+  wedstrijden worden niet opnieuw aangeboden voor hervatten.
+
+De nieuwe `CoachMatchStoreTest` verifieert een echte database-close/reopen, scores,
+IDs, metadata, servicevoorkeuren, undo na hervatten, gamegrenzen, completed/
+abandoned-status en migratie met bestaande spelers en wedstrijden. De bestaande
+speler-migratietest verifieert nu ook de volledige 1→2→3-route.
+
+Actuele verificatie:
+
+- `:app:testDebugUnitTest`: 15/15 groen.
+- `:app:connectedDebugAndroidTest`: 6/6 groen, inclusief de nieuwe
+  `CoachPersistenceTest`.
+- `skip test --project Packages/SquashAnalyzerCore`: 15/15 groen op Darwin en
+  15/15 groen op Android.
+- `xcodebuild test -project SquashAnalyzer.xcodeproj -scheme SquashAnalyzer
+  -destination 'platform=iOS Simulator,id=6AC09A50-94A7-4348-BB84-DA1EC43A4644'
+  -skipPackagePluginValidation`: 72/72 groen.
+
 ## Fase 5 — Volgende onderdelen (NOG NIET GESTART)
 
 Volgorde: scheidsrechtermodus (kan nu veel hergebruiken:
@@ -768,10 +802,8 @@ badges-UI → geschiedenis → delen (linkjes overzetten; **CloudKit-uitnodigen
 blijft bewust iOS-only**, dat is geen gat maar een keuze) → Mijn team
 (netwerk/regex, moet met kleine aanpassingen overgaan) → instellingen/AI
 Coach (Keychain is iOS-only; Android krijgt EncryptedSharedPreferences
-achter dezelfde kleine abstractie). Ook nog open: `CoachScoringView`
-koppelen aan `MatchStore` (fase 3) zodat een gescoorde wedstrijd op Android
-ook echt bewaard blijft — nu gebruikt de Coach-tegel een los, ongepersisteerd
-`Match()` per bezoek.
+achter dezelfde kleine abstractie). Coachwedstrijden worden inmiddels opgeslagen;
+het overzicht van die opgeslagen wedstrijden moet nog worden gebouwd.
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 
@@ -804,7 +836,7 @@ branch tot een presenteerbare mijlpaal; samenvoegen is een afzonderlijke stap.
 
 ## Wat nog niet is overgezet
 
-- Android-bestemmingen achter de starttegels: scoren, scheidsrechter,
+- Android-bestemmingen achter de starttegels: scheidsrechter,
   badges, geschiedenis, delen, Mijn team en instellingen/AI Coach (fase 5).
 - Android-opslag voor badge-awards en scheidsrechterwedstrijden.
 - Foto's, badgecatalogus en teamimport in het Android-spelersscherm.

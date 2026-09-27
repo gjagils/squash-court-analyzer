@@ -23,7 +23,7 @@ class PlayerStoreTest {
 
     private fun open() {
         db = Room.databaseBuilder(context, AppDatabase::class.java, databaseName)
-            .addMigrations(AppDatabase.MIGRATION_1_2).build()
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3).build()
         store = RoomPlayerStore(db.playerDao())
     }
 
@@ -81,6 +81,7 @@ class PlayerStoreTest {
         // in v2. Remove only the new player table and set SQLite's user_version.
         SQLiteDatabase.openDatabase(context.getDatabasePath(databaseName).path, null, SQLiteDatabase.OPEN_READWRITE).use {
             it.execSQL("DROP TABLE players")
+            it.execSQL("ALTER TABLE games DROP COLUMN serviceState")
             it.version = 1
         }
         open() // Room now performs MIGRATION_1_2 and validates its result.

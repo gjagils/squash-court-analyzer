@@ -8,7 +8,7 @@ import squash.analyzer.core.*
 import squash.analyzer.core.MatchStatus as CoreStatus
 
 /** Maps the shared live model to phase 3's transactional Room MatchStore. */
-class RoomCoachMatchStore(private val store: MatchStore) : CoachMatchStore {
+class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardStore: BadgeAwardStore) : CoachMatchStore {
     override suspend fun loadInProgress(): Match? = store.mostRecentInProgressMatch()?.let(::restore)
 
     override suspend fun save(match: Match) {
@@ -18,12 +18,24 @@ class RoomCoachMatchStore(private val store: MatchStore) : CoachMatchStore {
         store.upsert(snapshot)
         match.status = CoreStatus.init(rawValue = snapshot.status)!!
         match.updatedAt = date(snapshot.updatedAt)
+        syncBadges(match)
     }
 
     override suspend fun abandon(match: Match) {
         val snapshot = capture(match).copy(status = MatchStatus.ABANDONED)
         store.upsert(snapshot)
         match.status = CoreStatus.abandoned
+        syncBadges(match)
+    }
+
+    /** Only players picked via "Kies speler" (a real id) ever earn a badge. */
+    private suspend fun syncBadges(match: Match) {
+        val players = buildList {
+            match.player1Id?.let { add(it.uuidString to Player.player1) }
+            match.player2Id?.let { add(it.uuidString to Player.player2) }
+        }
+        if (players.isEmpty()) return
+        badgeAwardStore.syncAwards(match.id.uuidString, players, match.badgeInput)
     }
 
     private fun capture(match: Match): MatchRecord {

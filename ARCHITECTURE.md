@@ -93,9 +93,20 @@ player list, no head-start/coaching-focus setup) shown by `CoachSessionView`/
 `PickedPlayer` rule that editing the name after picking drops the id.
 `PlayerProfile.id` (a `String`) bridges to `Match`/`RefereeMatch.player1Id`/
 `player2Id` (`UUID?`) via `UUID(uuidString:)` at that point — no Core type
-change needed. The history browser and badge-award persistence itself
-(an Android award store plus a Kotlin reimplementation of
-`BadgeAwarder.syncAwards` without CloudKit) are still future work.
+change needed. With a real player id available, Android now computes and
+stores real per-match badge awards too: `BadgeAwardStore` (Room schema 5,
+table `badge_awards`, keyed directly to a `PlayerProfile.id` — no `cardId`,
+since Android shares no cards) is a Kotlin reimplementation of
+`BadgeAwarder.syncAwards`'s diff logic without CloudKit, called from
+`RoomCoachMatchStore`/`RoomRefereeMatchStore` on every `save()`/`abandon()`:
+it runs the shared, pure `BadgeEngine` over the match's `badgeInput` and
+replaces that match's award rows with exactly what's currently earned, so
+undoing the winning rally retracts the badge the same way `BadgeAwarder`
+does. Career badges (`BadgeKind.isCareer`) are out of scope until the
+history browser exists, since they need cross-match data
+(`BadgeEngine.careerBadges(in:history:earnedElsewhere:)`). There is no UI
+yet to show a player's earned badges — that, and the history browser, are
+still future work.
 Full plan, phase status, toolchain setup and transpile gotchas found so far:
 see [`docs/android-port.md`](docs/android-port.md). Read that file before
 touching anything Android-related, and keep it updated as phases complete.

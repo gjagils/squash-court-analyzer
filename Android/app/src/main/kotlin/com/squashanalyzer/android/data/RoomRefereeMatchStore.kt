@@ -6,7 +6,10 @@ import skip.lib.Array as SwiftArray
 import squash.analyzer.core.*
 
 /** Maps the shared live `RefereeMatch` model to a transactional Room store. */
-class RoomRefereeMatchStore(private val store: RefereeMatchStore) : squash.analyzer.core.RefereeMatchStore {
+class RoomRefereeMatchStore(
+    private val store: RefereeMatchStore,
+    private val badgeAwardStore: BadgeAwardStore,
+) : squash.analyzer.core.RefereeMatchStore {
     override suspend fun loadInProgress(): RefereeMatch? = store.mostRecentInProgressMatch()?.let(::restore)
 
     override suspend fun save(match: RefereeMatch) {
@@ -14,10 +17,22 @@ class RoomRefereeMatchStore(private val store: RefereeMatchStore) : squash.analy
         // serializes edits; Room's upsert replaces all children atomically.
         val snapshot = capture(match)
         store.upsert(snapshot)
+        syncBadges(match)
     }
 
     override suspend fun abandon(match: RefereeMatch) {
         store.upsert(capture(match).copy(status = MatchStatus.ABANDONED))
+        syncBadges(match)
+    }
+
+    /** Only players picked via "Kies speler" (a real id) ever earn a badge. */
+    private suspend fun syncBadges(match: RefereeMatch) {
+        val players = buildList {
+            match.player1Id?.let { add(it.uuidString to Player.player1) }
+            match.player2Id?.let { add(it.uuidString to Player.player2) }
+        }
+        if (players.isEmpty()) return
+        badgeAwardStore.syncAwards(match.id.uuidString, players, match.badgeInput)
     }
 
     private fun capture(match: RefereeMatch): RefereeMatchRecord {

@@ -22,6 +22,7 @@ import com.squashanalyzer.android.data.MatchStore
 import com.squashanalyzer.android.data.RoomCoachMatchStore
 import com.squashanalyzer.android.data.RefereeMatchStore
 import com.squashanalyzer.android.data.RoomRefereeMatchStore
+import com.squashanalyzer.android.data.BadgeAwardStore
 
 /** Only the Android lifecycle lives here; the screen is shared SwiftUI. */
 class SquashApplication : Application() {
@@ -40,8 +41,9 @@ class MainActivity : AppCompatActivity() {
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
         )
         val playerStore = RoomPlayerStore(AppDatabase.get(this).playerDao())
-        val matchStore = RoomCoachMatchStore(MatchStore(AppDatabase.get(this).matchDao()))
-        val refereeMatchStore = RoomRefereeMatchStore(RefereeMatchStore(AppDatabase.get(this).refereeMatchDao()))
+        val badgeAwardStore = BadgeAwardStore(AppDatabase.get(this).badgeAwardDao())
+        val matchStore = RoomCoachMatchStore(MatchStore(AppDatabase.get(this).matchDao()), badgeAwardStore)
+        val refereeMatchStore = RoomRefereeMatchStore(RefereeMatchStore(AppDatabase.get(this).refereeMatchDao()), badgeAwardStore)
         setContent {
             val stateHolder = rememberSaveableStateHolder()
             stateHolder.SaveableStateProvider(true) {

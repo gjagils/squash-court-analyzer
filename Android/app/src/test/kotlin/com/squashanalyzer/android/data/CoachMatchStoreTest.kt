@@ -23,8 +23,8 @@ class CoachMatchStoreTest {
     private lateinit var adapter: RoomCoachMatchStore
     private fun open() {
         db = Room.databaseBuilder(context, AppDatabase::class.java, filename)
-            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4).build()
-        adapter = RoomCoachMatchStore(MatchStore(db.matchDao()))
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5).build()
+        adapter = RoomCoachMatchStore(MatchStore(db.matchDao()), BadgeAwardStore(db.badgeAwardDao()))
     }
     @Before fun before() { context.deleteDatabase(filename); open() }
     @After fun after() { db.close(); context.deleteDatabase(filename) }

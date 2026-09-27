@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.squashanalyzer.android.data.AppDatabase
+import com.squashanalyzer.android.data.BadgeAwardStore
 import com.squashanalyzer.android.data.RefereeMatchStore
 import com.squashanalyzer.android.data.RoomRefereeMatchStore
 import kotlinx.coroutines.runBlocking
@@ -26,7 +27,7 @@ class RefereePersistenceTest {
     @Before fun seed() = runBlocking {
         db = AppDatabase.get(ApplicationProvider.getApplicationContext())
         db.refereeMatchDao().deleteAll()
-        store = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()))
+        store = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()), BadgeAwardStore(db.badgeAwardDao()))
         seeded = RefereeMatch(player1Name = "RefTest", player2Name = "Tegenstander", bestOf = 5, startingServer = Player.player1)
         store.save(seeded)
     }

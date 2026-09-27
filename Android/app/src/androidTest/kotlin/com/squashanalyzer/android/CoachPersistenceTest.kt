@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.squashanalyzer.android.data.AppDatabase
+import com.squashanalyzer.android.data.BadgeAwardStore
 import com.squashanalyzer.android.data.MatchStore
 import com.squashanalyzer.android.data.RoomCoachMatchStore
 import kotlinx.coroutines.runBlocking
@@ -25,7 +26,7 @@ class CoachPersistenceTest {
 
     @Before fun seed() = runBlocking {
         db = AppDatabase.get(ApplicationProvider.getApplicationContext())
-        store = RoomCoachMatchStore(MatchStore(db.matchDao()))
+        store = RoomCoachMatchStore(MatchStore(db.matchDao()), BadgeAwardStore(db.badgeAwardDao()))
         seeded = Match()
         seeded.setupMatch(player1 = "CoachTest", player2 = "Tegenstander", startingServer = Player.player1)
         store.save(seeded)

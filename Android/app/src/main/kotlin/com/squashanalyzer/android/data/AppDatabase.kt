@@ -11,17 +11,34 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     entities = [
         MatchEntity::class, GameEntity::class, PointEntity::class, LetEntity::class, PlayerEntity::class,
         RefereeMatchEntity::class, RefereeGameEntity::class, RefereePointEntity::class, RefereeCurrentPointEntity::class,
+        BadgeAwardEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun matchDao(): MatchDao
     abstract fun playerDao(): PlayerDao
     abstract fun refereeMatchDao(): RefereeMatchDao
+    abstract fun badgeAwardDao(): BadgeAwardDao
 
     companion object {
         @Volatile private var instance: AppDatabase? = null
+
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS badge_awards (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        playerId TEXT NOT NULL,
+                        badge TEXT NOT NULL,
+                        matchId TEXT NOT NULL,
+                        earnedAt INTEGER NOT NULL,
+                        deletedAt INTEGER
+                    )
+                """.trimIndent())
+            }
+        }
 
         val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -129,7 +146,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "squash-analyzer.db",
                 ).addCallback(enableForeignKeys)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build().also { instance = it }
             }
     }

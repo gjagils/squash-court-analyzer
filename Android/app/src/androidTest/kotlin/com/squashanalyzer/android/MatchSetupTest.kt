@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.squashanalyzer.android.data.AppDatabase
+import com.squashanalyzer.android.data.BadgeAwardStore
 import com.squashanalyzer.android.data.PlayerEntity
 import com.squashanalyzer.android.data.RefereeMatchStore
 import com.squashanalyzer.android.data.RoomRefereeMatchStore
@@ -47,7 +48,7 @@ class MatchSetupTest {
         compose.onNodeWithText("Start").performClick()
         awaitText("SCHEIDSRECHTER")
 
-        val store = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()))
+        val store = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()), BadgeAwardStore(db.badgeAwardDao()))
         val restored = runBlocking { store.loadInProgress()!! }
         assertEquals("Kies-speler-test", restored.player1Name)
         assertEquals(playerId, restored.player1Id?.uuidString)

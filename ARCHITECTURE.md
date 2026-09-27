@@ -112,8 +112,22 @@ itself, backs a badge-count pill on each row of `PlayerDirectoryView`
 (a `BadgeMedallion` grid) it taps through to — named `Shared...`, not
 `PlayerBadgesView`, for the same reason as `SharedBadgeCatalogView`: the
 iOS app target already has its own, richer `PlayerBadgesView`. There is no
-"Badges verdiend" strip on the game/match-over screen yet, and the history
-browser (needed for career badges) is still future work.
+"Badges verdiend" strip on the game/match-over screen yet.
+
+Android also now has a read-only history browser: a shared
+`MatchHistoryStore` protocol (`loadHistory() -> [MatchHistorySummary]`,
+`MatchHistorySummary` a small flat record — names, games won, status, date,
+not full point-by-point data) backs the "Afgeronde wedstrijden" tile.
+`RoomMatchHistoryStore` merges completed/abandoned coach and referee
+matches into one sorted list; games-won counts come straight from each
+record's own game winners rather than restoring a live `Match`/
+`RefereeMatch`, so a head start is not added in (an accepted simplification
+for this summary list). The new `SharedMatchHistoryView` (much smaller than
+iOS' full `MatchHistoryView` — no import/export, backup or filters, no
+tap-through detail yet) renders it. Career badges are still out of scope
+even with history now available, since they need `BadgeEngine`'s
+`CareerMatch` input shape, not yet built from `MatchHistorySummary` — a
+separate next step.
 Full plan, phase status, toolchain setup and transpile gotchas found so far:
 see [`docs/android-port.md`](docs/android-port.md). Read that file before
 touching anything Android-related, and keep it updated as phases complete.

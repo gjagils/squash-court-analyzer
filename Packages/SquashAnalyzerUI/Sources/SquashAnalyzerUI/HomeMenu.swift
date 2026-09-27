@@ -172,17 +172,21 @@ public struct AndroidHomeView: View {
 
     private let playerStore: any PlayerProfileStore
     private let badgeStore: any PlayerBadgeSummaryStore
+    private let historyStore: any MatchHistoryStore
     @State private var showingPlayers = false
     @State private var showingCoach = false
     @State private var showingReferee = false
     @State private var showingBadges = false
+    @State private var showingHistory = false
     private let matchStore: any CoachMatchStore
     private let refereeMatchStore: any RefereeMatchStore
 
     public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
+                historyStore: any MatchHistoryStore,
                 matchStore: any CoachMatchStore, refereeMatchStore: any RefereeMatchStore) {
         self.playerStore = playerStore
         self.badgeStore = badgeStore
+        self.historyStore = historyStore
         self.matchStore = matchStore
         self.refereeMatchStore = refereeMatchStore
     }
@@ -204,6 +208,9 @@ public struct AndroidHomeView: View {
                 .navigationDestination(isPresented: $showingBadges) {
                     SharedBadgeCatalogView()
                 }
+                .navigationDestination(isPresented: $showingHistory) {
+                    SharedMatchHistoryView(store: historyStore)
+                }
         }
         .preferredColorScheme(.dark)
     }
@@ -221,7 +228,7 @@ public struct AndroidHomeView: View {
                         HomeMenuTiles(
                             onCoach: { showingCoach = true },
                             onReferee: { showingReferee = true },
-                            onHistory: { showAvailability("Afgeronde wedstrijden") },
+                            onHistory: { showingHistory = true },
                             onPlayers: { showingPlayers = true },
                             onBadges: { showingBadges = true }
                         )

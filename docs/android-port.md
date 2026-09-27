@@ -2,26 +2,28 @@
 
 **Status: Fase 0 t/m 4 afgerond; fase 5 Spelers, `CourtView`, coach-modus
 scoren, scheidsrechtermodus (beide ínclusief opslag/hervatten), de
-badges-catalogus, "Kies speler" bij nieuwe wedstrijden, en echte
-badge-awards (berekenen, opslaan én tonen in Spelers) zijn afgerond
-(2026-09-27).** Android heeft nu een echt startscherm, een werkend
-spelersbeheer-scherm, een volledig werkende coach-scoreflow (tik score →
-puntsoort → zone → slag, undo, game/match-einde) en een werkende
-scheidsrechtermodus (punten, LET, STROKE, undo, game-wissel) — beide met
-automatische opslag/hervatten via Room, een "Kies speler"-stap vóór een
-nieuwe wedstrijd start (`MatchSetupView`, gedeeld), en automatische
-badge-berekening bij elke opslag (`BadgeAwardStore`, Room-schema 5) die nu
-ook zichtbaar is: een badge-aantal per speler in het Spelers-scherm, met een
+badges-catalogus, "Kies speler" bij nieuwe wedstrijden, echte badge-awards
+(berekenen, opslaan én tonen in Spelers), en een geschiedenisoverzicht van
+afgeronde wedstrijden zijn afgerond (2026-09-27).** Android heeft nu een
+echt startscherm, een werkend spelersbeheer-scherm, een volledig werkende
+coach-scoreflow (tik score → puntsoort → zone → slag, undo, game/match-einde)
+en een werkende scheidsrechtermodus (punten, LET, STROKE, undo, game-wissel)
+— beide met automatische opslag/hervatten via Room, een "Kies speler"-stap
+vóór een nieuwe wedstrijd start (`MatchSetupView`, gedeeld), en automatische
+badge-berekening bij elke opslag (`BadgeAwardStore`, Room-schema 5) die
+zichtbaar is via een badge-aantal per speler in het Spelers-scherm met een
 tik-door naar hun verdiende badges (`SharedPlayerBadgesView`) — plus een
-vijfde starttegel "Badges" met de volledige badge-catalogus. Allemaal
-test-gedekt en (waar er UI is) handmatig op de emulator geverifieerd.
-`Game`, `Match`, `Point`, `LetCall`, `ServerSide`, `MatchStatus`,
-`RefereeMatch` en `Match`/`RefereeMatch`'s `badgeInput`/`rallyWinners` zijn
-gedeeld via `SquashAnalyzerCore`, met een `CoachMatchStore`-, een
-`RefereeMatchStore`- en een `PlayerBadgeSummaryStore`-protocol ernaast.
-Regressie bij de laatste stap: `:app:testDebugUnitTest` groen,
-`:app:connectedDebugAndroidTest` (12/12, inclusief `PlayerBadgesScreenTest`),
-`swift test`/`skip test` groen, volledige iOS-testsuite (`xcodebuild test
+vijfde starttegel "Badges" met de volledige badge-catalogus, en een echte
+"Afgeronde wedstrijden"-tegel die coach- en scheidsrechterwedstrijden samen
+toont (`SharedMatchHistoryView`). Allemaal test-gedekt en (waar er UI is)
+handmatig op de emulator geverifieerd. `Game`, `Match`, `Point`, `LetCall`,
+`ServerSide`, `MatchStatus`, `RefereeMatch` en `Match`/`RefereeMatch`'s
+`badgeInput`/`rallyWinners` zijn gedeeld via `SquashAnalyzerCore`, met een
+`CoachMatchStore`-, een `RefereeMatchStore`-, een `PlayerBadgeSummaryStore`-
+en een `MatchHistoryStore`-protocol ernaast. Regressie bij de laatste stap:
+`:app:testDebugUnitTest` groen, `:app:connectedDebugAndroidTest` (13/13,
+inclusief `MatchHistoryScreenTest`), `swift test`/`skip test` groen,
+volledige iOS-testsuite (`xcodebuild test
 -skipPackagePluginValidation`) **TEST SUCCEEDED**. De Badges-tegel
 verscheen bij een eerdere stap ook op iOS' eigen homescherm, zie Fase 5
 hieronder. Geen TestFlight-upload.
@@ -1149,16 +1151,77 @@ Actuele verificatie:
   -destination 'platform=iOS Simulator,id=6AC09A50-94A7-4348-BB84-DA1EC43A4644'
   -skipPackagePluginValidation`: **TEST SUCCEEDED**.
 
+## Fase 5 — Geschiedenis: overzicht van afgeronde wedstrijden (AFGEROND, 2026-09-27)
+
+De "Afgeronde wedstrijden"-tegel opent nu een echt scherm in plaats van de
+placeholder-melding. Sterk verkleind t.o.v. iOS' volledige
+`MatchHistoryView` (1132 regels: import/export, backup, filters, een
+incomplete wedstrijd aanvullen) — alleen een lijst, geen tap-through-detail.
+
+- **Nieuw, gedeeld `MatchHistoryStore`-protocol** in `SquashAnalyzerCore`
+  (`loadHistory() -> [MatchHistorySummary]`) met een klein, platte
+  `MatchHistorySummary`-record (naam, aantal games, status, datum) — geen
+  volledige punt-voor-punt data, dat is bewust te veel voor een lijst.
+- **`RoomMatchHistoryStore`** (Android) voegt coach- en
+  scheidsrechterwedstrijden samen tot één, op datum gesorteerde lijst.
+  Alleen voltooide/afgebroken wedstrijden (`status IN ('completed',
+  'abandoned')`, nieuwe DAO-query op beide tabellen); lopende wedstrijden
+  blijven uitgesloten. Games-gewonnen-aantallen komen rechtstreeks uit elke
+  record z'n eigen gamelijst (`GameRecord.winner`/`CompletedRefereeGame.winner`),
+  niet via het herstellen van een levend `Match`/`RefereeMatch`-object — een
+  bewuste vereenvoudiging die head-start-games (`player1GamesBefore`) niet
+  meetelt.
+- **Nieuw, gedeeld `SharedMatchHistoryView`** (weer met `Shared...`-prefix,
+  zelfde botsingsreden als de andere gedeelde schermen: iOS heeft al een
+  eigen `MatchHistoryView`): een simpele kaartenlijst met spelernamen,
+  COACH/SCHEIDSRECHTER-label, AFGEBROKEN-label waar van toepassing, datum en
+  eindstand.
+- **Bekende Skip-gotcha (opnieuw) vermeden, niet opnieuw geraakt**: datum-
+  weergave gebruikt `DateFormatter` met een vast patroon, niet
+  `Date.FormatStyle`/`.formatted(date:time:)` — die laatste heeft geen
+  Android-ondersteuning in SkipFoundation, al gedocumenteerd bij
+  `MatchShareReport.swift`.
+- **Testfout gevonden en gefixt — in de test, niet de productiecode**: een
+  eerste versie van `RoomMatchHistoryStoreTest` verwachtte dat een
+  coachwedstrijd die pas na 2× `onGameEnd()` een derde game "stilzwijgend"
+  wint, maar 2 games-gewonnen zou tellen. In werkelijkheid bevat
+  `Match.games` de huidige game al vanaf het begin (`Game.winner` is
+  berekend uit de score, niet pas gezet bij `onGameEnd()`), dus alle 3 games
+  tellen al mee zodra de score dat toelaat — precies het gedrag dat de
+  bestaande `CoachMatchStoreTest` ook al aantoont. Testverwachting
+  gecorrigeerd naar 3, geen productiecode gewijzigd.
+- `HomeScreenTest` bijgewerkt: "Afgeronde wedstrijden" uit de
+  placeholder-lus gehaald (alleen "Instellingen" resteert als placeholder),
+  en de activity-recreation-test gebruikt nu "Instellingen" als doel in
+  plaats van "Afgeronde wedstrijden".
+- Career-badges blijven bewust nog buiten scope, ook al bestaat er nu een
+  geschiedenis: die vereisen `BadgeEngine.careerBadges(in:history:...)` met
+  een specifieke `CareerMatch`-invoervorm die nog niet is opgebouwd uit
+  `MatchHistorySummary`. Een volgende, aparte stap.
+
+Actuele verificatie:
+
+- `:app:testDebugUnitTest`: groen, inclusief nieuwe `RoomMatchHistoryStoreTest`.
+- `:app:connectedDebugAndroidTest`: 13/13 groen, inclusief nieuwe
+  `MatchHistoryScreenTest`.
+- `swift test --package-path Packages/SquashAnalyzerCore`: 16 XCTests groen,
+  `skip test` 15/15 groen.
+- `xcodebuild test -project SquashAnalyzer.xcodeproj -scheme SquashAnalyzer
+  -destination 'platform=iOS Simulator,id=6AC09A50-94A7-4348-BB84-DA1EC43A4644'
+  -skipPackagePluginValidation`: **TEST SUCCEEDED**.
+- Handmatig op de emulator geverifieerd: lege staat toont de juiste uitleg;
+  het gevulde pad (voltooide/afgebroken wedstrijd verschijnt, tikken/terug
+  werkt) is grondig automatisch gedekt door `MatchHistoryScreenTest`.
+
 ## Fase 5 — Volgende onderdelen (NOG NIET GESTART)
 
-Volgorde: geschiedenis (overzicht van opgeslagen coach- én
-scheidsrechterwedstrijden — opent ook de deur naar career-badges, en een
-"Badges verdiend"-strip op het game/match-einde-scherm kan dan als kleine
-losse toevoeging) → delen (linkjes overzetten; **CloudKit-uitnodigen
-blijft bewust iOS-only**, dat is geen gat maar een keuze) → Mijn team
-(netwerk/regex, moet met kleine aanpassingen overgaan) → instellingen/AI
-Coach (Keychain is iOS-only; Android krijgt EncryptedSharedPreferences
-achter dezelfde kleine abstractie).
+Volgorde: een "Badges verdiend"-strip op het game/match-einde-scherm (raakt
+`CoachScoringView`/`RefereeScoringView`'s bestaande banners) → career-badges
+(bouwt op de nieuwe geschiedenis) → delen (linkjes overzetten;
+**CloudKit-uitnodigen blijft bewust iOS-only**, dat is geen gat maar een
+keuze) → Mijn team (netwerk/regex, moet met kleine aanpassingen overgaan) →
+instellingen/AI Coach (Keychain is iOS-only; Android krijgt
+EncryptedSharedPreferences achter dezelfde kleine abstractie).
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 

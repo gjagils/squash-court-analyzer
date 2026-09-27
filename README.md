@@ -5,10 +5,10 @@ De Android-port gebruikt gedeelde Swift/SwiftUI via Skip en Room voor opslag.
 
 Android heeft spelersbeheer, zowel coachscoring als scheidsrechtermodus
 (punten, LET, STROKE, undo, game-wissel, "Kies speler" bij het starten) met
-automatische opslag en hervatten, een badges-catalogus, en berekent, bewaart
-en toont nu ook echte badge-awards per speler (badge-aantal in Spelers, met
-een scherm voor de verdiende badges). Het overzicht van opgeslagen
-wedstrijden volgt nog.
+automatische opslag en hervatten, een badges-catalogus met echte, per speler
+berekende en bewaarde badge-awards (badge-aantal in Spelers, met een scherm
+voor de verdiende badges), en een overzicht van afgeronde coach- en
+scheidsrechterwedstrijden.
 
 - [Architectuur](ARCHITECTURE.md)
 - [Android-status, bouwinstructies en resterende stappen](docs/android-port.md)

@@ -69,6 +69,8 @@ class RefereeMatchStore(private val dao: RefereeMatchDao) {
         dao.upsertMatchWithChildren(entity, games, points, currentPoints)
     }
 
+    suspend fun history(): List<RefereeMatchRecord> = dao.completedAndAbandoned().map { assemble(it) }
+
     suspend fun mostRecentInProgressMatch(): RefereeMatchRecord? =
         dao.mostRecentMatchWithStatus(MatchStatus.IN_PROGRESS)?.let { assemble(it) }
 

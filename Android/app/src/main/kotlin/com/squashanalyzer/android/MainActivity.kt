@@ -23,6 +23,7 @@ import com.squashanalyzer.android.data.RoomCoachMatchStore
 import com.squashanalyzer.android.data.RefereeMatchStore
 import com.squashanalyzer.android.data.RoomRefereeMatchStore
 import com.squashanalyzer.android.data.BadgeAwardStore
+import com.squashanalyzer.android.data.RoomMatchHistoryStore
 
 /** Only the Android lifecycle lives here; the screen is shared SwiftUI. */
 class SquashApplication : Application() {
@@ -42,14 +43,17 @@ class MainActivity : AppCompatActivity() {
         )
         val playerStore = RoomPlayerStore(AppDatabase.get(this).playerDao())
         val badgeAwardStore = BadgeAwardStore(AppDatabase.get(this).badgeAwardDao())
-        val matchStore = RoomCoachMatchStore(MatchStore(AppDatabase.get(this).matchDao()), badgeAwardStore)
-        val refereeMatchStore = RoomRefereeMatchStore(RefereeMatchStore(AppDatabase.get(this).refereeMatchDao()), badgeAwardStore)
+        val coachMatchStore = MatchStore(AppDatabase.get(this).matchDao())
+        val refereeMatchDataStore = RefereeMatchStore(AppDatabase.get(this).refereeMatchDao())
+        val matchStore = RoomCoachMatchStore(coachMatchStore, badgeAwardStore)
+        val refereeMatchStore = RoomRefereeMatchStore(refereeMatchDataStore, badgeAwardStore)
+        val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore)
         setContent {
             val stateHolder = rememberSaveableStateHolder()
             stateHolder.SaveableStateProvider(true) {
                 PresentationRoot(defaultColorScheme = ColorScheme.dark, context = ComposeContext()) { context ->
                     Box(modifier = context.modifier.fillMaxSize()) {
-                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore).Compose(context = context.content())
+                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore).Compose(context = context.content())
                     }
                 }
                 SideEffect { stateHolder.removeState(true) }

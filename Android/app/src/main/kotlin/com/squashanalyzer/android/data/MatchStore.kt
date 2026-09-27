@@ -84,6 +84,8 @@ class MatchStore(private val dao: MatchDao) {
         dao.upsertMatchWithChildren(entity, games, points, lets)
     }
 
+    suspend fun history(): List<MatchRecord> = dao.completedAndAbandoned().map { assemble(it) }
+
     suspend fun mostRecentInProgressMatch(): MatchRecord? =
         dao.mostRecentMatchWithStatus(MatchStatus.IN_PROGRESS)?.let { assemble(it) }
 

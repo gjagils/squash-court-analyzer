@@ -16,9 +16,10 @@ class HomeScreenTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
 
     @Test fun allDestinationsExplainAvailabilityAndReturnHome() {
-        // "Coach" and "Scheidsrechter" now open real screens covered by
-        // dedicated tests; the rest are still placeholders.
-        for (label in listOf("Afgeronde wedstrijden", "Instellingen")) {
+        // "Coach", "Scheidsrechter", "Badges" and "Afgeronde wedstrijden" now
+        // open real screens covered by dedicated tests; only "Instellingen"
+        // is still a placeholder.
+        for (label in listOf("Instellingen")) {
             compose.onNodeWithContentDescription(label).assertIsDisplayed().performClick()
             compose.onNodeWithText("Deze functie is nog niet beschikbaar op Android. We voegen de onderdelen stap voor stap toe.").assertIsDisplayed()
             compose.onNodeWithText("Begrepen").performClick()
@@ -28,7 +29,7 @@ class HomeScreenTest {
 
     @Test fun homeSurvivesActivityRecreation() {
         compose.activityRule.scenario.recreate()
-        compose.onNodeWithContentDescription("Afgeronde wedstrijden").assertIsDisplayed().performClick()
+        compose.onNodeWithContentDescription("Instellingen").assertIsDisplayed().performClick()
         compose.onNodeWithText("Begrepen").assertIsDisplayed().performClick()
         compose.onNodeWithContentDescription("Spelers").assertIsDisplayed()
     }

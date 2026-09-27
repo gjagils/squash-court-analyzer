@@ -30,6 +30,9 @@ interface MatchDao {
     @Query("SELECT * FROM matches WHERE status = :status ORDER BY updatedAt DESC LIMIT 1")
     suspend fun mostRecentMatchWithStatus(status: String): MatchEntity?
 
+    @Query("SELECT * FROM matches WHERE status IN ('completed', 'abandoned') ORDER BY updatedAt DESC")
+    suspend fun completedAndAbandoned(): List<MatchEntity>
+
     @Query("SELECT * FROM games WHERE matchId = :matchId ORDER BY gameNumber ASC")
     suspend fun gamesForMatch(matchId: String): List<GameEntity>
 

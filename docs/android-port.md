@@ -3,9 +3,11 @@
 **Status: Fase 0 t/m 4 afgerond; fase 5 Spelers, `CourtView`, coach-modus
 scoren, scheidsrechtermodus (beide ínclusief opslag/hervatten), de
 badges-catalogus, "Kies speler" bij nieuwe wedstrijden, echte badge-awards
-(berekenen, opslaan, tonen in Spelers, én een "Badges verdiend"-strip op het
-match-einde-scherm), en een geschiedenisoverzicht van afgeronde wedstrijden
-zijn afgerond (2026-09-27).** Android heeft nu een echt startscherm, een
+inclusief career-badges (berekenen, opslaan, tonen in Spelers, én een
+"Badges verdiend"-strip op het match-einde-scherm), en een
+geschiedenisoverzicht van afgeronde wedstrijden zijn afgerond
+(2026-09-27).** Alle badges-substappen zijn hiermee compleet. Android heeft
+nu een echt startscherm, een
 werkend spelersbeheer-scherm, een volledig werkende coach-scoreflow (tik
 score → puntsoort → zone → slag, undo, game/match-einde) en een werkende
 scheidsrechtermodus (punten, LET, STROKE, undo, game-wissel) — beide met
@@ -1261,15 +1263,70 @@ Actuele verificatie:
   -destination 'platform=iOS Simulator,id=6AC09A50-94A7-4348-BB84-DA1EC43A4644'
   -skipPackagePluginValidation`: **TEST SUCCEEDED**.
 
+## Fase 5 — Career-badges (AFGEROND, 2026-09-27)
+
+De laatste badge-categorie: hat trick, off the mark, centurion, ten out of
+ten, nemesis, veteran — die tellen over al iemands wedstrijden op dit
+toestel, niet slechts één.
+
+- **`BadgeAwardStore` kreeg twee nieuwe afhankelijkheden**: `MatchStore` en
+  `RefereeMatchStore` (de plain Kotlin-stores, niet de Room-adapters) — nodig
+  om, voor een gegeven speler-id, hun hele geschiedenis (coach + referee,
+  alleen completed/abandoned) om te zetten naar `BadgeEngine.CareerMatch`
+  (`matchId`, `date`, `won`, `pointsWon`, `opponentKey`). Games-gewonnen en
+  punten komen uit dezelfde velden als `RoomMatchHistoryStore` al gebruikt
+  (`GameRecord.winner`/`CompletedRefereeGame.winner`, spelerscores per game).
+  `opponentKey` is de andere speler's id, of anders diens getypte naam (voor
+  de Nemesis-badge, die specifiek dezelfde tegenstander moet herkennen).
+- **`BadgeEngine.careerBadges(in:history:earnedElsewhere:)` rapporteert per
+  wedstrijd alleen wát die ÉNE wedstrijd toevoegde** (bv. "off the mark"
+  alleen in de wedstrijd waar de 0-naar-1-drempel wordt gehaald) — niet "heeft
+  deze speler ooit badge X gehaald". Om dat laatste (nodig voor weergave) te
+  krijgen, doorloopt `BadgeAwardStore.careerBadges(playerId)` de hele,
+  chronologisch gesorteerde geschiedenis en unieert alle per-wedstrijd
+  resultaten.
+- **Niet opgeslagen in `badge_awards`** — in tegenstelling tot per-wedstrijd
+  badges kunnen career-badges wijzigen zonder dat er een nieuwe wedstrijd
+  wordt opgeslagen (bv. een 25e wedstrijd die al eerder is opgeslagen, maar
+  nu pas meetelt omdat "veteran" opnieuw wordt berekend), dus deze worden
+  altijd live berekend in `badges(forPlayer:)` in plaats van gesynchroniseerd
+  bij een save.
+- Dit betekent `PlayerBadgeSummaryStore.badges(forPlayer:)` — dus zowel de
+  badge-telling in Spelers als `SharedPlayerBadgesView` — toont nu
+  automatisch ook career-badges, zonder dat die UI zelf iets hoefde te
+  wijzigen.
+- **Kotlin-valkuil gevonden en gefixt (geen Skip-bug)**: `BadgeEngine`'s
+  Swift-parameter `earnedElsewhere: Set<BadgeKind>` transpileert naar
+  `skip.lib.Set<BadgeKind>`, niet Kotlin's eigen `kotlin.collections.Set` —
+  net als `skip.lib.Array`, moet je expliciet `skip.lib.Set(...)`
+  construeren (`import skip.lib.Set as SwiftSet`) in plaats van een gewone
+  Kotlin-`Set`/`.toSet()` door te geven.
+- Nieuwe test **`CareerBadgesTest`** (Robolectric, 3 tests): eerste
+  overwinning geeft "off the mark"; 3 overwinningen op rij geven "hat
+  trick"; career-badges lekken niet naar een niet-betrokken speler-id.
+
+Actuele verificatie:
+
+- `:app:testDebugUnitTest`: groen, inclusief de nieuwe `CareerBadgesTest`.
+- `:app:connectedDebugAndroidTest`: 13/13 groen (geen nieuwe UI, dus geen
+  nieuwe instrumented test nodig — bestaande dekking bevestigt dat niets is
+  gebroken, inclusief de vier bestaande tests die nu ook `MatchStore`/
+  `RefereeMatchStore` importeren voor `BadgeAwardStore`'s nieuwe parameters).
+- `swift test --package-path Packages/SquashAnalyzerCore`: 16 XCTests groen,
+  `skip test` 15/15 groen.
+- `xcodebuild test -project SquashAnalyzer.xcodeproj -scheme SquashAnalyzer
+  -destination 'platform=iOS Simulator,id=6AC09A50-94A7-4348-BB84-DA1EC43A4644'
+  -skipPackagePluginValidation`: **TEST SUCCEEDED**.
+
 ## Fase 5 — Volgende onderdelen (NOG NIET GESTART)
 
-Volgorde: career-badges (bouwt op de geschiedenis: `BadgeEngine.careerBadges`
-heeft een `CareerMatch`-lijst nodig, nog niet opgebouwd uit
-`MatchHistorySummary`) → delen (linkjes overzetten; **CloudKit-uitnodigen
-blijft bewust iOS-only**, dat is geen gat maar een keuze) → Mijn team
-(netwerk/regex, moet met kleine aanpassingen overgaan) → instellingen/AI
-Coach (Keychain is iOS-only; Android krijgt EncryptedSharedPreferences
-achter dezelfde kleine abstractie).
+Alle badges-substappen zijn nu afgerond (catalogus, opslag, "Kies speler",
+per-wedstrijd + career-berekening, weergave in Spelers/spelerscherm/
+match-einde-strip) en de geschiedenis bestaat. Volgorde: delen (linkjes
+overzetten; **CloudKit-uitnodigen blijft bewust iOS-only**, dat is geen gat
+maar een keuze) → Mijn team (netwerk/regex, moet met kleine aanpassingen
+overgaan) → instellingen/AI Coach (Keychain is iOS-only; Android krijgt
+EncryptedSharedPreferences achter dezelfde kleine abstractie).
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 

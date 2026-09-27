@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.squashanalyzer.android.data.AppDatabase
 import com.squashanalyzer.android.data.BadgeAwardStore
 import com.squashanalyzer.android.data.MatchStore
+import com.squashanalyzer.android.data.RefereeMatchStore
 import com.squashanalyzer.android.data.RoomCoachMatchStore
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -27,7 +28,7 @@ class MatchHistoryScreenTest {
 
     @Before fun seed() = runBlocking {
         db = AppDatabase.get(ApplicationProvider.getApplicationContext())
-        val store = RoomCoachMatchStore(MatchStore(db.matchDao()), BadgeAwardStore(db.badgeAwardDao()))
+        val store = RoomCoachMatchStore(MatchStore(db.matchDao()), BadgeAwardStore(db.badgeAwardDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao())))
         seeded = Match()
         seeded.setupMatch(player1 = "HistoryP1", player2 = "HistoryP2", startingServer = Player.player1)
         repeat(3) { game ->

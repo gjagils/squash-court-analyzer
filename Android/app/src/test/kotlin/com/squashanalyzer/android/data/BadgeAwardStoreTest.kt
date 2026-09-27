@@ -25,7 +25,7 @@ class BadgeAwardStoreTest {
         context.deleteDatabase(filename)
         db = Room.databaseBuilder(context, AppDatabase::class.java, filename)
             .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5).build()
-        badgeStore = BadgeAwardStore(db.badgeAwardDao())
+        badgeStore = BadgeAwardStore(db.badgeAwardDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao()))
         coachAdapter = RoomCoachMatchStore(MatchStore(db.matchDao()), badgeStore)
     }
     @After fun after() { db.close(); context.deleteDatabase(filename) }

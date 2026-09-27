@@ -128,10 +128,22 @@ record's own game winners rather than restoring a live `Match`/
 `RefereeMatch`, so a head start is not added in (an accepted simplification
 for this summary list). The new `SharedMatchHistoryView` (much smaller than
 iOS' full `MatchHistoryView` — no import/export, backup or filters, no
-tap-through detail yet) renders it. Career badges are still out of scope
-even with history now available, since they need `BadgeEngine`'s
-`CareerMatch` input shape, not yet built from `MatchHistorySummary` — a
-separate next step.
+tap-through detail yet) renders it.
+
+Career badges (hat trick, off the mark, centurion, ten out of ten, nemesis,
+veteran) are now computed too, completing the badges work. `BadgeAwardStore`
+takes `MatchStore`/`RefereeMatchStore` (the plain Kotlin stores, not the Room
+adapters) as extra dependencies to build each `BadgeEngine.CareerMatch`
+(matchId, date, won, pointsWon, opponentKey) from a player's whole
+completed/abandoned history — games-won and points come from the same game
+winners `RoomMatchHistoryStore` already reads. Since `BadgeEngine.careerBadges(in:...)`
+only reports what one specific match added, `BadgeAwardStore.badges(forPlayer:)`
+replays the full sorted history and unions every match's result to get "does
+this player currently have badge X". Career badges are never written to
+`badge_awards` — they're computed live on every query, since they can change
+without any new match being saved. Because they're folded into the same
+`badges(forPlayer:)` that already powers the Spelers badge-count pill and
+`SharedPlayerBadgesView`, no UI changed to pick them up.
 Full plan, phase status, toolchain setup and transpile gotchas found so far:
 see [`docs/android-port.md`](docs/android-port.md). Read that file before
 touching anything Android-related, and keep it updated as phases complete.

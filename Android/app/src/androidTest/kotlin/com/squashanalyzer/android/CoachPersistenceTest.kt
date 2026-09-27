@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.squashanalyzer.android.data.AppDatabase
 import com.squashanalyzer.android.data.BadgeAwardStore
 import com.squashanalyzer.android.data.MatchStore
+import com.squashanalyzer.android.data.RefereeMatchStore
 import com.squashanalyzer.android.data.RoomCoachMatchStore
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -26,7 +27,7 @@ class CoachPersistenceTest {
 
     @Before fun seed() = runBlocking {
         db = AppDatabase.get(ApplicationProvider.getApplicationContext())
-        store = RoomCoachMatchStore(MatchStore(db.matchDao()), BadgeAwardStore(db.badgeAwardDao()))
+        store = RoomCoachMatchStore(MatchStore(db.matchDao()), BadgeAwardStore(db.badgeAwardDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao())))
         seeded = Match()
         seeded.setupMatch(player1 = "CoachTest", player2 = "Tegenstander", startingServer = Player.player1)
         store.save(seeded)

@@ -1,4 +1,5 @@
 import XCTest
+import Foundation
 @testable import SquashAnalyzerCore
 
 // Ported from SquashAnalyzerTests/BadgeEngineTests.swift as part of the
@@ -85,12 +86,12 @@ final class BadgeEngineTests: XCTestCase {
     }
 
     func testTenAllGames() {
-        let tenAll = game(Array(repeating: [(.player1, 1), (.player2, 1)], count: 10).flatMap { $0 } + [(.player1, 2)])
+        let tenAll = game(Array(repeating: [(Player.player1, 1), (Player.player2, 1)], count: 10).flatMap { $0 } + [(Player.player1, 2)])
         XCTAssertTrue(engine.badges(for: input([tenAll]))[.player1]!.contains(.coolUnderPressure))
         XCTAssertFalse(engine.badges(for: input([tenAll]))[.player1]!.contains(.doubleTrouble))
         XCTAssertTrue(engine.badges(for: input([tenAll, tenAll]))[.player1]!.contains(.doubleTrouble))
 
-        let long = game(Array(repeating: [(.player1, 1), (.player2, 1)], count: 19).flatMap { $0 } + [(.player1, 2)])
+        let long = game(Array(repeating: [(Player.player1, 1), (Player.player2, 1)], count: 19).flatMap { $0 } + [(Player.player1, 2)])
         XCTAssertTrue(engine.badges(for: input([long]))[.player1]!.contains(.marathonMan), "21-19")
     }
 
@@ -108,7 +109,7 @@ final class BadgeEngineTests: XCTestCase {
 
     func testHoudiniSavesThreeMatchPoints() {
         // 0-2 down, the deciding game goes from 7-10 to 12-10 → three match points saved
-        let decider = game(Array(repeating: [(.player1, 1), (.player2, 1)], count: 7).flatMap { $0 } + [(.player2, 3), (.player1, 5)])
+        let decider = game(Array(repeating: [(Player.player1, 1), (Player.player2, 1)], count: 7).flatMap { $0 } + [(Player.player2, 3), (Player.player1, 5)])
         let match = input([closeGame(.player1), closeGame(.player1), decider], winner: .player1, before: (0, 2))
         XCTAssertEqual(engine.matchPointsSaved(by: .player1, in: match), 3)
         XCTAssertTrue(engine.badges(for: match)[.player1]!.contains(.houdini))
@@ -123,7 +124,9 @@ final class BadgeEngineTests: XCTestCase {
 
     func testCareerBadges() {
         func history(_ wins: [Bool], points: Int = 30) -> [BadgeEngine.CareerMatch] {
-            wins.enumerated().map { .init(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval($0.offset)), won: $0.element, pointsWon: points) }
+            wins.enumerated().map { entry in
+                BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval(entry.offset)), won: entry.element, pointsWon: points)
+            }
         }
         let first = history([false, true, true, true])
         XCTAssertEqual(engine.careerBadges(in: first[1].matchId, history: first, earnedElsewhere: []), [.offTheMark])
@@ -140,7 +143,7 @@ final class BadgeEngineTests: XCTestCase {
 
     func testPerfectTenAndUnbreakable() {
         let earned = engine.badges(for: input([game([(.player1, 11)])]))
-        XCTAssertTrue(earned[.player1]!.isSuperset(of: [.perfectTen, .unbreakable]))
+        XCTAssertTrue(earned[.player1]!.isSuperset(of: [BadgeKind.perfectTen, BadgeKind.unbreakable]))
         let trailed = engine.badges(for: input([game([(.player2, 1), (.player1, 11)])]))
         XCTAssertFalse(trailed[.player1]!.contains(.unbreakable), "was 0-1 down")
     }
@@ -167,10 +170,10 @@ final class BadgeEngineTests: XCTestCase {
         XCTAssertTrue(earned[.player1]!.contains(.frontRowKing))
         XCTAssertTrue(earned[.player2]!.contains(.strokeOfGenius))
 
-        let firstLong = [BadgeRally(winner: .player1, duration: 90), BadgeRally(winner: .player2, duration: 70)]
+        let firstLong = [BadgeRally(winner: .player1, duration: 90.0), BadgeRally(winner: .player2, duration: 70.0)]
         XCTAssertNil(engine.badges(for: input([BadgeGame(rallies: firstLong, winner: nil)]))[Player.player1], "first rally never counts")
         XCTAssertNil(engine.badges(for: input([BadgeGame(rallies: firstLong, winner: nil)]))[Player.player2], "70 s is short of 75")
-        let secondLong = [BadgeRally(winner: .player2, duration: 5), BadgeRally(winner: .player1, duration: 75)]
+        let secondLong = [BadgeRally(winner: .player2, duration: 5.0), BadgeRally(winner: .player1, duration: 75.0)]
         XCTAssertEqual(engine.badges(for: input([BadgeGame(rallies: secondLong, winner: nil)]))[.player1], [.endurance])
     }
 
@@ -178,17 +181,21 @@ final class BadgeEngineTests: XCTestCase {
         var match = input([closeGame(.player1), closeGame(.player2), closeGame(.player1), closeGame(.player2), closeGame(.player1)], winner: .player1)
         XCTAssertTrue(engine.badges(for: match)[.player1]!.contains(.photoFinish))
         XCTAssertFalse(engine.badges(for: match)[.player1]!.contains(.ironMan))
-        match.duration = 61 * 60
+        match.duration = 61.0 * 60.0
         XCTAssertTrue(engine.badges(for: match)[.player1]!.contains(.ironMan))
         XCTAssertTrue(engine.badges(for: match)[.player2]!.contains(.ironMan), "both played it out")
     }
 
     func testNemesisAndVeteran() {
-        let kristian = (0..<5).map { BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval($0)), won: true, pointsWon: 0, opponentKey: "kristian") }
+        let kristian = (0..<5).map { i in
+            BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval(i)), won: true, pointsWon: 0, opponentKey: "kristian")
+        }
         XCTAssertTrue(engine.careerBadges(in: kristian[4].matchId, history: kristian, earnedElsewhere: []).contains(.nemesis))
         XCTAssertFalse(engine.careerBadges(in: kristian[3].matchId, history: kristian, earnedElsewhere: []).contains(.nemesis))
 
-        let many = (0..<25).map { BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval($0)), won: false, pointsWon: 0, opponentKey: "x\($0)") }
+        let many = (0..<25).map { i in
+            BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval(i)), won: false, pointsWon: 0, opponentKey: "x\(i)")
+        }
         XCTAssertEqual(engine.careerBadges(in: many[24].matchId, history: many, earnedElsewhere: []), [.veteran])
     }
 }

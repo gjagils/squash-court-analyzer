@@ -53,25 +53,3 @@ extension RefereeMatch {
         completedGames.flatMap { $0.points.map(\.scorer) } + pointHistory.map(\.scorer)
     }
 }
-
-/// Badges one picked player earned in one match, for the "Badges verdiend" strip
-struct MatchBadgeEarning: Identifiable, Equatable {
-    let player: Player
-    let playerId: UUID
-    let name: String
-    let badges: [BadgeKind]
-
-    var id: UUID { playerId }
-}
-
-extension BadgeEngine {
-    /// Earnings of the players picked from "Kies speler", player 1 first
-    func earnings(for input: BadgeMatchInput, playerIds: [Player: UUID], names: [Player: String]) -> [MatchBadgeEarning] {
-        let earned = badges(for: input)
-        return Player.allCases.compactMap { player in
-            guard let playerId = playerIds[player], let kinds = earned[player], !kinds.isEmpty else { return nil }
-            return MatchBadgeEarning(player: player, playerId: playerId, name: names[player] ?? "",
-                                     badges: BadgeKind.allCases.filter(kinds.contains))
-        }
-    }
-}

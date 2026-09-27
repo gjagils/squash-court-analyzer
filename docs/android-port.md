@@ -1,9 +1,11 @@
 # Android port (one Swift codebase, via Skip)
 
-**Status: Fase 0 en Fase 1 afgerond (2026-09-27) — het package
-`SquashAnalyzerCore` is geëxtraheerd, aan de app gekoppeld en in gebruik;
-`xcodebuild test` en `swift test` zijn allebei groen. Volgende: Fase 2
-(Android-kant van het package).** Dit document is
+**Status: Fase 0, 1 en 2 afgerond (2026-09-27) — `SquashAnalyzerCore` is
+geëxtraheerd, aan de app gekoppeld, in gebruik, én transpileert nu echt naar
+Kotlin: `skip test` geeft 15/15 groen op zowel Darwin (XCTest) als Android
+(Robolectric/JUnit). `xcodebuild test -skipPackagePluginValidation` op het
+iOS-schema is ook groen. Volgende: Fase 3 (opslag-abstractie voor
+Android).** Dit document is
 het naslagwerk voor de Android-poging — voor wie er ook aan werkt (Claude of
 Codex), zodat niemand blind begint. Werk je hieraan verder, houd dit bestand
 bij: fase-status, nieuwe transpile-eigenaardigheden, en genomen beslissingen.
@@ -62,7 +64,20 @@ skip devices          # toont zowel iOS-simulators als Android-emulators/toestel
 # In een Skip-package: transpileert naar Kotlin, bouwt met Gradle, draait als
 # JUnit/Robolectric-tests op de lokale JVM — GEEN emulator nodig, dit is de
 # snelle iteratielus voor de logica-laag
-swift test
+cd Packages/SquashAnalyzerCore && swift test
+
+# Side-by-side rapport: dezelfde tests op Darwin (XCTest) én Android
+# (Robolectric/JUnit), met per-test pass/fail en timing naast elkaar
+skip test --project Packages/SquashAnalyzerCore
+
+# iOS-app bouwen/testen vanaf de CLI: NU verplicht met deze vlag, want Xcode
+# vraagt anders interactief om het "skipstone" build-tool-plugin te
+# vertrouwen (de eerste keer dat je het project in de Xcode-GUI opent krijg
+# je diezelfde vraag als eenmalig klikbaar dialoogvenster — dat is normaal)
+xcodebuild build -project SquashAnalyzer.xcodeproj -scheme SquashAnalyzer \
+  -destination 'platform=iOS Simulator,id=<UDID>' -skipPackagePluginValidation
+xcodebuild test  -project SquashAnalyzer.xcodeproj -scheme SquashAnalyzer \
+  -destination 'platform=iOS Simulator,id=<UDID>' -skipPackagePluginValidation
 ```
 
 `skip android test` / `skip android sdk install` is een **ander** spoor (Swift
@@ -217,12 +232,103 @@ Regels voor de rest van deze fase:
   platform-specifieke vervanging acceptabel (net als bij opslag), zolang het
   gedrag (dezelfde output) identiek getest blijft.
 
-## Fase 2 — Android-kant van dat package (NOG NIET GESTART)
+## Fase 2 — Android-kant van dat package (AFGEROND, 2026-09-27)
 
-De bestaande XCTest-stijl tests (`BadgeEngineTests`, `ScoringAndPersistenceTests`
-voor zover ze geen SwiftData raken, `PlayerCardTests` voor zover puur) draaien
-via `swift test` óók als JUnit op de JVM. Dit is het vangnet: wijkt Android
-ooit af van iOS, dan faalt dit meteen.
+Doel: `Packages/SquashAnalyzerCore` daadwerkelijk door Skip laten
+transpileren naar Kotlin en de bestaande tests als JUnit op de JVM draaien
+(via Robolectric, geen emulator nodig) — het vangnet dat meteen faalt zodra
+Android ooit van iOS afwijkt.
+
+### Wat er is gedaan
+
+`Package.swift` is omgezet naar een echt Skip-package: `swift-tools-version:
+6.1`, `dependencies` op `skiptools/skip` en `skiptools/skip-foundation`, het
+`SquashAnalyzerCore`-target krijgt `SkipFoundation` als dependency en het
+`skipstone`-buildplugin, en het testtarget krijgt daarnaast `SkipTest`. Het
+library-product staat op `type: .dynamic` (net als Skip's eigen
+`skip init --transpiled-model` template dat genereert). Er zijn ook
+`Sources/SquashAnalyzerCore/Skip/skip.yml` en
+`Tests/SquashAnalyzerCoreTests/Skip/skip.yml` bijgekomen (grotendeels lege
+placeholders — hier komen ooit Gradle-dependencies als Android dat nodig
+heeft).
+
+`swift build`/`swift test` transpileert nu automatisch naar Kotlin, genereert
+een volledig Gradle-project onder `.build/plugins/outputs/.../skipstone/`, en
+draait de tests via Robolectric. `skip test --project
+Packages/SquashAnalyzerCore` geeft een side-by-side rapport: **15/15 tests
+groen op zowel Darwin (XCTest) als Android (Robolectric/JUnit)**.
+
+### Nieuwe Skip-eigenaardigheden (naast de twee uit fase 0)
+
+Bij het echt transpileren naar Kotlin (in plaats van alleen `swift build`
+zonder plugin) kwamen deze concrete problemen naar boven — allemaal in échte
+productiecode/tests, niet verzonnen:
+
+1. **`Date.FormatStyle` bestaat niet in SkipFoundation.** Er is geen Kotlin-
+   equivalent voor de hele `.formatted(.dateTime.weekday(...)...)`-API.
+   `MatchShareReport.shortDateText`/`longDateText` gebruikten dit voor de
+   Nederlandse datumtekst in de share-berichten. Fix: overgezet naar
+   `DateFormatter` met een vast `dateFormat`-patroon (`"EEE d MMM"` /
+   `"EEEE d MMMM yyyy"`) plus `locale`, want `DateFormatter` transpileert wél
+   (naar `java.text.SimpleDateFormat`). Geen zichtbare gedragsverandering op
+   iOS; geen test controleerde de exacte opgemaakte string.
+2. **Een gebonden method reference als eerste-klas waarde (`kinds.contains`,
+   `front.contains`) transpileert niet betrouwbaar.** `BadgeKind.allCases
+   .filter(kinds.contains)` en `$0.zone.map(front.contains)` gaven in Kotlin
+   "Function invocation 'contains(...)' expected" / een type-inferentiefout.
+   Fix: altijd een expliciete closure schrijven — `.filter { kinds.contains($0) }`,
+   `.map { front.contains($0) }` — nooit een kale method reference doorgeven.
+3. **Een geheel getal-literal in een `Double`/`TimeInterval`-context verliest
+   zijn type als de aanroep niet direct een `Double`-parameter raakt.**
+   Naast het eerder gevonden `Array(repeating:count:)`-geval (fase 0) ook
+   gezien bij: `($0.duration ?? 0)` (moet `?? 0.0` zijn), `60 * 60` toegekend
+   aan een `TimeInterval`-`static let` (moet `60.0 * 60.0`), en
+   `match.duration = 61 * 60` in een test (idem). **Vuistregel: bij twijfel,
+   schrijf het decimaalteken erbij.**
+4. **Een testbestand dat `Foundation`-types gebruikt (`UUID`, `Date`,
+   `TimeInterval`) maar zelf geen `import Foundation` heeft, laat Skip de
+   `import skip.foundation.*` in de gegenereerde Kotlin-file weglaten** — ook
+   al compileert het gewoon in Swift dankzij `@testable import
+   SquashAnalyzerCore`, dat die types al importeert. Fix: importeer
+   `Foundation` expliciet in elk testbestand dat die types noemt.
+5. **Een trailing closure met impliciete `$0` die zelf weer een initializer
+   met meerdere labeled arguments aanroept (`.map { .init(matchId: UUID(),
+   date: Date(timeIntervalSince1970: TimeInterval($0.offset)), ...) }`) kan
+   de Kotlin-transpiler in de war brengen** — het gaf volledig onbegrijpelijke
+   fouten ("Unresolved reference 'UUID'" middenin een regel die overduidelijk
+   `UUID` aanroept). Fix: geef de closure-parameter een expliciete naam
+   (`{ entry in ... }` / `{ i in ... }`) in plaats van `$0`, vooral zodra de
+   closure-body een initializer met meerdere labeled args bevat.
+
+### Xcode-kant: twee dingen om te weten
+
+- **`xcodebuild`/Xcode-GUI vraagt nu om het `skipstone`-buildplugin te
+  vertrouwen** zodra het project een Skip-package als dependency heeft. In de
+  Xcode-GUI is dat een eenmalig klikbaar "Trust & Enable"-dialoogvenster. Voor
+  `xcodebuild` vanaf de command line is de vlag `-skipPackagePluginValidation`
+  nu **verplicht** bij elke `build`/`test`-aanroep op dit project (zie
+  "Nuttige commando's" hierboven) — zonder die vlag faalt de build met
+  "Validate plug-in 'skipstone' in package 'skip'".
+- **Het package-product moest ook los aan het `SquashAnalyzerTests`-target
+  gekoppeld worden**, niet alleen aan `SquashAnalyzer`: fase 1 linkte het
+  product alleen aan het app-target (via de Xcode-GUI), maar
+  `SquashAnalyzerTests` gebruikt `import SquashAnalyzerCore` ook rechtstreeks
+  in vier testbestanden. Zolang het package een automatisch/statisch product
+  was liep dat toevallig goed (de symbolen kwamen mee via de host-app), maar
+  na de omzetting naar `type: .dynamic` (nodig voor Skip) faalde het linken
+  met "symbol(s) not found for architecture arm64" voor `PointType`/
+  `ScoringEngine`-symbolen. Ditmaal loste een handmatige `project.pbxproj`-
+  edit dit wél op (in tegenstelling tot fase 1's mislukte hand-edit): de
+  project-brede package-registratie stond al vast te werken (bewezen door het
+  app-target), dus alleen de tweede laag — een nieuwe `PBXBuildFile` met
+  dezelfde `productRef`, toegevoegd aan `SquashAnalyzerTests`'
+  Frameworks-fase en `packageProductDependencies` — moest nog bij. Zie de git-
+  geschiedenis van `project.pbxproj` voor de exacte diff als referentie voor
+  een volgend target dat het package ooit nodig heeft.
+
+Geverifieerd: `xcodebuild test -skipPackagePluginValidation` op het
+bestaande iOS-schema is groen, en `skip test` geeft 15/15 op zowel Darwin als
+Android.
 
 ## Fase 3 — Opslag-abstractie (NOG NIET GESTART)
 

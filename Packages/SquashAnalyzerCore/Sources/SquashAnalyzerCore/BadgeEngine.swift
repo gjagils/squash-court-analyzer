@@ -229,7 +229,7 @@ public struct BadgeEngine {
     /// 60 seconds of rally plus the 10-15 seconds before the serve the timer also counts
     public static let enduranceSeconds: TimeInterval = 75
     public static let strokesPerGame = 3
-    public static let ironManSeconds: TimeInterval = 60 * 60
+    public static let ironManSeconds: TimeInterval = 60.0 * 60.0
 
     public init() {}
 
@@ -262,12 +262,12 @@ public struct BadgeEngine {
                 if won.filter({ $0.pointType == .servicePoint }).count >= Self.shotsPerGame { award(.aceOfPace, to: player) }
                 if won.filter({ $0.pointType == .stroke }).count >= Self.strokesPerGame { award(.strokeOfGenius, to: player) }
                 let front: Set<CourtZone> = [.frontLeft, .frontMiddle, .frontRight]
-                if won.filter({ $0.pointType == .winner && $0.zone.map(front.contains) == true }).count >= Self.frontWinners {
+                if won.filter({ $0.pointType == .winner && $0.zone.map { front.contains($0) } == true }).count >= Self.frontWinners {
                     award(.frontRowKing, to: player)
                 }
                 // The first rally's time is unreliable (it runs from the start of the game)
                 let timed = game.rallies.dropFirst().filter { $0.winner == player }
-                if timed.contains(where: { ($0.duration ?? 0) >= Self.enduranceSeconds }) { award(.endurance, to: player) }
+                if timed.contains(where: { ($0.duration ?? 0.0) >= Self.enduranceSeconds }) { award(.endurance, to: player) }
             }
 
             guard let winner = game.winner else { continue }
@@ -414,7 +414,7 @@ extension BadgeEngine {
         return Player.allCases.compactMap { player in
             guard let playerId = playerIds[player], let kinds = earned[player], !kinds.isEmpty else { return nil }
             return MatchBadgeEarning(player: player, playerId: playerId, name: names[player] ?? "",
-                                     badges: BadgeKind.allCases.filter(kinds.contains))
+                                     badges: BadgeKind.allCases.filter { kinds.contains($0) })
         }
     }
 }

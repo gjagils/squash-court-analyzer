@@ -66,6 +66,7 @@
 		B1000081 /* LeagueTeamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000081 /* LeagueTeamView.swift */; };
 		B1000082 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000082 /* HomeView.swift */; };
 		F8B8AB9A30691B0A0098B973 /* SquashAnalyzerCore in Frameworks */ = {isa = PBXBuildFile; productRef = F8B8AB9930691B0A0098B973 /* SquashAnalyzerCore */; };
+		F8B8AB9B30691B0A0098B973 /* SquashAnalyzerCore in Frameworks */ = {isa = PBXBuildFile; productRef = F8B8AB9930691B0A0098B973 /* SquashAnalyzerCore */; };
 		F8FD9EFD2F5D73C5008892F1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F8FD9EFC2F5D73C5008892F1 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -157,6 +158,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F8B8AB9B30691B0A0098B973 /* SquashAnalyzerCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -324,6 +326,9 @@
 				B8000011 /* PBXTargetDependency */,
 			);
 			name = SquashAnalyzerTests;
+			packageProductDependencies = (
+				F8B8AB9930691B0A0098B973 /* SquashAnalyzerCore */,
+			);
 			productName = SquashAnalyzerTests;
 			productReference = B3000010 /* SquashAnalyzerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";

@@ -96,12 +96,22 @@ public struct MatchShareReport {
 
     private static let dutch = Locale(identifier: "nl_NL")
 
+    /// `DateFormatter` with a fixed pattern, not `Date.FormatStyle`: Skip's
+    /// Android runtime (SkipFoundation) has no `Date.FormatStyle` support, and
+    /// `DateFormatter` transpiles to `java.text.SimpleDateFormat`.
+    private func formattedDate(pattern: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = pattern
+        formatter.locale = Self.dutch
+        return formatter.string(from: startedAt)
+    }
+
     private var shortDateText: String {
-        startedAt.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).locale(Self.dutch))
+        formattedDate(pattern: "EEE d MMM")
     }
 
     private var longDateText: String {
-        startedAt.formatted(.dateTime.weekday(.wide).day().month(.wide).year().locale(Self.dutch))
+        formattedDate(pattern: "EEEE d MMMM yyyy")
     }
 
     private func minutesText(_ seconds: TimeInterval) -> String {

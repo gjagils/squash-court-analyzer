@@ -1,0 +1,4 @@
+# Skip configuration for SquashAnalyzerCoreTests
+
+#build:
+#  contents:

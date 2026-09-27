@@ -1,6 +1,7 @@
 # Android port (one Swift codebase, via Skip)
 
-**Status: Fase 0 afgerond (2026-09-27), Fase 1 nog niet gestart.** Dit document is
+**Status: Fase 0 afgerond, Fase 1 ten dele (2026-09-27) — zie hieronder, er
+staat één handmatige stap open in Xcode voordat fase 1 verder kan.** Dit document is
 het naslagwerk voor de Android-poging — voor wie er ook aan werkt (Claude of
 Codex), zodat niemand blind begint. Werk je hieraan verder, houd dit bestand
 bij: fase-status, nieuwe transpile-eigenaardigheden, en genomen beslissingen.
@@ -107,14 +108,96 @@ een subscript zonder tweede context. Schrijf het type voluit zodra een
 transpile-fout een `Unresolved reference` of een verdachte `Any` in de
 gegenereerde Kotlin toont.
 
-## Fase 1 — Pure logica loskoppelen (NOG NIET GESTART)
+## Fase 1 — Pure logica loskoppelen (GEDEELTELIJK: package staat, nog niet aan de app gekoppeld)
 
 Doel: `ScoringEngine`, `BadgeEngine`, `MatchShareReport`, `CardSnapshot`, de
 teamlink-parser (`LeagueTeamParser`/`LeagueTeamService`), en de simpele
 modelwaarden (`Player`, `PointType`, `ShotType`, `CourtZone`) verhuizen naar
-een Swift Package **binnen deze repo** (bijv. `Packages/SquashAnalyzerCore/`).
+een Swift Package **binnen deze repo** (`Packages/SquashAnalyzerCore/`).
 
-Regels voor deze fase:
+### Wat er staat (2026-09-27)
+
+Het package [`Packages/SquashAnalyzerCore`](../Packages/SquashAnalyzerCore)
+bestaat en bevat `Player`, `PointType`, `ShotType`, `CourtZone`,
+`ScoringEngine`/`SquashScore`, `MatchShareReport`/`MatchShareStyle`, en de
+volledige pure kant van `BadgeEngine` (`BadgeKind`, `BadgeRally`, `BadgeGame`,
+`BadgeMatchInput`, `BadgeEngine`, `MatchBadgeEarning`), allemaal met `public`
+API. Alle types kregen expliciete `public init(...)` waar nodig, want SPM's
+automatische memberwise-init is nooit `public`.
+
+`Packages/SquashAnalyzerCore/Tests` bevat een overgezette, groene versie van
+`BadgeEngineTests` (15 tests, `swift test` binnen de package-map): draai het
+zelf met
+
+```bash
+cd Packages/SquashAnalyzerCore && swift test
+```
+
+Twee tests bleven bewust in de app achter, want die raken `Match`/
+`RefereeMatch` (die niet mee verhuizen): `testRefereeRunCarriesOverIntoTheNextGame`
+en `testCoachMatchRallyWinnersFollowPlayOrder`.
+
+**Wat nog NIET is gedaan:** de app zelf gebruikt dit package nog niet. De
+oorspronkelijke bestanden (`Game.swift`'s `Player`, `PointType.swift`,
+`ShotType.swift`, `CourtZone.swift`, `ScoringEngine.swift`,
+`MatchShareReport.swift`, en de pure helft van `BadgeEngine.swift`) staan dus
+nog dubbel: één keer in de app (ongewijzigd, nog steeds wat de app gebruikt)
+en één keer in het nieuwe package (nog ongebruikt). Dat is bewust zo
+achtergelaten — zie hieronder waarom.
+
+### De hobbel: het package aan het Xcode-project koppelen
+
+Ik heb geprobeerd `Packages/SquashAnalyzerCore` als lokale Swift Package
+dependency in `SquashAnalyzer.xcodeproj/project.pbxproj` te verbinden door het
+projectbestand direct te bewerken (dit project gebruikt het oude,
+handgeschreven pbxproj-formaat, geen `PBXFileSystemSynchronizedRootGroup`).
+Ik voegde toe: een `XCLocalSwiftPackageReference`, twee
+`XCSwiftPackageProductDependency`-objecten, `packageReferences` op het
+project, `packageProductDependencies` op beide targets, en de bijbehorende
+`PBXBuildFile`/Frameworks-fase-entries.
+
+Het projectbestand bleef geldig (`plutil -lint` OK, `xcodebuild -list` OK), en
+zolang niets het package echt importeerde, bouwde de app zelfs foutloos. Maar
+zodra ergens `import SquashAnalyzerCore` werd toegevoegd, gaf de build
+`error: Unable to resolve module dependency: 'SquashAnalyzerCore'`. Verder
+onderzoek (`xcodebuild -resolvePackageDependencies` bleef "resolved source
+packages:" leeg tonen, ook na het wissen van alle DerivedData) liet zien dat
+Xcode's buildsysteem het package helemaal niet in de dependency-graph van het
+`SquashAnalyzer`-target opnam — "note: Target dependency graph (1 target)" —
+ondanks dat de pbxproj-secties er syntactisch correct uitzagen. Met Xcode
+27.0 kan het schema voor lokale package-referenties net iets anders zijn dan
+wat hier is neergezet; zonder de Xcode-GUI om dit stap voor stap te
+verifiëren was verder blind doorproberen niet verantwoord, dus **is deze
+wijziging teruggedraaid** (de app staat weer exact op commit `345164f`; alleen
+`Packages/SquashAnalyzerCore` zelf is nieuw en blijft staan).
+
+### Openstaande handmatige stap (voor Gerd-Jan of iemand met Xcode open)
+
+Dit kost in de Xcode-GUI naar verwachting minder dan een minuut, en schrijft
+het juiste formaat automatisch weg:
+
+1. Open `SquashAnalyzer.xcodeproj` in Xcode.
+2. Selecteer het project in de Project Navigator → tab **Package Dependencies**.
+3. Klik **+** → **Add Local...** → kies de map `Packages/SquashAnalyzerCore`.
+4. Voeg het product `SquashAnalyzerCore` toe aan het target **SquashAnalyzer**
+   (en desgewenst ook aan **SquashAnalyzerTests**).
+5. Commit de bijgewerkte `project.pbxproj` (Xcode schrijft `packageReferences`,
+   `XCLocalSwiftPackageReference`, `XCSwiftPackageProductDependency` en
+   `packageProductDependencies` zelf correct weg).
+
+Zodra dat gedaan is, is de rest van fase 1 weer pure herhaling: `import
+SquashAnalyzerCore` toevoegen aan de bestanden die de verplaatste types
+gebruiken (dat lijstje stond al klaar — zoek op `\b(Player|PointType|
+ShotType|CourtZone|ScoringEngine|SquashScore|MatchShareReport|
+MatchShareStyle|BadgeEngine|BadgeKind|BadgeRally|BadgeGame|BadgeMatchInput|
+MatchBadgeEarning)\b` door `SquashAnalyzer/`), de dubbele originelen
+verwijderen (`CourtZone.swift`, `PointType.swift`, `ShotType.swift`,
+`ScoringEngine.swift`, `MatchShareReport.swift` volledig; uit `Game.swift`
+alleen de `Player`-enum; uit `BadgeEngine.swift` alles behalve de
+`Match`/`RefereeMatch`-extensies), en dan `xcodebuild test` + `swift test`
+(in de package) allebei groen krijgen.
+
+Regels voor de rest van deze fase:
 
 - **Eén bestand per keer.** Na elke verplaatsing: `xcodebuild test` op het
   bestaande iOS-schema moet exact hetzelfde resultaat geven als ervoor. Geen
@@ -175,5 +258,11 @@ EncryptedSharedPreferences achter dezelfde kleine abstractie).
 - Er is nog geen `feature/android`-branch en geen Skip-project **in deze
   repo** — de fase-0-proef stond in een scratch-map buiten git en is
   weggegooid na gebruik (het was wegwerpwerk, geen onderdeel van de app).
-- Fase 1 is nog niet begonnen: er is nog geen `Packages/`-map, nog geen
-  bestand verplaatst.
+- `Packages/SquashAnalyzerCore` staat er en is zelfstandig groen (`swift
+  test` binnen de package-map), maar hangt nog **niet** aan
+  `SquashAnalyzer.xcodeproj` — zie "De hobbel" hierboven. De app gebruikt dus
+  nog de oorspronkelijke, dubbele bestanden; er is nog niets verwijderd uit
+  de app en er is nog geen `import SquashAnalyzerCore` ergens in de app.
+- Nog te doen zodra de package gekoppeld is: de dubbele originelen uit de app
+  verwijderen, imports toevoegen, en fase 2 (dit package als Skip-Android-
+  target).

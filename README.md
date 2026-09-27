@@ -3,10 +3,9 @@
 iOS-app voor squashcoaching, scheidsrechtermodus, spelers, badges en teamstanden.
 De Android-port gebruikt gedeelde Swift/SwiftUI via Skip en Room voor opslag.
 
-Android heeft spelersbeheer, coachscoring met automatische opslag en hervatten,
-en een werkende scheidsrechtermodus (punten, LET, STROKE, undo, game-wissel).
-Opslag van scheidsrechterwedstrijden en het overzicht van opgeslagen
-wedstrijden volgen nog.
+Android heeft spelersbeheer, en zowel coachscoring als scheidsrechtermodus
+(punten, LET, STROKE, undo, game-wissel) met automatische opslag en hervatten.
+Het overzicht van opgeslagen wedstrijden volgt nog.
 
 - [Architectuur](ARCHITECTURE.md)
 - [Android-status, bouwinstructies en resterende stappen](docs/android-port.md)

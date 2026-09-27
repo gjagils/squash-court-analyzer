@@ -20,6 +20,8 @@ import com.squashanalyzer.android.data.AppDatabase
 import com.squashanalyzer.android.data.RoomPlayerStore
 import com.squashanalyzer.android.data.MatchStore
 import com.squashanalyzer.android.data.RoomCoachMatchStore
+import com.squashanalyzer.android.data.RefereeMatchStore
+import com.squashanalyzer.android.data.RoomRefereeMatchStore
 
 /** Only the Android lifecycle lives here; the screen is shared SwiftUI. */
 class SquashApplication : Application() {
@@ -39,12 +41,13 @@ class MainActivity : AppCompatActivity() {
         )
         val playerStore = RoomPlayerStore(AppDatabase.get(this).playerDao())
         val matchStore = RoomCoachMatchStore(MatchStore(AppDatabase.get(this).matchDao()))
+        val refereeMatchStore = RoomRefereeMatchStore(RefereeMatchStore(AppDatabase.get(this).refereeMatchDao()))
         setContent {
             val stateHolder = rememberSaveableStateHolder()
             stateHolder.SaveableStateProvider(true) {
                 PresentationRoot(defaultColorScheme = ColorScheme.dark, context = ComposeContext()) { context ->
                     Box(modifier = context.modifier.fillMaxSize()) {
-                        AndroidHomeView(playerStore = playerStore, matchStore = matchStore).Compose(context = context.content())
+                        AndroidHomeView(playerStore = playerStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore).Compose(context = context.content())
                     }
                 }
                 SideEffect { stateHolder.removeState(true) }

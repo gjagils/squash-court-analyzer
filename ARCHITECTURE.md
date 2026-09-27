@@ -62,13 +62,19 @@ maps live Swift models to the existing transactional `MatchStore`. Room schema
 available). Each point, undo, service-side change, game transition and explicit
 exit saves; completed matches are retained but excluded from resume. Starting
 over marks the previous match abandoned instead of deleting its history.
-Android referee mode (`RefereeScoringView` in `SquashAnalyzerUI`, backed by
-the shared `RefereeMatch` in `SquashAnalyzerCore`) now scores points, LET,
-STROKE, undo and game transitions, but does not yet persist matches — it
-mirrors the coach-mode UI's shared components (`ServiceSideSelector`,
-`ServerIndicator`, `PlayerAvatarPlaceholder`) without a `MatchStore` hookup.
-The history browser and referee-match persistence on Android are still
-separate future work.
+Android referee mode (`RefereeScoringView`/`RefereeSessionView` in
+`SquashAnalyzerUI`, backed by the shared `RefereeMatch` in
+`SquashAnalyzerCore`) now scores points, LET, STROKE, undo and game
+transitions, and persists through the same pattern as coach mode: a
+`RefereeMatchStore` protocol (`loadInProgress`/`save`/`abandon`) implemented
+by `RoomRefereeMatchStore` over a dedicated, smaller Room schema
+(`RefereeMatchEntity`/`RefereeGameEntity`/`RefereePointEntity`/
+`RefereeCurrentPointEntity` — no point type/zone/shot columns, since referee
+mode never tags those). One accepted gap: `RefereeMatch.undo()` pops a
+private, in-memory-only undo stack (unlike `Game`/`Match`, which recompute
+undo from the persisted point list), so a resumed match can only undo points
+scored in the current live session, not ones from before a restart. The
+history browser on Android is still future work.
 Full plan, phase status, toolchain setup and transpile gotchas found so far:
 see [`docs/android-port.md`](docs/android-port.md). Read that file before
 touching anything Android-related, and keep it updated as phases complete.

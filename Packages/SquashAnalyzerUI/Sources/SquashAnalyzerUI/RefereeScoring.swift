@@ -6,11 +6,13 @@ import SquashAnalyzerCore
 /// STROKE, undo mistakes, and continue after a finished game.
 public struct RefereeScoringView: View {
     @State private var match: RefereeMatch
+    let onMatchChanged: (RefereeMatch) -> Void
     let onExit: @MainActor () -> Void
     @Environment(\.dismiss) private var dismiss
 
-    public init(match: RefereeMatch, onExit: @escaping @MainActor () -> Void) {
+    public init(match: RefereeMatch, onMatchChanged: @escaping (RefereeMatch) -> Void, onExit: @escaping @MainActor () -> Void) {
         _match = State(initialValue: match)
+        self.onMatchChanged = onMatchChanged
         self.onExit = onExit
     }
 
@@ -134,11 +136,15 @@ public struct RefereeScoringView: View {
                 disabled: match.isGameOver
             ) { side in
                 withAnimation(.easeInOut(duration: 0.15)) { match.overrideSide(to: side) }
+                onMatchChanged(match)
             }
             .opacity(isServer ? 1.0 : 0.0)
             .allowsHitTesting(isServer)
 
-            Button(action: { withAnimation(.easeInOut(duration: 0.15)) { match.awardPoint(to: player) } }) {
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.15)) { match.awardPoint(to: player) }
+                onMatchChanged(match)
+            }) {
                 VStack(spacing: 4) {
                     Text("\(score)")
                         .font(.system(size: 76, weight: .bold, design: .rounded))
@@ -195,16 +201,17 @@ public struct RefereeScoringView: View {
     private var actionGrid: some View {
         VStack(spacing: 8) {
             HStack(spacing: 8) {
-                actionButton("LET", color: CoachPalette.warmOrange) { match.callLet() }
-                actionButton("LET", color: CoachPalette.steelBlue) { match.callLet() }
+                actionButton("LET", color: CoachPalette.warmOrange) { match.callLet(); onMatchChanged(match) }
+                actionButton("LET", color: CoachPalette.steelBlue) { match.callLet(); onMatchChanged(match) }
             }
             HStack(spacing: 8) {
-                actionButton("STROKE", color: CoachPalette.warmOrange) { match.callStroke(to: .player1) }
-                actionButton("STROKE", color: CoachPalette.steelBlue) { match.callStroke(to: .player2) }
+                actionButton("STROKE", color: CoachPalette.warmOrange) { match.callStroke(to: .player1); onMatchChanged(match) }
+                actionButton("STROKE", color: CoachPalette.steelBlue) { match.callStroke(to: .player2); onMatchChanged(match) }
             }
             if match.isGameOver && !match.isMatchOver {
                 Button("VOLGENDE GAME") {
                     withAnimation(.easeInOut(duration: 0.15)) { match.confirmNextGame() }
+                    onMatchChanged(match)
                 }
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundColor(CoachPalette.backgroundDark)
@@ -243,7 +250,10 @@ public struct RefereeScoringView: View {
     }
 
     private var undoButton: some View {
-        Button(action: { withAnimation(.easeInOut(duration: 0.15)) { match.undo() } }) {
+        Button(action: {
+            withAnimation(.easeInOut(duration: 0.15)) { match.undo() }
+            onMatchChanged(match)
+        }) {
             HStack(spacing: 8) {
                 Image(systemName: "arrow.uturn.backward")
                 Text("Undo")

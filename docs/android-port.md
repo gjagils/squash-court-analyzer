@@ -1,18 +1,20 @@
 # Android port (one Swift codebase, via Skip)
 
 **Status: Fase 0 t/m 4 afgerond; fase 5 Spelers, `CourtView`, coach-modus
-scoren én scheidsrechtermodus afgerond (2026-09-27).** Android heeft nu een
-echt startscherm, een werkend spelersbeheer-scherm, een volledig werkende
-coach-scoreflow (tik score → puntsoort → zone → slag, undo, game/match-einde,
-met opslag/hervatten via `MatchStore`) én een werkende scheidsrechtermodus
-(punten, LET, STROKE, undo, game-wissel — nog zonder opslag) — allemaal
-handmatig op de emulator geverifieerd. `Game`, `Match`, `Point`, `LetCall`,
-`ServerSide`, `MatchStatus` en `RefereeMatch` zijn nu allemaal gedeeld via
-`SquashAnalyzerCore`. Regressie bij de laatste stap: `:app:testDebugUnitTest`
-groen, `:app:connectedDebugAndroidTest` (7/7, inclusief `RefereeScreenTest`),
-`swift test`/`skip test` groen, volledige iOS-testsuite
-(`xcodebuild test -skipPackagePluginValidation`) **TEST SUCCEEDED**.
-Geen TestFlight-upload.
+scoren en scheidsrechtermodus zijn allebei volledig afgerond ínclusief opslag
+en hervatten (2026-09-27).** Android heeft nu een echt startscherm, een
+werkend spelersbeheer-scherm, een volledig werkende coach-scoreflow (tik
+score → puntsoort → zone → slag, undo, game/match-einde) én een werkende
+scheidsrechtermodus (punten, LET, STROKE, undo, game-wissel) — beide met
+automatische opslag/hervatten via Room, allemaal handmatig op de emulator
+geverifieerd. `Game`, `Match`, `Point`, `LetCall`, `ServerSide`,
+`MatchStatus` en `RefereeMatch` zijn nu allemaal gedeeld via
+`SquashAnalyzerCore`, met een `CoachMatchStore`- en een `RefereeMatchStore`-
+protocol ernaast. Regressie bij de laatste stap: `:app:testDebugUnitTest`
+groen, `:app:connectedDebugAndroidTest` (9/9, inclusief
+`RefereePersistenceTest`), `swift test`/`skip test` groen, volledige
+iOS-testsuite (`xcodebuild test -skipPackagePluginValidation`)
+**TEST SUCCEEDED**. Geen TestFlight-upload.
 
 Eén echte fout gevonden en gefixt tijdens deze regressierun:
 `PlayerScreenTest.createEditReopenAndDeletePlayer` riep `.performScrollTo()`
@@ -805,9 +807,6 @@ toekennen per tik op een spelerscore, LET (geen puntwijziging, alleen een
 tijdelijke call-melding), STROKE (telt wel als punt, met call-melding),
 volledige undo, servicekant-override, en game-wissel via **VOLGENDE GAME**.
 
-- **Geen opslag voor scheidsrechterwedstrijden** — dit is bewust een sessie op
-  het scherm; verlaten via **Sluiten** bewaart niets. Dat is een expliciete
-  vervolgstap (zie backlog hieronder), niet vergeten.
 - Android-test `RefereeScreenTest` dekt de hoofdflow: punt scoren, undo, LET
   aanroepen, en teruggaan naar home. Er zijn twee "LET"-knoppen zichtbaar (één
   per speler/kant); de test gebruikt `onAllNodesWithText("LET").onFirst()`
@@ -828,18 +827,79 @@ Actuele verificatie:
   -destination 'platform=iOS Simulator,id=6AC09A50-94A7-4348-BB84-DA1EC43A4644'
   -skipPackagePluginValidation`: **TEST SUCCEEDED**.
 
+## Fase 5 — Scheidsrechterwedstrijden opslaan en hervatten (AFGEROND, 2026-09-27)
+
+Zelfde patroon als coach-modus' opslagstap: een nieuw `RefereeMatchStore`-
+protocol in `SquashAnalyzerCore` (`loadInProgress`/`save`/`abandon`, exact
+dezelfde vorm als `CoachMatchStore`), een nieuwe gedeelde `RefereeSessionView`
+in `SquashAnalyzerUI` (kopie van `CoachSessionView`'s hervatten/nieuwe-
+wedstrijd/busy/failed-logica, nu over `RefereeMatch`), en op Android een
+`RoomRefereeMatchStore` die het protocol implementeert bovenop een eigen,
+kleinere Room-laag (`RefereeMatchEntity`/`RefereeGameEntity`/
+`RefereePointEntity`/`RefereeCurrentPointEntity`, Room-schema **4**, migratie
+**3→4**). Simpeler dan de coach-tabellen: geen puntsoort/zone/slag-kolommen,
+alleen wie scoorde, de servicekant en of de rally een stroke was
+(`RefereePointEntry`'s daadwerkelijke velden). De Scheidsrechter-tegel opent
+nu `RefereeSessionView(store: refereeMatchStore, ...)` in plaats van steeds
+een losse `RefereeMatch()` te maken; `RefereeScoringView` kreeg er een
+`onMatchChanged`-callback bij (zelfde rol als `CoachScoringView`'s) om na elke
+mutatie een save te triggeren.
+
+- **Bekende beperking, geaccepteerd**: `RefereeMatch.undo()` pop't een
+  privé, alleen-in-memory undo-stack (in tegenstelling tot `Game`/`Match`,
+  waar undo altijd herberekent vanuit de opgeslagen puntenlijst). Die stack
+  wordt niet meegepersisteerd. Een hervatte wedstrijd kan dus alleen punten
+  ongedaan maken die in de huidige, live sessie zijn gescoord — niet iets van
+  vóór een herstart (`canUndo` is dan simpelweg `false`, de Undo-knop is
+  uitgeschakeld). Dit is een bestaande eigenschap van `RefereeMatch`, niet
+  iets dat deze opslagstap heeft geïntroduceerd; `RefereeMatchStoreTest`
+  documenteert dit expliciet in plaats van een verkeerde verwachting te
+  testen.
+- Nieuwe tests: `RefereeMatchStoreTest` (Robolectric, mirroring
+  `CoachMatchStoreTest`: resume na her-openen db, servicekant/voorkeuren,
+  game-grens via `confirmNextGame()`, completed/abandoned nooit hervatbaar,
+  en de 3→4-migratie), `RefereePersistenceTest` (instrumented, mirroring
+  `CoachPersistenceTest`: score overleeft een `activityRule.scenario.recreate()`,
+  en een aparte test dat undo binnen dezelfde sessie wél persisteert).
+  `RefereeScreenTest` kreeg een opruimstap (`refereeMatchDao().deleteAll()`
+  voor/na) omdat een leftover wedstrijd anders het hervat-scherm toont in
+  plaats van direct te scoren.
+- Handmatig geverifieerd op de emulator: punt scoren → Sluiten → app killen
+  → herstarten → Scheidsrechter-tegel toont "Wedstrijd hervatten" met de
+  juiste stand (`Game 1 · 1 – 0`) → Hervatten laadt de score correct terug.
+- Geen nieuwe Skip-transpile-bugs; wel één Kotlin-valkuil (geen Skip-bug):
+  `match.completedGames.map { ... }` (zonder index) resolvet naar
+  `skip.lib.Array`'s eigen `map`, niet Kotlin's `Iterable.map`, en levert dus
+  geen `List` op waar een Room-DTO dat verwacht ("Argument type mismatch").
+  `.mapIndexed { _, item -> ... }` (zoals de bestaande coach-code al overal
+  gebruikte) roept wél de Kotlin-stdlib-variant aan. **Vuistregel**: gebruik
+  op een getranspileerde Swift-`Array` altijd `.mapIndexed` in plaats van
+  `.map`, ook als de index niet nodig is.
+
+Actuele verificatie:
+
+- `:app:testDebugUnitTest`: groen, inclusief nieuwe `RefereeMatchStoreTest`
+  en (na een fix) de bestaande `CoachMatchStoreTest`/`PlayerStoreTest` — die
+  moesten ook `MIGRATION_3_4` in hun `addMigrations(...)` krijgen, anders
+  faalt hun handmatige downgrade-naar-v2-migratietest met "A migration from
+  2 to 4 was required but not found" nu de db-versie 4 is.
+- `:app:connectedDebugAndroidTest`: 9/9 groen, inclusief `RefereePersistenceTest`.
+- `swift test --package-path Packages/SquashAnalyzerCore`: 16 XCTests groen,
+  `skip test` 15/15 groen.
+- `xcodebuild test -project SquashAnalyzer.xcodeproj -scheme SquashAnalyzer
+  -destination 'platform=iOS Simulator,id=6AC09A50-94A7-4348-BB84-DA1EC43A4644'
+  -skipPackagePluginValidation`: **TEST SUCCEEDED**.
+
 ## Fase 5 — Volgende onderdelen (NOG NIET GESTART)
 
-Volgorde: badges-UI → geschiedenis → delen (linkjes overzetten;
-**CloudKit-uitnodigen blijft bewust iOS-only**, dat is geen gat maar een
-keuze) → Mijn team (netwerk/regex, moet met kleine aanpassingen overgaan) →
-instellingen/AI Coach (Keychain is iOS-only; Android krijgt
-EncryptedSharedPreferences achter dezelfde kleine abstractie).
-Coachwedstrijden worden inmiddels opgeslagen; het overzicht van die
-opgeslagen wedstrijden moet nog worden gebouwd. **Scheidsrechterwedstrijden
-opslaan en hervatten** (dezelfde `MatchStore`-koppeling als coach-modus)
-staat ook nog open — de scheidsrechtermodus is nu alleen een live sessie
-zonder persistentie.
+Volgorde: badges-UI → geschiedenis (overzicht van opgeslagen coach- én
+scheidsrechterwedstrijden) → delen (linkjes overzetten; **CloudKit-uitnodigen
+blijft bewust iOS-only**, dat is geen gat maar een keuze) → Mijn team
+(netwerk/regex, moet met kleine aanpassingen overgaan) → instellingen/AI
+Coach (Keychain is iOS-only; Android krijgt EncryptedSharedPreferences achter
+dezelfde kleine abstractie). Coach- én scheidsrechterwedstrijden worden nu
+allebei automatisch opgeslagen en hervat; alleen het overzicht van die
+opgeslagen wedstrijden moet nog worden gebouwd.
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 
@@ -874,8 +934,7 @@ branch tot een presenteerbare mijlpaal; samenvoegen is een afzonderlijke stap.
 
 - Android-bestemmingen achter de starttegels: badges, geschiedenis, delen,
   Mijn team en instellingen/AI Coach (fase 5).
-- Android-opslag voor badge-awards en scheidsrechterwedstrijden (scheidsrechter-
-  modus scoort al, maar bewaart nog niets).
+- Android-opslag voor badge-awards.
 - Foto's, badgecatalogus en teamimport in het Android-spelersscherm.
 - CloudKit-uitnodigingen blijven bewust iOS-only.
 - Een fysiek Android-toestel is nog nodig voor aanvullende praktijktests.

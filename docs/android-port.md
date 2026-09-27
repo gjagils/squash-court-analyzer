@@ -773,6 +773,28 @@ koppelen aan `MatchStore` (fase 3) zodat een gescoorde wedstrijd op Android
 ook echt bewaard blijft — nu gebruikt de Coach-tegel een los, ongepersisteerd
 `Match()` per bezoek.
 
+## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
+
+Idee van Gerd-Jan: een teamsamenstelling (spelers) ergens centraal neerzetten
+(bijv. op squashanalyzer.com) zodat clubleden 'm zelf kunnen importeren in
+"Spelers", in plaats van dat iedereen los een zip/bestand krijgt toegestuurd.
+
+**Gekozen aanpak: uitbreiden van het bestaande zip/`team.json`-importpad
+(`TeamImportService`) met een "importeer via URL"-optie**, die het bestand
+ophaalt via een simpele HTTP-download en door dezelfde (al bestaande, al
+geteste) parser haalt als de huidige lokale bestandsimport. **Bewust niet**
+via CloudKit (zoals de gedeelde spelerskaarten nu werken): CloudKit is
+Apple-only, en met de Android-port als expliciet doel moet dit juist op
+beide platforms werken. Een HTTP-download + dezelfde parser is dat vanaf het
+begin — `TeamImportService`/`LeagueTeamParser` zijn al pure Swift en dus
+straks via het gedeelde package ook op Android bruikbaar.
+
+Nadeel geaccepteerd: dit is een statisch bestand, geen live sync — bij een
+line-up-wijziging moet Gerd-Jan het gehoste bestand handmatig vervangen.
+Weegt niet op tegen een Apple-only afhankelijkheid nu cross-platform het doel
+is. Nog niet gebouwd — dit is alleen de architectuurkeuze, vastgelegd zodat
+ze niet opnieuw gemaakt hoeft te worden.
+
 ## Branching
 
 Fases 1–3 staan inmiddels op `main` (de eerdere afspraak over een aparte

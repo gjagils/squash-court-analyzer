@@ -98,6 +98,13 @@ struct RefereeView: View {
                 showingNextGameConfirm = true
             }
         }
+        .onChange(of: match.lastCallText) { _, call in
+            guard let call else { return }
+            Task {
+                try? await Task.sleep(nanoseconds: call.hasPrefix("LET") ? 2_000_000_000 : 1_500_000_000)
+                if match.lastCallText == call { match.clearCallText() }
+            }
+        }
     }
 
     // MARK: - Top Bar
@@ -1047,6 +1054,3 @@ struct OverlayUndoButton: View {
         .buttonStyle(.plain)
     }
 }
-
-// Make RefereeMatch Identifiable for fullScreenCover(item:)
-extension RefereeMatch: Identifiable {}

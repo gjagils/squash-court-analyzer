@@ -165,6 +165,7 @@ public struct AndroidHomeView: View {
     private let playerStore: any PlayerProfileStore
     @State private var showingPlayers = false
     @State private var showingCoach = false
+    @State private var showingReferee = false
     private let matchStore: any CoachMatchStore
 
     public init(playerStore: any PlayerProfileStore, matchStore: any CoachMatchStore) {
@@ -182,6 +183,13 @@ public struct AndroidHomeView: View {
                     CoachSessionView(store: matchStore, onExit: { showingCoach = false })
                         .navigationBarBackButtonHidden(true)
                 }
+                .navigationDestination(isPresented: $showingReferee) {
+                    RefereeScoringView(
+                        match: RefereeMatch(player1Name: "Speler 1", player2Name: "Speler 2", bestOf: 5, startingServer: .player1),
+                        onExit: { showingReferee = false }
+                    )
+                    .navigationBarBackButtonHidden(true)
+                }
         }
         .preferredColorScheme(.dark)
     }
@@ -198,11 +206,11 @@ public struct AndroidHomeView: View {
                     VStack(spacing: 20) {
                         HomeMenuTiles(
                             onCoach: { showingCoach = true },
-                            onReferee: { showAvailability("Scheidsrechter") },
+                            onReferee: { showingReferee = true },
                             onHistory: { showAvailability("Afgeronde wedstrijden") },
                             onPlayers: { showingPlayers = true }
                         )
-                        Text("Coachwedstrijden worden automatisch opgeslagen. Open Coach om een lopende wedstrijd te hervatten.")
+                        Text("Coachwedstrijden worden automatisch opgeslagen. Scheidsrechtermodus is beschikbaar zonder opslag.")
                             .font(.system(size: 13, design: .rounded))
                             .foregroundColor(HomePalette.secondary)
                             .multilineTextAlignment(.center)

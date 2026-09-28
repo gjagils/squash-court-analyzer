@@ -1322,11 +1322,90 @@ Actuele verificatie:
 
 Alle badges-substappen zijn nu afgerond (catalogus, opslag, "Kies speler",
 per-wedstrijd + career-berekening, weergave in Spelers/spelerscherm/
-match-einde-strip) en de geschiedenis bestaat. Volgorde: delen (linkjes
-overzetten; **CloudKit-uitnodigen blijft bewust iOS-only**, dat is geen gat
-maar een keuze) → Mijn team (netwerk/regex, moet met kleine aanpassingen
-overgaan) → instellingen/AI Coach (Keychain is iOS-only; Android krijgt
+match-einde-strip) en de geschiedenis bestaat. Volgorde: **spelerskaarten
+delen via links, op beide platforms** (zie de beslissing hieronder, stap 1
+t/m 6) → **"Nodig coach uit" + CloudKit-sync van iOS verwijderen** (stap 7,
+pas als Android links kan maken én openen) → Mijn team (netwerk/regex, moet
+met kleine aanpassingen overgaan; netwerken via Skip is nog ongetest, eerst
+verkennen) → instellingen/AI Coach (Keychain is iOS-only; Android krijgt
 EncryptedSharedPreferences achter dezelfde kleine abstractie).
+
+## Beslissing: spelerskaarten delen via links op iOS én Android, CloudKit-sync verdwijnt (2026-09-28)
+
+Gerd-Jan wil dat spelerskaarten (badges) over de platforms heen gedeeld
+kunnen worden. **Gekozen: één mechanisme, de bestaande snapshot-link**
+(`https://squashanalyzer.com/kaart/#<payload>`), op beide platforms, en
+**"Nodig coach uit" (CloudKit `CKShare` + `CKSyncEngine`, `CardSync.swift`)
+verdwijnt van iOS.** Geen live sync meer, ook niet iPhone↔iPhone.
+
+Waarom:
+
+- De snapshot-link is al platformneutraal: JSON → raw deflate → base64url in
+  het URL-fragment (dat de browser nooit naar de server stuurt). De website
+  pakt hem al uit met `DecompressionStream("deflate-raw")`; Kotlin kan dat met
+  `java.util.zip` (`Inflater(nowrap = true)`). Award-ids zijn deterministisch
+  (eerste 16 bytes SHA-256 over `cardId|badge|matchId`, versie-/variantbits
+  gezet), dus ook in Kotlin (`MessageDigest`) exact na te bouwen.
+- CloudKit werkt alleen tussen Apple-apparaten. Een Android-gebruiker kan een
+  uitnodiging niet openen; twee knoppen die voor verschillende mensen wel/niet
+  werken is verwarrend.
+- Live sync over platforms heen vraagt een eigen backend met accounts — een
+  veel grotere stap (en dan klopt het privacy-label "Data Not Collected" niet
+  meer). Bewust niet gekozen.
+- Het CloudKit-delen heeft (voor zover bekend) alleen in TestFlight-builds
+  (2.2) gezeten, nooit in de App Store. Nu weghalen is het goedkoopste moment.
+
+Geaccepteerde nadelen:
+
+- Geen automatische synchronisatie meer: na nieuwe badges moet iemand de
+  kaart opnieuw sturen. De app biedt dat na een wedstrijd met nieuwe badges
+  al aan.
+- **Bewuste uitzondering op de harde eis "geen functieverlies op iOS"**,
+  expliciet door Gerd-Jan goedgekeurd. TestFlight-testers met een gedeelde
+  kaart verliezen de live sync; hun badges blijven lokaal bewaard.
+- De iCloud Drive-backup blijft ongemoeid (dat is iCloud Drive, niet de
+  CloudKit-database).
+
+Plan (elke stap los testen, iOS en Android groen, zoals alle vorige stappen):
+
+1. **Eén gedeelde implementatie**: `CardSnapshot` (coderen/decoderen) en
+   `SavedBadgeAward.awardId` naar `SquashAnalyzerCore`. Deflate en SHA-256
+   krijgen per platform een eigen stukje (`#if SKIP`: `java.util.zip` /
+   `MessageDigest`; anders de huidige Apple-API's). Vaste
+   compatibiliteitstests: een door iOS gemaakte payload moet op Android
+   identiek uitpakken, en een bekend award-id moet op beide platforms gelijk
+   zijn. Gedragsneutraal voor iOS.
+2. **Android-datamodel gelijktrekken** (Room-migratie 5→6): `badge_awards`
+   krijgt `cardId`, `opponentName`, `awardedBy` (een eigen id per installatie,
+   zoals iOS' `BadgeAwarder.installId`) en het deterministische iOS-award-id.
+   Bestaande Android-awards worden omgerekend (`cardId` = `players.cardId`
+   of anders het speler-id, net als iOS' `badgeCardId`). Zelfde
+   verwijder-semantiek als iOS: een verwijdering wint altijd bij samenvoegen.
+3. **Delen vanaf Android**: knop "Deel kaart" in `SharedPlayerBadgesView`,
+   die de link maakt en het Android-deelvenster opent (`Intent.ACTION_SEND`)
+   via een kleine platform-hook vanuit `MainActivity`. Algemeen opgezet, zodat
+   "Deel score" er later op kan meeliften.
+4. **Ontvangen op Android**: intent-filters voor
+   `https://squashanalyzer.com/kaart` en `squashanalyzer://kaart`, plus een
+   importscherm zoals iOS' `CardImportSheet`: voorvertoning ("X nieuwe
+   badges, Y verwijderd"), koppelen aan een bestaande speler of een nieuwe
+   aanmaken, samenvoegen.
+5. **Website**: `website/.well-known/assetlinks.json` (Android App Links, de
+   tegenhanger van `apple-app-site-association`), eventueel een "Open in
+   app"-knop op de kaartpagina. Voor een geverifieerde App Link is de
+   SHA-256-vingerafdruk van de Android-release-sleutel nodig; die bestaat nog
+   niet, dus tot dan opent de link via "openen met" of het eigen scheme.
+   Uitrollen via Portainer (stack 85, zie de website-deploy-notitie).
+6. **End-to-end-test**: een link van de iPhone via WhatsApp openen op de
+   Android-emulator, en andersom.
+7. **Pas daarna**: "Nodig coach uit" en de CloudKit-sync van iOS verwijderen
+   (`CardSync.swift`, de uitnodigingsdelen van `CardShareActions`, het
+   accepteren van shares in `AppDelegate`/`SceneDelegate`,
+   `CKSharingSupported` in `Info.plist`, `docs/cloudkit-schema.ckdb`).
+   Lokale `SavedPlayerCard`-/award-gegevens blijven staan; alleen het
+   synchroniseren stopt. `ARCHITECTURE.md` (Badges-sectie) en de
+   privacytekst bijwerken. Volgorde bewust zo, zodat er nooit een moment is
+   zonder werkende manier van delen.
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 
@@ -1363,5 +1442,6 @@ branch tot een presenteerbare mijlpaal; samenvoegen is een afzonderlijke stap.
   Mijn team en instellingen/AI Coach (fase 5).
 - Android-opslag voor badge-awards.
 - Foto's, badgecatalogus en teamimport in het Android-spelersscherm.
-- CloudKit-uitnodigingen blijven bewust iOS-only.
+- Spelerskaarten delen via links (gepland, zie de beslissing van 2026-09-28);
+  CloudKit-uitnodigingen verdwijnen daarna ook van iOS.
 - Een fysiek Android-toestel is nog nodig voor aanvullende praktijktests.

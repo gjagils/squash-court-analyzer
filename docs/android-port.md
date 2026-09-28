@@ -1375,6 +1375,7 @@ Plan (elke stap los testen, iOS en Android groen, zoals alle vorige stappen):
    compatibiliteitstests: een door iOS gemaakte payload moet op Android
    identiek uitpakken, en een bekend award-id moet op beide platforms gelijk
    zijn. Gedragsneutraal voor iOS.
+   **AFGEROND (2026-09-28)**, zie "Stap 1 — resultaat" hieronder.
 2. **Android-datamodel gelijktrekken** (Room-migratie 5→6): `badge_awards`
    krijgt `cardId`, `opponentName`, `awardedBy` (een eigen id per installatie,
    zoals iOS' `BadgeAwarder.installId`) en het deterministische iOS-award-id.
@@ -1406,6 +1407,53 @@ Plan (elke stap los testen, iOS en Android groen, zoals alle vorige stappen):
    synchroniseren stopt. `ARCHITECTURE.md` (Badges-sectie) en de
    privacytekst bijwerken. Volgorde bewust zo, zodat er nooit een moment is
    zonder werkende manier van delen.
+
+### Stap 1 — resultaat (AFGEROND, 2026-09-28)
+
+- **`Packages/SquashAnalyzerCore/Sources/SquashAnalyzerCore/CardSnapshot.swift`**
+  (nieuw): `AwardValue` (inclusief `AwardValue.awardId(cardId:badge:matchId:)`),
+  `CardSnapshot` (payload/webURL/init(payload:)/init?(url:)) en
+  `CardSnapshotError`. De iOS-app houdt alleen de SwiftData-kant over
+  (`AwardValue.init?(_ award: SavedBadgeAward)`, `CardStore`, en
+  `CardLinkError` met de twee CloudKit-gevallen, die bij stap 7 verdwijnen);
+  `SavedBadgeAward.awardId` verwijst nu door naar de Core-versie.
+- **SHA-256**: SkipFoundation biedt al een CryptoKit-compatibele `SHA256`
+  (op `java.security.MessageDigest`), dus alleen `import CryptoKit` staat
+  achter `#if !SKIP`; de rest van de award-id-code is gedeeld. De 16 bytes
+  worden als `[Int]` bewerkt en via een hex-string naar `UUID(uuidString:)`
+  omgezet, niet via `UUID(uuid:)`-tupels (minder transpile-risico).
+- **Deflate**: `#if SKIP` gebruikt `java.util.zip.Deflater`/`Inflater` in
+  `nowrap`-modus (raw deflate, zoals Apple's `.zlib` en de website);
+  `Inflater` krijgt het gebruikelijke extra dummy-byte mee. De gecomprimeerde
+  bytes mogen per platform verschillen — alleen de uitgepakte JSON moet
+  gelijk zijn, dus er is bewust géén test "encode geeft exact dezelfde
+  string".
+- **Gouden testwaarden**: gemaakt met een letterlijke kopie van het oude
+  iOS-algoritme (vóór de verhuizing), met een verwijderde award, een
+  ontbrekende `d` en niet-ASCII-namen ("Paul Stéenks", "Jaïr"). Met Python
+  (`zlib`, wbits −15) gecontroleerd dat de payload raw deflate is.
+  `CardSnapshotTests` (5 tests): een iOS-link lezen, het iOS-award-id
+  reproduceren, id-afhankelijkheid van kaart/badge/wedstrijd, round-trip via
+  web- en app-URL, en andere URL's afwijzen. Draaien op Darwin én op Android.
+- **Nieuwe Skip-bug**: in een failable init geeft
+  `guard …, let snapshot = try? X else { return nil }; self = snapshot` in
+  Kotlin `Unresolved reference 'snapshot'` — Skip hernoemt de guard-binding
+  (`snapshot_0`) maar niet de uitgeschreven `self =`-toewijzing (die wordt
+  per property `this.v = snapshot.v …`). Fix: `do { self = try X } catch {
+  return nil }`. **Vuistregel**: wijs in een init nooit `self` toe vanuit een
+  `guard let`/`if let`-binding; wijs het rechtstreeks toe.
+- Nog open voor stap 6: een door Android gemaakte link echt openen op de
+  iPhone en in de browser. Java's raw deflate is standaard, dus dat zou
+  moeten werken, maar het is nog niet end-to-end gezien.
+
+Verificatie:
+
+- `swift test --package-path Packages/SquashAnalyzerCore`: 20 XCTests groen
+  op Darwin, 20/20 JUnit op Android (15 badge + 5 kaart).
+- `:app:testDebugUnitTest` en `:app:connectedDebugAndroidTest` (13/13): groen.
+- `xcodebuild test … -skipPackagePluginValidation`: **TEST SUCCEEDED**,
+  inclusief de bestaande `PlayerCardTests` en
+  `BadgeAwardTests.testAwardIdIsDeterministic`.
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 

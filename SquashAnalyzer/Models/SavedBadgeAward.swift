@@ -1,6 +1,5 @@
 import Foundation
 import SwiftData
-import CryptoKit
 import SquashAnalyzerCore
 
 /// One moment a player earned a badge: at most one per player card, badge and
@@ -39,13 +38,8 @@ final class SavedBadgeAward {
     var badgeKind: BadgeKind? { BadgeKind(rawValue: badge) }
     var isActive: Bool { deletedAt == nil }
 
-    /// Deterministic id: the first 16 bytes of SHA-256 over card, badge and match
+    /// Deterministic id, shared with Android (see `AwardValue.awardId` in SquashAnalyzerCore)
     static func awardId(cardId: UUID, badge: BadgeKind, matchId: UUID) -> UUID {
-        let digest = SHA256.hash(data: Data("\(cardId.uuidString)|\(badge.rawValue)|\(matchId.uuidString)".utf8))
-        var bytes = Array(digest.prefix(16))
-        bytes[6] = (bytes[6] & 0x0F) | 0x50   // version 5 style, name-based
-        bytes[8] = (bytes[8] & 0x3F) | 0x80   // RFC 4122 variant
-        return UUID(uuid: (bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
-                           bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]))
+        AwardValue.awardId(cardId: cardId, badge: badge, matchId: matchId)
     }
 }

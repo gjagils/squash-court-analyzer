@@ -1,5 +1,6 @@
 import XCTest
 import SwiftData
+import SquashAnalyzerCore
 @testable import SquashAnalyzer
 
 final class PlayerCardTests: XCTestCase {

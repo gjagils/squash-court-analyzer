@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerCore
 
 struct LeagueTeamCard: View {
     @AppStorage(CoachInputSettings.teamURLKey) private var teamURL = ""

@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerCore
 
 /// Coach input settings shared between the settings screen and the live coach screen
 enum CoachInputSettings {

@@ -1405,6 +1405,10 @@ Plan (elke stap los testen, iOS en Android groen, zoals alle vorige stappen):
    app"-knop op de kaartpagina. Voor een geverifieerde App Link is de
    SHA-256-vingerafdruk van de Android-release-sleutel nodig; die bestaat nog
    niet, dus tot dan opent de link via "openen met" of het eigen scheme.
+   **Voorbereid (2026-09-30)**: gekozen voor Google Play App Signing; icoon,
+   ondertekening en release-build staan klaar, het stappenplan voor de Play
+   Console staat in `docs/google-play.md`. Wacht op de twee
+   SHA-256-vingerafdrukken uit de Play Console.
    Uitrollen via Portainer (stack 85, zie de website-deploy-notitie).
 6. **End-to-end-test**: een link van de iPhone via WhatsApp openen op de
    Android-emulator, en andersom.

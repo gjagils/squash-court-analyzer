@@ -14,6 +14,7 @@ afgeronde coach- en scheidsrechterwedstrijden.
 
 - [Architectuur](ARCHITECTURE.md)
 - [Android-status, bouwinstructies en resterende stappen](docs/android-port.md)
+- [Google Play: Android-app ondertekenen, uploaden en testen](docs/google-play.md)
 - [Teamimport-formaat](docs/team-import/README.md)
 
 Lokaal Android bouwen (Xcode/Swift, Skip en Android Studio SDK zijn nodig):

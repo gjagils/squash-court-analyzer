@@ -5,6 +5,18 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+// Google Play upload key: never in the repo. The keystore lives in
+// ~/.android-keys (backed up in 1Password), the passwords in
+// ~/.gradle/gradle.properties. Google Play App Signing re-signs with the real
+// app key; see docs/google-play.md.
+val uploadStoreFile = file(
+    providers.gradleProperty("SQUASH_UPLOAD_STORE_FILE")
+        .getOrElse("${System.getProperty("user.home")}/.android-keys/squashanalyzer-upload.jks")
+)
+val uploadStorePassword = providers.gradleProperty("SQUASH_UPLOAD_STORE_PASSWORD").orNull
+val uploadKeyPassword = providers.gradleProperty("SQUASH_UPLOAD_KEY_PASSWORD").orNull
+val hasUploadKey = uploadStoreFile.exists() && uploadStorePassword != null && uploadKeyPassword != null
+
 android {
     namespace = "com.squashanalyzer.android"
     compileSdk = 36
@@ -13,14 +25,32 @@ android {
         applicationId = "com.squashanalyzer.android"
         minSdk = 28
         targetSdk = 36
+        // Bump versionCode for every upload to Google Play (it must go up);
+        // versionName is what testers see.
         versionCode = 1
-        versionName = "0.1-phase4"
+        versionName = "0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        if (hasUploadKey) {
+            create("upload") {
+                storeFile = uploadStoreFile
+                storePassword = uploadStorePassword
+                keyAlias = providers.gradleProperty("SQUASH_UPLOAD_KEY_ALIAS").getOrElse("upload")
+                keyPassword = uploadKeyPassword
+            }
+        }
     }
 
     buildTypes {
         release {
+            // No R8 yet: Skip's runtime reflects on generated classes, so
+            // shrinking needs its own keep rules and a test pass first.
             isMinifyEnabled = false
+            // Without the upload key a release build is debug-signed, so it can
+            // be tried locally; Google Play refuses debug-signed uploads.
+            signingConfig = if (hasUploadKey) signingConfigs.getByName("upload") else signingConfigs.getByName("debug")
         }
     }
 

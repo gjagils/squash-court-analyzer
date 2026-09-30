@@ -1697,15 +1697,16 @@ Aangepast:
   volgende schemaversie. Bestaande awards en gekoppelde `cardId`'s blijven
   gewoon werken.
 - `website/privacy.html`: CloudKit-alinea vervangen door alleen de link,
-  Android genoemd (opslag, verwijderen). **Nog niet gepubliceerd** — dat
-  gebeurt na akkoord van Gerd-Jan (Portainer, zie de website-deploy-notitie).
+  Android genoemd (opslag, verwijderen). Na akkoord van Gerd-Jan live gezet
+  op 2026-09-30 (Portainer; het Tailscale-adres gaf 404, het LAN-adres
+  `192.168.68.120:9000` werkte).
 - `ARCHITECTURE.md` (Badges): delen alleen via links; CloudKit-onderdelen
   gemarkeerd als verwijderd.
 
 Voor TestFlight-testers met een gedeelde kaart (build 13/14): de badges
-blijven lokaal staan, alleen de live sync stopt. In de release notes van de
-volgende build vermelden: "Nodig coach uit is vervangen door Deel kaart,
-dat nu ook met Android werkt."
+blijven lokaal staan, alleen de live sync stopt. De release notes voor de
+volgende TestFlight-build staan klaar in `release-notes/2.2-15.md` (pas het
+buildnummer aan als dat bij het uploaden anders uitkomt).
 
 Verificatie: iOS **TEST SUCCEEDED** (Android/Core ongewijzigd).
 

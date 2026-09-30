@@ -67,8 +67,16 @@ public protocol CardImportStore: Sendable {
 @Observable
 public final class CardInbox {
     public var pending: CardSnapshot?
+    /// Goes up after every finished import, so open screens can reload
+    public private(set) var importCount = 0
 
     public init() {
+    }
+
+    /// The pending card was imported: close the import screen and let open screens reload
+    public func finishImport() {
+        pending = nil
+        importCount += 1
     }
 
     /// Takes a link from outside the app. Returns false (and changes nothing)

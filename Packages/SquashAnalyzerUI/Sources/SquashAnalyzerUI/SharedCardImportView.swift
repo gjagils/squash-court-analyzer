@@ -8,13 +8,14 @@ import SquashAnalyzerCore
 public struct SharedCardImportView: View {
     let snapshot: CardSnapshot
     let store: any CardImportStore
-    let onClose: () -> Void
+    /// Called with true after an import, false after "Annuleren"
+    let onClose: (Bool) -> Void
 
     @State private var preview: CardImportPreview?
     @State private var isImporting = false
     @State private var failed = false
 
-    public init(snapshot: CardSnapshot, store: any CardImportStore, onClose: @escaping () -> Void) {
+    public init(snapshot: CardSnapshot, store: any CardImportStore, onClose: @escaping (Bool) -> Void) {
         self.snapshot = snapshot
         self.store = store
         self.onClose = onClose
@@ -69,7 +70,7 @@ public struct SharedCardImportView: View {
             .navigationTitle("Spelerskaart")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuleren") { onClose() }
+                    Button("Annuleren") { onClose(false) }
                 }
             }
             .alert("Koppelen mislukt", isPresented: $failed) {
@@ -96,7 +97,7 @@ public struct SharedCardImportView: View {
             do {
                 try await store.importCard(snapshot, toPlayer: playerId)
                 isImporting = false
-                onClose()
+                onClose(true)
             } catch {
                 isImporting = false
                 failed = true

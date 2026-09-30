@@ -121,7 +121,9 @@ hands the link to a Core `CardInbox`, and `AndroidHomeView` shows
 `SharedCardImportView` over any screen while one is pending; `BadgeAwardStore`
 implements the Core `CardImportStore` with iOS' `CardStore` rules (link moves
 the player's own awards onto the card, merge where a deletion wins, one
-transaction) — named `Shared...`, not
+transaction); after an import `CardInbox.importCount` goes up and the open player list
+and badge screen reload (`.task(id:)`). Checked end to end between the iOS
+simulator, the Android emulator and the website (docs/android-port.md, step 6) — named `Shared...`, not
 `PlayerBadgesView`, for the same reason as `SharedBadgeCatalogView`: the
 iOS app target already has its own, richer `PlayerBadgesView`. A "Badges
 verdiend" strip now shows on the match-over screen too: `SharedMatchBadgesStrip`

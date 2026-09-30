@@ -92,12 +92,15 @@ public struct PlayerDirectoryView: View {
     @State private var badgesForPlayer: PlayerProfile? = nil
 
     private let shareText: (String) -> Void
+    /// Reloads after a card link was imported while this screen was open
+    private let cardInbox: CardInbox
 
     public init(store: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
-                shareText: @escaping (String) -> Void) {
+                shareText: @escaping (String) -> Void, cardInbox: CardInbox) {
         self.store = store
         self.badgeStore = badgeStore
         self.shareText = shareText
+        self.cardInbox = cardInbox
     }
 
     public var body: some View {
@@ -197,13 +200,13 @@ public struct PlayerDirectoryView: View {
             }
         }
         .navigationTitle("Spelers")
-        .task { await reload() }
+        .task(id: cardInbox.importCount) { await reload() }
         .sheet(item: $editing) { player in
             PlayerProfileEditor(player: player, store: store) { await reload() }
         }
         .navigationDestination(isPresented: Binding(get: { badgesForPlayer != nil }, set: { if !$0 { badgesForPlayer = nil } })) {
             if let player = badgesForPlayer {
-                SharedPlayerBadgesView(playerId: player.id, playerName: player.name, badgeStore: badgeStore, shareText: shareText)
+                SharedPlayerBadgesView(playerId: player.id, playerName: player.name, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox)
             }
         }
         .alert("Speler verwijderen?", isPresented: $confirmDelete) {

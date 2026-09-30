@@ -206,7 +206,7 @@ public struct AndroidHomeView: View {
         NavigationStack {
             homeContent
                 .navigationDestination(isPresented: $showingPlayers) {
-                    PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText)
+                    PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
                     CoachSessionView(store: matchStore, playerStore: playerStore, onExit: { showingCoach = false })
@@ -226,7 +226,9 @@ public struct AndroidHomeView: View {
         .sheet(isPresented: Binding(get: { cardInbox.pending != nil },
                                     set: { if !$0 { cardInbox.pending = nil } })) {
             if let snapshot = cardInbox.pending {
-                SharedCardImportView(snapshot: snapshot, store: cardImportStore) { cardInbox.pending = nil }
+                SharedCardImportView(snapshot: snapshot, store: cardImportStore) { imported in
+                    if imported { cardInbox.finishImport() } else { cardInbox.pending = nil }
+                }
             }
         }
         .preferredColorScheme(.dark)

@@ -16,17 +16,20 @@ public struct SharedPlayerBadgesView: View {
     let playerName: String
     let badgeStore: any PlayerBadgeSummaryStore
     let shareText: (String) -> Void
+    /// Reloads after a card link was imported while this screen was open
+    let cardInbox: CardInbox
 
     @State private var badges: [BadgeKind] = []
     @State private var isLoading = true
     @State private var shareFailed = false
 
     public init(playerId: String, playerName: String, badgeStore: any PlayerBadgeSummaryStore,
-                shareText: @escaping (String) -> Void) {
+                shareText: @escaping (String) -> Void, cardInbox: CardInbox) {
         self.playerId = playerId
         self.playerName = playerName
         self.badgeStore = badgeStore
         self.shareText = shareText
+        self.cardInbox = cardInbox
     }
 
     public var body: some View {
@@ -69,7 +72,7 @@ public struct SharedPlayerBadgesView: View {
         } message: {
             Text("De kaart van \(playerName) kon niet worden gemaakt.")
         }
-        .task { await load() }
+        .task(id: cardInbox.importCount) { await load() }
     }
 
     private func shareCard() async {

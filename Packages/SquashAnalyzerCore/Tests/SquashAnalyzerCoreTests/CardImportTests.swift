@@ -24,6 +24,15 @@ final class CardImportTests: XCTestCase {
         XCTAssertNil(inbox.pending)
     }
 
+    func testFinishingAnImportClosesItAndCountsUp() {
+        let inbox = CardInbox()
+        inbox.receive("https://squashanalyzer.com/kaart/#" + iosPayload)
+        XCTAssertEqual(inbox.importCount, 0)
+        inbox.finishImport()
+        XCTAssertNil(inbox.pending)
+        XCTAssertEqual(inbox.importCount, 1)
+    }
+
     func testSummaryUsesTheIOSWording() {
         let hugo = CardImportPlayer(id: "1", name: "Hugo")
         XCTAssertEqual(CardImportPreview(activeBadges: 1, newBadges: 1, deletedBadges: 0, linkedPlayer: nil, players: []).summary,

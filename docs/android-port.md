@@ -1408,6 +1408,9 @@ Plan (elke stap los testen, iOS en Android groen, zoals alle vorige stappen):
    Uitrollen via Portainer (stack 85, zie de website-deploy-notitie).
 6. **End-to-end-test**: een link van de iPhone via WhatsApp openen op de
    Android-emulator, en andersom.
+   **AFGEROND (2026-09-30)** op simulator/emulator, zie "Stap 6 — resultaat"
+   hieronder. Nog te doen door Gerd-Jan: hetzelfde één keer met de echte
+   iPhone en WhatsApp.
 7. **Pas daarna**: "Nodig coach uit" en de CloudKit-sync van iOS verwijderen
    (`CardSync.swift`, de uitnodigingsdelen van `CardShareActions`, het
    accepteren van shares in `AppDelegate`/`SceneDelegate`,
@@ -1590,9 +1593,8 @@ Verificatie: `:app:testDebugUnitTest` 37/37, `:app:connectedDebugAndroidTest`
   zodat een link terwijl de app draait via `onNewIntent` binnenkomt; na een
   rotatie wordt dezelfde link niet opnieuw aangeboden
   (`savedInstanceState == null`).
-- **Bekende beperking**: staat het Spelers-scherm al open tijdens een
-  import, dan ververst de badge-telling pas bij opnieuw openen (het scherm
-  laadt bij verschijnen).
+- ~~Bekende beperking: een open Spelers-/badgescherm ververst niet na een
+  import~~ — opgelost in stap 6 (`CardInbox.importCount`).
 
 Tests: Core `CardImportTests` (3: web- en app-link, andere links genegeerd,
 bewoording samenvatting; Darwin + Android), `CardImportStoreTest` (4: nieuwe
@@ -1607,6 +1609,50 @@ voor jou" — een door de iOS-app gemaakte link werkt dus op Android.
 
 Verificatie: `:app:testDebugUnitTest` 41/41, `:app:connectedDebugAndroidTest`
 15/15, Core 24 op Darwin / 23 JUnit op Android, iOS **TEST SUCCEEDED**.
+
+### Stap 6 — resultaat (AFGEROND, 2026-09-30)
+
+Met beide echte apps (iOS-simulator iPhone 17 Pro, Android-emulator
+Medium_Phone_API_36.1), zonder testcode ertussen:
+
+1. **Android verdient**: speler Hugo aangemaakt, gekozen via "Kies speler"
+   in een scheidsrechterwedstrijd, 11-0 gespeeld → 4 badges (5 op rij,
+   perfect ten, 11-0, unbreakable).
+2. **Android deelt**: "Deel kaart" → de link uit het Android-deelvenster
+   gelezen. Met Python (`zlib`, wbits −15) gecontroleerd: raw deflate, JSON
+   in het iOS-formaat.
+3. **iPhone importeert**: `xcrun simctl openurl` met de **https**-link opent
+   direct de iOS-app (universal link werkt; `apple-app-site-association`
+   staat al live) → "Hugo · 4 badges op de kaart · 4 nieuw voor jou" →
+   "Nieuwe speler Hugo" → 4 badges met artwork, en een verdienmoment met
+   tegenstander "Speler 2" en de tijd van op Android (20:35).
+4. **iPhone verwijdert en deelt terug**: "5 op rij" weggeveegd (3 badges),
+   "Deel kaart" → Copy → `xcrun simctl pbpaste`: zelfde kaart-id, "5 op rij"
+   met `d` (verwijderd).
+5. **Android werkt bij**: de iPhone-link geopend → "Hugo · 3 badges op de
+   kaart · 1 verwijderd" met "Bijwerken bij Hugo" (herkend als dezelfde
+   kaart) → Hugo heeft op Android 3 badges; de verwijdering van de iPhone
+   wint.
+6. **Browser**: de Android-link op https://squashanalyzer.com/kaart/ in
+   Chrome toont "Badgekaart Hugo" met de verdiende badges.
+
+**Gevonden en opgelost**: het badgescherm dat onder het importvenster
+openstond, bleef de oude 4 badges tonen (dezelfde beperking als Spelers uit
+stap 4). Nu telt `CardInbox.importCount` op bij elke afgeronde import
+(`finishImport()`; "Annuleren" telt niet), en `PlayerDirectoryView` en
+`SharedPlayerBadgesView` laden opnieuw met `.task(id: cardInbox.importCount)`.
+`SharedCardImportView.onClose` krijgt daarvoor `imported: Bool` mee.
+Tests: Core `testFinishingAnImportClosesItAndCountsUp`, instrumented
+`aLinkOpenedOnTheSpelersScreenUpdatesItsBadgeCount` (link komt binnen via
+`onNewIntent` terwijl Spelers openstaat, badge-telling verschijnt zonder
+opnieuw te navigeren).
+
+**Nog niet getest**: de echte iPhone en WhatsApp, en een https-link op
+Android zonder expliciet pakket (zonder `assetlinks.json` vraagt Android
+"openen met" of kiest Chrome; dat is stap 5).
+
+Verificatie: `:app:testDebugUnitTest` 41/41, `:app:connectedDebugAndroidTest`
+16/16, Core 25 op Darwin / 24 JUnit op Android, iOS **TEST SUCCEEDED**.
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 

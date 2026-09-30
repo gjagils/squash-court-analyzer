@@ -101,10 +101,14 @@ public struct PlayerDirectoryView: View {
             PlayerStyle.background.ignoresSafeArea()
             VStack(spacing: 16) {
                 HStack {
+                    // Shrink the title rather than wrap it on narrow screens or large text
                     Text("SPELERS").font(.system(size: 22, weight: .bold, design: .rounded)).tracking(2)
-                    Spacer()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                    Spacer(minLength: 8)
                     Button { editing = PlayerProfile() } label: {
                         Label("Toevoegen", systemImage: "plus")
+                            .lineLimit(1)
                     }
                     .accessibilityLabel("Speler toevoegen")
                     .disabled(isLoading || isDeleting || loadFailed)

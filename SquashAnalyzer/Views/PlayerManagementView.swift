@@ -40,18 +40,23 @@ struct PlayerManagementView: View {
                             }
                             .font(AppFonts.body(14))
                             .foregroundColor(AppColors.textSecondary)
+                            .lineLimit(1)
+                            .fixedSize()
                         }
 
-                        Spacer()
+                        Spacer(minLength: 8)
 
+                        // Five controls share one row: shrink the title rather than wrap it
                         Text(isPickerMode ? "KIES SPELER" : "SPELERS")
                             .font(AppFonts.title(18))
                             .foregroundColor(AppColors.textPrimary)
                             .tracking(3)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
 
-                        Spacer()
+                        Spacer(minLength: 8)
 
-                        HStack(spacing: 18) {
+                        HStack(spacing: 14) {
                             Button(action: { showingBadgeCatalog = true }) {
                                 Image(systemName: "medal")
                                     .font(.system(size: 20))

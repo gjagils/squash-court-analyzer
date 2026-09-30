@@ -8,8 +8,8 @@ Android heeft spelersbeheer, zowel coachscoring als scheidsrechtermodus
 automatische opslag en hervatten, een badges-catalogus met echte, per speler
 berekende en bewaarde badge-awards inclusief career-badges (badge-aantal in
 Spelers met een scherm voor de verdiende badges en een knop "Deel kaart" die
-dezelfde kaartlink maakt als iOS, plus een "Badges
-verdiend"-strip direct op het match-einde-scherm), en een overzicht van
+dezelfde kaartlink maakt als iOS; zo'n link openen op Android importeert de
+kaart, plus een "Badges verdiend"-strip direct op het match-einde-scherm), en een overzicht van
 afgeronde coach- en scheidsrechterwedstrijden.
 
 - [Architectuur](ARCHITECTURE.md)

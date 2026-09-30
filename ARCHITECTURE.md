@@ -115,7 +115,13 @@ itself, backs a badge-count pill on each row of `PlayerDirectoryView`
 (a `BadgeMedallion` grid, with a "Deel kaart" toolbar button that sends the
 card as the same snapshot link iOS shares — `cardSnapshot(forPlayer:)` on the
 protocol, the Android share sheet via a `shareText` closure that `MainActivity`
-passes down and fills with `shareTextIntent`) it taps through to — named `Shared...`, not
+passes down and fills with `shareTextIntent`) it taps through to — and card links come back in the same way: `MainActivity` (`singleTask`,
+intent-filters for `squashanalyzer.com/kaart` and `squashanalyzer://kaart`)
+hands the link to a Core `CardInbox`, and `AndroidHomeView` shows
+`SharedCardImportView` over any screen while one is pending; `BadgeAwardStore`
+implements the Core `CardImportStore` with iOS' `CardStore` rules (link moves
+the player's own awards onto the card, merge where a deletion wins, one
+transaction) — named `Shared...`, not
 `PlayerBadgesView`, for the same reason as `SharedBadgeCatalogView`: the
 iOS app target already has its own, richer `PlayerBadgesView`. A "Badges
 verdiend" strip now shows on the match-over screen too: `SharedMatchBadgesStrip`

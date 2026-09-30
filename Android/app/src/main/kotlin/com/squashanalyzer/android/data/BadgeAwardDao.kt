@@ -21,6 +21,12 @@ interface BadgeAwardDao {
     @Query("SELECT * FROM badge_awards WHERE cardId = :cardId AND deletedAt IS NULL")
     suspend fun activeForCard(cardId: String): List<BadgeAwardEntity>
 
+    @Query("SELECT * FROM badge_awards WHERE id = :id")
+    suspend fun byId(id: String): BadgeAwardEntity?
+
+    @Query("UPDATE badge_awards SET deletedAt = :deletedAt WHERE id = :id")
+    suspend fun markDeleted(id: String, deletedAt: Long)
+
     @Query("DELETE FROM badge_awards WHERE id IN (:ids)")
     suspend fun deleteByIds(ids: List<String>)
 

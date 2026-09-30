@@ -38,6 +38,10 @@ abstract class PlayerDao {
         else updateFields(player.id, player.name, player.coachingFocusAreas, player.coachingNotes)
     }
 
+    /** Links the player to a shared card; null means the card is the player's own id */
+    @Query("UPDATE players SET cardId = :cardId WHERE id = :id")
+    abstract suspend fun setCardId(id: String, cardId: String?)
+
     // Deliberately no foreign key from match history to this editable directory.
     @Query("DELETE FROM players WHERE id = :id")
     abstract suspend fun delete(id: String)

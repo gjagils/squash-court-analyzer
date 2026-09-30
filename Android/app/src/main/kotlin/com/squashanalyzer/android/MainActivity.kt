@@ -1,7 +1,9 @@
 package com.squashanalyzer.android
 
 import android.app.Application
+import android.content.Intent
 import android.os.Bundle
+import androidx.room.withTransaction
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.SystemBarStyle
@@ -15,6 +17,7 @@ import skip.ui.ColorScheme
 import skip.ui.ComposeContext
 import skip.ui.PresentationRoot
 import skip.ui.UIApplication
+import squash.analyzer.core.CardInbox
 import squash.analyzer.ui.AndroidHomeView
 import com.squashanalyzer.android.data.AppDatabase
 import com.squashanalyzer.android.data.RoomPlayerStore
@@ -34,6 +37,9 @@ class SquashApplication : Application() {
 }
 
 class MainActivity : AppCompatActivity() {
+    /** Card links opened from WhatsApp, the browser, … wait here for the import screen */
+    private val cardInbox = CardInbox()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         UIApplication.launch(this)
@@ -44,8 +50,11 @@ class MainActivity : AppCompatActivity() {
         val playerStore = RoomPlayerStore(AppDatabase.get(this).playerDao())
         val coachMatchStore = MatchStore(AppDatabase.get(this).matchDao())
         val refereeMatchDataStore = RefereeMatchStore(AppDatabase.get(this).refereeMatchDao())
-        val badgeAwardStore = BadgeAwardStore(AppDatabase.get(this).badgeAwardDao(), AppDatabase.get(this).playerDao(),
-            coachMatchStore, refereeMatchDataStore, badgeInstallId())
+        val db = AppDatabase.get(this)
+        val badgeAwardStore = BadgeAwardStore(db.badgeAwardDao(), db.playerDao(),
+            coachMatchStore, refereeMatchDataStore, badgeInstallId(), transaction = { block -> db.withTransaction { block() } })
+        // Not again after a rotation: the link was already taken in (or dismissed)
+        if (savedInstanceState == null) receiveCardLink(intent)
         val matchStore = RoomCoachMatchStore(coachMatchStore, badgeAwardStore)
         val refereeMatchStore = RoomRefereeMatchStore(refereeMatchDataStore, badgeAwardStore)
         val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore)
@@ -54,12 +63,24 @@ class MainActivity : AppCompatActivity() {
             stateHolder.SaveableStateProvider(true) {
                 PresentationRoot(defaultColorScheme = ColorScheme.dark, context = ComposeContext()) { context ->
                     Box(modifier = context.modifier.fillMaxSize()) {
-                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }).Compose(context = context.content())
+                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore).Compose(context = context.content())
                     }
                 }
                 SideEffect { stateHolder.removeState(true) }
             }
         }
+    }
+
+    /** `launchMode="singleTask"`: a link opened while the app runs arrives here */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        receiveCardLink(intent)
+    }
+
+    private fun receiveCardLink(intent: Intent?) {
+        if (intent?.action != Intent.ACTION_VIEW) return
+        val link = intent.dataString ?: return
+        cardInbox.receive(link)
     }
 
     /** Identifies this install as the awarding coach, like iOS' `BadgeAwarder.installId` */

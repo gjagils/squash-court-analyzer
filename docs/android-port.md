@@ -1399,6 +1399,7 @@ Plan (elke stap los testen, iOS en Android groen, zoals alle vorige stappen):
    importscherm zoals iOS' `CardImportSheet`: voorvertoning ("X nieuwe
    badges, Y verwijderd"), koppelen aan een bestaande speler of een nieuwe
    aanmaken, samenvoegen.
+   **AFGEROND (2026-09-30)**, zie "Stap 4 — resultaat" hieronder.
 5. **Website**: `website/.well-known/assetlinks.json` (Android App Links, de
    tegenhanger van `apple-app-site-association`), eventueel een "Open in
    app"-knop op de kaartpagina. Voor een geverifieerde App Link is de
@@ -1553,6 +1554,59 @@ dat de chooser de kaartlink krijgt. Visueel gecontroleerd op de emulator.
 
 Verificatie: `:app:testDebugUnitTest` 37/37, `:app:connectedDebugAndroidTest`
 14/14, Core 21 op Darwin en Android, iOS **TEST SUCCEEDED**.
+
+### Stap 4 — resultaat (AFGEROND, 2026-09-30)
+
+- **Core** (`CardImport.swift`): `CardImportStore`-protocol
+  (`importPreview(_:)`, `importCard(_:toPlayer:)`), `CardImportPreview` met
+  `summary` in exact de iOS-bewoording ("1 badge op de kaart · 1 nieuw voor
+  jou · … verwijderd · je bent al bij"), `CardImportPlayer`, en `CardInbox`
+  (`@Observable`, `receive(_ link: String) -> Bool` leest een web- of
+  app-link en zet `pending`; andere links worden genegeerd).
+  `CardSnapshot`, `AwardValue` en `BadgeKind` zijn nu `Sendable` (pure
+  waardetypes; nodig om een snapshot aan een async store te geven onder
+  Swift 6-concurrency). Gedragsneutraal voor iOS.
+- **Room** (`BadgeAwardStore` implementeert `CardImportStore`), regels gelijk
+  aan iOS' `CardStore`: eerst koppelen (nieuwe speler met de kaartnaam, of
+  een bestaande), waarbij de eigen awards van de speler naar de kaart
+  verhuizen met herberekend award-id; dan samenvoegen: onbekende awards
+  erbij (ook verwijderde, zodat de verwijdering in eigen links meereist),
+  een verwijdering wint altijd, een lokaal verwijderde award komt nooit
+  terug. `players.cardId` wordt `null` als de kaart het eigen id is. Alles
+  in één transactie: `BadgeAwardStore` kreeg een optionele
+  `transaction`-parameter (standaard direct uitvoeren, zodat bestaande
+  constructors ongewijzigd bleven); `MainActivity` geeft
+  `db.withTransaction` mee. Nieuwe DAO-queries: `BadgeAwardDao.byId`,
+  `markDeleted`, `PlayerDao.setCardId`.
+- **UI**: `SharedCardImportView` (tegenhanger van `CardImportSheet`):
+  naam + samenvatting, "Bijwerken bij X" als de kaart al gekoppeld is,
+  anders "Koppel aan" met "Nieuwe speler X" en alle spelers ("zelfde naam"
+  als hint). `AndroidHomeView` toont hem als sheet zolang
+  `cardInbox.pending` gezet is, dus bovenop elk scherm.
+- **Android**: intent-filters voor `https://(www.)squashanalyzer.com/kaart…`
+  (met `autoVerify`; zonder `assetlinks.json` — stap 5 — faalt verificatie
+  onschuldig en biedt Android "openen met" / Chrome) en
+  `squashanalyzer://kaart`. `MainActivity` is nu `launchMode="singleTask"`
+  zodat een link terwijl de app draait via `onNewIntent` binnenkomt; na een
+  rotatie wordt dezelfde link niet opnieuw aangeboden
+  (`savedInstanceState == null`).
+- **Bekende beperking**: staat het Spelers-scherm al open tijdens een
+  import, dan ververst de badge-telling pas bij opnieuw openen (het scherm
+  laadt bij verschijnen).
+
+Tests: Core `CardImportTests` (3: web- en app-link, andere links genegeerd,
+bewoording samenvatting; Darwin + Android), `CardImportStoreTest` (4: nieuwe
+speler op de kaart incl. verwijderde award, eigen awards verhuizen met nieuw
+id, verwijdering wint in beide richtingen, preview/gekoppelde speler) en
+instrumented `CardLinkImportTest` (app starten met een `ACTION_VIEW`-link →
+importscherm → "Nieuwe speler" → speler met 1 badge in Spelers). Handmatig:
+`pm query-activities` bevestigt dat beide link-soorten bij de app uitkomen,
+en `adb shell am start -a VIEW -d 'squashanalyzer://kaart#<iOS-payload>'`
+opent het importscherm met "Paul Stéenks · 1 badge op de kaart · 1 nieuw
+voor jou" — een door de iOS-app gemaakte link werkt dus op Android.
+
+Verificatie: `:app:testDebugUnitTest` 41/41, `:app:connectedDebugAndroidTest`
+15/15, Core 24 op Darwin / 23 JUnit op Android, iOS **TEST SUCCEEDED**.
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 

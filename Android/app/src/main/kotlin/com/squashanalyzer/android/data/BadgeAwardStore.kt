@@ -9,6 +9,9 @@ import squash.analyzer.core.BadgeEngine
 import squash.analyzer.core.BadgeEngine.CareerMatch
 import squash.analyzer.core.BadgeKind
 import squash.analyzer.core.BadgeMatchInput
+import squash.analyzer.core.CardImportPlayer
+import squash.analyzer.core.CardImportPreview
+import squash.analyzer.core.CardImportStore
 import squash.analyzer.core.CardSnapshot
 import squash.analyzer.core.Player
 import squash.analyzer.core.PlayerBadgeSummaryStore
@@ -33,7 +36,9 @@ class BadgeAwardStore(
     private val refereeMatchStore: RefereeMatchStore,
     /** Identifies this install as the awarding coach, like iOS' `BadgeAwarder.installId` */
     private val installId: String,
-) : PlayerBadgeSummaryStore {
+    /** Runs a card import as one database transaction (`AppDatabase.withTransaction` in the app) */
+    private val transaction: suspend (suspend () -> Unit) -> Unit = { it() },
+) : PlayerBadgeSummaryStore, CardImportStore {
 
     /** The card a player's awards live on: `players.cardId ?: players.id`, like iOS' `badgeCardId` */
     suspend fun cardId(playerId: String): String? = playerDao.byId(playerId)?.let { it.cardId ?: it.id }
@@ -60,6 +65,79 @@ class BadgeAwardStore(
         }
         return CardSnapshot(cardId = cardUuid, name = player.name, awards = SwiftArray(awards))
     }
+
+    // MARK: Importing a card link, like iOS' `CardStore`
+
+    override suspend fun importPreview(snapshot: CardSnapshot): CardImportPreview {
+        var new = 0
+        var deleted = 0
+        val values = snapshot.awards.toList()
+        for (value in values) {
+            val existing = dao.byId(value.id.uuidString)
+            if (existing != null) {
+                if (existing.deletedAt == null && value.deletedAt != null) deleted++
+            } else if (value.deletedAt == null) {
+                new++
+            }
+        }
+        val players = playerDao.all()
+        val cardId = snapshot.cardId.uuidString
+        val linked = players.firstOrNull { (it.cardId ?: it.id) == cardId }
+        return CardImportPreview(
+            activeBadges = values.count { it.deletedAt == null },
+            newBadges = new, deletedBadges = deleted,
+            linkedPlayer = linked?.let { CardImportPlayer(id = it.id, name = it.name) },
+            players = SwiftArray(players.map { CardImportPlayer(id = it.id, name = it.name) }),
+        )
+    }
+
+    override suspend fun importCard(snapshot: CardSnapshot, toPlayer: String?) {
+        transaction {
+            link(snapshot.cardId, snapshot.name, toPlayer)
+            merge(snapshot.awards.toList().map(::entity))
+        }
+    }
+
+    /**
+     * Links a local player (or a new one) to a card, like iOS'
+     * `CardStore.link`: the player's own awards move onto the card first.
+     */
+    private suspend fun link(card: UUID, name: String, playerId: String?) {
+        val player = playerId?.let { playerDao.byId(it) } ?: PlayerEntity(
+            id = UUID().uuidString, name = name, coachingFocusAreas = "[]", coachingNotes = "",
+            createdAt = System.currentTimeMillis() / 1000.0,
+        ).also { playerDao.insert(it) }
+        val oldCard = player.cardId ?: player.id
+        val cardId = card.uuidString
+        if (oldCard == cardId) return
+        val moved = dao.forCard(oldCard)
+        merge(moved.mapNotNull { row ->
+            val badge = BadgeKind.init(rawValue = row.badge) ?: return@mapNotNull null
+            val match = UUID(uuidString = row.matchId) ?: return@mapNotNull null
+            row.copy(id = AwardValue.awardId(cardId = card, badge = badge, matchId = match).uuidString, cardId = cardId)
+        })
+        if (moved.isNotEmpty()) dao.deleteByIds(moved.map { it.id })
+        playerDao.setCardId(player.id, if (cardId == player.id) null else cardId)
+    }
+
+    /** Inserts unknown awards and applies deletions; a deletion always wins */
+    private suspend fun merge(awards: List<BadgeAwardEntity>) {
+        for (award in awards) {
+            val existing = dao.byId(award.id)
+            if (existing == null) {
+                dao.insertAll(listOf(award))
+            } else if (existing.deletedAt == null && award.deletedAt != null) {
+                dao.markDeleted(award.id, award.deletedAt)
+            }
+        }
+    }
+
+    private fun entity(value: AwardValue) = BadgeAwardEntity(
+        id = value.id.uuidString, cardId = value.cardId.uuidString, badge = value.badge.rawValue,
+        matchId = value.matchId.uuidString, earnedAt = (value.earnedAt.timeIntervalSince1970 * 1000).toLong(),
+        opponentName = value.opponentName, awardedBy = value.awardedBy,
+        deletedAt = value.deletedAt?.let { (it.timeIntervalSince1970 * 1000).toLong() },
+    )
 
     /**
      * Inserts missing awards and removes active ones the rallies no longer

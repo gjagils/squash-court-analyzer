@@ -2,7 +2,7 @@ import Foundation
 
 /// A badge a player can earn during a match. The raw value is the stable id that
 /// is stored and shared on player cards, so it must never change once shipped.
-public enum BadgeKind: String, CaseIterable, Identifiable, Codable {
+public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
     case fiveInARow = "five-in-a-row"
     case elevenNil = "eleven-nil"
     case dropIt = "drop-it"

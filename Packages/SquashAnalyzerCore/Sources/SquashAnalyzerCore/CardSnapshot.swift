@@ -4,7 +4,7 @@ import CryptoKit
 #endif
 
 /// One badge award as it travels between devices in a card link.
-public struct AwardValue: Equatable {
+public struct AwardValue: Equatable, Sendable {
     public let cardId: UUID
     public let badge: BadgeKind
     public let matchId: UUID
@@ -59,7 +59,7 @@ public struct AwardValue: Equatable {
 /// which browsers never send to the server; the web page draws the card from it
 /// and both apps merge it. The byte format is shared with the website, so any
 /// change must stay readable by `website/kaart/index.html` and older app builds.
-public struct CardSnapshot: Codable, Equatable {
+public struct CardSnapshot: Codable, Equatable, Sendable {
     public var v = 1
     /// Card id
     public let c: UUID
@@ -68,7 +68,7 @@ public struct CardSnapshot: Codable, Equatable {
     /// Awards, deleted ones included so a deletion travels too
     public let a: [Entry]
 
-    public struct Entry: Codable, Equatable {
+    public struct Entry: Codable, Equatable, Sendable {
         public let b: String
         public let m: UUID
         /// Earned at, seconds since 1970

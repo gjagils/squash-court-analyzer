@@ -183,12 +183,18 @@ public struct AndroidHomeView: View {
     /// Opens the platform share sheet with a text (a card link); Android's
     /// `MainActivity` supplies `Intent.ACTION_SEND`
     private let shareText: (String) -> Void
+    /// A card link opened from outside the app; the import screen shows while one is pending
+    private let cardInbox: CardInbox
+    private let cardImportStore: any CardImportStore
 
     public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 historyStore: any MatchHistoryStore,
                 matchStore: any CoachMatchStore, refereeMatchStore: any RefereeMatchStore,
-                shareText: @escaping (String) -> Void) {
+                shareText: @escaping (String) -> Void,
+                cardInbox: CardInbox, cardImportStore: any CardImportStore) {
         self.shareText = shareText
+        self.cardInbox = cardInbox
+        self.cardImportStore = cardImportStore
         self.playerStore = playerStore
         self.badgeStore = badgeStore
         self.historyStore = historyStore
@@ -216,6 +222,12 @@ public struct AndroidHomeView: View {
                 .navigationDestination(isPresented: $showingHistory) {
                     SharedMatchHistoryView(store: historyStore)
                 }
+        }
+        .sheet(isPresented: Binding(get: { cardInbox.pending != nil },
+                                    set: { if !$0 { cardInbox.pending = nil } })) {
+            if let snapshot = cardInbox.pending {
+                SharedCardImportView(snapshot: snapshot, store: cardImportStore) { cardInbox.pending = nil }
+            }
         }
         .preferredColorScheme(.dark)
     }

@@ -1,5 +1,6 @@
 import Foundation
 import Security
+import SquashAnalyzerCore
 
 /// Manages secure storage of API keys using Keychain
 final class APIKeyManager {
@@ -77,3 +78,6 @@ final class APIKeyManager {
         SecItemDelete(query as CFDictionary)
     }
 }
+
+/// The shared AI Coach code reads the key through `APIKeyStore`
+extension APIKeyManager: APIKeyStore {}

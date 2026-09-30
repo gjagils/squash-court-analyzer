@@ -287,70 +287,7 @@ struct CoachDashboardView: View {
     }
 
     private func formatDuration(_ seconds: TimeInterval) -> String {
-        if seconds < 60 {
-            return String(format: "%.0fs", seconds)
-        } else {
-            let minutes = Int(seconds) / 60
-            let secs = Int(seconds) % 60
-            return String(format: "%d:%02d", minutes, secs)
-        }
-    }
-
-    // MARK: - Tempo Advice Calculation
-    private func calculateTempoAdvice() -> (icon: String, text: String, type: AdviceRow.AdviceType)? {
-        // Need at least 4 points to give meaningful advice
-        guard game.points.count >= 4 else { return nil }
-
-        let shortRallyWin = game.shortRallyWinPercentage(for: selectedPlayer)
-        let longRallyWin = game.longRallyWinPercentage(for: selectedPlayer)
-        let avgWon = game.averageDurationWon(by: selectedPlayer)
-        let avgLost = game.averageDurationLost(by: selectedPlayer)
-
-        // Primary: compare short vs long rally win percentages
-        if let shortWin = shortRallyWin, let longWin = longRallyWin {
-            let difference = abs(shortWin - longWin)
-
-            // Only give advice if there's a meaningful difference (>15%)
-            if difference > 15 {
-                if shortWin > longWin {
-                    return (
-                        icon: "hare.fill",
-                        text: "Versnel het spel! Je wint \(Int(shortWin))% van korte rally's vs \(Int(longWin))% van lange",
-                        type: .success
-                    )
-                } else {
-                    return (
-                        icon: "tortoise.fill",
-                        text: "Vertraag het spel! Je wint \(Int(longWin))% van lange rally's vs \(Int(shortWin))% van korte",
-                        type: .success
-                    )
-                }
-            }
-        }
-
-        // Fallback: compare average duration of won vs lost points
-        if let won = avgWon, let lost = avgLost {
-            let difference = abs(won - lost)
-
-            // Only give advice if there's a meaningful difference (>3 seconds)
-            if difference > 3 {
-                if won < lost {
-                    return (
-                        icon: "hare.fill",
-                        text: "Versnel het spel! Je gewonnen punten duren gem. \(formatDuration(won)), verloren \(formatDuration(lost))",
-                        type: .info
-                    )
-                } else {
-                    return (
-                        icon: "tortoise.fill",
-                        text: "Vertraag het spel! Je gewonnen punten duren gem. \(formatDuration(won)), verloren \(formatDuration(lost))",
-                        type: .info
-                    )
-                }
-            }
-        }
-
-        return nil
+        CoachAdvice.formatDuration(seconds)
     }
 
     // MARK: - Mini Heatmap
@@ -448,24 +385,8 @@ struct CoachDashboardView: View {
 
     // MARK: - Local Advice Card
     private var localAdviceCard: some View {
-        let opponent = selectedPlayer.opponent
-        let recommended = game.recommendedZones(against: opponent)
-        let opponentStrongZone = game.bestZone(for: opponent)
-        let tempoAdvice = calculateTempoAdvice()
-
-        // Service point statistics (points straight from the serve)
-        let myAces = game.servicePoints(by: selectedPlayer).count
-        let opponentAces = game.servicePoints(by: opponent).count
-
-        // Let statistics
-        let letsAgainstMe = game.letsRequested(by: opponent).count
-        let letsForMe = game.letsRequested(by: selectedPlayer).count
-
-        // Error statistics
-        let totalPoints = game.points.count
-        let ownErrors = game.unforcedErrors(by: opponent).count   // player's own unforced errors
-        let errorRate = totalPoints > 0 ? Double(ownErrors) / Double(totalPoints) : 0
-        let opponentErrors = game.unforcedErrors(by: selectedPlayer).count  // opponent's unforced errors
+        // The rules and wording live in SquashAnalyzerCore (`CoachAdvice`), shared with Android
+        let advice = CoachAdvice.local(in: game, for: selectedPlayer)
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -477,105 +398,9 @@ struct CoachDashboardView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                // Tempo advice
-                if let advice = tempoAdvice {
-                    AdviceRow(icon: advice.icon, text: advice.text, type: advice.type)
-                }
-
-                // Own unforced errors - concentration
-                if ownErrors >= 3 {
-                    AdviceRow(
-                        icon: "brain.head.profile",
-                        text: "\(ownErrors) eigen fouten - focus op concentratie en rustig spelen",
-                        type: .warning
-                    )
-                } else if ownErrors >= 2 && errorRate > 0.25 {
-                    AdviceRow(
-                        icon: "brain.head.profile",
-                        text: "Minder haast - neem meer tijd voor je slagen",
-                        type: .warning
-                    )
-                }
-
-                // Racket preparation - forced errors against you
-                let forcedAgainstMe = game.forcedErrors(by: opponent).count
-                if forcedAgainstMe >= 3 {
-                    AdviceRow(
-                        icon: "hand.raised.fill",
-                        text: "\(forcedAgainstMe) forced errors - racket eerder klaar voor je slag",
-                        type: .warning
-                    )
-                }
-
-                // Movement - lets against you
-                if letsAgainstMe >= 2 {
-                    AdviceRow(
-                        icon: "figure.walk",
-                        text: "\(letsAgainstMe) lets tegen - beweeg sneller weg naar de T na je slag",
-                        type: .warning
-                    )
-                }
-
-                // Opponent making many errors - capitalize
-                if opponentErrors >= 3 {
-                    AdviceRow(
-                        icon: "arrow.up.circle",
-                        text: "\(game.name(for: opponent)) maakt \(opponentErrors) fouten - blijf druk zetten",
-                        type: .success
-                    )
-                }
-
-                // Ace advice - opponent scoring aces
-                if opponentAces >= 2 {
-                    AdviceRow(
-                        icon: "exclamationmark.circle",
-                        text: "\(game.name(for: opponent)) scoort \(opponentAces) servicepunten - racket vroeg omhoog bij de return",
-                        type: .warning
-                    )
-                }
-
-                // Ace advice - you scoring aces
-                if myAces >= 2 {
-                    AdviceRow(
-                        icon: "bolt.fill",
-                        text: "Je hebt \(myAces) servicepunten - je service werkt, blijf zo serveren!",
-                        type: .success
-                    )
-                }
-
-                // Let advice - you requesting lets = moving well
-                if letsForMe >= 2 && letsAgainstMe < 2 {
-                    AdviceRow(
-                        icon: "figure.run",
-                        text: "\(letsForMe) lets mee - je beweegt goed naar de bal",
-                        type: .success
-                    )
-                }
-
-                // Opponent strong zone
-                if let zone = opponentStrongZone {
-                    AdviceRow(
-                        icon: "exclamationmark.triangle",
-                        text: "Vermijd \(zone.rawValue) - daar is \(game.name(for: opponent)) sterk",
-                        type: .warning
-                    )
-                }
-
-                // Recommended zones
-                if !recommended.isEmpty {
-                    AdviceRow(
-                        icon: "target",
-                        text: "Speel naar: \(recommended.map { $0.rawValue }.joined(separator: ", "))",
-                        type: .success
-                    )
-                }
-
-                if let bestShot = game.bestShotType(for: selectedPlayer) {
-                    AdviceRow(
-                        icon: "star",
-                        text: "Je \(bestShot.rawValue) is effectief, blijf dit gebruiken",
-                        type: .info
-                    )
+                ForEach(advice.indices, id: \.self) { index in
+                    let item = advice[index]
+                    AdviceRow(icon: Self.icon(for: item.topic), text: item.text, type: Self.type(for: item.tone))
                 }
             }
         }
@@ -590,6 +415,31 @@ struct CoachDashboardView: View {
                 .stroke(Color.white.opacity(0.08), lineWidth: 1)
         )
         .padding(.horizontal, 20)
+    }
+
+    private static func icon(for topic: AdviceTopic) -> String {
+        switch topic {
+        case .speedUp: return "hare.fill"
+        case .slowDown: return "tortoise.fill"
+        case .ownErrors, .hurry: return "brain.head.profile"
+        case .forcedErrors: return "hand.raised.fill"
+        case .letsAgainst: return "figure.walk"
+        case .opponentErrors: return "arrow.up.circle"
+        case .opponentServicePoints: return "exclamationmark.circle"
+        case .ownServicePoints: return "bolt.fill"
+        case .letsFor: return "figure.run"
+        case .avoidZone: return "exclamationmark.triangle"
+        case .playTo: return "target"
+        case .bestShot: return "star"
+        }
+    }
+
+    private static func type(for tone: AdviceTone) -> AdviceRow.AdviceType {
+        switch tone {
+        case .success: return .success
+        case .warning: return .warning
+        case .info: return .info
+        }
     }
 
     // MARK: - AI Coach Card
@@ -783,12 +633,7 @@ struct CoachDashboardView: View {
     }
 
     private func topShots() -> [(ShotType, Int)] {
-        ShotType.allCases
-            .map { ($0, game.pointsWon(by: selectedPlayer, with: $0)) }
-            .filter { $0.1 > 0 }
-            .sorted { $0.1 > $1.1 }
-            .prefix(4)
-            .map { ($0.0, $0.1) }
+        CoachAdvice.topShots(in: game, for: selectedPlayer).map { ($0.shot, $0.count) }
     }
 
     private func shareCurrentGame() {
@@ -804,12 +649,11 @@ struct CoachDashboardView: View {
 
         Task {
             do {
-                let advice = try await OpenAIService.shared.generateTacticalAdvice(
+                let advice = try await OpenAIService.client.advice(
                     for: game,
                     player: selectedPlayer,
                     apiKey: apiKey,
-                    coachingFocus: match?.coachingFocus(for: selectedPlayer) ?? [],
-                    coachingNotes: match?.coachingNotes(for: selectedPlayer) ?? ""
+                    coachingFocus: match?.coachingFocus(for: selectedPlayer) ?? []
                 )
                 await MainActor.run {
                     self.aiAdvice = advice

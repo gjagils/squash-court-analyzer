@@ -4,7 +4,7 @@ import CoreGraphics
 #endif
 
 /// Represents the zones on a squash court (9 zones - 3x3 grid)
-public enum CourtZone: String, CaseIterable, Identifiable, Codable {
+public enum CourtZone: String, CaseIterable, Identifiable, Codable, Sendable {
     case frontLeft = "Voor Links"
     case frontMiddle = "Voor Midden"
     case frontRight = "Voor Rechts"

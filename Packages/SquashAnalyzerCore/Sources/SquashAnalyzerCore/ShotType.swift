@@ -1,7 +1,7 @@
 import Foundation
 
 /// Types of shots in squash
-public enum ShotType: String, CaseIterable, Identifiable, Codable {
+public enum ShotType: String, CaseIterable, Identifiable, Codable, Sendable {
     case drive = "Drive"
     case cross = "Cross"
     case volley = "Volley"

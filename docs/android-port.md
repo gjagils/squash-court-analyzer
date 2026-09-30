@@ -1767,8 +1767,12 @@ aangepast (tandwiel opent Instellingen). Bewust geen echte SBN-pagina's als
 testdata: robots.txt sluit `/league/` uit, en de tests moeten offline
 draaien.
 
-**Nog open**: één echte test tegen sbn.toernooi.nl op de emulator met
-Gerd-Jans teamlink (geen link in de repo gevonden).
+**Live gecontroleerd (2026-09-30)** op de emulator met Gerd-Jans teamlink
+(All Inn Squash 8): Instellingen → link opslaan → de kaart op het startscherm
+toont stand 1, 3 gespeeld, 42 punten en de volgende wedstrijd; het teamscherm
+toont de hele stand (10 teams), alle wedstrijden met uitslag of 20:00, en de
+spelers met hun balans. De cookiepagina van SBN werd dus goed afgehandeld
+door `HttpLeaguePageLoader`.
 
 Verificatie: Core 36 op Darwin / 35 JUnit op Android,
 `:app:testDebugUnitTest` 44/44, `:app:connectedDebugAndroidTest` 17/17, iOS

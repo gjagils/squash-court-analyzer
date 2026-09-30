@@ -153,7 +153,14 @@ keys as iOS). Only the page loader is per platform (`LeaguePageLoader`):
 HttpURLConnection + a process CookieManager) on Android, because Skip's
 URLSession keeps no cookies and the cookie wall needs them. Android shows it
 with `SharedLeagueTeamCard` on the home screen, `SharedLeagueTeamDetailView`,
-and `SharedSettingsView` (the gear; for now only the team link).
+and `SharedSettingsView` (the gear: team link and AI Coach key).
+
+The coach dashboard's local advice (`CoachAdvice`) and AI Coach
+(`AICoachPrompt`, `AICoachClient`) are in Core too; the platforms supply
+`AICoachTransport` (URLSession on iOS, `HttpAICoachTransport` on Android) and
+`APIKeyStore` (Keychain via `APIKeyManager` on iOS, `KeystoreAPIKeyStore`,
+AES-GCM with an Android Keystore key, on Android). Android's
+`SharedCoachDashboardView` opens from ANALYSE on a finished coach game.
 Full plan, phase status, toolchain setup and transpile gotchas found so far:
 see [`docs/android-port.md`](docs/android-port.md). Read that file before
 touching anything Android-related, and keep it updated as phases complete.

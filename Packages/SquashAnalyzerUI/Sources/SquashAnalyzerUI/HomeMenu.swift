@@ -228,14 +228,17 @@ public struct AndroidHomeView: View {
     private let cardImportStore: any CardImportStore
     /// Fetches Mijn team from sbn.toernooi.nl (Android supplies the page loader)
     private let leagueTeamFetcher: LeagueTeamFetcher
+    /// AI Coach (Android supplies the key store and the sender)
+    private let aiCoach: AICoachContext?
 
     public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 historyStore: any MatchHistoryStore,
                 matchStore: any CoachMatchStore, refereeMatchStore: any RefereeMatchStore,
                 shareText: @escaping (String) -> Void,
                 cardInbox: CardInbox, cardImportStore: any CardImportStore,
-                leagueTeamFetcher: LeagueTeamFetcher) {
+                leagueTeamFetcher: LeagueTeamFetcher, aiCoach: AICoachContext? = nil) {
         self.leagueTeamFetcher = leagueTeamFetcher
+        self.aiCoach = aiCoach
         self.shareText = shareText
         self.cardInbox = cardInbox
         self.cardImportStore = cardImportStore
@@ -253,7 +256,7 @@ public struct AndroidHomeView: View {
                     PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
-                    CoachSessionView(store: matchStore, playerStore: playerStore, onExit: { showingCoach = false })
+                    CoachSessionView(store: matchStore, playerStore: playerStore, aiCoach: aiCoach, onExit: { showingCoach = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingReferee) {
@@ -267,7 +270,7 @@ public struct AndroidHomeView: View {
                     SharedMatchHistoryView(store: historyStore)
                 }
                 .navigationDestination(isPresented: $showingSettings) {
-                    SharedSettingsView()
+                    SharedSettingsView(aiCoach: aiCoach)
                 }
                 .navigationDestination(isPresented: $showingTeam) {
                     if let team {

@@ -1778,6 +1778,67 @@ Verificatie: Core 36 op Darwin / 35 JUnit op Android,
 `:app:testDebugUnitTest` 44/44, `:app:connectedDebugAndroidTest` 17/17, iOS
 **TEST SUCCEEDED**.
 
+## Game-analyse en AI Coach op Android — resultaat (AFGEROND, 2026-09-30)
+
+AI Coach zit op iOS in het Coach-dashboard (analyse na een game), dat Android
+nog niet had. Daarom eerst het dashboard, dan AI Coach en de instelling.
+
+- **Core** (`CoachAdvice.swift`, `AICoach.swift`, verhuisd uit iOS'
+  `CoachDashboardView`/`OpenAIService`, regels en teksten ongewijzigd):
+  `CoachAdvice.local` (tempo, eigen fouten, forced errors, lets,
+  servicepunten, zones, beste slag; `AdviceTopic` + `AdviceTone`, het
+  platform kiest het icoon), `formatDuration`, `topShots`, `courtRows`;
+  `AICoachPrompt` (zonder spelersnamen), `AICoachClient`
+  (`requestBody` + `send`, antwoord lezen, 401 = foute key, geen verbinding
+  = `noConnection` met Nederlandse melding), `APIKeyStore` en
+  `AICoachTransport` als platformgrenzen. `CourtZone`/`ShotType` zijn nu
+  `Sendable`.
+- **iOS** gebruikt dit: `CoachDashboardView` toont `CoachAdvice.local`,
+  `OpenAIService.client` (URLSession-transport), `APIKeyManager` (Keychain)
+  is een `APIKeyStore`. Zichtbaar gelijk; alleen een verbindingsfout geeft
+  nu een Nederlandse melding. iOS' `AnalysisView` heeft nog een eigen kopie
+  van het tempo-advies (buiten deze stap gelaten).
+- **Android**: `HttpAICoachTransport` (Kotlin, HttpURLConnection) en
+  `KeystoreAPIKeyStore` (AES-GCM-sleutel in de Android Keystore, alleen de
+  versleutelde waarde in SharedPreferences `squash-analyzer-secure`;
+  EncryptedSharedPreferences is deprecated). Na een back-up op een ander
+  toestel is de key niet te ontsleutelen en geldt hij als "niet ingesteld".
+- **Android-UI**: knop **ANALYSE** op het game- en wedstrijdeinde van
+  Coach → `SharedCoachDashboardView` (sheet): speler kiezen, game kiezen,
+  duur gewonnen/verloren, beste zone/slag, heatmap, slagen,
+  puntverdeling, tactisch advies, AI Coach-kaart (vraag advies / laden /
+  resultaat / fout + opnieuw; zonder key "Stel je API key in bij
+  Instellingen"). Instellingen kreeg een AI Coach-sectie (key invoeren,
+  tonen/verbergen, bewaren, verwijderen, status). De puntinvoer-instelling
+  van iOS ontbreekt bewust: Android heeft alleen de tik-op-de-score-invoer.
+- **Skip-valkuilen**:
+  - Een argumentlabel met de naam van een property
+    (`select(player:)` terwijl er een `@State var player` is) wordt in
+    Kotlin een parameter die de property overschaduwt ("'val' cannot be
+    reassigned"). Gebruik `_`.
+  - Een `Game` (klasse, niet `Sendable`) mag onder Swift 6 niet een async
+    aanroep in; bouw de verzoektekst vooraf (`requestBody`) en stuur alleen
+    `Data`.
+  - Skip's sheet is niet volledig hoog en de onderkant valt onder de
+    systeemnavigatiebalk: zet knoppen bovenin (sluiten = × rechtsboven).
+  - In Compose-tests moet je naar besturing onder de vouw eerst
+    `performScrollTo()` doen, anders valt de klik buiten beeld.
+- **Tests**: Core `CoachAdviceTests` (9: tijdnotatie, advies en volgorde,
+  tegenstander ziet de andere kant, geen tempo onder 4 punten, top-slagen,
+  geen spelersnamen in het verzoek, antwoord lezen incl. platte tekst,
+  foutcodes, key in de header en geen verbinding) op Darwin en Android;
+  `HttpAICoachTransportTest` (2, MockWebServer); instrumented
+  `AICoachTest` (Keystore bewaart versleuteld, key opslaan/verwijderen in
+  Instellingen, een echte coachgame tot 11-0 → ANALYSE → gedeeld advies →
+  sluiten). Nooit een echte OpenAI-aanroep in tests.
+- **Nog niet gedaan**: een echte AI-aanroep met een geldige key (vraagt een
+  OpenAI-key van Gerd-Jan); delen vanuit het dashboard; scheidsrechter
+  heeft (zoals op iOS) geen analyse.
+
+Verificatie: Core 45 op Darwin / 44 JUnit op Android,
+`:app:testDebugUnitTest` 46/46, `:app:connectedDebugAndroidTest` 20/20, iOS
+**TEST SUCCEEDED**.
+
 ## Starttegels: één kleur, betere icoontjes (2026-09-30)
 
 Op verzoek van Gerd-Jan hebben alle vijf starttegels (gedeeld
@@ -1828,7 +1889,7 @@ branch tot een presenteerbare mijlpaal; samenvoegen is een afzonderlijke stap.
 
 ## Wat nog niet is overgezet
 
-- Instellingen op Android: alleen de Mijn team-link; invoermodus, AI Coach
-  en back-ups ontbreken nog.
+- Instellingen op Android: Mijn team en AI Coach; de invoermodus (Android
+  heeft alleen tik-op-de-score) en back-ups ontbreken nog.
 - Foto's, badgecatalogus en teamimport in het Android-spelersscherm.
 - Een fysiek Android-toestel is nog nodig voor aanvullende praktijktests.

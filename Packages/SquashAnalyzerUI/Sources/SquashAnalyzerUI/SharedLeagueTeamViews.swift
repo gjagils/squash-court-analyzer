@@ -240,15 +240,24 @@ public struct SharedLeagueTeamDetailView: View {
     }
 }
 
-/// Android's settings. For now only the Mijn team link; the other iOS settings
-/// (AI Coach, input mode, backups) follow later.
+/// Android's settings: the Mijn team link and the AI Coach API key. The
+/// coach input mode is not here because Android's coach screen has only the
+/// score-tap flow; backups follow later.
 public struct SharedSettingsView: View {
+    let aiCoach: AICoachContext?
+
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     @State private var draft = ""
     @State private var message: String?
     @State private var messageIsError = false
+    @State private var keyDraft = ""
+    @State private var showingKey = false
+    @State private var hasKey = false
+    @State private var keyMessage: String?
 
-    public init() {}
+    public init(aiCoach: AICoachContext? = nil) {
+        self.aiCoach = aiCoach
+    }
 
     public var body: some View {
         ZStack {
@@ -286,16 +295,82 @@ public struct SharedSettingsView: View {
                             .font(.system(size: 12))
                             .foregroundColor(messageIsError ? Color(red: 0.95, green: 0.40, blue: 0.35) : Color(red: 0.45, green: 0.80, blue: 0.45))
                     }
-                    Text("Meer instellingen volgen later op Android.")
-                        .font(.system(size: 12))
-                        .foregroundColor(LeaguePalette.muted)
-                        .padding(.top, 12)
+                    if aiCoach != nil {
+                        aiCoachSection
+                            .padding(.top, 20)
+                    }
                 }
                 .padding(24)
             }
         }
         .navigationTitle("Instellingen")
-        .onAppear { draft = teamURL }
+        .onAppear {
+            draft = teamURL
+            hasKey = aiCoach?.keyStore.hasOpenAIKey == true
+        }
+    }
+
+    private var aiCoachSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("AI Coach")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(LeaguePalette.text)
+            Text("Voeg je OpenAI API key toe voor tactisch advies van de AI Coach in de game-analyse. Het basisadvies werkt ook zonder key.")
+                .font(.system(size: 13))
+                .foregroundColor(LeaguePalette.secondary)
+            HStack(spacing: 8) {
+                if showingKey {
+                    TextField("sk-...", text: $keyDraft)
+                        .accessibilityLabel("OpenAI API key")
+                        .autocorrectionDisabled()
+                        .foregroundColor(LeaguePalette.text)
+                } else {
+                    SecureField("sk-...", text: $keyDraft)
+                        .accessibilityLabel("OpenAI API key")
+                        .foregroundColor(LeaguePalette.text)
+                }
+                Button(showingKey ? "Verberg" : "Toon") { showingKey.toggle() }
+                    .foregroundColor(LeaguePalette.secondary)
+            }
+            .padding()
+            .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
+            HStack(spacing: 12) {
+                Button("Bewaar API key") { saveKey() }
+                    .buttonStyle(.borderedProminent)
+                    .tint(LeaguePalette.gold)
+                    .disabled(keyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                if hasKey {
+                    Button("Verwijder key") { removeKey() }
+                        .foregroundColor(LeaguePalette.secondary)
+                }
+            }
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(hasKey ? Color(red: 0.45, green: 0.80, blue: 0.45) : Color(red: 0.95, green: 0.40, blue: 0.35))
+                    .frame(width: 8, height: 8)
+                Text(keyMessage ?? (hasKey ? "API key ingesteld" : "Geen API key ingesteld"))
+                    .font(.system(size: 12))
+                    .foregroundColor(LeaguePalette.muted)
+            }
+            Text("De key wordt versleuteld op dit toestel bewaard (Android Keystore). Een analyse kost ongeveer € 0,01 (GPT-4o-mini) en werkt alleen met internet. Er gaan geen spelersnamen naar OpenAI.")
+                .font(.system(size: 11))
+                .foregroundColor(LeaguePalette.muted)
+        }
+    }
+
+    private func saveKey() {
+        let key = keyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let aiCoach, !key.isEmpty else { return }
+        aiCoach.keyStore.openAIAPIKey = key
+        keyDraft = ""
+        hasKey = aiCoach.keyStore.hasOpenAIKey
+        keyMessage = hasKey ? "API key opgeslagen" : "Opslaan is niet gelukt"
+    }
+
+    private func removeKey() {
+        aiCoach?.keyStore.openAIAPIKey = nil
+        hasKey = false
+        keyMessage = "API key verwijderd"
     }
 
     private func save() {

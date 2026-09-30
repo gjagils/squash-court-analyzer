@@ -11,7 +11,9 @@ Spelers met een scherm voor de verdiende badges en een knop "Deel kaart" die
 dezelfde kaartlink maakt als iOS; zo'n link openen op Android importeert de
 kaart, plus een "Badges verdiend"-strip direct op het match-einde-scherm), een overzicht van
 afgeronde coach- en scheidsrechterwedstrijden, en Mijn team (stand, wedstrijden
-en spelers van sbn.toernooi.nl; de teamlink vul je in bij Instellingen).
+en spelers van sbn.toernooi.nl; de teamlink vul je in bij Instellingen), en
+een game-analyse na elke coachgame met tactisch advies en AI Coach (eigen
+OpenAI-key in Instellingen).
 
 - [Architectuur](ARCHITECTURE.md)
 - [Android-status, bouwinstructies en resterende stappen](docs/android-port.md)

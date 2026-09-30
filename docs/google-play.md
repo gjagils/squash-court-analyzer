@@ -108,17 +108,25 @@ Coach, geen iCloud; alleen Mijn team gebruikt internet):
 **Data safety** (Gegevensveiligheid):
 
 1. *Does your app collect or share any of the required user data types?*
-   **No**. Alles blijft op het toestel (Room-database). Er is geen server,
+   Zonder AI Coach **No**; met AI Coach zie punt 3. Verder blijft alles op
+   het toestel (Room-database). Er is geen server,
    geen analytics, geen crashrapportage van derden. Een kaartlink delen doe
    je zelf via de deelknop; de gegevens staan in de link na het `#` en
    worden niet naar een server gestuurd.
-2. Daarmee vervallen de vervolgvragen (encryptie, verwijderverzoek).
+2. Bij "No" vervallen de vervolgvragen (encryptie, verwijderverzoek).
 3. **Mijn team** (sinds 2026-09-30 op Android) haalt de openbare teampagina
    op van sbn.toernooi.nl. Daarbij gaat alleen het verzoek om die pagina
    het toestel af (de teamlink die je zelf invult), geen gegevens over
    spelers of wedstrijden; dat telt niet als "verzamelen" door de app.
-   **Bijwerken zodra** AI Coach naar Android komt: dan gaan er wél gegevens
-   naar OpenAI.
+   **AI Coach** (sinds 2026-09-30 op Android): alleen als de gebruiker zelf
+   een OpenAI-key invult en op "Vraag AI Coach om advies" tikt, gaan
+   gamestatistieken zonder namen naar OpenAI (een derde partij). Daardoor
+   is vraag 1 waarschijnlijk niet meer simpelweg "No". Kenmerken om bij het
+   invullen te gebruiken: optioneel en door de gebruiker gestart, niet aan
+   een persoon of account gekoppeld, versleuteld verzonden (HTTPS), niet
+   bewaard door de app. Kies de categorie die het best past op het moment
+   van invullen (de lijst verandert weleens); twijfel je, vraag het Claude
+   dan samen met het scherm erbij.
 
 ### B4. Store-vermelding (Main store listing)
 

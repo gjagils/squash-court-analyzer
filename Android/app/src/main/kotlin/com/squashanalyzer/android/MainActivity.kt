@@ -19,6 +19,10 @@ import skip.ui.PresentationRoot
 import skip.ui.UIApplication
 import squash.analyzer.core.CardInbox
 import squash.analyzer.core.LeagueTeamFetcher
+import squash.analyzer.core.AICoachClient
+import squash.analyzer.ui.AICoachContext
+import com.squashanalyzer.android.aicoach.HttpAICoachTransport
+import com.squashanalyzer.android.aicoach.KeystoreAPIKeyStore
 import com.squashanalyzer.android.league.HttpLeaguePageLoader
 import squash.analyzer.ui.AndroidHomeView
 import com.squashanalyzer.android.data.AppDatabase
@@ -61,12 +65,13 @@ class MainActivity : AppCompatActivity() {
         val refereeMatchStore = RoomRefereeMatchStore(refereeMatchDataStore, badgeAwardStore)
         val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore)
         val leagueTeamFetcher = LeagueTeamFetcher(loader = HttpLeaguePageLoader())
+        val aiCoach = AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport()))
         setContent {
             val stateHolder = rememberSaveableStateHolder()
             stateHolder.SaveableStateProvider(true) {
                 PresentationRoot(defaultColorScheme = ColorScheme.dark, context = ComposeContext()) { context ->
                     Box(modifier = context.modifier.fillMaxSize()) {
-                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher).Compose(context = context.content())
+                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach).Compose(context = context.content())
                     }
                 }
                 SideEffect { stateHolder.removeState(true) }

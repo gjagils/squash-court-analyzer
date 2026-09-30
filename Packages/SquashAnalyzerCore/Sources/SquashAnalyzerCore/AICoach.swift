@@ -179,8 +179,9 @@ public struct AICoachClient: Sendable {
         self.transport = transport
     }
 
-    /// The request body OpenAI gets
-    static func requestBody(game: Game, player: Player, coachingFocus: [String]) throws -> Data {
+    /// The request body OpenAI gets. Built before sending, on the caller's
+    /// side, so the (non-Sendable) `Game` never crosses into the async call.
+    public static func requestBody(game: Game, player: Player, coachingFocus: [String] = []) throws -> Data {
         let request = ChatRequest(model: AICoachPrompt.model,
                                   messages: [ChatMessage(role: "system", content: AICoachPrompt.system),
                                              ChatMessage(role: "user", content: AICoachPrompt.user(game: game, player: player, coachingFocus: coachingFocus))],
@@ -203,7 +204,11 @@ public struct AICoachClient: Sendable {
     }
 
     public func advice(for game: Game, player: Player, apiKey: String, coachingFocus: [String] = []) async throws -> TacticalAdvice {
-        let body = try AICoachClient.requestBody(game: game, player: player, coachingFocus: coachingFocus)
+        try await send(try AICoachClient.requestBody(game: game, player: player, coachingFocus: coachingFocus), apiKey: apiKey)
+    }
+
+    /// Sends a body from `requestBody(game:player:coachingFocus:)`
+    public func send(_ body: Data, apiKey: String) async throws -> TacticalAdvice {
         let headers = ["Authorization": "Bearer \(apiKey)", "Content-Type": "application/json"]
         let response: AITransportResponse
         do {

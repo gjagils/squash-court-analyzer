@@ -127,11 +127,16 @@ enum CoachPalette {
 /// cut already made for phase 5's Spelers (no photos/badges/team-import).
 public struct CoachScoringView: View {
     @State private var match: Match
+    let aiCoach: AICoachContext?
     let onMatchChanged: (Match) -> Void
     let onExit: () -> Void
+    /// The finished game shown in the analysis sheet
+    @State private var analysedGame: Game?
+    @State private var showingAnalysis = false
 
-    public init(match: Match, onMatchChanged: @escaping (Match) -> Void, onExit: @escaping () -> Void) {
+    public init(match: Match, aiCoach: AICoachContext? = nil, onMatchChanged: @escaping (Match) -> Void, onExit: @escaping () -> Void) {
         _match = State(initialValue: match)
+        self.aiCoach = aiCoach
         self.onMatchChanged = onMatchChanged
         self.onExit = onExit
     }
@@ -306,6 +311,7 @@ public struct CoachScoringView: View {
                     .font(.system(size: 32, weight: .bold, design: .monospaced))
                     .foregroundColor(CoachPalette.textPrimary)
             }
+            analysisButton
             Button(action: {
                 match.onGameEnd()
                 onMatchChanged(match)
@@ -339,6 +345,7 @@ public struct CoachScoringView: View {
                 player2Id: match.player2Id, player2Name: match.player2Name,
                 badgeInput: match.badgeInput
             ))
+            analysisButton
             Button(action: onExit) {
                 Text("KLAAR")
                     .font(.system(size: 14, weight: .bold, design: .rounded))
@@ -349,6 +356,27 @@ public struct CoachScoringView: View {
             }
             .buttonStyle(.plain)
             Spacer(minLength: 0)
+        }
+    }
+
+    /// Opens the game analysis (stats, advice, AI Coach) for the game just finished
+    private var analysisButton: some View {
+        Button {
+            analysedGame = game
+            showingAnalysis = true
+        } label: {
+            Text("ANALYSE")
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundColor(CoachPalette.textPrimary)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .background(Capsule().stroke(CoachPalette.textPrimary.opacity(0.5), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showingAnalysis) {
+            SharedCoachDashboardView(match: match, game: analysedGame ?? game, aiCoach: aiCoach) {
+                showingAnalysis = false
+            }
         }
     }
 

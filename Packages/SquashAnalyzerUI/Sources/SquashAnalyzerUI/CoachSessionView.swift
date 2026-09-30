@@ -7,6 +7,8 @@ public struct CoachSessionView: View {
     let store: any CoachMatchStore
     let playerStore: any PlayerProfileStore
     let onExit: @MainActor () -> Void
+    /// AI Coach in the game analysis; nil hides the AI part
+    let aiCoach: AICoachContext?
     @Environment(\.dismiss) private var dismiss
     @State private var match: Match? = nil
     @State private var pending: Match? = nil
@@ -16,8 +18,10 @@ public struct CoachSessionView: View {
     @State private var confirmingNew = false
     @State private var exitAfterSave = false
 
-    public init(store: any CoachMatchStore, playerStore: any PlayerProfileStore, onExit: @escaping @MainActor () -> Void) {
+    public init(store: any CoachMatchStore, playerStore: any PlayerProfileStore, aiCoach: AICoachContext? = nil,
+                onExit: @escaping @MainActor () -> Void) {
         self.store = store
+        self.aiCoach = aiCoach
         self.playerStore = playerStore
         self.onExit = onExit
     }
@@ -26,7 +30,7 @@ public struct CoachSessionView: View {
         ZStack {
             CoachPalette.backgroundDark.ignoresSafeArea()
             if let match {
-                CoachScoringView(match: match, onMatchChanged: { changed in
+                CoachScoringView(match: match, aiCoach: aiCoach, onMatchChanged: { changed in
                     persist(changed, exit: false)
                 }, onExit: { persist(match, exit: true) })
                 .disabled(busy || failed)

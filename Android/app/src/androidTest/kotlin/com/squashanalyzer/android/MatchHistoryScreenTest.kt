@@ -28,7 +28,7 @@ class MatchHistoryScreenTest {
 
     @Before fun seed() = runBlocking {
         db = AppDatabase.get(ApplicationProvider.getApplicationContext())
-        val store = RoomCoachMatchStore(MatchStore(db.matchDao()), BadgeAwardStore(db.badgeAwardDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao())))
+        val store = RoomCoachMatchStore(MatchStore(db.matchDao()), BadgeAwardStore(db.badgeAwardDao(), db.playerDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao()), "test-install"))
         seeded = Match()
         seeded.setupMatch(player1 = "HistoryP1", player2 = "HistoryP2", startingServer = Player.player1)
         repeat(3) { game ->

@@ -23,7 +23,7 @@ class PlayerStoreTest {
 
     private fun open() {
         db = Room.databaseBuilder(context, AppDatabase::class.java, databaseName)
-            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5).build()
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6).build()
         store = RoomPlayerStore(db.playerDao())
     }
 
@@ -82,6 +82,8 @@ class PlayerStoreTest {
         SQLiteDatabase.openDatabase(context.getDatabasePath(databaseName).path, null, SQLiteDatabase.OPEN_READWRITE).use {
             it.execSQL("DROP TABLE players")
             it.execSQL("ALTER TABLE games DROP COLUMN serviceState")
+            // badge_awards only exists from version 5 on; a real older database has none
+            it.execSQL("DROP TABLE IF EXISTS badge_awards")
             it.version = 1
         }
         open() // Room now performs MIGRATION_1_2 and validates its result.

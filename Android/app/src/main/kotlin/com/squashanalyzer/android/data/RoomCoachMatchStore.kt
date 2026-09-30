@@ -35,7 +35,8 @@ class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardS
             match.player2Id?.let { add(it.uuidString to Player.player2) }
         }
         if (players.isEmpty()) return
-        badgeAwardStore.syncAwards(match.id.uuidString, players, match.badgeInput)
+        badgeAwardStore.syncAwards(match.id.uuidString, players,
+            mapOf(Player.player1 to match.player1Name, Player.player2 to match.player2Name), match.badgeInput)
     }
 
     private fun capture(match: Match): MatchRecord {

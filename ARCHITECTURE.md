@@ -93,18 +93,21 @@ player list, no head-start/coaching-focus setup) shown by `CoachSessionView`/
 `PickedPlayer` rule that editing the name after picking drops the id.
 `PlayerProfile.id` (a `String`) bridges to `Match`/`RefereeMatch.player1Id`/
 `player2Id` (`UUID?`) via `UUID(uuidString:)` at that point — no Core type
-change needed. With a real player id available, Android now computes and
-stores real per-match badge awards too: `BadgeAwardStore` (Room schema 5,
-table `badge_awards`, keyed directly to a `PlayerProfile.id` — no `cardId`,
-since Android shares no cards) is a Kotlin reimplementation of
-`BadgeAwarder.syncAwards`'s diff logic without CloudKit, called from
-`RoomCoachMatchStore`/`RoomRefereeMatchStore` on every `save()`/`abandon()`:
-it runs the shared, pure `BadgeEngine` over the match's `badgeInput` and
-replaces that match's award rows with exactly what's currently earned, so
-undoing the winning rally retracts the badge the same way `BadgeAwarder`
-does. Career badges (`BadgeKind.isCareer`) are out of scope until the
-history browser exists, since they need cross-match data
-(`BadgeEngine.careerBadges(in:history:earnedElsewhere:)`). Earned badges are
+change needed. With a real player id available, Android computes and stores
+real badge awards too: `BadgeAwardStore` (Room schema 6, table
+`badge_awards`) is a behaviour-identical Kotlin counterpart of
+`BadgeAwarder` without CloudKit, called from
+`RoomCoachMatchStore`/`RoomRefereeMatchStore` on every `save()`/`abandon()`.
+Its rows have the iOS `SavedBadgeAward` shape (card id, badge, match,
+earnedAt, opponent name, awarding install id, deletedAt) and the shared
+`AwardValue.awardId` id, so awards merge across platforms: an award lives on
+the player's card (`players.cardId ?: players.id`, like `badgeCardId`), a
+player without a `players` row earns nothing, an undone rally removes the
+award outright, a deleted award stays deleted, and career badges are stored
+with the decided match that earned them (history built like
+`BadgeAwarder.history(of:)`: decided matches only, head start counted,
+opponent keyed by id or lowercased name; once-only badges not awarded twice).
+The install id is kept in the app's `SharedPreferences`. Earned badges are
 now visible too: a shared `PlayerBadgeSummaryStore` protocol
 (`badges(forPlayer:) -> [BadgeKind]`), implemented by `BadgeAwardStore`
 itself, backs a badge-count pill on each row of `PlayerDirectoryView`
@@ -129,21 +132,6 @@ record's own game winners rather than restoring a live `Match`/
 for this summary list). The new `SharedMatchHistoryView` (much smaller than
 iOS' full `MatchHistoryView` — no import/export, backup or filters, no
 tap-through detail yet) renders it.
-
-Career badges (hat trick, off the mark, centurion, ten out of ten, nemesis,
-veteran) are now computed too, completing the badges work. `BadgeAwardStore`
-takes `MatchStore`/`RefereeMatchStore` (the plain Kotlin stores, not the Room
-adapters) as extra dependencies to build each `BadgeEngine.CareerMatch`
-(matchId, date, won, pointsWon, opponentKey) from a player's whole
-completed/abandoned history — games-won and points come from the same game
-winners `RoomMatchHistoryStore` already reads. Since `BadgeEngine.careerBadges(in:...)`
-only reports what one specific match added, `BadgeAwardStore.badges(forPlayer:)`
-replays the full sorted history and unions every match's result to get "does
-this player currently have badge X". Career badges are never written to
-`badge_awards` — they're computed live on every query, since they can change
-without any new match being saved. Because they're folded into the same
-`badges(forPlayer:)` that already powers the Spelers badge-count pill and
-`SharedPlayerBadgesView`, no UI changed to pick them up.
 Full plan, phase status, toolchain setup and transpile gotchas found so far:
 see [`docs/android-port.md`](docs/android-port.md). Read that file before
 touching anything Android-related, and keep it updated as phases complete.

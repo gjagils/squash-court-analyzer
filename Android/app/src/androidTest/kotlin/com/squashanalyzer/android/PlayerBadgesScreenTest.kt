@@ -29,7 +29,8 @@ class PlayerBadgesScreenTest {
         db = AppDatabase.get(ApplicationProvider.getApplicationContext())
         db.playerDao().insert(PlayerEntity(id = playerId, name = playerName, coachingFocusAreas = "[]", coachingNotes = "", createdAt = 0.0))
         db.badgeAwardDao().insertAll(listOf(
-            BadgeAwardEntity(id = "$playerId:five-in-a-row:$matchId", playerId = playerId, badge = "five-in-a-row", matchId = matchId, earnedAt = 0L)
+            BadgeAwardEntity(id = "$playerId:five-in-a-row:$matchId", cardId = playerId, badge = "five-in-a-row", matchId = matchId,
+                earnedAt = 0L, opponentName = "Tegenstander", awardedBy = "test-install")
         ))
     }
     @After fun clean() = runBlocking {

@@ -27,7 +27,7 @@ class CoachPersistenceTest {
 
     @Before fun seed() = runBlocking {
         db = AppDatabase.get(ApplicationProvider.getApplicationContext())
-        store = RoomCoachMatchStore(MatchStore(db.matchDao()), BadgeAwardStore(db.badgeAwardDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao())))
+        store = RoomCoachMatchStore(MatchStore(db.matchDao()), BadgeAwardStore(db.badgeAwardDao(), db.playerDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao()), "test-install"))
         seeded = Match()
         seeded.setupMatch(player1 = "CoachTest", player2 = "Tegenstander", startingServer = Player.player1)
         store.save(seeded)

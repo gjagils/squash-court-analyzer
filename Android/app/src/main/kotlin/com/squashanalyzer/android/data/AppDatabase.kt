@@ -6,6 +6,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import skip.foundation.UUID
+import squash.analyzer.core.AwardValue
+import squash.analyzer.core.BadgeKind
 
 @Database(
     entities = [
@@ -13,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         RefereeMatchEntity::class, RefereeGameEntity::class, RefereePointEntity::class, RefereeCurrentPointEntity::class,
         BadgeAwardEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -24,6 +27,53 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         @Volatile private var instance: AppDatabase? = null
+
+        /**
+         * Rebuilds `badge_awards` in the iOS shape (card instead of player,
+         * opponent name, awarding install, shared deterministic id). Rows with
+         * `deletedAt` set are dropped: before this version Android only set it
+         * when an undone rally retracted a badge (there was no delete action),
+         * and iOS removes those outright — carried over they would block the
+         * badge for good and travel in card links as deletions.
+         */
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE badge_awards_new (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        cardId TEXT NOT NULL,
+                        badge TEXT NOT NULL,
+                        matchId TEXT NOT NULL,
+                        earnedAt INTEGER NOT NULL,
+                        opponentName TEXT NOT NULL,
+                        awardedBy TEXT NOT NULL,
+                        deletedAt INTEGER
+                    )
+                """.trimIndent())
+                db.query("""
+                    SELECT a.badge, a.matchId, a.earnedAt, COALESCE(p.cardId, a.playerId)
+                    FROM badge_awards a LEFT JOIN players p ON p.id = a.playerId
+                    WHERE a.deletedAt IS NULL
+                """.trimIndent()).use { rows ->
+                    while (rows.moveToNext()) {
+                        val badge = BadgeKind.init(rawValue = rows.getString(0)) ?: continue
+                        val matchId = rows.getString(1)
+                        val cardId = rows.getString(3)
+                        val matchUuid = UUID(uuidString = matchId) ?: continue
+                        val cardUuid = UUID(uuidString = cardId) ?: continue
+                        val id = AwardValue.awardId(cardId = cardUuid, badge = badge, matchId = matchUuid).uuidString
+                        db.execSQL(
+                            "INSERT OR IGNORE INTO badge_awards_new (id, cardId, badge, matchId, earnedAt, opponentName, awardedBy, deletedAt) VALUES (?, ?, ?, ?, ?, '', '', NULL)",
+                            arrayOf<Any>(id, cardId, badge.rawValue, matchId, rows.getLong(2)),
+                        )
+                    }
+                }
+                db.execSQL("DROP TABLE badge_awards")
+                db.execSQL("ALTER TABLE badge_awards_new RENAME TO badge_awards")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_badge_awards_cardId ON badge_awards (cardId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_badge_awards_matchId ON badge_awards (matchId)")
+            }
+        }
 
         val MIGRATION_4_5 = object : Migration(4, 5) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -146,7 +196,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "squash-analyzer.db",
                 ).addCallback(enableForeignKeys)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .build().also { instance = it }
             }
     }

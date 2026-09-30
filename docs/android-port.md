@@ -1265,6 +1265,12 @@ Actuele verificatie:
 
 ## Fase 5 — Career-badges (AFGEROND, 2026-09-27)
 
+> **Achterhaald door "Kaarten delen — stap 2" (2026-09-30):** career-badges
+> worden sindsdien niet meer live berekend maar, net als op iOS, *opgeslagen*
+> bij de beslissende wedstrijd, anders zouden ze nooit in een gedeelde kaart
+> terechtkomen. De geschiedenisopbouw volgt nu ook iOS (alleen wedstrijden
+> met een winnaar). Onderstaande tekst beschrijft de oude, live aanpak.
+
 De laatste badge-categorie: hat trick, off the mark, centurion, ten out of
 ten, nemesis, veteran — die tellen over al iemands wedstrijden op dit
 toestel, niet slechts één.
@@ -1382,6 +1388,7 @@ Plan (elke stap los testen, iOS en Android groen, zoals alle vorige stappen):
    Bestaande Android-awards worden omgerekend (`cardId` = `players.cardId`
    of anders het speler-id, net als iOS' `badgeCardId`). Zelfde
    verwijder-semantiek als iOS: een verwijdering wint altijd bij samenvoegen.
+   **AFGEROND (2026-09-30)**, zie "Stap 2 — resultaat" hieronder.
 3. **Delen vanaf Android**: knop "Deel kaart" in `SharedPlayerBadgesView`,
    die de link maakt en het Android-deelvenster opent (`Intent.ACTION_SEND`)
    via een kleine platform-hook vanuit `MainActivity`. Algemeen opgezet, zodat
@@ -1454,6 +1461,58 @@ Verificatie:
 - `xcodebuild test … -skipPackagePluginValidation`: **TEST SUCCEEDED**,
   inclusief de bestaande `PlayerCardTests` en
   `BadgeAwardTests.testAwardIdIsDeterministic`.
+
+### Stap 2 — resultaat (AFGEROND, 2026-09-30)
+
+Android's awards gedragen zich nu exact als iOS' `BadgeAwarder`, want anders
+zouden gedeelde kaarten niet goed samenvoegen. Naast de kolommen bleken er
+drie gedragsverschillen te zijn, die alle drie zijn gelijkgetrokken:
+
+- **Kaart i.p.v. speler**: een award hangt aan `players.cardId ?: players.id`
+  en heeft het gedeelde id `AwardValue.awardId(cardId, badge, matchId)`. Een
+  speler zonder rij in `players` verdient niets (zoals iOS: geen kaart).
+- **Terugdraaien**: een ongedaan gemaakte rally *verwijdert* de award (iOS
+  doet `context.delete`). Voorheen zette Android `deletedAt` en wiste het
+  weer bij opnieuw verdienen; zo'n teruggedraaide award zou in een kaartlink
+  als "verwijderd" meereizen, en bij iOS wint een verwijdering altijd. Een
+  door de gebruiker verwijderde award blijft verwijderd
+  (`OnConflictStrategy.IGNORE`), ook als de wedstrijd opnieuw wordt
+  opgeslagen. Dit zit in `BadgeAwardDao.syncMatch`.
+- **Career-badges worden opgeslagen** bij de beslissende wedstrijd (alleen
+  als `input.matchWinner != nil`), met `earnedElsewhere` = de eenmalige
+  badges die al op de kaart staan van een andere wedstrijd. De geschiedenis
+  volgt `BadgeAwarder.history(of:)`: alleen wedstrijden met een winnaar, de
+  voorsprong ("later instappen") en aangevulde games tellen mee, bij
+  scheidsrechterwedstrijden telt de onbevestigde laatste game mee zodra die
+  een winnaar heeft, de datum is `savedAt`, en de tegenstander is id of
+  naam, in kleine letters. De live berekening is weg.
+- **Nieuwe velden**: `opponentName` (naam van de andere speler) en
+  `awardedBy` (installatie-id, in `SharedPreferences` onder
+  `badgeInstallId`, net als iOS in `UserDefaults`). `BadgeAwardStore` kreeg
+  `PlayerDao` en het installatie-id als extra constructorparameters.
+- **Migratie 5→6** bouwt `badge_awards` opnieuw op in de iOS-vorm en rekent
+  bestaande rijen om naar kaart-id en gedeeld id. Rijen met `deletedAt`
+  worden weggelaten: vóór versie 6 was dat altijd een teruggedraaide badge
+  (Android had geen verwijderknop). Rijen met een onbekende badge of een
+  niet-UUID-id worden overgeslagen. `opponentName`/`awardedBy` blijven leeg
+  voor omgezette rijen.
+- **Testopzet gerepareerd, geen productiefout**: drie oudere migratietests
+  maakten een "oude" database door alleen het versienummer terug te zetten,
+  waardoor de nieuwe `badge_awards`-tabel bleef staan in een versie waarin
+  die nog niet bestond. Ze gooien die tabel nu eerst weg, zoals een echte
+  oude database eruitziet.
+
+Nieuwe/aangepaste tests: `BadgeAwardStoreTest` (5: iOS-id op de kaart,
+gekoppelde kaart, alleen bekende gekozen spelers, terugdraaien verwijdert,
+verwijderd blijft verwijderd), `CareerBadgesTest` (5: opgeslagen bij de
+wedstrijd, eenmalige niet dubbel, hat trick bij de derde, geen winnaar =
+geen career-badges, niet naar anderen), `BadgeAwardMigrationTest` (versie-5-
+rijen worden correct omgerekend).
+
+Verificatie: `:app:testDebugUnitTest` 33/33, `:app:connectedDebugAndroidTest`
+13/13 (op een emulator met een echte versie-5-database, dus de migratie liep
+ook op bestaande data), Core 20/20 op Darwin en Android, iOS **TEST
+SUCCEEDED**.
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 

@@ -22,8 +22,8 @@ class RefereeMatchStoreTest {
     private lateinit var adapter: RoomRefereeMatchStore
     private fun open() {
         db = Room.databaseBuilder(context, AppDatabase::class.java, filename)
-            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5).build()
-        adapter = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()), BadgeAwardStore(db.badgeAwardDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao())))
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6).build()
+        adapter = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()), BadgeAwardStore(db.badgeAwardDao(), db.playerDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao()), "test-install"))
     }
     @Before fun before() { context.deleteDatabase(filename); open() }
     @After fun after() { db.close(); context.deleteDatabase(filename) }
@@ -113,6 +113,8 @@ class RefereeMatchStoreTest {
             it.execSQL("DROP TABLE referee_points")
             it.execSQL("DROP TABLE referee_games")
             it.execSQL("DROP TABLE referee_matches")
+            // badge_awards only exists from version 5 on; a real older database has none
+            it.execSQL("DROP TABLE IF EXISTS badge_awards")
             it.version = 3
         }
         open()

@@ -24,8 +24,8 @@ class RoomMatchHistoryStoreTest {
     @Before fun before() {
         context.deleteDatabase(filename)
         db = Room.databaseBuilder(context, AppDatabase::class.java, filename)
-            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5).build()
-        val badgeStore = BadgeAwardStore(db.badgeAwardDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao()))
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6).build()
+        val badgeStore = BadgeAwardStore(db.badgeAwardDao(), db.playerDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao()), "test-install")
         val coachStore = MatchStore(db.matchDao())
         val refereeStore = RefereeMatchStore(db.refereeMatchDao())
         coachAdapter = RoomCoachMatchStore(coachStore, badgeStore)

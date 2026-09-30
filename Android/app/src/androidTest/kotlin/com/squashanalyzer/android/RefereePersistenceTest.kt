@@ -28,7 +28,7 @@ class RefereePersistenceTest {
     @Before fun seed() = runBlocking {
         db = AppDatabase.get(ApplicationProvider.getApplicationContext())
         db.refereeMatchDao().deleteAll()
-        store = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()), BadgeAwardStore(db.badgeAwardDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao())))
+        store = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()), BadgeAwardStore(db.badgeAwardDao(), db.playerDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao()), "test-install"))
         seeded = RefereeMatch(player1Name = "RefTest", player2Name = "Tegenstander", bestOf = 5, startingServer = Player.player1)
         store.save(seeded)
     }

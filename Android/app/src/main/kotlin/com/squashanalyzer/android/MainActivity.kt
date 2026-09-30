@@ -44,7 +44,8 @@ class MainActivity : AppCompatActivity() {
         val playerStore = RoomPlayerStore(AppDatabase.get(this).playerDao())
         val coachMatchStore = MatchStore(AppDatabase.get(this).matchDao())
         val refereeMatchDataStore = RefereeMatchStore(AppDatabase.get(this).refereeMatchDao())
-        val badgeAwardStore = BadgeAwardStore(AppDatabase.get(this).badgeAwardDao(), coachMatchStore, refereeMatchDataStore)
+        val badgeAwardStore = BadgeAwardStore(AppDatabase.get(this).badgeAwardDao(), AppDatabase.get(this).playerDao(),
+            coachMatchStore, refereeMatchDataStore, badgeInstallId())
         val matchStore = RoomCoachMatchStore(coachMatchStore, badgeAwardStore)
         val refereeMatchStore = RoomRefereeMatchStore(refereeMatchDataStore, badgeAwardStore)
         val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore)
@@ -59,5 +60,14 @@ class MainActivity : AppCompatActivity() {
                 SideEffect { stateHolder.removeState(true) }
             }
         }
+    }
+
+    /** Identifies this install as the awarding coach, like iOS' `BadgeAwarder.installId` */
+    private fun badgeInstallId(): String {
+        val prefs = getSharedPreferences("squash-analyzer", MODE_PRIVATE)
+        prefs.getString("badgeInstallId", null)?.let { return it }
+        val id = java.util.UUID.randomUUID().toString().uppercase()
+        prefs.edit().putString("badgeInstallId", id).apply()
+        return id
     }
 }

@@ -49,7 +49,7 @@ class MatchSetupTest {
         compose.onNodeWithText("Start").performClick()
         awaitText("SCHEIDSRECHTER")
 
-        val store = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()), BadgeAwardStore(db.badgeAwardDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao())))
+        val store = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()), BadgeAwardStore(db.badgeAwardDao(), db.playerDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao()), "test-install"))
         val restored = runBlocking { store.loadInProgress()!! }
         assertEquals("Kies-speler-test", restored.player1Name)
         assertEquals(playerId, restored.player1Id?.uuidString)

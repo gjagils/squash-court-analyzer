@@ -8,34 +8,36 @@ import androidx.room.Transaction
 
 @Dao
 interface BadgeAwardDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    /** Existing ids are left alone, so a deleted award is never brought back. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(awards: List<BadgeAwardEntity>)
 
     @Query("SELECT * FROM badge_awards WHERE matchId = :matchId")
     suspend fun forMatch(matchId: String): List<BadgeAwardEntity>
 
-    @Query("UPDATE badge_awards SET deletedAt = :deletedAt WHERE id = :id")
-    suspend fun markDeleted(id: String, deletedAt: Long)
+    @Query("SELECT * FROM badge_awards WHERE cardId = :cardId")
+    suspend fun forCard(cardId: String): List<BadgeAwardEntity>
 
-    @Query("SELECT * FROM badge_awards WHERE playerId = :playerId AND deletedAt IS NULL")
-    suspend fun activeForPlayer(playerId: String): List<BadgeAwardEntity>
+    @Query("SELECT * FROM badge_awards WHERE cardId = :cardId AND deletedAt IS NULL")
+    suspend fun activeForCard(cardId: String): List<BadgeAwardEntity>
+
+    @Query("DELETE FROM badge_awards WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<String>)
 
     @Query("DELETE FROM badge_awards WHERE matchId = :matchId")
     suspend fun deleteForMatch(matchId: String)
 
     /**
-     * Replaces this match's award rows with exactly the currently-earned set:
-     * inserts/refreshes `current` (an `OnConflictStrategy.REPLACE` upsert also
-     * un-deletes a badge re-earned after an undo-then-redo), then soft-deletes
-     * any of the match's existing rows that are no longer in `currentIds` —
-     * mirrors "an undone rally takes back an award" from `BadgeAwarder`.
+     * Brings one match's awards in line with what its rallies earn, exactly
+     * like iOS' `BadgeAwarder.syncAwards`: an active award the rallies no
+     * longer support is removed outright (an undone rally never really earned
+     * it), a missing one is inserted, and a deleted one stays deleted.
      */
     @Transaction
-    suspend fun replaceForMatch(matchId: String, current: List<BadgeAwardEntity>, currentIds: Set<String>) {
-        if (current.isNotEmpty()) insertAll(current)
-        val now = System.currentTimeMillis()
-        forMatch(matchId).forEach { row ->
-            if (row.id !in currentIds && row.deletedAt == null) markDeleted(row.id, now)
-        }
+    suspend fun syncMatch(matchId: String, expected: List<BadgeAwardEntity>) {
+        val expectedIds = expected.map { it.id }.toSet()
+        val retracted = forMatch(matchId).filter { it.deletedAt == null && it.id !in expectedIds }.map { it.id }
+        if (retracted.isNotEmpty()) deleteByIds(retracted)
+        if (expected.isNotEmpty()) insertAll(expected)
     }
 }

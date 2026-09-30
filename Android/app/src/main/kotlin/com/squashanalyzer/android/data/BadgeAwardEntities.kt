@@ -1,23 +1,28 @@
 package com.squashanalyzer.android.data
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
- * Mirrors the shape of iOS' `SavedBadgeAward` (see ARCHITECTURE.md's Badges
- * section), minus CloudKit-only fields (`cardId`/`awardedBy`/
- * `cloudSystemFields`): Android has no card sharing, so an award is keyed
- * directly to a `PlayerProfile.id`. The primary key is the deterministic
- * "<playerId>:<badge>:<matchId>" triple itself (no SHA-256 needed locally,
- * unlike iOS' `awardId(cardId:badge:matchId:)` which must also be a stable
- * UUID for CloudKit record names).
+ * Same shape as iOS' `SavedBadgeAward` minus its CloudKit bookkeeping, so a
+ * card link carries the same awards either way. An award belongs to a card
+ * (`players.cardId ?: players.id`, like iOS' `badgeCardId`), not directly to a
+ * player, and its id is `AwardValue.awardId(cardId, badge, matchId)` from
+ * SquashAnalyzerCore — identical on both platforms, which is what lets two
+ * devices merge the same award instead of duplicating it.
  */
-@Entity(tableName = "badge_awards")
+@Entity(
+    tableName = "badge_awards",
+    indices = [Index(value = ["cardId"]), Index(value = ["matchId"])],
+)
 data class BadgeAwardEntity(
     @PrimaryKey val id: String,
-    val playerId: String,
+    val cardId: String,
     val badge: String, // BadgeKind raw value
     val matchId: String,
-    val earnedAt: Long,
-    val deletedAt: Long? = null,
+    val earnedAt: Long, // epoch millis
+    val opponentName: String,
+    val awardedBy: String, // install id of the device that computed it
+    val deletedAt: Long? = null, // set once when the user deletes it, never cleared
 )

@@ -18,6 +18,8 @@ import skip.ui.ComposeContext
 import skip.ui.PresentationRoot
 import skip.ui.UIApplication
 import squash.analyzer.core.CardInbox
+import squash.analyzer.core.LeagueTeamFetcher
+import com.squashanalyzer.android.league.HttpLeaguePageLoader
 import squash.analyzer.ui.AndroidHomeView
 import com.squashanalyzer.android.data.AppDatabase
 import com.squashanalyzer.android.data.RoomPlayerStore
@@ -58,12 +60,13 @@ class MainActivity : AppCompatActivity() {
         val matchStore = RoomCoachMatchStore(coachMatchStore, badgeAwardStore)
         val refereeMatchStore = RoomRefereeMatchStore(refereeMatchDataStore, badgeAwardStore)
         val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore)
+        val leagueTeamFetcher = LeagueTeamFetcher(loader = HttpLeaguePageLoader())
         setContent {
             val stateHolder = rememberSaveableStateHolder()
             stateHolder.SaveableStateProvider(true) {
                 PresentationRoot(defaultColorScheme = ColorScheme.dark, context = ComposeContext()) { context ->
                     Box(modifier = context.modifier.fillMaxSize()) {
-                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore).Compose(context = context.content())
+                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher).Compose(context = context.content())
                     }
                 }
                 SideEffect { stateHolder.removeState(true) }

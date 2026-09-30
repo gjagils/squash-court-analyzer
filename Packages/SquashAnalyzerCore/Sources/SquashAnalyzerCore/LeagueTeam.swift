@@ -426,3 +426,26 @@ public struct LeagueTeamFetcher: Sendable {
         }
     }
 }
+
+// MARK: - Storage
+
+/// Where the team link and the last fetched team are kept, with the same keys
+/// as the iOS app (`CoachInputSettings.teamURLKey`, `LeagueTeamCard`).
+public enum LeagueTeamStorage {
+    public static let linkKey = "sbnTeamURL"
+    static let snapshotKey = "sbnTeamSnapshot"
+
+    /// The last fetched team, only when it belongs to `link`
+    public static func cachedSnapshot(for link: LeagueTeamLink, in defaults: UserDefaults = UserDefaults.standard) -> LeagueTeamSnapshot? {
+        guard let data = defaults.data(forKey: snapshotKey),
+              let snapshot = try? JSONDecoder().decode(LeagueTeamSnapshot.self, from: data),
+              snapshot.source == link.url else { return nil }
+        return snapshot
+    }
+
+    public static func store(_ snapshot: LeagueTeamSnapshot, in defaults: UserDefaults = UserDefaults.standard) {
+        if let data = try? JSONEncoder().encode(snapshot) {
+            defaults.set(data, forKey: snapshotKey)
+        }
+    }
+}

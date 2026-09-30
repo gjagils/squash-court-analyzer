@@ -142,6 +142,18 @@ record's own game winners rather than restoring a live `Match`/
 for this summary list). The new `SharedMatchHistoryView` (much smaller than
 iOS' full `MatchHistoryView` — no import/export, backup or filters, no
 tap-through detail yet) renders it.
+
+Mijn team runs on both platforms from Core: `LeagueTeamLink` (validation),
+`LeagueTeamParser` (the SBN team and standings pages; a tiny `LeagueRegex`
+wraps NSRegularExpression on Apple and `kotlin.text.Regex` on Android, since
+Skip has no NSRegularExpression), `LeagueTeamFetcher` (the cookie-wall
+consent and all sanity checks) and `LeagueTeamStorage` (same UserDefaults
+keys as iOS). Only the page loader is per platform (`LeaguePageLoader`):
+`URLSessionLeaguePageLoader` on iOS, `HttpLeaguePageLoader` (Kotlin,
+HttpURLConnection + a process CookieManager) on Android, because Skip's
+URLSession keeps no cookies and the cookie wall needs them. Android shows it
+with `SharedLeagueTeamCard` on the home screen, `SharedLeagueTeamDetailView`,
+and `SharedSettingsView` (the gear; for now only the team link).
 Full plan, phase status, toolchain setup and transpile gotchas found so far:
 see [`docs/android-port.md`](docs/android-port.md). Read that file before
 touching anything Android-related, and keep it updated as phases complete.

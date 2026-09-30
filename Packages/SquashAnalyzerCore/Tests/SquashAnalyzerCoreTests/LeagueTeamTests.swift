@@ -142,6 +142,18 @@ final class LeagueTeamTests: XCTestCase {
         XCTAssertEqual(decoded.players, team.players)
     }
 
+    func testCacheOnlyAnswersForTheSameTeam() throws {
+        let defaults = UserDefaults(suiteName: "league-team-tests")!
+        defaults.removeObject(forKey: "sbnTeamSnapshot")
+        let link = try LeagueTeamLink(teamURL)
+        let (team, _) = try LeagueTeamParser.team(teamPage, link: link)
+        XCTAssertNil(LeagueTeamStorage.cachedSnapshot(for: link, in: defaults))
+        LeagueTeamStorage.store(team, in: defaults)
+        XCTAssertEqual(LeagueTeamStorage.cachedSnapshot(for: link, in: defaults)?.name, "SC Hugo 1")
+        let other = try LeagueTeamLink("https://sbn.toernooi.nl/league/\(league)/team/114")
+        XCTAssertNil(LeagueTeamStorage.cachedSnapshot(for: other, in: defaults))
+    }
+
     // MARK: Fetching
 
     func testFetchAnswersTheCookieWallAndChecksTheTeamIsInTheStandings() async throws {

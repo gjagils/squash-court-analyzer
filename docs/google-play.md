@@ -90,7 +90,7 @@ Let op, afhankelijk van je account:
 
 In het menu **Policy and programs → App content** (of via de takenlijst op
 het Dashboard). Antwoorden voor de Android-app zoals die nu is (geen AI
-Coach, geen Mijn team, geen iCloud, geen netwerkverkeer):
+Coach, geen iCloud; alleen Mijn team gebruikt internet):
 
 | Onderdeel | Antwoord |
 |---|---|
@@ -113,8 +113,12 @@ Coach, geen Mijn team, geen iCloud, geen netwerkverkeer):
    je zelf via de deelknop; de gegevens staan in de link na het `#` en
    worden niet naar een server gestuurd.
 2. Daarmee vervallen de vervolgvragen (encryptie, verwijderverzoek).
-3. **Bijwerken zodra** AI Coach of Mijn team naar Android komt: dan gaan er
-   wél gegevens het toestel af (OpenAI-verzoeken, ophalen van teamgegevens).
+3. **Mijn team** (sinds 2026-09-30 op Android) haalt de openbare teampagina
+   op van sbn.toernooi.nl. Daarbij gaat alleen het verzoek om die pagina
+   het toestel af (de teamlink die je zelf invult), geen gegevens over
+   spelers of wedstrijden; dat telt niet als "verzamelen" door de app.
+   **Bijwerken zodra** AI Coach naar Android komt: dan gaan er wél gegevens
+   naar OpenAI.
 
 ### B4. Store-vermelding (Main store listing)
 

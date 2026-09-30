@@ -1331,9 +1331,8 @@ per-wedstrijd + career-berekening, weergave in Spelers/spelerscherm/
 match-einde-strip) en de geschiedenis bestaat. Volgorde: **spelerskaarten
 delen via links, op beide platforms** (zie de beslissing hieronder, stap 1
 t/m 6) → **"Nodig coach uit" + CloudKit-sync van iOS verwijderen** (stap 7,
-pas als Android links kan maken én openen) → Mijn team (netwerk/regex, moet
-met kleine aanpassingen overgaan; netwerken via Skip is nog ongetest, eerst
-verkennen) → instellingen/AI Coach (Keychain is iOS-only; Android krijgt
+pas als Android links kan maken én openen) → Mijn team (**AFGEROND
+2026-09-30**, zie "Mijn team op Android — resultaat") → instellingen/AI Coach (Keychain is iOS-only; Android krijgt
 EncryptedSharedPreferences achter dezelfde kleine abstractie).
 
 ## Beslissing: spelerskaarten delen via links op iOS én Android, CloudKit-sync verdwijnt (2026-09-28)
@@ -1710,6 +1709,71 @@ buildnummer aan als dat bij het uploaden anders uitkomt).
 
 Verificatie: iOS **TEST SUCCEEDED** (Android/Core ongewijzigd).
 
+## Mijn team op Android — resultaat (AFGEROND, 2026-09-30)
+
+**Verkenning Skip-netwerk.** SkipFoundation's `URLSession` draait op OkHttp,
+maar heeft geen cookie-opslag (`httpCookieStorage` is een lege stub). De
+cookiepagina van SBN (toestemming geven per POST, dan terug naar de pagina)
+heeft die cookie juist nodig. `NSRegularExpression` bestaat in Skip niet.
+Daarom:
+
+- **Core** (`LeagueTeam.swift`, verhuisd uit de iOS-app): `LeagueTeamLink`,
+  de modellen, `LeagueTeamParser`, `LeagueTeamFetcher` (cookiepagina,
+  statuscode, host, 5 MB-grens, "team staat in de eigen stand") en
+  `LeagueTeamStorage` (zelfde sleutels `sbnTeamURL`/`sbnTeamSnapshot` als
+  iOS; de cache telt alleen voor dezelfde teamlink). `LeagueRegex` is de
+  enige platformcode: `NSRegularExpression` op Apple, `kotlin.text.Regex`
+  met inline vlaggen `(?siu)` op Android.
+- **Per platform alleen de pagina-lader** (`LeaguePageLoader`): iOS
+  `URLSessionLeaguePageLoader` (ephemeral sessie, zoals voorheen), Android
+  `HttpLeaguePageLoader` (Kotlin, `HttpURLConnection` volgt redirects — een
+  POST met 302 gaat verder als GET — en een proces-`CookieManager`).
+- **Android-UI**: `SharedLeagueTeamCard` bovenaan het startscherm (niets
+  zolang er geen teamlink is; toont de laatst opgehaalde stand als SBN
+  onbereikbaar is), `SharedLeagueTeamDetailView` (stand, wedstrijden met
+  tijd of uitslag, spelers) en `SharedSettingsView` achter het tandwiel (voor
+  nu alleen de teamlink; opslaan normaliseert de link, "Verwijder" wist
+  hem). De oude melding "nog niet beschikbaar" is weg: elke tegel en het
+  tandwiel leiden nu ergens heen. `INTERNET`-toestemming toegevoegd.
+- **Gedragswijziging iOS**: netwerkfouten (geen verbinding, time-out) tonen
+  nu "SBN is nu niet bereikbaar" in plaats van de ruwe systeemmelding.
+
+**Nieuwe Skip-valkuilen**:
+
+- `kotlin.text.Regex(pattern, setOf(...))` compileert niet: Skip heeft een
+  eigen `setOf`, waardoor Kotlin een interne `Regex`-constructor kiest.
+  Oplossing: vlaggen in het patroon (`(?siu)`).
+- `Int(_:radix:)` bestaat niet in SkipLib; op Android `toIntOrNull(16)`.
+- `URL(string:relativeTo:)?.absoluteURL` houdt in Skip de basis-URL vast,
+  waardoor zo'n URL na een JSON-rondreis niet meer "gelijk" is. Oplossing:
+  opnieuw opbouwen uit `absoluteString`.
+- SkipTest kent `XCTAssertThrowsError` niet; gebruik een eigen do/catch.
+- `person.3.fill` heeft geen Android-icoon (driehoekje); `person.fill` wel.
+- `textInputAutocapitalization`/`keyboardType` bestaan niet op macOS, waar
+  het UI-pakket ook voor bouwt; weggelaten (de linkcontrole is niet
+  hoofdlettergevoelig waar dat telt).
+
+**Tests** (de eerste voor deze code, ook voor iOS): Core
+`LeagueTeamTests` (11: linkcontrole, team- en standpagina met entiteiten
+incl. emoji, veranderde pagina, volgende wedstrijd, cache-rondreis, cache
+per team, cookiepagina met exacte verzoeken, fouten → onbereikbaar, team
+niet in eigen stand) op Darwin en Android; `HttpLeaguePageLoaderTest` (3,
+tegen een lokale MockWebServer — nieuwe testdependency
+`mockwebserver3:5.3.2`, dezelfde OkHttp-versie als Skip: cookie + redirect
+na POST, foutstatus en niet-UTF-8, groottegrens); instrumented
+`SettingsScreenTest` (foute link geweigerd met reden, goede opgeslagen en
+weer verwijderd — zonder ooit SBN te benaderen) en `HomeScreenTest`
+aangepast (tandwiel opent Instellingen). Bewust geen echte SBN-pagina's als
+testdata: robots.txt sluit `/league/` uit, en de tests moeten offline
+draaien.
+
+**Nog open**: één echte test tegen sbn.toernooi.nl op de emulator met
+Gerd-Jans teamlink (geen link in de repo gevonden).
+
+Verificatie: Core 36 op Darwin / 35 JUnit op Android,
+`:app:testDebugUnitTest` 44/44, `:app:connectedDebugAndroidTest` 17/17, iOS
+**TEST SUCCEEDED**.
+
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 
 Idee van Gerd-Jan: een teamsamenstelling (spelers) ergens centraal neerzetten
@@ -1741,10 +1805,7 @@ branch tot een presenteerbare mijlpaal; samenvoegen is een afzonderlijke stap.
 
 ## Wat nog niet is overgezet
 
-- Android-bestemmingen achter de starttegels: badges, geschiedenis, delen,
-  Mijn team en instellingen/AI Coach (fase 5).
-- Android-opslag voor badge-awards.
+- Instellingen op Android: alleen de Mijn team-link; invoermodus, AI Coach
+  en back-ups ontbreken nog.
 - Foto's, badgecatalogus en teamimport in het Android-spelersscherm.
-- Spelerskaarten delen via links (gepland, zie de beslissing van 2026-09-28);
-  CloudKit-uitnodigingen verdwijnen daarna ook van iOS.
 - Een fysiek Android-toestel is nog nodig voor aanvullende praktijktests.

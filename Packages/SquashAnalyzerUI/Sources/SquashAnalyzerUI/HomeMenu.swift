@@ -163,13 +163,9 @@ private struct HomeMenuIcon: View {
     }
 }
 
-/// Android's first screen. Feature destinations are introduced individually in
-/// phase 5, so every unfinished action explains its availability instead of
-/// opening a nonfunctional scoring screen.
+/// Android's first screen: the Mijn team card (once a team link is saved in
+/// Instellingen) above the five tiles; every tile and the gear lead somewhere.
 public struct AndroidHomeView: View {
-    @State private var showingAvailability = false
-    @State private var selectedFeature = ""
-
     private let playerStore: any PlayerProfileStore
     private let badgeStore: any PlayerBadgeSummaryStore
     private let historyStore: any MatchHistoryStore
@@ -178,6 +174,9 @@ public struct AndroidHomeView: View {
     @State private var showingReferee = false
     @State private var showingBadges = false
     @State private var showingHistory = false
+    @State private var showingSettings = false
+    @State private var showingTeam = false
+    @State private var team: LeagueTeamSnapshot?
     private let matchStore: any CoachMatchStore
     private let refereeMatchStore: any RefereeMatchStore
     /// Opens the platform share sheet with a text (a card link); Android's
@@ -186,12 +185,16 @@ public struct AndroidHomeView: View {
     /// A card link opened from outside the app; the import screen shows while one is pending
     private let cardInbox: CardInbox
     private let cardImportStore: any CardImportStore
+    /// Fetches Mijn team from sbn.toernooi.nl (Android supplies the page loader)
+    private let leagueTeamFetcher: LeagueTeamFetcher
 
     public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 historyStore: any MatchHistoryStore,
                 matchStore: any CoachMatchStore, refereeMatchStore: any RefereeMatchStore,
                 shareText: @escaping (String) -> Void,
-                cardInbox: CardInbox, cardImportStore: any CardImportStore) {
+                cardInbox: CardInbox, cardImportStore: any CardImportStore,
+                leagueTeamFetcher: LeagueTeamFetcher) {
+        self.leagueTeamFetcher = leagueTeamFetcher
         self.shareText = shareText
         self.cardInbox = cardInbox
         self.cardImportStore = cardImportStore
@@ -222,6 +225,14 @@ public struct AndroidHomeView: View {
                 .navigationDestination(isPresented: $showingHistory) {
                     SharedMatchHistoryView(store: historyStore)
                 }
+                .navigationDestination(isPresented: $showingSettings) {
+                    SharedSettingsView()
+                }
+                .navigationDestination(isPresented: $showingTeam) {
+                    if let team {
+                        SharedLeagueTeamDetailView(snapshot: team)
+                    }
+                }
         }
         .sheet(isPresented: Binding(get: { cardInbox.pending != nil },
                                     set: { if !$0 { cardInbox.pending = nil } })) {
@@ -241,9 +252,13 @@ public struct AndroidHomeView: View {
                            startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             VStack(spacing: 0) {
-                HomeMenuHeader { showAvailability("Instellingen") }
+                HomeMenuHeader { showingSettings = true }
                 ScrollView {
                     VStack(spacing: 20) {
+                        SharedLeagueTeamCard(fetcher: leagueTeamFetcher) { snapshot in
+                            team = snapshot
+                            showingTeam = true
+                        }
                         HomeMenuTiles(
                             onCoach: { showingCoach = true },
                             onReferee: { showingReferee = true },
@@ -263,15 +278,5 @@ public struct AndroidHomeView: View {
             }
         }
         .preferredColorScheme(.dark)
-        .alert(selectedFeature, isPresented: $showingAvailability) {
-            Button("Begrepen", role: .cancel) {}
-        } message: {
-            Text("Deze functie is nog niet beschikbaar op Android. We voegen de onderdelen stap voor stap toe.")
-        }
-    }
-
-    private func showAvailability(_ feature: String) {
-        selectedFeature = feature
-        showingAvailability = true
     }
 }

@@ -7,7 +7,8 @@ Android heeft spelersbeheer, zowel coachscoring als scheidsrechtermodus
 (punten, LET, STROKE, undo, game-wissel, "Kies speler" bij het starten) met
 automatische opslag en hervatten, een badges-catalogus met echte, per speler
 berekende en bewaarde badge-awards inclusief career-badges (badge-aantal in
-Spelers met een scherm voor de verdiende badges, plus een "Badges
+Spelers met een scherm voor de verdiende badges en een knop "Deel kaart" die
+dezelfde kaartlink maakt als iOS, plus een "Badges
 verdiend"-strip direct op het match-einde-scherm), en een overzicht van
 afgeronde coach- en scheidsrechterwedstrijden.
 

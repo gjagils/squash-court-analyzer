@@ -1393,6 +1393,7 @@ Plan (elke stap los testen, iOS en Android groen, zoals alle vorige stappen):
    die de link maakt en het Android-deelvenster opent (`Intent.ACTION_SEND`)
    via een kleine platform-hook vanuit `MainActivity`. Algemeen opgezet, zodat
    "Deel score" er later op kan meeliften.
+   **AFGEROND (2026-09-30)**, zie "Stap 3 — resultaat" hieronder.
 4. **Ontvangen op Android**: intent-filters voor
    `https://squashanalyzer.com/kaart` en `squashanalyzer://kaart`, plus een
    importscherm zoals iOS' `CardImportSheet`: voorvertoning ("X nieuwe
@@ -1513,6 +1514,45 @@ Verificatie: `:app:testDebugUnitTest` 33/33, `:app:connectedDebugAndroidTest`
 13/13 (op een emulator met een echte versie-5-database, dus de migratie liep
 ook op bestaande data), Core 20/20 op Darwin en Android, iOS **TEST
 SUCCEEDED**.
+
+### Stap 3 — resultaat (AFGEROND, 2026-09-30)
+
+- **Knop**: `SharedPlayerBadgesView` heeft rechtsboven een deelicoon
+  ("Deel kaart", toolbar `.primaryAction`, Skip toont het Material
+  share-icoon voor `square.and.arrow.up`). Het scherm is alleen bereikbaar
+  via de badge-telling op een spelersrij, dus alleen voor spelers met
+  badges — een lege kaart delen heeft geen zin.
+- **Link maken**: `PlayerBadgeSummaryStore` kreeg
+  `cardSnapshot(forPlayer:) -> CardSnapshot?`, in `BadgeAwardStore` gelijk
+  aan iOS' `CardStore.snapshot(for:)`: alle awards op de kaart
+  (`players.cardId ?: players.id`), verwijderde inbegrepen (zodat de
+  ontvanger ze ook verwijdert), oudste eerst, spelersnaam uit `players`.
+  Tijden gaan van milliseconden (Room) naar seconden (link). De tekst is
+  dezelfde als op iOS: `Badgekaart van <naam>: https://squashanalyzer.com/kaart/#…`.
+- **Platform-hook**: een `shareText: (String) -> Void`-closure die
+  `MainActivity` meegeeft aan `AndroidHomeView` → `PlayerDirectoryView` →
+  `SharedPlayerBadgesView`. `MainActivity` vult hem met
+  `startActivity(shareTextIntent(text))`; `shareTextIntent` (in
+  `ShareText.kt`) is `ACTION_SEND` + `text/plain` in een chooser, los van de
+  activity zodat "Deel score" hem kan hergebruiken en tests hem kunnen
+  bekijken. Geen statische globale hook: expliciet doorgeven houdt de
+  schermen testbaar.
+- **Bewust nog niet**: de kaart als afbeelding meesturen (iOS stuurt
+  `PlayerCardImage` mee). Alleen de link is nodig om te importeren en de
+  website tekent de kaart al; een afbeelding renderen via Skip is een eigen
+  klus voor later.
+- Mislukt het maken van de link, dan verschijnt "Delen lukt niet".
+
+Tests: `CardSnapshotStoreTest` (3: hele kaart oudste eerst incl.
+verwijderingen, round-trip via de weblink, ander-kaart-awards blijven
+buiten, zelfde award-id; speler zonder kaart gebruikt eigen id; onbekende
+speler geeft nil), `ShareTextTest` (chooser met `ACTION_SEND`/`text/plain`),
+en in `PlayerBadgesScreenTest` een instrumented test die op "Deel kaart"
+tikt en met `espresso-intents` (nieuwe androidTest-dependency) controleert
+dat de chooser de kaartlink krijgt. Visueel gecontroleerd op de emulator.
+
+Verificatie: `:app:testDebugUnitTest` 37/37, `:app:connectedDebugAndroidTest`
+14/14, Core 21 op Darwin en Android, iOS **TEST SUCCEEDED**.
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 

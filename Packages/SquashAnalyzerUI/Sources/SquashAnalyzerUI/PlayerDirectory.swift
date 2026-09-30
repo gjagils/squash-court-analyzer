@@ -91,9 +91,13 @@ public struct PlayerDirectoryView: View {
     @State private var showingError = false
     @State private var badgesForPlayer: PlayerProfile? = nil
 
-    public init(store: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore) {
+    private let shareText: (String) -> Void
+
+    public init(store: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
+                shareText: @escaping (String) -> Void) {
         self.store = store
         self.badgeStore = badgeStore
+        self.shareText = shareText
     }
 
     public var body: some View {
@@ -199,7 +203,7 @@ public struct PlayerDirectoryView: View {
         }
         .navigationDestination(isPresented: Binding(get: { badgesForPlayer != nil }, set: { if !$0 { badgesForPlayer = nil } })) {
             if let player = badgesForPlayer {
-                SharedPlayerBadgesView(playerId: player.id, playerName: player.name, badgeStore: badgeStore)
+                SharedPlayerBadgesView(playerId: player.id, playerName: player.name, badgeStore: badgeStore, shareText: shareText)
             }
         }
         .alert("Speler verwijderen?", isPresented: $confirmDelete) {

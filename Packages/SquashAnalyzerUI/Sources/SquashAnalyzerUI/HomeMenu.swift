@@ -180,10 +180,15 @@ public struct AndroidHomeView: View {
     @State private var showingHistory = false
     private let matchStore: any CoachMatchStore
     private let refereeMatchStore: any RefereeMatchStore
+    /// Opens the platform share sheet with a text (a card link); Android's
+    /// `MainActivity` supplies `Intent.ACTION_SEND`
+    private let shareText: (String) -> Void
 
     public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 historyStore: any MatchHistoryStore,
-                matchStore: any CoachMatchStore, refereeMatchStore: any RefereeMatchStore) {
+                matchStore: any CoachMatchStore, refereeMatchStore: any RefereeMatchStore,
+                shareText: @escaping (String) -> Void) {
+        self.shareText = shareText
         self.playerStore = playerStore
         self.badgeStore = badgeStore
         self.historyStore = historyStore
@@ -195,7 +200,7 @@ public struct AndroidHomeView: View {
         NavigationStack {
             homeContent
                 .navigationDestination(isPresented: $showingPlayers) {
-                    PlayerDirectoryView(store: playerStore, badgeStore: badgeStore)
+                    PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
                     CoachSessionView(store: matchStore, playerStore: playerStore, onExit: { showingCoach = false })

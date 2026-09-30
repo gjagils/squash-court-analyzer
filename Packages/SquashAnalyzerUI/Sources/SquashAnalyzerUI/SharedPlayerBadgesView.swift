@@ -7,18 +7,26 @@ import SquashAnalyzerCore
 /// in scope via `import SquashAnalyzerUI`, same reason as
 /// `SharedBadgeCatalogView`. Career badges are not shown here yet: they need
 /// cross-match history, which the Android history browser doesn't have yet.
+///
+/// "Deel kaart" sends the card as a snapshot link
+/// (`https://squashanalyzer.com/kaart/#…`), the same link iOS shares, through
+/// `shareText` (the platform's share sheet).
 public struct SharedPlayerBadgesView: View {
     let playerId: String
     let playerName: String
     let badgeStore: any PlayerBadgeSummaryStore
+    let shareText: (String) -> Void
 
     @State private var badges: [BadgeKind] = []
     @State private var isLoading = true
+    @State private var shareFailed = false
 
-    public init(playerId: String, playerName: String, badgeStore: any PlayerBadgeSummaryStore) {
+    public init(playerId: String, playerName: String, badgeStore: any PlayerBadgeSummaryStore,
+                shareText: @escaping (String) -> Void) {
         self.playerId = playerId
         self.playerName = playerName
         self.badgeStore = badgeStore
+        self.shareText = shareText
     }
 
     public var body: some View {
@@ -47,7 +55,34 @@ public struct SharedPlayerBadgesView: View {
             }
         }
         .navigationTitle(playerName)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { Task { await shareCard() } } label: {
+                    Label("Deel kaart", systemImage: "square.and.arrow.up")
+                }
+                .accessibilityLabel("Deel kaart")
+                .disabled(isLoading)
+            }
+        }
+        .alert("Delen lukt niet", isPresented: $shareFailed) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("De kaart van \(playerName) kon niet worden gemaakt.")
+        }
         .task { await load() }
+    }
+
+    private func shareCard() async {
+        do {
+            guard let snapshot = try await badgeStore.cardSnapshot(forPlayer: playerId) else {
+                shareFailed = true
+                return
+            }
+            let url = try snapshot.webURL()
+            shareText("Badgekaart van \(snapshot.name): \(url.absoluteString)")
+        } catch {
+            shareFailed = true
+        }
     }
 
     private func load() async {

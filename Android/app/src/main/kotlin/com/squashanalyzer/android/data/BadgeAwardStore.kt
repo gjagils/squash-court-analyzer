@@ -9,6 +9,7 @@ import squash.analyzer.core.BadgeEngine
 import squash.analyzer.core.BadgeEngine.CareerMatch
 import squash.analyzer.core.BadgeKind
 import squash.analyzer.core.BadgeMatchInput
+import squash.analyzer.core.CardSnapshot
 import squash.analyzer.core.Player
 import squash.analyzer.core.PlayerBadgeSummaryStore
 import squash.analyzer.core.ScoringEngine
@@ -44,6 +45,21 @@ class BadgeAwardStore(
 
     override suspend fun badges(forPlayer: String): SwiftArray<BadgeKind> =
         SwiftArray(activeAwards(forPlayer).map { it.badge }.distinct().mapNotNull { BadgeKind.init(rawValue = it) })
+
+    override suspend fun cardSnapshot(forPlayer: String): CardSnapshot? {
+        val player = playerDao.byId(forPlayer) ?: return null
+        val cardId = player.cardId ?: player.id
+        val cardUuid = UUID(uuidString = cardId) ?: return null
+        val awards = dao.forCard(cardId).sortedBy { it.earnedAt }.mapNotNull { row ->
+            val badge = BadgeKind.init(rawValue = row.badge) ?: return@mapNotNull null
+            val matchUuid = UUID(uuidString = row.matchId) ?: return@mapNotNull null
+            AwardValue(cardId = cardUuid, badge = badge, matchId = matchUuid,
+                earnedAt = Date(timeIntervalSince1970 = row.earnedAt / 1000.0),
+                opponentName = row.opponentName, awardedBy = row.awardedBy,
+                deletedAt = row.deletedAt?.let { Date(timeIntervalSince1970 = it / 1000.0) })
+        }
+        return CardSnapshot(cardId = cardUuid, name = player.name, awards = SwiftArray(awards))
+    }
 
     /**
      * Inserts missing awards and removes active ones the rallies no longer

@@ -3,7 +3,17 @@ package com.squashanalyzer.android
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.core.app.ApplicationProvider
+import android.app.Activity
+import android.app.Instrumentation
+import android.content.Intent
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.Intents.intending
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
+import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.startsWith
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.squashanalyzer.android.data.AppDatabase
 import com.squashanalyzer.android.data.BadgeAwardEntity
@@ -49,5 +59,23 @@ class PlayerBadgesScreenTest {
         awaitText("5 points in a row")
         pressBack()
         awaitText(playerName)
+    }
+
+    @Test fun deelKaartOpensTheShareSheetWithTheCardLink() {
+        Intents.init()
+        try {
+            // Answer the share sheet straight away instead of showing it
+            intending(hasAction(Intent.ACTION_CHOOSER)).respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, null))
+            compose.onNodeWithContentDescription("Spelers").performClick()
+            awaitText(playerName)
+            compose.onNodeWithContentDescription("1 badges van $playerName").performClick()
+            awaitText("5 points in a row")
+            compose.onNodeWithContentDescription("Deel kaart").performClick()
+            compose.waitUntil(10_000) { Intents.getIntents().isNotEmpty() }
+            intended(allOf(hasAction(Intent.ACTION_CHOOSER), hasExtra(org.hamcrest.Matchers.equalTo(Intent.EXTRA_INTENT),
+                allOf(hasAction(Intent.ACTION_SEND), hasExtra(Intent.EXTRA_TEXT, startsWith("Badgekaart van $playerName: https://squashanalyzer.com/kaart/#"))))))
+        } finally {
+            Intents.release()
+        }
     }
 }

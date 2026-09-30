@@ -109,10 +109,13 @@ with the decided match that earned them (history built like
 opponent keyed by id or lowercased name; once-only badges not awarded twice).
 The install id is kept in the app's `SharedPreferences`. Earned badges are
 now visible too: a shared `PlayerBadgeSummaryStore` protocol
-(`badges(forPlayer:) -> [BadgeKind]`), implemented by `BadgeAwardStore`
+(`badges(forPlayer:) -> [BadgeKind]`, `cardSnapshot(forPlayer:)`), implemented by `BadgeAwardStore`
 itself, backs a badge-count pill on each row of `PlayerDirectoryView`
 (Android's "Spelers" screen) and a new shared `SharedPlayerBadgesView`
-(a `BadgeMedallion` grid) it taps through to — named `Shared...`, not
+(a `BadgeMedallion` grid, with a "Deel kaart" toolbar button that sends the
+card as the same snapshot link iOS shares — `cardSnapshot(forPlayer:)` on the
+protocol, the Android share sheet via a `shareText` closure that `MainActivity`
+passes down and fills with `shareTextIntent`) it taps through to — named `Shared...`, not
 `PlayerBadgesView`, for the same reason as `SharedBadgeCatalogView`: the
 iOS app target already has its own, richer `PlayerBadgesView`. A "Badges
 verdiend" strip now shows on the match-over screen too: `SharedMatchBadgesStrip`

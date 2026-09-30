@@ -235,7 +235,6 @@ struct BadgeMomentsView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query private var awards: [SavedBadgeAward]
-    @Query private var cards: [SavedPlayerCard]
 
     init(player: SavedPlayer, kind: BadgeKind) {
         self.player = player
@@ -244,13 +243,6 @@ struct BadgeMomentsView: View {
         let badge = kind.rawValue
         _awards = Query(filter: #Predicate<SavedBadgeAward> { $0.cardId == cardId && $0.badge == badge && $0.deletedAt == nil },
                         sort: \SavedBadgeAward.earnedAt, order: .reverse)
-        _cards = Query(filter: #Predicate<SavedPlayerCard> { $0.cardId == cardId })
-    }
-
-    /// On a joined card a coach deletes only the badges they awarded; the owner deletes any
-    private func canDelete(_ award: SavedBadgeAward) -> Bool {
-        guard let card = cards.first, !card.isOwner else { return true }
-        return award.awardedBy == BadgeAwarder.installId
     }
 
     private static let dateFormatter: DateFormatter = {
@@ -299,9 +291,7 @@ struct BadgeMomentsView: View {
                     }
                     .listRowBackground(Color.white.opacity(0.05))
                     .swipeActions {
-                        if canDelete(award) {
-                            Button("Verwijder", role: .destructive) { delete(award) }
-                        }
+                        Button("Verwijder", role: .destructive) { delete(award) }
                     }
                 }
             }
@@ -315,7 +305,6 @@ struct BadgeMomentsView: View {
     private func delete(_ award: SavedBadgeAward) {
         award.deletedAt = Date()
         try? modelContext.save()
-        CardSync.shared.awardsChanged([award])
     }
 }
 

@@ -42,12 +42,9 @@ struct BadgeAwarder {
 
         let existing = try awards(forMatch: matchId)
         let existingIds = Set(existing.map(\.id))
-        var removed: [(id: UUID, cardId: UUID)] = []
         for award in existing where expected[award.id] == nil && award.isActive {
-            removed.append((award.id, award.cardId))
             context.delete(award)
         }
-        var inserted: [SavedBadgeAward] = []
         for (id, value) in expected where !existingIds.contains(id) {
             let award = SavedBadgeAward(
                 cardId: value.cardId,
@@ -58,24 +55,17 @@ struct BadgeAwarder {
                 awardedBy: Self.installId
             )
             context.insert(award)
-            inserted.append(award)
         }
-        CardSync.shared.awardsRemoved(removed)
-        CardSync.shared.awardsChanged(inserted)
     }
 
     /// A discarded match was never really played: its awards go completely.
     func removeAwards(forMatch matchId: UUID) throws {
-        let awards = try awards(forMatch: matchId)
-        CardSync.shared.awardsRemoved(awards.map { ($0.id, $0.cardId) })
-        awards.forEach(context.delete)
+        try awards(forMatch: matchId).forEach(context.delete)
     }
 
     /// A deleted match keeps its awards as deleted, so they cannot come back.
     func markAwardsDeleted(forMatch matchId: UUID, at date: Date = Date()) throws {
-        let deleted = try awards(forMatch: matchId).filter(\.isActive)
-        deleted.forEach { $0.deletedAt = date }
-        CardSync.shared.awardsChanged(deleted)
+        try awards(forMatch: matchId).filter(\.isActive).forEach { $0.deletedAt = date }
     }
 
     private func awards(forMatch matchId: UUID) throws -> [SavedBadgeAward] {

@@ -32,7 +32,8 @@ struct ContentView: View {
     @State private var persistenceErrorMessage: String?
     @State private var showingPersistenceError = false
     @State private var showingStartupPersistenceWarning = false
-    @State private var cardSync = CardSync.shared
+    /// A player card link that was opened and waits for the import sheet (shared with Android)
+    @State private var cardInbox = CardInbox()
     @AppStorage(CoachInputSettings.modeKey) private var inputModeRaw = CoachInputMode.scoreTap.rawValue
 
     private var inputMode: CoachInputMode { CoachInputMode(rawValue: inputModeRaw) ?? .scoreTap }
@@ -225,27 +226,16 @@ struct ContentView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .inactive || phase == .background {
                 persistMatch()
-            } else if phase == .active {
-                Task { await cardSync.fetchChanges() }
             }
         }
         // A player card link (website or squashanalyzer://kaart#…)
         .onOpenURL { url in
-            if let snapshot = CardSnapshot(url: url) {
-                cardSync.inbox = PendingCard(cardId: snapshot.cardId, name: snapshot.name,
-                                             awards: snapshot.awards, source: .snapshot)
-            }
+            cardInbox.receive(url.absoluteString)
         }
-        .onChange(of: cardSync.inbox?.id) { _, id in
-            if id != nil, let pending = cardSync.inbox {
-                CardImportPresenter.present(pending, container: modelContext.container)
+        .onChange(of: cardInbox.pending) { _, snapshot in
+            if let snapshot {
+                CardImportPresenter.present(snapshot, container: modelContext.container) { cardInbox.pending = nil }
             }
-        }
-        .alert("Spelerskaart", isPresented: Binding(get: { cardSync.lastError != nil },
-                                                   set: { if !$0 { cardSync.lastError = nil } })) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(cardSync.lastError ?? "")
         }
         .alert("Incomplete wedstrijd opslaan?", isPresented: $showingCancelConfirm) {
             Button("Opslaan als incompleet") {

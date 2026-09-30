@@ -1,9 +1,10 @@
 import Foundation
 import SwiftData
 
-/// A player card that lives in CloudKit: one record zone per card, shared with
-/// other coaches through a CKShare. Only cards that were shared or joined have
-/// one; the badges of every other player stay on this device.
+/// No longer used: shared player cards used to live in CloudKit (one record
+/// zone per card, shared through a CKShare) until card sharing moved to links
+/// that work on iPhone and Android (2026-09-30). The model stays because
+/// schema V5 is frozen; drop it in a future schema version.
 @Model
 final class SavedPlayerCard {
     var cardId: UUID

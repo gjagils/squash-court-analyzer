@@ -1423,6 +1423,7 @@ Plan (elke stap los testen, iOS en Android groen, zoals alle vorige stappen):
    synchroniseren stopt. `ARCHITECTURE.md` (Badges-sectie) en de
    privacytekst bijwerken. Volgorde bewust zo, zodat er nooit een moment is
    zonder werkende manier van delen.
+   **AFGEROND (2026-09-30)**, zie "Stap 7 — resultaat" hieronder.
 
 ### Stap 1 — resultaat (AFGEROND, 2026-09-28)
 
@@ -1657,6 +1658,56 @@ Android zonder expliciet pakket (zonder `assetlinks.json` vraagt Android
 
 Verificatie: `:app:testDebugUnitTest` 41/41, `:app:connectedDebugAndroidTest`
 16/16, Core 25 op Darwin / 24 JUnit op Android, iOS **TEST SUCCEEDED**.
+
+### Stap 7 — resultaat (AFGEROND, 2026-09-30)
+
+Verwijderd van iOS:
+
+- `SquashAnalyzer/Services/CardSync.swift` (de twee `CKSyncEngine`s,
+  uitnodigen, accepteren, stoppen/ontkoppelen, `PendingCard`) en
+  `SquashAnalyzer/Services/AppDelegate.swift` (push-registratie voor de
+  stille CloudKit-meldingen en de `SceneDelegate` die shares accepteerde),
+  met hun regels in `project.pbxproj`; `@UIApplicationDelegateAdaptor` en
+  `CardSync.start` uit `SquashAnalyzerApp`.
+- `Info.plist`: `CKSharingSupported` en `UIBackgroundModes`
+  (`remote-notification`). Entitlements: `aps-environment` en de
+  `CloudKit`-service; `CloudDocuments` (iCloud Drive-backup) en de
+  container-id's blijven. De App ID mag Push/CloudKit aan houden; zonder
+  entitlement doet dat niets.
+- `CardShareActions`: alleen nog "Deel kaart" (afbeelding + link), over de
+  volle breedte; weg zijn "Nodig coach uit", de status "Gedeelde/Gekoppelde
+  kaart" en "Stop met delen"/"Ontkoppel kaart".
+- `BadgeMomentsView`: elk verdienmoment is te verwijderen (de regel "op een
+  gekoppelde kaart alleen je eigen badges" hoorde bij CloudKit); de
+  verwijdering reist mee in de volgende kaartlink.
+- `BadgeAwarder`: de `CardSync.awardsChanged/awardsRemoved`-aanroepen.
+- `CardStore.card(_:)`, `CardLinkError`, `docs/cloudkit-schema.ckdb`.
+
+Aangepast:
+
+- Binnenkomende links op iOS lopen nu via dezelfde Core-`CardInbox` als op
+  Android (`ContentView.onOpenURL` → `cardInbox.receive` →
+  `CardImportPresenter`). `CardImportSheet` neemt een `CardSnapshot`,
+  koppelt en voegt samen via `CardStore` en bewaart; de samenvatting komt
+  uit `CardImportPreview.summary`, dus iOS en Android gebruiken letterlijk
+  dezelfde zin.
+- **Blijft staan**: het model `SavedPlayerCard` en
+  `SavedBadgeAward.cloudSystemFields` — schema V5 is bevroren (draait op
+  Gerd-Jans iPhone); ze worden niet meer gebruikt en kunnen weg in een
+  volgende schemaversie. Bestaande awards en gekoppelde `cardId`'s blijven
+  gewoon werken.
+- `website/privacy.html`: CloudKit-alinea vervangen door alleen de link,
+  Android genoemd (opslag, verwijderen). **Nog niet gepubliceerd** — dat
+  gebeurt na akkoord van Gerd-Jan (Portainer, zie de website-deploy-notitie).
+- `ARCHITECTURE.md` (Badges): delen alleen via links; CloudKit-onderdelen
+  gemarkeerd als verwijderd.
+
+Voor TestFlight-testers met een gedeelde kaart (build 13/14): de badges
+blijven lokaal staan, alleen de live sync stopt. In de release notes van de
+volgende build vermelden: "Nodig coach uit is vervangen door Deel kaart,
+dat nu ook met Android werkt."
+
+Verificatie: iOS **TEST SUCCEEDED** (Android/Core ongewijzigd).
 
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 

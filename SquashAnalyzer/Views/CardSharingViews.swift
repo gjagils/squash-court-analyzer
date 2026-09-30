@@ -2,70 +2,27 @@ import SwiftUI
 import SwiftData
 import SquashAnalyzerCore
 
-// MARK: - Share buttons on the badge screen
+// MARK: - Share button on the badge screen
 
-/// "Deel kaart" (image plus snapshot link, for WhatsApp) and "Nodig coach uit"
-/// (the CloudKit invitation), plus the sharing status of the card.
+/// "Deel kaart": an image of the card plus the snapshot link, for WhatsApp.
+/// The link opens in the app on iPhone and Android, or in a browser.
 struct CardShareActions: View {
     let player: SavedPlayer
 
     @Environment(\.modelContext) private var modelContext
-    @Query private var cards: [SavedPlayerCard]
     @State private var shareItems: ShareItemsWrapper?
-    @State private var isInviting = false
     @State private var errorMessage: String?
-    @State private var showingStopConfirm = false
-
-    init(player: SavedPlayer) {
-        self.player = player
-        let cardId = player.badgeCardId
-        _cards = Query(filter: #Predicate<SavedPlayerCard> { $0.cardId == cardId })
-    }
-
-    private var card: SavedPlayerCard? { cards.first }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if let card {
-                HStack(spacing: 8) {
-                    Image(systemName: "person.2.fill")
-                        .font(.system(size: 12))
-                    Text(card.isOwner ? "Gedeelde kaart · nieuwe badges gaan automatisch mee"
-                                      : "Gekoppelde kaart · nieuwe badges gaan automatisch mee")
-                        .font(AppFonts.caption(12))
-                }
-                .foregroundColor(AppColors.textSecondary)
+        actionButton("Deel kaart", icon: "square.and.arrow.up") { shareSnapshot() }
+            .sheet(item: $shareItems) { wrapper in
+                ShareSheet(items: wrapper.items)
             }
-
-            HStack(spacing: 10) {
-                actionButton("Deel kaart", icon: "square.and.arrow.up") { shareSnapshot() }
-                actionButton(isInviting ? "Bezig…" : "Nodig coach uit", icon: "person.badge.plus") { invite() }
-                    .disabled(isInviting)
+            .alert("Delen lukt niet", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(errorMessage ?? "")
             }
-
-            if let card {
-                Button(card.isOwner ? "Stop met delen" : "Ontkoppel kaart") { showingStopConfirm = true }
-                    .font(AppFonts.caption(13))
-                    .foregroundColor(AppColors.textMuted)
-            }
-        }
-        .sheet(item: $shareItems) { wrapper in
-            ShareSheet(items: wrapper.items)
-        }
-        .alert("Delen lukt niet", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(errorMessage ?? "")
-        }
-        .confirmationDialog(card?.isOwner == true ? "Stoppen met delen?" : "Kaart ontkoppelen?",
-                            isPresented: $showingStopConfirm, titleVisibility: .visible) {
-            Button(card?.isOwner == true ? "Stop met delen" : "Ontkoppel", role: .destructive) { stopSharing() }
-            Button("Annuleren", role: .cancel) { }
-        } message: {
-            Text(card?.isOwner == true
-                 ? "De andere coaches zien de kaart dan niet meer bijwerken. De badges blijven op dit toestel."
-                 : "Nieuwe badges worden dan niet meer gedeeld. De badges blijven op dit toestel.")
-        }
     }
 
     private func actionButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
@@ -102,32 +59,6 @@ struct CardShareActions: View {
             shareItems = ShareItemsWrapper(items: items)
         } catch {
             errorMessage = error.localizedDescription
-        }
-    }
-
-    private func invite() {
-        isInviting = true
-        Task {
-            defer { isInviting = false }
-            do {
-                let url = try await CardSync.shared.invitationURL(for: player)
-                shareItems = ShareItemsWrapper(items: [
-                    "Koppel de badgekaart van \(player.name) in Squash Analyzer, dan tellen jouw badges voor \(player.name) ook mee: \(url.absoluteString)"
-                ])
-            } catch {
-                errorMessage = error.localizedDescription
-            }
-        }
-    }
-
-    private func stopSharing() {
-        guard let card else { return }
-        Task {
-            do {
-                try await CardSync.shared.stopSharing(card)
-            } catch {
-                errorMessage = error.localizedDescription
-            }
         }
     }
 }
@@ -209,10 +140,10 @@ struct PlayerCardImage: View {
 
 // MARK: - Linking a card that came in
 
-/// Shown when a card link or an invitation is opened: link it to a local
-/// player (or a new one) and merge its badges.
+/// Shown when a card link is opened: link it to a local player (or a new one)
+/// and merge its badges. Android's `SharedCardImportView` does the same.
 struct CardImportSheet: View {
-    let pending: PendingCard
+    let snapshot: CardSnapshot
     /// Closes the sheet when it is presented from UIKit (see `CardImportPresenter`)
     var onClose: (() -> Void)? = nil
 
@@ -221,15 +152,10 @@ struct CardImportSheet: View {
     @Query(sort: \SavedPlayer.name) private var players: [SavedPlayer]
     @State private var errorMessage: String?
 
-    private var linkedPlayer: SavedPlayer? { players.first { $0.badgeCardId == pending.cardId } }
+    private var linkedPlayer: SavedPlayer? { players.first { $0.badgeCardId == snapshot.cardId } }
 
     private var preview: (new: Int, deleted: Int) {
-        (try? CardStore(context: modelContext).preview(pending.awards)) ?? (0, 0)
-    }
-
-    private var isInvitation: Bool {
-        if case .share = pending.source { return true }
-        return false
+        (try? CardStore(context: modelContext).preview(snapshot.awards)) ?? (0, 0)
     }
 
     var body: some View {
@@ -237,17 +163,12 @@ struct CardImportSheet: View {
             List {
                 Section {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(pending.name)
+                        Text(snapshot.name)
                             .font(AppFonts.title(20))
                             .foregroundColor(AppColors.textPrimary)
                         Text(summary)
                             .font(AppFonts.body(13))
                             .foregroundColor(AppColors.textSecondary)
-                        if isInvitation {
-                            Text("Na het koppelen gaan nieuwe badges van deze speler automatisch naar de gedeelde kaart.")
-                                .font(AppFonts.caption(12))
-                                .foregroundColor(AppColors.textMuted)
-                        }
                     }
                     .listRowBackground(Color.clear)
                 }
@@ -267,7 +188,7 @@ struct CardImportSheet: View {
                         Button {
                             link(to: nil)
                         } label: {
-                            Label("Nieuwe speler \(pending.name)", systemImage: "person.badge.plus")
+                            Label("Nieuwe speler \(snapshot.name)", systemImage: "person.badge.plus")
                                 .foregroundColor(AppColors.accentGold)
                         }
                         .listRowBackground(Color.white.opacity(0.05))
@@ -280,7 +201,7 @@ struct CardImportSheet: View {
                                     Text(player.name)
                                         .foregroundColor(AppColors.textPrimary)
                                     Spacer()
-                                    if player.name.localizedCaseInsensitiveCompare(pending.name) == .orderedSame {
+                                    if player.name.localizedCaseInsensitiveCompare(snapshot.name) == .orderedSame {
                                         Text("zelfde naam")
                                             .font(AppFonts.caption(11))
                                             .foregroundColor(AppColors.textMuted)
@@ -310,14 +231,13 @@ struct CardImportSheet: View {
         .preferredColorScheme(.dark)
     }
 
+    /// Same wording as Android, from `CardImportPreview.summary`
     private var summary: String {
-        let active = pending.awards.filter { $0.deletedAt == nil }.count
         let preview = preview
-        var parts = [active == 1 ? "1 badge op de kaart" : "\(active) badges op de kaart"]
-        if preview.new > 0 { parts.append(preview.new == 1 ? "1 nieuw voor jou" : "\(preview.new) nieuw voor jou") }
-        if preview.deleted > 0 { parts.append("\(preview.deleted) verwijderd") }
-        if linkedPlayer != nil, preview.new == 0, preview.deleted == 0 { parts.append("je bent al bij") }
-        return parts.joined(separator: " · ")
+        return CardImportPreview(activeBadges: snapshot.awards.filter { $0.deletedAt == nil }.count,
+                                 newBadges: preview.new, deletedBadges: preview.deleted,
+                                 linkedPlayer: linkedPlayer.map { CardImportPlayer(id: $0.id.uuidString, name: $0.name) },
+                                 players: []).summary
     }
 
     private func close() {
@@ -326,7 +246,10 @@ struct CardImportSheet: View {
 
     private func link(to player: SavedPlayer?) {
         do {
-            try CardSync.shared.completeLink(pending, to: player)
+            let store = CardStore(context: modelContext)
+            try store.link(cardId: snapshot.cardId, name: snapshot.name, to: player)
+            try store.merge(snapshot.awards)
+            try modelContext.save()
             close()
         } catch {
             errorMessage = error.localizedDescription
@@ -338,15 +261,15 @@ struct CardImportSheet: View {
 /// match, the history), so an opened card link never has to wait.
 @MainActor
 enum CardImportPresenter {
-    static func present(_ pending: PendingCard, container: ModelContainer) {
+    static func present(_ snapshot: CardSnapshot, container: ModelContainer, onClose: @escaping () -> Void) {
         guard let root = UIApplication.shared.connectedScenes
             .compactMap({ ($0 as? UIWindowScene)?.keyWindow?.rootViewController }).first else { return }
         var top = root
         while let presented = top.presentedViewController, !presented.isBeingDismissed { top = presented }
         var host: UIViewController?
-        let sheet = CardImportSheet(pending: pending) {
+        let sheet = CardImportSheet(snapshot: snapshot) {
             host?.dismiss(animated: true)
-            CardSync.shared.inbox = nil
+            onClose()
         }
         let controller = UIHostingController(rootView: AnyView(sheet.modelContainer(container)))
         controller.isModalInPresentation = true

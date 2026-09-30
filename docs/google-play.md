@@ -94,7 +94,7 @@ Coach, geen Mijn team, geen iCloud, geen netwerkverkeer):
 
 | Onderdeel | Antwoord |
 |---|---|
-| Privacy policy | `https://squashanalyzer.com/privacy.html` — **let op**: die tekst gaat nu alleen over iOS; vóór een openbare release moet er een Android-alinea bij (Claude zet die klaar, publiceren na jouw akkoord). Voor de interne test is de huidige URL bruikbaar. |
+| Privacy policy | `https://squashanalyzer.com/privacy.html` — de versie in de repo noemt Android al (2026-09-30), maar staat nog niet live; publiceren na jouw akkoord. Voor de interne test is de huidige URL bruikbaar. |
 | App access | **All functionality is available without special access** (geen login) |
 | Ads | **No, my app does not contain ads** |
 | Content rating | Vragenlijst starten, e-mail invullen, categorie **All Other App Types** (of "Reference, News, or Educational" als dat er niet staat); alle vragen over geweld, seks, taal, drugs, gokken, gebruikersinteractie: **No**. Delen van gebruikersinhoud: **No** (een kaartlink delen gaat via de deelknop van het toestel, niet via een eigen dienst). Resultaat wordt vrijwel zeker "PEGI 3 / Everyone". |

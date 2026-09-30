@@ -14,28 +14,15 @@ extension AwardValue {
     }
 }
 
-enum CardLinkError: LocalizedError {
-    case noICloud
-    case notShared
-
-    var errorDescription: String? {
-        switch self {
-        case .noICloud: return "Log in bij iCloud om spelerskaarten te delen."
-        case .notShared: return "Deze kaart is (nog) niet gedeeld."
-        }
-    }
-}
-
 // MARK: - Merging cards into the store
 
-/// Store operations shared by snapshot links and CloudKit: merge awards, link a
-/// local player to a card, and read a card back out.
+/// Store operations for card links: merge awards, link a local player to a
+/// card, and read a card back out.
 @MainActor
 struct CardStore {
     let context: ModelContext
 
     /// Inserts unknown awards and applies deletions (a deletion always wins).
-    /// Returns the awards that changed, so they can be sent on to a shared card.
     @discardableResult
     func merge(_ values: [AwardValue]) throws -> [SavedBadgeAward] {
         var changed: [SavedBadgeAward] = []
@@ -111,11 +98,5 @@ struct CardStore {
             .sorted { $0.earnedAt < $1.earnedAt }
             .compactMap(AwardValue.init)
         return CardSnapshot(cardId: cardId, name: player.name, awards: values)
-    }
-
-    func card(_ cardId: UUID) throws -> SavedPlayerCard? {
-        var descriptor = FetchDescriptor<SavedPlayerCard>(predicate: #Predicate { $0.cardId == cardId })
-        descriptor.fetchLimit = 1
-        return try context.fetch(descriptor).first
     }
 }

@@ -22,7 +22,7 @@ final class SavedBadgeAward {
     /// Install that awarded it (see `BadgeAwarder.installId`)
     var awardedBy: String
     var deletedAt: Date? = nil
-    /// Encoded CloudKit system fields once the award was saved to a shared card
+    /// No longer used (CloudKit card sync was removed); kept because schema V5 is frozen
     var cloudSystemFields: Data? = nil
 
     init(cardId: UUID, badge: BadgeKind, matchId: UUID, earnedAt: Date, opponentName: String, awardedBy: String) {

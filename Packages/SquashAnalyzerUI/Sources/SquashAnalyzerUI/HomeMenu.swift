@@ -1,5 +1,16 @@
 import SwiftUI
 import SquashAnalyzerCore
+#if SKIP
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.MilitaryTech
+import androidx.compose.material.icons.filled.Sports
+import androidx.compose.material3.Icon
+import androidx.compose.ui.unit.dp
+#endif
 
 /// Platform-independent home presentation. Navigation and persistence belong to
 /// the host app; iOS keeps its existing destinations and Android adds them in phase 5.
@@ -56,11 +67,11 @@ public struct HomeMenuTiles: View {
 
     public var body: some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible())], spacing: 14) {
-            HomeMenuTile(title: "Coach", icon: "chart.bar.xaxis", color: HomePalette.orange, action: onCoach)
-            HomeMenuTile(title: "Scheidsrechter", icon: "hand.raised.fill", color: HomePalette.orange, action: onReferee)
-            HomeMenuTile(title: "Afgeronde wedstrijden", icon: "clock.arrow.circlepath", color: HomePalette.blue, action: onHistory)
-            HomeMenuTile(title: "Spelers", icon: "person.2.fill", color: HomePalette.gold, action: onPlayers)
-            HomeMenuTile(title: "Badges", icon: "medal.fill", color: HomePalette.gold, action: onBadges)
+            HomeMenuTile(title: "Coach", icon: .coach, action: onCoach)
+            HomeMenuTile(title: "Scheidsrechter", icon: .referee, action: onReferee)
+            HomeMenuTile(title: "Afgeronde wedstrijden", icon: .history, action: onHistory)
+            HomeMenuTile(title: "Spelers", icon: .players, action: onPlayers)
+            HomeMenuTile(title: "Badges", icon: .badges, action: onBadges)
         }
         .padding(.horizontal, 24)
     }
@@ -70,22 +81,20 @@ private enum HomePalette {
     static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
     static let secondary = Color(red: 0.70, green: 0.68, blue: 0.65)
     static let orange = Color(red: 0.95, green: 0.55, blue: 0.15)
-    static let blue = Color(red: 0.35, green: 0.45, blue: 0.55)
-    static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
 }
 
+/// All tiles share one accent colour, so the icon is what tells them apart
 private struct HomeMenuTile: View {
     let title: String
-    let icon: String
-    let color: Color
+    let icon: HomeTileIcon
     let action: () -> Void
+
+    private var color: Color { HomePalette.orange }
 
     var body: some View {
         Button(action: action) {
             VStack(spacing: 10) {
-                HomeMenuIcon(name: icon)
-                    .font(.system(size: 26, weight: .semibold))
-                    .foregroundColor(color)
+                HomeTileIconView(icon: icon, color: color, size: 30)
                 Text(title.uppercased())
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .tracking(1)
@@ -105,62 +114,94 @@ private struct HomeMenuTile: View {
     }
 }
 
-/// Skip's built-in symbol mapping only covers a subset of SF Symbols.
-/// These small original paths supply the three missing home symbols on Android.
-private struct HomeMenuIcon: View {
-    let name: String
+/// The five home tiles' icons: a clipboard (coach), a whistle or raised hand
+/// (referee), history, a group (players) and a medal (badges).
+enum HomeTileIcon {
+    case coach, referee, history, players, badges
+
+    /// SF Symbol on Apple. The referee is drawn (`WhistleShape`): the
+    /// `whistle` symbols render as an empty glyph on the iOS SF Symbols
+    /// runtime we test on, so this name is only a fallback.
+    var symbol: String {
+        switch self {
+        case .coach: return "list.bullet.clipboard.fill"
+        case .referee: return "hand.raised.fill"
+        case .history: return "clock.arrow.circlepath"
+        case .players: return "person.2.fill"
+        case .badges: return "medal.fill"
+        }
+    }
+}
+
+#if !SKIP
+/// A referee's whistle for iOS, in the spirit of Android's Material "Sports"
+/// icon: a round body with an air hole, a mouthpiece to the right and a ring
+/// for the cord. Drawn on a 24×24 grid and scaled to the frame; the body and
+/// the holes are separate parts so the holes can be cut out of the union.
+struct WhistleShape: Shape {
+    enum Part { case body, holes }
+    let part: Part
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        switch part {
+        case .body:
+            path.addEllipse(in: CGRect(x: 1, y: 8, width: 13, height: 13))
+            path.addRoundedRect(in: CGRect(x: 8, y: 8, width: 15, height: 5.5), cornerSize: CGSize(width: 1.5, height: 1.5))
+            path.addEllipse(in: CGRect(x: 2.5, y: 3, width: 5, height: 5))
+        case .holes:
+            path.addEllipse(in: CGRect(x: 5, y: 12.5, width: 5, height: 5))
+            path.addEllipse(in: CGRect(x: 4, y: 4.5, width: 2, height: 2))
+        }
+        let scale = min(rect.width, rect.height) / 24
+        return path.applying(CGAffineTransform(scaleX: scale, y: scale).translatedBy(x: rect.minX / scale, y: rect.minY / scale))
+    }
+}
+#endif
+
+/// SF Symbols on Apple; on Android the matching Material icons, drawn
+/// directly with Compose, because Skip only maps a small set of SF Symbols
+/// (the rest become a warning triangle).
+struct HomeTileIconView: View {
+    let icon: HomeTileIcon
+    let color: Color
+    let size: CGFloat
 
     var body: some View {
         #if SKIP
-        if name == "person.2.fill" {
-            Path { path in
-                path.addEllipse(in: CGRect(x: 5, y: 2, width: 8, height: 8))
-                path.addEllipse(in: CGRect(x: 16, y: 4, width: 7, height: 7))
-                path.addRoundedRect(in: CGRect(x: 1, y: 12, width: 16, height: 12), cornerSize: CGSize(width: 6, height: 6))
-                path.addRoundedRect(in: CGRect(x: 18, y: 13, width: 8, height: 11), cornerSize: CGSize(width: 3, height: 3))
-            }.fill().frame(width: 26, height: 26)
-        } else if name == "clock.arrow.circlepath" {
-            ZStack {
-                Circle().stroke(lineWidth: 2)
-                Path { path in
-                    path.move(to: CGPoint(x: 13, y: 5))
-                    path.addLine(to: CGPoint(x: 13, y: 13))
-                    path.addLine(to: CGPoint(x: 18, y: 16))
-                }.stroke(lineWidth: 2)
-            }.frame(width: 26, height: 26)
-        } else if name == "hand.raised.fill" {
-            Path { path in
-                path.move(to: CGPoint(x: 7, y: 24))
-                path.addLine(to: CGPoint(x: 1, y: 15))
-                path.addQuadCurve(to: CGPoint(x: 4, y: 13), control: CGPoint(x: 0, y: 10))
-                path.addLine(to: CGPoint(x: 7, y: 16))
-                path.addLine(to: CGPoint(x: 7, y: 5))
-                path.addQuadCurve(to: CGPoint(x: 10, y: 5), control: CGPoint(x: 8.5, y: 1))
-                path.addLine(to: CGPoint(x: 10, y: 12))
-                path.addLine(to: CGPoint(x: 11, y: 2))
-                path.addQuadCurve(to: CGPoint(x: 14, y: 2), control: CGPoint(x: 12.5, y: -1))
-                path.addLine(to: CGPoint(x: 14, y: 12))
-                path.addLine(to: CGPoint(x: 15, y: 4))
-                path.addQuadCurve(to: CGPoint(x: 18, y: 4), control: CGPoint(x: 16.5, y: 1))
-                path.addLine(to: CGPoint(x: 18, y: 13))
-                path.addLine(to: CGPoint(x: 19, y: 8))
-                path.addQuadCurve(to: CGPoint(x: 22, y: 8), control: CGPoint(x: 20.5, y: 5))
-                path.addLine(to: CGPoint(x: 22, y: 19))
-                path.addQuadCurve(to: CGPoint(x: 18, y: 25), control: CGPoint(x: 22, y: 25))
-                path.closeSubpath()
-            }.fill().frame(width: 26, height: 26)
-        } else if name == "medal.fill" {
-            ZStack {
-                Circle().stroke(lineWidth: 2)
-                Circle().frame(width: 9, height: 9)
-            }.frame(width: 26, height: 26)
-        } else {
-            Image(systemName: name)
+        ComposeView { context in
+            Icon(imageVector: materialIcon(), contentDescription: nil,
+                 modifier: context.modifier.size(size.dp), tint: color.colorImpl())
         }
         #else
-        Image(systemName: name)
+        if icon == .referee {
+            // Solid whistle, then the air hole and the cord hole cut out
+            ZStack {
+                WhistleShape(part: .body).fill(color)
+                WhistleShape(part: .holes).fill(Color.black).blendMode(.destinationOut)
+            }
+            .compositingGroup()
+            .frame(width: size, height: size)
+        } else {
+            Image(systemName: icon.symbol)
+                .font(.system(size: size * 0.85, weight: .semibold))
+                .foregroundColor(color)
+                .frame(width: size, height: size)
+        }
         #endif
     }
+
+    #if SKIP
+    private func materialIcon() -> androidx.compose.ui.graphics.vector.ImageVector {
+        switch icon {
+        case .coach: return Icons.AutoMirrored.Filled.Assignment
+        case .referee: return Icons.Filled.Sports
+        case .history: return Icons.Filled.History
+        case .players: return Icons.Filled.Groups
+        case .badges: return Icons.Filled.MilitaryTech
+        }
+    }
+    #endif
 }
 
 /// Android's first screen: the Mijn team card (once a team link is saved in

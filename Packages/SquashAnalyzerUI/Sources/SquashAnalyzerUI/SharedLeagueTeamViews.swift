@@ -82,7 +82,7 @@ public struct SharedLeagueTeamCard: View {
     private func card(_ snapshot: LeagueTeamSnapshot) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Image(systemName: "person.fill") // person.3.fill has no Android icon in Skip
+                HomeTileIconView(icon: .players, color: LeaguePalette.orange, size: 16)
                 Text("MIJN TEAM")
                     .font(.system(size: 11, weight: .semibold))
                     .tracking(1.4)
@@ -256,7 +256,7 @@ public struct SharedSettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack(spacing: 8) {
-                        Image(systemName: "person.fill").foregroundColor(LeaguePalette.orange)
+                        HomeTileIconView(icon: .players, color: LeaguePalette.orange, size: 20)
                         Text("Mijn team")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(LeaguePalette.text)

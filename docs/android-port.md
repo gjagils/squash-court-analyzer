@@ -1778,6 +1778,25 @@ Verificatie: Core 36 op Darwin / 35 JUnit op Android,
 `:app:testDebugUnitTest` 44/44, `:app:connectedDebugAndroidTest` 17/17, iOS
 **TEST SUCCEEDED**.
 
+## Starttegels: één kleur, betere icoontjes (2026-09-30)
+
+Op verzoek van Gerd-Jan hebben alle vijf starttegels (gedeeld
+`HomeMenuTiles`, dus iOS én Android) dezelfde oranje kleur; het icoon maakt
+het verschil. `HomeTileIcon` (coach, referee, history, players, badges):
+
+- **iOS**: SF Symbols `list.bullet.clipboard.fill`, `clock.arrow.circlepath`,
+  `person.2.fill`, `medal.fill`; de scheidsrechter is een zelfgetekend
+  fluitje (`WhistleShape`, gaatjes weggeknipt met `.destinationOut`), omdat
+  de `whistle`-symbolen op de geteste iOS-runtime leeg blijven.
+- **Android**: echte Material-icoontjes via `ComposeView` + `Icon`
+  (`AutoMirrored.Filled.Assignment`, `Filled.Sports` = fluitje,
+  `Filled.History`, `Filled.Groups`, `Filled.MilitaryTech`). Skip neemt
+  `material-icons-extended` al mee; zijn `Image(systemName:)` kent maar een
+  kleine set SF Symbols, de rest werd een waarschuwingsdriehoek of een grof
+  eigen `Path`-figuurtje (die zijn weg). Handig voor later: elk
+  Material-icoon is zo bruikbaar, met een Kotlin-import in `#if SKIP`.
+- Ook de Mijn team-kaart en -instellingen gebruiken het groepsicoon.
+
 ## Beslissing: gedeeld team-importeren via URL, niet CloudKit (2026-09-27)
 
 Idee van Gerd-Jan: een teamsamenstelling (spelers) ergens centraal neerzetten

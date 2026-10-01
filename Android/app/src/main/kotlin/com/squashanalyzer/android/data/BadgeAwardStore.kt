@@ -41,6 +41,10 @@ class BadgeAwardStore(
     private val transaction: suspend (suspend () -> Unit) -> Unit = { it() },
 ) : PlayerBadgeSummaryStore, CardImportStore {
 
+    /** Matches with at least one badge that was not deleted (medal on a history card) */
+    suspend fun matchIdsWithBadges(): Set<String> =
+        dao.all().filter { it.deletedAt == null }.map { it.matchId }.toSet()
+
     /** The card a player's awards live on: `players.cardId ?: players.id`, like iOS' `badgeCardId` */
     suspend fun cardId(playerId: String): String? = playerDao.byId(playerId)?.let { it.cardId ?: it.id }
 

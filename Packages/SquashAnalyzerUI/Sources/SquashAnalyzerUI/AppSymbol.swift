@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.SportsScore
 import androidx.compose.material.icons.filled.FrontHand
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MilitaryTech
@@ -88,7 +90,9 @@ struct AppSymbol: View {
         case "xmark": return Icons.Filled.Close
         case "square.and.arrow.down": return Icons.Filled.Download
         case "trash": return Icons.Filled.Delete
-        case "chart.bar.fill": return Icons.Filled.BarChart
+        case "chart.bar.fill", "chart.bar.xaxis": return Icons.Filled.BarChart
+        case "crown.fill": return Icons.Filled.EmojiEvents
+        case "flag.checkered": return Icons.Filled.SportsScore
         case "gearshape": return Icons.Filled.Settings
         case "timer": return Icons.Filled.Timer
         case "square.and.arrow.up": return Icons.Filled.Share

@@ -50,8 +50,9 @@ class MatchHistoryScreenTest {
 
     @Test fun completedMatchAppearsInHistoryAndReturnsHome() {
         compose.onNodeWithContentDescription("Afgeronde wedstrijden").performClick()
-        awaitText("Afgeronde wedstrijden")
-        awaitText("HistoryP1 – HistoryP2")
+        awaitText("Wedstrijden")
+        awaitText("HistoryP1")
+        awaitText("HistoryP2")
         pressBack()
         awaitText("SQUASH ANALYZER")
     }

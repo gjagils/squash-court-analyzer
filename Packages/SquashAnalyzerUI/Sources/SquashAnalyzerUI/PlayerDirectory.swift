@@ -241,7 +241,7 @@ public struct PlayerDirectoryView: View {
         }
         .navigationDestination(isPresented: Binding(get: { badgesForPlayer != nil }, set: { if !$0 { badgesForPlayer = nil } })) {
             if let player = badgesForPlayer {
-                SharedPlayerBadgesView(playerId: player.id, playerName: player.name, badgeStore: badgeStore, shareText: shareText,
+                SharedPlayerBadgesView(playerId: player.id, playerName: player.name, photo: photos[player.id], badgeStore: badgeStore, shareText: shareText,
                                        shareCard: shareCard, cardInbox: cardInbox)
             }
         }

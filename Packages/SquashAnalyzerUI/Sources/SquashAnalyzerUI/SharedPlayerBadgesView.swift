@@ -13,6 +13,8 @@ import SquashAnalyzerCore
 public struct SharedPlayerBadgesView: View {
     let playerId: String
     let playerName: String
+    /// The player's photo for the header; nil shows the initial
+    let photo: Data?
     let badgeStore: any PlayerBadgeSummaryStore
     let shareText: (String) -> Void
     /// Shares the card as a picture plus the link (Android draws the picture); nil shares the link only
@@ -23,14 +25,12 @@ public struct SharedPlayerBadgesView: View {
     @State private var moments: [BadgeMoment] = []
     @State private var isLoading = true
     @State private var shareFailed = false
-    @State private var openBadge: BadgeKind? = nil
-    @State private var deleting: BadgeMoment? = nil
-    @State private var confirmDelete = false
 
-    public init(playerId: String, playerName: String, badgeStore: any PlayerBadgeSummaryStore,
+    public init(playerId: String, playerName: String, photo: Data? = nil, badgeStore: any PlayerBadgeSummaryStore,
                 shareText: @escaping (String) -> Void, shareCard: ((CardSnapshot, String) -> Void)? = nil, cardInbox: CardInbox) {
         self.playerId = playerId
         self.playerName = playerName
+        self.photo = photo
         self.badgeStore = badgeStore
         self.shareText = shareText
         self.cardPicture = shareCard
@@ -60,141 +60,130 @@ public struct SharedPlayerBadgesView: View {
                 ProgressView("Badges laden…").foregroundColor(BadgePalette.textPrimary)
             } else {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text(moments.isEmpty ? "Nog geen badges verdiend" : "\(moments.count) badges verdiend")
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
-                            .foregroundColor(BadgePalette.textPrimary)
-                        if moments.isEmpty {
-                            Text("Kies \(playerName) via \"Kies speler\" bij een coach- of scheidsrechterwedstrijd om badges te verdienen.")
-                                .font(.system(size: 13))
-                                .foregroundColor(BadgePalette.textSecondary)
+                    VStack(alignment: .leading, spacing: 24) {
+                        header
+                        section("BADGES · \(earnedKinds) VAN \(BadgeKind.allCases.count)") {
+                            // Rows of three, not a LazyVGrid: on Android that becomes a
+                            // scroll area of its own inside the page
+                            VStack(spacing: 18) {
+                                ForEach(0..<Self.rowCount, id: \.self) { row in
+                                    badgeRow(row)
+                                }
+                            }
                         }
-                        Text("BADGES · \(earnedKinds) VAN \(BadgeKind.allCases.count)")
-                            .font(.system(size: 11, weight: .semibold, design: .rounded))
-                            .tracking(1.2)
-                            .foregroundColor(BadgePalette.gold)
-                        ForEach(BadgeKind.allCases) { kind in
-                            badgeRow(kind)
+                        section("DELEN") {
+                            Button { Task { await shareCard() } } label: {
+                                HStack(spacing: 8) {
+                                    AppSymbol("square.and.arrow.up", size: 14, color: BadgePalette.backgroundDark)
+                                    Text("DEEL KAART")
+                                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                        .tracking(1)
+                                        .foregroundColor(BadgePalette.backgroundDark)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(BadgePalette.gold)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Deel kaart")
                         }
                     }
                     .padding(20)
                     .padding(.bottom, 40)
                 }
             }
-            if let badge = openBadge {
-                momentsOverlay(badge)
-            }
         }
         .navigationTitle(playerName)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button { Task { await shareCard() } } label: {
-                    Label("Deel kaart", systemImage: "square.and.arrow.up")
-                }
-                .accessibilityLabel("Deel kaart")
-                .disabled(isLoading)
-            }
-        }
         .alert("Delen lukt niet", isPresented: $shareFailed) {
             Button("OK", role: .cancel) { }
         } message: {
             Text("De kaart van \(playerName) kon niet worden gemaakt.")
         }
-        .alert("Verdienmoment verwijderen?", isPresented: $confirmDelete) {
-            Button("Annuleren", role: .cancel) { deleting = nil }
-            Button("Verwijder", role: .destructive) {
-                if let moment = deleting { remove(moment) }
-            }
-        } message: {
-            Text("Deze badge telt dan niet meer mee. De verwijdering gaat mee in de volgende kaart die je deelt.")
-        }
         .task(id: cardInbox.importCount) { await load() }
     }
 
-    private func badgeRow(_ kind: BadgeKind) -> some View {
-        let earned = count(kind)
-        return Button { if earned > 0 { openBadge = kind } } label: {
-            HStack(spacing: 14) {
-                BadgeMedallion(kind: kind, size: 52, showsTitle: false, isLocked: earned == 0)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(kind.title)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(earned > 0 ? BadgePalette.textPrimary : BadgePalette.textMuted)
-                    Text(kind.detail)
-                        .font(.system(size: 12))
-                        .foregroundColor(BadgePalette.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 4)
-                if earned > 0 {
-                    Text("×\(earned)")
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundColor(BadgePalette.gold)
-                }
-            }
-            .padding(10)
-            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(earned > 0 ? 0.06 : 0.02)))
+    private static var rowCount: Int { (BadgeKind.allCases.count + 2) / 3 }
+
+    private func badgeRow(_ row: Int) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            gridCell(row * 3)
+            gridCell(row * 3 + 1)
+            gridCell(row * 3 + 2)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("\(kind.title), \(earned > 0 ? "\(earned) keer verdiend" : "nog niet verdiend")")
     }
 
-    private func momentsOverlay(_ badge: BadgeKind) -> some View {
+    @ViewBuilder
+    private func gridCell(_ index: Int) -> some View {
+        if index < BadgeKind.allCases.count {
+            let kind = BadgeKind.allCases[index]
+            NavigationLink {
+                SharedBadgeMomentsView(kind: kind, moments: moments(of: kind)) { moment in remove(moment) }
+            } label: {
+                badgeTile(kind)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("\(kind.title), \(count(kind) > 0 ? "\(count(kind)) keer verdiend" : "nog niet verdiend")")
+        } else {
+            Color.clear.frame(maxWidth: .infinity, maxHeight: 1)
+        }
+    }
+
+    private func moments(of kind: BadgeKind) -> [BadgeMoment] {
         var list: [BadgeMoment] = []
-        for moment in moments where moment.badge == badge {
+        for moment in moments where moment.badge == kind {
             list.append(moment)
         }
-        return ZStack {
-            Color.black.opacity(0.6).ignoresSafeArea()
-            VStack(spacing: 12) {
-                BadgeMedallion(kind: badge, size: 72, showsTitle: false)
-                Text(badge.title)
+        return list
+    }
+
+    private var header: some View {
+        HStack(spacing: 14) {
+            PlayerAvatarPlaceholder(color: BadgePalette.gold, size: 52, photo: photo)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(playerName)
                     .font(.system(size: 18, weight: .bold, design: .rounded))
                     .foregroundColor(BadgePalette.textPrimary)
-                ForEach(list) { moment in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(moment.opponentName.isEmpty ? "Verdiend" : "Tegen \(moment.opponentName)")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(BadgePalette.textPrimary)
-                            Text(Self.dateText(moment.earnedAt))
-                                .font(.system(size: 12))
-                                .foregroundColor(BadgePalette.textSecondary)
-                        }
-                        Spacer()
-                        Button("Verwijder") {
-                            deleting = moment
-                            confirmDelete = true
-                        }
-                        .foregroundColor(Color(red: 0.90, green: 0.40, blue: 0.35))
-                    }
-                    .padding(10)
-                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.05)))
-                }
-                Button("Sluiten") { openBadge = nil }
+                Text(moments.count == 1 ? "1 badge verdiend" : "\(moments.count) badges verdiend")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundColor(BadgePalette.textSecondary)
-                    .padding(.top, 4)
             }
-            .padding(20)
-            .background(RoundedRectangle(cornerRadius: 20).fill(BadgePalette.backgroundDark))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(BadgePalette.gold.opacity(0.4), lineWidth: 1))
-            .padding(24)
         }
     }
 
-    private static func dateText(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "d MMM yyyy"
-        formatter.locale = Locale(identifier: "nl_NL")
-        return formatter.string(from: date)
+    private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .tracking(1.5)
+                .foregroundColor(BadgePalette.textMuted)
+            content()
+        }
+    }
+
+    private func badgeTile(_ kind: BadgeKind) -> some View {
+        let earned = count(kind)
+        return VStack(spacing: 4) {
+            BadgeMedallion(kind: kind, size: 76, showsTitle: true, isLocked: earned == 0)
+            if earned > 0 {
+                Text("\(earned)×")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundColor(BadgePalette.gold)
+            } else {
+                Text(kind.detail)
+                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                    .foregroundColor(BadgePalette.textMuted)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .top)
     }
 
     private func remove(_ moment: BadgeMoment) {
-        deleting = nil
         Task {
             try? await badgeStore.deleteMoment(moment.id)
             await load()
-            if let badge = openBadge, count(badge) == 0 { openBadge = nil }
         }
     }
 
@@ -216,5 +205,75 @@ public struct SharedPlayerBadgesView: View {
         isLoading = moments.isEmpty
         moments = (try? await badgeStore.moments(forPlayer: playerId)) ?? []
         isLoading = false
+    }
+}
+
+/// Every match in which the player earned this badge, as iOS' BadgeMomentsView:
+/// the badge with what it means, then "N× verdiend" with opponent and date.
+/// Deleting only marks the award, so recomputing the match does not bring it back.
+struct SharedBadgeMomentsView: View {
+    let kind: BadgeKind
+    @State var moments: [BadgeMoment]
+    let onDelete: (BadgeMoment) -> Void
+
+    var body: some View {
+        ZStack {
+            BadgePalette.backgroundDark.ignoresSafeArea()
+            List {
+                Section {
+                    HStack(spacing: 14) {
+                        BadgeMedallion(kind: kind, size: 72, showsTitle: false, isLocked: moments.isEmpty)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(kind.title)
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .foregroundColor(BadgePalette.textPrimary)
+                            Text(kind.detail)
+                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .foregroundColor(BadgePalette.textSecondary)
+                            if kind.coachOnly {
+                                Text("Alleen in coachmodus, waar de slagen worden bijgehouden")
+                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .foregroundColor(BadgePalette.textMuted)
+                            } else if kind.isCareer {
+                                Text("Telt de wedstrijden op dit toestel")
+                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .foregroundColor(BadgePalette.textMuted)
+                            }
+                        }
+                    }
+                    .listRowBackground(Color.clear)
+                }
+                Section("\(moments.count)× verdiend") {
+                    ForEach(moments) { moment in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(moment.opponentName.isEmpty ? "Wedstrijd" : "Tegen \(moment.opponentName)")
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .foregroundColor(BadgePalette.textPrimary)
+                            Text(Self.dateText(moment.earnedAt))
+                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .foregroundColor(BadgePalette.textMuted)
+                        }
+                        // Opaque: Android draws the red swipe-to-delete layer underneath
+                        .listRowBackground(Color(red: 0.11, green: 0.10, blue: 0.09))
+                    }
+                    .onDelete { offsets in
+                        for index in offsets {
+                            onDelete(moments[index])
+                        }
+                        moments.remove(atOffsets: offsets)
+                    }
+                }
+            }
+            .scrollContentBackground(.hidden)
+        }
+        .navigationTitle(kind.title)
+    }
+
+    /// "1 okt 2026 16:20", like iOS' medium date with short time
+    private static func dateText(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d MMM yyyy HH:mm"
+        formatter.locale = Locale(identifier: "nl_NL")
+        return formatter.string(from: date)
     }
 }

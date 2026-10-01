@@ -70,7 +70,8 @@ class PlayerBadgesScreenTest {
             awaitText(playerName)
             compose.onNodeWithContentDescription("1 badges van $playerName").performClick()
             awaitText("5 points in a row")
-            compose.onNodeWithContentDescription("Deel kaart").performClick()
+            // "Deel kaart" sits under the badge grid, as on iOS: swipe down to it
+            compose.onNodeWithContentDescription("Deel kaart").performScrollTo().performClick()
             compose.waitUntil(10_000) { Intents.getIntents().isNotEmpty() }
             intended(allOf(hasAction(Intent.ACTION_CHOOSER), hasExtra(org.hamcrest.Matchers.equalTo(Intent.EXTRA_INTENT),
                 allOf(hasAction(Intent.ACTION_SEND), hasExtra(Intent.EXTRA_TEXT, startsWith("Badgekaart van $playerName: https://squashanalyzer.com/kaart/#"))))))

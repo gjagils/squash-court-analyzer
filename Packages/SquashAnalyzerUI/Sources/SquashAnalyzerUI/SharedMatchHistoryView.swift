@@ -82,8 +82,17 @@ public struct SharedMatchHistoryView: View {
                                 .foregroundColor(HistoryPalette.muted)
                                 .padding(.top, 24)
                         }
-                        ForEach(shown) { entry in
-                            row(for: entry)
+                        if !coachEntries.isEmpty {
+                            sectionHeader("COACH", icon: "chart.bar.xaxis")
+                            ForEach(coachEntries) { entry in
+                                coachCard(entry)
+                            }
+                        }
+                        if !refereeEntries.isEmpty {
+                            sectionHeader("SCHEIDSRECHTER", icon: "hand.raised.fill")
+                            ForEach(refereeEntries) { entry in
+                                refereeCard(entry)
+                            }
                         }
                     }
                     .padding(16)
@@ -95,7 +104,7 @@ public struct SharedMatchHistoryView: View {
                                          onCancel: { completing = nil })
             }
         }
-        .navigationTitle("Afgeronde wedstrijden")
+        .navigationTitle("Wedstrijden")
         .task { await load() }
         .sheet(isPresented: $choosingPlayer) {
             NavigationStack {
@@ -125,7 +134,7 @@ public struct SharedMatchHistoryView: View {
                 if let entry = deleting { remove(entry) }
             }
         } message: {
-            Text("De wedstrijd verdwijnt uit de lijst. Verdiende badges worden als verwijderd gemarkeerd.")
+            Text("Deze actie kan niet ongedaan worden gemaakt.")
         }
     }
 
@@ -170,76 +179,227 @@ public struct SharedMatchHistoryView: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: Rows
+    // MARK: Rows (as iOS' MatchHistoryCard and RefereeMatchCard)
 
-    private func row(for entry: MatchHistorySummary) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Button { if entry.kind == "coach" { open(entry, analysis: true) } } label: {
-                HStack(spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 6) {
-                            Text(entry.kind == "coach" ? "COACH" : "SCHEIDSRECHTER")
-                                .font(.system(size: 10, weight: .bold, design: .rounded))
-                                .tracking(1)
-                                .foregroundColor(HistoryPalette.gold)
-                            if entry.status == "abandoned" {
-                                Text("INCOMPLEET")
-                                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                                    .tracking(1)
-                                    .foregroundColor(HistoryPalette.red)
+    private var coachEntries: [MatchHistorySummary] {
+        var result: [MatchHistorySummary] = []
+        for entry in shown where entry.kind == "coach" { result.append(entry) }
+        return result
+    }
+
+    private var refereeEntries: [MatchHistorySummary] {
+        var result: [MatchHistorySummary] = []
+        for entry in shown where entry.kind != "coach" { result.append(entry) }
+        return result
+    }
+
+    private func sectionHeader(_ title: String, icon: String) -> some View {
+        HStack(spacing: 6) {
+            AppSymbol(icon, size: 11, color: HistoryPalette.gold)
+            Text(title)
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .tracking(2)
+                .foregroundColor(HistoryPalette.gold)
+            Spacer()
+        }
+        .padding(.vertical, 8)
+    }
+
+    private var incompleteLabel: some View {
+        Text("INCOMPLEET")
+            .font(.system(size: 9, weight: .semibold, design: .rounded))
+            .tracking(1)
+            .foregroundColor(HistoryPalette.red)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .overlay(Capsule().stroke(HistoryPalette.red.opacity(0.6), lineWidth: 1))
+    }
+
+    private var medal: some View {
+        AppSymbol("medal.fill", size: 11, color: HistoryPalette.gold)
+            .accessibilityLabel("Badge verdiend")
+    }
+
+    private func gameChips(_ entry: MatchHistorySummary) -> [String] {
+        var chips: [String] = []
+        for _ in 0..<entry.untrackedBefore { chips.append("–") }
+        for game in entry.games { chips.append("\(game.player1Score)-\(game.player2Score)") }
+        for _ in 0..<entry.untrackedAfter { chips.append("–") }
+        return chips
+    }
+
+    private func deleteButton(_ entry: MatchHistorySummary) -> some View {
+        Button {
+            deleting = entry
+            confirmDelete = true
+        } label: {
+            AppSymbol("trash", size: 13, color: HistoryPalette.muted)
+                .frame(width: 32, height: 28)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Verwijder \(entry.player1Name) – \(entry.player2Name)")
+    }
+
+    private func shareButton(_ entry: MatchHistorySummary) -> some View {
+        Button { share(entry) } label: {
+            HStack(spacing: 4) {
+                AppSymbol("square.and.arrow.up", size: 12, color: HistoryPalette.blue)
+                Text("Delen")
+                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                    .foregroundColor(HistoryPalette.blue)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func coachCard(_ entry: MatchHistorySummary) -> some View {
+        let winner = entry.winner
+        let chips = gameChips(entry)
+        return VStack(spacing: 12) {
+            Button { open(entry, analysis: true) } label: {
+                VStack(spacing: 12) {
+                    HStack(spacing: 6) {
+                        Text(Self.dateText(for: entry.updatedAt))
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(HistoryPalette.muted)
+                        if entry.status == "abandoned" { incompleteLabel }
+                        if entry.hasBadges { medal }
+                        Spacer()
+                        if let name = entry.winnerName {
+                            HStack(spacing: 4) {
+                                AppSymbol("crown.fill", size: 10, color: HistoryPalette.gold)
+                                Text(name)
+                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .foregroundColor(HistoryPalette.gold)
                             }
                         }
-                        Text("\(entry.player1Name) – \(entry.player2Name)")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundColor(HistoryPalette.text)
-                        Text(Self.dateText(for: entry.updatedAt))
-                            .font(.system(size: 12))
-                            .foregroundColor(HistoryPalette.muted)
                     }
-                    Spacer()
-                    Text("\(entry.player1Games) – \(entry.player2Games)")
-                        .font(.system(size: 22, weight: .bold, design: .monospaced))
-                        .foregroundColor(HistoryPalette.text)
+                    HStack(spacing: 16) {
+                        scoreSide(entry.player1Name, entry.player1Games, won: winner == Player.player1, color: HistoryPalette.orange)
+                        VStack(spacing: 4) {
+                            Text("vs").font(.system(size: 12, weight: .medium, design: .rounded)).foregroundColor(HistoryPalette.dim)
+                            Text("-").font(.system(size: 32, weight: .bold, design: .rounded)).foregroundColor(HistoryPalette.dim)
+                        }
+                        scoreSide(entry.player2Name, entry.player2Games, won: winner == Player.player2, color: HistoryPalette.blue)
+                    }
+                    if !chips.isEmpty {
+                        HStack(spacing: 8) {
+                            ForEach(0..<chips.count, id: \.self) { index in
+                                Text(chips[index])
+                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .foregroundColor(chips[index] == "–" ? HistoryPalette.dim.opacity(0.6) : HistoryPalette.dim)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.white.opacity(chips[index] == "–" ? 0.03 : 0.05))
+                                    .clipShape(Capsule())
+                            }
+                        }
+                    }
                 }
             }
             .buttonStyle(.plain)
 
-            if entry.kind == "coach" && entry.status == "abandoned" {
+            if entry.status == "abandoned" {
                 Button { open(entry, analysis: false) } label: {
-                    Text("Uitslag aanvullen")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundColor(HistoryPalette.gold)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(RoundedRectangle(cornerRadius: 10).stroke(HistoryPalette.gold.opacity(0.5), lineWidth: 1))
+                    HStack(spacing: 4) {
+                        AppSymbol("flag.checkered", size: 12, color: HistoryPalette.gold)
+                        Text("Uitslag aanvullen")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(HistoryPalette.gold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(HistoryPalette.gold.opacity(0.4), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
             }
 
-            HStack(spacing: 18) {
-                if entry.kind == "coach" {
-                    Button("Bekijk analyse") { open(entry, analysis: true) }
-                        .foregroundColor(HistoryPalette.gold)
-                }
-                Spacer()
-                if shareText != nil {
-                    Button("Delen") { share(entry) }
-                        .foregroundColor(HistoryPalette.blue)
-                }
-                Button {
-                    deleting = entry
-                    confirmDelete = true
-                } label: {
-                    AppSymbol("trash", size: 16, color: HistoryPalette.muted)
-                        .frame(width: 32, height: 28)
+            HStack {
+                Button { open(entry, analysis: true) } label: {
+                    HStack(spacing: 4) {
+                        AppSymbol("chart.bar.xaxis", size: 12, color: HistoryPalette.gold)
+                        Text("Bekijk analyse")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(HistoryPalette.gold)
+                    }
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Verwijder \(entry.player1Name) – \(entry.player2Name)")
+                Spacer()
+                if shareText != nil { shareButton(entry) }
+                deleteButton(entry)
+                    .padding(.leading, 8)
             }
-            .font(.system(size: 13, weight: .medium, design: .rounded))
+        }
+        .padding(16)
+        .background(HistoryPalette.card)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
+    }
+
+    private func scoreSide(_ name: String, _ games: Int, won: Bool, color: Color) -> some View {
+        VStack(spacing: 4) {
+            Text(name)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundColor(won ? color : HistoryPalette.text)
+                .lineLimit(1)
+            Text("\(games)")
+                .font(.system(size: 32, weight: .bold, design: .rounded))
+                .foregroundColor(won ? color : HistoryPalette.muted)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func refereeCard(_ entry: MatchHistorySummary) -> some View {
+        HStack(spacing: 14) {
+            AppSymbol("hand.raised.fill", size: 18, color: HistoryPalette.gold.opacity(0.8))
+                .frame(width: 36, height: 36)
+                .background(HistoryPalette.gold.opacity(0.12))
+                .clipShape(Circle())
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(entry.player1Name)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(HistoryPalette.orange)
+                        .lineLimit(1)
+                    Text("vs")
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundColor(HistoryPalette.dim)
+                    Text(entry.player2Name)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(HistoryPalette.blue)
+                        .lineLimit(1)
+                    Spacer()
+                    if entry.hasBadges { medal }
+                    Text("\(entry.player1Games)-\(entry.player2Games)")
+                        .font(.system(size: 16, weight: .bold, design: .monospaced))
+                        .foregroundColor(HistoryPalette.text)
+                }
+                HStack(spacing: 8) {
+                    Text(entry.gameScoresText)
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundColor(HistoryPalette.dim)
+                    if let name = entry.winnerName {
+                        Text("· \(name) wint")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(HistoryPalette.gold.opacity(0.8))
+                    } else {
+                        incompleteLabel
+                    }
+                }
+                HStack {
+                    Text(Self.dateText(for: entry.updatedAt))
+                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                        .foregroundColor(HistoryPalette.dim.opacity(0.7))
+                    Spacer()
+                    if shareText != nil { shareButton(entry) }
+                    deleteButton(entry)
+                }
+            }
         }
         .padding(14)
-        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.05)))
+        .background(Color.white.opacity(0.05))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(HistoryPalette.gold.opacity(0.15), lineWidth: 1))
     }
 
     // MARK: Actions
@@ -318,7 +478,10 @@ private enum HistoryPalette {
     static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
     static let muted = Color(red: 0.70, green: 0.68, blue: 0.65)
     static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
-    static let blue = Color(red: 0.45, green: 0.60, blue: 0.75)
-    static let red = Color(red: 0.90, green: 0.40, blue: 0.35)
+    static let blue = Color(red: 0.35, green: 0.45, blue: 0.55)
+    static let red = Color(red: 0.85, green: 0.30, blue: 0.30)
+    static let orange = Color(red: 0.95, green: 0.55, blue: 0.15)
+    static let dim = Color(red: 0.50, green: 0.48, blue: 0.45)
+    static let card = Color(red: 0.12, green: 0.10, blue: 0.08)
     static let background = Color(red: 0.06, green: 0.05, blue: 0.04)
 }

@@ -24,7 +24,7 @@
   <!-- ── Privacy content ──────────────────────────────────── -->
   <article class="prose">
     <h1>Privacybeleid</h1>
-    <p class="meta">Laatst bijgewerkt: september 2026</p>
+    <p class="meta">Laatst bijgewerkt: oktober 2026</p>
 
     <h2>1. Wie zijn wij?</h2>
     <p>
@@ -41,6 +41,7 @@
       <li><strong>Wedstrijddata</strong>: Scores, punt-types, zones en slagkeuzes die de gebruiker registreert. Opgeslagen lokaal op het apparaat en, op iPhone, optioneel via iCloud Drive backup.</li>
       <li><strong>AI coaching verzoeken</strong>: Geanonimiseerde wedstrijdstatistieken en gekozen algemene coaching-aandachtspunten worden naar de OpenAI API gestuurd om coachingadvies te genereren. Spelersnamen en vrije coachingnotities worden niet meegestuurd.</li>
       <li><strong>Mijn team</strong>: Als je in de instellingen een teamlink van sbn.toernooi.nl invult, haalt de app de openbare teampagina en stand op bij sbn.toernooi.nl. Daarbij gaat alleen het verzoek om die openbare pagina naar sbn.toernooi.nl; er worden geen spelers, wedstrijden of andere gegevens uit de app meegestuurd. De opgehaalde stand wordt alleen lokaal op het apparaat bewaard.</li>
+      <li><strong>Teams via een link</strong>: Een team (namen, foto's en eventueel aandachtspunten) kan op squashanalyzer.com/teams staan, zodat een coach het met één link in de app zet. Zie hieronder bij "Teams op squashanalyzer.com".</li>
     </ul>
 
     <h2>3. Wat verwerken wij <em>niet</em>?</h2>
@@ -66,6 +67,22 @@
       De kaart zit in de link zelf (na het #-teken); browsers sturen dat deel niet naar onze server, en de pagina bewaart of verstuurt niets. Wie de link opent in de app (iPhone of Android), kan de kaart overnemen bij een eigen speler; dat gebeurt alleen op dat apparaat. Er is geen automatische synchronisatie tussen apparaten.
     </p>
 
+    <p>
+      Op Android maak je back-ups naar een map die je zelf kiest. Ook daar hebben wij geen toegang toe.
+    </p>
+
+    <h3>Teams op squashanalyzer.com</h3>
+    <p>
+      Een coach of teamcaptain kan de beheerder van Squash Analyzer (Gerd-Jan van Gils) vragen een team op squashanalyzer.com te zetten. Teamgenoten zetten dat team dan met één link als spelers in hun eigen app. Er is geen uploadformulier: alleen de beheerder zet teams online, en alleen als de spelers in het team daarvoor <strong>toestemming</strong> hebben gegeven. De captain die het team aanlevert, vraagt die toestemming.
+    </p>
+    <ul>
+      <li><strong>Wat staat er</strong>: per speler de naam, een foto en eventueel algemene aandachtspunten (zoals "Backhand"). Geen coachingnotities, wedstrijden, scores of badges.</li>
+      <li><strong>Wie kan het zien</strong>: iedereen die de link heeft. De link bevat een lange willekeurige code, staat nergens op de website en wordt niet door zoekmachines opgenomen. Deel de link daarom alleen binnen je eigen team.</li>
+      <li><strong>Waar</strong>: op een eigen server van Squash Analyzer. Het verkeer naar squashanalyzer.com loopt via Cloudflare.</li>
+      <li><strong>In de app</strong>: de app haalt het teambestand op bij squashanalyzer.com en zet de spelers alleen op het eigen apparaat. Daarbij wordt niets uit de app meegestuurd. Zoals bij elke website zien onze server en Cloudflare het IP-adres van het verzoek; wij gebruiken dat niet.</li>
+      <li><strong>Hoe lang</strong>: zolang het team de link gebruikt. Op verzoek van de captain of van een speler zelf halen we het team of die ene speler weg. Spelers die al in iemands app staan, blijven op dat apparaat tot die gebruiker ze verwijdert.</li>
+    </ul>
+
     <h2>5. OpenAI (AI coaching)</h2>
     <p>
       De AI-coachingfunctie stuurt geanonimiseerde wedstrijdstatistieken (percentages, aantallen per zone/slagtype) en eventueel gekozen algemene aandachtspunten naar de OpenAI API. Er worden <strong>geen spelersnamen, vrije coachingnotities of direct identificeerbare gegevens</strong> verstuurd. OpenAI verwerkt deze verzoeken conform hun eigen <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">privacybeleid</a>.
@@ -74,16 +91,19 @@
 
     <h2>6. Gegevensopslag</h2>
     <p>
-      Alle wedstrijddata wordt lokaal op het apparaat opgeslagen (op iPhone met Apple's SwiftData, op Android in een lokale database). Er is geen server, database of cloud-dienst van Squash Analyzer zelf betrokken bij de opslag van gebruikersdata.
+      Alle wedstrijddata wordt lokaal op het apparaat opgeslagen (op iPhone met Apple's SwiftData, op Android in een lokale database). Er is geen server, database of cloud-dienst van Squash Analyzer zelf betrokken bij de opslag van gebruikersdata. De enige uitzondering zijn teams die de beheerder op verzoek op squashanalyzer.com zet (zie "Teams op squashanalyzer.com").
     </p>
 
     <h2>7. Rechten van gebruikers</h2>
-    <p>Omdat wij geen persoonsgegevens opslaan op externe servers, is er geen apart inzageverzoek nodig. Je kunt je gegevens op elk moment verwijderen door:</p>
+    <p>Je wedstrijden en spelers staan alleen op je eigen apparaat. Je kunt die gegevens op elk moment verwijderen door:</p>
     <ul>
       <li>De wedstrijden handmatig te verwijderen via "Wedstrijdgeschiedenis" in de app</li>
       <li>De app te verwijderen van je iPhone, iPad of Android-toestel (verwijdert alle lokale data)</li>
-      <li>Handmatig de back-upbestanden te verwijderen uit iCloud Drive (Bestanden-app → iCloud Drive → Squash Analyzer)</li>
+      <li>Handmatig de back-upbestanden te verwijderen uit iCloud Drive (Bestanden-app → iCloud Drive → Squash Analyzer) of, op Android, uit de map die je voor back-ups hebt gekozen</li>
     </ul>
+    <p>
+      Sta je met naam of foto in een team op squashanalyzer.com? Dan kun je vragen welke gegevens er van je staan, ze laten aanpassen of ze laten verwijderen. Stuur een e-mail naar <a href="mailto:info@squashanalyzer.com">info@squashanalyzer.com</a>; we handelen het zo snel mogelijk af, in elk geval binnen een maand.
+    </p>
 
     <h2>8. Wijzigingen</h2>
     <p>

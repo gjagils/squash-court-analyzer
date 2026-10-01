@@ -152,3 +152,6 @@ build/
 screenshots/
 Packages/*/.build/
 /.build/
+
+# Team zips with names and photos: published to the website by hand, never in git
+website/teams/

@@ -30,3 +30,20 @@ team/
 - Foto's gaan mee in de gewone backup/restore.
 
 Zippen op de Mac: rechtsklik op de map → *Comprimeer*. Op de iPhone: in Bestanden lang drukken op de map → *Comprimeer*.
+
+## Importeren via een link
+
+Een team kan ook met een link in de app komen, op iPhone (**Spelers → importeer-icoon → Via link**) en Android (**Spelers → Team**). De app accepteert alleen links van de vorm `https://squashanalyzer.com/teams/<code>/<naam>.zip` (ook `www.`). Het bestand achter de link is precies dezelfde zip als hierboven. Controle en samenvoegen zijn gedeeld (`TeamImport` in SquashAnalyzerCore): iOS gebruikt `TeamImportService`, Android `RoomTeamImporter`.
+
+## Een team op squashanalyzer.com zetten (alleen de beheerder)
+
+Er is geen uploadformulier. Gerd-Jan zet teams online, op verzoek van een captain of coach. Zie ook de privacyverklaring ("Teams op squashanalyzer.com").
+
+1. **Toestemming**: de captain bevestigt dat alle spelers in het team akkoord zijn met naam en foto op de site.
+2. **Inhoud nakijken**: alleen `name`, `photo` en eventueel `focus`. **Haal `notes` weg** (coachingnotities horen niet online). Controleer dat de zip in de app importeert.
+3. **Code maken**: een lange willekeurige mapnaam, bijvoorbeeld `openssl rand -hex 12`. Zet de zip in `website/teams/<code>/team.zip`. Die map staat in `.gitignore`: teambestanden met namen en foto's gaan **nooit** in git (de repo is openbaar).
+4. **Online zetten**: upload `teams/<code>/team.zip` via Portainer, zoals de rest van de website. `robots.txt` houdt `/teams/` uit zoekmachines; nginx toont geen maplijst.
+5. **Link delen** met de captain: `https://squashanalyzer.com/teams/<code>/team.zip`.
+6. **Verwijderen of bijwerken** op verzoek: vervang of verwijder het bestand op de server, binnen een maand. Een speler weghalen = nieuwe zip zonder die speler.
+
+Houd lokaal (buiten git) een lijstje bij welke code bij welk team en welke captain hoort, zodat een verwijderverzoek snel af te handelen is.

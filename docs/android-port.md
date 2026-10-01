@@ -2094,7 +2094,7 @@ branch tot een presenteerbare mijlpaal; samenvoegen is een afzonderlijke stap.
 - (Instellingen op Android is compleet: Mijn team, AI Coach en back-ups. De
   invoermodus is er niet meer, ook niet op iOS — zie de beslissing van
   2026-10-01.)
-- Foto's, badgecatalogus en teamimport in het Android-spelersscherm.
+- Foto's in het Android-spelersscherm (bewerken en tonen). Teamimport werkt sinds 2026-10-01 via een link (Spelers → Team, `RoomTeamImporter`); importeren uit een zip-bestand op het toestel kan op Android nog niet.
 - **Backlog: badge-artwork op Android.** iOS heeft per badge een PNG in
   `SquashAnalyzer/Assets.xcassets/badge-*.imageset` (31 stuks, ±6 MB);
   Android toont nu een eenvoudige medaille (`BadgeCatalog.swift`). Kan:

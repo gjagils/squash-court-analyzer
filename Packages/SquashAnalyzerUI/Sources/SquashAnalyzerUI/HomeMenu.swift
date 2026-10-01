@@ -273,7 +273,9 @@ public struct AndroidHomeView: View {
                                         photoStore: photoStore, filePicker: filePicker, shareCard: shareCard)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
-                    CoachSessionView(store: matchStore, playerStore: playerStore, photoStore: photoStore, aiCoach: aiCoach, shareText: shareText, onExit: { showingCoach = false })
+                    CoachSessionView(store: matchStore, playerStore: playerStore, photoStore: photoStore, aiCoach: aiCoach, shareText: shareText,
+                                     historyStore: historyStore, settings: SettingsContext(aiCoach: aiCoach, backup: backup),
+                                     onExit: { showingCoach = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingReferee) {

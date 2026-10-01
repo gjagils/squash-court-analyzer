@@ -73,4 +73,22 @@ class CoachPersistenceTest {
         closeSaved()
         assertEquals(seeded.id, runBlocking { store.loadInProgress()!!.id })
     }
+
+    /** History and settings open from the coach header, as on iOS, and close back to the match */
+    @Test fun headerOpensHistoryAndSettings() {
+        resume()
+        compose.onNodeWithContentDescription("Afgeronde wedstrijden").performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("Sluiten").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("Sluiten").performClick()
+        awaitText("Tik op de score van wie scoort")
+        compose.onNodeWithContentDescription("Instellingen").performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("Mijn team").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("Sluiten").performClick()
+        awaitText("Tik op de score van wie scoort")
+        closeSaved()
+    }
 }

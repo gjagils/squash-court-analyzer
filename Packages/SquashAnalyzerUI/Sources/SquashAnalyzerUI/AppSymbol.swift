@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SportsTennis
 import androidx.compose.material.icons.filled.Star
@@ -87,6 +88,7 @@ struct AppSymbol: View {
         case "square.and.arrow.down": return Icons.Filled.Download
         case "trash": return Icons.Filled.Delete
         case "chart.bar.fill": return Icons.Filled.BarChart
+        case "gearshape": return Icons.Filled.Settings
         case "square.and.arrow.up": return Icons.Filled.Share
         case "chevron.left": return Icons.AutoMirrored.Filled.KeyboardArrowLeft
         case "chevron.right": return Icons.AutoMirrored.Filled.KeyboardArrowRight

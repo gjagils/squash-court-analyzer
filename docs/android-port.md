@@ -2120,14 +2120,18 @@ Bijgewerkt 1 oktober 2026 (tweede ronde):
 - Android "Deel kaart" deelt nu ook een afbeelding (`CardImage.kt`, getekend op
   een Canvas met het badge-artwork uit de assets, via een FileProvider).
 - Spelersfoto's staan op het scorebord (coach en scheidsrechter).
-- Coach op Android heeft de analyse van de vorige game in de kop (vanaf game 2).
-  Een geschiedenis- of instellingenknop in de coachkop is er niet; op Android
-  ga je daarvoor terug naar het beginscherm.
+- Coach op Android heeft de analyse van de vorige game in de kop (vanaf game 2),
+  en net als iOS knoppen voor Afgeronde wedstrijden en Instellingen (sheets
+  vanuit `CoachSessionView`, met `SettingsContext`).
 - iOS-scheidsrechter bewaart een onafgemaakte wedstrijd nu ook
   (`RefereeInProgressStore`, een JSON-bestand met Core's
-  `RefereeMatchSnapshot`) en vraagt bij de tegel "Wedstrijd hervatten?". Verschil:
-  op iOS verdwijnt de oude bij "Nieuwe wedstrijd", op Android komt hij als
-  afgebroken in de lijst.
+  `RefereeMatchSnapshot`) en vraagt bij de tegel "Wedstrijd hervatten?". Bij
+  "Nieuwe wedstrijd" komt de oude op beide als incompleet in Afgeronde
+  wedstrijden (iOS: `RefereeInProgressStore.keepAsAbandoned`, alleen de
+  uitgespeelde games, met badges; een wedstrijd zonder rally wordt niet bewaard).
+- De Android-test `SettingsScreenTest` was wisselvallig (ongeveer 1 op 5): het
+  toetsenbord verschuift de knop terwijl de klik onderweg is. De test klikt nu
+  opnieuw tot de melding er staat (8 van 8 groen).
 - Undo na hervatten (scheidsrechter) werkt op beide: de wedstrijd bewaart wie
   de eerste rally van de game serveerde (`openingServer`/`openingSide`, Room
   versie 8 met `MIGRATION_7_8`, en in `RefereeMatchSnapshot` voor iOS), en

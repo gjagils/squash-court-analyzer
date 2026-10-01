@@ -15,6 +15,12 @@ public struct CoachSessionView: View {
     let aiCoach: AICoachContext?
     /// The platform share sheet, for "Deel score" and the game summary
     let shareText: ((String) -> Void)?
+    /// Afgeronde wedstrijden from the coach header; nil hides the button
+    let historyStore: (any MatchHistoryStore)?
+    /// Instellingen from the coach header (nil hides the button)
+    let settings: SettingsContext?
+    @State private var showingHistory = false
+    @State private var showingSettings = false
     @Environment(\.dismiss) private var dismiss
     @State private var match: Match? = nil
     @State private var pending: Match? = nil
@@ -27,8 +33,11 @@ public struct CoachSessionView: View {
     @State private var saveAgain = false
 
     public init(store: any CoachMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, aiCoach: AICoachContext? = nil,
-                shareText: ((String) -> Void)? = nil, onExit: @escaping @MainActor () -> Void) {
+                shareText: ((String) -> Void)? = nil, historyStore: (any MatchHistoryStore)? = nil, settings: SettingsContext? = nil,
+                onExit: @escaping @MainActor () -> Void) {
         self.store = store
+        self.historyStore = historyStore
+        self.settings = settings
         self.shareText = shareText
         self.aiCoach = aiCoach
         self.playerStore = playerStore
@@ -43,6 +52,8 @@ public struct CoachSessionView: View {
                 CoachScoringView(match: match, aiCoach: aiCoach, shareText: shareText, photos: photos, onMatchChanged: { changed in
                     persist(changed, exit: false)
                 }, onAbandon: { finish(match, discard: false) }, onDiscard: { finish(match, discard: true) },
+                onHistory: historyStore == nil ? nil : { showingHistory = true },
+                onSettings: settings == nil ? nil : { showingSettings = true },
                 onExit: { persist(match, exit: true) })
                 .disabled(busy || failed)
             } else if let pending {
@@ -88,6 +99,30 @@ public struct CoachSessionView: View {
         .task {
             if let photoStore { photos = (try? await photoStore.photos()) ?? [:] }
             if match == nil && pending == nil && !showingSetup { await load() }
+        }
+        .sheet(isPresented: $showingHistory) {
+            if let historyStore {
+                NavigationStack {
+                    SharedMatchHistoryView(store: historyStore, aiCoach: aiCoach, shareText: shareText)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Sluiten") { showingHistory = false }
+                            }
+                        }
+                }
+            }
+        }
+        .sheet(isPresented: $showingSettings) {
+            if let settings {
+                NavigationStack {
+                    SharedSettingsView(aiCoach: settings.aiCoach, backup: settings.backup)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Sluiten") { showingSettings = false }
+                            }
+                        }
+                }
+            }
         }
         .alert("Nieuwe wedstrijd starten?", isPresented: $confirmingNew) {
             Button("Annuleren", role: .cancel) {}

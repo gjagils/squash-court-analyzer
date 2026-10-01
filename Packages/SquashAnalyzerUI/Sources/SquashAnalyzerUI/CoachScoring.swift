@@ -150,6 +150,9 @@ public struct CoachScoringView: View {
     let onAbandon: (() -> Void)?
     /// "Niet opslaan"
     let onDiscard: (() -> Void)?
+    /// Afgeronde wedstrijden and Instellingen from the header, as on iOS; nil hides the button
+    let onHistory: (() -> Void)?
+    let onSettings: (() -> Void)?
     @State private var showingStop = false
     @State private var showingLet = false
     @State private var showingComplete = false
@@ -167,8 +170,11 @@ public struct CoachScoringView: View {
     public init(match: Match, aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil,
                 photos: [String: Data] = [:],
                 onMatchChanged: @escaping (Match) -> Void, onAbandon: (() -> Void)? = nil, onDiscard: (() -> Void)? = nil,
+                onHistory: (() -> Void)? = nil, onSettings: (() -> Void)? = nil,
                 onExit: @escaping () -> Void) {
         _match = State(initialValue: match)
+        self.onHistory = onHistory
+        self.onSettings = onSettings
         self.photos = photos
         self.onAbandon = onAbandon
         self.onDiscard = onDiscard
@@ -270,10 +276,26 @@ public struct CoachScoringView: View {
                         showingAnalysis = true
                     } label: {
                         AppSymbol("chart.bar.fill", size: 20, color: CoachPalette.textSecondary)
-                            .frame(width: 44, height: 32)
+                            .frame(width: 36, height: 32)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Analyse vorige game")
+                }
+                if let onHistory {
+                    Button(action: onHistory) {
+                        AppSymbol("clock.arrow.circlepath", size: 20, color: CoachPalette.textSecondary)
+                            .frame(width: 36, height: 32)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Afgeronde wedstrijden")
+                }
+                if let onSettings {
+                    Button(action: onSettings) {
+                        AppSymbol("gearshape", size: 20, color: CoachPalette.textSecondary)
+                            .frame(width: 36, height: 32)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Instellingen")
                 }
             }
         }

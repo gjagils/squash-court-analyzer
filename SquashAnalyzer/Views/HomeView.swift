@@ -25,6 +25,7 @@ struct HomeView: View {
     @State private var createdRefereeMatch: RefereeMatch? = nil
     /// An unfinished referee match found when the Scheidsrechter tile is tapped
     @State private var resumableReferee: RefereeMatch? = nil
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         ZStack {
@@ -51,12 +52,12 @@ struct HomeView: View {
                presenting: resumableReferee) { unfinished in
             Button("Hervatten") { createdRefereeMatch = unfinished }
             Button("Nieuwe wedstrijd", role: .destructive) {
-                RefereeInProgressStore.clear()
+                RefereeInProgressStore.keepAsAbandoned(unfinished, in: modelContext)
                 withAnimation(.easeInOut(duration: 0.2)) { startMode = .referee }
             }
             Button("Annuleren", role: .cancel) {}
         } message: { unfinished in
-            Text("\(unfinished.player1Name) – \(unfinished.player2Name), game \(unfinished.currentGameNumber): \(unfinished.player1Score) – \(unfinished.player2Score). Bij een nieuwe wedstrijd wordt deze niet bewaard.")
+            Text("\(unfinished.player1Name) – \(unfinished.player2Name), game \(unfinished.currentGameNumber): \(unfinished.player1Score) – \(unfinished.player2Score). Bij een nieuwe wedstrijd komt deze als incompleet in Afgeronde wedstrijden.")
         }
         #if DEBUG
         .onAppear {

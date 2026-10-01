@@ -257,6 +257,17 @@ public struct BackupContext {
     }
 }
 
+/// What Instellingen needs, so a screen can open it from its header
+public struct SettingsContext {
+    public let aiCoach: AICoachContext?
+    public let backup: BackupContext?
+
+    public init(aiCoach: AICoachContext?, backup: BackupContext?) {
+        self.aiCoach = aiCoach
+        self.backup = backup
+    }
+}
+
 /// Android's settings: the Mijn team link, the AI Coach API key and backups.
 /// The coach input mode is not here because Android's coach screen has only
 /// the score-tap flow.

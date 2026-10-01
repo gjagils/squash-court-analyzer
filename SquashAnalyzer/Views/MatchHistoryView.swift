@@ -920,6 +920,14 @@ struct RefereeMatchCard: View {
                         Text("· \(winner) wint")
                             .font(AppFonts.caption(11))
                             .foregroundColor(AppColors.accentGold.opacity(0.8))
+                    } else {
+                        Text("INCOMPLEET")
+                            .font(AppFonts.label(9))
+                            .tracking(1)
+                            .foregroundColor(AppColors.warmRed)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Capsule().stroke(AppColors.warmRed.opacity(0.6), lineWidth: 1))
                     }
                 }
 

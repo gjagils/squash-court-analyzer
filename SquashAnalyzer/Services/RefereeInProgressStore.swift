@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 import SquashAnalyzerCore
 
 /// The referee match being played, kept as a file (Core's
@@ -21,6 +22,40 @@ enum RefereeInProgressStore {
         guard let data = try? Data(contentsOf: url),
               let snapshot = try? JSONDecoder().decode(RefereeMatchSnapshot.self, from: data) else { return nil }
         return RefereeMatch.restoring(snapshot)
+    }
+
+    /// "Nieuwe wedstrijd" while one is unfinished: it goes into Afgeronde
+    /// wedstrijden as incomplete (only its finished games), with its badges,
+    /// as Android keeps it as abandoned. Then the file is removed.
+    @MainActor static func keepAsAbandoned(_ match: RefereeMatch, in context: ModelContext) {
+        // Not a single rally played: nothing worth keeping
+        guard !match.pointHistory.isEmpty || !match.completedGames.isEmpty else {
+            clear()
+            return
+        }
+        let results = match.allGameResults.map {
+            RefereeGameResult(number: $0.number, player1Score: $0.p1, player2Score: $0.p2, winner: $0.winner)
+        }
+        let saved = SavedRefereeMatch(
+            player1Name: match.player1Name,
+            player2Name: match.player2Name,
+            bestOf: match.bestOf,
+            gameResults: results,
+            player1GamesBefore: match.player1GamesBefore,
+            player2GamesBefore: match.player2GamesBefore
+        )
+        saved.matchId = match.id
+        saved.player1Id = match.player1Id
+        saved.player2Id = match.player2Id
+        context.insert(saved)
+        try? BadgeAwarder(context: context).syncAwards(
+            matchId: match.id,
+            playerIds: match.playerIds,
+            playerNames: [.player1: match.player1Name, .player2: match.player2Name],
+            input: match.badgeInput
+        )
+        try? context.save()
+        clear()
     }
 
     static func clear() {

@@ -329,11 +329,6 @@ public struct AndroidHomeView: View {
                             onPlayers: { showingPlayers = true },
                             onBadges: { showingBadges = true }
                         )
-                        Text("Coach- en scheidsrechterwedstrijden worden automatisch opgeslagen en kunnen worden hervat.")
-                            .font(.system(size: 13, design: .rounded))
-                            .foregroundColor(HomePalette.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 32)
                     }
                     .padding(.top, 8)
                     .padding(.bottom, 32)

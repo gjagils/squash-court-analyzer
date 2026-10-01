@@ -340,16 +340,19 @@ public struct SharedSettingsView: View {
                             .font(.system(size: 12))
                             .foregroundColor(messageIsError ? Color(red: 0.95, green: 0.40, blue: 0.35) : Color(red: 0.45, green: 0.80, blue: 0.45))
                     }
-                    if aiCoach != nil {
-                        aiCoachSection
-                            .padding(.top, 20)
-                    }
+                    // Same order as iOS: back-up, then AI Coach and what it is
                     if backup != nil {
                         backupSection
                             .padding(.top, 20)
-                            // Clear of the system navigation bar
-                            .padding(.bottom, 40)
                     }
+                    if aiCoach != nil {
+                        aiCoachSection
+                            .padding(.top, 20)
+                        aboutAICoachSection
+                            .padding(.top, 20)
+                    }
+                    // Clear of the system navigation bar
+                    Color.clear.frame(height: 40)
                 }
                 .padding(24)
             }
@@ -400,7 +403,7 @@ public struct SharedSettingsView: View {
             Text("AI Coach")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(LeaguePalette.text)
-            Text("Voeg je OpenAI API key toe voor tactisch advies van de AI Coach in de game-analyse. Het basisadvies werkt ook zonder key.")
+            Text("Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach.")
                 .font(.system(size: 13))
                 .foregroundColor(LeaguePalette.secondary)
             HStack(spacing: 8) {
@@ -433,13 +436,34 @@ public struct SharedSettingsView: View {
                 Circle()
                     .fill(hasKey ? Color(red: 0.45, green: 0.80, blue: 0.45) : Color(red: 0.95, green: 0.40, blue: 0.35))
                     .frame(width: 8, height: 8)
-                Text(keyMessage ?? (hasKey ? "API key ingesteld" : "Geen API key ingesteld"))
+                Text(keyMessage ?? (hasKey ? "API key geconfigureerd" : "Geen API key ingesteld"))
                     .font(.system(size: 12))
                     .foregroundColor(LeaguePalette.muted)
             }
-            Text("De key wordt versleuteld op dit toestel bewaard (Android Keystore). Een analyse kost ongeveer € 0,01 (GPT-4o-mini) en werkt alleen met internet. Er gaan geen spelersnamen naar OpenAI.")
-                .font(.system(size: 11))
-                .foregroundColor(LeaguePalette.muted)
+        }
+    }
+
+    /// "Over AI Coach", as on iOS
+    private var aboutAICoachSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Over AI Coach")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(LeaguePalette.text)
+            infoRow("Veilig", "Je API key wordt versleuteld op dit toestel bewaard")
+            infoRow("Kosten", "~€0.01 per analyse (het goedkoopste beschikbare model)")
+            infoRow("Internet vereist", "AI advies werkt alleen met internetverbinding")
+            infoRow("Lokaal advies", "Basis advies werkt altijd, ook zonder API key")
+        }
+    }
+
+    private func infoRow(_ title: String, _ detail: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(LeaguePalette.text)
+            Text(detail)
+                .font(.system(size: 12))
+                .foregroundColor(LeaguePalette.secondary)
         }
     }
 

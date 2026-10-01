@@ -72,7 +72,7 @@ public struct CoachSessionView: View {
                 .disabled(busy || failed)
             }
             if busy || (saving && exitAfterSave) {
-                ProgressView("Even opslaan…")
+                ProgressView(match == nil && pending == nil && !showingSetup ? "Laden…" : "Even opslaan…")
                     .padding(24).background(CoachPalette.backgroundMedium)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
             }

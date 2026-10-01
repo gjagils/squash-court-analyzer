@@ -14,6 +14,8 @@ struct SettingsView: View {
     @State private var showingSaveConfirmation = false
     @AppStorage(CoachInputSettings.teamURLKey) private var teamURL = ""
     @State private var teamSaveMessage: String?
+    /// What is typed; only a valid link is saved, cleaned up (as on Android)
+    @State private var teamDraft = ""
     @AppStorage(AutomaticBackup.enabledKey) private var automaticBackup = true
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
 
@@ -48,6 +50,7 @@ struct SettingsView: View {
         }
         .onAppear {
             apiKey = APIKeyManager.shared.openAIAPIKey ?? ""
+            teamDraft = teamURL
         }
     }
 
@@ -56,15 +59,30 @@ struct SettingsView: View {
             HStack { Image(systemName: "person.3.fill").foregroundColor(AppColors.warmOrange); Text("Mijn team").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary) }
             Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
                 .font(AppFonts.body(13)).foregroundColor(AppColors.textSecondary)
-            TextField("https://sbn.toernooi.nl/league/.../team/...", text: $teamURL)
+            TextField("https://sbn.toernooi.nl/league/.../team/...", text: $teamDraft)
                 .font(AppFonts.body(13)).foregroundColor(AppColors.textPrimary)
                 .textInputAutocapitalization(.never).autocorrectionDisabled()
                 .padding().background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
-            HardwareButton(title: "Bewaar teamlink", subtitle: nil, color: AppColors.warmOrange, colorDark: AppColors.warmOrangeDark) {
-                do { _ = try LeagueTeamLink(teamURL); teamSaveMessage = "Teamlink opgeslagen" }
-                catch { teamSaveMessage = error.localizedDescription }
+            HStack(spacing: 12) {
+                HardwareButton(title: "Bewaar teamlink", subtitle: nil, color: AppColors.warmOrange, colorDark: AppColors.warmOrangeDark) {
+                    do {
+                        let link = try LeagueTeamLink(teamDraft)
+                        teamURL = link.url.absoluteString
+                        teamDraft = teamURL
+                        teamSaveMessage = "Teamlink opgeslagen"
+                    } catch {
+                        teamSaveMessage = (error as? LeagueTeamError)?.message ?? LeagueTeamError.invalidLink.message
+                    }
+                }
+                if !teamURL.isEmpty {
+                    HardwareButton(title: "Verwijder", color: AppColors.textSecondary, style: .outlined) {
+                        teamURL = ""
+                        teamDraft = ""
+                        teamSaveMessage = "Teamlink verwijderd"
+                    }
+                }
             }
-            if let teamSaveMessage { Text(teamSaveMessage).font(AppFonts.caption(12)).foregroundColor(teamSaveMessage.contains("opgeslagen") ? .green : AppColors.warmRed) }
+            if let teamSaveMessage { Text(teamSaveMessage).font(AppFonts.caption(12)).foregroundColor(teamSaveMessage.hasPrefix("Teamlink") ? .green : AppColors.warmRed) }
         }.padding().background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03))).overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
     }
 
@@ -284,7 +302,7 @@ struct SettingsView: View {
                 InfoRow(
                     icon: "dollarsign.circle",
                     title: "Kosten",
-                    description: "~€0.01 per analyse (GPT-4o-mini)"
+                    description: "~€0.01 per analyse (het goedkoopste beschikbare model)"
                 )
 
                 InfoRow(

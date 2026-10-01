@@ -21,6 +21,9 @@ struct PlayerManagementView: View {
     @State private var showingBadgeCatalog = false
     @State private var showingTeamImporter = false
     @State private var teamImportMessage: String? = nil
+    @State private var showingTeamLink = false
+    @State private var teamLink = ""
+    @State private var importingTeam = false
     @State private var showingTeamImportResult = false
 
     var isPickerMode: Bool { onSelectPlayer != nil }
@@ -64,11 +67,24 @@ struct PlayerManagementView: View {
                             }
                             .accessibilityLabel("Alle badges")
 
-                            Button(action: { showingTeamImporter = true }) {
-                                Image(systemName: "square.and.arrow.down")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(AppColors.accentGold)
+                            Menu {
+                                Button { showingTeamImporter = true } label: {
+                                    Label("Uit bestand (zip)", systemImage: "doc.zipper")
+                                }
+                                Button { teamLink = ""; showingTeamLink = true } label: {
+                                    Label("Via link", systemImage: "link")
+                                }
+                            } label: {
+                                if importingTeam {
+                                    ProgressView()
+                                        .tint(AppColors.accentGold)
+                                } else {
+                                    Image(systemName: "square.and.arrow.down")
+                                        .font(.system(size: 20))
+                                        .foregroundColor(AppColors.accentGold)
+                                }
                             }
+                            .disabled(importingTeam)
                             .accessibilityLabel("Importeer team")
 
                             Button(action: { showingAddPlayer = true }) {
@@ -154,6 +170,16 @@ struct PlayerManagementView: View {
             .fileImporter(isPresented: $showingTeamImporter, allowedContentTypes: [.zip]) { result in
                 importTeam(result)
             }
+            .alert("Team via link", isPresented: $showingTeamLink) {
+                TextField("https://squashanalyzer.com/teams/…", text: $teamLink)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .keyboardType(.URL)
+                Button("Annuleren", role: .cancel) { }
+                Button("Importeren") { importTeam(link: teamLink) }
+            } message: {
+                Text("Plak de teamlink die je hebt gekregen.")
+            }
             .alert("Team importeren", isPresented: $showingTeamImportResult) {
                 Button("OK", role: .cancel) { }
             } message: {
@@ -163,6 +189,20 @@ struct PlayerManagementView: View {
     }
 
     // MARK: - Team import (zip with team.json + photos, see TeamImportService)
+
+    private func importTeam(link: String) {
+        importingTeam = true
+        Task {
+            do {
+                let imported = try await TeamImportService.importTeam(link: link, context: modelContext)
+                teamImportMessage = "Geïmporteerd: \(imported.summary)"
+            } catch {
+                teamImportMessage = error.localizedDescription
+            }
+            importingTeam = false
+            showingTeamImportResult = true
+        }
+    }
 
     private func importTeam(_ result: Result<URL, Error>) {
         do {

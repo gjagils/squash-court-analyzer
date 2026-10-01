@@ -2,125 +2,84 @@ import Foundation
 import SquashAnalyzerCore
 import SwiftData
 
-// MARK: - Import format
-//
-// A zip file with `team.json` at the top level and photos referenced relative to it:
-//
-//   team.zip
-//   ├── team.json
-//   └── photos/niels.jpg
-//
-//   {
-//     "team": "Squash Club 1",
-//     "players": [
-//       { "name": "Niels", "photo": "photos/niels.jpg", "focus": ["Backhand"], "notes": "" },
-//       { "name": "Paul",  "photo": "photos/paul.jpg" }
-//     ]
-//   }
-//
-// Only `name` is required. Existing players are matched by name (case-insensitive)
-// and updated; photos are cropped square and scaled to 512px.
+// The format, the checks and the summary are shared with Android
+// (SquashAnalyzerCore's `TeamImport`); this file unzips, scales the photos
+// (`PlayerPhoto`) and writes SwiftData. Format: docs/team-import/README.md.
 
-struct TeamImportFile: Decodable {
-    let team: String?
-    let players: [TeamImportPlayer]
+extension TeamImportError: @retroactive LocalizedError {
+    public var errorDescription: String? { message }
 }
 
-struct TeamImportPlayer: Decodable {
-    let name: String
-    let photo: String?
-    let focus: [String]?
-    let notes: String?
-}
-
-struct TeamImportResult {
-    var team: String?
-    var added = 0
-    var updated = 0
-    var photos = 0
-
-    var summary: String {
-        var parts = ["\(added) nieuw", "\(updated) bijgewerkt", "\(photos) foto's"]
-        if let team, !team.isEmpty { parts.insert(team, at: 0) }
-        return parts.joined(separator: " · ")
-    }
-}
-
-enum TeamImportError: LocalizedError {
-    case missingTeamJSON
-    case invalidTeamJSON(String)
-    case emptyName(index: Int)
-    case unknownFocusTag(player: String, tag: String)
-    case photoNotFound(player: String, path: String)
-    case photoUnreadable(player: String, path: String)
-
-    var errorDescription: String? {
-        switch self {
-        case .missingTeamJSON:
-            return "Het zip-bestand bevat geen team.json."
-        case .invalidTeamJSON(let detail):
-            return "team.json kon niet worden gelezen: \(detail)"
-        case .emptyName(let index):
-            return "Speler \(index + 1) heeft geen naam."
-        case .unknownFocusTag(let player, let tag):
-            let allowed = CoachingFocusTag.allCases.map(\.rawValue).joined(separator: ", ")
-            return "Onbekend aandachtspunt '\(tag)' bij \(player). Toegestaan: \(allowed)."
-        case .photoNotFound(let player, let path):
-            return "Foto '\(path)' van \(player) zit niet in het zip-bestand."
-        case .photoUnreadable(let player, let path):
-            return "Foto '\(path)' van \(player) is geen bruikbare afbeelding."
-        }
+/// Downloads a team zip from squashanalyzer.com/teams (Android: HttpTeamDownloader)
+struct URLSessionTeamDownloader: TeamDownloader {
+    func download(_ url: URL) async throws -> Data {
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForResource = 120
+        let (data, response) = try await URLSession(configuration: config).data(from: url)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw TeamImportError.unavailable }
+        guard data.count <= TeamImport.maxBytes else { throw TeamImportError.tooLarge }
+        guard TeamImport.looksLikeZip(data) else { throw TeamImportError.notAZip }
+        return data
     }
 }
 
 enum TeamImportService {
+    /// Downloads the team behind a squashanalyzer.com/teams link and imports it
+    @MainActor
+    static func importTeam(link text: String, context: ModelContext,
+                           downloader: any TeamDownloader = URLSessionTeamDownloader()) async throws -> TeamImportResult {
+        guard let url = TeamImport.link(from: text) else { throw TeamImportError.invalidLink }
+        let data: Data
+        do {
+            data = try await downloader.download(url)
+        } catch let error as TeamImportError {
+            throw error
+        } catch {
+            throw TeamImportError.unavailable
+        }
+        return try importTeam(zipData: data, context: context)
+    }
+
     /// Validates the whole file before touching the database, then adds or updates players.
     @MainActor
     static func importTeam(zipData: Data, context: ModelContext) throws -> TeamImportResult {
         let archive = try ZipArchive(data: zipData)
-        let (file, baseDirectory) = try decodeTeamFile(from: archive)
+        guard let jsonPath = TeamImport.teamJSONPath(in: archive.fileEntries.map(\.path)),
+              let jsonEntry = archive.entry(named: jsonPath) else { throw TeamImportError.missingTeamJSON }
+        let file = try TeamImport.decode(try archive.contents(of: jsonEntry))
+        let baseDirectory = TeamImport.baseDirectory(ofTeamJSON: jsonPath)
 
-        // Resolve and validate everything first so a bad entry never leaves a half-imported team.
-        var prepared: [(player: TeamImportPlayer, name: String, focus: [String], photo: Data?)] = []
-        for (index, player) in file.players.enumerated() {
-            let name = player.name.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !name.isEmpty else { throw TeamImportError.emptyName(index: index) }
-
-            let focus = try (player.focus ?? []).map { raw -> String in
-                let trimmed = raw.trimmingCharacters(in: .whitespaces)
-                guard let tag = CoachingFocusTag.allCases.first(where: { $0.rawValue.caseInsensitiveCompare(trimmed) == .orderedSame }) else {
-                    throw TeamImportError.unknownFocusTag(player: name, tag: raw)
-                }
-                return tag.rawValue
-            }
-
+        // Check every player and photo first so a bad entry never leaves a half-imported team.
+        var prepared: [(entry: TeamImportEntry, photo: Data?)] = []
+        for entry in try TeamImport.entries(of: file) {
             var photo: Data? = nil
-            if let path = player.photo?.trimmingCharacters(in: .whitespaces), !path.isEmpty {
-                guard let entry = archive.entry(named: baseDirectory + path) ?? archive.entry(named: path) else {
-                    throw TeamImportError.photoNotFound(player: name, path: path)
+            if let path = entry.photoPath {
+                guard let photoEntry = archive.entry(named: baseDirectory + path) ?? archive.entry(named: path) else {
+                    throw TeamImportError.photoNotFound(player: entry.name, path: path)
                 }
-                guard let normalized = PlayerPhoto.normalized(try archive.contents(of: entry)) else {
-                    throw TeamImportError.photoUnreadable(player: name, path: path)
+                guard let normalized = PlayerPhoto.normalized(try archive.contents(of: photoEntry)) else {
+                    throw TeamImportError.photoUnreadable(player: entry.name, path: path)
                 }
                 photo = normalized
             }
-            prepared.append((player, name, focus, photo))
+            prepared.append((entry, photo))
         }
 
         let existing = try context.fetch(FetchDescriptor<SavedPlayer>())
         var result = TeamImportResult(team: file.team)
-
         for item in prepared {
-            if let match = existing.first(where: { $0.name.caseInsensitiveCompare(item.name) == .orderedSame }) {
-                if !item.focus.isEmpty { match.coachingFocusAreas = item.focus }
-                if let notes = item.player.notes { match.coachingNotes = notes }
+            if let index = TeamImport.matchIndex(for: item.entry, in: existing.map(\.name)) {
+                let match = existing[index]
+                if !item.entry.focus.isEmpty { match.coachingFocusAreas = item.entry.focus }
+                if let notes = item.entry.notes { match.coachingNotes = notes }
                 if let photo = item.photo { match.photoData = photo }
                 result.updated += 1
             } else {
                 context.insert(SavedPlayer(
-                    name: item.name,
-                    coachingFocusAreas: item.focus,
-                    coachingNotes: item.player.notes ?? "",
+                    name: item.entry.name,
+                    coachingFocusAreas: item.entry.focus,
+                    coachingNotes: item.entry.notes ?? "",
                     photoData: item.photo
                 ))
                 result.added += 1
@@ -130,22 +89,5 @@ enum TeamImportService {
 
         try context.save()
         return result
-    }
-
-    /// Returns the decoded file plus the folder prefix photos are relative to. team.json may sit
-    /// at the top level or inside one wrapping folder (Finder zips a folder that way).
-    private static func decodeTeamFile(from archive: ZipArchive) throws -> (TeamImportFile, String) {
-        let candidates = archive.fileEntries.filter { $0.path.hasSuffix("team.json") }
-            .sorted { $0.path.count < $1.path.count }
-        guard let entry = candidates.first else { throw TeamImportError.missingTeamJSON }
-        let baseDirectory = String(entry.path.dropLast("team.json".count))
-        do {
-            let file = try JSONDecoder().decode(TeamImportFile.self, from: try archive.contents(of: entry))
-            return (file, baseDirectory)
-        } catch let error as TeamImportError {
-            throw error
-        } catch {
-            throw TeamImportError.invalidTeamJSON(error.localizedDescription)
-        }
     }
 }

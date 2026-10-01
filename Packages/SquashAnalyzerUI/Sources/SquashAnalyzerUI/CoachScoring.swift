@@ -263,13 +263,19 @@ public struct CoachScoringView: View {
             }
             .padding(.horizontal, 24)
         case .selectZone:
-            VStack(spacing: 10) {
-                CourtView(isInteractive: true, selectedPlayer: game.selectedPlayer,
-                          layout: CourtLayout.from(stored: courtLayout)) { zone in
-                    handleZoneTap(zone)
+            // The court gets an exact size that fits above the cancel button
+            GeometryReader { geometry in
+                let court = CourtView.fittedSize(in: CGSize(width: geometry.size.width - 32,
+                                                            height: geometry.size.height - 50))
+                VStack(spacing: 10) {
+                    CourtView(isInteractive: true, selectedPlayer: game.selectedPlayer,
+                              layout: CourtLayout.from(stored: courtLayout)) { zone in
+                        handleZoneTap(zone)
+                    }
+                    .frame(width: court.width, height: court.height)
+                    cancelButton
                 }
-                .padding(.horizontal, 16)
-                cancelButton
+                .frame(width: geometry.size.width, height: geometry.size.height)
             }
         case .selectShot:
             VStack(spacing: 12) {
@@ -342,7 +348,8 @@ public struct CoachScoringView: View {
                     .foregroundColor(CoachPalette.backgroundDark)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
-                    .background(Capsule().fill(CoachPalette.textPrimary))
+                    .background(CoachPalette.warmOrange)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .buttonStyle(.plain)
             Spacer(minLength: 0)
@@ -381,7 +388,8 @@ public struct CoachScoringView: View {
                     .foregroundColor(CoachPalette.backgroundDark)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
-                    .background(Capsule().fill(CoachPalette.textPrimary))
+                    .background(CoachPalette.warmOrange)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .buttonStyle(.plain)
             Spacer(minLength: 0)
@@ -408,7 +416,11 @@ public struct CoachScoringView: View {
                 .foregroundColor(CoachPalette.textPrimary)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
-                .background(Capsule().stroke(CoachPalette.textPrimary.opacity(0.5), lineWidth: 1))
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(CoachPalette.textPrimary.opacity(0.10))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(CoachPalette.textPrimary.opacity(0.3), lineWidth: 1))
+                )
         }
         .buttonStyle(.plain)
     }

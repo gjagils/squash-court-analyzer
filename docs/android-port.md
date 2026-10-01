@@ -2070,7 +2070,16 @@ Baanindeling (`@AppStorage(CourtLayout.storageKey)`, standaard 6). In
 `CoachScoring` staan de slagknoppen als twee expliciete rijen uit
 `ShotType.rows(...)`, niet als geneste `ForEach` (zie de valkuil met
 closures hierboven). Valkuil: `cond ? 43 : 28` als `frame(width:)` wordt
-in Kotlin een `Int` en compileert niet; schrijf `CGFloat(43) : CGFloat(28)`.
+in Kotlin een `Int` en compileert niet; schrijf `CGFloat(43) : CGFloat(28)`
+(net zo `max(0, …)` met CGFloat: `max(CGFloat(0.0), …)`).
+Valkuil: `.aspectRatio(contentMode: .fit)` volgt op Android alleen de
+breedte, dus de baan groeide over scorebord en knoppen; de zonestap geeft
+`CourtView` nu een exacte maat (`CourtView.fittedSize(in:)`).
+Valkuil: een knop met donkere tekst (`foregroundColor`) op
+`.background(RoundedRectangle(...).fill(kleur))` of `Capsule().fill` werd
+op Android donker op donker. Gebruik `.background(kleur)` plus
+`.clipShape(RoundedRectangle(cornerRadius: 12))` (VOLGENDE GAME, KLAAR,
+scheidsrechter-knoppen, DELEN).
 Plan en voortgang: `docs/plan-6-vakken-slagen.md`.
 
 ## Branching

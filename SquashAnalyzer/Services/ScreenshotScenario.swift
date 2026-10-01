@@ -40,9 +40,9 @@ enum ScreenshotScenario: String, CaseIterable {
         game.addPoint(to: .player2, pointType: .unforcedError, at: nil, with: nil)
         game.addPoint(to: .player1, pointType: .winner, at: .backRight, with: .drive)
         game.addPoint(to: .player2, pointType: .winner, at: .frontRight, with: .boast)
-        game.addPoint(to: .player1, pointType: .forcedError, at: .middleMiddle, with: .volley)
+        game.addPoint(to: .player1, pointType: .forcedError, at: .middleRight, with: .kill, isVolley: true)
         game.addPoint(to: .player2, pointType: .winner, at: .backLeft, with: .lob)
-        game.addPoint(to: .player1, pointType: .winner, at: .frontRight, with: .cross)
+        game.addPoint(to: .player1, pointType: .winner, at: .frontRight, with: .drop)
         return match
     }
 

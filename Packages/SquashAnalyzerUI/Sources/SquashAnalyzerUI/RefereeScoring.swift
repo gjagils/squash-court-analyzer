@@ -221,7 +221,8 @@ public struct RefereeScoringView: View {
                 .foregroundColor(CoachPalette.backgroundDark)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(RoundedRectangle(cornerRadius: 12).fill(CoachPalette.textPrimary))
+                .background(CoachPalette.textPrimary)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             if match.isMatchOver, let winner = match.matchWinner {
                 Text("\(match.name(for: winner)) wint met \(match.player1TotalGames) – \(match.player2TotalGames)")
@@ -241,7 +242,8 @@ public struct RefereeScoringView: View {
                         .foregroundColor(CoachPalette.backgroundDark)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(RoundedRectangle(cornerRadius: 12).fill(CoachPalette.warmOrange))
+                        .background(CoachPalette.warmOrange)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                         .sheet(isPresented: $showingShare) {
                             SharedMatchShareView(report: match.shareReport, shareText: shareText) { showingShare = false }
                         }

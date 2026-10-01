@@ -34,6 +34,17 @@ public struct CourtView: View {
         courtWidth / courtLength
     }
 
+    /// The largest court (panel included) that fits in `available`. Give the
+    /// view this exact frame where space is tight: on Android
+    /// `.aspectRatio(contentMode: .fit)` only follows the width, so a court
+    /// in a short area grew over the views around it.
+    public static func fittedSize(in available: CGSize) -> CGSize {
+        let ratio: CGFloat = 6.4 / 9.75
+        let panel: CGFloat = 20.0
+        let height = max(CGFloat(0.0), min(available.height - panel, (available.width - panel) / ratio))
+        return CGSize(width: height * ratio + panel, height: height + panel)
+    }
+
     public var body: some View {
         GeometryReader { geometry in
             let availableWidth = geometry.size.width

@@ -61,7 +61,8 @@ public struct SharedMatchShareView: View {
                         .foregroundColor(DashboardPalette.background)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(RoundedRectangle(cornerRadius: 12).fill(DashboardPalette.orange))
+                        .background(DashboardPalette.orange)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
                 ScrollView {

@@ -1,6 +1,6 @@
 # Bouwplan: 6 vakken + slagkeuze per vak
 
-Status: **in uitvoering op `codex/android-phase4`** (oktober 2026)
+Status: **gebouwd op `codex/android-phase4`** (1 oktober 2026); nog uit te proberen in de praktijk
 
 ## Bijgewerkt voor deze branch (2026-10-01)
 
@@ -221,6 +221,13 @@ share-tekst (`GameSummaryText`) noemt alleen de beste zone en blijft zo.
 
 ## Fase 5 — Android
 
+**AFGEROND 2026-10-01**: Room 7 (`points.isVolley`, `MIGRATION_6_7`), invoer,
+instelling en analyse komen uit de gedeelde code. De scheidsrechter kent geen
+vakken of slagen. Bij het nakijken op de emulator ook opgelost: de baan in de
+zonestap liep over scorebord en knoppen (nu een vaste maat via
+`CourtView.fittedSize`), en knoppen met donkere tekst op een gevulde vorm
+waren onleesbaar (Skip; zie docs/android-port.md).
+
 De Android-app is nog een basisopzet (Room `version = 1`).
 
 - `MatchEntities.kt` / `MatchRecord.kt`: kolom `isVolley: Boolean = false`.
@@ -229,6 +236,12 @@ De Android-app is nog een basisopzet (Room `version = 1`).
 - Zone- en slaglogica komt uit Core (via Skip), dus Android krijgt `inputZones`, `options(for:)` en `displayName` vanzelf mee.
 
 ## Fase 6 — Teksten en release
+
+**AFGEROND 2026-10-01**: voorbeelddata (`SampleDataService`,
+`ScreenshotScenario`, previews) gebruikt 6 vakken, passende slagen, kills en
+een paar volleys; release notes 2.2-15, README en ARCHITECTURE bijgewerkt.
+Nieuwe App Store-screenshots zijn nog niet gemaakt/geüpload (pas bij een
+release, `scripts/screenshots.sh`).
 
 - `release-notes/`: nieuwe notitie ("Baan in 6 vakken, slagen passend bij het vak, volley als schakelaar, nieuwe slag Kill").
 - `website/` en `appstore-metadata.md`: noemen geen 9 vakken, dus geen wijziging nodig. Wel opnieuw screenshots maken (`scripts/screenshots.sh`).

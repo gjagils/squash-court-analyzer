@@ -797,9 +797,9 @@ struct AdviceRow: View {
     game.player2Score = 8
     game.points = [
         Point(scorer: .player1, zone: .frontLeft, shotType: .drop, server: .player1, player1Score: 1, player2Score: 0),
-        Point(scorer: .player1, zone: .frontMiddle, shotType: .drive, server: .player1, player1Score: 2, player2Score: 0),
+        Point(scorer: .player1, zone: .frontRight, shotType: .boast, server: .player1, player1Score: 2, player2Score: 0),
         Point(scorer: .player2, zone: .backRight, shotType: .cross, server: .player1, player1Score: 2, player2Score: 1),
-        Point(scorer: .player1, zone: .middleMiddle, shotType: .volley, server: .player2, player1Score: 3, player2Score: 1),
+        Point(scorer: .player1, zone: .middleRight, shotType: .kill, server: .player2, player1Score: 3, player2Score: 1, isVolley: true),
     ]
 
     return CoachDashboardView(game: game) { }

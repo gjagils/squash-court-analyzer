@@ -16,6 +16,10 @@ een game-analyse na elke coachgame met tactisch advies en AI Coach (eigen
 OpenAI-key in Instellingen), "Deel score" en back-ups (met de hand of automatisch eens per week naar een
 gekozen map) die ook op een iPhone terug te zetten zijn (en andersom).
 
+Coachen gaat met een baan van 6 vakken (of 9, in te stellen bij Instellingen →
+Baanindeling). Per vak kies je alleen de slagen die daar passen, met een
+schakelaar "Uit de lucht" voor volleys; nieuw is de slag Kill.
+
 - [Architectuur](ARCHITECTURE.md)
 - [Android-status, bouwinstructies en resterende stappen](docs/android-port.md)
 - [Google Play: Android-app ondertekenen, uploaden en testen](docs/google-play.md)

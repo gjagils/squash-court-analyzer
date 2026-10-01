@@ -26,7 +26,7 @@ sys.exit(f"no available simulator named {name!r}")
 
 echo "▸ Building Debug for $DEVICE_NAME ($UDID)"
 xcodebuild -project SquashAnalyzer.xcodeproj -scheme SquashAnalyzer -configuration Debug \
-  -destination "platform=iOS Simulator,id=$UDID" -derivedDataPath "$DERIVED" build -quiet
+  -destination "platform=iOS Simulator,id=$UDID" -derivedDataPath "$DERIVED" -skipPackagePluginValidation -skipMacroValidation build -quiet
 APP="$DERIVED/Build/Products/Debug-iphonesimulator/SquashAnalyzer.app"
 
 echo "▸ Booting simulator"

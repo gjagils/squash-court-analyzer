@@ -51,7 +51,7 @@ public struct RefereeSessionView: View {
                                  onCancel: { close() })
                 .disabled(busy || failed)
             } else if showingSetup {
-                MatchSetupView(playerStore: playerStore, title: "Nieuwe scheidsrechterwedstrijd", onCancel: { close() }) { choice in
+                MatchSetupView(playerStore: playerStore, mode: .referee, onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }
                 .disabled(busy || failed)

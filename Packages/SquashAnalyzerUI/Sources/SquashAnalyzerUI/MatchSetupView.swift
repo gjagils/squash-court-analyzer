@@ -16,6 +16,11 @@ public struct MatchSetupChoice: Equatable {
     public let player2Focus: [String]
 }
 
+/// Which match the setup screen starts
+public enum MatchSetupMode {
+    case coach, referee
+}
+
 /// The step before a new coach/referee match, like iOS' MatchStartView: two
 /// names (each optionally picked from the player list, with that player's
 /// focus shown), who serves first, and "Later instappen" with the games
@@ -23,7 +28,7 @@ public struct MatchSetupChoice: Equatable {
 /// id again, same rule as iOS' `PickedPlayer`.
 public struct MatchSetupView: View {
     let playerStore: any PlayerProfileStore
-    let title: String
+    let mode: MatchSetupMode
     let onCancel: (() -> Void)?
     let onStart: (MatchSetupChoice) -> Void
 
@@ -38,10 +43,10 @@ public struct MatchSetupView: View {
     @State private var gamesBefore1 = 0
     @State private var gamesBefore2 = 0
 
-    public init(playerStore: any PlayerProfileStore, title: String, onCancel: (() -> Void)? = nil,
+    public init(playerStore: any PlayerProfileStore, mode: MatchSetupMode, onCancel: (() -> Void)? = nil,
                 onStart: @escaping (MatchSetupChoice) -> Void) {
         self.playerStore = playerStore
-        self.title = title
+        self.mode = mode
         self.onCancel = onCancel
         self.onStart = onStart
     }
@@ -49,23 +54,23 @@ public struct MatchSetupView: View {
     private var name1: String { resolvedName(player1Name, fallback: "Speler 1") }
     private var name2: String { resolvedName(player2Name, fallback: "Speler 2") }
     private var headStartIsValid: Bool { Match.isValidHeadStart(player1: gamesBefore1, player2: gamesBefore2) }
+    /// Games already played count also with "Later instappen" folded, as on iOS
+    private var hasHeadStart: Bool { gamesBefore1 + gamesBefore2 > 0 }
+    private var isCoach: Bool { mode == .coach }
 
     public var body: some View {
         ScrollView {
             VStack(spacing: 22) {
-                Text(title)
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(SetupPalette.text)
-                    .padding(.top, 8)
+                header
 
-                playerRow(label: "Speler 1", name: $player1Name, slot: 1, focus: focus(player1Pick, currentName: player1Name))
-                playerRow(label: "Speler 2", name: $player2Name, slot: 2, focus: focus(player2Pick, currentName: player2Name))
+                playerRow(label: "Speler 1", name: $player1Name, slot: 1, color: SetupPalette.orange, focus: focus(player1Pick, currentName: player1Name))
+                playerRow(label: "Speler 2", name: $player2Name, slot: 2, color: SetupPalette.blue, focus: focus(player2Pick, currentName: player2Name))
 
                 serverPicker
                 lateStartSection
 
                 Button(action: start) {
-                    Text("Start")
+                    Text(isCoach ? "START WEDSTRIJD" : "START SCHEIDSRECHTER")
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .tracking(1)
                         .foregroundColor(SetupPalette.background)
@@ -75,12 +80,7 @@ public struct MatchSetupView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
-                .disabled(lateStart && !headStartIsValid)
-
-                if let onCancel {
-                    Button("Terug", action: onCancel)
-                        .foregroundColor(SetupPalette.muted)
-                }
+                .disabled(!headStartIsValid)
             }
             .padding(24)
         }
@@ -96,27 +96,62 @@ public struct MatchSetupView: View {
         }
     }
 
-    private func playerRow(label: String, name: Binding<String>, slot: Int, focus: [String]) -> some View {
+    /// "‹ Home", the mode in capitals, as on iOS
+    private var header: some View {
+        ZStack {
+            Text(isCoach ? "COACH" : "SCHEIDSRECHTER")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .tracking(3)
+                .foregroundColor(SetupPalette.text)
+            if let onCancel {
+                HStack {
+                    Button(action: onCancel) {
+                        HStack(spacing: 4) {
+                            AppSymbol("chevron.left", size: 14, color: SetupPalette.muted)
+                            Text("Home")
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .foregroundColor(SetupPalette.muted)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    Spacer()
+                }
+            }
+        }
+        .padding(.top, 8)
+    }
+
+    private func playerRow(label: String, name: Binding<String>, slot: Int, color: Color, focus: [String]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label.uppercased())
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .tracking(1)
-                .foregroundColor(SetupPalette.gold)
+                .foregroundColor(color)
             HStack(spacing: 8) {
-                TextField(label, text: name)
+                TextField("Naam \(label.lowercased())", text: name)
                     .accessibilityLabel(label)
                     .textFieldStyle(.plain)
                     .padding()
                     .background(Color.white.opacity(0.08))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(color.opacity(0.4), lineWidth: 1))
                     .foregroundColor(SetupPalette.text)
                 Button("Kies speler") { pickingSlot = slot }
                     .disabled(players.isEmpty)
             }
-            if !focus.isEmpty {
-                Text(focus.joined(separator: " · "))
-                    .font(.system(size: 12))
-                    .foregroundColor(SetupPalette.gold)
+            // Coaching focus only matters when coaching, as on iOS
+            if isCoach && !focus.isEmpty {
+                HStack(spacing: 6) {
+                    ForEach(focus, id: \.self) { tag in
+                        Text(tag)
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(color)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(color.opacity(0.12))
+                            .clipShape(Capsule())
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity)
@@ -128,23 +163,30 @@ public struct MatchSetupView: View {
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundColor(SetupPalette.muted)
             HStack(spacing: 10) {
-                serverButton(Player.player1, name1)
-                serverButton(Player.player2, name2)
+                serverButton(Player.player1, name1, SetupPalette.orange)
+                serverButton(Player.player2, name2, SetupPalette.blue)
             }
         }
     }
 
-    private func serverButton(_ player: Player, _ name: String) -> some View {
+    private func serverButton(_ player: Player, _ name: String, _ color: Color) -> some View {
         let selected = server == player
         return Button { server = player } label: {
-            Text(name)
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .lineLimit(1)
-                .foregroundColor(selected ? SetupPalette.background : SetupPalette.text)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(selected ? SetupPalette.orange : Color.white.opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+            HStack(spacing: 8) {
+                Circle()
+                    .stroke(color, lineWidth: 2)
+                    .frame(width: 18, height: 18)
+                    .overlay(Circle().fill(selected ? color : Color.clear).frame(width: 10, height: 10))
+                Text(name)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .lineLimit(1)
+                    .foregroundColor(selected ? color : SetupPalette.text)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(color.opacity(selected ? 0.15 : 0.05))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(color.opacity(selected ? 0.6 : 0.15), lineWidth: 1))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(name) serveert eerst")
@@ -153,9 +195,12 @@ public struct MatchSetupView: View {
     private var lateStartSection: some View {
         VStack(spacing: 12) {
             Button { lateStart.toggle() } label: {
-                Text(lateStart ? "Later instappen ▴" : "Later instappen? ▾")
+                // Folded with games filled in, the line itself says where the match starts (as on iOS)
+                Text(hasHeadStart && headStartIsValid
+                     ? "Start bij game \(1 + gamesBefore1 + gamesBefore2) · stand \(gamesBefore1) – \(gamesBefore2) " + (lateStart ? "▴" : "▾")
+                     : (lateStart ? "Later instappen ▴" : "Later instappen? ▾"))
                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(SetupPalette.muted)
+                    .foregroundColor(hasHeadStart ? SetupPalette.gold : SetupPalette.muted)
             }
             .buttonStyle(.plain)
             if lateStart {
@@ -163,26 +208,26 @@ public struct MatchSetupView: View {
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(SetupPalette.gold)
-                gamesRow(name1, value: gamesBefore1, onMinus: { gamesBefore1 = max(0, gamesBefore1 - 1) }, onPlus: { gamesBefore1 = min(2, gamesBefore1 + 1) })
-                gamesRow(name2, value: gamesBefore2, onMinus: { gamesBefore2 = max(0, gamesBefore2 - 1) }, onPlus: { gamesBefore2 = min(2, gamesBefore2 + 1) })
-                Text(headStartIsValid
-                     ? "Start bij game \(1 + gamesBefore1 + gamesBefore2) · stand \(gamesBefore1) – \(gamesBefore2)"
-                     : "Met deze stand is de wedstrijd al beslist")
-                    .font(.system(size: 12))
-                    .foregroundColor(SetupPalette.muted)
+                gamesRow(name1, color: SetupPalette.orange, value: gamesBefore1, onMinus: { gamesBefore1 = max(0, gamesBefore1 - 1) }, onPlus: { gamesBefore1 = min(2, gamesBefore1 + 1) })
+                gamesRow(name2, color: SetupPalette.blue, value: gamesBefore2, onMinus: { gamesBefore2 = max(0, gamesBefore2 - 1) }, onPlus: { gamesBefore2 = min(2, gamesBefore2 + 1) })
+                if !headStartIsValid {
+                    Text("Met deze stand is de wedstrijd al beslist")
+                        .font(.system(size: 12))
+                        .foregroundColor(SetupPalette.muted)
+                }
             }
         }
     }
 
-    private func gamesRow(_ name: String, value: Int, onMinus: @escaping () -> Void, onPlus: @escaping () -> Void) -> some View {
+    private func gamesRow(_ name: String, color: Color, value: Int, onMinus: @escaping () -> Void, onPlus: @escaping () -> Void) -> some View {
         HStack {
             Text(name)
-                .foregroundColor(SetupPalette.text)
+                .foregroundColor(color)
                 .lineLimit(1)
             Spacer()
             Button(action: onMinus) { Text("−").font(.system(size: 22, weight: .bold)).frame(width: 44, height: 36) }
                 .buttonStyle(.plain)
-                .foregroundColor(SetupPalette.gold)
+                .foregroundColor(color)
                 .accessibilityLabel("Minder games voor \(name)")
             Text("\(value)")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -190,7 +235,7 @@ public struct MatchSetupView: View {
                 .frame(width: 28)
             Button(action: onPlus) { Text("+").font(.system(size: 22, weight: .bold)).frame(width: 44, height: 36) }
                 .buttonStyle(.plain)
-                .foregroundColor(SetupPalette.gold)
+                .foregroundColor(color)
                 .accessibilityLabel("Meer games voor \(name)")
         }
         .padding(.horizontal, 12)
@@ -199,7 +244,7 @@ public struct MatchSetupView: View {
     }
 
     private func start() {
-        let late = lateStart && headStartIsValid
+        let late = headStartIsValid
         onStart(MatchSetupChoice(
             player1Name: name1, player2Name: name2,
             player1Id: pickedId(player1Pick, currentName: player1Name), player2Id: pickedId(player2Pick, currentName: player2Name),
@@ -241,5 +286,6 @@ private enum SetupPalette {
     static let muted = Color(red: 0.70, green: 0.68, blue: 0.65)
     static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
     static let orange = Color(red: 0.95, green: 0.55, blue: 0.15)
+    static let blue = Color(red: 0.35, green: 0.45, blue: 0.55)
     static let background = Color(red: 0.06, green: 0.05, blue: 0.04)
 }

@@ -56,9 +56,91 @@ public struct SharedScoreboardView: View {
                 .font(.system(size: 8, weight: .medium, design: .rounded))
                 .foregroundColor(CoachPalette.textMuted)
                 .tracking(1.5)
+
+            pointsTimeline
+                .padding(.top, 8)
         }
         .frame(width: 84)
         .padding(.top, 6)
+    }
+
+    /// Small version of the referee scoring line, as on iOS: newest rally on
+    /// top under the "now" marker, player 1 pills left of the line, player 2
+    /// right, each with the scorer's new score. The last five rallies.
+    private var pointsTimeline: some View {
+        let width = CGFloat(84)
+        let rowHeight = CGFloat(15)
+        let rows = 5
+        var recent: [Point] = []
+        for point in game.points.suffix(rows).reversed() { recent.append(point) }
+        let serverColor = game.currentServer == Player.player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue
+
+        return VStack(spacing: 0) {
+            ZStack {
+                Circle()
+                    .fill(serverColor.opacity(0.28))
+                    .frame(width: 14, height: 14)
+                    .blur(radius: 2)
+                Circle()
+                    .fill(serverColor)
+                    .frame(width: 7, height: 7)
+            }
+            .frame(height: 14)
+            ForEach(recent) { point in
+                timelineRow(point, width: width, rowHeight: rowHeight)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(width: width, height: CGFloat(14) + CGFloat(rows) * rowHeight, alignment: .top)
+        .background(alignment: .top) {
+            Rectangle()
+                .fill(LinearGradient(colors: [serverColor.opacity(0.7), serverColor.opacity(0.1)], startPoint: .top, endPoint: .bottom))
+                .frame(width: 1)
+                .padding(.top, 7)
+        }
+        .clipped()
+    }
+
+    private func timelineRow(_ point: Point, width: CGFloat, rowHeight: CGFloat) -> some View {
+        let isLeft = point.scorer == Player.player1
+        let color = isLeft ? CoachPalette.warmOrange : CoachPalette.steelBlue
+        let score = isLeft ? point.player1Score : point.player2Score
+        let dotSize = CGFloat(8)
+        let inner = width / CGFloat(2) - dotSize / CGFloat(2)
+        return HStack(spacing: 0) {
+            if isLeft {
+                Spacer(minLength: 0)
+                timelinePill("\(score)", color: color, dotOnRight: true, dotSize: dotSize)
+                Color.clear.frame(width: inner)
+            } else {
+                Color.clear.frame(width: inner)
+                timelinePill("\(score)", color: color, dotOnRight: false, dotSize: dotSize)
+                Spacer(minLength: 0)
+            }
+        }
+        .frame(width: width, height: rowHeight)
+    }
+
+    private func timelinePill(_ text: String, color: Color, dotOnRight: Bool, dotSize: CGFloat) -> some View {
+        HStack(spacing: 2) {
+            if !dotOnRight { timelineDot(color, dotSize) }
+            Text(text)
+                .font(.system(size: 8, weight: .semibold, design: .rounded))
+                .foregroundColor(.white)
+            if dotOnRight { timelineDot(color, dotSize) }
+        }
+        .padding(.leading, dotOnRight ? CGFloat(5) : CGFloat(2))
+        .padding(.trailing, dotOnRight ? CGFloat(2) : CGFloat(5))
+        .padding(.vertical, 1.5)
+        .background(color)
+        .clipShape(Capsule())
+    }
+
+    private func timelineDot(_ color: Color, _ size: CGFloat) -> some View {
+        Circle()
+            .fill(Color.white)
+            .frame(width: size, height: size)
+            .overlay(Circle().fill(color).frame(width: 3, height: 3))
     }
 
     // The score button must not contain the separate service-side buttons.
@@ -75,13 +157,20 @@ public struct SharedScoreboardView: View {
         let highlight = ServerHighlight(color: color, isServer: isServing)
 
         return VStack(spacing: 4) {
-            PlayerAvatarPlaceholder(color: color, size: 34, active: isServing, photo: photo(for: player))
-
-            Text(game.name(for: player))
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundColor(highlight.name)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+            // Avatar and name start a point too, as the whole column does on iOS
+            Button(action: { onSelectPlayer?(player) }) {
+                VStack(spacing: 4) {
+                    PlayerAvatarPlaceholder(color: color, size: 34, active: isServing, photo: photo(for: player))
+                    Text(game.name(for: player))
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundColor(highlight.name)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.plain)
+            .disabled(game.isGameOver)
 
             ServiceSideSelector(
                 side: game.serverSide,

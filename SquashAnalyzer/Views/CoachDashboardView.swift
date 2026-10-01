@@ -101,6 +101,9 @@ struct CoachDashboardView: View {
             }
 
         }
+        // Advice belongs to one player and game; switching clears it (as on Android)
+        .onChange(of: selectedPlayer) { _, _ in aiAdvice = nil; aiError = nil }
+        .onChange(of: selectedGameIndex) { _, _ in aiAdvice = nil; aiError = nil }
         .sheet(item: $shareItemsToShow) { wrapper in
             ShareSheet(items: wrapper.items)
         }
@@ -540,12 +543,17 @@ struct CoachDashboardView: View {
                 }
             } else if let error = aiError {
                 // Show error
-                HStack {
-                    Image(systemName: "exclamationmark.triangle")
-                        .foregroundColor(.orange)
-                    Text(error)
-                        .font(AppFonts.caption(12))
-                        .foregroundColor(AppColors.textMuted)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle")
+                            .foregroundColor(.orange)
+                        Text(error)
+                            .font(AppFonts.caption(12))
+                            .foregroundColor(AppColors.textMuted)
+                    }
+                    Button("Opnieuw proberen", action: requestAIAdvice)
+                        .font(AppFonts.label(13))
+                        .foregroundColor(AppColors.steelBlue)
                 }
             } else if isLoadingAI {
                 // Loading state

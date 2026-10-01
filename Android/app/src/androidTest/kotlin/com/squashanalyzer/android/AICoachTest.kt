@@ -87,7 +87,7 @@ class AICoachTest {
         awaitText("ANALYSE")
         compose.onNodeWithText("ANALYSE").performClick()
 
-        awaitText("GAME-ANALYSE")
+        awaitText("COACH DASHBOARD")
         awaitText("Voorin werkt je drive het best (10 punten).")
         awaitText("Waar vallen de punten")
         // Without an OpenAI key there is no AI card, only the local advice

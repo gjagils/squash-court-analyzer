@@ -66,7 +66,7 @@ public struct CoachSessionView: View {
                                  onCancel: { close() })
                 .disabled(busy || failed)
             } else if showingSetup {
-                MatchSetupView(playerStore: playerStore, title: "Nieuwe coachwedstrijd", onCancel: { close() }) { choice in
+                MatchSetupView(playerStore: playerStore, mode: .coach, onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }
                 .disabled(busy || failed)

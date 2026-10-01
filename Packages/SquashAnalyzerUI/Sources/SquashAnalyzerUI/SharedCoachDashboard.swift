@@ -82,13 +82,24 @@ public struct SharedCoachDashboardView: View {
                     pointTypes
                     volleys
                     localAdvice
-                        // Skip's sheet is not full height; keep the last card clear of the system bar
-                        .padding(.bottom, hasKey ? CGFloat(0) : CGFloat(48))
                     // Only with an OpenAI key (Instellingen); without one the local advice is it
                     if hasKey {
                         aiCard
-                            .padding(.bottom, 48)
                     }
+                    // As on iOS; Skip's sheet is not full height, so keep it clear of the system bar
+                    Button(action: onClose) {
+                        Text("SLUITEN")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .tracking(1)
+                            .foregroundColor(DashboardPalette.secondary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(DashboardPalette.secondary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(DashboardPalette.secondary.opacity(0.35), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.bottom, 48)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
@@ -133,7 +144,7 @@ public struct SharedCoachDashboardView: View {
 
     private var titleBlock: some View {
         VStack(spacing: 4) {
-            Text("GAME-ANALYSE")
+            Text("COACH DASHBOARD")
                 .font(.system(size: 20, weight: .bold, design: .rounded))
                 .tracking(3)
                 .foregroundColor(DashboardPalette.text)

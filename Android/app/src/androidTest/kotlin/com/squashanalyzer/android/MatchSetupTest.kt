@@ -42,12 +42,12 @@ class MatchSetupTest {
 
     @Test fun pickingAPlayerLinksTheNewMatchToTheirId() {
         compose.onNodeWithContentDescription("Scheidsrechter").performClick()
-        awaitText("Nieuwe scheidsrechterwedstrijd")
+        awaitText("Wie serveert eerst?")
         compose.onAllNodesWithText("Kies speler").onFirst().performClick()
         awaitText("Kies-speler-test")
         compose.onNodeWithText("Kies-speler-test").performClick()
-        compose.onNodeWithText("Start").performScrollTo().performClick()
-        awaitText("SCHEIDSRECHTER")
+        compose.onNodeWithText("START SCHEIDSRECHTER").performScrollTo().performClick()
+        awaitText("LET CALL")
 
         val store = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()), BadgeAwardStore(db.badgeAwardDao(), db.playerDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao()), "test-install"))
         val restored = runBlocking { store.loadInProgress()!! }

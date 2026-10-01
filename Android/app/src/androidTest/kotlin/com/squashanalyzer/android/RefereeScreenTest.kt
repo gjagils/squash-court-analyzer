@@ -31,9 +31,9 @@ class RefereeScreenTest {
 
     @Test fun refereeScoresUndoAndReturnsHome() {
         compose.onNodeWithContentDescription("Scheidsrechter").performClick()
-        awaitText("Nieuwe scheidsrechterwedstrijd")
-        compose.onNodeWithText("Start").performScrollTo().performClick()
-        awaitText("SCHEIDSRECHTER")
+        awaitText("Wie serveert eerst?")
+        compose.onNodeWithText("START SCHEIDSRECHTER").performScrollTo().performClick()
+        awaitText("LET CALL")
         compose.onNodeWithContentDescription("Punt voor Speler 1").performClick()
         compose.onAllNodesWithText("1").fetchSemanticsNodes().isNotEmpty()
         compose.onNodeWithText("Undo").performClick()

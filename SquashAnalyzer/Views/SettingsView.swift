@@ -14,6 +14,7 @@ struct SettingsView: View {
     @State private var showingSaveConfirmation = false
     @AppStorage(CoachInputSettings.teamURLKey) private var teamURL = ""
     @State private var teamSaveMessage: String?
+    @AppStorage(AutomaticBackup.enabledKey) private var automaticBackup = true
 
     var body: some View {
         ZStack {
@@ -26,6 +27,8 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(spacing: 24) {
                         teamSection
+
+                        backupSection
 
                         // AI Coach Section
                         aiCoachSection
@@ -91,6 +94,37 @@ struct SettingsView: View {
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 16)
+    }
+
+    // MARK: - Backup Section
+    private var backupSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "icloud.and.arrow.up").foregroundColor(AppColors.warmOrange)
+                Text("Back-up").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary)
+            }
+            Toggle(isOn: $automaticBackup) {
+                Text("Wekelijkse back-up naar iCloud")
+                    .font(AppFonts.label(14))
+                    .foregroundColor(AppColors.textPrimary)
+            }
+            .tint(AppColors.warmOrange)
+            Text(backupFootnote)
+                .font(AppFonts.caption(11))
+                .foregroundColor(AppColors.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+    }
+
+    private var backupFootnote: String {
+        var text = "Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in iCloud Drive (Bestanden → iCloud Drive → Squash Analyzer). De 7 nieuwste blijven bewaard. Ook terug te zetten op Android."
+        if let last = AutomaticBackup.lastBackup {
+            text += " Laatste: \(last.formatted(date: .abbreviated, time: .shortened))."
+        }
+        return text
     }
 
     // MARK: - AI Coach Section

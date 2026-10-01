@@ -7,6 +7,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.documentfile.provider.DocumentFile
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import skip.foundation.Date
@@ -18,8 +21,9 @@ import squash.analyzer.core.BackupStore
 /**
  * Automatic backups on Android: once the user picks a folder (the system
  * folder picker; the app keeps a persistent permission for it), a backup is
- * written there at most once a day when the app comes to the foreground, and
- * only the newest 7 dated files are kept. The rules come from Core's
+ * written there at most once a week when the app goes to the background
+ * (so a Friday evening's matches are in it), and only the newest 7 dated
+ * files are kept. The rules come from Core's
  * `AutoBackupPlan`, the file format from `BackupCodec` (same file as iOS).
  * Must be created in `onCreate` (it registers an activity-result launcher).
  */
@@ -65,7 +69,15 @@ class AutoBackup(
         prefs.edit().remove(KEY_FOLDER).apply()
     }
 
-    /** Called when the app comes to the foreground; a failure is retried next time */
+    /** Its own scope: the backup finishes even when the activity is closed right after */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /** Called when the app goes to the background */
+    fun runIfDueInBackground() {
+        scope.launch { runIfDue() }
+    }
+
+    /** A failure is retried the next time */
     suspend fun runIfDue() {
         if (folderUri() == null || !AutoBackupPlan.isDue(lastBackup = lastBackupDate(), now = Date())) return
         runCatching { backUp() }

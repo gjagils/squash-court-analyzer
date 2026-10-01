@@ -1779,6 +1779,31 @@ Verificatie: Core 36 op Darwin / 35 JUnit op Android,
 `:app:testDebugUnitTest` 44/44, `:app:connectedDebugAndroidTest` 17/17, iOS
 **TEST SUCCEEDED**.
 
+## Automatische back-ups: wekelijks, op iOS én Android (2026-10-01)
+
+Gerd-Jan: eens per week is genoeg, de app wordt vooral één avond per week
+(vrijdag) gebruikt; en iOS mag het ook. Daarom:
+
+- `AutoBackupPlan.isDue` (Core): een back-up als de laatste minstens **6
+  dagen** oud is (niet 7, zodat een speelavond die iets vroeger valt dan
+  vorige week toch telt). De 7 nieuwste blijven: ±7 weken terug.
+- Het moment is nu **het wegzetten van de app** in plaats van het openen,
+  zodat de wedstrijden van die avond er al in zitten. Android: `onStop` →
+  `AutoBackup.runIfDueInBackground()` (eigen coroutine-scope, maakt af ook als
+  de activity sluit). iOS: `scenePhase == .background` in `ContentView` →
+  `AutomaticBackup.runIfDue` (nieuw, `SquashAnalyzer/Services/AutomaticBackup.swift`).
+- **iOS**: naar iCloud Drive via de bestaande `ExportService.saveBackupToiCloud`
+  (zelfde bestand, zelfde rotatie van 7, ook `latest-backup.json`), met
+  alle spelers, coachwedstrijden, losse games en badges. Standaard **aan**;
+  schakelaar "Wekelijkse back-up naar iCloud" in Instellingen (nieuwe sectie
+  Back-up, toont de laatste datum). Zonder iCloud Drive wordt hij stil
+  overgeslagen en de volgende keer opnieuw geprobeerd. De handmatige knop
+  "Backup naar iCloud" in Afgeronde wedstrijden blijft.
+- **Android**: tekst in Instellingen aangepast ("Eén keer per week, als je de
+  app na gebruik wegzet …").
+- Niet getest met een echte iCloud-account: de simulator is niet bij iCloud
+  ingelogd. Het schrijven zelf is de bestaande, al gebruikte iOS-functie.
+
 ## Beslissing: "Snelle invoer" verdwijnt van iOS (2026-10-01)
 
 Gerd-Jan: snelle invoer mag uit iOS. De coach voert punten voortaan op één
@@ -1868,9 +1893,9 @@ aanname: iOS maakt *geen* automatische back-ups, maar heeft één knop
 "Backup naar iCloud" (bestand in iCloud Drive, de 7 nieuwste blijven). Android
 krijgt echte automatische back-ups: Instellingen → Back-up → "Aanzetten en
 map kiezen" (systeemmapkiezer, `OpenDocumentTree`, blijvende toestemming)
-maakt meteen de eerste; daarna schrijft `AutoBackup` (Kotlin) bij het
-openen van de app (`onResume`) hoogstens eens per 20 uur een back-up in die
-map en houdt alleen de 7 nieuwste `squash-backup-…json` (andere bestanden
+maakt meteen de eerste; daarna schrijft `AutoBackup` (Kotlin) een back-up
+in die map (sinds dezelfde dag: wekelijks bij het wegzetten, zie
+"Automatische back-ups: wekelijks") en houdt alleen de 7 nieuwste `squash-backup-…json` (andere bestanden
 blijven staan). "Uitzetten" geeft de maptoestemming terug. De regels staan
 in Core (`AutoBackupPlan`: `isDue`, `fileName`, `filesToDelete`, getest op
 beide platforms); bestanden via `androidx.documentfile` (nieuwe dependency).

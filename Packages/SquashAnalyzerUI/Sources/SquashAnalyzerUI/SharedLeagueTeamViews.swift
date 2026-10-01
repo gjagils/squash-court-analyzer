@@ -447,7 +447,7 @@ public struct SharedSettingsView: View {
                 }
                 .foregroundColor(LeaguePalette.secondary)
             } else {
-                Text("Eén keer per dag, als je de app opent, komt er een back-up in een map die je kiest (bijvoorbeeld Documenten). De 7 nieuwste blijven bewaard.")
+                Text("Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in een map die je kiest (bijvoorbeeld Documenten). De 7 nieuwste blijven bewaard.")
                     .font(.system(size: 12))
                     .foregroundColor(LeaguePalette.muted)
                 Button("Aanzetten en map kiezen") { turnOnAuto(auto) }

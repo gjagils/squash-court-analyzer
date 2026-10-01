@@ -102,8 +102,11 @@ final class BackupTests: XCTestCase {
     func testAutomaticBackupPlan() {
         let now = Date(timeIntervalSince1970: 1_790_000_000)
         XCTAssertTrue(AutoBackupPlan.isDue(lastBackup: nil, now: now))
-        XCTAssertFalse(AutoBackupPlan.isDue(lastBackup: now.addingTimeInterval(-19 * 3600), now: now))
-        XCTAssertTrue(AutoBackupPlan.isDue(lastBackup: now.addingTimeInterval(-20 * 3600), now: now))
+        // Weekly: last Friday 22:00 → this Friday 20:00 is due, Saturday after a Friday is not
+        XCTAssertTrue(AutoBackupPlan.isDue(lastBackup: now.addingTimeInterval(-(7 * 24 - 2) * 3600), now: now))
+        XCTAssertFalse(AutoBackupPlan.isDue(lastBackup: now.addingTimeInterval(-24 * 3600), now: now))
+        XCTAssertFalse(AutoBackupPlan.isDue(lastBackup: now.addingTimeInterval(-(6 * 24 - 1) * 3600), now: now))
+        XCTAssertTrue(AutoBackupPlan.isDue(lastBackup: now.addingTimeInterval(-6 * 24 * 3600), now: now))
 
         var names = ["latest-backup.json", "notities.txt", "squash-backup-2026-10-01-090552.json"]
         for day in 1...9 {

@@ -24,8 +24,6 @@ import squash.analyzer.ui.AICoachContext
 import squash.analyzer.ui.BackupContext
 import com.squashanalyzer.android.backup.ActivityBackupFiles
 import com.squashanalyzer.android.backup.AutoBackup
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import com.squashanalyzer.android.data.RoomBackupStore
 import com.squashanalyzer.android.aicoach.HttpAICoachTransport
 import com.squashanalyzer.android.aicoach.KeystoreAPIKeyStore
@@ -91,10 +89,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Automatic backup, at most once a day, whenever the app comes to the foreground */
-    override fun onResume() {
-        super.onResume()
-        lifecycleScope.launch { autoBackup.runIfDue() }
+    /** Automatic backup, at most once a week, when the app goes to the background (after the evening's matches) */
+    override fun onStop() {
+        super.onStop()
+        autoBackup.runIfDueInBackground()
     }
 
     /** `launchMode="singleTask"`: a link opened while the app runs arrives here */

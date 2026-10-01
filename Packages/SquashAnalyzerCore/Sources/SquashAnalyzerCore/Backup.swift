@@ -359,17 +359,20 @@ public protocol BackupFiles: AnyObject, Sendable {
 
 // MARK: - Automatic backups
 
-/// When an automatic backup is due and which old files go, the same rules as
-/// iOS' iCloud backup folder: dated files `squash-backup-…json`, newest 7 kept.
+/// When an automatic backup is due and which old files go, on iOS (iCloud
+/// Drive) and Android (a chosen folder): dated files `squash-backup-…json`,
+/// newest 7 kept, so about seven weeks back.
 public enum AutoBackupPlan {
     public static let keep = 7
     public static let prefix = "squash-backup-"
 
-    /// One a day: due when there was none yet, or the last is 20 hours old
-    /// (not 24, so opening the app at about the same time each day still counts)
+    /// Once a week: the app is mostly used one evening a week (Friday), and
+    /// the backup is made when the app goes to the background, so that
+    /// evening's matches are in it. Due when there was none yet or the last
+    /// is 6 days old (not 7, so a session a bit earlier than last week still counts).
     public static func isDue(lastBackup: Date?, now: Date = Date()) -> Bool {
         guard let lastBackup else { return true }
-        return now.timeIntervalSince(lastBackup) >= 20 * 3600
+        return now.timeIntervalSince(lastBackup) >= 6 * 24 * 3600
     }
 
     /// "squash-backup-2026-10-01-090552.json"; the name sorts by time

@@ -168,7 +168,10 @@ Skip's JSONEncoder produces the same bytes as Apple's, so a backup from
 either platform passes the checksum on the other (pinned by a test that runs
 on both). iOS' `ExportService` and Android's `RoomBackupStore` map their
 stores to and from it; Android picks files with the system document pickers
-(`ActivityBackupFiles`).
+(`ActivityBackupFiles`). Automatic backups follow Core's `AutoBackupPlan`
+(weekly, newest 7, made when the app goes to the background): iOS'
+`AutomaticBackup` writes to iCloud Drive, Android's `AutoBackup` to a folder
+the user picked.
 Full plan, phase status, toolchain setup and transpile gotchas found so far:
 see [`docs/android-port.md`](docs/android-port.md). Read that file before
 touching anything Android-related, and keep it updated as phases complete.

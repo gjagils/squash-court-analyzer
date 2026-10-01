@@ -212,6 +212,9 @@ struct ContentView: View {
             if phase == .inactive || phase == .background {
                 persistMatch()
             }
+            if phase == .background {
+                AutomaticBackup.runIfDue(context: modelContext)
+            }
         }
         // A player card link (website or squashanalyzer://kaart#…)
         .onOpenURL { url in

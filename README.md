@@ -13,7 +13,7 @@ kaart, plus een "Badges verdiend"-strip direct op het match-einde-scherm), een o
 afgeronde coach- en scheidsrechterwedstrijden, en Mijn team (stand, wedstrijden
 en spelers van sbn.toernooi.nl; de teamlink vul je in bij Instellingen), en
 een game-analyse na elke coachgame met tactisch advies en AI Coach (eigen
-OpenAI-key in Instellingen), "Deel score" en back-ups (met de hand of automatisch eens per dag naar een
+OpenAI-key in Instellingen), "Deel score" en back-ups (met de hand of automatisch eens per week naar een
 gekozen map) die ook op een iPhone terug te zetten zijn (en andersom).
 
 - [Architectuur](ARCHITECTURE.md)

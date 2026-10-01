@@ -232,8 +232,11 @@ public struct AndroidHomeView: View {
     private let aiCoach: AICoachContext?
     /// Backups in Instellingen (Android supplies Room and the file pickers)
     private let backup: BackupContext?
-    /// Spelers → Team via link (Android supplies download, unzip and Room)
+    /// Spelers → Team via link or zip (Android supplies download, unzip and Room)
     private let teamImporter: (any TeamLinkImporter)?
+    /// Player photos and the system pickers (Android)
+    private let photoStore: (any PlayerPhotoStore)?
+    private let filePicker: (any PlayerFilePicker)?
 
     public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 historyStore: any MatchHistoryStore,
@@ -241,8 +244,11 @@ public struct AndroidHomeView: View {
                 shareText: @escaping (String) -> Void,
                 cardInbox: CardInbox, cardImportStore: any CardImportStore,
                 leagueTeamFetcher: LeagueTeamFetcher, aiCoach: AICoachContext? = nil, backup: BackupContext? = nil,
-                teamImporter: (any TeamLinkImporter)? = nil) {
+                teamImporter: (any TeamLinkImporter)? = nil, photoStore: (any PlayerPhotoStore)? = nil,
+                filePicker: (any PlayerFilePicker)? = nil) {
         self.teamImporter = teamImporter
+        self.photoStore = photoStore
+        self.filePicker = filePicker
         self.leagueTeamFetcher = leagueTeamFetcher
         self.backup = backup
         self.aiCoach = aiCoach
@@ -260,7 +266,8 @@ public struct AndroidHomeView: View {
         NavigationStack {
             homeContent
                 .navigationDestination(isPresented: $showingPlayers) {
-                    PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox, teamImporter: teamImporter)
+                    PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox, teamImporter: teamImporter,
+                                        photoStore: photoStore, filePicker: filePicker)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
                     CoachSessionView(store: matchStore, playerStore: playerStore, aiCoach: aiCoach, shareText: shareText, onExit: { showingCoach = false })

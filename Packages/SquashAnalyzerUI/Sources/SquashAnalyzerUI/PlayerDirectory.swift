@@ -91,16 +91,24 @@ public struct PlayerDirectoryView: View {
     @State private var showingError = false
     @State private var badgesForPlayer: PlayerProfile? = nil
     @State private var showingTeamImport = false
+    @State private var photos: [String: Data] = [:]
 
     private let shareText: (String) -> Void
     /// Reloads after a card link was imported while this screen was open
     private let cardInbox: CardInbox
-    /// Spelers → Team: import a team from a squashanalyzer.com/teams link
+    /// Spelers → Team: import a team from a squashanalyzer.com/teams link or a zip
     private let teamImporter: (any TeamLinkImporter)?
+    /// Player photos (Android: Room); nil shows initials only
+    private let photoStore: (any PlayerPhotoStore)?
+    /// The system photo and file pickers
+    private let filePicker: (any PlayerFilePicker)?
 
     public init(store: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
-                shareText: @escaping (String) -> Void, cardInbox: CardInbox, teamImporter: (any TeamLinkImporter)? = nil) {
+                shareText: @escaping (String) -> Void, cardInbox: CardInbox, teamImporter: (any TeamLinkImporter)? = nil,
+                photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil) {
         self.teamImporter = teamImporter
+        self.photoStore = photoStore
+        self.filePicker = filePicker
         self.store = store
         self.badgeStore = badgeStore
         self.shareText = shareText
@@ -166,12 +174,7 @@ public struct PlayerDirectoryView: View {
                         LazyVStack(spacing: 12) {
                             ForEach(players) { player in
                                 HStack(spacing: 12) {
-                                    Text(String(player.name.prefix(1)).uppercased())
-                                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                                        .foregroundColor(PlayerStyle.gold)
-                                        .frame(width: 44, height: 44)
-                                        .background(PlayerStyle.gold.opacity(0.15))
-                                        .clipShape(Circle())
+                                    PlayerPhotoView(photo: photos[player.id], name: player.name, size: 44, color: PlayerStyle.gold)
                                     VStack(alignment: .leading, spacing: 5) {
                                         Text(player.name).font(.headline)
                                         if !player.coachingFocusAreas.isEmpty {
@@ -218,11 +221,12 @@ public struct PlayerDirectoryView: View {
         .task(id: cardInbox.importCount) { await reload() }
         .sheet(isPresented: $showingTeamImport) {
             if let teamImporter {
-                SharedTeamImportView(importer: teamImporter, onImported: { await reload() }) { showingTeamImport = false }
+                SharedTeamImportView(importer: teamImporter, filePicker: filePicker, onImported: { await reload() }) { showingTeamImport = false }
             }
         }
         .sheet(item: $editing) { player in
-            PlayerProfileEditor(player: player, store: store) { await reload() }
+            PlayerProfileEditor(player: player, store: store, photo: photos[player.id], photoStore: photoStore,
+                                filePicker: filePicker) { await reload() }
         }
         .navigationDestination(isPresented: Binding(get: { badgesForPlayer != nil }, set: { if !$0 { badgesForPlayer = nil } })) {
             if let player = badgesForPlayer {
@@ -262,6 +266,9 @@ public struct PlayerDirectoryView: View {
                 counts[player.id] = (try? await badgeStore.badges(forPlayer: player.id))?.count ?? 0
             }
             badgeCounts = counts
+            if let photoStore {
+                photos = (try? await photoStore.photos()) ?? [:]
+            }
         } catch {
             loadFailed = true
             showError("De opgeslagen spelers konden niet worden geladen. Probeer het opnieuw.")
@@ -277,15 +284,53 @@ public struct PlayerDirectoryView: View {
 
 private struct PlayerProfileEditor: View {
     let store: any PlayerProfileStore
+    let photoStore: (any PlayerPhotoStore)?
+    let filePicker: (any PlayerFilePicker)?
     let onSaved: () async -> Void
+    /// The photo shown; `photoChanged` says whether to store it on save
+    @State private var photo: Data?
+    @State private var photoChanged = false
     @Environment(\.dismiss) private var dismiss
     @State private var player: PlayerProfile
     @State private var isSaving = false
     @State private var showingError = false
+    @State private var photoFailed = false
     private let isNew: Bool
 
-    init(player: PlayerProfile, store: any PlayerProfileStore, onSaved: @escaping () async -> Void) {
+    private var photoSection: some View {
+        VStack(spacing: 10) {
+            PlayerPhotoView(photo: photo, name: player.name.isEmpty ? "?" : player.name, size: 96, color: PlayerStyle.gold)
+            HStack(spacing: 20) {
+                Button(photo == nil ? "Kies foto" : "Andere foto") {
+                    Task {
+                        do {
+                            if let picked = try await filePicker?.pickPhoto() {
+                                photo = picked
+                                photoChanged = true
+                            }
+                        } catch {
+                            photoFailed = true
+                        }
+                    }
+                }
+                .foregroundColor(PlayerStyle.gold)
+                if photo != nil {
+                    Button("Foto verwijderen") {
+                        photo = nil
+                        photoChanged = true
+                    }
+                    .foregroundColor(PlayerStyle.muted)
+                }
+            }
+        }
+    }
+
+    init(player: PlayerProfile, store: any PlayerProfileStore, photo: Data?, photoStore: (any PlayerPhotoStore)?,
+         filePicker: (any PlayerFilePicker)?, onSaved: @escaping () async -> Void) {
         self.store = store
+        self.photoStore = photoStore
+        self.filePicker = filePicker
+        _photo = State(initialValue: photo)
         self.onSaved = onSaved
         self.isNew = player.name.isEmpty
         _player = State(initialValue: player)
@@ -298,6 +343,9 @@ private struct PlayerProfileEditor: View {
                 VStack(spacing: 24) {
                     Text(isNew ? "SPELER TOEVOEGEN" : "SPELER BEWERKEN")
                         .font(.system(size: 18, weight: .bold, design: .rounded)).tracking(2)
+                    if photoStore != nil && filePicker != nil {
+                        photoSection
+                    }
                     PlayerProfileFields(name: $player.name, focus: $player.coachingFocusAreas, notes: $player.coachingNotes)
                     HStack(spacing: 16) {
                         Button("Annuleren") { dismiss() }.disabled(isSaving)
@@ -309,6 +357,9 @@ private struct PlayerProfileEditor: View {
                                     var normalized = player
                                     normalized.name = player.trimmedName
                                     try await store.savePlayer(normalized)
+                                    if photoChanged, let photoStore {
+                                        try await photoStore.setPhoto(photo, for: normalized.id)
+                                    }
                                     await onSaved()
                                     dismiss()
                                 } catch {
@@ -328,6 +379,9 @@ private struct PlayerProfileEditor: View {
             }
         }
         .interactiveDismissDisabled(isSaving)
+        .alert("Deze foto kon niet worden gebruikt", isPresented: $photoFailed) {
+            Button("OK", role: .cancel) {}
+        }
         .alert("Opslaan is niet gelukt", isPresented: $showingError) {
             Button("OK", role: .cancel) {}
         } message: { Text("Je invoer is bewaard in dit scherm. Probeer opnieuw op te slaan.") }

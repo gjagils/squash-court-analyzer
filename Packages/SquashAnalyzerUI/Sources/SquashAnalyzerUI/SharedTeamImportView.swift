@@ -6,6 +6,8 @@ import SquashAnalyzerCore
 /// its own Spelers screen (`PlayerManagementView`, "Via link").
 struct SharedTeamImportView: View {
     let importer: any TeamLinkImporter
+    /// "Kies zip-bestand" from the phone's files; nil hides it
+    let filePicker: (any PlayerFilePicker)?
     /// Called after a successful import so the list reloads
     let onImported: () async -> Void
     let onClose: () -> Void
@@ -52,6 +54,21 @@ struct SharedTeamImportView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(isImporting || link.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                if filePicker != nil {
+                    Text("Of kies een team-zip van je telefoon.")
+                        .font(.system(size: 14))
+                        .foregroundColor(PlayerStyle.muted)
+                    Button(action: pickZip) {
+                        Text("KIES ZIP-BESTAND")
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .foregroundColor(PlayerStyle.gold)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(RoundedRectangle(cornerRadius: 12).stroke(PlayerStyle.gold.opacity(0.6), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isImporting)
+                }
                 if let resultText {
                     Text(resultText)
                         .font(.system(size: 14, weight: .semibold))
@@ -65,6 +82,25 @@ struct SharedTeamImportView: View {
                 Spacer()
             }
             .padding(24)
+        }
+    }
+
+    private func pickZip() {
+        Task {
+            do {
+                guard let zip = try await filePicker?.pickTeamZip() else { return }
+                isImporting = true
+                resultText = nil
+                errorText = nil
+                let result = try await importer.importTeam(zip: zip)
+                resultText = "Geïmporteerd: \(result.summary)"
+                await onImported()
+            } catch let error as TeamImportError {
+                errorText = error.message
+            } catch {
+                errorText = TeamImportError.notAZip.message
+            }
+            isImporting = false
         }
     }
 

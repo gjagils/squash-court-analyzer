@@ -11,6 +11,10 @@ public struct RefereeScoringView: View {
     let shareText: ((String) -> Void)?
     @Environment(\.dismiss) private var dismiss
     @State private var showingShare = false
+    /// Sharing the stand during the match (the share icon in the header)
+    @State private var sharingNow = false
+    /// Ticks every second for the match and game timers
+    @State private var now = Date()
 
     public init(match: RefereeMatch, shareText: ((String) -> Void)? = nil, onMatchChanged: @escaping (RefereeMatch) -> Void,
                 onExit: @escaping @MainActor () -> Void) {
@@ -31,9 +35,14 @@ public struct RefereeScoringView: View {
                 gameHeader
                 playerColumns
                 actionGrid
+                timers
                 undoButton
             }
             .padding(.bottom, 20)
+
+            if sharingNow, let shareText {
+                SharedMatchShareView(report: match.shareReport, shareText: shareText) { sharingNow = false }
+            }
 
             if let call = match.lastCallText {
                 callFlash(call)
@@ -61,7 +70,16 @@ public struct RefereeScoringView: View {
                 .foregroundColor(CoachPalette.textPrimary)
                 .tracking(2)
             Spacer()
-            Color.clear.frame(width: 74, height: 1)
+            if shareText != nil {
+                Button { sharingNow = true } label: {
+                    AppSymbol("square.and.arrow.up", size: 20, color: CoachPalette.warmOrange)
+                        .frame(width: 74, height: 32, alignment: .trailing)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Deel de stand")
+            } else {
+                Color.clear.frame(width: 74, height: 1)
+            }
         }
         .padding(.horizontal, 20)
         .padding(.top, 14)
@@ -206,8 +224,8 @@ public struct RefereeScoringView: View {
     private var actionGrid: some View {
         VStack(spacing: 8) {
             HStack(spacing: 8) {
-                actionButton("LET", color: CoachPalette.warmOrange) { match.callLet(); onMatchChanged(match) }
-                actionButton("LET", color: CoachPalette.steelBlue) { match.callLet(); onMatchChanged(match) }
+                actionButton("LET CALL", color: CoachPalette.warmOrange) { match.callLet(); onMatchChanged(match) }
+                actionButton("LET CALL", color: CoachPalette.steelBlue) { match.callLet(); onMatchChanged(match) }
             }
             HStack(spacing: 8) {
                 actionButton("STROKE", color: CoachPalette.warmOrange) { match.callStroke(to: .player1); onMatchChanged(match) }
@@ -270,6 +288,38 @@ public struct RefereeScoringView: View {
         }
         .buttonStyle(.plain)
         .disabled(match.isGameOver)
+    }
+
+    /// MATCH and GAME time, as on iOS
+    private var timers: some View {
+        let _ = now
+        return HStack {
+            timer("MATCH", match.matchDuration)
+            Spacer()
+            timer("GAME", match.currentGameDuration)
+        }
+        .padding(.horizontal, 24)
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                now = Date()
+            }
+        }
+    }
+
+    private func timer(_ label: String, _ seconds: TimeInterval) -> some View {
+        let total = Int(seconds)
+        let text = (total / 60 < 10 ? "0" : "") + "\(total / 60):" + (total % 60 < 10 ? "0" : "") + "\(total % 60)"
+        return VStack(spacing: 0) {
+            Text(label)
+                .font(.system(size: 9, weight: .medium, design: .rounded))
+                .tracking(1)
+                .foregroundColor(CoachPalette.textMuted)
+            Text(text)
+                .font(.system(size: 18, weight: .bold, design: .monospaced))
+                .foregroundColor(CoachPalette.textSecondary)
+        }
+        .accessibilityLabel("\(label == "MATCH" ? "Wedstrijdtijd" : "Gametijd") \(text)")
     }
 
     private var undoButton: some View {

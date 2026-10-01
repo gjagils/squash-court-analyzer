@@ -43,3 +43,21 @@ public protocol PlayerProfileStore: Sendable {
     func savePlayer(_ player: PlayerProfile) async throws
     func deletePlayer(_ id: String) async throws
 }
+
+/// Player photos, kept apart from the profile (photos are large and only the
+/// player list and editor need them). Android: Room; iOS keeps its own
+/// SwiftData photos.
+@MainActor
+public protocol PlayerPhotoStore {
+    /// Small square JPEGs by player id, for the list
+    func photos() async throws -> [String: Data]
+    /// Scales the picked image to a 512px square JPEG and stores it; nil removes it
+    func setPhoto(_ image: Data?, for playerId: String) async throws
+}
+
+/// The system pickers the player screens need on Android: a photo from the
+/// gallery and a team zip from the files. Nil when the user cancelled.
+public protocol PlayerFilePicker: AnyObject, Sendable {
+    func pickPhoto() async throws -> Data?
+    func pickTeamZip() async throws -> Data?
+}

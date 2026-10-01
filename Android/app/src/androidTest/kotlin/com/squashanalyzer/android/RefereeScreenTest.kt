@@ -37,7 +37,7 @@ class RefereeScreenTest {
         compose.onNodeWithContentDescription("Punt voor Speler 1").performClick()
         compose.onAllNodesWithText("1").fetchSemanticsNodes().isNotEmpty()
         compose.onNodeWithText("Undo").performClick()
-        compose.onAllNodesWithText("LET").onFirst().performClick()
+        compose.onAllNodesWithText("LET CALL").onFirst().performClick()
         awaitText("LET")
         compose.onNodeWithText("Sluiten").performClick()
         awaitText("SQUASH ANALYZER")

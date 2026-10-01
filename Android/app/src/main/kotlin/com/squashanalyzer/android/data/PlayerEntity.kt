@@ -42,6 +42,9 @@ abstract class PlayerDao {
     @Query("UPDATE players SET photoData = :photo WHERE id = :id")
     abstract suspend fun setPhoto(id: String, photo: ByteArray)
 
+    @Query("UPDATE players SET photoData = NULL WHERE id = :id")
+    abstract suspend fun clearPhoto(id: String)
+
     @Query("UPDATE players SET cardId = :cardId WHERE id = :id")
     abstract suspend fun setCardId(id: String, cardId: String?)
 

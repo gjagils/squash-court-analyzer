@@ -202,4 +202,6 @@ public protocol TeamDownloader: Sendable {
 /// iOS has its own `TeamImportService` with SwiftData.
 public protocol TeamLinkImporter: Sendable {
     func importTeam(link: String) async throws -> TeamImportResult
+    /// A team zip picked from the phone's files
+    func importTeam(zip: Data) async throws -> TeamImportResult
 }

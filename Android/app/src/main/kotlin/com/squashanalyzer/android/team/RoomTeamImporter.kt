@@ -1,9 +1,5 @@
 package com.squashanalyzer.android.team
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Rect
 import androidx.room.withTransaction
 import com.squashanalyzer.android.data.AppDatabase
 import com.squashanalyzer.android.data.PlayerEntity
@@ -24,7 +20,7 @@ import java.util.zip.ZipInputStream
 /**
  * Android's team import (Spelers → Team via link), the counterpart of iOS'
  * `TeamImportService`: the checks come from Core's `TeamImport`; this class
- * unzips, scales photos to a 512px square JPEG like iOS' `PlayerPhoto`, and
+ * unzips, scales photos with `PhotoScaler` (like iOS' `PlayerPhoto`), and
  * writes Room in one transaction after every player and photo was checked.
  */
 class RoomTeamImporter(
@@ -44,6 +40,8 @@ class RoomTeamImporter(
         return importZip(zip.platformValue)
     }
 
+    override suspend fun importTeam(zip: Data): TeamImportResult = importZip(zip.platformValue)
+
     suspend fun importZip(bytes: ByteArray): TeamImportResult {
         val files = unzip(bytes)
         val jsonPath = TeamImport.teamJSONPath(in_ = SwiftArray(files.keys.toList())) ?: throw TeamImportError.missingTeamJSON
@@ -53,7 +51,7 @@ class RoomTeamImporter(
         val prepared = TeamImport.entries(of = file).toList().map { entry ->
             val photo = entry.photoPath?.let { path ->
                 val raw = files[base + path] ?: files[path] ?: throw TeamImportError.photoNotFound(player = entry.name, path = path)
-                normalizedPhoto(raw) ?: throw TeamImportError.photoUnreadable(player = entry.name, path = path)
+                PhotoScaler.squareJpeg(raw) ?: throw TeamImportError.photoUnreadable(player = entry.name, path = path)
             }
             entry to photo
         }
@@ -112,20 +110,5 @@ class RoomTeamImporter(
         }
         if (files.isEmpty()) throw TeamImportError.notAZip
         return files
-    }
-
-    /** Center-cropped square, at most 512px, JPEG; null when it is not an image */
-    private fun normalizedPhoto(bytes: ByteArray): ByteArray? {
-        val image = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: return null
-        val side = minOf(image.width, image.height)
-        if (side <= 0) return null
-        val target = minOf(side, 512)
-        val square = Bitmap.createBitmap(target, target, Bitmap.Config.ARGB_8888)
-        val left = (image.width - side) / 2
-        val top = (image.height - side) / 2
-        Canvas(square).drawBitmap(image, Rect(left, top, left + side, top + side), Rect(0, 0, target, target), null)
-        val out = ByteArrayOutputStream()
-        square.compress(Bitmap.CompressFormat.JPEG, 82, out)
-        return out.toByteArray()
     }
 }

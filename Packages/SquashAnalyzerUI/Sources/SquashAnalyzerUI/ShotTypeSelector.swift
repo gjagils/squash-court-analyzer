@@ -186,6 +186,8 @@ struct ShotIconView: View {
             LobIcon(color: color, size: size)
         case .boast:
             BoastIcon(color: color, size: size)
+        case .kill:
+            KillIcon(color: color, size: size)
         }
     }
 }
@@ -203,6 +205,27 @@ struct DriveIcon: View {
             path.move(to: CGPoint(x: w * 0.28, y: h * 0.65))
             path.addLine(to: CGPoint(x: w * 0.5, y: h * 0.9))
             path.addLine(to: CGPoint(x: w * 0.72, y: h * 0.65))
+        }
+        .stroke(color, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+        .frame(width: size, height: size)
+    }
+}
+
+/// Kill: a steep arrow driven down to just above the tin (the short line)
+struct KillIcon: View {
+    var color: Color = ShotPalette.textPrimary
+    var size: CGFloat = 40
+
+    var body: some View {
+        let w = size, h = size
+        Path { path in
+            path.move(to: CGPoint(x: w * 0.22, y: h * 0.12))
+            path.addLine(to: CGPoint(x: w * 0.62, y: h * 0.74))
+            path.move(to: CGPoint(x: w * 0.40, y: h * 0.66))
+            path.addLine(to: CGPoint(x: w * 0.62, y: h * 0.74))
+            path.addLine(to: CGPoint(x: w * 0.66, y: h * 0.51))
+            path.move(to: CGPoint(x: w * 0.18, y: h * 0.88))
+            path.addLine(to: CGPoint(x: w * 0.86, y: h * 0.88))
         }
         .stroke(color, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
         .frame(width: size, height: size)

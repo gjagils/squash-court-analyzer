@@ -160,14 +160,17 @@ public struct BadgeRally: Equatable {
     public var zone: CourtZone?
     /// Seconds since the previous rally (coach mode), including the time before the serve
     public var duration: TimeInterval?
+    /// The winning shot was a volley ("Uit de lucht")
+    public var isVolley: Bool
 
     public init(winner: Player, shot: ShotType? = nil, pointType: PointType? = nil,
-                zone: CourtZone? = nil, duration: TimeInterval? = nil) {
+                zone: CourtZone? = nil, duration: TimeInterval? = nil, isVolley: Bool = false) {
         self.winner = winner
         self.shot = shot
         self.pointType = pointType
         self.zone = zone
         self.duration = duration
+        self.isVolley = isVolley
     }
 }
 
@@ -256,13 +259,14 @@ public struct BadgeEngine {
                 if count(.drop) >= Self.shotsPerGame { award(.dropIt, to: player) }
                 if count(.cross) >= Self.shotsPerGame { award(.krissCross, to: player) }
                 if count(.lob) >= Self.shotsPerGame { award(.lobStory, to: player) }
-                if count(.volley) >= Self.shotsPerGame { award(.volleywood, to: player) }
+                // The volley switch, or an older point with "Volley" as its shot
+                if won.filter({ $0.isVolley || $0.shot == .volley }).count >= Self.shotsPerGame { award(.volleywood, to: player) }
                 if count(.drive) >= Self.shotsPerGame { award(.driveMeCrazy, to: player) }
                 if count(.boast) >= Self.shotsPerGame { award(.boastBuster, to: player) }
                 if won.filter({ $0.pointType == .servicePoint }).count >= Self.shotsPerGame { award(.aceOfPace, to: player) }
                 if won.filter({ $0.pointType == .stroke }).count >= Self.strokesPerGame { award(.strokeOfGenius, to: player) }
-                let front: Set<CourtZone> = [.frontLeft, .frontMiddle, .frontRight]
-                if won.filter({ $0.pointType == .winner && $0.zone.map { front.contains($0) } == true }).count >= Self.frontWinners {
+                // Front row in either layout (6 or 9 zones)
+                if won.filter({ $0.pointType == .winner && $0.zone?.row == CourtRow.front }).count >= Self.frontWinners {
                     award(.frontRowKing, to: player)
                 }
                 // The first rally's time is unreliable (it runs from the start of the game)
@@ -293,10 +297,15 @@ public struct BadgeEngine {
         }
         for (player, count) in tenAllGamesWon where count >= 2 { award(.doubleTrouble, to: player) }
 
-        // Full house: points won with every kind of shot in one match
+        // Full house: points won with all 6 shots in one match. Today's six
+        // (with Kill, volley being a switch), or for older matches the old six
+        // (with Volley), so a full house from before the change still counts.
+        let oldSix: Set<ShotType> = [.drive, .cross, .volley, .drop, .lob, .boast]
         for player in Player.allCases {
             let shots = Set(input.games.flatMap(\.rallies).filter { $0.winner == player }.compactMap(\.shot))
-            if shots.count == ShotType.allCases.count { award(.fullHouse, to: player) }
+            if Set(ShotType.selectableCases).isSubset(of: shots) || oldSix.isSubset(of: shots) {
+                award(.fullHouse, to: player)
+            }
         }
 
         if let winner = input.matchWinner {

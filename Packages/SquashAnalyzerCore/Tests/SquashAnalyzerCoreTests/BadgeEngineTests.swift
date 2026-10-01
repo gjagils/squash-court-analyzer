@@ -116,7 +116,8 @@ final class BadgeEngineTests: XCTestCase {
     }
 
     func testFullHouseNeedsEveryShot() {
-        let shots = ShotType.allCases.map { BadgeRally(winner: .player1, shot: $0) }
+        // Today's six shots (the old six with Volley also count: ZoneAndShotTests)
+        let shots = ShotType.selectableCases.map { BadgeRally(winner: .player1, shot: $0) }
         XCTAssertTrue(engine.badges(for: input([BadgeGame(rallies: shots, winner: nil)]))[.player1]!.contains(.fullHouse))
         let fewer = shots.dropLast()
         XCTAssertFalse(engine.badges(for: input([BadgeGame(rallies: Array(fewer), winner: nil)]))[.player1]!.contains(.fullHouse))

@@ -159,10 +159,10 @@ public class Game: Identifiable {
     }
 
     /// Add a point with shot type (step 4 of scoring)
-    public func addPoint(shotType: ShotType?) {
+    public func addPoint(shotType: ShotType?, isVolley: Bool = false) {
         guard let player = selectedPlayer, let pointType = selectedPointType else { return }
         let zone = selectedZone
-        addPoint(to: player, pointType: pointType, at: zone, with: shotType)
+        addPoint(to: player, pointType: pointType, at: zone, with: shotType, isVolley: isVolley)
     }
 
     /// Clear the current selection
@@ -184,7 +184,7 @@ public class Game: Identifiable {
     }
 
     /// Add a point with all details
-    public func addPoint(to player: Player, pointType: PointType, at zone: CourtZone?, with shotType: ShotType?) {
+    public func addPoint(to player: Player, pointType: PointType, at zone: CourtZone?, with shotType: ShotType?, isVolley: Bool = false) {
         guard !isGameOver else { return }
 
         // Save current server, service box and point time for undo
@@ -212,7 +212,9 @@ public class Game: Identifiable {
             server: currentServer,
             player1Score: player1Score,
             player2Score: player2Score,
-            duration: duration
+            duration: duration,
+            // Only a shot can be played out of the air, and never a lob
+            isVolley: isVolley && (shotType?.allowsVolley ?? false)
         )
         points.append(point)
 
@@ -373,6 +375,11 @@ public class Game: Identifiable {
     /// Get all unforced errors by a player (errors not caused by player's shot)
     public func unforcedErrors(by player: Player) -> [Point] {
         points.filter { $0.scorer == player && $0.pointType == .unforcedError }
+    }
+
+    /// Points a player won with a volley: the switch, or an older "Volley" shot
+    public func volleysWon(by player: Player) -> [Point] {
+        points.filter { $0.scorer == player && ($0.isVolley || $0.shotType == ShotType.volley) }
     }
 
     /// Get all strokes awarded to a player

@@ -68,6 +68,20 @@ Buiten scope (eventueel later): nick als vinkje, reverse/trickle boast, cross lo
 
 ## Fase 1 — Kernmodel (`Packages/SquashAnalyzerCore`)
 
+**AFGEROND 2026-10-01** op `codex/android-phase4`: `CourtZone.row`,
+`isMiddleColumn`, `CourtLayout` (`six`/`nine`, `rows`, `zones`,
+`zone(x:y:)`, `showing(_:)`, `from(stored:)` — een statische functie, want
+`init(stored: String)` botst in Kotlin met `init(rawValue:)`),
+`ShotType.kill`, `isLegacy`, `selectableCases`, `options(for:)`,
+`allowsVolley`, `displayName(isVolley:)`, `Point.isVolley`,
+`Game.addPoint(…, isVolley:)` (genegeerd zonder slag of bij Lob),
+`Game.volleysWon(by:)`, `BadgeRally.isVolley`; Volleywood, Full house en
+Front row king aangepast (zie boven). Eigen Kill-icoon (steile pijl naar de
+tin) in beide `ShotIconView`s. Tests: Core `ZoneAndShotTests` (6) op Darwin
+en Android; `testFullHouseNeedsEveryShot` (Core en iOS) gebruikt nu
+`selectableCases`. Nog niets zichtbaar veranderd: de invoer biedt Kill en
+de volleyschakelaar pas vanaf stap 3.
+
 ### 1.1 `CourtZone.swift`
 - De 6 vakken zijn de bestaande cases `frontLeft`, `frontRight`, `middleLeft`, `middleRight`, `backLeft`, `backRight`. **De rawValues blijven gelijk** ("Voor Links", …), dus 6 van de 9 oude waarden blijven 1-op-1 geldig.
 - `frontMiddle`, `middleMiddle` en `backMiddle` blijven bestaan als **legacy**: oude wedstrijden moeten blijven decoderen. Ze worden niet meer aangeboden bij de invoer.

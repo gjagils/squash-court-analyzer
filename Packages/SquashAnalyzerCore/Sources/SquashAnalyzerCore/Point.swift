@@ -12,6 +12,8 @@ public struct Point: Identifiable {
     public let player2Score: Int       // Score after this point
     public let timestamp: Date         // When the point was scored
     public let duration: TimeInterval  // Duration of the rally in seconds (time since previous point or game start)
+    /// The shot was played out of the air ("Uit de lucht"); see `ShotType.volley` for older points
+    public let isVolley: Bool
 
     public init(
         id: UUID = UUID(),
@@ -23,7 +25,8 @@ public struct Point: Identifiable {
         player1Score: Int,
         player2Score: Int,
         timestamp: Date = Date(),
-        duration: TimeInterval = 0
+        duration: TimeInterval = 0,
+        isVolley: Bool = false
     ) {
         self.id = id
         self.scorer = scorer
@@ -35,5 +38,6 @@ public struct Point: Identifiable {
         self.player2Score = player2Score
         self.timestamp = timestamp
         self.duration = duration
+        self.isVolley = isVolley
     }
 }

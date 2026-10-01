@@ -1817,14 +1817,17 @@ overlays voor punttype en slag (`PointTypeSelectorOverlay`,
 opgeslagen waarde "quick" in UserDefaults doet niets meer. De release notes
 voor de volgende TestFlight-build vermelden het.
 
-**Skip-valkuil bij het testen hiervan**: na een `git stash` + `stash pop` gaf
-de app-build "Unresolved reference" op tuple-labels (`it.count` in
-`Game.bestZone`). De door Skip gegenereerde `PackageSupport.kt` (met de
-Kotlin-hulpvelden voor tuple-labels) in de UI-uitvoer was niet opnieuw
-gemaakt en verouderd. Oplossing: `rm -rf
+**Terugkerende Skip/Kotlin-valkuil**: na een wijziging in een Core-bestand
+met tuple-labels (bv. `Game.swift`) geeft de app-build soms "None of the
+following candidates is applicable: val String.count" op `it.count` in
+`Game.bestZone`. De hulpvelden voor tuple-labels staan in de door Skip
+gegenereerde `PackageSupport.kt`; die verandert niet (en houdt zijn oude
+bestandsdatum), en de incrementele Kotlin-compilatie van de meegebouwde
+Core-module verliest ze dan. (Eerst gedacht dat `git stash` de oorzaak was;
+het gebeurde later ook zonder.) Oplossing: `rm -rf
 Packages/SquashAnalyzerUI/.build/plugins/outputs/squashanalyzerui` en
 opnieuw bouwen. Dus: bij vreemde Kotlin-fouten in code die je niet aanraakte,
-eerst de Skip-uitvoer weggooien.
+eerst die Skip-uitvoer weggooien.
 
 ## Back-ups op Android — resultaat (AFGEROND, 2026-10-01)
 

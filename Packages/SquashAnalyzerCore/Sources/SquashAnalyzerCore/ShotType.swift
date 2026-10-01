@@ -1,6 +1,8 @@
 import Foundation
 
-/// Types of shots in squash
+/// Types of shots in squash. `volley` is kept only so older points still
+/// read: a volley is now a switch ("Uit de lucht", `Point.isVolley`) on top of
+/// the shot. The raw values are stored, never renamed.
 public enum ShotType: String, CaseIterable, Identifiable, Codable, Sendable {
     case drive = "Drive"
     case cross = "Cross"
@@ -8,6 +10,7 @@ public enum ShotType: String, CaseIterable, Identifiable, Codable, Sendable {
     case drop = "Drop"
     case lob = "Lob"
     case boast = "Boast"
+    case kill = "Kill"
 
     public var id: String { rawValue }
 
@@ -20,6 +23,7 @@ public enum ShotType: String, CaseIterable, Identifiable, Codable, Sendable {
         case .drop: return "DRP"
         case .lob: return "LOB"
         case .boast: return "BST"
+        case .kill: return "KIL"
         }
     }
 
@@ -32,6 +36,7 @@ public enum ShotType: String, CaseIterable, Identifiable, Codable, Sendable {
         case .drop: return "arrow.down.to.line"
         case .lob: return "arrow.up.forward"
         case .boast: return "arrow.turn.up.right"
+        case .kill: return "arrow.down.right"
         }
     }
 
@@ -41,9 +46,38 @@ public enum ShotType: String, CaseIterable, Identifiable, Codable, Sendable {
         case .drive: return "Rechte slag langs de muur"
         case .cross: return "Diagonale slag"
         case .volley: return "Slag uit de lucht"
-        case .drop: return "Korte bal naar de voorkant"
+        case .drop: return "Korte bal naar voren (ook cross drop)"
         case .lob: return "Hoge bal naar achteren"
         case .boast: return "Slag via de zijmuur"
+        case .kill: return "Hard en laag, sterft snel"
         }
+    }
+
+    /// Only for points entered before the volley switch
+    public var isLegacy: Bool { self == ShotType.volley }
+
+    /// The shots offered when entering a point
+    public static let selectableCases: [ShotType] = [ShotType.drive, ShotType.cross, ShotType.drop,
+                                                     ShotType.lob, ShotType.boast, ShotType.kill]
+
+    /// The shots that make sense from `zone`, by its row (the trainer's
+    /// table): front Drop · Boast · Kill, middle Kill · Drive · Cross · Boast,
+    /// back Drive · Cross · Lob. Without a zone, all selectable shots.
+    public static func options(for zone: CourtZone?) -> [ShotType] {
+        guard let zone else { return selectableCases }
+        switch zone.row {
+        case .front: return [ShotType.drop, ShotType.boast, ShotType.kill]
+        case .middle: return [ShotType.kill, ShotType.drive, ShotType.cross, ShotType.boast]
+        case .back: return [ShotType.drive, ShotType.cross, ShotType.lob]
+        }
+    }
+
+    /// Whether "Uit de lucht" can go with this shot (a lob is never a volley)
+    public var allowsVolley: Bool { self != ShotType.lob && self != ShotType.volley }
+
+    /// "Drop", "Volley drop", or "Volley (oud)" for a point from before the switch
+    public func displayName(isVolley: Bool) -> String {
+        if self == ShotType.volley { return "Volley (oud)" }
+        return isVolley ? "Volley " + rawValue.lowercased() : rawValue
     }
 }

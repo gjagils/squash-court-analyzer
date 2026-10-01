@@ -1,64 +1,14 @@
 import Foundation
 import SwiftData
 import SwiftUI
-import CryptoKit
 import SquashAnalyzerCore
 
-// MARK: - Full Backup Structures
+// The full backup format (FullBackup, the envelope with its checksum and the
+// match/game/point/let/player/award records) lives in SquashAnalyzerCore
+// (`Backup.swift`), shared with Android so backups restore on either platform.
 
-struct FullBackup: Codable {
-    let version: Int
-    let backupDate: Date
-    let players: [PlayerBackupData]
-    let matches: [MatchExportData]
-    let standaloneGames: [GameExportData]
-    /// Badge awards including deleted ones (absent in backups made before badges)
-    var badgeAwards: [BadgeAwardBackupData]? = nil
-}
-
-struct BadgeAwardBackupData: Codable {
-    let cardId: String
-    let badge: String
-    let matchId: String
-    let earnedAt: Date
-    let opponentName: String
-    let awardedBy: String
-    let deletedAt: Date?
-}
-
-struct BackupEnvelope: Codable {
-    let formatVersion: Int
-    let schemaVersion: String
-    let appVersion: String
-    let createdAt: Date
-    let checksum: String
-    let payload: FullBackup
-}
-
-enum BackupValidationError: LocalizedError {
-    case unsupportedVersion(Int)
-    case checksumMismatch
-
-    var errorDescription: String? {
-        switch self {
-        case .unsupportedVersion(let version):
-            return "Deze backupversie (\(version)) wordt niet ondersteund."
-        case .checksumMismatch:
-            return "De backup is beschadigd of onvolledig; de checksum klopt niet."
-        }
-    }
-}
-
-struct PlayerBackupData: Codable {
-    let id: String
-    let name: String
-    let coachingFocusAreas: [String]
-    let coachingNotes: String
-    let createdAt: Date
-    /// Base64 JPEG (absent in backups made before photos existed)
-    let photoBase64: String?
-    /// Linked player card (absent when the player uses their own card, and in older backups)
-    var cardId: String? = nil
+extension BackupValidationError: @retroactive LocalizedError {
+    public var errorDescription: String? { message }
 }
 
 // MARK: - Export Data Structures
@@ -73,69 +23,6 @@ struct SquashExport: Codable {
     enum ExportType: String, Codable {
         case match, game
     }
-}
-
-struct MatchExportData: Codable {
-    let id: String?
-    let player1Name: String
-    let player2Name: String
-    let savedAt: Date
-    let updatedAt: Date?
-    let matchStartingServer: String?
-    let bestOf: Int?
-    let status: String?
-    let player1CoachingFocus: [String]?
-    let player2CoachingFocus: [String]?
-    let player1CoachingNotes: String?
-    let player2CoachingNotes: String?
-    /// Games won before tracking started (absent in older backups)
-    var player1GamesBefore: Int? = nil
-    var player2GamesBefore: Int? = nil
-    /// Games won after tracking stopped, filled in afterwards (absent in older backups)
-    var player1GamesAfter: Int? = nil
-    var player2GamesAfter: Int? = nil
-    /// Players picked from "Kies speler" (absent for typed-in names and in older backups)
-    var player1Id: String? = nil
-    var player2Id: String? = nil
-    let games: [GameExportData]
-}
-
-struct GameExportData: Codable {
-    let id: String?
-    let gameNumber: Int
-    let player1Name: String
-    let player2Name: String
-    let player1Score: Int
-    let player2Score: Int
-    let startingServer: String
-    let winner: String?
-    let savedAt: Date
-    let points: [PointExportData]
-    let lets: [LetExportData]
-}
-
-struct PointExportData: Codable {
-    let id: String?
-    let pointNumber: Int
-    let scorer: String
-    let pointType: String
-    let zone: String
-    let shotType: String
-    let server: String
-    let player1Score: Int
-    let player2Score: Int
-    let duration: Double
-    let timestamp: Date?
-}
-
-struct LetExportData: Codable {
-    let id: String?
-    let letNumber: Int
-    let requestedBy: String
-    let server: String
-    let player1Score: Int
-    let player2Score: Int
-    let timestamp: Date?
 }
 
 // MARK: - Export Service
@@ -305,19 +192,10 @@ enum ExportService {
             standaloneGames: gameData,
             badgeAwards: awardData.isEmpty ? nil : awardData
         )
-        let payloadData = try canonicalData(for: backup)
-        let envelope = BackupEnvelope(
-            formatVersion: 2,
-            schemaVersion: "1.0.0",
-            appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown",
-            createdAt: Date(),
-            checksum: SHA256.hash(data: payloadData).map { String(format: "%02x", $0) }.joined(),
-            payload: backup
+        return try BackupCodec.encode(
+            backup,
+            appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
         )
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return try encoder.encode(envelope)
     }
 
     // MARK: - Full Backup Import
@@ -505,35 +383,8 @@ enum ExportService {
 
     // MARK: - Private helpers
 
-    private static func canonicalData(for backup: FullBackup) throws -> Data {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = [.sortedKeys]
-        return try encoder.encode(backup)
-    }
-
     private static func decodeAndValidateBackup(_ data: Data) throws -> FullBackup {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-
-        if let envelope = try? decoder.decode(BackupEnvelope.self, from: data) {
-            guard envelope.formatVersion == 2 else {
-                throw BackupValidationError.unsupportedVersion(envelope.formatVersion)
-            }
-            let payloadData = try canonicalData(for: envelope.payload)
-            let checksum = SHA256.hash(data: payloadData).map { String(format: "%02x", $0) }.joined()
-            guard checksum == envelope.checksum else {
-                throw BackupValidationError.checksumMismatch
-            }
-            return envelope.payload
-        }
-
-        // Version 1 backups remain importable for existing App Store users.
-        let legacy = try decoder.decode(FullBackup.self, from: data)
-        guard legacy.version == 1 else {
-            throw BackupValidationError.unsupportedVersion(legacy.version)
-        }
-        return legacy
+        try BackupCodec.decode(data)
     }
 
     private static func rotateBackups(in directory: URL, keeping limit: Int) {

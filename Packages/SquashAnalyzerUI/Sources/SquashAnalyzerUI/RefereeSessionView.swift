@@ -20,7 +20,6 @@ public struct RefereeSessionView: View {
     @State private var showingSetup = false
     @State private var busy = true
     @State private var failed = false
-    @State private var confirmingNew = false
     @State private var exitAfterSave = false
     /// A change came in while saving; save once more when done
     @State private var saveAgain = false
@@ -46,17 +45,10 @@ public struct RefereeSessionView: View {
                 }, onExit: { persist(match, exit: true) })
                 .disabled(busy || failed)
             } else if let pending {
-                VStack(spacing: 24) {
-                    Text("Wedstrijd hervatten").font(.title2.bold())
-                    Text("\(pending.player1Name) – \(pending.player2Name)")
-                    Text("Game \(pending.currentGameNumber) · \(pending.player1Score) – \(pending.player2Score)")
-                    Button("Hervatten") { match = pending; self.pending = nil }
-                        .buttonStyle(.borderedProminent)
-                    Button("Nieuwe wedstrijd") { confirmingNew = true }
-                    Button("Terug") { close() }
-                }
-                .foregroundColor(CoachPalette.textPrimary)
-                .padding(24)
+                ResumePromptCard(message: pending.resumeMessage,
+                                 onResume: { match = pending; self.pending = nil },
+                                 onNew: { startFresh(abandoning: pending) },
+                                 onCancel: { close() })
                 .disabled(busy || failed)
             } else if showingSetup {
                 MatchSetupView(playerStore: playerStore, title: "Nieuwe scheidsrechterwedstrijd", onCancel: { close() }) { choice in
@@ -89,21 +81,19 @@ public struct RefereeSessionView: View {
             if let photoStore { photos = (try? await photoStore.photos()) ?? [:] }
             if match == nil && pending == nil && !showingSetup { await load() }
         }
-        .alert("Nieuwe wedstrijd starten?", isPresented: $confirmingNew) {
-            Button("Annuleren", role: .cancel) {}
-            Button("Nieuwe wedstrijd", role: .destructive) {
-                busy = true
-                Task { @MainActor in
-                    do {
-                        if let pending { try await store.abandon(pending) }
-                        pending = nil
-                        showingSetup = true
-                    } catch { failed = true }
-                    busy = false
-                }
-            }
-        } message: {
-            Text("De huidige wedstrijd wordt als afgebroken bewaard.")
+    }
+
+    /// "Nieuwe wedstrijd" on the resume question: the old one goes into
+    /// Afgeronde wedstrijden as incomplete (an empty one is dropped), then setup
+    private func startFresh(abandoning old: RefereeMatch) {
+        busy = true
+        Task { @MainActor in
+            do {
+                try await store.abandon(old)
+                pending = nil
+                showingSetup = true
+            } catch { failed = true }
+            busy = false
         }
     }
 

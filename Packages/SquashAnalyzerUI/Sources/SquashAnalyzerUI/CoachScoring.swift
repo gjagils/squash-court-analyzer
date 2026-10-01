@@ -125,6 +125,9 @@ enum CoachPalette {
     static let backgroundDark = Color(red: 0.06, green: 0.05, blue: 0.04)
     static let backgroundMedium = Color(red: 0.12, green: 0.10, blue: 0.08)
     static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
+    static let coolBlue = Color(red: 0.42, green: 0.58, blue: 0.82)
+    static let coolIndigo = Color(red: 0.55, green: 0.47, blue: 0.90)
+    static let warmRed = Color(red: 0.85, green: 0.30, blue: 0.30)
 }
 
 /// Coach mode's scoring screen, shared between iOS and Android. Reproduces
@@ -267,7 +270,7 @@ public struct CoachScoringView: View {
                 .foregroundColor(CoachPalette.textPrimary)
                 .tracking(2)
             HStack {
-                Button { showingStop = true } label: {
+                Button { requestStop() } label: {
                     HStack(spacing: 4) {
                         AppSymbol("xmark", size: 14, color: CoachPalette.textSecondary)
                         Text("Stop")
@@ -475,7 +478,7 @@ public struct CoachScoringView: View {
                 game.undoLastPoint()
                 onMatchChanged(match)
             },
-            link: match.isMatchOver ? nil : ResultButton("Stop wedstrijd") { showingStop = true }
+            link: match.isMatchOver ? nil : ResultButton("Stop wedstrijd") { requestStop() }
         )
         .sheet(isPresented: $showingShare) {
             if let shareText {
@@ -548,34 +551,41 @@ public struct CoachScoringView: View {
         onMatchChanged(match)
     }
 
-    private var hasRallies: Bool {
-        for played in match.games where !played.points.isEmpty || !played.lets.isEmpty {
-            return true
+    /// Stop, as on iOS (Core's Match.stopAction): a finished match is saved
+    /// and closed, an empty one dropped, anything else asks
+    private func requestStop() {
+        switch match.stopAction {
+        case .finish:
+            onExit()
+        case .discard:
+            if let onDiscard { onDiscard() } else { onExit() }
+        case .ask:
+            showingStop = true
         }
-        return false
     }
 
-    /// Like iOS' stop question, plus Android's "later verder"
     private var stopOverlay: some View {
         overlayCard {
-            Text("Wedstrijd stoppen")
+            Text(Match.stopTitle)
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundColor(CoachPalette.textPrimary)
+            Text(match.stopMessage)
+                .font(.system(size: 13))
+                .foregroundColor(CoachPalette.textSecondary)
+                .multilineTextAlignment(.center)
             overlayButton("Bewaar en ga later verder", CoachPalette.warmOrange) {
                 showingStop = false
                 onExit()
             }
-            if hasRallies && !match.isMatchOver {
-                if let onAbandon {
-                    overlayButton("Opslaan als incompleet", CoachPalette.textSecondary) {
-                        showingStop = false
-                        onAbandon()
-                    }
-                }
-                overlayButton("Uitslag aanvullen", CoachPalette.textSecondary) {
+            if let onAbandon {
+                overlayButton("Opslaan als incompleet", CoachPalette.textSecondary) {
                     showingStop = false
-                    showingComplete = true
+                    onAbandon()
                 }
+            }
+            overlayButton("Uitslag aanvullen", CoachPalette.textSecondary) {
+                showingStop = false
+                showingComplete = true
             }
             if let onDiscard {
                 overlayButton("Niet opslaan", Color(red: 0.90, green: 0.40, blue: 0.35)) {

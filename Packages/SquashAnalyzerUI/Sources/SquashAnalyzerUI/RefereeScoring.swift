@@ -13,7 +13,6 @@ public struct RefereeScoringView: View {
     /// Photos of the picked players, by player id
     let photos: [String: Data]
     @Environment(\.dismiss) private var dismiss
-    @State private var showingShare = false
     /// Sharing the stand during the match (the share icon in the header)
     @State private var sharingNow = false
     /// Ticks every second for the match and game timers
@@ -53,13 +52,17 @@ public struct RefereeScoringView: View {
             }
 
             if sharingNow, let shareText {
-                SharedMatchShareView(report: match.shareReport, shareText: shareText) { sharingNow = false }
+                SharedMatchShareView(report: match.shareReport, shareText: shareText) {
+                    sharingNow = false
+                    // Back to the result card, as on iOS
+                    if match.isMatchOver { hiddenResult = nil }
+                }
             }
 
             if let call = match.lastCallText {
                 callFlash(call)
                     .task {
-                        try? await Task.sleep(nanoseconds: 1_200_000_000)
+                        try? await Task.sleep(nanoseconds: call.hasPrefix("LET") ? UInt64(2_000_000_000) : UInt64(1_500_000_000))
                         if match.lastCallText == call { match.clearCallText() }
                     }
             }
@@ -266,11 +269,11 @@ public struct RefereeScoringView: View {
         VStack(spacing: 8) {
             HStack(spacing: 8) {
                 actionButton("LET CALL", color: CoachPalette.warmOrange) { match.callLet(); onMatchChanged(match) }
-                actionButton("LET CALL", color: CoachPalette.steelBlue) { match.callLet(); onMatchChanged(match) }
+                actionButton("LET CALL", color: CoachPalette.coolBlue) { match.callLet(); onMatchChanged(match) }
             }
             HStack(spacing: 8) {
-                actionButton("STROKE", color: CoachPalette.warmOrange) { match.callStroke(to: .player1); onMatchChanged(match) }
-                actionButton("STROKE", color: CoachPalette.steelBlue) { match.callStroke(to: .player2); onMatchChanged(match) }
+                actionButton("STROKE", color: CoachPalette.warmRed) { match.callStroke(to: .player1); onMatchChanged(match) }
+                actionButton("STROKE", color: CoachPalette.coolIndigo) { match.callStroke(to: .player2); onMatchChanged(match) }
             }
             if match.isGameOver && !match.isMatchOver {
                 Button("VOLGENDE GAME") {
@@ -283,31 +286,6 @@ public struct RefereeScoringView: View {
                 .padding(.vertical, 14)
                 .background(CoachPalette.textPrimary)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            if match.isMatchOver, let winner = match.matchWinner {
-                Text("\(match.name(for: winner)) wint met \(match.player1TotalGames) – \(match.player2TotalGames)")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(CoachPalette.textPrimary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(RoundedRectangle(cornerRadius: 12).fill(CoachPalette.textPrimary.opacity(0.10)))
-                SharedMatchBadgesStrip(earnings: SharedMatchBadgesStrip.earnings(
-                    player1Id: match.player1Id, player1Name: match.player1Name,
-                    player2Id: match.player2Id, player2Name: match.player2Name,
-                    badgeInput: match.badgeInput
-                ))
-                if let shareText {
-                    Button("DEEL SCORE") { showingShare = true }
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundColor(CoachPalette.backgroundDark)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(CoachPalette.warmOrange)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .sheet(isPresented: $showingShare) {
-                            SharedMatchShareView(report: match.shareReport, shareText: shareText) { showingShare = false }
-                        }
-                }
             }
         }
         .padding(.horizontal, 16)
@@ -385,7 +363,7 @@ public struct RefereeScoringView: View {
 
     private func callFlash(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 26, weight: .bold, design: .rounded))
+            .font(.system(size: 28, weight: .bold, design: .rounded))
             .foregroundColor(.white)
             .tracking(3)
             .padding(.horizontal, 28)

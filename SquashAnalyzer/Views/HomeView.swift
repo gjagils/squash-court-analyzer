@@ -18,6 +18,8 @@ struct HomeView: View {
     @Binding var isPresented: Bool
     var onViewHistory: (() -> Void)? = nil
     var onOpenSettings: (() -> Void)? = nil
+    /// Continue an unfinished coach match, offered when the Coach tile is tapped
+    var onResumeCoach: ((Match) -> Void)? = nil
 
     @State private var startMode: SetupMode? = nil
     @State private var showingPlayerManagement = false
@@ -25,6 +27,8 @@ struct HomeView: View {
     @State private var createdRefereeMatch: RefereeMatch? = nil
     /// An unfinished referee match found when the Scheidsrechter tile is tapped
     @State private var resumableReferee: RefereeMatch? = nil
+    /// An unfinished coach match found when the Coach tile is tapped (as on Android)
+    @State private var resumableCoach: Match? = nil
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
@@ -57,7 +61,19 @@ struct HomeView: View {
             }
             Button("Annuleren", role: .cancel) {}
         } message: { unfinished in
-            Text("\(unfinished.player1Name) – \(unfinished.player2Name), game \(unfinished.currentGameNumber): \(unfinished.player1Score) – \(unfinished.player2Score). Bij een nieuwe wedstrijd komt deze als incompleet in Afgeronde wedstrijden.")
+            Text(unfinished.resumeMessage)
+        }
+        .alert("Wedstrijd hervatten?", isPresented: Binding(get: { resumableCoach != nil }, set: { if !$0 { resumableCoach = nil } }),
+               presenting: resumableCoach) { unfinished in
+            Button("Hervatten") { onResumeCoach?(unfinished) }
+            Button("Nieuwe wedstrijd", role: .destructive) {
+                let repository = SwiftDataMatchRepository(context: modelContext)
+                if unfinished.stopAction == .discard { try? repository.delete(unfinished) } else { try? repository.markAbandoned(unfinished) }
+                withAnimation(.easeInOut(duration: 0.2)) { startMode = .coach }
+            }
+            Button("Annuleren", role: .cancel) {}
+        } message: { unfinished in
+            Text(unfinished.resumeMessage)
         }
         #if DEBUG
         .onAppear {
@@ -98,7 +114,14 @@ struct HomeView: View {
 
     private var tileGrid: some View {
         HomeMenuTiles(
-            onCoach: { withAnimation(.easeInOut(duration: 0.2)) { startMode = .coach } },
+            onCoach: {
+                // An unfinished coach match is offered first, as on Android
+                if onResumeCoach != nil, let unfinished = try? SwiftDataMatchRepository(context: modelContext).mostRecentInProgressMatch() {
+                    resumableCoach = unfinished
+                } else {
+                    withAnimation(.easeInOut(duration: 0.2)) { startMode = .coach }
+                }
+            },
             onReferee: {
                 // An unfinished referee match is offered first, as on Android
                 if let unfinished = RefereeInProgressStore.load() {

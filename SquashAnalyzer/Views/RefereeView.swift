@@ -101,7 +101,10 @@ struct RefereeView: View {
                 )
             }
         }
-        .sheet(isPresented: $showingShareSheet) {
+        .sheet(isPresented: $showingShareSheet, onDismiss: {
+            // Back to the result card, as on Android
+            if match.isMatchOver { showingMatchOver = true }
+        }) {
             MatchShareSheet(report: match.shareReport)
         }
         .onChange(of: match.isGameOver) { _, isOver in
@@ -292,6 +295,13 @@ struct RefereeView: View {
                 }
                 actionButton("STROKE", color: AppColors.coolIndigo) {
                     match.callStroke(to: .player2)
+                }
+            }
+
+            // After "Bekijk stand" the game-over card is gone; carry on from here
+            if match.isGameOver && !match.isMatchOver && !showingNextGameConfirm {
+                HardwareButton(title: "Volgende game", color: AppColors.warmOrange) {
+                    withAnimation(.easeInOut(duration: 0.15)) { match.confirmNextGame() }
                 }
             }
         }

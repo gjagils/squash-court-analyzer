@@ -48,8 +48,14 @@ class CoachPersistenceTest {
             compose.onAllNodes(hasText("Stop") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText("Stop").performClick()
-        awaitText("Bewaar en ga later verder")
-        compose.onNodeWithText("Bewaar en ga later verder").performClick()
+        // A match without any rally is dropped without asking (Match.stopAction)
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("Bewaar en ga later verder").fetchSemanticsNodes().isNotEmpty() ||
+                compose.onAllNodesWithText("SQUASH ANALYZER").fetchSemanticsNodes().isNotEmpty()
+        }
+        if (compose.onAllNodesWithText("Bewaar en ga later verder").fetchSemanticsNodes().isNotEmpty()) {
+            compose.onNodeWithText("Bewaar en ga later verder").performClick()
+        }
         awaitText("SQUASH ANALYZER")
     }
 
@@ -70,7 +76,7 @@ class CoachPersistenceTest {
         compose.waitUntil(10_000) {
             runBlocking { store.loadInProgress()?.currentGame?.player1Score == 0 }
         }
-        closeSaved()
+        // The undo is durable and the match is still the one in progress
         assertEquals(seeded.id, runBlocking { store.loadInProgress()!!.id })
     }
 

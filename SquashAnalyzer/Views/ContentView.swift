@@ -26,9 +26,6 @@ struct ContentView: View {
     @State private var showingLetSelector = false
     @State private var rallyElapsedTime: TimeInterval = 0
     @State private var rallyTimer: Timer? = nil
-    @State private var recoverableMatch: Match?
-    @State private var showingRecoveryPrompt = false
-    @State private var hasCheckedForRecovery = false
     @State private var persistenceErrorMessage: String?
     @State private var showingPersistenceError = false
     @State private var showingStartupPersistenceWarning = false
@@ -55,6 +52,9 @@ struct ContentView: View {
                     showingHistory = true
                 }, onOpenSettings: {
                     showingSettings = true
+                }, onResumeCoach: { unfinished in
+                    match = unfinished
+                    showingSetup = false
                 })
                     .transition(.opacity)
             }
@@ -189,7 +189,6 @@ struct ContentView: View {
             }
             #endif
             TeamImportService.addSamplePlayersIfNew(context: modelContext)
-            checkForInterruptedMatch()
             showingStartupPersistenceWarning = startupPersistenceWarning != nil
         }
         .onDisappear {
@@ -230,7 +229,13 @@ struct ContentView: View {
                 CardImportPresenter.present(snapshot, container: modelContext.container) { cardInbox.pending = nil }
             }
         }
-        .alert("Incomplete wedstrijd opslaan?", isPresented: $showingCancelConfirm) {
+        .alert(Match.stopTitle, isPresented: $showingCancelConfirm) {
+            // Stays in progress; the Coach tile offers it again (as on Android)
+            Button("Bewaar en ga later verder") {
+                persistMatch()
+                match = Match()
+                showingSetup = true
+            }
             Button("Opslaan als incompleet") {
                 abandonCurrentMatch()
                 match = Match()
@@ -246,30 +251,7 @@ struct ContentView: View {
             }
             Button("Doorspelen", role: .cancel) { }
         } message: {
-            Text("\(match.player1Name) – \(match.player2Name) staat \(match.player1GamesWon)-\(match.player2GamesWon) in games en is nog niet afgelopen. Sla hem op als incompleet, vul de winnaars van de gemiste games in, of gooi hem weg.")
-        }
-        .alert("Wedstrijd hervatten?", isPresented: $showingRecoveryPrompt) {
-            Button("Hervatten") {
-                if let recoverableMatch {
-                    match = recoverableMatch
-                    showingSetup = false
-                }
-                self.recoverableMatch = nil
-            }
-            Button("Afbreken", role: .destructive) {
-                if let recoverableMatch {
-                    try? SwiftDataMatchRepository(context: modelContext).markAbandoned(recoverableMatch)
-                }
-                self.recoverableMatch = nil
-            }
-            // Explicit cancel role, otherwise SwiftUI adds an untranslated "Cancel" button
-            Button("Later", role: .cancel) {
-                self.recoverableMatch = nil
-            }
-        } message: {
-            if let recoverableMatch {
-                Text("\(recoverableMatch.player1Name) – \(recoverableMatch.player2Name) is nog niet afgerond.")
-            }
+            Text(match.stopMessage)
         }
         .alert("Opslaan mislukt", isPresented: $showingPersistenceError) {
             Button("OK", role: .cancel) { }
@@ -330,18 +312,6 @@ struct ContentView: View {
         }
     }
 
-    private func checkForInterruptedMatch() {
-        guard !hasCheckedForRecovery else { return }
-        hasCheckedForRecovery = true
-        do {
-            recoverableMatch = try SwiftDataMatchRepository(context: modelContext).mostRecentInProgressMatch()
-            showingRecoveryPrompt = recoverableMatch != nil
-        } catch {
-            persistenceErrorMessage = error.localizedDescription
-            showingPersistenceError = true
-        }
-    }
-
     private func finishOrAbandonCurrentMatch() {
         if match.isMatchOver {
             match.status = .completed
@@ -351,14 +321,15 @@ struct ContentView: View {
         }
     }
 
-    /// Stopping a match that is not over asks whether to keep it; one without any
-    /// recorded rally is discarded straight away.
+    /// Stop (Core's Match.stopAction, the same on Android): a finished match is
+    /// saved, one without any recorded rally discarded, anything else asks.
     private func requestStop() {
-        if match.isMatchOver {
+        switch match.stopAction {
+        case .finish:
             finishOrAbandonCurrentMatch()
-        } else if match.allPoints.isEmpty && match.allLets.isEmpty && match.firstGameNumber == 1 {
+        case .discard:
             discardCurrentMatch()
-        } else {
+        case .ask:
             showingCancelConfirm = true
             return
         }

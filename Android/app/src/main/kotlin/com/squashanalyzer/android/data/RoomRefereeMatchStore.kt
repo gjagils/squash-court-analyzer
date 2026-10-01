@@ -21,6 +21,11 @@ class RoomRefereeMatchStore(
     }
 
     override suspend fun abandon(match: RefereeMatch) {
+        // Not a single rally played: nothing worth keeping, as on iOS
+        if (match.pointHistory.isEmpty && match.completedGames.isEmpty) {
+            store.delete(capture(match))
+            return
+        }
         store.upsert(capture(match).copy(status = MatchStatus.ABANDONED))
         syncBadges(match)
     }
@@ -77,6 +82,7 @@ class RoomRefereeMatchStore(
             id = uuid(row.id), player1Name = row.player1Name, player2Name = row.player2Name,
             bestOf = row.bestOf, startingServer = player(row.currentServer),
             player1GamesBefore = row.player1GamesBefore, player2GamesBefore = row.player2GamesBefore,
+            matchStartedAt = date(row.matchStartedAt),
         )
         match.player1Id = row.player1Id?.let(::uuid)
         match.player2Id = row.player2Id?.let(::uuid)

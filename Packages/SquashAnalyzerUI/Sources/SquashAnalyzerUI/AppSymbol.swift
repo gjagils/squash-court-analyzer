@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SportsTennis
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.VerticalAlignBottom
 import androidx.compose.material3.Icon
@@ -89,6 +90,7 @@ struct AppSymbol: View {
         case "trash": return Icons.Filled.Delete
         case "chart.bar.fill": return Icons.Filled.BarChart
         case "gearshape": return Icons.Filled.Settings
+        case "timer": return Icons.Filled.Timer
         case "square.and.arrow.up": return Icons.Filled.Share
         case "chevron.left": return Icons.AutoMirrored.Filled.KeyboardArrowLeft
         case "chevron.right": return Icons.AutoMirrored.Filled.KeyboardArrowRight

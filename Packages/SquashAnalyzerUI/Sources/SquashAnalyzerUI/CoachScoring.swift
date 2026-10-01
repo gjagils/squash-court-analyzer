@@ -124,6 +124,7 @@ enum CoachPalette {
     static let textMuted = Color(red: 0.50, green: 0.48, blue: 0.45)
     static let backgroundDark = Color(red: 0.06, green: 0.05, blue: 0.04)
     static let backgroundMedium = Color(red: 0.12, green: 0.10, blue: 0.08)
+    static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
 }
 
 /// Coach mode's scoring screen, shared between iOS and Android. Reproduces
@@ -150,6 +151,8 @@ public struct CoachScoringView: View {
     let onAbandon: (() -> Void)?
     /// "Niet opslaan"
     let onDiscard: (() -> Void)?
+    /// "Nieuwe wedstrijd" on the match-over card; nil shows "Klaar" (back home)
+    let onNewMatch: (() -> Void)?
     /// Afgeronde wedstrijden and Instellingen from the header, as on iOS; nil hides the button
     let onHistory: (() -> Void)?
     let onSettings: (() -> Void)?
@@ -162,6 +165,7 @@ public struct CoachScoringView: View {
     @State private var analysedGame: Game?
     @State private var showingAnalysis = false
     @State private var showingShare = false
+    @State private var showingBadges = false
     /// 6 or 9 zones, a setting (Instellingen)
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     /// "Uit de lucht" for the point being entered; off again after every point
@@ -170,9 +174,10 @@ public struct CoachScoringView: View {
     public init(match: Match, aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil,
                 photos: [String: Data] = [:],
                 onMatchChanged: @escaping (Match) -> Void, onAbandon: (() -> Void)? = nil, onDiscard: (() -> Void)? = nil,
-                onHistory: (() -> Void)? = nil, onSettings: (() -> Void)? = nil,
+                onHistory: (() -> Void)? = nil, onSettings: (() -> Void)? = nil, onNewMatch: (() -> Void)? = nil,
                 onExit: @escaping () -> Void) {
         _match = State(initialValue: match)
+        self.onNewMatch = onNewMatch
         self.onHistory = onHistory
         self.onSettings = onSettings
         self.photos = photos
@@ -205,10 +210,9 @@ public struct CoachScoringView: View {
                 .padding(.horizontal, 24)
                 .frame(height: 28)
 
-                if match.isMatchOver {
-                    matchOverBanner
-                } else if game.isGameOver {
-                    gameOverBanner
+                if match.isMatchOver || game.isGameOver {
+                    // The result card covers the screen (see resultCard)
+                    Spacer(minLength: 0)
                 } else {
                     scoreTapStage
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -223,6 +227,9 @@ public struct CoachScoringView: View {
             }
             .padding(.vertical, 8)
 
+            if match.isMatchOver || game.isGameOver {
+                resultCard
+            }
             if showingLet {
                 letOverlay
             }
@@ -422,98 +429,62 @@ public struct CoachScoringView: View {
 
     // MARK: - Game / match over
 
-    private var gameOverBanner: some View {
-        VStack(spacing: 16) {
-            Spacer(minLength: 0)
-            if let winner = game.winner {
-                Text("\(game.name(for: winner)) WINT DE GAME")
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(CoachPalette.textPrimary)
-                Text("\(game.player1Score) – \(game.player2Score)")
-                    .font(.system(size: 32, weight: .bold, design: .monospaced))
-                    .foregroundColor(CoachPalette.textPrimary)
-            }
-            analysisButton
-            Button(action: {
-                match.onGameEnd()
-                onMatchChanged(match)
-            }) {
-                Text("VOLGENDE GAME")
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundColor(CoachPalette.backgroundDark)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(CoachPalette.warmOrange)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .buttonStyle(.plain)
-            Spacer(minLength: 0)
-        }
+    // MARK: - Result card (as on iOS)
+
+    private func photo(_ player: Player) -> Data? {
+        (player == Player.player1 ? match.player1Id : match.player2Id).flatMap { photos[$0.uuidString] }
     }
 
-    private var matchOverBanner: some View {
-        VStack(spacing: 16) {
-            Spacer(minLength: 0)
-            if let winner = match.matchWinner {
-                Text("\(match.name(for: winner)) WINT DE WEDSTRIJD")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(CoachPalette.textPrimary)
-                    .multilineTextAlignment(.center)
-                Text("\(match.player1GamesWon) – \(match.player2GamesWon)")
-                    .font(.system(size: 36, weight: .bold, design: .monospaced))
-                    .foregroundColor(CoachPalette.textPrimary)
-            }
-            SharedMatchBadgesStrip(earnings: SharedMatchBadgesStrip.earnings(
-                player1Id: match.player1Id, player1Name: match.player1Name,
-                player2Id: match.player2Id, player2Name: match.player2Name,
-                badgeInput: match.badgeInput
-            ))
-            HStack(spacing: 10) {
-                analysisButton
-                if let shareText {
-                    outlineButton("DEEL SCORE") { showingShare = true }
-                        .sheet(isPresented: $showingShare) {
-                            SharedMatchShareView(report: match.shareReport, shareText: shareText) { showingShare = false }
-                        }
-                }
-            }
-            Button(action: onExit) {
-                Text("KLAAR")
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundColor(CoachPalette.backgroundDark)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(CoachPalette.warmOrange)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .buttonStyle(.plain)
-            Spacer(minLength: 0)
-        }
+    private var badgeEarnings: [MatchBadgeEarning] {
+        guard match.isMatchOver else { return [] }
+        return SharedMatchBadgesStrip.earnings(player1Id: match.player1Id, player1Name: match.player1Name,
+                                               player2Id: match.player2Id, player2Name: match.player2Name,
+                                               badgeInput: match.badgeInput)
     }
 
-    /// Opens the game analysis (stats, advice, AI Coach) for the game just finished
-    private var analysisButton: some View {
-        outlineButton("ANALYSE") {
+    /// Game over and match over, the same card as iOS' GameOverOverlay
+    private var resultCard: some View {
+        var secondary: [ResultButton] = [ResultButton("Analyse", icon: "chart.bar.fill") {
             analysedGame = game
             showingAnalysis = true
+        }]
+        if shareText != nil {
+            secondary.append(ResultButton("Deel score", icon: "square.and.arrow.up") { showingShare = true })
         }
-    }
-
-
-    private func outlineButton(_ title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(CoachPalette.textPrimary)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(CoachPalette.textPrimary.opacity(0.10))
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(CoachPalette.textPrimary.opacity(0.3), lineWidth: 1))
-                )
+        let primary: ResultButton
+        if match.isMatchOver {
+            if let onNewMatch {
+                primary = ResultButton("Nieuwe wedstrijd") { onNewMatch() }
+            } else {
+                primary = ResultButton("Klaar") { onExit() }
+            }
+        } else {
+            primary = ResultButton("Volgende game") {
+                match.onGameEnd()
+                onMatchChanged(match)
+            }
         }
-        .buttonStyle(.plain)
+        return MatchResultOverlay(
+            result: MatchResult.coach(match, game: game),
+            player1Photo: photo(Player.player1), player2Photo: photo(Player.player2),
+            badgeEarnings: badgeEarnings, onBadges: { showingBadges = true },
+            secondary: secondary, primary: primary,
+            onUndo: {
+                // Back in play: the match is no longer finished
+                match.status = MatchStatus.inProgress
+                game.undoLastPoint()
+                onMatchChanged(match)
+            },
+            link: match.isMatchOver ? nil : ResultButton("Stop wedstrijd") { showingStop = true }
+        )
+        .sheet(isPresented: $showingShare) {
+            if let shareText {
+                SharedMatchShareView(report: match.shareReport, shareText: shareText) { showingShare = false }
+            }
+        }
+        .sheet(isPresented: $showingBadges) {
+            SharedMatchBadgesSheet(earnings: badgeEarnings) { showingBadges = false }
+        }
     }
 
     // MARK: - Rally timer, last point, let and stop

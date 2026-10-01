@@ -737,10 +737,9 @@ struct GameOverOverlay: View {
     var onStop: (() -> Void)? = nil
     var onUndo: (() -> Void)? = nil
 
+    @Query private var players: [SavedPlayer]
     @State private var showingShareSheet = false
     @State private var showingBadges = false
-
-    private var winner: Player? { match.isMatchOver ? match.matchWinner : game.winner }
 
     private var badgeEarnings: [MatchBadgeEarning] {
         guard match.isMatchOver else { return [] }
@@ -748,123 +747,29 @@ struct GameOverOverlay: View {
                                       names: [.player1: match.player1Name, .player2: match.player2Name])
     }
 
-    /// Finished games of this match, newest last
-    private var gameResults: [(number: Int, p1: Int, p2: Int, winner: Player)] {
-        match.games.enumerated().compactMap { index, g in
-            g.winner.map { (number: match.gameNumber(at: index), p1: g.player1Score, p2: g.player2Score, winner: $0) }
-        }
-    }
-
     var body: some View {
-        ResultOverlayCard(accent: winner.map(RefereeView.color(for:))) {
-            ResultTitle(match.isMatchOver ? "WEDSTRIJD KLAAR" : "GAME \(match.currentGameNumber) KLAAR")
-
-            if match.isMatchOver {
-                ResultScoreRow(
-                    player1Name: match.player1Name,
-                    player2Name: match.player2Name,
-                    player1Score: match.player1GamesWon,
-                    player2Score: match.player2GamesWon,
-                    winner: winner
-                )
-            } else {
-                ResultScoreRow(
-                    player1Name: game.player1Name,
-                    player2Name: game.player2Name,
-                    player1Score: game.player1Score,
-                    player2Score: game.player2Score,
-                    winner: winner
-                )
-            }
-
-            if let winner {
-                ResultWinnerLine(
-                    text: "\(game.name(for: winner)) wint\(match.isMatchOver ? " de wedstrijd" : " game \(match.currentGameNumber)")",
-                    color: RefereeView.color(for: winner)
-                )
-            }
-
-            VStack(spacing: 10) {
-                if gameResults.count > 1 || match.isMatchOver || match.firstGameNumber > 1 {
-                    GameResultChips(games: gameResults, untracked: match.firstGameNumber - 1)
-                }
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 11))
-                        .foregroundColor(.green)
-                    Text(match.isMatchOver ? "Wedstrijd automatisch opgeslagen" : "Game automatisch opgeslagen")
-                        .font(AppFonts.caption(11))
-                        .foregroundColor(AppColors.textMuted)
-                }
-            }
-
-            let earnings = badgeEarnings
-            if !earnings.isEmpty {
-                MatchBadgesStrip(earnings: earnings) { showingBadges = true }
-            }
-
-            VStack(spacing: 12) {
-                HStack(spacing: 8) {
-                    secondaryButton("Analyse", icon: "chart.bar.xaxis") { onAnalysis() }
-                    secondaryButton("Deel score", icon: "square.and.arrow.up") {
-                        showingShareSheet = true
-                    }
-                }
-
-                if match.isMatchOver {
-                    HardwareButton(title: "Nieuwe wedstrijd", color: AppColors.warmOrange) { onNewMatch() }
-                } else {
-                    HardwareButton(title: "Volgende game", color: AppColors.warmOrange) { onNextGame() }
-                }
-
-                if let undo = onUndo {
-                    OverlayUndoButton(action: undo)
-                }
-
-                if !match.isMatchOver, let stop = onStop {
-                    Button(action: stop) {
-                        Text("Stop wedstrijd")
-                            .font(AppFonts.caption(13))
-                            .foregroundColor(AppColors.textMuted)
-                    }
-                    .padding(.top, 2)
-                }
-            }
-        }
+        // The card is shared with Android (SquashAnalyzerUI's MatchResultOverlay)
+        MatchResultOverlay(
+            result: .coach(match, game: game),
+            player1Photo: players.photo(named: match.player1Name),
+            player2Photo: players.photo(named: match.player2Name),
+            badgeEarnings: badgeEarnings,
+            onBadges: { showingBadges = true },
+            secondary: [
+                ResultButton("Analyse", icon: "chart.bar.xaxis") { onAnalysis() },
+                ResultButton("Deel score", icon: "square.and.arrow.up") { showingShareSheet = true }
+            ],
+            primary: match.isMatchOver ? ResultButton("Nieuwe wedstrijd") { onNewMatch() }
+                                       : ResultButton("Volgende game") { onNextGame() },
+            onUndo: onUndo,
+            link: match.isMatchOver ? nil : onStop.map { stop in ResultButton("Stop wedstrijd") { stop() } }
+        )
         .sheet(isPresented: $showingShareSheet) {
             MatchShareSheet(report: match.shareReport)
         }
         .sheet(isPresented: $showingBadges) {
             MatchBadgesSheet(earnings: badgeEarnings, matchId: match.id)
         }
-    }
-
-    /// Outlined gold button with an icon, two of them share the row above the primary action
-    private func secondaryButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
-        let color = AppColors.accentGold
-        return Button(action: action) {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 12, weight: .semibold))
-                Text(title.uppercased())
-                    .font(AppFonts.label(13))
-                    .tracking(1)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .foregroundColor(color)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(color.opacity(0.12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(color.opacity(0.35), lineWidth: 1)
-                    )
-            )
-        }
-        .buttonStyle(.plain)
     }
 }
 

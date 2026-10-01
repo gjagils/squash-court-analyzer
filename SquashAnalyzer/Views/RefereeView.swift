@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import SquashAnalyzerCore
 import SquashAnalyzerUI
 
@@ -630,58 +631,18 @@ private struct RefereeGameOverOverlay: View {
     let onUndo: () -> Void
     let onDismiss: () -> Void
 
-    private var winner: Player? { match.currentGameWinner }
+    @Query private var players: [SavedPlayer]
 
     var body: some View {
-        ResultOverlayCard(accent: winner.map(RefereeView.color(for:))) {
-            ResultTitle("GAME \(match.currentGameNumber) KLAAR")
-
-            ResultScoreRow(
-                player1Name: match.player1Name,
-                player2Name: match.player2Name,
-                player1Score: match.player1Score,
-                player2Score: match.player2Score,
-                winner: winner
-            )
-
-            if let winner {
-                ResultWinnerLine(text: "\(match.name(for: winner)) wint game \(match.currentGameNumber)",
-                                 color: RefereeView.color(for: winner))
-            }
-
-            VStack(spacing: 10) {
-                GameResultChips(games: match.allGameResults, untracked: match.firstGameNumber - 1)
-                ResultCaption(standText)
-                ResultCaption(gameStatsText, icon: "timer")
-            }
-
-            VStack(spacing: 12) {
-                HardwareButton(title: "Volgende game", color: AppColors.warmOrange) { onNextGame() }
-                OverlayUndoButton(action: onUndo)
-                Button(action: onDismiss) {
-                    Text("Bekijk stand")
-                        .font(AppFonts.caption(13))
-                        .foregroundColor(AppColors.textMuted)
-                }
-                .padding(.top, 2)
-            }
-        }
-    }
-
-    /// "Gelijk 1 – 1" or "Jan leidt 2 – 1", games won including this one
-    private var standText: String {
-        let p1 = match.player1TotalGames, p2 = match.player2TotalGames
-        if p1 == p2 { return "Gelijk \(p1) – \(p2)" }
-        let leader: Player = p1 > p2 ? .player1 : .player2
-        return "\(match.name(for: leader)) leidt \(max(p1, p2)) – \(min(p1, p2))"
-    }
-
-    private var gameStatsText: String {
-        let secs = Int(match.currentGameDuration)
-        var parts = [String(format: "%d:%02d", secs / 60, secs % 60), "\(match.pointHistory.count) rallies"]
-        let strokes = match.pointHistory.filter(\.isStroke).count
-        if strokes > 0 { parts.append("\(strokes) stroke\(strokes == 1 ? "" : "s")") }
-        return parts.joined(separator: " · ")
+        // The card is shared with Android (SquashAnalyzerUI's MatchResultOverlay)
+        MatchResultOverlay(
+            result: .refereeGame(match),
+            player1Photo: players.photo(named: match.player1Name),
+            player2Photo: players.photo(named: match.player2Name),
+            primary: ResultButton("Volgende game") { onNextGame() },
+            onUndo: onUndo,
+            link: ResultButton("Bekijk stand") { onDismiss() }
+        )
     }
 }
 
@@ -693,9 +654,8 @@ private struct RefereeMatchOverOverlay: View {
     let onUndo: () -> Void
     let onDismiss: () -> Void
 
+    @Query private var players: [SavedPlayer]
     @State private var showingBadges = false
-
-    private var winner: Player? { match.matchWinner }
 
     private var badgeEarnings: [MatchBadgeEarning] {
         BadgeEngine().earnings(for: match.badgeInput, playerIds: match.playerIds,
@@ -703,48 +663,19 @@ private struct RefereeMatchOverOverlay: View {
     }
 
     var body: some View {
-        ResultOverlayCard(accent: winner.map(RefereeView.color(for:))) {
-            ResultTitle("WEDSTRIJD KLAAR")
-
-            ResultScoreRow(
-                player1Name: match.player1Name,
-                player2Name: match.player2Name,
-                player1Score: match.player1TotalGames,
-                player2Score: match.player2TotalGames,
-                winner: winner
-            )
-
-            if let winner {
-                ResultWinnerLine(text: "🏆 \(match.name(for: winner)) wint de wedstrijd",
-                                 color: RefereeView.color(for: winner))
-            }
-
-            VStack(spacing: 10) {
-                GameResultChips(games: match.allGameResults, untracked: match.firstGameNumber - 1)
-                ResultCaption(matchStatsText, icon: "timer")
-            }
-
-            let earnings = badgeEarnings
-            if !earnings.isEmpty {
-                MatchBadgesStrip(earnings: earnings) { showingBadges = true }
-            }
-
-            VStack(spacing: 12) {
-                HardwareButton(title: "Deel score", color: AppColors.warmOrange) { onShare() }
-                HardwareButton(title: "Sluiten", color: AppColors.textSecondary, style: .outlined) { onDismiss() }
-                OverlayUndoButton(action: onUndo)
-            }
-        }
+        MatchResultOverlay(
+            result: .refereeMatch(match),
+            player1Photo: players.photo(named: match.player1Name),
+            player2Photo: players.photo(named: match.player2Name),
+            badgeEarnings: badgeEarnings,
+            onBadges: { showingBadges = true },
+            primary: ResultButton("Deel score") { onShare() },
+            outlined: ResultButton("Sluiten") { onDismiss() },
+            onUndo: onUndo
+        )
         .sheet(isPresented: $showingBadges) {
             MatchBadgesSheet(earnings: badgeEarnings, matchId: match.id)
         }
-    }
-
-    private var matchStatsText: String {
-        let minutes = max(1, Int((match.matchDuration / 60).rounded()))
-        var parts = ["\(minutes) min", "\(match.totalRallies) rallies"]
-        if match.totalStrokes > 0 { parts.append("\(match.totalStrokes) stroke\(match.totalStrokes == 1 ? "" : "s")") }
-        return parts.joined(separator: " · ")
     }
 }
 
@@ -755,203 +686,3 @@ extension RefereeView {
     }
 }
 
-// MARK: - Result overlay building blocks (referee + coach)
-
-/// Dimmed scrim with the flat referee-style result card on top. `accent` tints
-/// the hairline border in the winner's colour.
-struct ResultOverlayCard<Content: View>: View {
-    var accent: Color? = nil
-    @ViewBuilder let content: Content
-
-    var body: some View {
-        ZStack {
-            Color.black.opacity(0.85)
-                .ignoresSafeArea()
-
-            VStack(spacing: 22) {
-                content
-            }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 28)
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(AppColors.backgroundMedium)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(accent?.opacity(0.35) ?? Color.white.opacity(0.10), lineWidth: 1)
-            )
-            .padding(.horizontal, 24)
-        }
-    }
-}
-
-struct ResultTitle: View {
-    let text: String
-    init(_ text: String) { self.text = text }
-
-    var body: some View {
-        Text(text)
-            .font(AppFonts.title(20))
-            .foregroundColor(AppColors.textPrimary)
-            .tracking(3)
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-    }
-}
-
-/// Avatars, names and the big rounded scores side by side; the winner keeps
-/// their colour, the loser is dimmed – same treatment as the live columns.
-struct ResultScoreRow: View {
-    let player1Name: String
-    let player2Name: String
-    let player1Score: Int
-    let player2Score: Int
-    let winner: Player?
-    var scoreSize: CGFloat = 64
-
-    var body: some View {
-        HStack(alignment: .lastTextBaseline, spacing: 4) {
-            side(.player1, name: player1Name, score: player1Score)
-            Text("–")
-                .font(.system(size: scoreSize * 0.55, weight: .bold, design: .rounded))
-                .foregroundColor(AppColors.textMuted)
-                .baselineOffset(scoreSize * 0.22)   // centre the dash on the digits
-            side(.player2, name: player2Name, score: player2Score)
-        }
-    }
-
-    private func side(_ player: Player, name: String, score: Int) -> some View {
-        let color = RefereeView.color(for: player)
-        let won = winner == nil || winner == player
-        return VStack(spacing: 6) {
-            PlayerAvatar(name: name, color: color, size: 44, active: won)
-            Text(name)
-                .font(AppFonts.label(13))
-                .foregroundColor(won ? color : AppColors.textSecondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-            Text("\(score)")
-                .font(.system(size: scoreSize, weight: .bold, design: .rounded))
-                .foregroundColor(won ? color : AppColors.textPrimary.opacity(0.55))
-                .contentTransition(.numericText())
-        }
-        .frame(maxWidth: .infinity)
-    }
-}
-
-struct ResultWinnerLine: View {
-    let text: String
-    let color: Color
-
-    var body: some View {
-        Text(text)
-            .font(AppFonts.body(16))
-            .foregroundColor(color)
-            .lineLimit(1)
-            .minimumScaleFactor(0.8)
-    }
-}
-
-struct ResultCaption: View {
-    let text: String
-    var icon: String? = nil
-    init(_ text: String, icon: String? = nil) {
-        self.text = text
-        self.icon = icon
-    }
-
-    var body: some View {
-        HStack(spacing: 5) {
-            if let icon {
-                Image(systemName: icon)
-                    .font(.system(size: 11))
-                    .foregroundColor(AppColors.accentGold.opacity(0.6))
-            }
-            Text(text)
-                .font(AppFonts.caption(12))
-                .foregroundColor(AppColors.textSecondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-        }
-    }
-}
-
-/// "G1 11-13" chips in the winner's colour, like the row under the live header.
-/// `untracked` games (played before scoring started) show as grey "G1 –" chips.
-struct GameResultChips: View {
-    let games: [(number: Int, p1: Int, p2: Int, winner: Player)]
-    var untracked: Int = 0
-
-    var body: some View {
-        HStack(spacing: 6) {
-            ForEach(0..<untracked, id: \.self) { index in
-                chip(number: index + 1, score: "–", color: AppColors.textMuted)
-            }
-            ForEach(games, id: \.number) { game in
-                chip(number: game.number, score: "\(game.p1)-\(game.p2)", color: RefereeView.color(for: game.winner))
-            }
-        }
-        .lineLimit(1)
-        .minimumScaleFactor(0.7)
-    }
-
-    private func chip(number: Int, score: String, color: Color) -> some View {
-        VStack(spacing: 1) {
-            Text("G\(number)")
-                .font(AppFonts.caption(9))
-                .foregroundColor(color.opacity(0.7))
-                .tracking(1)
-            Text(score)
-                .font(AppFonts.label(12))
-                .foregroundColor(color)
-        }
-        .padding(.horizontal, 9)
-        .padding(.vertical, 5)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(color.opacity(0.10))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(color.opacity(0.3), lineWidth: 1)
-                )
-        )
-    }
-}
-
-// MARK: - Service side selector (referee + coach)
-
-/// "SERVICE" caption with the Links / Rechts box chips for the current server.
-/// The active chip is filled in the player's colour; a pin marks the box the
-/// player starts from after every hand-out. `compact` is the scoreboard size.
-// MARK: - Overlay Undo Button
-
-/// "Undo laatste punt" for game-over / match-over overlays, so a mis-tap on the
-/// final point can still be corrected. Used by referee and coach overlays.
-struct OverlayUndoButton: View {
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 6) {
-                Image(systemName: "arrow.uturn.backward")
-                    .font(.system(size: 12, weight: .semibold))
-                Text("Undo laatste punt")
-                    .font(AppFonts.label(13))
-            }
-            .foregroundColor(AppColors.textSecondary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.white.opacity(0.06))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.14), lineWidth: 1)
-                    )
-            )
-        }
-        .buttonStyle(.plain)
-    }
-}

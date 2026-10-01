@@ -57,6 +57,7 @@ public struct CoachSessionView: View {
                 }, onAbandon: { finish(match, discard: false) }, onDiscard: { finish(match, discard: true) },
                 onHistory: historyStore == nil ? nil : { showingHistory = true },
                 onSettings: settings == nil ? nil : { showingSettings = true },
+                onNewMatch: { startOver(match) },
                 onExit: { persist(match, exit: true) })
                 .disabled(busy || failed)
             } else if let pending {
@@ -170,6 +171,23 @@ public struct CoachSessionView: View {
             )
             match = fresh
             do { try await store.save(fresh) } catch { failed = true }
+            busy = false
+        }
+    }
+
+    /// "Nieuwe wedstrijd" on the match-over card: the finished match is
+    /// saved, then the setup screen opens, as on iOS
+    private func startOver(_ value: Match) {
+        busy = true
+        failed = false
+        Task { @MainActor in
+            do {
+                try await store.save(value)
+                match = nil
+                showingSetup = true
+            } catch {
+                failed = true
+            }
             busy = false
         }
     }

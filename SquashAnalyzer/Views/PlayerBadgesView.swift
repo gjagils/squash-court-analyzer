@@ -2,53 +2,6 @@ import SwiftUI
 import SwiftData
 import SquashAnalyzerCore
 
-// MARK: - "Badges verdiend" strip on the match-over screen (coach + referee)
-
-/// Outlined gold row listing who earned what in this match; tapping it opens
-/// the badge screen. Only shown when a picked player earned something.
-struct MatchBadgesStrip: View {
-    let earnings: [MatchBadgeEarning]
-    let onTap: () -> Void
-
-    var body: some View {
-        let color = AppColors.accentGold
-        Button(action: onTap) {
-            HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("BADGES VERDIEND")
-                        .font(AppFonts.label(11))
-                        .tracking(1)
-                        .foregroundColor(color)
-                    ForEach(earnings) { earning in
-                        HStack(spacing: 8) {
-                            ForEach(earning.badges) { kind in
-                                BadgeView(kind: kind, size: 26, showsTitle: false)
-                            }
-                            Text("\(earning.name) · \(earning.badges.count == 1 ? earning.badges[0].title : "\(earning.badges.count) badges")")
-                                .font(AppFonts.body(13))
-                                .foregroundColor(AppColors.textPrimary)
-                                .lineLimit(1)
-                        }
-                    }
-                }
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(color)
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(color.opacity(0.12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.35), lineWidth: 1))
-            )
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Bekijk badges")
-    }
-}
-
 // MARK: - Sheet from the match-over screen
 
 /// Badge screen for the players who earned something in this match, with a

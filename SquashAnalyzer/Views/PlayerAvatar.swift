@@ -57,3 +57,10 @@ struct PlayerAvatarImage: View {
         .frame(width: size, height: size)
     }
 }
+
+extension Array where Element == SavedPlayer {
+    /// The photo of the saved player with this name, as PlayerAvatar finds it
+    func photo(named name: String) -> Data? {
+        first(where: { $0.name == name })?.photoData
+    }
+}

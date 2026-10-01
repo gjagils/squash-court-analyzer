@@ -2167,3 +2167,12 @@ Bijgewerkt 1 oktober 2026 (tweede ronde):
 - Let op: `connectedDebugAndroidTest` verwijdert de app (en de gegevens) van
   **elk** aangesloten toestel. Zet `ANDROID_SERIAL=emulator-5554` als de
   telefoon aan de Mac hangt.
+- **Eindvenster na een game en na de wedstrijd** (coach en scheidsrechter) is nu
+  één gedeeld venster, `MatchResultOverlay` in SquashAnalyzerUI, met de inhoud
+  uit `MatchResult.refereeGame/refereeMatch/coach`: spelers met foto en score,
+  winnaarsregel, gamechips, stand en duur/rallies/strokes, verdiende badges
+  (`MatchBadgesRow`; Android opent `SharedMatchBadgesSheet`, iOS zijn eigen
+  badgescherm), en de knoppen Analyse/Deel score, Volgende game/Nieuwe
+  wedstrijd/Deel score, Sluiten, Undo laatste punt en Stop wedstrijd/Bekijk
+  stand, precies als iOS had. De losse iOS-onderdelen (`ResultOverlayCard`,
+  `GameResultChips`, `OverlayUndoButton`, `MatchBadgesStrip`, …) zijn weg.

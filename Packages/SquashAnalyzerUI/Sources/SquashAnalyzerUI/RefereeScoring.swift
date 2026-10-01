@@ -18,6 +18,10 @@ public struct RefereeScoringView: View {
     @State private var sharingNow = false
     /// Ticks every second for the match and game timers
     @State private var now = Date()
+    /// The game end whose result card was put aside ("Bekijk stand"); a new
+    /// game end, or the same one after an undo and a new point, shows it again
+    @State private var hiddenResult: String? = nil
+    @State private var showingBadges = false
 
     public init(match: RefereeMatch, shareText: ((String) -> Void)? = nil, photos: [String: Data] = [:],
                 onMatchChanged: @escaping (RefereeMatch) -> Void, onExit: @escaping @MainActor () -> Void) {
@@ -44,6 +48,10 @@ public struct RefereeScoringView: View {
             }
             .padding(.bottom, 20)
 
+            if match.isGameOver && hiddenResult != resultKey {
+                resultCard
+            }
+
             if sharingNow, let shareText {
                 SharedMatchShareView(report: match.shareReport, shareText: shareText) { sharingNow = false }
             }
@@ -55,6 +63,56 @@ public struct RefereeScoringView: View {
                         if match.lastCallText == call { match.clearCallText() }
                     }
             }
+        }
+    }
+
+    // MARK: - Result card (as on iOS)
+
+    private var resultKey: String {
+        "\(match.currentGameNumber)-\(match.player1Score)-\(match.player2Score)"
+    }
+
+    private func photo(_ player: Player) -> Data? {
+        (player == Player.player1 ? match.player1Id : match.player2Id).flatMap { photos[$0.uuidString] }
+    }
+
+    private var badgeEarnings: [MatchBadgeEarning] {
+        SharedMatchBadgesStrip.earnings(player1Id: match.player1Id, player1Name: match.player1Name,
+                                        player2Id: match.player2Id, player2Name: match.player2Name,
+                                        badgeInput: match.badgeInput)
+    }
+
+    private func undoLastPoint() {
+        withAnimation(.easeInOut(duration: 0.15)) { match.undo() }
+        onMatchChanged(match)
+    }
+
+    @ViewBuilder
+    private var resultCard: some View {
+        if match.isMatchOver {
+            MatchResultOverlay(
+                result: MatchResult.refereeMatch(match),
+                player1Photo: photo(Player.player1), player2Photo: photo(Player.player2),
+                badgeEarnings: badgeEarnings, onBadges: { showingBadges = true },
+                primary: shareText == nil ? ResultButton("Sluiten") { close() }
+                    : ResultButton("Deel score") { hiddenResult = resultKey; sharingNow = true },
+                outlined: shareText == nil ? nil : ResultButton("Sluiten") { close() },
+                onUndo: { undoLastPoint() }
+            )
+            .sheet(isPresented: $showingBadges) {
+                SharedMatchBadgesSheet(earnings: badgeEarnings) { showingBadges = false }
+            }
+        } else {
+            MatchResultOverlay(
+                result: MatchResult.refereeGame(match),
+                player1Photo: photo(Player.player1), player2Photo: photo(Player.player2),
+                primary: ResultButton("Volgende game") {
+                    withAnimation(.easeInOut(duration: 0.15)) { match.confirmNextGame() }
+                    onMatchChanged(match)
+                },
+                onUndo: { undoLastPoint() },
+                link: ResultButton("Bekijk stand") { hiddenResult = resultKey }
+            )
         }
     }
 

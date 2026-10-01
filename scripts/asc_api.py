@@ -69,7 +69,9 @@ def request(method: str, path: str, body=None, params=None, headers=None, raw=Fa
         query = "&".join(f"{k}={v}" for k, v in params.items())
         url += ("&" if "?" in url else "?") + query
     data = None
-    hdrs = {"Authorization": f"Bearer {token()}"}
+    # Only the API gets the token; upload URLs (object storage) are pre-signed
+    # and reject an extra Authorization header with 400
+    hdrs = {"Authorization": f"Bearer {token()}"} if url.startswith(BASE_URL) else {}
     if body is not None:
         if raw:
             data = body

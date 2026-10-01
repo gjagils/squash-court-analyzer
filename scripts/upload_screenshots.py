@@ -20,7 +20,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 import asc_api as asc  # noqa: E402
 
 BUNDLE_ID = "com.squashanalyzer.app"
-DISPLAY_TYPE = "APP_IPHONE_69"
+# The 6.9" slot in App Store Connect; the API calls it APP_IPHONE_67 (APP_IPHONE_69 is rejected with 409)
+DISPLAY_TYPE = "APP_IPHONE_67"
 OTHER_IPHONE_TYPES = {"APP_IPHONE_65", "APP_IPHONE_61", "APP_IPHONE_58", "APP_IPHONE_55", "APP_IPHONE_47", "APP_IPHONE_40", "APP_IPHONE_35"}
 EDITABLE_STATES = {"PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "REJECTED", "METADATA_REJECTED", "WAITING_FOR_REVIEW", "INVALID_BINARY"}
 

@@ -144,6 +144,16 @@ de volleyschakelaar pas vanaf stap 3.
 
 ## Fase 3 — Invoer (iOS)
 
+**AFGEROND 2026-10-01** op `codex/android-phase4`, voor iOS én Android tegelijk:
+`CourtView(layout:)` tekent de vakken uit `CourtLayout.rows` (standaard 6,
+via Instellingen → Baanindeling ook 9; opgeslagen onder `courtZoneLayout`).
+Na de zone verschijnt de schakelaar "Uit de lucht" (`VolleyToggle`, alleen
+bij slagen waar `allowsVolley` geldt) en de slagen van die rij
+(`ShotType.options(for:)`, in rijen van 2 of 3 via `ShotType.rows`). Snelle
+invoer en `ShotTypeSelectorView` zijn verwijderd (3.2/3.4 vervallen). Op de
+emulator gecontroleerd: middenvak → Kill/Drive/Cross/Boast, volley + Kill
+wordt opgeslagen.
+
 Er zijn drie plekken waar je een vak of slag kiest. Alle drie gebruiken straks dezelfde logica.
 
 ### 3.1 Baan (`CourtView.swift`)

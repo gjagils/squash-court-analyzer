@@ -135,6 +135,10 @@ public struct CoachScoringView: View {
     @State private var analysedGame: Game?
     @State private var showingAnalysis = false
     @State private var showingShare = false
+    /// 6 or 9 zones, a setting (Instellingen)
+    @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
+    /// "Uit de lucht" for the point being entered; off again after every point
+    @State private var volley = false
 
     public init(match: Match, aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil,
                 onMatchChanged: @escaping (Match) -> Void, onExit: @escaping () -> Void) {
@@ -260,7 +264,8 @@ public struct CoachScoringView: View {
             .padding(.horizontal, 24)
         case .selectZone:
             VStack(spacing: 10) {
-                CourtView(isInteractive: true, selectedPlayer: game.selectedPlayer) { zone in
+                CourtView(isInteractive: true, selectedPlayer: game.selectedPlayer,
+                          layout: CourtLayout.from(stored: courtLayout)) { zone in
                     handleZoneTap(zone)
                 }
                 .padding(.horizontal, 16)
@@ -275,14 +280,23 @@ public struct CoachScoringView: View {
                         .foregroundColor(playerColor)
                         .tracking(1.5)
                 }
-                HStack(spacing: 12) {
-                    ForEach([ShotType.drive, .cross, .volley]) { shot in
-                        ShotTypeButton(shotType: shot, color: playerColor) { handleShotTypeSelect(shot) }
+                VolleyToggle(isOn: $volley, color: playerColor)
+                // The shots that fit the zone's row: 3 in a row, or 4 as 2×2.
+                // Two plain rows, not a nested ForEach (Skip mixes up captured
+                // values in nested loops, see docs/android-port.md).
+                let rows = ShotType.rows(ShotType.options(for: game.selectedZone))
+                if rows.count > 0 {
+                    HStack(spacing: 12) {
+                        ForEach(rows[0]) { shot in
+                            ShotTypeButton(shotType: shot, color: playerColor) { handleShotTypeSelect(shot) }
+                        }
                     }
                 }
-                HStack(spacing: 12) {
-                    ForEach([ShotType.drop, .lob, .boast]) { shot in
-                        ShotTypeButton(shotType: shot, color: playerColor) { handleShotTypeSelect(shot) }
+                if rows.count > 1 {
+                    HStack(spacing: 12) {
+                        ForEach(rows[1]) { shot in
+                            ShotTypeButton(shotType: shot, color: playerColor) { handleShotTypeSelect(shot) }
+                        }
                     }
                 }
                 cancelButton
@@ -293,7 +307,10 @@ public struct CoachScoringView: View {
     }
 
     private var cancelButton: some View {
-        Button(action: { game.clearSelection() }) {
+        Button(action: {
+            game.clearSelection()
+            volley = false
+        }) {
             Text("Annuleer")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(CoachPalette.textMuted)
@@ -462,8 +479,9 @@ public struct CoachScoringView: View {
 
     private func handleShotTypeSelect(_ shotType: ShotType) {
         withAnimation(.easeInOut(duration: 0.2)) {
-            game.addPoint(shotType: shotType)
+            game.addPoint(shotType: shotType, isVolley: volley)
         }
+        volley = false
         onMatchChanged(match)
     }
 }

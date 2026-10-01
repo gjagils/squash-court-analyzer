@@ -2062,6 +2062,15 @@ Weegt niet op tegen een Apple-only afhankelijkheid nu cross-platform het doel
 is. Nog niet gebouwd — dit is alleen de architectuurkeuze, vastgelegd zodat
 ze niet opnieuw gemaakt hoeft te worden.
 
+## 6 of 9 vakken, slagen per rij, volley (2026-10-01)
+
+Gedeeld in `SquashAnalyzerUI`: `CourtView(layout:)` en `VolleyToggle`, dus
+Android en iOS gebruiken dezelfde baan. De keuze staat in Instellingen →
+Baanindeling (`@AppStorage(CourtLayout.storageKey)`, standaard 6). In
+`CoachScoring` staan de slagknoppen als twee expliciete rijen uit
+`ShotType.rows(...)`, niet als geneste `ForEach` (zie de valkuil met
+closures hierboven). Plan en voortgang: `docs/plan-6-vakken-slagen.md`.
+
 ## Branching
 
 Fases 1–3 staan inmiddels op `main` (de eerdere afspraak over een aparte

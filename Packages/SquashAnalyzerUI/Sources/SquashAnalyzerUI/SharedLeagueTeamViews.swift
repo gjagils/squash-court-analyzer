@@ -265,6 +265,7 @@ public struct SharedSettingsView: View {
     let backup: BackupContext?
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
+    @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     @State private var draft = ""
     @State private var message: String?
     @State private var messageIsError = false
@@ -293,6 +294,8 @@ public struct SharedSettingsView: View {
             LeaguePalette.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
+                    courtSection
+                        .padding(.bottom, 20)
                     HStack(spacing: 8) {
                         HomeTileIconView(icon: .players, color: LeaguePalette.orange, size: 20)
                         Text("Mijn team")
@@ -342,6 +345,22 @@ public struct SharedSettingsView: View {
         .onAppear {
             draft = teamURL
             hasKey = aiCoach?.keyStore.hasOpenAIKey == true
+        }
+    }
+
+    private var courtSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Baanindeling")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(LeaguePalette.text)
+            Picker("Baanindeling", selection: $courtLayout) {
+                Text("6 vakken").tag(CourtLayout.six.rawValue)
+                Text("9 vakken").tag(CourtLayout.nine.rawValue)
+            }
+            .pickerStyle(.segmented)
+            Text("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak.")
+                .font(.system(size: 12))
+                .foregroundColor(LeaguePalette.muted)
         }
     }
 

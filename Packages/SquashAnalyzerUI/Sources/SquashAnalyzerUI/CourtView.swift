@@ -11,11 +11,15 @@ import SquashAnalyzerCore
 public struct CourtView: View {
     public var isInteractive: Bool
     public var selectedPlayer: Player?
+    /// 6 zones (left/right) or 9 (with a middle column); a setting
+    public var layout: CourtLayout
     public var onZoneTapped: ((CourtZone) -> Void)?
 
-    public init(isInteractive: Bool = false, selectedPlayer: Player? = nil, onZoneTapped: ((CourtZone) -> Void)? = nil) {
+    public init(isInteractive: Bool = false, selectedPlayer: Player? = nil, layout: CourtLayout = CourtLayout.six,
+                onZoneTapped: ((CourtZone) -> Void)? = nil) {
         self.isInteractive = isInteractive
         self.selectedPlayer = selectedPlayer
+        self.layout = layout
         self.onZoneTapped = onZoneTapped
     }
 
@@ -73,14 +77,15 @@ public struct CourtView: View {
 
     // MARK: - Interactive Zones
     private func interactiveZones(size: CGSize) -> some View {
-        let zoneWidth = size.width / 3
+        let columns = layout == CourtLayout.six ? 2 : 3
+        let zoneWidth = size.width / CGFloat(columns)
         let zoneHeight = size.height / 3
 
         return ZStack {
-            // 9 tappable zones in a 3x3 grid
+            // 6 (3 rows × left/right) or 9 tappable zones, from Core's CourtLayout
             ForEach(0..<3, id: \.self) { row in
-                ForEach(0..<3, id: \.self) { col in
-                    let zone = zoneFor(row: row, col: col)
+                ForEach(0..<columns, id: \.self) { col in
+                    let zone = layout.rows[row][col]
                     let xOffset = CGFloat(col) * zoneWidth + zoneWidth / 2
                     let yOffset = CGFloat(row) * zoneHeight + zoneHeight / 2
 
@@ -99,20 +104,6 @@ public struct CourtView: View {
         return selectedPlayer == .player1 ? CourtPalette.warmOrange : CourtPalette.deepBlue
     }
 
-    private func zoneFor(row: Int, col: Int) -> CourtZone {
-        switch (row, col) {
-        case (0, 0): return .frontLeft
-        case (0, 1): return .frontMiddle
-        case (0, 2): return .frontRight
-        case (1, 0): return .middleLeft
-        case (1, 1): return .middleMiddle
-        case (1, 2): return .middleRight
-        case (2, 0): return .backLeft
-        case (2, 1): return .backMiddle
-        case (2, 2): return .backRight
-        default: return .middleMiddle
-        }
-    }
 
     // MARK: - Instruction Overlay
     private func instructionOverlay(size: CGSize, player: Player) -> some View {

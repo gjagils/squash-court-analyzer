@@ -72,6 +72,18 @@ public enum ShotType: String, CaseIterable, Identifiable, Codable, Sendable {
         }
     }
 
+    /// Buttons per row for the shot step: 4 as 2×2, otherwise rows of 3
+    public static func rows(_ shots: [ShotType]) -> [[ShotType]] {
+        let perRow = shots.count == 4 ? 2 : 3
+        var rows: [[ShotType]] = []
+        var index = 0
+        while index < shots.count {
+            rows.append(Array(shots[index..<min(index + perRow, shots.count)]))
+            index += perRow
+        }
+        return rows
+    }
+
     /// Whether "Uit de lucht" can go with this shot (a lob is never a volley)
     public var allowsVolley: Bool { self != ShotType.lob && self != ShotType.volley }
 

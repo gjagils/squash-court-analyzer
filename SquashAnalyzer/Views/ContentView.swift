@@ -34,6 +34,10 @@ struct ContentView: View {
     @State private var showingStartupPersistenceWarning = false
     /// A player card link that was opened and waits for the import sheet (shared with Android)
     @State private var cardInbox = CardInbox()
+    /// 6 or 9 zones, a setting (Instellingen)
+    @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
+    /// "Uit de lucht" for the point being entered; off again after every point
+    @State private var volley = false
 
     private var currentGame: Game {
         match.currentGame
@@ -562,7 +566,8 @@ struct ContentView: View {
             .transition(.opacity)
         case .selectZone:
             VStack(spacing: 10) {
-                CourtView(isInteractive: currentGame.scoringStep == .selectZone, selectedPlayer: currentGame.selectedPlayer) { zone in
+                CourtView(isInteractive: currentGame.scoringStep == .selectZone, selectedPlayer: currentGame.selectedPlayer,
+                          layout: CourtLayout.from(stored: courtLayout)) { zone in
                     handleZoneTap(zone)
                 }
                 .padding(.horizontal, 16)
@@ -578,14 +583,13 @@ struct ContentView: View {
                         .foregroundColor(color)
                         .tracking(1.5)
                 }
-                HStack(spacing: 12) {
-                    ForEach([ShotType.drive, .cross, .volley]) { shot in
-                        ShotTypeButton(shotType: shot, color: color) { handleShotTypeSelect(shot) }
-                    }
-                }
-                HStack(spacing: 12) {
-                    ForEach([ShotType.drop, .lob, .boast]) { shot in
-                        ShotTypeButton(shotType: shot, color: color) { handleShotTypeSelect(shot) }
+                VolleyToggle(isOn: $volley, color: color)
+                // The shots that fit the zone's row: 3 in a row, or 4 as 2×2
+                ForEach(Array(ShotType.rows(ShotType.options(for: currentGame.selectedZone)).enumerated()), id: \.offset) { _, row in
+                    HStack(spacing: 12) {
+                        ForEach(row) { shot in
+                            ShotTypeButton(shotType: shot, color: color) { handleShotTypeSelect(shot) }
+                        }
                     }
                 }
                 cancelButton
@@ -625,15 +629,16 @@ struct ContentView: View {
     }
 
     private func cancelInlinePoint() {
+        volley = false
         withAnimation(.easeInOut(duration: 0.2)) {
             currentGame.clearSelection()
         }
     }
 
-    /// "Niels: Winner · Drop · Voor Links", "Niels: Stroke · Midden Links" or "Niels: Unforced error"
+    /// "Niels: Winner · Volley drop · Voor Links", "Niels: Stroke · Midden Links" or "Niels: Unforced error"
     private func lastPointText(_ point: Point) -> String {
         var parts = [point.pointType.title]
-        if let shot = point.shotType { parts.append(shot.rawValue) }
+        if let shot = point.shotType { parts.append(shot.displayName(isVolley: point.isVolley)) }
         if let zone = point.zone { parts.append(zone.rawValue) }
         return "\(currentGame.name(for: point.scorer)): " + parts.joined(separator: " · ")
     }
@@ -675,8 +680,9 @@ struct ContentView: View {
 
     private func handleShotTypeSelect(_ shotType: ShotType) {
         withAnimation(.easeInOut(duration: 0.2)) {
-            currentGame.addPoint(shotType: shotType)
+            currentGame.addPoint(shotType: shotType, isVolley: volley)
         }
+        volley = false
     }
 
     // MARK: - Rally Timer

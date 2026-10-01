@@ -15,6 +15,7 @@ struct SettingsView: View {
     @AppStorage(CoachInputSettings.teamURLKey) private var teamURL = ""
     @State private var teamSaveMessage: String?
     @AppStorage(AutomaticBackup.enabledKey) private var automaticBackup = true
+    @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
 
     var body: some View {
         ZStack {
@@ -26,6 +27,8 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
+                        courtSection
+
                         teamSection
 
                         backupSection
@@ -94,6 +97,28 @@ struct SettingsView: View {
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 16)
+    }
+
+    // MARK: - Court Section
+    private var courtSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "square.grid.3x3").foregroundColor(AppColors.warmOrange)
+                Text("Baanindeling").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary)
+            }
+            Picker("Baanindeling", selection: $courtLayout) {
+                Text("6 vakken").tag(CourtLayout.six.rawValue)
+                Text("9 vakken").tag(CourtLayout.nine.rawValue)
+            }
+            .pickerStyle(.segmented)
+            Text("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak: voorin Drop, Boast en Kill, in het midden Kill, Drive, Cross en Boast, achterin Drive, Cross en Lob.")
+                .font(AppFonts.caption(11))
+                .foregroundColor(AppColors.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
     }
 
     // MARK: - Backup Section

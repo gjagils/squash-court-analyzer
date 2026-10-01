@@ -20,6 +20,21 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.HourglassBottom
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.ArrowCircleUp
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.filled.GpsFixed
+import androidx.compose.material.icons.filled.ArrowCircleDown
+import androidx.compose.material.icons.filled.CenterFocusStrong
+import androidx.compose.material.icons.filled.OfflineBolt
+import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Place
@@ -101,6 +116,21 @@ struct AppSymbol: View {
         case "gearshape": return Icons.Filled.Settings
         case "timer": return Icons.Filled.Timer
         case "camera.fill": return Icons.Filled.PhotoCamera
+        case "hare.fill": return Icons.Filled.FastForward
+        case "tortoise.fill": return Icons.Filled.HourglassBottom
+        case "brain.head.profile", "brain": return Icons.Filled.Psychology
+        case "figure.walk": return Icons.AutoMirrored.Filled.DirectionsWalk
+        case "arrow.up.circle": return Icons.Filled.ArrowCircleUp
+        case "exclamationmark.circle": return Icons.Filled.Error
+        case "figure.run": return Icons.AutoMirrored.Filled.DirectionsRun
+        case "exclamationmark.triangle": return Icons.Filled.Warning
+        case "star": return Icons.Filled.StarBorder
+        case "target": return Icons.Filled.GpsFixed
+        case "arrow.down.right.circle": return Icons.Filled.ArrowCircleDown
+        case "scope": return Icons.Filled.CenterFocusStrong
+        case "bolt.circle": return Icons.Filled.OfflineBolt
+        case "chart.pie.fill": return Icons.Filled.PieChart
+        case "lightbulb.fill": return Icons.Filled.Lightbulb
         case "person.badge.plus": return Icons.Filled.PersonAdd
         case "person.2.circle": return Icons.Filled.Groups
         case "mappin": return Icons.Filled.Place

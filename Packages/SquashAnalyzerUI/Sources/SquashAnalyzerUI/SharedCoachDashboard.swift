@@ -192,13 +192,15 @@ public struct SharedCoachDashboardView: View {
     }
 
     private var gamePicker: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
+        // A fixed row, as on iOS
+        HStack(spacing: 8) {
                 ForEach(0..<games.count, id: \.self) { index in
                     let candidate = games[index]
                     Button { chooseGame(index) } label: {
                         Text("Game \(gameNumber(of: candidate)) (\(candidate.player1Score)-\(candidate.player2Score))")
                             .font(.system(size: 11))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                             .foregroundColor(index == gameIndex ? DashboardPalette.text : DashboardPalette.muted)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
@@ -206,7 +208,6 @@ public struct SharedCoachDashboardView: View {
                     }
                     .buttonStyle(.plain)
                 }
-            }
         }
     }
 
@@ -365,7 +366,7 @@ public struct SharedCoachDashboardView: View {
 
     private var pointTypes: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionTitle("Puntverdeling")
+            sectionTitle("Puntverdeling", icon: "chart.pie.fill")
             HStack(spacing: 8) {
                 countBadge("Winners", game.winners(by: player).count, DashboardPalette.green)
                 countBadge("Druk", game.forcedErrors(by: player).count, DashboardPalette.gold)
@@ -374,7 +375,7 @@ public struct SharedCoachDashboardView: View {
             HStack(spacing: 8) {
                 countBadge("Cadeautjes", game.unforcedErrors(by: player).count, DashboardPalette.blue)
                 countBadge("Eigen fouten", game.unforcedErrors(by: player.opponent).count, DashboardPalette.red)
-                countBadge("Strokes", game.strokes(by: player).count, DashboardPalette.red)
+                countBadge("Strokes", game.strokes(by: player).count, Color(red: 0.85, green: 0.30, blue: 0.30))
             }
         }
         .padding(14)
@@ -419,11 +420,14 @@ public struct SharedCoachDashboardView: View {
         .background(RoundedRectangle(cornerRadius: 8).fill(tint.opacity(0.10)))
     }
 
-    private func sectionTitle(_ title: String) -> some View {
-        Text(title.uppercased())
-            .font(.system(size: 11, weight: .semibold))
-            .tracking(1.2)
-            .foregroundColor(DashboardPalette.gold)
+    /// Gold icon and the title, as on iOS
+    private func sectionTitle(_ title: String, icon: String) -> some View {
+        HStack(spacing: 8) {
+            AppSymbol(icon, size: 15, color: DashboardPalette.gold)
+            Text(title)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundColor(DashboardPalette.text)
+        }
     }
 
     // MARK: Advice
@@ -432,7 +436,7 @@ public struct SharedCoachDashboardView: View {
         // With the match, so findings that also showed in an earlier game are named
         let items = CoachAdvice.local(in: game, for: player, match: match)
         return VStack(alignment: .leading, spacing: 10) {
-            sectionTitle("Tactisch advies")
+            sectionTitle("Tactisch Advies", icon: "lightbulb.fill")
             ZoneProfileTable(profile: ZoneProfile.of(game, for: player))
                 .padding(.bottom, 4)
             if items.isEmpty {
@@ -441,14 +445,14 @@ public struct SharedCoachDashboardView: View {
                     .foregroundColor(DashboardPalette.muted)
             }
             ForEach(0..<items.count, id: \.self) { index in
-                HStack(alignment: .top, spacing: 10) {
-                    Circle()
-                        .fill(toneColor(items[index].tone))
-                        .frame(width: 8, height: 8)
-                        .padding(.top, 5)
+                HStack(alignment: .top, spacing: 8) {
+                    // A topic icon in the tone colour, as iOS' AdviceRow
+                    AppSymbol(Self.icon(for: items[index].topic), size: 12, color: toneColor(items[index].tone))
+                        .frame(width: 16)
+                        .padding(.top, 2)
                     Text(items[index].text)
-                        .font(.system(size: 13))
-                        .foregroundColor(DashboardPalette.text)
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundColor(DashboardPalette.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -456,6 +460,28 @@ public struct SharedCoachDashboardView: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(RoundedRectangle(cornerRadius: 12).fill(DashboardPalette.card))
+    }
+
+    /// The same symbol per advice topic as iOS (CoachDashboardView.icon(for:))
+    static func icon(for topic: AdviceTopic) -> String {
+        switch topic {
+        case .speedUp: return "hare.fill"
+        case .slowDown: return "tortoise.fill"
+        case .ownErrors, .hurry: return "brain.head.profile"
+        case .forcedErrors: return "hand.raised.fill"
+        case .letsAgainst: return "figure.walk"
+        case .opponentErrors: return "arrow.up.circle"
+        case .opponentServicePoints: return "exclamationmark.circle"
+        case .ownServicePoints: return "bolt.fill"
+        case .letsFor: return "figure.run"
+        case .avoidZone: return "exclamationmark.triangle"
+        case .bestShot: return "star"
+        case .wonArea: return "target"
+        case .lostArea: return "arrow.down.right.circle"
+        case .errorArea: return "xmark.circle"
+        case .opening: return "scope"
+        case .volleys, .opponentVolleys: return "bolt.circle"
+        }
     }
 
     private func toneColor(_ tone: AdviceTone) -> Color {
@@ -473,7 +499,7 @@ public struct SharedCoachDashboardView: View {
     private var aiCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                sectionTitle("AI Coach")
+                sectionTitle("AI Coach", icon: "brain")
                 Spacer()
                 if !hasKey {
                     Text("API key vereist")

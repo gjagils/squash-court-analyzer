@@ -9,6 +9,7 @@ import squash.analyzer.core.BadgeEngine
 import squash.analyzer.core.BadgeEngine.CareerMatch
 import squash.analyzer.core.BadgeKind
 import squash.analyzer.core.BadgeMatchInput
+import squash.analyzer.core.BadgeMoment
 import squash.analyzer.core.CardImportPlayer
 import squash.analyzer.core.CardImportPreview
 import squash.analyzer.core.CardImportStore
@@ -50,6 +51,17 @@ class BadgeAwardStore(
 
     override suspend fun badges(forPlayer: String): SwiftArray<BadgeKind> =
         SwiftArray(activeAwards(forPlayer).map { it.badge }.distinct().mapNotNull { BadgeKind.init(rawValue = it) })
+
+    override suspend fun moments(forPlayer: String): SwiftArray<BadgeMoment> =
+        SwiftArray(activeAwards(forPlayer).sortedByDescending { it.earnedAt }.mapNotNull { row ->
+            val badge = BadgeKind.init(rawValue = row.badge) ?: return@mapNotNull null
+            BadgeMoment(id = row.id, badge = badge, earnedAt = Date(timeIntervalSince1970 = row.earnedAt / 1000.0),
+                        opponentName = row.opponentName)
+        })
+
+    override suspend fun deleteMoment(id: String) {
+        dao.markDeleted(id, System.currentTimeMillis())
+    }
 
     override suspend fun cardSnapshot(forPlayer: String): CardSnapshot? {
         val player = playerDao.byId(forPlayer) ?: return null

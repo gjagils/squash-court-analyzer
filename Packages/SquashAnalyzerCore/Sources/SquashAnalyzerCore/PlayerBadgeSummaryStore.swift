@@ -1,8 +1,26 @@
 import Foundation
 
+/// One time a player earned a badge: against whom and when. Deleting it
+/// (swipe on iOS, "Verwijder" on Android) marks the award deleted; the
+/// deletion travels with the next shared card.
+public struct BadgeMoment: Identifiable, Equatable, Sendable {
+    /// The award id
+    public let id: String
+    public let badge: BadgeKind
+    public let earnedAt: Date
+    public let opponentName: String
+
+    public init(id: String, badge: BadgeKind, earnedAt: Date, opponentName: String) {
+        self.id = id
+        self.badge = badge
+        self.earnedAt = earnedAt
+        self.opponentName = opponentName
+    }
+}
+
 /// Read-only view onto a player's earned badges, for the "Spelers" list and
-/// a player's badge screen. Android implements this over `BadgeAwardStore`;
-/// this is deliberately not a full award CRUD protocol.
+/// a player's badge screen (with the earning moments, which can be deleted).
+/// Android implements this over `BadgeAwardStore`.
 public protocol PlayerBadgeSummaryStore: Sendable {
     func badges(forPlayer playerId: String) async throws -> [BadgeKind]
 
@@ -10,4 +28,10 @@ public protocol PlayerBadgeSummaryStore: Sendable {
     /// deletions included, oldest first, like iOS' `CardStore.snapshot(for:)`.
     /// Nil when the player no longer exists.
     func cardSnapshot(forPlayer playerId: String) async throws -> CardSnapshot?
+
+    /// Every badge the player still has, one entry per time earned, newest first
+    func moments(forPlayer playerId: String) async throws -> [BadgeMoment]
+
+    /// Marks one earned moment deleted
+    func deleteMoment(_ id: String) async throws
 }

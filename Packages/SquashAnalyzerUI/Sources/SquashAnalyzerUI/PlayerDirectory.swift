@@ -174,14 +174,21 @@ public struct PlayerDirectoryView: View {
                         LazyVStack(spacing: 12) {
                             ForEach(players) { player in
                                 HStack(spacing: 12) {
-                                    PlayerPhotoView(photo: photos[player.id], name: player.name, size: 44, color: PlayerStyle.gold)
-                                    VStack(alignment: .leading, spacing: 5) {
-                                        Text(player.name).font(.headline)
-                                        if !player.coachingFocusAreas.isEmpty {
-                                            Text(player.coachingFocusAreas.joined(separator: " · "))
-                                                .font(.caption).foregroundColor(PlayerStyle.muted)
+                                    // Tap the player for their badges, as on iOS
+                                    Button { badgesForPlayer = player } label: {
+                                        HStack(spacing: 12) {
+                                            PlayerPhotoView(photo: photos[player.id], name: player.name, size: 44, color: PlayerStyle.gold)
+                                            VStack(alignment: .leading, spacing: 5) {
+                                                Text(player.name).font(.headline)
+                                                if !player.coachingFocusAreas.isEmpty {
+                                                    Text(player.coachingFocusAreas.joined(separator: " · "))
+                                                        .font(.caption).foregroundColor(PlayerStyle.muted)
+                                                }
+                                            }
                                         }
                                     }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel("Badges van \(player.name)")
                                     Spacer()
                                     if let count = badgeCounts[player.id], count > 0 {
                                         Button { badgesForPlayer = player } label: {

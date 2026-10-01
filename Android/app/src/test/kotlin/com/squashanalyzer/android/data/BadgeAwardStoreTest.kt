@@ -113,4 +113,17 @@ class BadgeAwardStoreTest {
         assertEquals(1_000L, after.deletedAt)
         assertTrue(badgeStore.activeAwards(playerId.uuidString).none { it.badge == BadgeKind.fiveInARow.rawValue })
     }
+
+    @Test fun momentsListWhenAndAgainstWhomAndADeletedOneIsGone() = runTest {
+        val playerId = player()
+        coachAdapter.save(matchWithFiveInARow(playerId))
+
+        val moment = badgeStore.moments(playerId.uuidString).toList().single { it.badge == BadgeKind.fiveInARow }
+        assertEquals("Tegenstander", moment.opponentName)
+        badgeStore.deleteMoment(moment.id)
+        assertTrue(badgeStore.moments(playerId.uuidString).toList().none { it.id == moment.id })
+        // The deletion travels with the next shared card
+        val card = badgeStore.cardSnapshot(playerId.uuidString)!!
+        assertTrue(card.awards.toList().any { it.deletedAt != null })
+    }
 }

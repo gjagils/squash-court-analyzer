@@ -27,6 +27,7 @@
 		A1000030 /* PlayerManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000030 /* PlayerManagementView.swift */; };
 		A1000031 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000031 /* ExportService.swift */; };
 		B1000090 /* AutomaticBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000090 /* AutomaticBackup.swift */; };
+		B1000091 /* RefereeInProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000091 /* RefereeInProgressStore.swift */; };
 		A1000032 /* SampleDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000032 /* SampleDataService.swift */; };
 		A1000033 /* RefereeMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000033 /* RefereeMatch.swift */; };
 		A1000034 /* RefereeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000034 /* RefereeView.swift */; };
@@ -95,6 +96,7 @@
 		A2000030 /* PlayerManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerManagementView.swift; sourceTree = "<group>"; };
 		A2000031 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
 		B2000090 /* AutomaticBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomaticBackup.swift; sourceTree = "<group>"; };
+		B2000091 /* RefereeInProgressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeInProgressStore.swift; sourceTree = "<group>"; };
 		A2000032 /* SampleDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleDataService.swift; sourceTree = "<group>"; };
 		A2000033 /* RefereeMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeMatch.swift; sourceTree = "<group>"; };
 		A2000034 /* RefereeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeView.swift; sourceTree = "<group>"; };
@@ -243,6 +245,7 @@
 				A2000025 /* APIKeyManager.swift */,
 				A2000031 /* ExportService.swift */,
 				B2000090 /* AutomaticBackup.swift */,
+				B2000091 /* RefereeInProgressStore.swift */,
 				A2000032 /* SampleDataService.swift */,
 			);
 			path = Services;
@@ -401,6 +404,7 @@
 				A1000027 /* SavedLet.swift in Sources */,
 				A1000031 /* ExportService.swift in Sources */,
 				B1000090 /* AutomaticBackup.swift in Sources */,
+				B1000091 /* RefereeInProgressStore.swift in Sources */,
 				A1000032 /* SampleDataService.swift in Sources */,
 				A1000033 /* RefereeMatch.swift in Sources */,
 				A1000034 /* RefereeView.swift in Sources */,

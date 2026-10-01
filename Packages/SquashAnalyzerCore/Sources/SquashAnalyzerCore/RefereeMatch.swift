@@ -111,7 +111,7 @@ public class RefereeMatch: Identifiable {
     private var undoStack: [RefereeAction] = []
 
     public init(id: UUID = UUID(), player1Name: String, player2Name: String, bestOf: Int, startingServer: Player,
-                player1GamesBefore: Int = 0, player2GamesBefore: Int = 0) {
+                player1GamesBefore: Int = 0, player2GamesBefore: Int = 0, matchStartedAt: Date = Date()) {
         self.id = id
         self.player1Name = player1Name
         self.player2Name = player2Name
@@ -121,9 +121,8 @@ public class RefereeMatch: Identifiable {
         self.player2GamesBefore = validHeadStart ? player2GamesBefore : 0
         self.currentGameNumber = 1 + self.player1GamesBefore + self.player2GamesBefore
         self.currentServer = startingServer
-        let now = Date()
-        self.matchStartedAt = now
-        self.gameStartedAt = now
+        self.matchStartedAt = matchStartedAt
+        self.gameStartedAt = Date()
     }
 
     public var player1GamesWon: Int { player1GamesBefore + completedGames.filter { $0.winner == .player1 }.count }

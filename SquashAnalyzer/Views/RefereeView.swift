@@ -18,6 +18,20 @@ struct RefereeView: View {
         self.onDismiss = onDismiss
     }
 
+    /// Changes whenever something worth keeping changed
+    private var progressKey: String {
+        "\(match.player1Score)-\(match.player2Score)-\(match.currentGameNumber)-\(match.pointHistory.count)-\(match.completedGames.count)-\(match.currentServer.rawValue)-\(match.serverSide.rawValue)"
+    }
+
+    /// Keeps an unfinished match in a file so it can be resumed; a finished one is in SwiftData
+    private func keepProgress() {
+        if match.isMatchOver {
+            RefereeInProgressStore.clear()
+        } else {
+            RefereeInProgressStore.save(match)
+        }
+    }
+
     var body: some View {
         ZStack {
             AppBackground()
@@ -98,6 +112,9 @@ struct RefereeView: View {
                 showingNextGameConfirm = true
             }
         }
+        // Every rally, call and box change is kept, so Sluiten or closing the app can be resumed
+        .onChange(of: progressKey) { _, _ in keepProgress() }
+        .onAppear { keepProgress() }
         .onChange(of: match.lastCallText) { _, call in
             guard let call else { return }
             Task {

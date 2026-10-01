@@ -2115,12 +2115,21 @@ Op 1 oktober zijn de grootste verschillen met iOS weggewerkt, in gedeelde code:
 
 ## Wat nog verschilt
 
-- "Deel kaart" deelt op Android alleen de link, niet ook een afbeelding van de kaart.
-- Spelersfoto's staan nog niet in het scorebord tijdens een wedstrijd.
-- Coach op Android heeft geen knop voor de analyse van de vorige game tijdens
-  het spelen, en geen geschiedenis- of instellingenknop in de kop.
-- iOS-scheidsrechter bewaart een onafgemaakte wedstrijd niet (Android wel).
-- Mijn team op iOS toont bij een wedstrijd zonder uitslag altijd "20:00".
+Bijgewerkt 1 oktober 2026 (tweede ronde):
+
+- Android "Deel kaart" deelt nu ook een afbeelding (`CardImage.kt`, getekend op
+  een Canvas met het badge-artwork uit de assets, via een FileProvider).
+- Spelersfoto's staan op het scorebord (coach en scheidsrechter).
+- Coach op Android heeft de analyse van de vorige game in de kop (vanaf game 2).
+  Een geschiedenis- of instellingenknop in de coachkop is er niet; op Android
+  ga je daarvoor terug naar het beginscherm.
+- iOS-scheidsrechter bewaart een onafgemaakte wedstrijd nu ook
+  (`RefereeInProgressStore`, een JSON-bestand met Core's
+  `RefereeMatchSnapshot`) en vraagt bij de tegel "Wedstrijd hervatten?". Verschil:
+  op iOS verdwijnt de oude bij "Nieuwe wedstrijd", op Android komt hij als
+  afgebroken in de lijst. Undo na hervatten werkt op beide niet (geen
+  undo-geschiedenis bewaard).
+- Mijn team op iOS toont nu de echte tijd van een nog te spelen wedstrijd.
 
 - Badge-artwork op Android: **gedaan 2026-10-01**. De 31 plaatjes staan nu in
   `Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets`

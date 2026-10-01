@@ -23,6 +23,8 @@ struct HomeView: View {
     @State private var showingPlayerManagement = false
     @State private var showingBadgeCatalog = false
     @State private var createdRefereeMatch: RefereeMatch? = nil
+    /// An unfinished referee match found when the Scheidsrechter tile is tapped
+    @State private var resumableReferee: RefereeMatch? = nil
 
     var body: some View {
         ZStack {
@@ -44,6 +46,17 @@ struct HomeView: View {
         }
         .fullScreenCover(item: $createdRefereeMatch) { m in
             RefereeView(match: m) { createdRefereeMatch = nil }
+        }
+        .alert("Wedstrijd hervatten?", isPresented: Binding(get: { resumableReferee != nil }, set: { if !$0 { resumableReferee = nil } }),
+               presenting: resumableReferee) { unfinished in
+            Button("Hervatten") { createdRefereeMatch = unfinished }
+            Button("Nieuwe wedstrijd", role: .destructive) {
+                RefereeInProgressStore.clear()
+                withAnimation(.easeInOut(duration: 0.2)) { startMode = .referee }
+            }
+            Button("Annuleren", role: .cancel) {}
+        } message: { unfinished in
+            Text("\(unfinished.player1Name) – \(unfinished.player2Name), game \(unfinished.currentGameNumber): \(unfinished.player1Score) – \(unfinished.player2Score). Bij een nieuwe wedstrijd wordt deze niet bewaard.")
         }
         #if DEBUG
         .onAppear {
@@ -85,7 +98,14 @@ struct HomeView: View {
     private var tileGrid: some View {
         HomeMenuTiles(
             onCoach: { withAnimation(.easeInOut(duration: 0.2)) { startMode = .coach } },
-            onReferee: { withAnimation(.easeInOut(duration: 0.2)) { startMode = .referee } },
+            onReferee: {
+                // An unfinished referee match is offered first, as on Android
+                if let unfinished = RefereeInProgressStore.load() {
+                    resumableReferee = unfinished
+                } else {
+                    withAnimation(.easeInOut(duration: 0.2)) { startMode = .referee }
+                }
+            },
             onHistory: { onViewHistory?() },
             onPlayers: { showingPlayerManagement = true },
             onBadges: { showingBadgeCatalog = true }

@@ -90,7 +90,8 @@ class AICoachTest {
         awaitText("GAME-ANALYSE")
         awaitText("Voorin werkt je drive het best (10 punten).")
         awaitText("Waar vallen de punten")
-        compose.onAllNodesWithText("Stel je API key in bij Instellingen").onFirst().performScrollTo().assertIsDisplayed()
+        // Without an OpenAI key there is no AI card, only the local advice
+        assertTrue(compose.onAllNodesWithText("Stel je API key in bij Instellingen").fetchSemanticsNodes().isEmpty())
         compose.onAllNodesWithContentDescription("Sluiten").onLast().performClick()
         awaitText("VOLGENDE GAME")
     }

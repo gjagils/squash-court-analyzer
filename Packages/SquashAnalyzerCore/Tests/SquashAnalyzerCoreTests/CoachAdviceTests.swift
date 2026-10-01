@@ -89,10 +89,12 @@ final class CoachAdviceTests: XCTestCase {
     // MARK: AI Coach
 
     func testRequestNeverContainsPlayerNames() throws {
-        let body = try AICoachClient.requestBody(game: game(), player: Player.player1, coachingFocus: ["Backhand"])
-        let text = String(data: body, encoding: .utf8) ?? ""
-        XCTAssertTrue(text.contains("gpt-4o-mini"))
-        XCTAssertTrue(text.contains("\"max_tokens\":500"))
+        let request = AICoachClient.prompt(game: game(), player: Player.player1, coachingFocus: ["Backhand"])
+        let text = String(data: try AICoachClient.requestBody(request, model: "gpt-4.1-nano"), encoding: .utf8) ?? ""
+        XCTAssertTrue(text.contains("gpt-4.1-nano"))
+        XCTAssertTrue(text.contains("\"max_completion_tokens\":500"))
+        XCTAssertTrue(text.contains("\"temperature\""))
+        XCTAssertFalse(text.contains("reasoning_effort"))
         XCTAssertTrue(text.contains("Backhand"))
         XCTAssertFalse(text.contains("Hugo"))
         XCTAssertFalse(text.contains("Ja\\u00efr") || text.contains("Jaïr"))
@@ -100,6 +102,24 @@ final class CoachAdviceTests: XCTestCase {
         XCTAssertTrue(prompt.contains("Eindstand: 5 - 3"))
         XCTAssertTrue(prompt.contains("Winners geslagen: 5"))
         XCTAssertTrue(prompt.contains("Voor Links: 5 gewonnen, 0 verloren"))
+    }
+
+    func testAReasoningModelGetsItsOwnSettings() throws {
+        let request = AICoachClient.prompt(game: game(), player: Player.player1)
+        let text = String(data: try AICoachClient.requestBody(request, model: "gpt-5-nano"), encoding: .utf8) ?? ""
+        XCTAssertTrue(text.contains("\"reasoning_effort\":\"low\""))
+        XCTAssertTrue(text.contains("\"max_completion_tokens\":3000"))
+        XCTAssertFalse(text.contains("temperature"))
+    }
+
+    func testTheCheapestAvailableModelIsChosen() {
+        XCTAssertEqual(AIModelChoice.pick(from: ["gpt-4o", "gpt-4o-mini", "gpt-4.1-nano", "whisper-1"]), "gpt-4.1-nano")
+        XCTAssertEqual(AIModelChoice.pick(from: ["gpt-4o", "gpt-4o-mini"]), "gpt-4o-mini")
+        // Models that do not exist yet: a nano before a mini, no audio/realtime variants
+        XCTAssertEqual(AIModelChoice.pick(from: ["gpt-7-mini", "gpt-7-nano-realtime", "gpt-7-nano", "gpt-7"]), "gpt-7-nano")
+        XCTAssertEqual(AIModelChoice.pick(from: ["gpt-7-mini-2027-01-01", "gpt-7-mini"]), "gpt-7-mini")
+        XCTAssertEqual(AIModelChoice.pick(from: ["gpt-4.1-nano", "gpt-4o-mini"], except: ["gpt-4.1-nano"]), "gpt-4o-mini")
+        XCTAssertNil(AIModelChoice.pick(from: ["gpt-4o", "dall-e-3"]))
     }
 
     private func chat(_ content: String) -> Data {
@@ -136,15 +156,47 @@ final class CoachAdviceTests: XCTestCase {
         XCTAssertEqual(garbage as? AICoachError, AICoachError.invalidResponse)
     }
 
-    func testClientSendsTheKeyAndReportsNoConnection() async throws {
-        let transport = FakeAITransport(response: AITransportResponse(status: 200, body: chat("Prima")))
+    private func models(_ ids: [String]) -> AITransportResponse {
+        let list = ids.map { "{\"id\":\"\($0)\"}" }.joined(separator: ",")
+        return AITransportResponse(status: 200, body: "{\"data\":[\(list)]}".data(using: .utf8)!)
+    }
+
+    func testClientAsksTheChosenModelWithTheKey() async throws {
+        let transport = FakeAITransport(models: models(["gpt-4o", "gpt-4o-mini"]),
+                                        answers: [AITransportResponse(status: 200, body: chat("Prima"))])
         let advice = try await AICoachClient(transport: transport).advice(for: game(), player: Player.player1, apiKey: "sk-test")
         XCTAssertEqual(advice.samenvatting, "Prima")
         XCTAssertEqual(transport.headers["Authorization"], "Bearer sk-test")
         XCTAssertEqual(transport.url?.absoluteString, "https://api.openai.com/v1/chat/completions")
+        XCTAssertEqual(transport.askedModels, ["gpt-4o-mini"])
+    }
 
+    func testARetiredModelIsSkippedOnce() async throws {
+        let retired = AITransportResponse(status: 404, body: "{\"error\":{\"code\":\"model_not_found\"}}".data(using: .utf8)!)
+        let transport = FakeAITransport(models: models(["gpt-4.1-nano", "gpt-4o-mini"]),
+                                        answers: [retired, AITransportResponse(status: 200, body: chat("Prima"))])
+        let advice = try await AICoachClient(transport: transport).advice(for: game(), player: Player.player1, apiKey: "sk-test")
+        XCTAssertEqual(advice.samenvatting, "Prima")
+        XCTAssertEqual(transport.askedModels, ["gpt-4.1-nano", "gpt-4o-mini"])
+    }
+
+    func testWithoutAModelListThePreferredModelIsTriedAndAWrongKeyIsNamed() async throws {
+        let transport = FakeAITransport(models: nil, answers: [AITransportResponse(status: 200, body: chat("Prima"))])
+        _ = try await AICoachClient(transport: transport).advice(for: game(), player: Player.player1, apiKey: "sk-test")
+        XCTAssertEqual(transport.askedModels, [AIModelChoice.preferred[0]])
+
+        let wrongKey = FakeAITransport(models: AITransportResponse(status: 401, body: Data()), answers: [])
         do {
-            _ = try await AICoachClient(transport: FakeAITransport(response: nil)).advice(for: game(), player: Player.player1, apiKey: "sk-test")
+            _ = try await AICoachClient(transport: wrongKey).advice(for: game(), player: Player.player1, apiKey: "sk-fout")
+            XCTFail("expected an error")
+        } catch {
+            XCTAssertEqual(error as? AICoachError, AICoachError.invalidAPIKey)
+        }
+    }
+
+    func testNoConnectionIsNamed() async throws {
+        do {
+            _ = try await AICoachClient(transport: FakeAITransport(models: nil, answers: [])).advice(for: game(), player: Player.player1, apiKey: "sk-test")
             XCTFail("expected an error")
         } catch {
             XCTAssertEqual(error as? AICoachError, AICoachError.noConnection)
@@ -152,20 +204,32 @@ final class CoachAdviceTests: XCTestCase {
     }
 }
 
-/// Answers with `response`, or fails like a lost connection when it is nil
+/// Answers the model list with `models` and each question with the next of
+/// `answers`; nil or no answer left fails like a lost connection
 final class FakeAITransport: AICoachTransport, @unchecked Sendable {
-    let response: AITransportResponse?
+    let models: AITransportResponse?
+    var answers: [AITransportResponse]
     var headers: [String: String] = [:]
     var url: URL?
+    var askedModels: [String] = []
 
-    init(response: AITransportResponse?) {
-        self.response = response
+    init(models: AITransportResponse?, answers: [AITransportResponse]) {
+        self.models = models
+        self.answers = answers
+    }
+
+    func get(_ url: URL, headers: [String: String]) async throws -> AITransportResponse {
+        guard let models else { throw URLError(.notConnectedToInternet) }
+        return models
     }
 
     func post(_ url: URL, headers: [String: String], body: Data) async throws -> AITransportResponse {
         self.url = url
         self.headers = headers
-        guard let response else { throw URLError(.notConnectedToInternet) }
-        return response
+        if let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any], let model = json["model"] as? String {
+            askedModels.append(model)
+        }
+        guard !answers.isEmpty else { throw URLError(.notConnectedToInternet) }
+        return answers.removeFirst()
     }
 }

@@ -46,4 +46,17 @@ class HttpAICoachTransportTest {
         assertEquals(401, response.status)
         assertEquals("{\"error\":\"bad key\"}", String(response.body.platformValue, Charsets.UTF_8))
     }
+
+    @Test fun getsTheModelListWithTheKey() = runTest {
+        server.enqueue(MockResponse.Builder().code(200).body("{\"data\":[{\"id\":\"gpt-4.1-nano\"}]}").build())
+        val headers = Dictionary<String, String>()
+        headers["Authorization"] = "Bearer sk-test"
+
+        val response = HttpAICoachTransport().get(URL(string = server.url("/v1/models").toString())!!, headers = headers)
+
+        assertEquals(200, response.status)
+        val request = server.takeRequest()
+        assertEquals("GET", request.method)
+        assertEquals("Bearer sk-test", request.headers["Authorization"])
+    }
 }

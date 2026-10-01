@@ -82,9 +82,13 @@ public struct SharedCoachDashboardView: View {
                     pointTypes
                     volleys
                     localAdvice
-                    aiCard
                         // Skip's sheet is not full height; keep the last card clear of the system bar
-                        .padding(.bottom, 48)
+                        .padding(.bottom, hasKey ? CGFloat(0) : CGFloat(48))
+                    // Only with an OpenAI key (Instellingen); without one the local advice is it
+                    if hasKey {
+                        aiCard
+                            .padding(.bottom, 48)
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
@@ -502,14 +506,14 @@ public struct SharedCoachDashboardView: View {
         guard let aiCoach, let key = aiCoach.keyStore.openAIAPIKey, !key.isEmpty else { return }
         let asked = player
         let askedGame = gameIndex
-        // Built here, so only the request body (not the Game) goes into the task
-        guard let body = try? AICoachClient.requestBody(game: game, player: asked, coachingFocus: match.coachingFocus(for: asked)) else { return }
+        // Built here, so only the texts (not the Game) go into the task
+        let request = AICoachClient.prompt(game: game, player: asked, coachingFocus: match.coachingFocus(for: asked))
         let client = aiCoach.client
         loadingAI = true
         aiError = nil
         Task {
             do {
-                let result = try await client.send(body, apiKey: key)
+                let result = try await client.send(request, apiKey: key)
                 // Only show it when the choice did not change meanwhile
                 if asked == player && askedGame == gameIndex {
                     advice = result

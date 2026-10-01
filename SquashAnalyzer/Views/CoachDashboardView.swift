@@ -81,8 +81,10 @@ struct CoachDashboardView: View {
                     // Local Tactical Advice
                     localAdviceCard
 
-                    // AI Coach Section
-                    aiCoachCard
+                    // AI Coach: only with an OpenAI key (Instellingen); without one the local advice is it
+                    if hasAIKey {
+                        aiCoachCard
+                    }
 
                     // Close Button
                     HardwareButton(

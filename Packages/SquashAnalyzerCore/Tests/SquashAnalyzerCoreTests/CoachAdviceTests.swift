@@ -63,12 +63,9 @@ final class CoachAdviceTests: XCTestCase {
         XCTAssertNil(CoachAdvice.tempo(in: short, for: Player.player1))
     }
 
-    func testTopShotsAndCourtRows() {
+    func testTopShots() {
         let shots = CoachAdvice.topShots(in: game(), for: Player.player1)
         XCTAssertEqual(shots, [ShotCount(shot: ShotType.drive, count: 5)])
-        XCTAssertEqual(CoachAdvice.courtRows.count, 3)
-        XCTAssertEqual(CoachAdvice.courtRows[0][0], CourtZone.frontLeft)
-        XCTAssertEqual(CoachAdvice.courtRows[2][2], CourtZone.backRight)
     }
 
     func testGameSummaryText() {

@@ -100,12 +100,13 @@ public enum AICoachPrompt {
             }
         }
         var shotStats: [String] = []
-        for shot in ShotType.allCases {
-            let count = game.pointsWon(by: player, with: shot)
-            if count > 0 {
-                shotStats.append("\(shot.rawValue): \(count) punten")
-            }
+        for shot in CoachAdvice.topShots(in: game, for: player, limit: 20) {
+            shotStats.append("\(shot.name): \(shot.count) punten")
         }
+        let volleys = game.volleysWon(by: player).count
+        let court = game.heatmapLayout == CourtLayout.nine
+            ? "9 vakken (voor/midden/achter × links/midden/rechts)"
+            : "6 vakken (voor/midden/achter × links/rechts)"
         let bestZone = game.bestZone(for: player)?.rawValue ?? "geen"
         let bestShot = game.bestShotType(for: player)?.rawValue ?? "geen"
         let worstZone = game.bestZone(for: opponent)?.rawValue ?? "geen"
@@ -128,9 +129,12 @@ public enum AICoachPrompt {
         - Cadeautjes (unforced errors tegenstander): \(game.unforcedErrors(by: player).count)
         - Strokes toegekend: \(game.strokes(by: player).count)
         - Servicepunten (direct uit de service): \(game.servicePoints(by: player).count)
+        - Punten uit de lucht (volleys): \(volleys)
         - Beste zone: \(bestZone)
         - Beste slag: \(bestShot)
         - Zone waar tegenstander scoorde: \(worstZone)
+
+        De baan is verdeeld in \(court). Links/rechts is de forehand- of backhandkant, afhankelijk van de speler.
 
         PUNTEN PER ZONE (winners + forced errors):
         \(zoneStats.isEmpty ? "geen data" : zoneStats.joined(separator: "\n"))

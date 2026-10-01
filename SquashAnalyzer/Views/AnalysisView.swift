@@ -257,19 +257,20 @@ struct AnalysisView: View {
                 .font(AppFonts.label(14))
                 .foregroundColor(AppColors.textPrimary)
 
-            // Row 1: Drive, Cross, Volley
+            // Drive · Cross · Lob / Drop · Boast · Kill; a volley counts with its shot
             HStack(spacing: 10) {
                 shotStatCell(for: .drive)
                 shotStatCell(for: .cross)
-                shotStatCell(for: .volley)
+                shotStatCell(for: .lob)
             }
 
-            // Row 3: Drop, Lob, Boast
             HStack(spacing: 10) {
                 shotStatCell(for: .drop)
-                shotStatCell(for: .lob)
                 shotStatCell(for: .boast)
+                shotStatCell(for: .kill)
             }
+
+            volleyRow
         }
         .padding()
         .background(
@@ -281,6 +282,32 @@ struct AnalysisView: View {
                 .stroke(Color.white.opacity(0.08), lineWidth: 1)
         )
         .padding(.horizontal, 24)
+    }
+
+    /// Volleys: the "Uit de lucht" switch plus older Volley points
+    private var volleyRow: some View {
+        let count = displayedGame.volleysWon(by: selectedPlayer).count
+        return HStack(spacing: 10) {
+            Image(systemName: "bolt.fill")
+                .foregroundColor(count > 0 ? AppColors.accentGold : AppColors.textMuted)
+            Text("Uit de lucht")
+                .font(AppFonts.caption(11))
+                .foregroundColor(AppColors.textSecondary)
+            Text(CoachAdvice.volleyBreakdown(in: displayedGame, for: selectedPlayer) ?? "")
+                .font(AppFonts.caption(10))
+                .foregroundColor(AppColors.textMuted)
+                .lineLimit(1)
+            Spacer()
+            Text("\(count)")
+                .font(AppFonts.score(18))
+                .foregroundColor(count > 0 ? AppColors.textPrimary : AppColors.textMuted)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.white.opacity(count > 0 ? 0.08 : 0.03))
+        )
     }
 
     private func shotStatCell(for shotType: ShotType) -> some View {
@@ -605,14 +632,18 @@ struct HeatmapCourt: View {
         .aspectRatio(aspectRatio, contentMode: .fit)
     }
 
+    /// 2×3 or 3×3, as the game was played (`Game.heatmapLayout`)
+    private var rows: [[CourtZone]] { game.heatmapLayout.rows }
+
     private func heatmapZones(size: CGSize) -> some View {
-        let zoneWidth = size.width / 3
+        let rows = rows
+        let zoneWidth = size.width / CGFloat(rows[0].count)
         let zoneHeight = size.height / 3
 
         return ZStack {
-            ForEach(0..<3, id: \.self) { row in
-                ForEach(0..<3, id: \.self) { col in
-                    let zone = zoneFor(row: row, col: col)
+            ForEach(0..<rows.count, id: \.self) { row in
+                ForEach(0..<rows[row].count, id: \.self) { col in
+                    let zone = rows[row][col]
                     let count = showingWins
                         ? game.pointsWon(by: player, in: zone)
                         : game.pointsWon(by: player.opponent, in: zone)
@@ -658,13 +689,14 @@ struct HeatmapCourt: View {
     }
 
     private func zoneLabels(size: CGSize) -> some View {
-        let zoneWidth = size.width / 3
+        let rows = rows
+        let zoneWidth = size.width / CGFloat(rows[0].count)
         let zoneHeight = size.height / 3
 
         return ZStack {
-            ForEach(0..<3, id: \.self) { row in
-                ForEach(0..<3, id: \.self) { col in
-                    let zone = zoneFor(row: row, col: col)
+            ForEach(0..<rows.count, id: \.self) { row in
+                ForEach(0..<rows[row].count, id: \.self) { col in
+                    let zone = rows[row][col]
                     let count = showingWins
                         ? game.pointsWon(by: player, in: zone)
                         : game.pointsWon(by: player.opponent, in: zone)
@@ -688,21 +720,6 @@ struct HeatmapCourt: View {
             }
         }
         .frame(width: size.width, height: size.height)
-    }
-
-    private func zoneFor(row: Int, col: Int) -> CourtZone {
-        switch (row, col) {
-        case (0, 0): return .frontLeft
-        case (0, 1): return .frontMiddle
-        case (0, 2): return .frontRight
-        case (1, 0): return .middleLeft
-        case (1, 1): return .middleMiddle
-        case (1, 2): return .middleRight
-        case (2, 0): return .backLeft
-        case (2, 1): return .backMiddle
-        case (2, 2): return .backRight
-        default: return .middleMiddle
-        }
     }
 
     private func intensityFor(count: Int) -> Double {

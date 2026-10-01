@@ -74,6 +74,9 @@ struct CoachDashboardView: View {
                     // Point Type Breakdown
                     pointTypeCard
 
+                    // Volleys ("Uit de lucht")
+                    volleyCard
+
                     // Local Tactical Advice
                     localAdviceCard
 
@@ -297,19 +300,20 @@ struct CoachDashboardView: View {
                 .font(AppFonts.caption(10))
                 .foregroundColor(AppColors.textMuted)
 
-            // 3x3 Mini Grid
+            // 2×3 or 3×3, as the game was played (`Game.heatmapLayout`)
+            let rows = game.heatmapLayout.rows
             VStack(spacing: 2) {
-                ForEach(0..<3, id: \.self) { row in
+                ForEach(0..<rows.count, id: \.self) { row in
                     HStack(spacing: 2) {
-                        ForEach(0..<3, id: \.self) { col in
-                            let zone = zoneFor(row: row, col: col)
+                        ForEach(0..<rows[row].count, id: \.self) { col in
+                            let zone = rows[row][col]
                             let count = game.pointsWon(by: selectedPlayer, in: zone)
                             let maxCount = maxPointsInZone()
                             let intensity = maxCount > 0 ? Double(count) / Double(maxCount) : 0
 
                             Rectangle()
                                 .fill(Color.green.opacity(0.2 + intensity * 0.6))
-                                .frame(width: 28, height: 28)
+                                .frame(width: rows[row].count == 2 ? 43 : 28, height: 28)
                                 .overlay(
                                     Text("\(count)")
                                         .font(AppFonts.caption(10))
@@ -343,12 +347,13 @@ struct CoachDashboardView: View {
                 .foregroundColor(AppColors.textMuted)
 
             VStack(spacing: 4) {
-                ForEach(topShots(), id: \.0.id) { shot, count in
+                ForEach(topShots(), id: \.name) { item in
+                    let count = item.count
                     HStack(spacing: 6) {
-                        ShotIconView(type: shot, color: AppColors.accentGold, size: 14)
+                        ShotIconView(type: item.shot, color: AppColors.accentGold, size: 14)
                             .frame(width: 14, height: 14)
 
-                        Text(shot.rawValue)
+                        Text(item.name)
                             .font(AppFonts.caption(10))
                             .foregroundColor(AppColors.textSecondary)
 
@@ -356,7 +361,7 @@ struct CoachDashboardView: View {
 
                         // Mini bar
                         GeometryReader { geo in
-                            let maxCount = topShots().map { $0.1 }.max() ?? 1
+                            let maxCount = topShots().map { $0.count }.max() ?? 1
                             let width = CGFloat(count) / CGFloat(maxCount) * geo.size.width
 
                             RoundedRectangle(cornerRadius: 2)
@@ -611,29 +616,46 @@ struct CoachDashboardView: View {
         .padding(.horizontal, 20)
     }
 
-    // MARK: - Helper Functions
-
-    private func zoneFor(row: Int, col: Int) -> CourtZone {
-        switch (row, col) {
-        case (0, 0): return .frontLeft
-        case (0, 1): return .frontMiddle
-        case (0, 2): return .frontRight
-        case (1, 0): return .middleLeft
-        case (1, 1): return .middleMiddle
-        case (1, 2): return .middleRight
-        case (2, 0): return .backLeft
-        case (2, 1): return .backMiddle
-        case (2, 2): return .backRight
-        default: return .middleMiddle
+    // MARK: - Volley Card
+    private var volleyCard: some View {
+        let count = game.volleysWon(by: selectedPlayer).count
+        return HStack(spacing: 12) {
+            Image(systemName: "bolt.fill")
+                .font(.system(size: 18))
+                .foregroundColor(AppColors.accentGold)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Uit de lucht")
+                    .font(AppFonts.label(13))
+                    .foregroundColor(AppColors.textPrimary)
+                Text(CoachAdvice.volleyBreakdown(in: game, for: selectedPlayer) ?? "Nog geen volleys")
+                    .font(AppFonts.caption(11))
+                    .foregroundColor(AppColors.textSecondary)
+            }
+            Spacer()
+            Text("\(count)")
+                .font(AppFonts.score(22))
+                .foregroundColor(count > 0 ? AppColors.accentGold : AppColors.textMuted)
         }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.03))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
+        .padding(.horizontal, 20)
     }
+
+    // MARK: - Helper Functions
 
     private func maxPointsInZone() -> Int {
         CourtZone.allCases.map { game.pointsWon(by: selectedPlayer, in: $0) }.max() ?? 1
     }
 
-    private func topShots() -> [(ShotType, Int)] {
-        CoachAdvice.topShots(in: game, for: selectedPlayer).map { ($0.shot, $0.count) }
+    private func topShots() -> [ShotCount] {
+        CoachAdvice.topShots(in: game, for: selectedPlayer)
     }
 
     private func shareCurrentGame() {

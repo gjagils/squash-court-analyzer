@@ -183,6 +183,18 @@ Eén helper (in Core, zodat Android hem ook krijgt): `ShotType.displayName(isVol
 
 ## Fase 4 — Analyse en coaching (iOS)
 
+**AFGEROND 2026-10-01** op `codex/android-phase4` (iOS én Android):
+heatmaps in iOS `AnalysisView`/`CoachDashboardView` en het gedeelde
+`SharedCoachDashboardView` volgen `Game.heatmapLayout` (2×3, of 3×3 zodra er
+een punt in de middenkolom ligt). Slaglijsten tellen een volley apart
+(`ShotCount.isVolley`/`name`: "Volley kill"). Nieuwe kaart **"Uit de lucht"**
+met `CoachAdvice.volleyBreakdown` ("2 drop, 1 kill"; oude Volley-punten als
+"oud"). Het slagraster in `AnalysisView` is Drive · Cross · Lob / Drop ·
+Boast · Kill plus een volley-regel. De AI-prompt noemt de volley-namen, het
+aantal volleys en of de baan in 6 of 9 vakken is verdeeld.
+`CoachAdvice.courtRows` is vervallen (`CourtLayout.nine.rows`). De
+share-tekst (`GameSummaryText`) noemt alleen de beste zone en blijft zo.
+
 ### 4.1 Heatmaps (`AnalysisView.swift`, `CoachDashboardView.swift`)
 - Een raster van 2×3 met `CourtZone.inputZones` in plaats van 3×3.
 - **Oude wedstrijden:** punten in een legacy-middenvak vallen buiten het raster. Onder de heatmap komt dan een regel "Midden (oude indeling): n punten". Er verdwijnt dus niets en er wordt niets verzonnen.

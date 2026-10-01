@@ -2069,7 +2069,9 @@ Android en iOS gebruiken dezelfde baan. De keuze staat in Instellingen →
 Baanindeling (`@AppStorage(CourtLayout.storageKey)`, standaard 6). In
 `CoachScoring` staan de slagknoppen als twee expliciete rijen uit
 `ShotType.rows(...)`, niet als geneste `ForEach` (zie de valkuil met
-closures hierboven). Plan en voortgang: `docs/plan-6-vakken-slagen.md`.
+closures hierboven). Valkuil: `cond ? 43 : 28` als `frame(width:)` wordt
+in Kotlin een `Int` en compileert niet; schrijf `CGFloat(43) : CGFloat(28)`.
+Plan en voortgang: `docs/plan-6-vakken-slagen.md`.
 
 ## Branching
 
@@ -2084,4 +2086,10 @@ branch tot een presenteerbare mijlpaal; samenvoegen is een afzonderlijke stap.
   invoermodus is er niet meer, ook niet op iOS — zie de beslissing van
   2026-10-01.)
 - Foto's, badgecatalogus en teamimport in het Android-spelersscherm.
+- **Backlog: badge-artwork op Android.** iOS heeft per badge een PNG in
+  `SquashAnalyzer/Assets.xcassets/badge-*.imageset` (31 stuks, ±6 MB);
+  Android toont nu een eenvoudige medaille (`BadgeCatalog.swift`). Kan:
+  de imagesets naar een asset catalog in `Packages/SquashAnalyzerUI`
+  (`Resources/`, `Image(name, bundle: .module)`) verplaatsen, zodat iOS en
+  Android dezelfde bestanden gebruiken. Daarbij de PNG's verkleinen (APK).
 - Een fysiek Android-toestel is nog nodig voor aanvullende praktijktests.

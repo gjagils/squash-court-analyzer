@@ -80,6 +80,7 @@ public struct SharedCoachDashboardView: View {
                         shots
                     }
                     pointTypes
+                    volleys
                     localAdvice
                     aiCard
                         // Skip's sheet is not full height; keep the last card clear of the system bar
@@ -250,7 +251,9 @@ public struct SharedCoachDashboardView: View {
         .background(RoundedRectangle(cornerRadius: 10).fill(DashboardPalette.card))
     }
 
+    /// 2×3 or 3×3, whichever the game was played with (`Game.heatmapLayout`)
     private var heatmap: some View {
+        let rows = game.heatmapLayout.rows
         var most = 1
         for zone in CourtZone.allCases {
             most = max(most, game.pointsWon(by: player, in: zone))
@@ -261,17 +264,17 @@ public struct SharedCoachDashboardView: View {
                 .font(.system(size: 10))
                 .foregroundColor(DashboardPalette.muted)
             VStack(spacing: 2) {
-                ForEach(0..<3, id: \.self) { row in
+                ForEach(0..<rows.count, id: \.self) { row in
                     HStack(spacing: 2) {
-                        ForEach(0..<3, id: \.self) { column in
-                            let count = game.pointsWon(by: player, in: CoachAdvice.courtRows[row][column])
+                        ForEach(0..<rows[row].count, id: \.self) { column in
+                            let count = game.pointsWon(by: player, in: rows[row][column])
                             ZStack {
                                 Rectangle().fill(DashboardPalette.green.opacity(0.2 + Double(count) / Double(highest) * 0.6))
                                 Text("\(count)")
                                     .font(.system(size: 10))
                                     .foregroundColor(DashboardPalette.text)
                             }
-                            .frame(width: 28, height: 28)
+                            .frame(width: rows[row].count == 2 ? CGFloat(43) : CGFloat(28), height: 28)
                         }
                     }
                 }
@@ -296,7 +299,7 @@ public struct SharedCoachDashboardView: View {
             }
             ForEach(0..<top.count, id: \.self) { index in
                 HStack {
-                    Text(top[index].shot.rawValue)
+                    Text(top[index].name)
                         .font(.system(size: 11))
                         .foregroundColor(DashboardPalette.secondary)
                     Spacer()
@@ -324,6 +327,28 @@ public struct SharedCoachDashboardView: View {
                 countBadge("Eigen fouten", game.unforcedErrors(by: player.opponent).count, DashboardPalette.red)
                 countBadge("Strokes", game.strokes(by: player).count, DashboardPalette.red)
             }
+        }
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: 12).fill(DashboardPalette.card))
+    }
+
+    /// Points won out of the air, with the shots: "3 drop, 1 kill"
+    private var volleys: some View {
+        let count = game.volleysWon(by: player).count
+        return HStack(spacing: 12) {
+            AppSymbol("bolt.fill", size: 18, color: DashboardPalette.gold)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Uit de lucht")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(DashboardPalette.text)
+                Text(CoachAdvice.volleyBreakdown(in: game, for: player) ?? "Nog geen volleys")
+                    .font(.system(size: 11))
+                    .foregroundColor(DashboardPalette.secondary)
+            }
+            Spacer()
+            Text("\(count)")
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .foregroundColor(count > 0 ? DashboardPalette.gold : DashboardPalette.muted)
         }
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 12).fill(DashboardPalette.card))

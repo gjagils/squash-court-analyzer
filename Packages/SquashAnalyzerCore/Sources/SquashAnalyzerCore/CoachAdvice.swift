@@ -31,7 +31,18 @@ public struct AdviceItem: Equatable, Sendable {
 
 public struct ShotCount: Equatable, Sendable {
     public let shot: ShotType
+    /// Played out of the air ("Uit de lucht"); always false for the old Volley shot
+    public let isVolley: Bool
     public let count: Int
+
+    public init(shot: ShotType, isVolley: Bool = false, count: Int) {
+        self.shot = shot
+        self.isVolley = isVolley
+        self.count = count
+    }
+
+    /// "Drop", "Volley drop" or "Volley (oud)"
+    public var name: String { shot.displayName(isVolley: isVolley) }
 }
 
 public enum CoachAdvice {
@@ -141,23 +152,45 @@ public enum CoachAdvice {
         return result
     }
 
-    /// The player's most used scoring shots, most first (at most `limit`)
+    /// The player's scoring shots, most first (at most `limit`). A volley
+    /// counts apart from the same shot off the bounce: "Volley drop" and
+    /// "Drop" are two lines.
     public static func topShots(in game: Game, for player: Player, limit: Int = 4) -> [ShotCount] {
         var counts: [ShotCount] = []
         for shot in ShotType.allCases {
-            let count = game.pointsWon(by: player, with: shot)
-            if count > 0 {
-                counts.append(ShotCount(shot: shot, count: count))
+            for volley in [false, true] {
+                var count = 0
+                for point in game.points where point.scorer == player && point.shotType == shot && point.isVolley == volley {
+                    count += 1
+                }
+                if count > 0 {
+                    counts.append(ShotCount(shot: shot, isVolley: volley, count: count))
+                }
             }
         }
         counts.sort { first, second in first.count > second.count }
         return Array(counts.prefix(limit))
     }
 
-    /// The court as three rows of three zones, front row first
-    public static let courtRows: [[CourtZone]] = [
-        [CourtZone.frontLeft, CourtZone.frontMiddle, CourtZone.frontRight],
-        [CourtZone.middleLeft, CourtZone.middleMiddle, CourtZone.middleRight],
-        [CourtZone.backLeft, CourtZone.backMiddle, CourtZone.backRight],
-    ]
+    /// The player's volleys by shot, most first: "3 drop, 1 kill". Older
+    /// "Volley" points show as "2 oud". Nil without volleys.
+    public static func volleyBreakdown(in game: Game, for player: Player) -> String? {
+        var parts: [ShotCount] = []
+        for shot in ShotType.allCases {
+            var count = 0
+            for point in game.volleysWon(by: player) where point.shotType == shot {
+                count += 1
+            }
+            if count > 0 {
+                parts.append(ShotCount(shot: shot, count: count))
+            }
+        }
+        if parts.isEmpty { return nil }
+        parts.sort { first, second in first.count > second.count }
+        var texts: [String] = []
+        for part in parts {
+            texts.append("\(part.count) \(part.shot.isLegacy ? "oud" : part.shot.rawValue.lowercased())")
+        }
+        return texts.joined(separator: ", ")
+    }
 }

@@ -382,6 +382,16 @@ public class Game: Identifiable {
         points.filter { $0.scorer == player && ($0.isVolley || $0.shotType == ShotType.volley) }
     }
 
+    /// The heatmap grid for this game: 3×3 as soon as a point lies in the
+    /// middle column (played with 9 zones, or an older game), else 2×3
+    public var heatmapLayout: CourtLayout {
+        var zones: [CourtZone] = []
+        for point in points {
+            if let zone = point.zone { zones.append(zone) }
+        }
+        return CourtLayout.showing(zones)
+    }
+
     /// Get all strokes awarded to a player
     public func strokes(by player: Player) -> [Point] {
         points.filter { $0.scorer == player && $0.pointType == .stroke }

@@ -80,4 +80,41 @@ final class ZoneAndShotTests: XCTestCase {
         let nine = (0..<5).map { _ in rally(ShotType.kill, zone: CourtZone.frontMiddle) }
         XCTAssertTrue(badges(nine).contains(BadgeKind.frontRowKing))
     }
+
+    // MARK: Analysis
+
+    private func analysisGame() -> Game {
+        let game = Game()
+        game.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.frontLeft, with: ShotType.drop, isVolley: true)
+        game.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.frontRight, with: ShotType.drop, isVolley: true)
+        game.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.frontRight, with: ShotType.drop)
+        game.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.middleLeft, with: ShotType.kill, isVolley: true)
+        game.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.backLeft, with: ShotType.volley)
+        return game
+    }
+
+    func testTopShotsKeepVolleysApart() {
+        let shots = CoachAdvice.topShots(in: analysisGame(), for: Player.player1)
+        XCTAssertEqual(shots.first, ShotCount(shot: ShotType.drop, isVolley: true, count: 2))
+        XCTAssertEqual(shots.map { $0.name }.sorted(), ["Drop", "Volley (oud)", "Volley drop", "Volley kill"])
+    }
+
+    func testVolleyBreakdown() {
+        XCTAssertEqual(CoachAdvice.volleyBreakdown(in: analysisGame(), for: Player.player1), "2 drop, 1 oud, 1 kill")
+        XCTAssertNil(CoachAdvice.volleyBreakdown(in: analysisGame(), for: Player.player2))
+    }
+
+    func testHeatmapLayoutFollowsThePoints() {
+        let game = analysisGame()
+        XCTAssertEqual(game.heatmapLayout, CourtLayout.six)
+        game.addPoint(to: Player.player2, pointType: PointType.winner, at: CourtZone.middleMiddle, with: ShotType.drive)
+        XCTAssertEqual(game.heatmapLayout, CourtLayout.nine)
+    }
+
+    func testAIPromptNamesVolleysAndTheCourt() {
+        let prompt = AICoachPrompt.user(game: analysisGame(), player: Player.player1)
+        XCTAssertTrue(prompt.contains("Volley drop: 2 punten"))
+        XCTAssertTrue(prompt.contains("Punten uit de lucht (volleys): 4"))
+        XCTAssertTrue(prompt.contains("6 vakken"))
+    }
 }

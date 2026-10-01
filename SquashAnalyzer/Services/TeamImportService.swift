@@ -42,15 +42,14 @@ enum TeamImportService {
         return try importTeam(zipData: data, context: context)
     }
 
-    /// Bombardino and Whiskey on a fresh install (SquashAnalyzerUI's SamplePlayers):
-    /// once, and only when there are no players yet. Not during tests.
+    /// Bombardino and Whiskey for everyone (SquashAnalyzerUI's SamplePlayers):
+    /// once per install, also next to existing players. Not during tests.
     @MainActor
     static func addSamplePlayersIfNew(context: ModelContext) {
         guard SamplePlayers.isPending,
               ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
         defer { SamplePlayers.markDone() }
-        guard (try? context.fetchCount(FetchDescriptor<SavedPlayer>())) == 0,
-              let data = SamplePlayers.zipData() else { return }
+        guard let data = SamplePlayers.zipData() else { return }
         _ = try? importTeam(zipData: data, context: context)
     }
 

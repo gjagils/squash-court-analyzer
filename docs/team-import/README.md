@@ -55,7 +55,7 @@ zodat je meteen een wedstrijd met "Kies speler" kunt proberen. Ze zitten als
 gewone team-zip in `Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/voorbeeldspelers.zip`
 (foto's 512 px) en gaan via dezelfde teamimport erin: iOS
 `TeamImportService.addSamplePlayersIfNew`, Android in `MainActivity`. Dat gebeurt
-één keer (`SamplePlayers`, UserDefaults-sleutel `samplePlayersSeeded`) en alleen
-als er nog geen spelers zijn, dus bestaande gebruikers krijgen ze niet bij een
-update. Verwijder je ze, dan komen ze niet terug. Niet tijdens tests en
+één keer per installatie (`SamplePlayers`, UserDefaults-sleutel
+`samplePlayersAdded`), ook naast bestaande spelers, dus iedereen krijgt ze bij
+de update. Een eigen speler met dezelfde naam wordt bijgewerkt, niet verdubbeld. Verwijder je ze, dan komen ze niet terug. Niet tijdens tests en
 screenshot-scenario's.

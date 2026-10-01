@@ -18,6 +18,8 @@ public struct RefereeSessionView: View {
     @State private var failed = false
     @State private var confirmingNew = false
     @State private var exitAfterSave = false
+    /// A change came in while saving; save once more when done
+    @State private var saveAgain = false
 
     public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, shareText: ((String) -> Void)? = nil,
                 onExit: @escaping @MainActor () -> Void) {
@@ -49,8 +51,8 @@ public struct RefereeSessionView: View {
                 .padding(24)
                 .disabled(busy || failed)
             } else if showingSetup {
-                MatchSetupView(playerStore: playerStore, title: "Nieuwe scheidsrechterwedstrijd", onCancel: { close() }) { player1, player2, player1Id, player2Id in
-                    startNewMatch(player1: player1, player2: player2, player1Id: player1Id, player2Id: player2Id)
+                MatchSetupView(playerStore: playerStore, title: "Nieuwe scheidsrechterwedstrijd", onCancel: { close() }) { choice in
+                    startNewMatch(choice)
                 }
                 .disabled(busy || failed)
             }
@@ -104,30 +106,43 @@ public struct RefereeSessionView: View {
         busy = false
     }
 
-    private func startNewMatch(player1: String, player2: String, player1Id: String?, player2Id: String?) {
+    private func startNewMatch(_ choice: MatchSetupChoice) {
         showingSetup = false
         busy = true
         failed = false
         Task { @MainActor in
-            let fresh = RefereeMatch(player1Name: player1, player2Name: player2, bestOf: 5, startingServer: .player1)
-            fresh.player1Id = player1Id.flatMap { UUID(uuidString: $0) }
-            fresh.player2Id = player2Id.flatMap { UUID(uuidString: $0) }
+            let fresh = RefereeMatch(player1Name: choice.player1Name, player2Name: choice.player2Name, bestOf: 5,
+                                     startingServer: choice.startingServer,
+                                     player1GamesBefore: choice.player1GamesBefore, player2GamesBefore: choice.player2GamesBefore)
+            fresh.player1Id = choice.player1Id.flatMap { UUID(uuidString: $0) }
+            fresh.player2Id = choice.player2Id.flatMap { UUID(uuidString: $0) }
             match = fresh
             do { try await store.save(fresh) } catch { failed = true }
             busy = false
         }
     }
 
+    /// Saves `value`. A change while a save is running is saved right after
+    /// it (with the latest state), never dropped.
     private func persist(_ value: RefereeMatch, exit: Bool) {
-        guard !busy else { return }
+        if exit { exitAfterSave = true }
+        if busy {
+            saveAgain = true
+            return
+        }
         busy = true
         failed = false
-        exitAfterSave = exit
         Task { @MainActor in
             do {
                 try await store.save(value)
+                if saveAgain, let latest = match {
+                    saveAgain = false
+                    busy = false
+                    persist(latest, exit: false)
+                    return
+                }
                 busy = false
-                if exit { close() }
+                if exitAfterSave { close() }
             } catch {
                 busy = false
                 failed = true

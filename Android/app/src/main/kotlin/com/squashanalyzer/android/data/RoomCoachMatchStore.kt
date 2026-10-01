@@ -28,6 +28,11 @@ class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardS
         syncBadges(match)
     }
 
+    override suspend fun discard(match: Match) {
+        store.delete(capture(match))
+        badgeAwardStore.removeMatch(match.id.uuidString)
+    }
+
     /** Only players picked via "Kies speler" (a real id) ever earn a badge. */
     private suspend fun syncBadges(match: Match) {
         val players = buildList {

@@ -41,3 +41,13 @@ public struct Point: Identifiable {
         self.isVolley = isVolley
     }
 }
+
+extension Point {
+    /// "Winner · Volley drop · Voor Links": the last-point line under the coach buttons
+    public var summary: String {
+        var parts = [pointType.title]
+        if let shotType { parts.append(shotType.displayName(isVolley: isVolley)) }
+        if let zone { parts.append(zone.rawValue) }
+        return parts.joined(separator: " · ")
+    }
+}

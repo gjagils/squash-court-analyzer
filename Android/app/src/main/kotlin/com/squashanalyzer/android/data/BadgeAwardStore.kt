@@ -170,6 +170,11 @@ class BadgeAwardStore(
         dao.syncMatch(matchId, expected)
     }
 
+    /** A discarded match ("Niet opslaan") keeps none of its awards */
+    suspend fun removeMatch(matchId: String) {
+        dao.syncMatch(matchId, emptyList())
+    }
+
     /** Once-only badges the card already has from another match */
     private suspend fun onceBadges(cardId: String, exceptMatchId: String): List<BadgeKind> =
         dao.forCard(cardId)

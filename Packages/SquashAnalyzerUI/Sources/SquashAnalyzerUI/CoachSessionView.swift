@@ -19,6 +19,8 @@ public struct CoachSessionView: View {
     @State private var failed = false
     @State private var confirmingNew = false
     @State private var exitAfterSave = false
+    /// A change came in while saving; save once more when done
+    @State private var saveAgain = false
 
     public init(store: any CoachMatchStore, playerStore: any PlayerProfileStore, aiCoach: AICoachContext? = nil,
                 shareText: ((String) -> Void)? = nil, onExit: @escaping @MainActor () -> Void) {
@@ -35,7 +37,8 @@ public struct CoachSessionView: View {
             if let match {
                 CoachScoringView(match: match, aiCoach: aiCoach, shareText: shareText, onMatchChanged: { changed in
                     persist(changed, exit: false)
-                }, onExit: { persist(match, exit: true) })
+                }, onAbandon: { finish(match, discard: false) }, onDiscard: { finish(match, discard: true) },
+                onExit: { persist(match, exit: true) })
                 .disabled(busy || failed)
             } else if let pending {
                 VStack(spacing: 24) {
@@ -51,8 +54,8 @@ public struct CoachSessionView: View {
                 .padding(24)
                 .disabled(busy || failed)
             } else if showingSetup {
-                MatchSetupView(playerStore: playerStore, title: "Nieuwe coachwedstrijd", onCancel: { close() }) { player1, player2, player1Id, player2Id in
-                    startNewMatch(player1: player1, player2: player2, player1Id: player1Id, player2Id: player2Id)
+                MatchSetupView(playerStore: playerStore, title: "Nieuwe coachwedstrijd", onCancel: { close() }) { choice in
+                    startNewMatch(choice)
                 }
                 .disabled(busy || failed)
             }
@@ -106,16 +109,18 @@ public struct CoachSessionView: View {
         busy = false
     }
 
-    private func startNewMatch(player1: String, player2: String, player1Id: String?, player2Id: String?) {
+    private func startNewMatch(_ choice: MatchSetupChoice) {
         showingSetup = false
         busy = true
         failed = false
         Task { @MainActor in
             let fresh = Match()
             fresh.setupMatch(
-                player1: player1, player2: player2, startingServer: .player1,
-                player1Id: player1Id.flatMap { UUID(uuidString: $0) },
-                player2Id: player2Id.flatMap { UUID(uuidString: $0) }
+                player1: choice.player1Name, player2: choice.player2Name, startingServer: choice.startingServer,
+                player1CoachingFocus: choice.player1Focus, player2CoachingFocus: choice.player2Focus,
+                player1GamesBefore: choice.player1GamesBefore, player2GamesBefore: choice.player2GamesBefore,
+                player1Id: choice.player1Id.flatMap { UUID(uuidString: $0) },
+                player2Id: choice.player2Id.flatMap { UUID(uuidString: $0) }
             )
             match = fresh
             do { try await store.save(fresh) } catch { failed = true }
@@ -123,16 +128,43 @@ public struct CoachSessionView: View {
         }
     }
 
-    private func persist(_ value: Match, exit: Bool) {
-        guard !busy else { return }
+    /// "Opslaan als incompleet" or "Niet opslaan", then back home
+    private func finish(_ value: Match, discard: Bool) {
         busy = true
         failed = false
-        exitAfterSave = exit
+        Task { @MainActor in
+            do {
+                if discard { try await store.discard(value) } else { try await store.abandon(value) }
+                busy = false
+                close()
+            } catch {
+                busy = false
+                failed = true
+            }
+        }
+    }
+
+    /// Saves `value`. A change while a save is running is saved right after
+    /// it (with the latest state), never dropped.
+    private func persist(_ value: Match, exit: Bool) {
+        if exit { exitAfterSave = true }
+        if busy {
+            saveAgain = true
+            return
+        }
+        busy = true
+        failed = false
         Task { @MainActor in
             do {
                 try await store.save(value)
+                if saveAgain, let latest = match {
+                    saveAgain = false
+                    busy = false
+                    persist(latest, exit: false)
+                    return
+                }
                 busy = false
-                if exit { close() }
+                if exitAfterSave { close() }
             } catch {
                 busy = false
                 failed = true

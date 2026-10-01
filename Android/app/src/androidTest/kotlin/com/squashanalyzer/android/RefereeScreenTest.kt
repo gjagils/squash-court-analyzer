@@ -32,7 +32,7 @@ class RefereeScreenTest {
     @Test fun refereeScoresUndoAndReturnsHome() {
         compose.onNodeWithContentDescription("Scheidsrechter").performClick()
         awaitText("Nieuwe scheidsrechterwedstrijd")
-        compose.onNodeWithText("Start").performClick()
+        compose.onNodeWithText("Start").performScrollTo().performClick()
         awaitText("SCHEIDSRECHTER")
         compose.onNodeWithContentDescription("Punt voor Speler 1").performClick()
         compose.onAllNodesWithText("1").fetchSemanticsNodes().isNotEmpty()

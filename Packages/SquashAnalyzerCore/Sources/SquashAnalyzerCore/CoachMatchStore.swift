@@ -7,4 +7,6 @@ public protocol CoachMatchStore {
     func loadInProgress() async throws -> Match?
     func save(_ match: Match) async throws
     func abandon(_ match: Match) async throws
+    /// "Niet opslaan": removes the match and the badges it earned
+    func discard(_ match: Match) async throws
 }

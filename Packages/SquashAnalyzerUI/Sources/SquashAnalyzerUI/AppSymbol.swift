@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.SportsTennis
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.SwapHoriz
@@ -74,6 +75,7 @@ struct AppSymbol: View {
         case "pin.fill": return Icons.Filled.PushPin
         case "medal", "medal.fill": return Icons.Filled.MilitaryTech
         case "arrow.uturn.backward": return Icons.AutoMirrored.Filled.Undo
+        case "arrow.counterclockwise": return Icons.Filled.Replay
         case "clock.arrow.circlepath": return Icons.Filled.History
         case "arrow.left.and.right": return Icons.Filled.SwapHoriz
         case "bolt.fill": return Icons.Filled.Bolt

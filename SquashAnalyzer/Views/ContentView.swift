@@ -635,12 +635,9 @@ struct ContentView: View {
         }
     }
 
-    /// "Niels: Winner · Volley drop · Voor Links", "Niels: Stroke · Midden Links" or "Niels: Unforced error"
+    /// "Niels: Winner · Volley drop · Voor Links" (the summary is shared with Android)
     private func lastPointText(_ point: Point) -> String {
-        var parts = [point.pointType.title]
-        if let shot = point.shotType { parts.append(shot.displayName(isVolley: point.isVolley)) }
-        if let zone = point.zone { parts.append(zone.rawValue) }
-        return "\(currentGame.name(for: point.scorer)): " + parts.joined(separator: " · ")
+        "\(currentGame.name(for: point.scorer)): " + point.summary
     }
 
     private func coachActionButton(_ title: String, icon: String, color: Color, disabled: Bool,

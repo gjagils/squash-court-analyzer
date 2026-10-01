@@ -131,7 +131,17 @@ public struct CoachScoringView: View {
     let aiCoach: AICoachContext?
     let shareText: ((String) -> Void)?
     let onMatchChanged: (Match) -> Void
+    /// "Bewaar en ga later verder": saved, resumed from the Coach tile
     let onExit: () -> Void
+    /// "Opslaan als incompleet"
+    let onAbandon: (() -> Void)?
+    /// "Niet opslaan"
+    let onDiscard: (() -> Void)?
+    @State private var showingStop = false
+    @State private var showingLet = false
+    @State private var showingComplete = false
+    /// Ticks every second for the rally timer
+    @State private var now = Date()
     /// The finished game shown in the analysis sheet
     @State private var analysedGame: Game?
     @State private var showingAnalysis = false
@@ -142,8 +152,11 @@ public struct CoachScoringView: View {
     @State private var volley = false
 
     public init(match: Match, aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil,
-                onMatchChanged: @escaping (Match) -> Void, onExit: @escaping () -> Void) {
+                onMatchChanged: @escaping (Match) -> Void, onAbandon: (() -> Void)? = nil, onDiscard: (() -> Void)? = nil,
+                onExit: @escaping () -> Void) {
         _match = State(initialValue: match)
+        self.onAbandon = onAbandon
+        self.onDiscard = onDiscard
         self.aiCoach = aiCoach
         self.shareText = shareText
         self.onMatchChanged = onMatchChanged
@@ -163,9 +176,13 @@ public struct CoachScoringView: View {
                 SharedScoreboardView(game: game, match: match, onServiceChanged: { onMatchChanged(match) }) { player in handleScoreTap(player) }
                     .padding(.horizontal, 20)
 
-                instructionText
-                    .padding(.horizontal, 24)
-                    .frame(height: 28)
+                HStack(spacing: 12) {
+                    rallyTimer
+                    instructionText
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 24)
+                .frame(height: 28)
 
                 if match.isMatchOver {
                     matchOverBanner
@@ -178,10 +195,33 @@ public struct CoachScoringView: View {
 
                 bottomActions
                     .padding(.horizontal, 24)
+                lastPointLine
+                    .padding(.horizontal, 24)
 
                 Spacer(minLength: 0)
             }
             .padding(.vertical, 8)
+
+            if showingLet {
+                letOverlay
+            }
+            if showingStop {
+                stopOverlay
+            }
+            if showingComplete {
+                SharedCompleteResultView(match: match, onSave: { winners in
+                    if match.completeResult(with: winners) {
+                        showingComplete = false
+                        onMatchChanged(match)
+                    }
+                }, onCancel: { showingComplete = false })
+            }
+        }
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                now = Date()
+            }
         }
     }
 
@@ -194,10 +234,10 @@ public struct CoachScoringView: View {
                 .foregroundColor(CoachPalette.textPrimary)
                 .tracking(2)
             HStack {
-                Button(action: onExit) {
+                Button { showingStop = true } label: {
                     HStack(spacing: 4) {
-                        Image(systemName: "xmark")
-                        Text("Bewaar & sluit")
+                        AppSymbol("xmark", size: 14, color: CoachPalette.textSecondary)
+                        Text("Stop")
                     }
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(CoachPalette.textSecondary)
@@ -426,10 +466,142 @@ public struct CoachScoringView: View {
         .buttonStyle(.plain)
     }
 
+    // MARK: - Rally timer, last point, let and stop
+
+    /// Time since the last point or let, like iOS' rally timer
+    private var rallyTimer: some View {
+        let seconds = max(0, Int(now.timeIntervalSince(game.lastPointTime)))
+        let text = (seconds / 60 < 10 ? "0" : "") + "\(seconds / 60):" + (seconds % 60 < 10 ? "0" : "") + "\(seconds % 60)"
+        return VStack(alignment: .leading, spacing: 0) {
+            Text("RALLY")
+                .font(.system(size: 8, weight: .medium, design: .rounded))
+                .tracking(1)
+                .foregroundColor(CoachPalette.textMuted)
+            Text(text)
+                .font(.system(size: 14, weight: .bold, design: .monospaced))
+                .foregroundColor(CoachPalette.textSecondary)
+        }
+        .opacity(game.isGameOver || match.isMatchOver ? 0.0 : 1.0)
+        .accessibilityLabel("Rallytijd \(text)")
+    }
+
+    /// "Gerard: Winner · Volley drop · Voor Links" (Core's Point.summary, as on iOS)
+    private var lastPointLine: some View {
+        Group {
+            if let last = game.points.last {
+                Text("\(game.name(for: last.scorer)): \(last.summary)")
+            } else {
+                Text(" ")
+            }
+        }
+        .font(.system(size: 11))
+        .foregroundColor(CoachPalette.textMuted)
+        .lineLimit(1)
+        .frame(height: 16)
+    }
+
+    private var letOverlay: some View {
+        overlayCard {
+            Text("LET")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .tracking(2)
+                .foregroundColor(CoachPalette.textPrimary)
+            Text("Wie vraagt de let?")
+                .font(.system(size: 14))
+                .foregroundColor(CoachPalette.textSecondary)
+            HStack(spacing: 10) {
+                overlayButton(match.player1Name, CoachPalette.warmOrange) { callLet(Player.player1) }
+                overlayButton(match.player2Name, CoachPalette.steelBlue) { callLet(Player.player2) }
+            }
+            Text("Lets deze game: \(game.lets.count)")
+                .font(.system(size: 12))
+                .foregroundColor(CoachPalette.textMuted)
+            Button("Annuleren") { showingLet = false }
+                .foregroundColor(CoachPalette.textSecondary)
+        }
+    }
+
+    private func callLet(_ player: Player) {
+        game.addLet(requestedBy: player)
+        showingLet = false
+        onMatchChanged(match)
+    }
+
+    private var hasRallies: Bool {
+        for played in match.games where !played.points.isEmpty || !played.lets.isEmpty {
+            return true
+        }
+        return false
+    }
+
+    /// Like iOS' stop question, plus Android's "later verder"
+    private var stopOverlay: some View {
+        overlayCard {
+            Text("Wedstrijd stoppen")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundColor(CoachPalette.textPrimary)
+            overlayButton("Bewaar en ga later verder", CoachPalette.warmOrange) {
+                showingStop = false
+                onExit()
+            }
+            if hasRallies && !match.isMatchOver {
+                if let onAbandon {
+                    overlayButton("Opslaan als incompleet", CoachPalette.textSecondary) {
+                        showingStop = false
+                        onAbandon()
+                    }
+                }
+                overlayButton("Uitslag aanvullen", CoachPalette.textSecondary) {
+                    showingStop = false
+                    showingComplete = true
+                }
+            }
+            if let onDiscard {
+                overlayButton("Niet opslaan", Color(red: 0.90, green: 0.40, blue: 0.35)) {
+                    showingStop = false
+                    onDiscard()
+                }
+            }
+            Button("Doorspelen") { showingStop = false }
+                .foregroundColor(CoachPalette.textSecondary)
+        }
+    }
+
+    private func overlayCard<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        ZStack {
+            Color.black.opacity(0.6).ignoresSafeArea()
+            VStack(spacing: 14) {
+                content()
+            }
+            .padding(24)
+            .background(RoundedRectangle(cornerRadius: 20).fill(CoachPalette.backgroundMedium))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(CoachPalette.warmOrange.opacity(0.4), lineWidth: 1))
+            .padding(24)
+        }
+    }
+
+    private func overlayButton(_ title: String, _ color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .lineLimit(1)
+                .foregroundColor(color)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(color.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+    }
+
     // MARK: - Bottom actions
 
     private var bottomActions: some View {
         HStack(spacing: 8) {
+            coachActionButton("LET CALL", icon: "arrow.counterclockwise",
+                              disabled: game.selectedPlayer != nil || game.isGameOver || match.isMatchOver) {
+                showingLet = true
+            }
             coachActionButton("UNDO", icon: "arrow.uturn.backward",
                               disabled: game.selectedZone != nil || !game.canUndo || match.isMatchOver) {
                 game.undoLastPoint()

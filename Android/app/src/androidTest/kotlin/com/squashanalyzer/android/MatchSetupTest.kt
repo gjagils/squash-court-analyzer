@@ -46,7 +46,7 @@ class MatchSetupTest {
         compose.onAllNodesWithText("Kies speler").onFirst().performClick()
         awaitText("Kies-speler-test")
         compose.onNodeWithText("Kies-speler-test").performClick()
-        compose.onNodeWithText("Start").performClick()
+        compose.onNodeWithText("Start").performScrollTo().performClick()
         awaitText("SCHEIDSRECHTER")
 
         val store = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()), BadgeAwardStore(db.badgeAwardDao(), db.playerDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao()), "test-install"))

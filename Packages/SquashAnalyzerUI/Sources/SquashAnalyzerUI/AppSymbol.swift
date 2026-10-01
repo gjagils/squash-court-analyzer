@@ -7,6 +7,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
@@ -85,6 +86,7 @@ struct AppSymbol: View {
         case "xmark": return Icons.Filled.Close
         case "square.and.arrow.down": return Icons.Filled.Download
         case "trash": return Icons.Filled.Delete
+        case "chart.bar.fill": return Icons.Filled.BarChart
         case "square.and.arrow.up": return Icons.Filled.Share
         case "chevron.left": return Icons.AutoMirrored.Filled.KeyboardArrowLeft
         case "chevron.right": return Icons.AutoMirrored.Filled.KeyboardArrowRight

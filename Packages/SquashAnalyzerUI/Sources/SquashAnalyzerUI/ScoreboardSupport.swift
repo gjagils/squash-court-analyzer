@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 import SquashAnalyzerCore
 
 /// Small pieces shared between coach's `ScoreboardView` and referee mode's own
@@ -108,18 +109,24 @@ public struct PlayerAvatarPlaceholder: View {
     let color: Color
     var size: CGFloat = 52
     var active: Bool = true
+    /// The picked player's photo, if they have one
+    var photo: Data? = nil
 
-    public init(color: Color, size: CGFloat = 52, active: Bool = true) {
+    public init(color: Color, size: CGFloat = 52, active: Bool = true, photo: Data? = nil) {
         self.color = color
         self.size = size
         self.active = active
+        self.photo = photo
     }
 
     public var body: some View {
         ZStack {
-            Image(systemName: "person.fill")
-                .font(.system(size: size * 0.42))
-                .foregroundColor(color.opacity(active ? 1.0 : 0.4))
+            if let photo {
+                PlayerPhotoView(photo: photo, name: "", size: size - 4, color: color)
+                    .opacity(active ? 1.0 : 0.6)
+            } else {
+                AppSymbol("person.fill", size: size * 0.42, color: color.opacity(active ? 1.0 : 0.4))
+            }
             Circle()
                 .stroke(color.opacity(active ? 1.0 : 0.4), lineWidth: 2)
                 .frame(width: size, height: size)

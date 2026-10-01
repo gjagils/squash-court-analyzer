@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 import SquashAnalyzerCore
 
 /// Shared Android referee screen. It keeps the same core controls as iOS:
@@ -9,6 +10,8 @@ public struct RefereeScoringView: View {
     let onMatchChanged: (RefereeMatch) -> Void
     let onExit: @MainActor () -> Void
     let shareText: ((String) -> Void)?
+    /// Photos of the picked players, by player id
+    let photos: [String: Data]
     @Environment(\.dismiss) private var dismiss
     @State private var showingShare = false
     /// Sharing the stand during the match (the share icon in the header)
@@ -16,9 +19,10 @@ public struct RefereeScoringView: View {
     /// Ticks every second for the match and game timers
     @State private var now = Date()
 
-    public init(match: RefereeMatch, shareText: ((String) -> Void)? = nil, onMatchChanged: @escaping (RefereeMatch) -> Void,
-                onExit: @escaping @MainActor () -> Void) {
+    public init(match: RefereeMatch, shareText: ((String) -> Void)? = nil, photos: [String: Data] = [:],
+                onMatchChanged: @escaping (RefereeMatch) -> Void, onExit: @escaping @MainActor () -> Void) {
         _match = State(initialValue: match)
+        self.photos = photos
         self.shareText = shareText
         self.onMatchChanged = onMatchChanged
         self.onExit = onExit
@@ -144,7 +148,8 @@ public struct RefereeScoringView: View {
         let highlight = ServerHighlight(color: color, isServer: isServer)
 
         return VStack(spacing: 8) {
-            PlayerAvatarPlaceholder(color: color, size: 48, active: isServer)
+            PlayerAvatarPlaceholder(color: color, size: 48, active: isServer,
+                                    photo: (player == Player.player1 ? match.player1Id : match.player2Id).flatMap { photos[$0.uuidString] })
             Text(match.name(for: player))
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundColor(highlight.name)

@@ -237,6 +237,8 @@ public struct AndroidHomeView: View {
     /// Player photos and the system pickers (Android)
     private let photoStore: (any PlayerPhotoStore)?
     private let filePicker: (any PlayerFilePicker)?
+    /// "Deel kaart" with a picture (Android draws it)
+    private let shareCard: ((CardSnapshot, String) -> Void)?
 
     public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 historyStore: any MatchHistoryStore,
@@ -245,7 +247,7 @@ public struct AndroidHomeView: View {
                 cardInbox: CardInbox, cardImportStore: any CardImportStore,
                 leagueTeamFetcher: LeagueTeamFetcher, aiCoach: AICoachContext? = nil, backup: BackupContext? = nil,
                 teamImporter: (any TeamLinkImporter)? = nil, photoStore: (any PlayerPhotoStore)? = nil,
-                filePicker: (any PlayerFilePicker)? = nil) {
+                filePicker: (any PlayerFilePicker)? = nil, shareCard: ((CardSnapshot, String) -> Void)? = nil) {
         self.teamImporter = teamImporter
         self.photoStore = photoStore
         self.filePicker = filePicker
@@ -253,6 +255,7 @@ public struct AndroidHomeView: View {
         self.backup = backup
         self.aiCoach = aiCoach
         self.shareText = shareText
+        self.shareCard = shareCard
         self.cardInbox = cardInbox
         self.cardImportStore = cardImportStore
         self.playerStore = playerStore
@@ -267,14 +270,14 @@ public struct AndroidHomeView: View {
             homeContent
                 .navigationDestination(isPresented: $showingPlayers) {
                     PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox, teamImporter: teamImporter,
-                                        photoStore: photoStore, filePicker: filePicker)
+                                        photoStore: photoStore, filePicker: filePicker, shareCard: shareCard)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
-                    CoachSessionView(store: matchStore, playerStore: playerStore, aiCoach: aiCoach, shareText: shareText, onExit: { showingCoach = false })
+                    CoachSessionView(store: matchStore, playerStore: playerStore, photoStore: photoStore, aiCoach: aiCoach, shareText: shareText, onExit: { showingCoach = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingReferee) {
-                    RefereeSessionView(store: refereeMatchStore, playerStore: playerStore, shareText: shareText, onExit: { showingReferee = false })
+                    RefereeSessionView(store: refereeMatchStore, playerStore: playerStore, photoStore: photoStore, shareText: shareText, onExit: { showingReferee = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingBadges) {

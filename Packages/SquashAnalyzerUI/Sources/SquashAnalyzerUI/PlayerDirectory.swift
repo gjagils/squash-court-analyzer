@@ -102,16 +102,20 @@ public struct PlayerDirectoryView: View {
     private let photoStore: (any PlayerPhotoStore)?
     /// The system photo and file pickers
     private let filePicker: (any PlayerFilePicker)?
+    /// "Deel kaart" with a picture
+    private let shareCard: ((CardSnapshot, String) -> Void)?
 
     public init(store: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 shareText: @escaping (String) -> Void, cardInbox: CardInbox, teamImporter: (any TeamLinkImporter)? = nil,
-                photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil) {
+                photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil,
+                shareCard: ((CardSnapshot, String) -> Void)? = nil) {
         self.teamImporter = teamImporter
         self.photoStore = photoStore
         self.filePicker = filePicker
         self.store = store
         self.badgeStore = badgeStore
         self.shareText = shareText
+        self.shareCard = shareCard
         self.cardInbox = cardInbox
     }
 
@@ -237,7 +241,8 @@ public struct PlayerDirectoryView: View {
         }
         .navigationDestination(isPresented: Binding(get: { badgesForPlayer != nil }, set: { if !$0 { badgesForPlayer = nil } })) {
             if let player = badgesForPlayer {
-                SharedPlayerBadgesView(playerId: player.id, playerName: player.name, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox)
+                SharedPlayerBadgesView(playerId: player.id, playerName: player.name, badgeStore: badgeStore, shareText: shareText,
+                                       shareCard: shareCard, cardInbox: cardInbox)
             }
         }
         .alert("Speler verwijderen?", isPresented: $confirmDelete) {

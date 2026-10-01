@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 import SquashAnalyzerCore
 
 /// Serializes UI edits with durable writes, mirroring `CoachSessionView`. A
@@ -7,6 +8,9 @@ import SquashAnalyzerCore
 public struct RefereeSessionView: View {
     let store: any RefereeMatchStore
     let playerStore: any PlayerProfileStore
+    /// Player photos for the scoreboard; nil shows the plain avatar
+    let photoStore: (any PlayerPhotoStore)?
+    @State private var photos: [String: Data] = [:]
     let onExit: @MainActor () -> Void
     /// The platform share sheet, for "Deel score"
     let shareText: ((String) -> Void)?
@@ -21,11 +25,12 @@ public struct RefereeSessionView: View {
     /// A change came in while saving; save once more when done
     @State private var saveAgain = false
 
-    public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, shareText: ((String) -> Void)? = nil,
+    public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, shareText: ((String) -> Void)? = nil,
                 onExit: @escaping @MainActor () -> Void) {
         self.shareText = shareText
         self.store = store
         self.playerStore = playerStore
+        self.photoStore = photoStore
         self.onExit = onExit
     }
 
@@ -33,7 +38,7 @@ public struct RefereeSessionView: View {
         ZStack {
             CoachPalette.backgroundDark.ignoresSafeArea()
             if let match {
-                RefereeScoringView(match: match, shareText: shareText, onMatchChanged: { changed in
+                RefereeScoringView(match: match, shareText: shareText, photos: photos, onMatchChanged: { changed in
                     persist(changed, exit: false)
                 }, onExit: { persist(match, exit: true) })
                 .disabled(busy || failed)
@@ -77,7 +82,10 @@ public struct RefereeSessionView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16)).padding(20)
             }
         }
-        .task { if match == nil && pending == nil && !showingSetup { await load() } }
+        .task {
+            if let photoStore { photos = (try? await photoStore.photos()) ?? [:] }
+            if match == nil && pending == nil && !showingSetup { await load() }
+        }
         .alert("Nieuwe wedstrijd starten?", isPresented: $confirmingNew) {
             Button("Annuleren", role: .cancel) {}
             Button("Nieuwe wedstrijd", role: .destructive) {

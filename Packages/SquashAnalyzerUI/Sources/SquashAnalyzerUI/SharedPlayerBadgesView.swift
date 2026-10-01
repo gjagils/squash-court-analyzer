@@ -15,6 +15,8 @@ public struct SharedPlayerBadgesView: View {
     let playerName: String
     let badgeStore: any PlayerBadgeSummaryStore
     let shareText: (String) -> Void
+    /// Shares the card as a picture plus the link (Android draws the picture); nil shares the link only
+    let cardPicture: ((CardSnapshot, String) -> Void)?
     /// Reloads after a card link was imported while this screen was open
     let cardInbox: CardInbox
 
@@ -26,11 +28,12 @@ public struct SharedPlayerBadgesView: View {
     @State private var confirmDelete = false
 
     public init(playerId: String, playerName: String, badgeStore: any PlayerBadgeSummaryStore,
-                shareText: @escaping (String) -> Void, cardInbox: CardInbox) {
+                shareText: @escaping (String) -> Void, shareCard: ((CardSnapshot, String) -> Void)? = nil, cardInbox: CardInbox) {
         self.playerId = playerId
         self.playerName = playerName
         self.badgeStore = badgeStore
         self.shareText = shareText
+        self.cardPicture = shareCard
         self.cardInbox = cardInbox
     }
 
@@ -202,7 +205,8 @@ public struct SharedPlayerBadgesView: View {
                 return
             }
             let url = try snapshot.webURL()
-            shareText("Badgekaart van \(snapshot.name): \(url.absoluteString)")
+            let text = "Badgekaart van \(snapshot.name): \(url.absoluteString)"
+            if let cardPicture { cardPicture(snapshot, text) } else { shareText(text) }
         } catch {
             shareFailed = true
         }

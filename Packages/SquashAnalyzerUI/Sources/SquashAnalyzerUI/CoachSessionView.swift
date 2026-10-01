@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 import SquashAnalyzerCore
 
 /// Serializes UI edits with durable writes. A failed save keeps the live match
@@ -6,6 +7,9 @@ import SquashAnalyzerCore
 public struct CoachSessionView: View {
     let store: any CoachMatchStore
     let playerStore: any PlayerProfileStore
+    /// Player photos for the scoreboard; nil shows the plain avatar
+    let photoStore: (any PlayerPhotoStore)?
+    @State private var photos: [String: Data] = [:]
     let onExit: @MainActor () -> Void
     /// AI Coach in the game analysis; nil hides the AI part
     let aiCoach: AICoachContext?
@@ -22,12 +26,13 @@ public struct CoachSessionView: View {
     /// A change came in while saving; save once more when done
     @State private var saveAgain = false
 
-    public init(store: any CoachMatchStore, playerStore: any PlayerProfileStore, aiCoach: AICoachContext? = nil,
+    public init(store: any CoachMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, aiCoach: AICoachContext? = nil,
                 shareText: ((String) -> Void)? = nil, onExit: @escaping @MainActor () -> Void) {
         self.store = store
         self.shareText = shareText
         self.aiCoach = aiCoach
         self.playerStore = playerStore
+        self.photoStore = photoStore
         self.onExit = onExit
     }
 
@@ -35,7 +40,7 @@ public struct CoachSessionView: View {
         ZStack {
             CoachPalette.backgroundDark.ignoresSafeArea()
             if let match {
-                CoachScoringView(match: match, aiCoach: aiCoach, shareText: shareText, onMatchChanged: { changed in
+                CoachScoringView(match: match, aiCoach: aiCoach, shareText: shareText, photos: photos, onMatchChanged: { changed in
                     persist(changed, exit: false)
                 }, onAbandon: { finish(match, discard: false) }, onDiscard: { finish(match, discard: true) },
                 onExit: { persist(match, exit: true) })
@@ -80,7 +85,10 @@ public struct CoachSessionView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16)).padding(20)
             }
         }
-        .task { if match == nil && pending == nil && !showingSetup { await load() } }
+        .task {
+            if let photoStore { photos = (try? await photoStore.photos()) ?? [:] }
+            if match == nil && pending == nil && !showingSetup { await load() }
+        }
         .alert("Nieuwe wedstrijd starten?", isPresented: $confirmingNew) {
             Button("Annuleren", role: .cancel) {}
             Button("Nieuwe wedstrijd", role: .destructive) {

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Files the app shares with other apps: the badge card picture -->
+<paths>
+    <cache-path name="kaart" path="kaart/" />
+</paths>

@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 import SquashAnalyzerCore
 
 /// Shared scoreboard: same layout as iOS's own `ScoreboardView`, but with
@@ -9,12 +10,22 @@ public struct SharedScoreboardView: View {
     let match: Match?
     var onSelectPlayer: ((Player) -> Void)? = nil
     var onServiceChanged: () -> Void
+    /// Photos of the picked players, by player id
+    var photos: [String: Data] = [:]
 
-    public init(game: Game, match: Match? = nil, onServiceChanged: @escaping () -> Void = {}, onSelectPlayer: ((Player) -> Void)? = nil) {
+    public init(game: Game, match: Match? = nil, photos: [String: Data] = [:], onServiceChanged: @escaping () -> Void = {},
+                onSelectPlayer: ((Player) -> Void)? = nil) {
         self.game = game
+        self.photos = photos
         self.match = match
         self.onSelectPlayer = onSelectPlayer
         self.onServiceChanged = onServiceChanged
+    }
+
+    private func photo(for player: Player) -> Data? {
+        let id = player == Player.player1 ? match?.player1Id : match?.player2Id
+        guard let id else { return nil }
+        return photos[id.uuidString]
     }
 
     public var body: some View {
@@ -64,7 +75,7 @@ public struct SharedScoreboardView: View {
         let highlight = ServerHighlight(color: color, isServer: isServing)
 
         return VStack(spacing: 4) {
-            PlayerAvatarPlaceholder(color: color, size: 34, active: isServing)
+            PlayerAvatarPlaceholder(color: color, size: 34, active: isServing, photo: photo(for: player))
 
             Text(game.name(for: player))
                 .font(.system(size: 13, weight: .bold, design: .rounded))
@@ -131,6 +142,8 @@ public struct CoachScoringView: View {
     let aiCoach: AICoachContext?
     let shareText: ((String) -> Void)?
     let onMatchChanged: (Match) -> Void
+    /// Photos of the picked players, by player id
+    let photos: [String: Data]
     /// "Bewaar en ga later verder": saved, resumed from the Coach tile
     let onExit: () -> Void
     /// "Opslaan als incompleet"
@@ -152,9 +165,11 @@ public struct CoachScoringView: View {
     @State private var volley = false
 
     public init(match: Match, aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil,
+                photos: [String: Data] = [:],
                 onMatchChanged: @escaping (Match) -> Void, onAbandon: (() -> Void)? = nil, onDiscard: (() -> Void)? = nil,
                 onExit: @escaping () -> Void) {
         _match = State(initialValue: match)
+        self.photos = photos
         self.onAbandon = onAbandon
         self.onDiscard = onDiscard
         self.aiCoach = aiCoach
@@ -173,7 +188,7 @@ public struct CoachScoringView: View {
 
             VStack(spacing: 12) {
                 header
-                SharedScoreboardView(game: game, match: match, onServiceChanged: { onMatchChanged(match) }) { player in handleScoreTap(player) }
+                SharedScoreboardView(game: game, match: match, photos: photos, onServiceChanged: { onMatchChanged(match) }) { player in handleScoreTap(player) }
                     .padding(.horizontal, 20)
 
                 HStack(spacing: 12) {
@@ -223,6 +238,11 @@ public struct CoachScoringView: View {
                 now = Date()
             }
         }
+        .sheet(isPresented: $showingAnalysis) {
+            SharedCoachDashboardView(match: match, game: analysedGame ?? game, aiCoach: aiCoach, shareText: shareText) {
+                showingAnalysis = false
+            }
+        }
     }
 
     // MARK: - Header
@@ -243,6 +263,18 @@ public struct CoachScoringView: View {
                     .foregroundColor(CoachPalette.textSecondary)
                 }
                 Spacer()
+                // The previous game's analysis while playing, from game 2 on (as on iOS)
+                if match.currentGameIndex > 0 && !game.isGameOver && !match.isMatchOver {
+                    Button {
+                        analysedGame = match.games[match.currentGameIndex - 1]
+                        showingAnalysis = true
+                    } label: {
+                        AppSymbol("chart.bar.fill", size: 20, color: CoachPalette.textSecondary)
+                            .frame(width: 44, height: 32)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Analyse vorige game")
+                }
             }
         }
         .padding(.horizontal, 20)
@@ -443,12 +475,8 @@ public struct CoachScoringView: View {
             analysedGame = game
             showingAnalysis = true
         }
-        .sheet(isPresented: $showingAnalysis) {
-            SharedCoachDashboardView(match: match, game: analysedGame ?? game, aiCoach: aiCoach, shareText: shareText) {
-                showingAnalysis = false
-            }
-        }
     }
+
 
     private func outlineButton(_ title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {

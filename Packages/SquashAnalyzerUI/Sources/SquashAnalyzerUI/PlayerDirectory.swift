@@ -119,8 +119,11 @@ public struct PlayerDirectoryView: View {
                     Spacer(minLength: 8)
                     if teamImporter != nil {
                         Button { showingTeamImport = true } label: {
-                            Label("Team", systemImage: "square.and.arrow.down")
-                                .lineLimit(1)
+                            // AppSymbol: Skip's Label(systemImage:) draws a warning triangle for this symbol
+                            HStack(spacing: 6) {
+                                AppSymbol("square.and.arrow.down", size: 18, color: PlayerStyle.gold)
+                                Text("Team").lineLimit(1)
+                            }
                         }
                         .accessibilityLabel("Team importeren")
                         .disabled(isLoading || isDeleting || loadFailed)

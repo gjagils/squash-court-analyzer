@@ -7,18 +7,18 @@ enum SampleDataService {
 
     static func createSampleMatch(context: ModelContext) {
         let savedMatch = SavedMatch(
-            player1Name: "Niels",
-            player2Name: "Paul",
+            player1Name: "Gerard",
+            player2Name: "Thé",
             matchStartingServer: .player1,
             bestOf: 5,
             savedAt: Date().addingTimeInterval(-3600)
         )
         context.insert(savedMatch)
 
-        // Game 1: Niels wint 11-7
+        // Game 1: Gerard wint 11-7
         let game1 = makeSavedGame(
             number: 1,
-            p1Name: "Niels", p2Name: "Paul",
+            p1Name: "Gerard", p2Name: "Thé",
             p1Score: 11, p2Score: 7,
             winner: .player1,
             server: .player1,
@@ -29,10 +29,10 @@ enum SampleDataService {
         game1.match = savedMatch
         savedMatch.games.append(game1)
 
-        // Game 2: Paul wint 11-9
+        // Game 2: Thé wint 11-9
         let game2 = makeSavedGame(
             number: 2,
-            p1Name: "Niels", p2Name: "Paul",
+            p1Name: "Gerard", p2Name: "Thé",
             p1Score: 9, p2Score: 11,
             winner: .player2,
             server: .player2,
@@ -43,10 +43,10 @@ enum SampleDataService {
         game2.match = savedMatch
         savedMatch.games.append(game2)
 
-        // Game 3: Niels wint 11-8
+        // Game 3: Gerard wint 11-8
         let game3 = makeSavedGame(
             number: 3,
-            p1Name: "Niels", p2Name: "Paul",
+            p1Name: "Gerard", p2Name: "Thé",
             p1Score: 11, p2Score: 8,
             winner: .player1,
             server: .player1,

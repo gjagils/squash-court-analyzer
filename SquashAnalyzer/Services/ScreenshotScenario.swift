@@ -25,8 +25,8 @@ enum ScreenshotScenario: String, CaseIterable {
 
     static var isActive: Bool { current != nil }
 
-    static let player1 = "Niels"
-    static let player2 = "Paul"
+    static let player1 = "Gerard"
+    static let player2 = "Thé"
 
     // MARK: - Coach
 
@@ -141,7 +141,7 @@ enum ScreenshotScenario: String, CaseIterable {
 
     // MARK: - Saved data
 
-    /// Seeds the Niels–Paul sample match once, for the history and dashboard shots
+    /// Seeds the Gerard–Thé sample match once, for the history and dashboard shots
     @MainActor
     static func seededSampleMatch(context: ModelContext) -> SavedMatch? {
         if let existing = try? context.fetch(FetchDescriptor<SavedMatch>()).first {

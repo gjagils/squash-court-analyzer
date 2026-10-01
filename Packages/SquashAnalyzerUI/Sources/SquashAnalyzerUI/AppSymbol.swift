@@ -10,6 +10,7 @@ import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FrontHand
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MilitaryTech
@@ -78,6 +79,7 @@ struct AppSymbol: View {
         case "bolt.fill": return Icons.Filled.Bolt
         case "arrow.down.to.line": return Icons.Filled.VerticalAlignBottom
         case "xmark": return Icons.Filled.Close
+        case "square.and.arrow.down": return Icons.Filled.Download
         case "chevron.left": return Icons.AutoMirrored.Filled.KeyboardArrowLeft
         case "chevron.right": return Icons.AutoMirrored.Filled.KeyboardArrowRight
         case "person.fill": return Icons.Filled.Person

@@ -262,3 +262,15 @@ optioneel, voor app-functionaliteit; versleuteld verzonden; geen accounts; verwi
 Opnieuw insturen: `POST …/applications/com.squashanalyzer.android/dataSafety` met
 `{"safetyLabels": <inhoud van het CSV-bestand>}` (zie play_upload.py voor het token).
 Verandert de app wat hij verstuurt, pas dan dit bestand aan.
+
+## Stand 1 oktober 2026 (avond)
+
+- App-inhoud volledig: privacybeleid, inloggegevens, advertenties (geen), contentclassificatie,
+  doelgroep, gegevensveiligheid (API), overheid (nee), financiële functies (geen),
+  gezondheid (geen), advertentie-ID (nee; de app heeft geen AD_ID-machtiging), categorie Sport.
+- Gesloten test "Alpha": 0.3 (3), landen Nederland en België, testers via de e-maillijst
+  "Bombardino" (dezelfde als de interne test), feedback info@squashanalyzer.com.
+  Op een nog niet gepubliceerde app mag de API alleen een **concept**-release in een
+  gesloten track zetten; uitrollen gaat dan in de Play Console.
+- Alles (14 wijzigingen) ingestuurd ter beoordeling. Na goedkeuring staat onder
+  Gesloten test → Testers de opt-in-link. Productie pas na 12 testers × 14 dagen.

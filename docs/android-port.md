@@ -2095,10 +2095,9 @@ branch tot een presenteerbare mijlpaal; samenvoegen is een afzonderlijke stap.
   invoermodus is er niet meer, ook niet op iOS — zie de beslissing van
   2026-10-01.)
 - Foto's in het Android-spelersscherm (bewerken en tonen). Teamimport werkt sinds 2026-10-01 via een link (Spelers → Team, `RoomTeamImporter`); importeren uit een zip-bestand op het toestel kan op Android nog niet.
-- **Backlog: badge-artwork op Android.** iOS heeft per badge een PNG in
-  `SquashAnalyzer/Assets.xcassets/badge-*.imageset` (31 stuks, ±6 MB);
-  Android toont nu een eenvoudige medaille (`BadgeCatalog.swift`). Kan:
-  de imagesets naar een asset catalog in `Packages/SquashAnalyzerUI`
-  (`Resources/`, `Image(name, bundle: .module)`) verplaatsen, zodat iOS en
-  Android dezelfde bestanden gebruiken. Daarbij de PNG's verkleinen (APK).
+- Badge-artwork op Android: **gedaan 2026-10-01**. De 31 plaatjes staan nu in
+  `Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets`
+  (verkleind van 360 naar 240px, samen 3,1 MB), getekend door `BadgeArtwork`
+  (`Image(name, bundle: .module)`) op iOS en Android. Het package heeft daarvoor
+  `resources: [.process("Resources")]`; Skip neemt de catalogus mee naar Android.
 - Een fysiek Android-toestel is nog nodig voor aanvullende praktijktests.

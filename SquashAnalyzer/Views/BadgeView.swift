@@ -1,8 +1,9 @@
 import SwiftUI
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 
 /// A badge medallion: the artwork in colour once earned, greyed out while it is
-/// still to earn. A badge without artwork yet gets a plain gold medallion.
+/// still to earn.
 struct BadgeView: View {
     let kind: BadgeKind
     var size: CGFloat = 64
@@ -29,21 +30,9 @@ struct BadgeView: View {
         .accessibilityLabel("Badge \(kind.title)\(isLocked ? ", nog niet verdiend" : "")")
     }
 
-    @ViewBuilder
+    /// The artwork lives in SquashAnalyzerUI, shared with Android
     private var medallion: some View {
-        if let image = UIImage(named: kind.imageName) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFit()
-        } else {
-            ZStack {
-                Circle().fill(AppColors.accentGold.opacity(0.18))
-                Circle().strokeBorder(AppColors.accentGold, lineWidth: size * 0.05)
-                Image(systemName: "medal.fill")
-                    .font(.system(size: size * 0.4))
-                    .foregroundStyle(AppColors.accentGold)
-            }
-        }
+        BadgeArtwork(kind: kind)
     }
 }
 

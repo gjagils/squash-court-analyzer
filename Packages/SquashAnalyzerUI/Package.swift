@@ -15,6 +15,6 @@ let package = Package(
         .target(name: "SquashAnalyzerUI", dependencies: [
             .product(name: "SquashAnalyzerCore", package: "SquashAnalyzerCore"),
             .product(name: "SkipUI", package: "skip-ui"),
-        ], plugins: [.plugin(name: "skipstone", package: "skip")]),
+        ], resources: [.process("Resources")], plugins: [.plugin(name: "skipstone", package: "skip")]),
     ]
 )

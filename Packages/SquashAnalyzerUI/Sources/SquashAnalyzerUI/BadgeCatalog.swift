@@ -1,10 +1,25 @@
 import SwiftUI
 import SquashAnalyzerCore
 
-/// A badge medallion. Android has no badge artwork yet (see BadgeView.swift on
-/// iOS, which tries `UIImage(named:)` first), so this shared version always
-/// renders the plain gold placeholder — same scope-cut as
-/// `PlayerAvatarPlaceholder` for player photos.
+/// The artwork of a badge, shared by iOS and Android. The images live in this
+/// package (`Resources/Module.xcassets/badge-<id>`, 240px), so both apps use
+/// the same files; iOS' own `BadgeView` draws this too.
+public struct BadgeArtwork: View {
+    let kind: BadgeKind
+
+    public init(kind: BadgeKind) {
+        self.kind = kind
+    }
+
+    public var body: some View {
+        Image(kind.imageName, bundle: .module)
+            .resizable()
+            .scaledToFit()
+    }
+}
+
+/// A badge medallion with its title: in colour once earned, greyed out while
+/// it is still to earn.
 public struct BadgeMedallion: View {
     let kind: BadgeKind
     var size: CGFloat = 64.0
@@ -20,11 +35,7 @@ public struct BadgeMedallion: View {
 
     public var body: some View {
         VStack(spacing: 6) {
-            ZStack {
-                Circle().fill(BadgePalette.gold.opacity(0.18))
-                Circle().strokeBorder(BadgePalette.gold, lineWidth: size * 0.05)
-                AppSymbol("medal.fill", size: size * 0.4, color: BadgePalette.gold)
-            }
+            BadgeArtwork(kind: kind)
             .frame(width: size, height: size)
             .grayscale(isLocked ? 1.0 : 0.0)
             .opacity(isLocked ? 0.35 : 1.0)

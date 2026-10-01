@@ -251,3 +251,14 @@ Gedaan: 0.1 (1) met de hand, 0.2 (2) met het script.
 contactgegevens uit `Android/play/listing-nl-NL.json`, icoon en feature graphic uit
 `Android/play/`, en de telefoon-schermafdrukken uit `Android/play/screenshots/`
 (1080×2160, bijgesneden emulatorbeelden; die map staat in .gitignore). Eerst `--dry-run`.
+
+## Veiligheid van gegevens via de API (sinds 2026-10-01)
+
+`Android/play/data-safety.csv` is de export uit de Play Console, ingevuld: wel gegevens
+(alleen **App-activiteit → Andere door gebruikers gegenereerde content**: de gamestatistieken
+die de optionele AI Coach naar OpenAI stuurt), verzameld en niet gedeeld, niet kortstondig,
+optioneel, voor app-functionaliteit; versleuteld verzonden; geen accounts; verwijdering
+"Nee, binnen 90 dagen automatisch verwijderd" (OpenAI bewaart API-gegevens hooguit 30 dagen).
+Opnieuw insturen: `POST …/applications/com.squashanalyzer.android/dataSafety` met
+`{"safetyLabels": <inhoud van het CSV-bestand>}` (zie play_upload.py voor het token).
+Verandert de app wat hij verstuurt, pas dan dit bestand aan.

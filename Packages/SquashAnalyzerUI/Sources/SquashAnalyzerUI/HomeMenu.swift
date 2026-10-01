@@ -274,7 +274,7 @@ public struct AndroidHomeView: View {
                     SharedBadgeCatalogView()
                 }
                 .navigationDestination(isPresented: $showingHistory) {
-                    SharedMatchHistoryView(store: historyStore)
+                    SharedMatchHistoryView(store: historyStore, aiCoach: aiCoach, shareText: shareText)
                 }
                 .navigationDestination(isPresented: $showingSettings) {
                     SharedSettingsView(aiCoach: aiCoach, backup: backup)

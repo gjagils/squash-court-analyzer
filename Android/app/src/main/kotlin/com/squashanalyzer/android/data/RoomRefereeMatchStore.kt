@@ -25,6 +25,9 @@ class RoomRefereeMatchStore(
         syncBadges(match)
     }
 
+    /** A saved match by id, as the live model (Afgeronde wedstrijden) */
+    suspend fun byId(id: String): RefereeMatch? = store.byId(id)?.let(::restore)
+
     /** Only players picked via "Kies speler" (a real id) ever earn a badge. */
     private suspend fun syncBadges(match: RefereeMatch) {
         val players = buildList {

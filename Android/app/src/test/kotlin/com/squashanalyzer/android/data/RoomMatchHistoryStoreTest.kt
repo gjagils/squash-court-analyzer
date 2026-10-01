@@ -30,7 +30,7 @@ class RoomMatchHistoryStoreTest {
         val refereeStore = RefereeMatchStore(db.refereeMatchDao())
         coachAdapter = RoomCoachMatchStore(coachStore, badgeStore)
         refereeAdapter = RoomRefereeMatchStore(refereeStore, badgeStore)
-        history = RoomMatchHistoryStore(coachStore, refereeStore)
+        history = RoomMatchHistoryStore(coachStore, refereeStore, coachAdapter, refereeAdapter, badgeStore)
     }
     @After fun after() { db.close(); context.deleteDatabase(filename) }
 
@@ -77,5 +77,31 @@ class RoomMatchHistoryStoreTest {
         assertEquals("abandoned", refereeEntry.status)
         assertEquals(0, refereeEntry.player1Games)
         assertEquals(0, refereeEntry.player2Games)
+    }
+
+    @Test fun anIncompleteMatchCanBeOpenedCompletedAndDeleted() = runTest {
+        val match = Match()
+        match.setupMatch(player1 = "Gerard", player2 = "Thé", startingServer = Player.player1, player1GamesBefore = 1)
+        repeat(11) { point(match.currentGame) }
+        match.onGameEnd()
+        point(match.currentGame, Player.player2)
+        coachAdapter.save(match)
+        coachAdapter.abandon(match)
+
+        val row = history.loadHistory().single()
+        assertEquals("abandoned", row.status)
+        assertEquals(2, row.player1Games)
+
+        val opened = history.coachMatch(row.id)!!
+        assertEquals(1, opened.games[1].player2Score)
+        assertTrue(opened.completeResult(with = skip.lib.Array(listOf(Player.player1))))
+        history.saveCoachMatch(opened)
+        val completed = history.loadHistory().single()
+        assertEquals("completed", completed.status)
+        assertEquals(3, completed.player1Games)
+
+        history.delete(completed)
+        assertTrue(history.loadHistory().isEmpty)
+        assertNull(history.coachMatch(row.id))
     }
 }

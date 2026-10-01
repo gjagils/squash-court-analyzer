@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) receiveCardLink(intent)
         val matchStore = RoomCoachMatchStore(coachMatchStore, badgeAwardStore)
         val refereeMatchStore = RoomRefereeMatchStore(refereeMatchDataStore, badgeAwardStore)
-        val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore)
+        val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore, matchStore, refereeMatchStore, badgeAwardStore)
         val leagueTeamFetcher = LeagueTeamFetcher(loader = HttpLeaguePageLoader())
         // Registers activity-result launchers, so it must exist before the activity starts
         val appVersion = "Android " + (packageManager.getPackageInfo(packageName, 0).versionName ?: "?")

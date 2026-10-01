@@ -25,7 +25,16 @@ public struct MatchHistorySummary: Identifiable, Equatable, Sendable {
     }
 }
 
-/// Read-only history across both coach and referee matches, merged and sorted.
-public protocol MatchHistoryStore: Sendable {
+/// History across coach and referee matches, merged and sorted, newest first.
+/// A row can be opened (analysis, sharing), deleted, and an incomplete coach
+/// match can be finished with "Uitslag aanvullen".
+@MainActor
+public protocol MatchHistoryStore {
     func loadHistory() async throws -> [MatchHistorySummary]
+    func coachMatch(id: String) async throws -> Match?
+    func refereeMatch(id: String) async throws -> RefereeMatch?
+    /// Saves a coach match again, e.g. after its result was completed
+    func saveCoachMatch(_ match: Match) async throws
+    /// Removes the match; its badges are marked deleted, as on iOS
+    func delete(_ entry: MatchHistorySummary) async throws
 }

@@ -71,7 +71,9 @@ class RoomBackupStoreTest {
         assertEquals("", ace.shotType)
 
         // And the restored matches open in the history like any other
-        assertEquals(2, RoomMatchHistoryStore(MatchStore(a.matchDao()), RefereeMatchStore(a.refereeMatchDao())).loadHistory().count)
+        assertEquals(2, RoomMatchHistoryStore(MatchStore(a.matchDao()), RefereeMatchStore(a.refereeMatchDao()), coachStore(a),
+            RoomRefereeMatchStore(RefereeMatchStore(a.refereeMatchDao()), BadgeAwardStore(a.badgeAwardDao(), a.playerDao(), MatchStore(a.matchDao()), RefereeMatchStore(a.refereeMatchDao()), "test")),
+            BadgeAwardStore(a.badgeAwardDao(), a.playerDao(), MatchStore(a.matchDao()), RefereeMatchStore(a.refereeMatchDao()), "test")).loadHistory().count)
     }
 
     @Test fun anAndroidBackupRoundTripsIntoAnEmptyInstall() = runTest {

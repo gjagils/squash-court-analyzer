@@ -170,6 +170,14 @@ class BadgeAwardStore(
         dao.syncMatch(matchId, expected)
     }
 
+    /** A match deleted from the history: its awards stay, marked deleted (as on iOS) */
+    suspend fun markMatchDeleted(matchId: String) {
+        val now = System.currentTimeMillis()
+        for (award in dao.forMatch(matchId)) {
+            if (award.deletedAt == null) dao.markDeleted(award.id, now)
+        }
+    }
+
     /** A discarded match ("Niet opslaan") keeps none of its awards */
     suspend fun removeMatch(matchId: String) {
         dao.syncMatch(matchId, emptyList())

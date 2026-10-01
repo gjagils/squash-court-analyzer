@@ -33,6 +33,9 @@ class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardS
         badgeAwardStore.removeMatch(match.id.uuidString)
     }
 
+    /** A saved match by id, as the live model (Afgeronde wedstrijden) */
+    suspend fun byId(id: String): Match? = store.byId(id)?.let(::restore)
+
     /** Only players picked via "Kies speler" (a real id) ever earn a badge. */
     private suspend fun syncBadges(match: Match) {
         val players = buildList {

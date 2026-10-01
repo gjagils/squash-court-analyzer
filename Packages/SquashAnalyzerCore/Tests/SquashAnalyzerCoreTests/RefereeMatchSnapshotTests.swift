@@ -28,4 +28,27 @@ final class RefereeMatchSnapshotTests: XCTestCase {
         XCTAssertEqual(restored.matchStartedAt, match.matchStartedAt)
         XCTAssertEqual(restored.snapshot, match.snapshot)
     }
+
+    func testUndoWorksAgainAfterResuming() throws {
+        let match = RefereeMatch(player1Name: "Gerard", player2Name: "Thé", bestOf: 5, startingServer: Player.player1)
+        // The state right before each rally, to compare with undo after resuming
+        var before: [String] = []
+        func state(_ m: RefereeMatch) -> String {
+            "\(m.player1Score)-\(m.player2Score)-\(m.currentServer.rawValue)-\(m.serverSide.rawValue)-\(m.pointHistory.count)"
+        }
+        match.overrideSide(to: ServerSide.left)
+        before.append(state(match)); match.awardPoint(to: Player.player1)
+        before.append(state(match)); match.awardPoint(to: Player.player2)
+        match.overrideSide(to: ServerSide.left)
+        before.append(state(match)); match.awardPoint(to: Player.player2)
+        before.append(state(match)); match.callStroke(to: Player.player1)
+
+        let restored = try XCTUnwrap(RefereeMatch.restoring(match.snapshot))
+        XCTAssertTrue(restored.canUndo)
+        for expected in before.reversed() {
+            restored.undo()
+            XCTAssertEqual(state(restored), expected)
+        }
+        XCTAssertFalse(restored.canUndo)
+    }
 }

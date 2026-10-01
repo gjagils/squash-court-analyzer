@@ -28,6 +28,8 @@ data class RefereeMatchEntity(
     val currentGameNumber: Int,
     val player1PreferredSide: String?, // ServerSide raw value
     val player2PreferredSide: String?, // ServerSide raw value
+    val openingServer: String? = null, // Player raw value: who served the first rally of this game
+    val openingSide: String? = null, // ServerSide raw value
     val matchStartedAt: Long,
     val gameStartedAt: Long,
     val lastPointAt: Long?,

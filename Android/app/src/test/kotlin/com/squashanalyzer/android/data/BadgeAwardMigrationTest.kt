@@ -24,7 +24,7 @@ class BadgeAwardMigrationTest {
 
     private fun open() {
         db = Room.databaseBuilder(context, AppDatabase::class.java, filename)
-            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7).build()
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8).build()
     }
     @Before fun before() { context.deleteDatabase(filename); open() }
     @After fun after() { db.close(); context.deleteDatabase(filename) }

@@ -51,6 +51,7 @@ class RoomRefereeMatchStore(
             currentGameNumber = match.currentGameNumber,
             player1PreferredSide = match.player1PreferredSide?.rawValue,
             player2PreferredSide = match.player2PreferredSide?.rawValue,
+            openingServer = match.openingServer?.rawValue, openingSide = match.openingSide?.rawValue,
             matchStartedAt = millis(match.matchStartedAt), gameStartedAt = millis(match.gameStartedAt),
             lastPointAt = match.lastPointAt?.let(::millis),
             savedAt = now, updatedAt = now,
@@ -86,6 +87,8 @@ class RoomRefereeMatchStore(
         match.currentGameNumber = row.currentGameNumber
         match.player1PreferredSide = row.player1PreferredSide?.let { requireNotNull(ServerSide.init(rawValue = it)) }
         match.player2PreferredSide = row.player2PreferredSide?.let { requireNotNull(ServerSide.init(rawValue = it)) }
+        match.openingServer = row.openingServer?.let(::player)
+        match.openingSide = row.openingSide?.let { requireNotNull(ServerSide.init(rawValue = it)) }
         match.gameStartedAt = date(row.gameStartedAt)
         // Time spent with the app closed is not part of the next rally.
         match.lastPointAt = row.currentPoints.lastOrNull()?.let { Date() }
@@ -104,6 +107,8 @@ class RoomRefereeMatchStore(
             RefereePointEntry(id = uuid(point.id), scorer = player(point.scorer), score = point.score,
                 side = requireNotNull(ServerSide.init(rawValue = point.side)), isStroke = point.isStroke)
         })
+        // Undo works again for every rally of this game
+        match.rebuildUndo()
         return match
     }
 

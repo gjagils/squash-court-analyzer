@@ -75,10 +75,11 @@ transitions, and persists through the same pattern as coach mode: a
 by `RoomRefereeMatchStore` over a dedicated, smaller Room schema
 (`RefereeMatchEntity`/`RefereeGameEntity`/`RefereePointEntity`/
 `RefereeCurrentPointEntity` — no point type/zone/shot columns, since referee
-mode never tags those). One accepted gap: `RefereeMatch.undo()` pops a
-private, in-memory-only undo stack (unlike `Game`/`Match`, which recompute
-undo from the persisted point list), so a resumed match can only undo points
-scored in the current live session, not ones from before a restart. Android
+mode never tags those). `RefereeMatch.undo()` pops a private, in-memory
+undo stack; a saved match keeps who served the game's first rally
+(`openingServer`/`openingSide`, Room v8 and `RefereeMatchSnapshot`), and
+`rebuildUndo()` rebuilds the stack from that and the timeline on resume, so
+undo reaches back to the game's first rally on both platforms. Android
 also now has a badges destination: `SharedBadgeCatalogView`/`BadgeMedallion`
 in `SquashAnalyzerUI` render the full `BadgeKind` catalog (already pure and
 shared via `BadgeEngine.swift` in `SquashAnalyzerCore`) with a placeholder

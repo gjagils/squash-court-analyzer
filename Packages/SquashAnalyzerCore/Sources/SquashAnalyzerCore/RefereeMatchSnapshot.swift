@@ -2,7 +2,7 @@ import Foundation
 
 /// A referee match that is still being played, as JSON: iOS keeps it in a
 /// file so "Sluiten" halfway can be resumed (Android keeps the same values in
-/// Room). The undo history is not kept, as on Android.
+/// Room). Undo is rebuilt from the timeline after restoring (`rebuildUndo`).
 public struct RefereeMatchSnapshot: Codable, Equatable, Sendable {
     public struct Entry: Codable, Equatable, Sendable {
         public let id: UUID
@@ -37,6 +37,9 @@ public struct RefereeMatchSnapshot: Codable, Equatable, Sendable {
     public let currentGameNumber: Int
     public let player1PreferredSide: String?
     public let player2PreferredSide: String?
+    /// Server and box of the current game's first rally (nil in older files)
+    public let openingServer: String?
+    public let openingSide: String?
     public let matchStartedAt: Date
     public let gameStartedAt: Date
     public let completedGames: [FinishedGame]
@@ -74,6 +77,7 @@ extension RefereeMatch {
             player1Score: player1Score, player2Score: player2Score, currentServer: currentServer.rawValue,
             serverSide: serverSide.rawValue, currentGameNumber: currentGameNumber,
             player1PreferredSide: player1PreferredSide?.rawValue, player2PreferredSide: player2PreferredSide?.rawValue,
+            openingServer: openingServer?.rawValue, openingSide: openingSide?.rawValue,
             matchStartedAt: matchStartedAt, gameStartedAt: gameStartedAt, completedGames: games, points: points)
     }
 
@@ -111,6 +115,9 @@ extension RefereeMatch {
             if let point = RefereeMatchSnapshot.point(entry) { history.append(point) }
         }
         match.pointHistory = history
+        match.openingServer = snapshot.openingServer.flatMap { Player(rawValue: $0) }
+        match.openingSide = snapshot.openingSide.flatMap { ServerSide(rawValue: $0) }
+        match.rebuildUndo()
         // Time spent with the app closed is not part of the next rally
         match.lastPointAt = history.isEmpty ? nil : Date()
         return match

@@ -22,6 +22,8 @@ data class RefereeMatchRecord(
     val currentGameNumber: Int,
     val player1PreferredSide: String? = null,
     val player2PreferredSide: String? = null,
+    val openingServer: String? = null,
+    val openingSide: String? = null,
     val matchStartedAt: Long,
     val gameStartedAt: Long,
     val lastPointAt: Long? = null,

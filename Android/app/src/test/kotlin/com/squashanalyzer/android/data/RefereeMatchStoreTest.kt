@@ -22,7 +22,7 @@ class RefereeMatchStoreTest {
     private lateinit var adapter: RoomRefereeMatchStore
     private fun open() {
         db = Room.databaseBuilder(context, AppDatabase::class.java, filename)
-            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7).build()
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8).build()
         adapter = RoomRefereeMatchStore(RefereeMatchStore(db.refereeMatchDao()), BadgeAwardStore(db.badgeAwardDao(), db.playerDao(), MatchStore(db.matchDao()), RefereeMatchStore(db.refereeMatchDao()), "test-install"))
     }
     @Before fun before() { context.deleteDatabase(filename); open() }
@@ -53,9 +53,17 @@ class RefereeMatchStoreTest {
         assertEquals(ServerSide.left, restored.player2PreferredSide)
         assertEquals(2, restored.pointHistory.count)
         assertEquals(match.pointHistory.first().id, restored.pointHistory.first().id)
-        // RefereeMatch.undo() pops a private, in-memory undo stack that is not
-        // itself persisted; a restored match starts with an empty stack, so
-        // undo only ever reaches back to points scored in the live session.
+        // The undo stack is rebuilt from the timeline and the opening serve:
+        // undo reaches back to the first rally of this game.
+        assertTrue(restored.canUndo)
+        restored.undo()
+        assertEquals(1, restored.player1Score)
+        assertEquals(0, restored.player2Score)
+        assertEquals(Player.player1, restored.currentServer)
+        restored.undo()
+        assertEquals(0, restored.player1Score)
+        assertEquals(Player.player1, restored.currentServer)
+        assertEquals(ServerSide.left, restored.serverSide)
         assertFalse(restored.canUndo)
         assertEquals(stored.savedAt, db.refereeMatchDao().matchById(match.id.uuidString)!!.savedAt)
     }

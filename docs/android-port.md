@@ -2127,8 +2127,13 @@ Bijgewerkt 1 oktober 2026 (tweede ronde):
   (`RefereeInProgressStore`, een JSON-bestand met Core's
   `RefereeMatchSnapshot`) en vraagt bij de tegel "Wedstrijd hervatten?". Verschil:
   op iOS verdwijnt de oude bij "Nieuwe wedstrijd", op Android komt hij als
-  afgebroken in de lijst. Undo na hervatten werkt op beide niet (geen
-  undo-geschiedenis bewaard).
+  afgebroken in de lijst.
+- Undo na hervatten (scheidsrechter) werkt op beide: de wedstrijd bewaart wie
+  de eerste rally van de game serveerde (`openingServer`/`openingSide`, Room
+  versie 8 met `MIGRATION_7_8`, en in `RefereeMatchSnapshot` voor iOS), en
+  `RefereeMatch.rebuildUndo()` bouwt de undo-stapel daarmee en met de tijdlijn
+  opnieuw op. Een wedstrijd van vóór deze versie heeft geen opening en kan
+  daarom pas undo vanaf de eerstvolgende rally.
 - Mijn team op iOS toont nu de echte tijd van een nog te spelen wedstrijd.
 
 - Badge-artwork op Android: **gedaan 2026-10-01**. De 31 plaatjes staan nu in

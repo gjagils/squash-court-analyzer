@@ -109,6 +109,10 @@ public class RefereeMatch: Identifiable {
     public var lastPointAt: Date?
 
     private var undoStack: [RefereeAction] = []
+    /// Who served the first rally of this game, and from which box. Kept with
+    /// a saved match so undo can be rebuilt after resuming (`rebuildUndo`).
+    public var openingServer: Player?
+    public var openingSide: ServerSide?
 
     public init(id: UUID = UUID(), player1Name: String, player2Name: String, bestOf: Int, startingServer: Player,
                 player1GamesBefore: Int = 0, player2GamesBefore: Int = 0, matchStartedAt: Date = Date()) {
@@ -152,6 +156,10 @@ public class RefereeMatch: Identifiable {
 
     public func awardPoint(to scorer: Player, isStroke: Bool = false) {
         guard !isGameOver else { return }
+        if pointHistory.isEmpty {
+            openingServer = currentServer
+            openingSide = serverSide
+        }
         undoStack.append(.point(prevServer: currentServer, prevSide: serverSide, prevP1Score: player1Score, prevP2Score: player2Score, prevLastPointAt: lastPointAt))
         if scorer == .player1 { player1Score += 1 } else { player2Score += 1 }
         lastPointAt = Date()
@@ -209,6 +217,24 @@ public class RefereeMatch: Identifiable {
         lastCallText = nil
     }
 
+    /// After resuming a saved match: undo again works for every rally of the
+    /// current game. Each rally's server and box follow from the rally before
+    /// it (box changes are in the timeline), the first from `openingServer`.
+    public func rebuildUndo() {
+        undoStack.removeAll()
+        guard let firstServer = openingServer, let firstSide = openingSide else { return }
+        var server: Player = firstServer
+        var side: ServerSide = firstSide
+        var score1 = 0
+        var score2 = 0
+        for entry in pointHistory {
+            undoStack.append(.point(prevServer: server, prevSide: side, prevP1Score: score1, prevP2Score: score2, prevLastPointAt: nil))
+            if entry.scorer == Player.player1 { score1 += 1 } else { score2 += 1 }
+            server = entry.scorer
+            side = entry.side
+        }
+    }
+
     public func confirmNextGame() {
         guard let winner = currentGameWinner else { return }
         completedGames.append(CompletedRefereeGame(number: currentGameNumber, player1Score: player1Score, player2Score: player2Score, winner: winner, duration: currentGameDuration, points: pointHistory))
@@ -217,6 +243,8 @@ public class RefereeMatch: Identifiable {
         player2Score = 0
         pointHistory.removeAll()
         undoStack.removeAll()
+        openingServer = nil
+        openingSide = nil
         lastCallText = nil
         gameStartedAt = Date()
         lastPointAt = nil

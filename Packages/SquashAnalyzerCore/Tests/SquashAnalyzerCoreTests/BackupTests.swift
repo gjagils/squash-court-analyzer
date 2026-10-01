@@ -80,4 +80,22 @@ final class BackupTests: XCTestCase {
         let garbage = thrown { _ = try BackupCodec.decode("geen backup".data(using: String.Encoding.utf8)!) }
         XCTAssertEqual(garbage as? BackupValidationError, BackupValidationError.unreadable)
     }
+
+    func testOldIOSPointsAreNormalized() {
+        let ace = PointExportData(id: nil, pointNumber: 1, scorer: "Speler 2", pointType: "Winner", zone: "Achter Links", shotType: "Ace",
+                                  server: "Speler 2", player1Score: 0, player2Score: 1, duration: 4, timestamp: nil).normalized
+        XCTAssertEqual(ace.pointType, PointType.servicePoint.rawValue)
+        XCTAssertEqual(ace.shotType, "")
+        XCTAssertEqual(ace.zone, "Achter Links")
+        let stroke = PointExportData(id: nil, pointNumber: 2, scorer: "Speler 1", pointType: "Winner", zone: "", shotType: "Stroke",
+                                     server: "Speler 1", player1Score: 1, player2Score: 1, duration: 4, timestamp: nil).normalized
+        XCTAssertEqual(stroke.pointType, PointType.stroke.rawValue)
+        let odd = PointExportData(id: nil, pointNumber: 3, scorer: "Iemand", pointType: "Raar", zone: "Dak", shotType: "Smash",
+                                  server: "?", player1Score: 2, player2Score: 1, duration: 4, timestamp: nil).normalized
+        XCTAssertEqual(odd.pointType, PointType.winner.rawValue)
+        XCTAssertEqual(odd.scorer, Player.player1.rawValue)
+        XCTAssertEqual(odd.zone, "")
+        XCTAssertEqual(odd.shotType, "")
+        XCTAssertEqual(BackupCounts(players: 2, matches: 3, games: 7, badges: 1).summary, "2 spelers, 3 wedstrijden, 7 games, 1 badges")
+    }
 }

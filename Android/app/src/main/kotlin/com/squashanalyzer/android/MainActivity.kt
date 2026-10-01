@@ -21,6 +21,9 @@ import squash.analyzer.core.CardInbox
 import squash.analyzer.core.LeagueTeamFetcher
 import squash.analyzer.core.AICoachClient
 import squash.analyzer.ui.AICoachContext
+import squash.analyzer.ui.BackupContext
+import com.squashanalyzer.android.backup.ActivityBackupFiles
+import com.squashanalyzer.android.data.RoomBackupStore
 import com.squashanalyzer.android.aicoach.HttpAICoachTransport
 import com.squashanalyzer.android.aicoach.KeystoreAPIKeyStore
 import com.squashanalyzer.android.league.HttpLeaguePageLoader
@@ -65,13 +68,16 @@ class MainActivity : AppCompatActivity() {
         val refereeMatchStore = RoomRefereeMatchStore(refereeMatchDataStore, badgeAwardStore)
         val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore)
         val leagueTeamFetcher = LeagueTeamFetcher(loader = HttpLeaguePageLoader())
+        // Registers activity-result launchers, so it must exist before the activity starts
+        val backup = BackupContext(store = RoomBackupStore(db), files = ActivityBackupFiles(this),
+            appVersion = "Android " + (packageManager.getPackageInfo(packageName, 0).versionName ?: "?"))
         val aiCoach = AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport()))
         setContent {
             val stateHolder = rememberSaveableStateHolder()
             stateHolder.SaveableStateProvider(true) {
                 PresentationRoot(defaultColorScheme = ColorScheme.dark, context = ComposeContext()) { context ->
                     Box(modifier = context.modifier.fillMaxSize()) {
-                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach).Compose(context = context.content())
+                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach, backup = backup).Compose(context = context.content())
                     }
                 }
                 SideEffect { stateHolder.removeState(true) }

@@ -161,6 +161,14 @@ The coach dashboard's local advice (`CoachAdvice`) and AI Coach
 `APIKeyStore` (Keychain via `APIKeyManager` on iOS, `KeystoreAPIKeyStore`,
 AES-GCM with an Android Keystore key, on Android). Android's
 `SharedCoachDashboardView` opens from ANALYSE on a finished coach game.
+
+Backups use one file format on both platforms: `FullBackup` and
+`BackupCodec` (envelope + SHA-256 over sorted-key ISO 8601 JSON) are in Core;
+Skip's JSONEncoder produces the same bytes as Apple's, so a backup from
+either platform passes the checksum on the other (pinned by a test that runs
+on both). iOS' `ExportService` and Android's `RoomBackupStore` map their
+stores to and from it; Android picks files with the system document pickers
+(`ActivityBackupFiles`).
 Full plan, phase status, toolchain setup and transpile gotchas found so far:
 see [`docs/android-port.md`](docs/android-port.md). Read that file before
 touching anything Android-related, and keep it updated as phases complete.

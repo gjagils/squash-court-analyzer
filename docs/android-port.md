@@ -1779,6 +1779,72 @@ Verificatie: Core 36 op Darwin / 35 JUnit op Android,
 `:app:testDebugUnitTest` 44/44, `:app:connectedDebugAndroidTest` 17/17, iOS
 **TEST SUCCEEDED**.
 
+## Back-ups op Android — resultaat (AFGEROND, 2026-10-01)
+
+**Eén back-upbestand voor iOS en Android.** Het formaat (`FullBackup`, de
+envelop met SHA-256-controlegetal, en de records voor speler, wedstrijd,
+game, punt, let en badge) staat nu in Core (`Backup.swift`, `BackupCodec`),
+met exact dezelfde JSON-sleutels, dus bestaande iPhone-back-ups blijven
+werken. Het controlegetal gaat over de payload met gesorteerde sleutels en
+ISO 8601-datums. Bewezen: Skip's `JSONEncoder` maakt byte-voor-byte dezelfde
+tekst als Apple's (ook `\/`-escapes, weggelaten nil-velden, `12` voor
+`12.0`); `BackupTests.testCanonicalJSONIsTheSameOnEveryPlatform` pint een op
+Darwin gemaakte tekst en checksum vast en draait ook op Android.
+
+- **iOS**: `ExportService` codeert/controleert via `BackupCodec`; verder
+  ongewijzigd (iCloud Drive, rotatie, import/vervangen).
+  `testBackupMadeOnAndroidImports` zet een echt op de emulator gemaakt
+  bestand (base64 in de test) terug in SwiftData.
+- **Android**: `RoomBackupStore` (Kotlin) maakt de back-up uit Room
+  (spelers incl. foto als base64, alle coachwedstrijden, alle badges incl.
+  verwijderde) en zet hem terug in één transactie. *Samenvoegen* voegt alleen
+  spelers en wedstrijden met een nieuwe id toe en voegt badges samen
+  (verwijdering wint); *Alles vervangen* wist eerst spelers,
+  coachwedstrijden en badges. Losse games uit oude iOS-back-ups worden een
+  afgeronde wedstrijd (met de game-id als wedstrijd-id, zodat dubbel
+  samenvoegen niet dubbel toevoegt). Oude iOS-punten met slag "Stroke"/"Ace"
+  worden via `PointExportData.normalized` (Core) stroke/servicepunt;
+  onbekende zone/slag/speler valt terug in plaats van het terugzetten te
+  breken. Scheidsrechterwedstrijden zitten (net als op iOS) niet in het
+  formaat en blijven bij vervangen staan.
+- **UI**: Instellingen → **Back-up**: "Maak back-up" (systeem-opslaanscherm,
+  bv. Google Drive of Downloads; naam `squash-backup-jjjj-mm-dd-uummss.json`)
+  en "Zet back-up terug" (systeem-openscherm → vraag met datum en aantallen
+  → Samenvoegen / Alles vervangen / Annuleren → melding met aantallen).
+  `ActivityBackupFiles` (Kotlin) gebruikt CreateDocument/OpenDocument; geen
+  opslagtoestemming nodig. Grens 100 MB per bestand.
+- **Handmatig gecontroleerd op de emulator**: een op Darwin gemaakte
+  back-up via Downloads teruggezet ("Teruggezet: 1 spelers, 2 wedstrijden,
+  2 games, 1 badges"), en een Android-back-up opgeslagen in Downloads en
+  daarna op iOS ingelezen (de iOS-test hierboven).
+
+**Skip-valkuilen**:
+- In een berekende property binnen een `extension` op een struct vertaalt
+  Skip `PointType(rawValue:)` (en `.init(rawValue:)`) naar de private
+  Kotlin-constructor van de enum, wat in de app-build niet compileert
+  (de Core-testbuild wel). Opzoeken via `allCases` werkt overal.
+- Een `.alert(isPresented:)` met een `Binding` die bij `false` de gegevens
+  wist: op Android draait die setter vóór de knopactie, dus de knop vindt
+  niets meer. Houd de gegevens in een aparte `@State` en de vlag apart.
+- JUnit: `@After fun x() = runBlocking { … }` moet `Unit` teruggeven.
+
+Tests: Core `BackupTests` (5: canonieke JSON gelijk op elk platform,
+heen-en-terug, geknoeid bestand geweigerd, versie 1 / onbekende versie /
+geen back-up, oude punten genormaliseerd); `RoomBackupStoreTest` (4: iOS-back-up
+op Android incl. "Ace" en losse game, Android-back-up naar een lege
+installatie incl. foto/let/hervatten, samenvoegen houdt eigen wijzigingen en
+verwijdering wint, vervangen); instrumented `BackupScreenTest` (opslaan en
+terugzetten via Instellingen, de bestandskiezers beantwoord met
+espresso-intents); iOS `testBackupMadeOnAndroidImports`.
+
+Verificatie: Core 51 op Darwin / 50 JUnit op Android,
+`:app:testDebugUnitTest` 51/51, `:app:connectedDebugAndroidTest` 22/22, iOS
+**TEST SUCCEEDED**.
+
+**Nog niet**: automatische back-ups (iOS doet iCloud Drive met rotatie;
+Android heeft nu alleen handmatig, Android's eigen app-back-up via
+`allowBackup` neemt de Room-database wel mee).
+
 ## Icoontjes en Deel score op Android — resultaat (AFGEROND, 2026-10-01)
 
 **Icoontjes.** Gerd-Jan zag driehoekjes bij FORCED ERROR, UNFORCED ERROR,
@@ -1936,7 +2002,7 @@ branch tot een presenteerbare mijlpaal; samenvoegen is een afzonderlijke stap.
 
 ## Wat nog niet is overgezet
 
-- Instellingen op Android: Mijn team en AI Coach; de invoermodus (Android
-  heeft alleen tik-op-de-score) en back-ups ontbreken nog.
+- Instellingen op Android: Mijn team, AI Coach en back-ups; de invoermodus
+  (Android heeft alleen tik-op-de-score) ontbreekt nog.
 - Foto's, badgecatalogus en teamimport in het Android-spelersscherm.
 - Een fysiek Android-toestel is nog nodig voor aanvullende praktijktests.

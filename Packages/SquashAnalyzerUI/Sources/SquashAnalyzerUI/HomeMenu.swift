@@ -230,14 +230,17 @@ public struct AndroidHomeView: View {
     private let leagueTeamFetcher: LeagueTeamFetcher
     /// AI Coach (Android supplies the key store and the sender)
     private let aiCoach: AICoachContext?
+    /// Backups in Instellingen (Android supplies Room and the file pickers)
+    private let backup: BackupContext?
 
     public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 historyStore: any MatchHistoryStore,
                 matchStore: any CoachMatchStore, refereeMatchStore: any RefereeMatchStore,
                 shareText: @escaping (String) -> Void,
                 cardInbox: CardInbox, cardImportStore: any CardImportStore,
-                leagueTeamFetcher: LeagueTeamFetcher, aiCoach: AICoachContext? = nil) {
+                leagueTeamFetcher: LeagueTeamFetcher, aiCoach: AICoachContext? = nil, backup: BackupContext? = nil) {
         self.leagueTeamFetcher = leagueTeamFetcher
+        self.backup = backup
         self.aiCoach = aiCoach
         self.shareText = shareText
         self.cardInbox = cardInbox
@@ -270,7 +273,7 @@ public struct AndroidHomeView: View {
                     SharedMatchHistoryView(store: historyStore)
                 }
                 .navigationDestination(isPresented: $showingSettings) {
-                    SharedSettingsView(aiCoach: aiCoach)
+                    SharedSettingsView(aiCoach: aiCoach, backup: backup)
                 }
                 .navigationDestination(isPresented: $showingTeam) {
                     if let team {

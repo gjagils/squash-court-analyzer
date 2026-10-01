@@ -240,11 +240,26 @@ public struct SharedLeagueTeamDetailView: View {
     }
 }
 
-/// Android's settings: the Mijn team link and the AI Coach API key. The
-/// coach input mode is not here because Android's coach screen has only the
-/// score-tap flow; backups follow later.
+/// Backups in the settings: where the data comes from and goes to, and the
+/// file picker (both supplied by the platform)
+public struct BackupContext {
+    public let store: any BackupStore
+    public let files: any BackupFiles
+    public let appVersion: String
+
+    public init(store: any BackupStore, files: any BackupFiles, appVersion: String) {
+        self.store = store
+        self.files = files
+        self.appVersion = appVersion
+    }
+}
+
+/// Android's settings: the Mijn team link, the AI Coach API key and backups.
+/// The coach input mode is not here because Android's coach screen has only
+/// the score-tap flow.
 public struct SharedSettingsView: View {
     let aiCoach: AICoachContext?
+    let backup: BackupContext?
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     @State private var draft = ""
@@ -254,9 +269,17 @@ public struct SharedSettingsView: View {
     @State private var showingKey = false
     @State private var hasKey = false
     @State private var keyMessage: String?
+    @State private var backupBusy = false
+    @State private var backupMessage: String?
+    @State private var backupIsError = false
+    /// The backup picked to restore. Kept apart from `askingRestore`: the
+    /// alert clears its own flag before a button's action runs (on Android).
+    @State private var pendingRestore: FullBackup?
+    @State private var askingRestore = false
 
-    public init(aiCoach: AICoachContext? = nil) {
+    public init(aiCoach: AICoachContext? = nil, backup: BackupContext? = nil) {
         self.aiCoach = aiCoach
+        self.backup = backup
     }
 
     public var body: some View {
@@ -298,6 +321,12 @@ public struct SharedSettingsView: View {
                     if aiCoach != nil {
                         aiCoachSection
                             .padding(.top, 20)
+                    }
+                    if backup != nil {
+                        backupSection
+                            .padding(.top, 20)
+                            // Clear of the system navigation bar
+                            .padding(.bottom, 40)
                     }
                 }
                 .padding(24)
@@ -355,6 +384,107 @@ public struct SharedSettingsView: View {
             Text("De key wordt versleuteld op dit toestel bewaard (Android Keystore). Een analyse kost ongeveer € 0,01 (GPT-4o-mini) en werkt alleen met internet. Er gaan geen spelersnamen naar OpenAI.")
                 .font(.system(size: 11))
                 .foregroundColor(LeaguePalette.muted)
+        }
+    }
+
+    private var backupSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Back-up")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(LeaguePalette.text)
+            Text("Bewaar spelers, coachwedstrijden en badges in een bestand, bijvoorbeeld op Google Drive. Een back-up van Android kun je ook op een iPhone terugzetten, en andersom. Scheidsrechterwedstrijden zitten er (net als op iOS) niet in.")
+                .font(.system(size: 13))
+                .foregroundColor(LeaguePalette.secondary)
+            HStack(spacing: 12) {
+                Button("Maak back-up") { makeBackup() }
+                    .buttonStyle(.borderedProminent)
+                    .tint(LeaguePalette.orange)
+                    .disabled(backupBusy)
+                Button("Zet back-up terug") { pickBackup() }
+                    .foregroundColor(LeaguePalette.orange)
+                    .disabled(backupBusy)
+            }
+            if backupBusy {
+                ProgressView()
+            }
+            if let backupMessage {
+                Text(backupMessage)
+                    .font(.system(size: 12))
+                    .foregroundColor(backupIsError ? Color(red: 0.95, green: 0.40, blue: 0.35) : Color(red: 0.45, green: 0.80, blue: 0.45))
+            }
+        }
+        .alert("Back-up terugzetten?", isPresented: $askingRestore) {
+            Button("Samenvoegen") { restore(replacing: false) }
+            Button("Alles vervangen", role: .destructive) { restore(replacing: true) }
+            Button("Annuleren", role: .cancel) { pendingRestore = nil }
+        } message: {
+            Text(restoreQuestion)
+        }
+    }
+
+    private var restoreQuestion: String {
+        guard let backup = pendingRestore else { return "" }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "nl_NL")
+        formatter.dateFormat = "d MMMM yyyy HH:mm"
+        return "Back-up van \(formatter.string(from: backup.backupDate)): \(backup.players.count) spelers en \(backup.matches.count + backup.standaloneGames.count) wedstrijden. Samenvoegen voegt toe wat er nog niet is; Alles vervangen wist eerst je spelers, coachwedstrijden en badges op dit toestel."
+    }
+
+    private func showBackup(_ text: String, error: Bool) {
+        backupMessage = text
+        backupIsError = error
+    }
+
+    private func makeBackup() {
+        guard let backup else { return }
+        backupBusy = true
+        backupMessage = nil
+        Task {
+            do {
+                let full = try await backup.store.makeBackup()
+                let data = try BackupCodec.encode(full, appVersion: backup.appVersion)
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd-HHmmss"
+                let saved = try await backup.files.save(data, suggestedName: "squash-backup-\(formatter.string(from: Date())).json")
+                if saved {
+                    showBackup("Back-up opgeslagen: \(full.players.count) spelers, \(full.matches.count) wedstrijden", error: false)
+                }
+            } catch {
+                showBackup("De back-up is niet gelukt.", error: true)
+            }
+            backupBusy = false
+        }
+    }
+
+    private func pickBackup() {
+        guard let backup else { return }
+        backupBusy = true
+        backupMessage = nil
+        Task {
+            do {
+                if let data = try await backup.files.open() {
+                    pendingRestore = try BackupCodec.decode(data)
+                    askingRestore = true
+                }
+            } catch {
+                showBackup((error as? BackupValidationError)?.message ?? "Dit bestand kon niet worden gelezen.", error: true)
+            }
+            backupBusy = false
+        }
+    }
+
+    private func restore(replacing: Bool) {
+        guard let backup, let full = pendingRestore else { return }
+        pendingRestore = nil
+        backupBusy = true
+        Task {
+            do {
+                let counts = try await backup.store.restore(full, replacing: replacing)
+                showBackup("Teruggezet: \(counts.summary)", error: false)
+            } catch {
+                showBackup("Terugzetten is niet gelukt; er is niets veranderd.", error: true)
+            }
+            backupBusy = false
         }
     }
 

@@ -42,6 +42,14 @@ interface MatchDao {
     @Query("SELECT * FROM lets WHERE gameId = :gameId ORDER BY letNumber ASC")
     suspend fun letsForGame(gameId: String): List<LetEntity>
 
+    /** Every coach match, oldest first (backups) */
+    @Query("SELECT * FROM matches ORDER BY savedAt ASC, id ASC")
+    suspend fun allMatches(): List<MatchEntity>
+
+    /** Games, points and lets go too (foreign keys cascade) */
+    @Query("DELETE FROM matches")
+    suspend fun deleteAllMatches()
+
     @Query("DELETE FROM matches WHERE id = :id")
     suspend fun deleteMatchById(id: String)
 

@@ -9,7 +9,7 @@ import CryptoKit
 // existing backups keep working. The envelope carries a SHA-256 checksum over
 // the payload encoded with sorted keys and ISO 8601 dates.
 
-public struct FullBackup: Codable, Equatable {
+public struct FullBackup: Codable, Equatable, Sendable {
     public let version: Int
     public let backupDate: Date
     public let players: [PlayerBackupData]
@@ -29,7 +29,7 @@ public struct FullBackup: Codable, Equatable {
     }
 }
 
-public struct BadgeAwardBackupData: Codable, Equatable {
+public struct BadgeAwardBackupData: Codable, Equatable, Sendable {
     public let cardId: String
     public let badge: String
     public let matchId: String
@@ -49,7 +49,7 @@ public struct BadgeAwardBackupData: Codable, Equatable {
     }
 }
 
-public struct BackupEnvelope: Codable {
+public struct BackupEnvelope: Codable, Sendable {
     public let formatVersion: Int
     public let schemaVersion: String
     public let appVersion: String
@@ -81,7 +81,7 @@ public enum BackupValidationError: Error, Equatable {
     }
 }
 
-public struct PlayerBackupData: Codable, Equatable {
+public struct PlayerBackupData: Codable, Equatable, Sendable {
     public let id: String
     public let name: String
     public let coachingFocusAreas: [String]
@@ -104,7 +104,7 @@ public struct PlayerBackupData: Codable, Equatable {
     }
 }
 
-public struct MatchExportData: Codable, Equatable {
+public struct MatchExportData: Codable, Equatable, Sendable {
     public let id: String?
     public let player1Name: String
     public let player2Name: String
@@ -157,7 +157,7 @@ public struct MatchExportData: Codable, Equatable {
     }
 }
 
-public struct GameExportData: Codable, Equatable {
+public struct GameExportData: Codable, Equatable, Sendable {
     public let id: String?
     public let gameNumber: Int
     public let player1Name: String
@@ -186,7 +186,7 @@ public struct GameExportData: Codable, Equatable {
     }
 }
 
-public struct PointExportData: Codable, Equatable {
+public struct PointExportData: Codable, Equatable, Sendable {
     public let id: String?
     public let pointNumber: Int
     public let scorer: String
@@ -215,7 +215,7 @@ public struct PointExportData: Codable, Equatable {
     }
 }
 
-public struct LetExportData: Codable, Equatable {
+public struct LetExportData: Codable, Equatable, Sendable {
     public let id: String?
     public let letNumber: Int
     public let requestedBy: String
@@ -283,4 +283,76 @@ public enum BackupCodec {
         guard legacy.version == 1 else { throw BackupValidationError.unsupportedVersion(legacy.version) }
         return legacy
     }
+}
+
+// MARK: - Restoring on another platform
+
+extension PointExportData {
+    /// Only values the app can store: iOS' old points kept "Stroke"/"Ace" as
+    /// the shot type (now point types, like `SavedPoint.pointType(raw:shotType:)`),
+    /// and an unknown zone, shot or player falls back instead of failing the restore.
+    /// (Looked up via `allCases`: an `X(rawValue:)` call here transpiles to the
+    /// enum's private Kotlin constructor in the app build.)
+    public var normalized: PointExportData {
+        var type = PointType.winner
+        if shotType == "Stroke" {
+            type = PointType.stroke
+        } else if shotType == "Ace" {
+            type = PointType.servicePoint
+        } else {
+            for candidate in PointType.allCases where candidate.rawValue == pointType {
+                type = candidate
+            }
+        }
+        var zoneValue = ""
+        for candidate in CourtZone.allCases where candidate.rawValue == zone {
+            zoneValue = candidate.rawValue
+        }
+        var shotValue = ""
+        for candidate in ShotType.allCases where candidate.rawValue == shotType {
+            shotValue = candidate.rawValue
+        }
+        let players = [Player.player1.rawValue, Player.player2.rawValue]
+        return PointExportData(id: id, pointNumber: pointNumber,
+                               scorer: players.contains(scorer) ? scorer : Player.player1.rawValue,
+                               pointType: type.rawValue, zone: zoneValue, shotType: shotValue,
+                               server: players.contains(server) ? server : Player.player1.rawValue,
+                               player1Score: player1Score, player2Score: player2Score, duration: duration, timestamp: timestamp)
+    }
+}
+
+/// What a restore added
+public struct BackupCounts: Equatable, Sendable {
+    public let players: Int
+    public let matches: Int
+    public let games: Int
+    public let badges: Int
+
+    public init(players: Int, matches: Int, games: Int, badges: Int) {
+        self.players = players
+        self.matches = matches
+        self.games = games
+        self.badges = badges
+    }
+
+    public var summary: String {
+        "\(players) spelers, \(matches) wedstrijden, \(games) games, \(badges) badges"
+    }
+}
+
+/// The app's data as a backup, and a backup back into the app (Room on Android)
+public protocol BackupStore: AnyObject, Sendable {
+    func makeBackup() async throws -> FullBackup
+    /// `replacing` first removes players, coach matches and badges (referee
+    /// matches are not in the backup format and stay, as on iOS); otherwise
+    /// only what is not there yet is added, and a deleted badge stays deleted.
+    func restore(_ backup: FullBackup, replacing: Bool) async throws -> BackupCounts
+}
+
+/// Choosing where a backup file goes and which one to read (the platform's file picker)
+public protocol BackupFiles: AnyObject, Sendable {
+    /// False when the user cancelled
+    func save(_ data: Data, suggestedName: String) async throws -> Bool
+    /// Nil when the user cancelled
+    func open() async throws -> Data?
 }

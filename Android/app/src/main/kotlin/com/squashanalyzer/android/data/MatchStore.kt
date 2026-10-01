@@ -86,6 +86,9 @@ class MatchStore(private val dao: MatchDao) {
 
     suspend fun history(): List<MatchRecord> = dao.completedAndAbandoned().map { assemble(it) }
 
+    /** Every match, any status (for backups) */
+    suspend fun all(): List<MatchRecord> = dao.allMatches().map { assemble(it) }
+
     suspend fun mostRecentInProgressMatch(): MatchRecord? =
         dao.mostRecentMatchWithStatus(MatchStatus.IN_PROGRESS)?.let { assemble(it) }
 

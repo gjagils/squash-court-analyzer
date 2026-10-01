@@ -21,6 +21,13 @@ interface BadgeAwardDao {
     @Query("SELECT * FROM badge_awards WHERE cardId = :cardId AND deletedAt IS NULL")
     suspend fun activeForCard(cardId: String): List<BadgeAwardEntity>
 
+    /** Every award, deleted ones included (backups) */
+    @Query("SELECT * FROM badge_awards ORDER BY earnedAt ASC, id ASC")
+    suspend fun all(): List<BadgeAwardEntity>
+
+    @Query("DELETE FROM badge_awards")
+    suspend fun deleteAll()
+
     @Query("SELECT * FROM badge_awards WHERE id = :id")
     suspend fun byId(id: String): BadgeAwardEntity?
 

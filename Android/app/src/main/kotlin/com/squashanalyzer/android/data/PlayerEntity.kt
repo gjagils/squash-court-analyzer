@@ -43,6 +43,9 @@ abstract class PlayerDao {
     abstract suspend fun setCardId(id: String, cardId: String?)
 
     // Deliberately no foreign key from match history to this editable directory.
+    @Query("DELETE FROM players")
+    abstract suspend fun deleteAll()
+
     @Query("DELETE FROM players WHERE id = :id")
     abstract suspend fun delete(id: String)
 }

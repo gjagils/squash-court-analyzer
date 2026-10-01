@@ -2146,3 +2146,24 @@ Bijgewerkt 1 oktober 2026 (tweede ronde):
   (`Image(name, bundle: .module)`) op iOS en Android. Het package heeft daarvoor
   `resources: [.process("Resources")]`; Skip neemt de catalogus mee naar Android.
 - Een fysiek Android-toestel is nog nodig voor aanvullende praktijktests.
+
+## Eerste test op een echte telefoon (Galaxy A13, Android 14) — 1 oktober 2026
+
+- **Mijn team gaf "SBN is nu niet bereikbaar".** Oorzaak: sbn.toernooi.nl heeft
+  een certificaat dat eindigt bij *Sectigo Public Server Authentication Root
+  R46*, en dat rootcertificaat zit niet in Android 14 (wel in iOS en macOS). De
+  app vertrouwt het nu alleen voor sbn.toernooi.nl, naast de systeemroots:
+  `res/xml/network_security_config.xml` met `res/raw/sectigo_public_server_root_r46.pem`
+  (uit de macOS-rootstore, SHA-256 `7B:B6:47:…:5A:06`, geldig tot 2046). De
+  emulator had dit niet laten zien, omdat die een nieuwere rootstore heeft.
+- **"Even opslaan…" bij ieder punt.** Het opslaan na een punt blokkeerde het
+  scherm met een melding; op een echte telefoon is dat zichtbaar. Punten worden nu
+  op de achtergrond opgeslagen (`saving` in `RefereeSessionView` en
+  `CoachSessionView`); wijzigingen tijdens het opslaan gaan zoals eerder via
+  `saveAgain`. Alleen bij afsluiten wacht het scherm nog, met de melding.
+- **Tijdlijn zonder bolletjes.** De tijdlijn van iOS (`RefereeScoringTimeline`,
+  met de nu-markering, bolletjes en de lijn in de kleur van de serveerder) staat
+  nu in SquashAnalyzerUI en wordt door iOS en Android allebei gebruikt.
+- Let op: `connectedDebugAndroidTest` verwijdert de app (en de gegevens) van
+  **elk** aangesloten toestel. Zet `ANDROID_SERIAL=emulator-5554` als de
+  telefoon aan de Mac hangt.

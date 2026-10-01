@@ -24,6 +24,9 @@ public struct RefereeSessionView: View {
     @State private var exitAfterSave = false
     /// A change came in while saving; save once more when done
     @State private var saveAgain = false
+    /// Saving a point in the background: the screen stays usable, no overlay
+    /// (changes meanwhile go through `saveAgain`); only leaving waits for it
+    @State private var saving = false
 
     public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, shareText: ((String) -> Void)? = nil,
                 onExit: @escaping @MainActor () -> Void) {
@@ -61,7 +64,7 @@ public struct RefereeSessionView: View {
                 }
                 .disabled(busy || failed)
             }
-            if busy {
+            if busy || (saving && exitAfterSave) {
                 ProgressView("Even opslaan…")
                     .padding(24).background(CoachPalette.backgroundMedium)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -134,25 +137,25 @@ public struct RefereeSessionView: View {
     /// it (with the latest state), never dropped.
     private func persist(_ value: RefereeMatch, exit: Bool) {
         if exit { exitAfterSave = true }
-        if busy {
+        if saving || busy {
             saveAgain = true
             return
         }
-        busy = true
+        saving = true
         failed = false
         Task { @MainActor in
             do {
                 try await store.save(value)
                 if saveAgain, let latest = match {
                     saveAgain = false
-                    busy = false
+                    saving = false
                     persist(latest, exit: false)
                     return
                 }
-                busy = false
+                saving = false
                 if exitAfterSave { close() }
             } catch {
-                busy = false
+                saving = false
                 failed = true
             }
         }

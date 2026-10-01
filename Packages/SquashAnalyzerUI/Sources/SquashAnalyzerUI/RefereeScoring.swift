@@ -201,29 +201,7 @@ public struct RefereeScoringView: View {
     }
 
     private var timeline: some View {
-        VStack(spacing: 8) {
-            Text("NU")
-                .font(.system(size: 9, weight: .bold, design: .rounded))
-                .foregroundColor(CoachPalette.textMuted)
-                .tracking(1)
-            Rectangle()
-                .fill(CoachPalette.textMuted.opacity(0.35))
-                .frame(width: 2)
-                .overlay(alignment: .top) {
-                    VStack(spacing: 6) {
-                        ForEach(match.pointHistory.reversed()) { entry in
-                            Text(entry.label)
-                                .font(.system(size: 12, weight: .bold, design: .monospaced))
-                                .foregroundColor(entry.scorer == .player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue)
-                                .padding(.horizontal, 7)
-                                .padding(.vertical, 4)
-                                .background(Capsule().fill(CoachPalette.backgroundMedium))
-                        }
-                    }
-                    .padding(.top, 12)
-                }
-        }
-        .frame(width: 84)
+        RefereeScoringTimeline(entries: match.pointHistory, server: match.currentServer)
     }
 
     private var actionGrid: some View {

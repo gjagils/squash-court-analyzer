@@ -47,8 +47,7 @@ public struct ServiceSideSelector: View {
         return Button(action: { onSelect(box) }) {
             HStack(spacing: 3) {
                 if preferredSide == box {
-                    Image(systemName: "pin.fill")
-                        .font(.system(size: 7))
+                    AppSymbol("pin.fill", size: 7, color: active ? ScoreboardPalette.backgroundDark : color.opacity(0.4))
                 }
                 Text(label)
                     .font(.system(size: compact ? 11.0 : 12.0, weight: .bold, design: .rounded))

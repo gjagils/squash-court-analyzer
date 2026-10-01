@@ -8,6 +8,8 @@ public struct RefereeSessionView: View {
     let store: any RefereeMatchStore
     let playerStore: any PlayerProfileStore
     let onExit: @MainActor () -> Void
+    /// The platform share sheet, for "Deel score"
+    let shareText: ((String) -> Void)?
     @Environment(\.dismiss) private var dismiss
     @State private var match: RefereeMatch? = nil
     @State private var pending: RefereeMatch? = nil
@@ -17,7 +19,9 @@ public struct RefereeSessionView: View {
     @State private var confirmingNew = false
     @State private var exitAfterSave = false
 
-    public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, onExit: @escaping @MainActor () -> Void) {
+    public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, shareText: ((String) -> Void)? = nil,
+                onExit: @escaping @MainActor () -> Void) {
+        self.shareText = shareText
         self.store = store
         self.playerStore = playerStore
         self.onExit = onExit
@@ -27,7 +31,7 @@ public struct RefereeSessionView: View {
         ZStack {
             CoachPalette.backgroundDark.ignoresSafeArea()
             if let match {
-                RefereeScoringView(match: match, onMatchChanged: { changed in
+                RefereeScoringView(match: match, shareText: shareText, onMatchChanged: { changed in
                     persist(changed, exit: false)
                 }, onExit: { persist(match, exit: true) })
                 .disabled(busy || failed)

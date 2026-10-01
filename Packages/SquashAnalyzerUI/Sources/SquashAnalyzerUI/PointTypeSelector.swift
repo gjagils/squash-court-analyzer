@@ -21,9 +21,7 @@ public struct PointTypeButton: View {
         if pointType == .stroke {
             FistIcon(color: color, size: 22)
         } else {
-            Image(systemName: pointType.icon)
-                .font(.system(size: 20))
-                .foregroundColor(color)
+            AppSymbol(pointType.icon, size: 20, color: color)
         }
     }
 

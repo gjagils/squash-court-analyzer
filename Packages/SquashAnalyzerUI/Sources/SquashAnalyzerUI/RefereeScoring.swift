@@ -8,10 +8,14 @@ public struct RefereeScoringView: View {
     @State private var match: RefereeMatch
     let onMatchChanged: (RefereeMatch) -> Void
     let onExit: @MainActor () -> Void
+    let shareText: ((String) -> Void)?
     @Environment(\.dismiss) private var dismiss
+    @State private var showingShare = false
 
-    public init(match: RefereeMatch, onMatchChanged: @escaping (RefereeMatch) -> Void, onExit: @escaping @MainActor () -> Void) {
+    public init(match: RefereeMatch, shareText: ((String) -> Void)? = nil, onMatchChanged: @escaping (RefereeMatch) -> Void,
+                onExit: @escaping @MainActor () -> Void) {
         _match = State(initialValue: match)
+        self.shareText = shareText
         self.onMatchChanged = onMatchChanged
         self.onExit = onExit
     }
@@ -231,6 +235,17 @@ public struct RefereeScoringView: View {
                     player2Id: match.player2Id, player2Name: match.player2Name,
                     badgeInput: match.badgeInput
                 ))
+                if let shareText {
+                    Button("DEEL SCORE") { showingShare = true }
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundColor(CoachPalette.backgroundDark)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(RoundedRectangle(cornerRadius: 12).fill(CoachPalette.warmOrange))
+                        .sheet(isPresented: $showingShare) {
+                            SharedMatchShareView(report: match.shareReport, shareText: shareText) { showingShare = false }
+                        }
+                }
             }
         }
         .padding(.horizontal, 16)
@@ -260,7 +275,7 @@ public struct RefereeScoringView: View {
             onMatchChanged(match)
         }) {
             HStack(spacing: 8) {
-                Image(systemName: "arrow.uturn.backward")
+                AppSymbol("arrow.uturn.backward", size: 16, color: match.canUndo ? CoachPalette.textPrimary : CoachPalette.textMuted)
                 Text("Undo")
             }
             .font(.system(size: 16, weight: .bold, design: .rounded))

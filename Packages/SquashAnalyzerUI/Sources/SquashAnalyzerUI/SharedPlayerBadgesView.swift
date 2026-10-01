@@ -39,7 +39,7 @@ public struct SharedPlayerBadgesView: View {
                 ProgressView("Badges laden…").foregroundColor(BadgePalette.textPrimary)
             } else if badges.isEmpty {
                 VStack(spacing: 12) {
-                    Image(systemName: "medal").font(.system(size: 48))
+                    AppSymbol("medal", size: 48, color: BadgePalette.textSecondary)
                     Text("Nog geen badges verdiend").font(.headline)
                     Text("Kies \(playerName) via \"Kies speler\" bij een coach- of scheidsrechterwedstrijd om badges te verdienen.")
                         .multilineTextAlignment(.center)

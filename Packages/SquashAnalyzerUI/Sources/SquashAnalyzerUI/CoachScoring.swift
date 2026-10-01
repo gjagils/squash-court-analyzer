@@ -128,15 +128,19 @@ enum CoachPalette {
 public struct CoachScoringView: View {
     @State private var match: Match
     let aiCoach: AICoachContext?
+    let shareText: ((String) -> Void)?
     let onMatchChanged: (Match) -> Void
     let onExit: () -> Void
     /// The finished game shown in the analysis sheet
     @State private var analysedGame: Game?
     @State private var showingAnalysis = false
+    @State private var showingShare = false
 
-    public init(match: Match, aiCoach: AICoachContext? = nil, onMatchChanged: @escaping (Match) -> Void, onExit: @escaping () -> Void) {
+    public init(match: Match, aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil,
+                onMatchChanged: @escaping (Match) -> Void, onExit: @escaping () -> Void) {
         _match = State(initialValue: match)
         self.aiCoach = aiCoach
+        self.shareText = shareText
         self.onMatchChanged = onMatchChanged
         self.onExit = onExit
     }
@@ -345,7 +349,15 @@ public struct CoachScoringView: View {
                 player2Id: match.player2Id, player2Name: match.player2Name,
                 badgeInput: match.badgeInput
             ))
-            analysisButton
+            HStack(spacing: 10) {
+                analysisButton
+                if let shareText {
+                    outlineButton("DEEL SCORE") { showingShare = true }
+                        .sheet(isPresented: $showingShare) {
+                            SharedMatchShareView(report: match.shareReport, shareText: shareText) { showingShare = false }
+                        }
+                }
+            }
             Button(action: onExit) {
                 Text("KLAAR")
                     .font(.system(size: 14, weight: .bold, design: .rounded))
@@ -361,23 +373,27 @@ public struct CoachScoringView: View {
 
     /// Opens the game analysis (stats, advice, AI Coach) for the game just finished
     private var analysisButton: some View {
-        Button {
+        outlineButton("ANALYSE") {
             analysedGame = game
             showingAnalysis = true
-        } label: {
-            Text("ANALYSE")
+        }
+        .sheet(isPresented: $showingAnalysis) {
+            SharedCoachDashboardView(match: match, game: analysedGame ?? game, aiCoach: aiCoach, shareText: shareText) {
+                showingAnalysis = false
+            }
+        }
+    }
+
+    private func outlineButton(_ title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundColor(CoachPalette.textPrimary)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 20)
                 .padding(.vertical, 12)
                 .background(Capsule().stroke(CoachPalette.textPrimary.opacity(0.5), lineWidth: 1))
         }
         .buttonStyle(.plain)
-        .sheet(isPresented: $showingAnalysis) {
-            SharedCoachDashboardView(match: match, game: analysedGame ?? game, aiCoach: aiCoach) {
-                showingAnalysis = false
-            }
-        }
     }
 
     // MARK: - Bottom actions
@@ -395,7 +411,7 @@ public struct CoachScoringView: View {
     private func coachActionButton(_ title: String, icon: String, disabled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 6) {
-                Image(systemName: icon).font(.system(size: 12, weight: .semibold))
+                AppSymbol(icon, size: 13, color: disabled ? CoachPalette.textMuted : CoachPalette.textPrimary)
                 Text(title).font(.system(size: 13, weight: .bold, design: .rounded)).tracking(1)
             }
             .foregroundColor(disabled ? CoachPalette.textMuted : CoachPalette.textPrimary)

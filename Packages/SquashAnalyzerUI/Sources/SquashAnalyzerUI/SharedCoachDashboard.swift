@@ -32,6 +32,7 @@ enum DashboardPalette {
 public struct SharedCoachDashboardView: View {
     let match: Match
     let aiCoach: AICoachContext?
+    let shareText: ((String) -> Void)?
     let onClose: () -> Void
 
     @State private var player: Player = Player.player1
@@ -43,9 +44,11 @@ public struct SharedCoachDashboardView: View {
     /// Finished games, and the one being looked at when it is still open
     private let games: [Game]
 
-    public init(match: Match, game initial: Game, aiCoach: AICoachContext?, onClose: @escaping () -> Void) {
+    public init(match: Match, game initial: Game, aiCoach: AICoachContext?, shareText: ((String) -> Void)? = nil,
+                onClose: @escaping () -> Void) {
         self.match = match
         self.aiCoach = aiCoach
+        self.shareText = shareText
         self.onClose = onClose
         var available: [Game] = []
         for game in match.games where game.isGameOver || game === initial {
@@ -96,6 +99,21 @@ public struct SharedCoachDashboardView: View {
         ZStack(alignment: .topTrailing) {
             titleBlock
                 .frame(maxWidth: .infinity)
+            if let shareText {
+                HStack {
+                    Button { shareText(GameSummaryText.text(for: game)) } label: {
+                        Text("Deel")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(DashboardPalette.gold)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Capsule().fill(Color.white.opacity(0.1)))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Deel game-analyse")
+                    Spacer()
+                }
+            }
             Button(action: onClose) {
                 Image(systemName: "xmark")
                     .font(.system(size: 16, weight: .medium))

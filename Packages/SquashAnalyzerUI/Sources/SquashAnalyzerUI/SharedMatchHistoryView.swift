@@ -30,7 +30,7 @@ public struct SharedMatchHistoryView: View {
                 }
             } else if entries.isEmpty {
                 VStack(spacing: 12) {
-                    Image(systemName: "clock.arrow.circlepath").font(.system(size: 48))
+                    AppSymbol("clock.arrow.circlepath", size: 48, color: HistoryPalette.muted)
                     Text("Nog geen afgeronde wedstrijden").font(.headline)
                     Text("Voltooide en afgebroken coach- en scheidsrechterwedstrijden verschijnen hier.")
                         .multilineTextAlignment(.center)

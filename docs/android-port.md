@@ -740,6 +740,7 @@ Speler 1 → puntsoort WINNER → zone (via `CourtView`, correct herkend als
 "Links". `PointTypeButton`'s Path-iconen (WINNER=ster, STROKE=vuist) en
 `ShotTypeButton`'s Path-iconen (Drive/Lob/Boast) renderen allemaal correct.
 
+**(Opgelost 2026-10-01 met `AppSymbol`, zie "Icoontjes en Deel score".)**
 **Drie SF Symbols vallen terug op een generiek waarschuwingsdriehoekje**
 (niet leeg, wel niet het bedoelde icoon): `arrow.triangle.2.circlepath`
 (Forced error), `xmark.circle` (Unforced error), `figure.tennis`
@@ -1777,6 +1778,52 @@ door `HttpLeaguePageLoader`.
 Verificatie: Core 36 op Darwin / 35 JUnit op Android,
 `:app:testDebugUnitTest` 44/44, `:app:connectedDebugAndroidTest` 17/17, iOS
 **TEST SUCCEEDED**.
+
+## Icoontjes en Deel score op Android — resultaat (AFGEROND, 2026-10-01)
+
+**Icoontjes.** Gerd-Jan zag driehoekjes bij FORCED ERROR, UNFORCED ERROR,
+SERVICEPUNT en UNDO (al eerder gedocumenteerd als bekende Skip-beperking).
+Opgelost met `AppSymbol(name, size:, color:, weight:)`: op Apple gewoon
+`Image(systemName:)` (iOS ongewijzigd, ook de dikte), op Android het
+bijpassende Material-icoon via `ComposeView` + `Icon` voor elk SF Symbol dat
+de gedeelde schermen gebruiken (Forced error = Sync, Unforced error =
+Cancel, Servicepunt = SportsTennis, Stroke = FrontHand, Undo, medaille =
+MilitaryTech, Cross = SwapHoriz, Volley = Bolt, Drop = VerticalAlignBottom,
+pin, geschiedenis, chevrons, …); onbekende namen vallen terug op Skip's
+eigen `Image(systemName:)`. De kleur gaat expliciet mee, want Compose kan de
+SwiftUI-voorgrondkleur eromheen niet lezen (`_foregroundStyle` is intern in
+SkipUI). Vervangen op: punttypes, slagen (Cross/Volley/Drop op Android
+85 % i.p.v. 70 %, Material vult zijn vak), pin bij Links/Rechts, Undo
+(coach en scheidsrechter), medaille in badgecatalogus/spelerslijst/lege
+badges, lege geschiedenis.
+
+**Delen.**
+- `GameSummaryText` (Core, verhuisd uit iOS' `ExportService.textSummary(from:
+  Game)`, tekst ongewijzigd).
+- `SharedMatchShareView`: de drie WhatsApp-opmaken van Core's
+  `MatchShareReport` (Kort/Scorekaart/Verslag), voorbeeld, DELEN → het
+  Android-deelvenster; onthoudt de opmaak met dezelfde sleutel als iOS
+  (`refereeShareStyle`).
+- **DEEL SCORE** op het wedstrijdeinde van Coach (naast ANALYSE) en
+  Scheidsrechter; **Deel** linksboven in de game-analyse. `shareText` gaat
+  van `AndroidHomeView` naar `CoachSessionView`/`RefereeSessionView` →
+  scoringschermen → dashboard.
+
+**Gevonden bij het testen** (geen app-fout): de punttype-knoppen schuiven
+0,2 s in beeld; een tik tijdens die animatie kan in een test missen.
+`ResumeLaterGameTest` (Robolectric) bevestigt dat een in game 3 hervatte
+wedstrijd een servicepunt neemt en eindigt.
+
+**Bijvangst om later te bekijken**: `CoachSessionView.persist` slaat een
+wijziging over als er nog een opslag loopt (`guard !busy else { return }`);
+bij heel snel achter elkaar tikken kan de laatste stand dan pas bij de
+volgende wijziging worden bewaard.
+
+Tests: Core `testGameSummaryText`; instrumented `ShareScoreTest` (een
+wedstrijd afmaken → DEEL SCORE → Scorekaart → DELEN → het deelvenster krijgt
+de tekst; ANALYSE → Deel → de game-samenvatting). Verificatie: Core 47 op
+Darwin / 46 JUnit op Android, `:app:testDebugUnitTest` 47/47,
+`:app:connectedDebugAndroidTest` 21/21, iOS **TEST SUCCEEDED**.
 
 ## Game-analyse en AI Coach op Android — resultaat (AFGEROND, 2026-09-30)
 

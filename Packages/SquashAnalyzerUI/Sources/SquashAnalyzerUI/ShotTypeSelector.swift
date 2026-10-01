@@ -163,22 +163,25 @@ struct ShotIconView: View {
     var color: Color = ShotPalette.textPrimary
     var size: CGFloat = 28
 
+    /// SF Symbols draw smaller than their font size; Material icons fill their box
+    private var symbolSize: CGFloat {
+        #if SKIP
+        return size * 0.85
+        #else
+        return size * 0.7
+        #endif
+    }
+
     var body: some View {
         switch type {
         case .drive:
             DriveIcon(color: color, size: size)
         case .cross:
-            Image(systemName: "arrow.left.and.right")
-                .font(.system(size: size * 0.7, weight: .medium))
-                .foregroundColor(color)
+            AppSymbol("arrow.left.and.right", size: symbolSize, color: color, weight: .medium)
         case .volley:
-            Image(systemName: "bolt.fill")
-                .font(.system(size: size * 0.7, weight: .medium))
-                .foregroundColor(color)
+            AppSymbol("bolt.fill", size: symbolSize, color: color, weight: .medium)
         case .drop:
-            Image(systemName: "arrow.down.to.line")
-                .font(.system(size: size * 0.7, weight: .medium))
-                .foregroundColor(color)
+            AppSymbol("arrow.down.to.line", size: symbolSize, color: color, weight: .medium)
         case .lob:
             LobIcon(color: color, size: size)
         case .boast:

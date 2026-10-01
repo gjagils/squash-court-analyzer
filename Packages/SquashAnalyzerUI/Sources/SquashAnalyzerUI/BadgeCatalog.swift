@@ -23,9 +23,7 @@ public struct BadgeMedallion: View {
             ZStack {
                 Circle().fill(BadgePalette.gold.opacity(0.18))
                 Circle().strokeBorder(BadgePalette.gold, lineWidth: size * 0.05)
-                Image(systemName: "medal.fill")
-                    .font(.system(size: size * 0.4))
-                    .foregroundColor(BadgePalette.gold)
+                AppSymbol("medal.fill", size: size * 0.4, color: BadgePalette.gold)
             }
             .frame(width: size, height: size)
             .grayscale(isLocked ? 1.0 : 0.0)

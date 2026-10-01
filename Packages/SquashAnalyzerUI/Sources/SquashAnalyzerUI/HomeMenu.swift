@@ -256,11 +256,11 @@ public struct AndroidHomeView: View {
                     PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
-                    CoachSessionView(store: matchStore, playerStore: playerStore, aiCoach: aiCoach, onExit: { showingCoach = false })
+                    CoachSessionView(store: matchStore, playerStore: playerStore, aiCoach: aiCoach, shareText: shareText, onExit: { showingCoach = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingReferee) {
-                    RefereeSessionView(store: refereeMatchStore, playerStore: playerStore, onExit: { showingReferee = false })
+                    RefereeSessionView(store: refereeMatchStore, playerStore: playerStore, shareText: shareText, onExit: { showingReferee = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingBadges) {

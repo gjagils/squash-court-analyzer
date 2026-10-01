@@ -168,7 +168,7 @@ public struct PlayerDirectoryView: View {
                                     if let count = badgeCounts[player.id], count > 0 {
                                         Button { badgesForPlayer = player } label: {
                                             HStack(spacing: 4) {
-                                                Image(systemName: "medal.fill")
+                                                AppSymbol("medal.fill", size: 14, color: PlayerStyle.gold)
                                                 Text("\(count)")
                                             }
                                             .font(.system(size: 13, weight: .semibold, design: .rounded))

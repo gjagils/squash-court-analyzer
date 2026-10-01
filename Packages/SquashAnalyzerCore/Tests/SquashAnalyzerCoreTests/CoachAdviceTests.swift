@@ -71,6 +71,16 @@ final class CoachAdviceTests: XCTestCase {
         XCTAssertEqual(CoachAdvice.courtRows[2][2], CourtZone.backRight)
     }
 
+    func testGameSummaryText() {
+        let text = GameSummaryText.text(for: game())
+        XCTAssertTrue(text.contains("Hugo vs Jaïr"))
+        // Not finished (5-3), so there is no winner yet; the text says so as iOS always did
+        XCTAssertTrue(text.contains("Eindstand: 5-3 (Gelijkspel wint)"))
+        XCTAssertTrue(text.contains("• Winners: 5 | Forced errors: 0 | Eigen fouten: 0"))
+        XCTAssertTrue(text.contains("• Beste zone: Voor Links"))
+        XCTAssertTrue(text.hasSuffix("📲 Gedeeld via Squash Analyzer"))
+    }
+
     // MARK: AI Coach
 
     func testRequestNeverContainsPlayerNames() throws {

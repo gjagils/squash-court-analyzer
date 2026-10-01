@@ -78,8 +78,10 @@
         <h3>Een wedstrijd starten of hervatten</h3>
         <p>Loopt er nog een wedstrijd, dan zie je eerst <span class="ui">Wedstrijd hervatten</span> met de stand. Kies <span class="ui">Hervatten</span>, of <span class="ui">Nieuwe wedstrijd</span> (de oude wordt dan als afgebroken bewaard).</p>
         <ol>
-          <li>Vul bij <span class="ui">Speler 1</span> en <span class="ui">Speler 2</span> een naam in, of tik op <span class="ui">Kies speler</span> om een opgeslagen speler te kiezen. Alleen gekozen spelers kunnen <a href="#badges">badges</a> verdienen.</li>
-          <li>Tik op <span class="ui">Start</span>. Speler 1 serveert eerst; er wordt gespeeld tot drie gewonnen games (best of 5).</li>
+          <li>Vul bij <span class="ui">Speler 1</span> en <span class="ui">Speler 2</span> een naam in, of tik op <span class="ui">Kies speler</span> om een opgeslagen speler te kiezen. Je ziet dan meteen de aandachtspunten van die speler. Alleen gekozen spelers kunnen <a href="#badges">badges</a> verdienen.</li>
+          <li>Kies bij <span class="ui">Wie serveert eerst?</span> de serveerder.</li>
+          <li>Kom je later binnen? Tik op <span class="ui">Later instappen?</span> en vul met − en + in hoeveel games ieder al gewonnen heeft.</li>
+          <li>Tik op <span class="ui">Start</span>. Er wordt gespeeld tot drie gewonnen games (best of 5).</li>
         </ol>
 
         <h3>Een punt invoeren</h3>
@@ -89,8 +91,15 @@
           <li>Tik op de baan <strong>waar</strong> het punt viel. Standaard is de baan verdeeld in 6 vakken: voor, midden en achter, links en rechts. (Liever 9 vakken? Zie <a href="#instellingen">Instellingen</a>.)</li>
           <li>Kies de <strong>slag</strong>. Je ziet alleen slagen die bij dat vak passen: voorin Drop, Boast en Kill; in het midden Kill, Drive, Cross en Boast; achterin Drive, Cross en Lob. Was het een volley? Zet dan eerst <span class="ui">Uit de lucht</span> aan.</li>
         </ol>
-        <p>Bij een stroke of een unforced error kies je alleen het vak; een servicepunt telt meteen. Elke stap heeft een knop <span class="ui">Annuleer</span>. Met <span class="ui">Undo</span> onderaan maak je het laatste punt ongedaan.</p>
-        <p>Op het scorebord zie je wie serveert en uit welk vak (<span class="ui">Links</span>/<span class="ui">Rechts</span>). Klopt het vak niet, tik dan het andere aan.</p>
+        <p>Bij een stroke of een unforced error kies je alleen het vak; een servicepunt telt meteen. Elke stap heeft een knop <span class="ui">Annuleer</span>.</p>
+        <p>Op het scorebord zie je wie serveert en uit welk vak (<span class="ui">Links</span>/<span class="ui">Rechts</span>). Klopt het vak niet, tik dan het andere aan. Links van de instructie loopt de rally-timer.</p>
+
+        <h3>Let, undo en het laatste punt</h3>
+        <ul>
+          <li><span class="ui">Let call</span>: kies wie de let vraagt. De app telt de lets per game.</li>
+          <li><span class="ui">Undo</span>: maakt het laatste punt ongedaan.</li>
+          <li>Onderaan zie je het laatst ingevoerde punt, bijvoorbeeld <em>Gerard: Winner · Volley drop · Voor Links</em>.</li>
+        </ul>
 
         <h3>Game en wedstrijd klaar</h3>
         <p>Na een game verschijnen <span class="ui">Analyse</span> en <span class="ui">Volgende game</span>. Na de laatste game zie je de winnaar, de verdiende <strong>badges</strong>, <span class="ui">Analyse</span>, <span class="ui">Deel score</span> (Kort, Scorekaart of Verslag, bijvoorbeeld voor WhatsApp) en <span class="ui">Klaar</span>.</p>
@@ -101,7 +110,14 @@
         <p>Heb je een OpenAI-sleutel ingesteld, dan geeft <span class="ui">Vraag AI Coach om advies</span> een uitgebreide analyse. Er gaan geen namen mee, alleen cijfers.</p>
 
         <h3>Stoppen</h3>
-        <p>Tik op <span class="ui">Bewaar &amp; sluit</span>. De wedstrijd blijft bewaard en je gaat later verder via de Coach-tegel.</p>
+        <p>Tik op <span class="ui">Stop</span> en kies:</p>
+        <ul>
+          <li><span class="ui">Bewaar en ga later verder</span>: de wedstrijd blijft bewaard, je gaat later verder via de Coach-tegel.</li>
+          <li><span class="ui">Opslaan als incompleet</span>: de wedstrijd komt in <a href="#wedstrijden">Afgeronde wedstrijden</a> met het label INCOMPLEET.</li>
+          <li><span class="ui">Uitslag aanvullen</span>: kies per gemiste game wie hem won, tot de wedstrijd beslist is.</li>
+          <li><span class="ui">Niet opslaan</span>: de wedstrijd en de badges ervan verdwijnen.</li>
+          <li><span class="ui">Doorspelen</span>: terug naar de wedstrijd.</li>
+        </ul>
       </div>
       <div class="shots">
         <figure><img src="img/android/coach-start.jpg" alt="Coachwedstrijd starten" loading="lazy"><figcaption>Wedstrijd starten</figcaption></figure>
@@ -118,13 +134,15 @@
         <h2><span class="icon">🏆</span>Scheidsrechter</h2>
         <p class="where">Snel en officieel scoren, met de serviceregels</p>
         <h3>Starten of hervatten</h3>
-        <p>Net als bij Coach: een lopende wedstrijd kun je <span class="ui">Hervatten</span>. Voor een nieuwe vul je de namen in of gebruik je <span class="ui">Kies speler</span>, en tik je op <span class="ui">Start</span>.</p>
+        <p>Net als bij Coach: een lopende wedstrijd kun je <span class="ui">Hervatten</span>. Voor een nieuwe vul je de namen in of gebruik je <span class="ui">Kies speler</span>, kies je wie eerst serveert en eventueel <span class="ui">Later instappen?</span>, en tik je op <span class="ui">Start</span>.</p>
         <h3>Scoren</h3>
         <ul>
           <li><strong>Tik op de grote score</strong> (<em>tik = punt</em>) van wie de rally wint.</li>
           <li>Het servicevak wisselt vanzelf. Bij de serveerder kun je <span class="ui">Links</span>/<span class="ui">Rechts</span> aanpassen; de app onthoudt dat als voorkeur voor die speler (handig voor linkshandigen).</li>
           <li>In het midden staat de <strong>scorelijn</strong>: elke rally met de nieuwe stand en het vak, bijvoorbeeld <em>4R</em>.</li>
-          <li><span class="ui">Let</span> en <span class="ui">Stroke</span> staan per speler onder de scores; <span class="ui">Undo</span> maakt het laatste punt ongedaan.</li>
+          <li><span class="ui">Let call</span> en <span class="ui">Stroke</span> staan per speler onder de scores; <span class="ui">Undo</span> maakt het laatste punt ongedaan.</li>
+          <li>Daaronder lopen de <strong>match</strong>- en <strong>game</strong>-timer.</li>
+          <li>Met het deel-icoon rechtsboven deel je de tussenstand.</li>
         </ul>
         <h3>Game en wedstrijd klaar</h3>
         <p>Na een game tik je op <span class="ui">Volgende game</span>. Na de wedstrijd zie je de winnaar, de verdiende badges en <span class="ui">Deel score</span>.</p>
@@ -139,9 +157,15 @@
     <section class="tile" id="wedstrijden">
       <div>
         <h2><span class="icon">🕘</span>Afgeronde wedstrijden</h2>
-        <p class="where">Een overzicht van wat je gespeeld hebt</p>
-        <p>Hier staan alle voltooide en afgebroken coach- en scheidsrechterwedstrijden, met datum en uitslag in games. Een lopende wedstrijd vind je niet hier, maar via de Coach- of Scheidsrechter-tegel.</p>
-        <p>Back-ups maak en zet je terug in <a href="#instellingen">Instellingen</a>.</p>
+        <p class="where">Alles terugkijken, delen en opruimen</p>
+        <ul>
+          <li>Filter op <span class="ui">Alles</span>, <span class="ui">Coach</span> of <span class="ui">Scheidsrechter</span>, en via <span class="ui">Alle spelers</span> op één speler.</li>
+          <li>Tik op een coachwedstrijd of op <span class="ui">Bekijk analyse</span> voor de game-analyse.</li>
+          <li><span class="ui">Delen</span> maakt een tekst voor bijvoorbeeld WhatsApp: kort, scorekaart of verslag.</li>
+          <li>Niet afgemaakt? Dan staat er <strong>INCOMPLEET</strong> bij en vul je met <span class="ui">Uitslag aanvullen</span> in wie de resterende games won.</li>
+          <li>Met de prullenbak verwijder je een wedstrijd. Verdiende badges worden dan als verwijderd gemarkeerd.</li>
+        </ul>
+        <p>Een lopende wedstrijd vind je niet hier, maar via de Coach- of Scheidsrechter-tegel. Back-ups maak en zet je terug in <a href="#instellingen">Instellingen</a>.</p>
       </div>
       <div class="shots">
         <figure><img src="img/android/wedstrijden.jpg" alt="Afgeronde wedstrijden" loading="lazy"><figcaption>Afgeronde wedstrijden</figcaption></figure>
@@ -152,17 +176,19 @@
     <section class="tile" id="spelers">
       <div>
         <h2><span class="icon">👤</span>Spelers</h2>
-        <p class="where">Je vaste spelers, met aandachtspunten en badges</p>
+        <p class="where">Je vaste spelers, met foto, aandachtspunten en badges</p>
         <h3>Spelers toevoegen en bewerken</h3>
         <ul>
-          <li>Tik op <span class="ui">Toevoegen</span>: naam, <strong>coaching focus</strong> (zoals Backhand of Conditie) en notities, dan <span class="ui">Opslaan</span>.</li>
+          <li>Tik op <span class="ui">Toevoegen</span>: een foto (<span class="ui">Kies foto</span>), naam, <strong>coaching focus</strong> (zoals Backhand of Conditie) en notities, dan <span class="ui">Opslaan</span>.</li>
           <li>Het potlood bewerkt, de prullenbak verwijdert. Gespeelde wedstrijden blijven bewaard.</li>
-          <li>Heeft een speler badges, dan tik je op het medaille-getal om ze te zien.</li>
+          <li>Tik op een speler om de badges van die speler te zien.</li>
         </ul>
         <h3>Een heel team importeren</h3>
-        <p>Tik op <span class="ui">Team</span>, plak de teamlink die je hebt gekregen (<em>https://squashanalyzer.com/teams/…</em>) en tik op <span class="ui">Importeren</span>. Spelers met dezelfde naam worden bijgewerkt, nieuwe worden toegevoegd.</p>
+        <p>Tik op <span class="ui">Team</span> en plak de teamlink die je hebt gekregen (<em>https://squashanalyzer.com/teams/…</em>), of tik op <span class="ui">Kies zip-bestand</span> voor een team-zip op je telefoon. Spelers met dezelfde naam worden bijgewerkt, nieuwe worden toegevoegd.</p>
+        <h3>Badges van een speler</h3>
+        <p>Je ziet hoeveel badges de speler verdiende en alle 31 badges: verdiende in kleur met hoe vaak, de rest grijs met hoe je ze verdient. Tik op een verdiende badge voor de momenten (tegen wie en wanneer); met <span class="ui">Verwijder</span> haal je er een weg.</p>
         <h3>Spelerskaart delen en ontvangen</h3>
-        <p>Open de badges van een speler en tik op <span class="ui">Deel kaart</span>: je deelt een link naar de kaart. Krijg je zelf zo'n link, open hem dan op je telefoon. De app vraagt of je de kaart koppelt aan een <span class="ui">Nieuwe speler</span> of aan een bestaande speler. Deel een kaart alleen met toestemming van de speler.</p>
+        <p>Tik in de badges van een speler op <span class="ui">Deel kaart</span>: je deelt een link naar de kaart. Krijg je zelf zo'n link, open hem dan op je telefoon. De app vraagt of je de kaart koppelt aan een <span class="ui">Nieuwe speler</span> of aan een bestaande speler. Deel een kaart alleen met toestemming van de speler.</p>
       </div>
       <div class="shots">
         <figure><img src="img/android/spelers.jpg" alt="Spelerslijst" loading="lazy"><figcaption>Spelers</figcaption></figure>

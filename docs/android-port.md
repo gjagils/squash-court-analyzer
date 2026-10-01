@@ -2089,12 +2089,39 @@ Android-branch is in die stappen niet gevolgd). Fase 4 wordt ontwikkeld op
 `codex/android-phase4`. Verdere Android-UI-uitbreiding blijft op een aparte
 branch tot een presenteerbare mijlpaal; samenvoegen is een afzonderlijke stap.
 
-## Wat nog niet is overgezet
+## Gelijk met iOS (1 oktober 2026)
 
-- (Instellingen op Android is compleet: Mijn team, AI Coach en back-ups. De
-  invoermodus is er niet meer, ook niet op iOS — zie de beslissing van
-  2026-10-01.)
-- Foto's in het Android-spelersscherm (bewerken en tonen). Teamimport werkt sinds 2026-10-01 via een link (Spelers → Team, `RoomTeamImporter`); importeren uit een zip-bestand op het toestel kan op Android nog niet.
+Op 1 oktober zijn de grootste verschillen met iOS weggewerkt, in gedeelde code:
+
+- **Start** (`MatchSetupView`, coach en scheidsrechter): wie serveert eerst,
+  "Later instappen" met de al gewonnen games, aandachtspunten van een gekozen
+  speler (`MatchSetupChoice`).
+- **Coach** (`CoachScoring`): Let call, rally-timer, regel met het laatste punt
+  (Core `Point.summary`, ook op iOS), Stop met "Bewaar en ga later verder",
+  "Opslaan als incompleet", "Uitslag aanvullen" (`SharedCompleteResultView`) en
+  "Niet opslaan" (`CoachMatchStore.discard`: wedstrijd en badges weg).
+- **Opslaan** (coach en scheidsrechter): een wijziging tijdens een lopende
+  opslag wordt daarna alsnog bewaard in plaats van overgeslagen.
+- **Afgeronde wedstrijden** (`SharedMatchHistoryView`, `MatchHistoryStore` is nu
+  `@MainActor`): filters, analyse openen, delen, uitslag aanvullen, verwijderen
+  (badges gemarkeerd als verwijderd); games tellen ook vooraf/achteraf mee.
+- **Scheidsrechter**: match- en gametimer, delen tijdens de wedstrijd, "LET CALL".
+- **Spelers**: foto kiezen (`PlayerFilePicker` → `ActivityPlayerFiles`,
+  Android-fotokiezer) en tonen (`PlayerPhotoView`, `RoomPlayerStore` als
+  `PlayerPhotoStore`, `PhotoScaler`), team uit zip-bestand, tik op een speler
+  voor de badges.
+- **Badges van een speler** (`SharedPlayerBadgesView`): alle 31 badges met
+  aantallen, verdienmomenten met "Verwijder" (`BadgeMoment`, `deleteMoment`).
+
+## Wat nog verschilt
+
+- "Deel kaart" deelt op Android alleen de link, niet ook een afbeelding van de kaart.
+- Spelersfoto's staan nog niet in het scorebord tijdens een wedstrijd.
+- Coach op Android heeft geen knop voor de analyse van de vorige game tijdens
+  het spelen, en geen geschiedenis- of instellingenknop in de kop.
+- iOS-scheidsrechter bewaart een onafgemaakte wedstrijd niet (Android wel).
+- Mijn team op iOS toont bij een wedstrijd zonder uitslag altijd "20:00".
+
 - Badge-artwork op Android: **gedaan 2026-10-01**. De 31 plaatjes staan nu in
   `Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets`
   (verkleind van 360 naar 240px, samen 3,1 MB), getekend door `BadgeArtwork`

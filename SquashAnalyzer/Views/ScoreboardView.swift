@@ -145,13 +145,14 @@ struct ScoreboardView: View {
         let score = player == .player1 ? game.player1Score : game.player2Score
         let isServing = game.currentServer == player
         let isScoring = game.selectedPlayer == player
+        let highlight = ServerHighlight(color: color, isServer: isServing)
 
         return VStack(spacing: 4) {
             PlayerAvatar(name: game.name(for: player), color: color, size: 34, active: isServing)
 
             Text(game.name(for: player))
                 .font(AppFonts.label(13))
-                .foregroundColor(isServing ? color : AppColors.textSecondary)
+                .foregroundColor(highlight.name)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
 
@@ -171,7 +172,7 @@ struct ScoreboardView: View {
 
             Text("\(score)")
                 .font(.system(size: 52, weight: .bold, design: .rounded))
-                .foregroundColor(isServing ? color : AppColors.textPrimary)
+                .foregroundColor(highlight.score)
                 .contentTransition(.numericText())
         }
         .frame(maxWidth: .infinity)

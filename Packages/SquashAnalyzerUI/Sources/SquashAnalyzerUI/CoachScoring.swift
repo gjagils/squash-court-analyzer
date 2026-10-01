@@ -61,13 +61,14 @@ public struct SharedScoreboardView: View {
         let score = player == .player1 ? game.player1Score : game.player2Score
         let isServing = game.currentServer == player
         let isScoring = game.selectedPlayer == player
+        let highlight = ServerHighlight(color: color, isServer: isServing)
 
         return VStack(spacing: 4) {
             PlayerAvatarPlaceholder(color: color, size: 34, active: isServing)
 
             Text(game.name(for: player))
                 .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundColor(isServing ? color : CoachPalette.textSecondary)
+                .foregroundColor(highlight.name)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
 
@@ -87,7 +88,7 @@ public struct SharedScoreboardView: View {
             Button(action: { onSelectPlayer?(player) }) {
                 Text("\(score)")
                     .font(.system(size: 52, weight: .bold, design: .rounded))
-                    .foregroundColor(isServing ? color : CoachPalette.textPrimary)
+                    .foregroundColor(highlight.score)
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.plain)

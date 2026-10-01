@@ -10,6 +10,22 @@ private enum ScoreboardPalette {
     static let backgroundDark = Color(red: 0.06, green: 0.05, blue: 0.04)
 }
 
+/// The text colours of a player's column on the coach and referee screens,
+/// on iOS and Android: the server's name and score in white, the receiver's in
+/// the player colour. One rule, so all four screens change together.
+public struct ServerHighlight {
+    public let name: Color
+    public let score: Color
+    /// "TIK = PUNT" under the referee score
+    public let caption: Color
+
+    public init(color: Color, isServer: Bool) {
+        name = isServer ? ScoreboardPalette.text : color
+        score = isServer ? ScoreboardPalette.text : color
+        caption = isServer ? ScoreboardPalette.text.opacity(0.8) : color.opacity(0.55)
+    }
+}
+
 /// Links/Rechts service box picker, same rules on both platforms.
 public struct ServiceSideSelector: View {
     let side: ServerSide

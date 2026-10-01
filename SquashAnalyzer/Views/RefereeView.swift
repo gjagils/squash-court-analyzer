@@ -191,6 +191,7 @@ struct RefereeView: View {
         let isServer = match.currentServer == player
         let color: Color = player == .player1 ? AppColors.warmOrange : AppColors.steelBlue
         let score = player == .player1 ? match.player1Score : match.player2Score
+        let highlight = ServerHighlight(color: color, isServer: isServer)
 
         return VStack(spacing: 6) {
             PlayerAvatar(name: match.name(for: player), color: color, size: 52, active: isServer)
@@ -198,7 +199,7 @@ struct RefereeView: View {
             // Name
             Text(match.name(for: player))
                 .font(AppFonts.label(14))
-                .foregroundColor(isServer ? AppColors.textPrimary : color)
+                .foregroundColor(highlight.name)
                 .lineLimit(1)
 
             // Links / Rechts selector — always laid out so both scores line up,
@@ -221,11 +222,11 @@ struct RefereeView: View {
                 VStack(spacing: 2) {
                     Text("\(score)")
                         .font(.system(size: 80, weight: .bold, design: .rounded))
-                        .foregroundColor(isServer ? AppColors.textPrimary : color)
+                        .foregroundColor(highlight.score)
                         .contentTransition(.numericText())
                     Text("TIK = PUNT")
                         .font(AppFonts.caption(9))
-                        .foregroundColor(isServer ? AppColors.textPrimary.opacity(0.8) : color.opacity(0.55))
+                        .foregroundColor(highlight.caption)
                         .tracking(1.4)
                 }
                 .frame(maxWidth: .infinity)

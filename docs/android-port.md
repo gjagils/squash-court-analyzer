@@ -1779,6 +1779,28 @@ Verificatie: Core 36 op Darwin / 35 JUnit op Android,
 `:app:testDebugUnitTest` 44/44, `:app:connectedDebugAndroidTest` 17/17, iOS
 **TEST SUCCEEDED**.
 
+## Beslissing: "Snelle invoer" verdwijnt van iOS (2026-10-01)
+
+Gerd-Jan: snelle invoer mag uit iOS. De coach voert punten voortaan op één
+manier in, op beide platforms: tik op de score → punttype → zone → slag.
+Verwijderd: de schakelaar "Snelle invoer" in Instellingen (`CoachInputMode`,
+`CoachInputSettings.modeKey`), in `ContentView` de Winner/Fout-knoppen
+(`QuickEntryButtonsView`, bestand `PlayerButtonsView.swift`), de
+overlays voor punttype en slag (`PointTypeSelectorOverlay`,
+`ShotTypeSelectorView`), de "SLAG?"-chips achteraf, en in Core
+`Game.assignShotToLastPoint`/`lastPointAwaitsShot` met hun iOS-test. Een
+opgeslagen waarde "quick" in UserDefaults doet niets meer. De release notes
+voor de volgende TestFlight-build vermelden het.
+
+**Skip-valkuil bij het testen hiervan**: na een `git stash` + `stash pop` gaf
+de app-build "Unresolved reference" op tuple-labels (`it.count` in
+`Game.bestZone`). De door Skip gegenereerde `PackageSupport.kt` (met de
+Kotlin-hulpvelden voor tuple-labels) in de UI-uitvoer was niet opnieuw
+gemaakt en verouderd. Oplossing: `rm -rf
+Packages/SquashAnalyzerUI/.build/plugins/outputs/squashanalyzerui` en
+opnieuw bouwen. Dus: bij vreemde Kotlin-fouten in code die je niet aanraakte,
+eerst de Skip-uitvoer weggooien.
+
 ## Back-ups op Android — resultaat (AFGEROND, 2026-10-01)
 
 **Eén back-upbestand voor iOS en Android.** Het formaat (`FullBackup`, de
@@ -2002,7 +2024,8 @@ branch tot een presenteerbare mijlpaal; samenvoegen is een afzonderlijke stap.
 
 ## Wat nog niet is overgezet
 
-- Instellingen op Android: Mijn team, AI Coach en back-ups; de invoermodus
-  (Android heeft alleen tik-op-de-score) ontbreekt nog.
+- (Instellingen op Android is compleet: Mijn team, AI Coach en back-ups. De
+  invoermodus is er niet meer, ook niet op iOS — zie de beslissing van
+  2026-10-01.)
 - Foto's, badgecatalogus en teamimport in het Android-spelersscherm.
 - Een fysiek Android-toestel is nog nodig voor aanvullende praktijktests.

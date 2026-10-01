@@ -34,11 +34,6 @@ struct ContentView: View {
     @State private var showingStartupPersistenceWarning = false
     /// A player card link that was opened and waits for the import sheet (shared with Android)
     @State private var cardInbox = CardInbox()
-    @AppStorage(CoachInputSettings.modeKey) private var inputModeRaw = CoachInputMode.scoreTap.rawValue
-
-    private var inputMode: CoachInputMode { CoachInputMode(rawValue: inputModeRaw) ?? .scoreTap }
-    private var quickEntry: Bool { inputMode == .quick }
-    private var scoreTapEntry: Bool { inputMode == .scoreTap }
 
     private var currentGame: Game {
         match.currentGame
@@ -48,16 +43,6 @@ struct ContentView: View {
         ZStack {
             // Main game view
             gameView
-
-            // Point type selector overlay (shown after player selection; inline in the score-tap flow)
-            if !scoreTapEntry && currentGame.selectedPlayer != nil && currentGame.selectedPointType == nil {
-                pointTypeSelectorOverlay
-            }
-
-            // Shot type selector overlay (shown after zone selection; inline in the score-tap flow)
-            if !scoreTapEntry && currentGame.selectedZone != nil {
-                shotTypeSelectorOverlay
-            }
 
             // Home overlay
             if showingSetup {
@@ -405,7 +390,7 @@ struct ContentView: View {
 
                 // Scoreboard (tapping a score starts a point in the score-tap flow)
                 ScoreboardView(game: currentGame, match: match,
-                               onSelectPlayer: scoreTapEntry ? { player in handleScoreTap(player) } : nil)
+                               onSelectPlayer: { player in handleScoreTap(player) })
                     .padding(.horizontal, 20)
 
                 // Rally timer and instruction text
@@ -428,26 +413,9 @@ struct ContentView: View {
                 .padding(.horizontal, 24)
                 .frame(height: 34)
 
-                if scoreTapEntry {
-                    // Score-tap flow: the middle of the screen shows only the current step
-                    scoreTapStage
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    // Court view
-                    CourtView(isInteractive: currentGame.scoringStep == .selectZone, selectedPlayer: currentGame.selectedPlayer) { zone in
-                        handleZoneTap(zone)
-                    }
-                    .padding(.horizontal, 16)
-                }
-
-                // Quick-entry buttons (hidden when point type or shot is being selected)
-                if quickEntry && currentGame.selectedPlayer == nil {
-                    QuickEntryButtonsView(game: currentGame) { player, action in
-                        handleQuickEntry(player, action)
-                    }
-                    .padding(.horizontal, 24)
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-                }
+                // Score-tap flow: the middle of the screen shows only the current step
+                scoreTapStage
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 // Let / Undo row + last point
                 bottomActions
@@ -457,67 +425,6 @@ struct ContentView: View {
             }
             .padding(.vertical, 8)
         }
-    }
-
-    // MARK: - Point Type Selector Overlay
-    private var pointTypeSelectorOverlay: some View {
-        ZStack {
-            Color.black.opacity(0.7)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation {
-                        currentGame.goBackStep()
-                    }
-                }
-
-            PointTypeSelectorOverlay(
-                game: currentGame,
-                onPointTypeSelected: { pointType in
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        currentGame.selectPointType(pointType)
-                    }
-                },
-                onBack: {
-                    withAnimation {
-                        currentGame.goBackStep()
-                    }
-                }
-            )
-        }
-        .transition(.opacity)
-    }
-
-    // MARK: - Shot Type Selector Overlay
-    private var shotTypeSelectorOverlay: some View {
-        ZStack {
-            // Dimmed background
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation {
-                        currentGame.goBackStep()
-                    }
-                }
-
-            VStack {
-                Spacer()
-
-                ShotTypeSelectorView(
-                    game: currentGame,
-                    onShotSelected: { shotType in
-                        handleShotTypeSelect(shotType)
-                    },
-                    onBack: {
-                        withAnimation {
-                            currentGame.goBackStep()
-                        }
-                    }
-                )
-
-                Spacer().frame(height: 60)
-            }
-        }
-        .transition(.opacity)
     }
 
     // MARK: - Header View (same layout as the referee top bar)
@@ -574,7 +481,7 @@ struct ContentView: View {
         Group {
             switch currentGame.scoringStep {
             case .selectPlayer:
-                Text(scoreTapEntry ? "Tik op de score van wie scoort" : "Kies wie scoort")
+                Text("Tik op de score van wie scoort")
                     .font(AppFonts.body(14))
                     .foregroundColor(AppColors.textSecondary)
             case .selectPointType:
@@ -611,26 +518,19 @@ struct ContentView: View {
                 }
             }
 
-            // Last point indicator, or the optional shot chips right after a quick-entry point
-            if quickEntry, currentGame.selectedPlayer == nil, currentGame.lastPointAwaitsShot,
-               let lastPoint = currentGame.lastPoint {
-                shotStrip(for: lastPoint)
-                    .frame(height: 28)
-                    .transition(.opacity)
-            } else {
-                HStack(spacing: 6) {
-                    if let lastPoint = currentGame.lastPoint, currentGame.selectedPlayer == nil {
-                        Circle()
-                            .fill(lastPoint.scorer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
-                            .frame(width: 6, height: 6)
-                        Text(lastPointText(lastPoint))
-                    }
+            // Last point indicator
+            HStack(spacing: 6) {
+                if let lastPoint = currentGame.lastPoint, currentGame.selectedPlayer == nil {
+                    Circle()
+                        .fill(lastPoint.scorer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
+                        .frame(width: 6, height: 6)
+                    Text(lastPointText(lastPoint))
                 }
-                .font(AppFonts.caption(11))
-                .foregroundColor(AppColors.textMuted)
-                .lineLimit(1)
-                .frame(height: 16)
             }
+            .font(AppFonts.caption(11))
+            .foregroundColor(AppColors.textMuted)
+            .lineLimit(1)
+            .frame(height: 16)
         }
     }
 
@@ -727,37 +627,6 @@ struct ContentView: View {
         }
     }
 
-    /// "Slag?" plus one chip per shot; tapping one completes the last point
-    private func shotStrip(for point: Point) -> some View {
-        let color: Color = point.scorer == .player1 ? AppColors.warmOrange : AppColors.steelBlue
-        return HStack(spacing: 5) {
-            Text("SLAG?")
-                .font(AppFonts.caption(9))
-                .foregroundColor(color.opacity(0.7))
-                .tracking(1)
-            ForEach(ShotType.allCases) { shot in
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.15)) { currentGame.assignShotToLastPoint(shot) }
-                    persistMatch()
-                }) {
-                    Text(shot.rawValue)
-                        .font(AppFonts.label(11))
-                        .foregroundColor(color)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 5)
-                        .background(
-                            Capsule()
-                                .fill(color.opacity(0.10))
-                                .overlay(Capsule().stroke(color.opacity(0.3), lineWidth: 1))
-                        )
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .lineLimit(1)
-        .minimumScaleFactor(0.8)
-    }
-
     /// "Niels: Winner · Drop · Voor Links", "Niels: Stroke · Midden Links" or "Niels: Unforced error"
     private func lastPointText(_ point: Point) -> String {
         var parts = [point.pointType.title]
@@ -793,26 +662,11 @@ struct ContentView: View {
     }
 
     // MARK: - Handlers
-    private func handleQuickEntry(_ player: Player, _ action: QuickEntryAction) {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            currentGame.selectPlayer(player)
-            switch action {
-            case .winner: currentGame.selectPointType(.winner)          // → zone, then scored
-            case .unforcedError: currentGame.selectPointType(.unforcedError)   // scored at once
-            case .more: break                                           // point-type overlay
-            }
-        }
-    }
-
     private func handleZoneTap(_ zone: CourtZone) {
         guard currentGame.selectedPlayer != nil else { return }
 
         withAnimation(.easeInOut(duration: 0.2)) {
             currentGame.selectZone(zone)
-            // Quick entry: the point is in as soon as the zone is known; the shot is optional
-            if quickEntry, currentGame.selectedZone != nil, currentGame.selectedPointType?.requiresShot == true {
-                currentGame.addPoint(shotType: nil)
-            }
         }
     }
 
@@ -1129,92 +983,6 @@ struct FistIcon: View {
             .brightness(0.12)
             .colorMultiply(color)
             .frame(width: size, height: size)
-    }
-}
-
-// MARK: - Point Type Selector Overlay
-
-struct PointTypeSelectorOverlay: View {
-    let game: Game
-    let onPointTypeSelected: (PointType) -> Void
-    let onBack: () -> Void
-
-    private var playerColor: Color {
-        game.selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.steelBlue
-    }
-
-    var body: some View {
-        VStack(spacing: 20) {
-            // Header
-            if let player = game.selectedPlayer {
-                Text("\(game.name(for: player).uppercased()) SCOORT")
-                    .font(AppFonts.caption(11))
-                    .foregroundColor(playerColor)
-                    .tracking(1.5)
-            }
-
-            Text("Hoe werd het punt gewonnen?")
-                .font(AppFonts.title(18))
-                .foregroundColor(AppColors.textPrimary)
-
-            // Point type buttons
-            VStack(spacing: 12) {
-                PointTypeButton(
-                    pointType: .winner,
-                    color: playerColor,
-                    action: { onPointTypeSelected(.winner) }
-                )
-                PointTypeButton(
-                    pointType: .forcedError,
-                    color: playerColor,
-                    action: { onPointTypeSelected(.forcedError) }
-                )
-                PointTypeButton(
-                    pointType: .unforcedError,
-                    color: playerColor,
-                    action: { onPointTypeSelected(.unforcedError) }
-                )
-                PointTypeButton(
-                    pointType: .stroke,
-                    color: playerColor,
-                    action: { onPointTypeSelected(.stroke) }
-                )
-                // Only the server can score straight from the serve
-                if game.selectedPlayer == game.currentServer {
-                    PointTypeButton(
-                        pointType: .servicePoint,
-                        color: playerColor,
-                        action: { onPointTypeSelected(.servicePoint) }
-                    )
-                }
-            }
-
-            // Back button
-            Button(action: onBack) {
-                HStack(spacing: 6) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 12, weight: .semibold))
-                    Text("Terug")
-                        .font(AppFonts.caption(12))
-                }
-                .foregroundColor(AppColors.textSecondary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(Capsule().fill(Color.white.opacity(0.1)))
-            }
-        }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 20)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(AppColors.backgroundMedium.opacity(0.97))
-                .shadow(color: Color.black.opacity(0.5), radius: 20, x: 0, y: 10)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(playerColor.opacity(0.3), lineWidth: 1)
-        )
-        .padding(.horizontal, 24)
     }
 }
 

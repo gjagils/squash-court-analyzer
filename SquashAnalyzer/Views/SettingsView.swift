@@ -1,36 +1,14 @@
 import SwiftUI
 import SquashAnalyzerCore
 
-/// Coach input settings shared between the settings screen and the live coach screen
+/// Settings keys shared with other screens
 enum CoachInputSettings {
-    static let modeKey = "coachInputMode"
     static let teamURLKey = "sbnTeamURL"
-}
-
-/// How a point is entered on the coach screen. The stored raw value of the
-/// removed "classic" mode no longer parses and falls back to `.scoreTap`.
-enum CoachInputMode: String {
-    /// Winner/Fout buttons per player, shot optional afterwards
-    case quick
-    /// Tap the score, then everything inline: type → zone → slag, no pop-ups
-    case scoreTap
-
-    var description: String {
-        switch self {
-        case .quick: return "Winner en Fout per speler; na de zone is het punt binnen, de slag kies je optioneel achteraf."
-        case .scoreTap: return "Tik op de score van wie scoort; type, zone en slag volgen op het scherm zelf. Ook bij een unforced error leg je vast waar."
-        }
-    }
 }
 
 /// Settings view for managing app configuration
 struct SettingsView: View {
     @Binding var isPresented: Bool
-    @AppStorage(CoachInputSettings.modeKey) private var inputModeRaw = CoachInputMode.scoreTap.rawValue
-
-    private var inputMode: CoachInputMode {
-        CoachInputMode(rawValue: inputModeRaw) ?? .scoreTap
-    }
     @State private var apiKey: String = ""
     @State private var showingAPIKey = false
     @State private var showingSaveConfirmation = false
@@ -47,9 +25,6 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
-                        // Coach input
-                        coachInputSection
-
                         teamSection
 
                         // AI Coach Section
@@ -116,52 +91,6 @@ struct SettingsView: View {
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 16)
-    }
-
-    // MARK: - Coach input Section
-    private var coachInputSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Image(systemName: "hand.tap")
-                    .foregroundColor(AppColors.warmOrange)
-                Text("Coachmodus")
-                    .font(AppFonts.label(16))
-                    .foregroundColor(AppColors.textPrimary)
-            }
-
-            Text("PUNTINVOER")
-                .font(AppFonts.caption(11))
-                .foregroundColor(AppColors.textMuted)
-                .tracking(1)
-
-            Toggle(isOn: Binding(
-                get: { inputMode == .quick },
-                set: { quick in
-                    withAnimation(.easeInOut(duration: 0.15)) {
-                        inputModeRaw = (quick ? CoachInputMode.quick : .scoreTap).rawValue
-                    }
-                }
-            )) {
-                Text("Snelle invoer")
-                    .font(AppFonts.label(14))
-                    .foregroundColor(AppColors.textPrimary)
-            }
-            .tint(AppColors.warmOrange)
-
-            Text(inputMode.description)
-                .font(AppFonts.caption(11))
-                .foregroundColor(AppColors.textMuted)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.03))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
-        )
     }
 
     // MARK: - AI Coach Section

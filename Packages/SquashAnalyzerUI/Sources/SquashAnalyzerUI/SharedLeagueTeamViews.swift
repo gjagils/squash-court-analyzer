@@ -246,11 +246,14 @@ public struct BackupContext {
     public let store: any BackupStore
     public let files: any BackupFiles
     public let appVersion: String
+    /// Daily backups into a folder the user picks; nil hides the option
+    public let auto: (any AutoBackupControl)?
 
-    public init(store: any BackupStore, files: any BackupFiles, appVersion: String) {
+    public init(store: any BackupStore, files: any BackupFiles, appVersion: String, auto: (any AutoBackupControl)? = nil) {
         self.store = store
         self.files = files
         self.appVersion = appVersion
+        self.auto = auto
     }
 }
 
@@ -276,6 +279,9 @@ public struct SharedSettingsView: View {
     /// alert clears its own flag before a button's action runs (on Android).
     @State private var pendingRestore: FullBackup?
     @State private var askingRestore = false
+    /// Refreshed after turning automatic backups on or off
+    @State private var autoFolder: String?
+    @State private var autoLast: Date?
 
     public init(aiCoach: AICoachContext? = nil, backup: BackupContext? = nil) {
         self.aiCoach = aiCoach
@@ -404,6 +410,9 @@ public struct SharedSettingsView: View {
                     .foregroundColor(LeaguePalette.orange)
                     .disabled(backupBusy)
             }
+            if let auto = backup?.auto {
+                autoBackupRow(auto)
+            }
             if backupBusy {
                 ProgressView()
             }
@@ -419,6 +428,61 @@ public struct SharedSettingsView: View {
             Button("Annuleren", role: .cancel) { pendingRestore = nil }
         } message: {
             Text(restoreQuestion)
+        }
+    }
+
+    private func autoBackupRow(_ auto: any AutoBackupControl) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Automatische back-up")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(LeaguePalette.text)
+                .padding(.top, 8)
+            if let folder = autoFolder {
+                Text("Aan · map \u{201C}\(folder)\u{201D}\(autoLast.map { date in " · laatste \(Self.shortDate(date))" } ?? "")")
+                    .font(.system(size: 12))
+                    .foregroundColor(LeaguePalette.secondary)
+                Button("Uitzetten") {
+                    auto.turnOff()
+                    refreshAuto()
+                }
+                .foregroundColor(LeaguePalette.secondary)
+            } else {
+                Text("Eén keer per dag, als je de app opent, komt er een back-up in een map die je kiest (bijvoorbeeld Documenten). De 7 nieuwste blijven bewaard.")
+                    .font(.system(size: 12))
+                    .foregroundColor(LeaguePalette.muted)
+                Button("Aanzetten en map kiezen") { turnOnAuto(auto) }
+                    .foregroundColor(LeaguePalette.orange)
+                    .disabled(backupBusy)
+            }
+        }
+        .onAppear { refreshAuto() }
+    }
+
+    private static func shortDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "nl_NL")
+        formatter.dateFormat = "d MMM HH:mm"
+        return formatter.string(from: date)
+    }
+
+    private func refreshAuto() {
+        autoFolder = backup?.auto?.folderName()
+        autoLast = backup?.auto?.lastBackupDate()
+    }
+
+    private func turnOnAuto(_ auto: any AutoBackupControl) {
+        backupBusy = true
+        backupMessage = nil
+        Task {
+            do {
+                if try await auto.turnOn() {
+                    showBackup("Automatische back-up staat aan; de eerste is gemaakt.", error: false)
+                }
+            } catch {
+                showBackup("Automatische back-up aanzetten is niet gelukt.", error: true)
+            }
+            refreshAuto()
+            backupBusy = false
         }
     }
 

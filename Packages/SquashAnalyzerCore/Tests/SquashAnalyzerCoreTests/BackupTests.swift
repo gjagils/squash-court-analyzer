@@ -98,4 +98,21 @@ final class BackupTests: XCTestCase {
         XCTAssertEqual(odd.shotType, "")
         XCTAssertEqual(BackupCounts(players: 2, matches: 3, games: 7, badges: 1).summary, "2 spelers, 3 wedstrijden, 7 games, 1 badges")
     }
+
+    func testAutomaticBackupPlan() {
+        let now = Date(timeIntervalSince1970: 1_790_000_000)
+        XCTAssertTrue(AutoBackupPlan.isDue(lastBackup: nil, now: now))
+        XCTAssertFalse(AutoBackupPlan.isDue(lastBackup: now.addingTimeInterval(-19 * 3600), now: now))
+        XCTAssertTrue(AutoBackupPlan.isDue(lastBackup: now.addingTimeInterval(-20 * 3600), now: now))
+
+        var names = ["latest-backup.json", "notities.txt", "squash-backup-2026-10-01-090552.json"]
+        for day in 1...9 {
+            names.append("squash-backup-2026-09-0\(day)-120000.json")
+        }
+        XCTAssertEqual(AutoBackupPlan.filesToDelete(names),
+                       ["squash-backup-2026-09-03-120000.json", "squash-backup-2026-09-02-120000.json", "squash-backup-2026-09-01-120000.json"])
+        XCTAssertTrue(AutoBackupPlan.filesToDelete(["squash-backup-a.json"]).isEmpty)
+        XCTAssertTrue(AutoBackupPlan.fileName(at: now).hasPrefix("squash-backup-2026-09-2"))
+        XCTAssertTrue(AutoBackupPlan.fileName(at: now).hasSuffix(".json"))
+    }
 }

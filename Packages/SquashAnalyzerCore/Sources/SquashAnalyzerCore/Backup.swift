@@ -356,3 +356,47 @@ public protocol BackupFiles: AnyObject, Sendable {
     /// Nil when the user cancelled
     func open() async throws -> Data?
 }
+
+// MARK: - Automatic backups
+
+/// When an automatic backup is due and which old files go, the same rules as
+/// iOS' iCloud backup folder: dated files `squash-backup-…json`, newest 7 kept.
+public enum AutoBackupPlan {
+    public static let keep = 7
+    public static let prefix = "squash-backup-"
+
+    /// One a day: due when there was none yet, or the last is 20 hours old
+    /// (not 24, so opening the app at about the same time each day still counts)
+    public static func isDue(lastBackup: Date?, now: Date = Date()) -> Bool {
+        guard let lastBackup else { return true }
+        return now.timeIntervalSince(lastBackup) >= 20 * 3600
+    }
+
+    /// "squash-backup-2026-10-01-090552.json"; the name sorts by time
+    public static func fileName(at date: Date = Date()) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd-HHmmss"
+        return prefix + formatter.string(from: date) + ".json"
+    }
+
+    /// The dated backups beyond the newest `keep`; other files are left alone
+    public static func filesToDelete(_ names: [String], keep: Int = AutoBackupPlan.keep) -> [String] {
+        var backups: [String] = []
+        for name in names where name.hasPrefix(prefix) && name.hasSuffix(".json") {
+            backups.append(name)
+        }
+        backups.sort { first, second in first > second }
+        return Array(backups.dropFirst(keep))
+    }
+}
+
+/// Turning automatic backups on and off (Android: a folder the user picks)
+public protocol AutoBackupControl: AnyObject, Sendable {
+    /// The chosen folder's name while automatic backups are on, nil when off
+    func folderName() -> String?
+    func lastBackupDate() -> Date?
+    /// Asks for a folder, turns automatic backups on and makes one right away; false when cancelled
+    func turnOn() async throws -> Bool
+    func turnOff()
+}

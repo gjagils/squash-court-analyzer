@@ -87,6 +87,8 @@ dependencies {
     }
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
+    // Automatic backups write into a folder the user picks (Storage Access Framework)
+    implementation("androidx.documentfile:documentfile:1.0.1")
 
     val roomVersion = "2.8.5"
     implementation("androidx.room:room-runtime:$roomVersion")

@@ -1863,9 +1863,28 @@ Verificatie: Core 51 op Darwin / 50 JUnit op Android,
 `:app:testDebugUnitTest` 51/51, `:app:connectedDebugAndroidTest` 22/22, iOS
 **TEST SUCCEEDED**.
 
-**Nog niet**: automatische back-ups (iOS doet iCloud Drive met rotatie;
-Android heeft nu alleen handmatig, Android's eigen app-back-up via
-`allowBackup` neemt de Room-database wel mee).
+**Automatische back-ups (toegevoegd 2026-10-01).** Correctie op een eerdere
+aanname: iOS maakt *geen* automatische back-ups, maar heeft één knop
+"Backup naar iCloud" (bestand in iCloud Drive, de 7 nieuwste blijven). Android
+krijgt echte automatische back-ups: Instellingen → Back-up → "Aanzetten en
+map kiezen" (systeemmapkiezer, `OpenDocumentTree`, blijvende toestemming)
+maakt meteen de eerste; daarna schrijft `AutoBackup` (Kotlin) bij het
+openen van de app (`onResume`) hoogstens eens per 20 uur een back-up in die
+map en houdt alleen de 7 nieuwste `squash-backup-…json` (andere bestanden
+blijven staan). "Uitzetten" geeft de maptoestemming terug. De regels staan
+in Core (`AutoBackupPlan`: `isDue`, `fileName`, `filesToDelete`, getest op
+beide platforms); bestanden via `androidx.documentfile` (nieuwe dependency).
+Providers voegen zelf `.json` toe op basis van het MIME-type; wie dat niet
+doet krijgt het bestand hernoemd. Google Drive biedt meestal geen
+mapkeuze aan; kies een map op het toestel (bv. Documenten). Los daarvan
+neemt Android's eigen app-back-up (`allowBackup`) de Room-database mee.
+Handmatig gecontroleerd op de emulator: map Documents gekozen →
+`squash-backup-2026-10-01-092708.json` aangemaakt, status "Aan · map
+Documents · laatste 1 okt 09:27". Tests: Core
+`testAutomaticBackupPlan`, Robolectric `AutoBackupRotationTest` (9
+back-ups → 7 blijven, ander bestand blijft). Verificatie daarna: Core 52 op
+Darwin / 51 JUnit op Android, `:app:testDebugUnitTest` 52/52,
+`:app:connectedDebugAndroidTest` 22/22, iOS **TEST SUCCEEDED**.
 
 ## Icoontjes en Deel score op Android — resultaat (AFGEROND, 2026-10-01)
 

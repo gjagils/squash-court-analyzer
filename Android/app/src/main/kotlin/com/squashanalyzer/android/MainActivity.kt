@@ -23,6 +23,9 @@ import squash.analyzer.core.AICoachClient
 import squash.analyzer.ui.AICoachContext
 import squash.analyzer.ui.BackupContext
 import com.squashanalyzer.android.backup.ActivityBackupFiles
+import com.squashanalyzer.android.backup.AutoBackup
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.squashanalyzer.android.data.RoomBackupStore
 import com.squashanalyzer.android.aicoach.HttpAICoachTransport
 import com.squashanalyzer.android.aicoach.KeystoreAPIKeyStore
@@ -48,6 +51,7 @@ class SquashApplication : Application() {
 class MainActivity : AppCompatActivity() {
     /** Card links opened from WhatsApp, the browser, … wait here for the import screen */
     private val cardInbox = CardInbox()
+    private lateinit var autoBackup: AutoBackup
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,8 +73,10 @@ class MainActivity : AppCompatActivity() {
         val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore)
         val leagueTeamFetcher = LeagueTeamFetcher(loader = HttpLeaguePageLoader())
         // Registers activity-result launchers, so it must exist before the activity starts
-        val backup = BackupContext(store = RoomBackupStore(db), files = ActivityBackupFiles(this),
-            appVersion = "Android " + (packageManager.getPackageInfo(packageName, 0).versionName ?: "?"))
+        val appVersion = "Android " + (packageManager.getPackageInfo(packageName, 0).versionName ?: "?")
+        val backupStore = RoomBackupStore(db)
+        autoBackup = AutoBackup(this, backupStore, appVersion)
+        val backup = BackupContext(store = backupStore, files = ActivityBackupFiles(this), appVersion = appVersion, auto = autoBackup)
         val aiCoach = AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport()))
         setContent {
             val stateHolder = rememberSaveableStateHolder()
@@ -83,6 +89,12 @@ class MainActivity : AppCompatActivity() {
                 SideEffect { stateHolder.removeState(true) }
             }
         }
+    }
+
+    /** Automatic backup, at most once a day, whenever the app comes to the foreground */
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch { autoBackup.runIfDue() }
     }
 
     /** `launchMode="singleTask"`: a link opened while the app runs arrives here */

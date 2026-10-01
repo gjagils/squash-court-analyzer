@@ -431,13 +431,21 @@ public class Game: Identifiable {
         points.filter { $0.zone == zone }.count
     }
 
-    /// Get the best zone for a player (highest win count)
+    /// The zone where a player made the most winners and forced errors
     public func bestZone(for player: Player) -> CourtZone? {
-        let zoneCounts = CourtZone.allCases.map { zone in
-            (zone: zone, count: pointsWon(by: player, in: zone))
+        var best: CourtZone? = nil
+        var most = 0
+        for zone in CourtZone.allCases {
+            var count = 0
+            for point in attackingPoints(by: player) where point.zone == zone {
+                count += 1
+            }
+            if count > most {
+                most = count
+                best = zone
+            }
         }
-        guard let best = zoneCounts.max(by: { $0.count < $1.count }), best.count > 0 else { return nil }
-        return best.zone
+        return best
     }
 
     /// Get the best shot type for a player
@@ -449,24 +457,11 @@ public class Game: Identifiable {
         return best.shot
     }
 
-    /// Get the worst zone for a player (most points lost)
-    public func worstZone(for player: Player) -> CourtZone? {
-        let zoneCounts = CourtZone.allCases.map { zone in
-            (zone: zone, count: pointsWon(by: player.opponent, in: zone))
-        }
-        guard let worst = zoneCounts.max(by: { $0.count < $1.count }), worst.count > 0 else { return nil }
-        return worst.zone
-    }
-
-    /// Get recommendation: zones where opponent is weak
-    public func recommendedZones(against player: Player) -> [CourtZone] {
-        let zoneCounts = CourtZone.allCases.map { zone in
-            (zone: zone, lostCount: pointsWon(by: player.opponent, in: zone))
-        }
-        .filter { $0.lostCount > 0 }
-        .sorted { $0.lostCount > $1.lostCount }
-
-        return zoneCounts.prefix(3).map { $0.zone }
+    /// Points a player made by playing: winners and forced errors. Strokes and
+    /// service points say nothing about where the ball went, and the opponent's
+    /// own errors are the opponent's.
+    public func attackingPoints(by player: Player) -> [Point] {
+        points.filter { $0.scorer == player && ($0.pointType == PointType.winner || $0.pointType == PointType.forcedError) }
     }
 
     // MARK: - Duration Analysis

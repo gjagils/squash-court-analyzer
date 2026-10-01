@@ -14,7 +14,12 @@ public enum AdviceTopic: Equatable, Sendable {
     case speedUp, slowDown
     case ownErrors, hurry, forcedErrors, letsAgainst
     case opponentErrors, opponentServicePoints, ownServicePoints, letsFor
-    case avoidZone, playTo, bestShot
+    case avoidZone, bestShot
+    /// Where the player wins, loses or errs (row or side)
+    case wonArea, lostArea, errorArea
+    /// Where the opponent errs: a chance
+    case opening
+    case volleys, opponentVolleys
 }
 
 public struct AdviceItem: Equatable, Sendable {
@@ -56,100 +61,105 @@ public enum CoachAdvice {
         return "\(total / 60):\(secs < 10 ? "0" : "")\(secs)"
     }
 
+    /// The most advice lines the dashboard shows
+    public static let maximumItems = 5
+
     /// Faster or slower: short vs long rallies won, or else the average
     /// length of won vs lost points. Nil below 4 points or without a clear
     /// difference.
     public static func tempo(in game: Game, for player: Player) -> AdviceItem? {
+        tempoCandidate(in: game, for: player)?.item
+    }
+
+    /// The advice for `player` in `game`, at most five lines, the ones with
+    /// the most to gain first: points lost or chances, counted in points.
+    /// With the match, a finding that also showed in an earlier game is
+    /// called a pattern ("Net als in game 1.").
+    public static func local(in game: Game, for player: Player, match: Match? = nil) -> [AdviceItem] {
+        var candidates = AdviceRules.candidates(in: game, for: player)
+
+        var earlier: [Game] = []
+        var numbers: [Int] = []
+        if let match {
+            for (index, other) in match.games.enumerated() {
+                if other === game { break }
+                earlier.append(other)
+                numbers.append(match.gameNumber(at: index))
+            }
+        }
+        if !earlier.isEmpty {
+            var updated: [AdviceCandidate] = []
+            for candidate in candidates {
+                var seenIn: [Int] = []
+                var extra = 0.0
+                for (index, other) in earlier.enumerated() {
+                    for previous in AdviceRules.candidates(in: other, for: player) where previous.key == candidate.key {
+                        seenIn.append(numbers[index])
+                        extra += previous.potential / 2.0
+                    }
+                }
+                if seenIn.isEmpty {
+                    updated.append(candidate)
+                } else {
+                    let text = candidate.item.text + " Net als in game " + AdviceRules.list(seenIn) + "."
+                    updated.append(AdviceCandidate(item: AdviceItem(topic: candidate.item.topic, tone: candidate.item.tone, text: text),
+                                                   potential: candidate.potential + extra, key: candidate.key, order: candidate.order))
+                }
+            }
+            candidates = updated
+        }
+
+        candidates.sort { first, second in
+            if first.potential != second.potential { return first.potential > second.potential }
+            let firstWarns = first.item.tone == AdviceTone.warning
+            let secondWarns = second.item.tone == AdviceTone.warning
+            if firstWarns != secondWarns { return firstWarns }
+            return first.order < second.order
+        }
+        var result: [AdviceItem] = []
+        for candidate in candidates.prefix(maximumItems) {
+            result.append(candidate.item)
+        }
+        return result
+    }
+
+    static func tempoCandidate(in game: Game, for player: Player) -> AdviceCandidate? {
         guard game.points.count >= 4 else { return nil }
         if let shortWin = game.shortRallyWinPercentage(for: player),
            let longWin = game.longRallyWinPercentage(for: player),
            abs(shortWin - longWin) > 15 {
-            if shortWin > longWin {
-                return AdviceItem(topic: .speedUp, tone: .success,
-                                  text: "Versnel het spel! Je wint \(Int(shortWin))% van korte rally's vs \(Int(longWin))% van lange")
+            // The chance: the points lost in the kind of rally the player is weaker in
+            var durations: [TimeInterval] = []
+            for point in game.points {
+                durations.append(point.duration)
             }
-            return AdviceItem(topic: .slowDown, tone: .success,
-                              text: "Vertraag het spel! Je wint \(Int(longWin))% van lange rally's vs \(Int(shortWin))% van korte")
+            durations.sort()
+            let median = durations[durations.count / 2]
+            var lostLong = 0
+            var lostShort = 0
+            for point in game.points where point.scorer != player {
+                if point.duration >= median { lostLong += 1 } else { lostShort += 1 }
+            }
+            if shortWin > longWin {
+                return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.speedUp, tone: AdviceTone.success,
+                                                        text: "Versnel het spel: je wint \(Int(shortWin))% van de korte rally's en \(Int(longWin))% van de lange."),
+                                       potential: Double(lostLong), key: "tempo-sneller", order: 0)
+            }
+            return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.slowDown, tone: AdviceTone.success,
+                                                    text: "Vertraag het spel: je wint \(Int(longWin))% van de lange rally's en \(Int(shortWin))% van de korte."),
+                                   potential: Double(lostShort), key: "tempo-trager", order: 0)
         }
         if let won = game.averageDurationWon(by: player), let lost = game.averageDurationLost(by: player), abs(won - lost) > 3 {
-            let durations = "Je gewonnen punten duren gem. \(formatDuration(won)), verloren \(formatDuration(lost))"
+            let durations = "je gewonnen punten duren gemiddeld \(formatDuration(won)), je verloren punten \(formatDuration(lost))."
+            let potential = Double(game.pointsLost(by: player).count) / 2.0
             if won < lost {
-                return AdviceItem(topic: .speedUp, tone: .info, text: "Versnel het spel! \(durations)")
+                return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.speedUp, tone: AdviceTone.info, text: "Versnel het spel: " + durations),
+                                       potential: potential, key: "tempo-sneller", order: 0)
             }
-            return AdviceItem(topic: .slowDown, tone: .info, text: "Vertraag het spel! \(durations)")
+            return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.slowDown, tone: AdviceTone.info, text: "Vertraag het spel: " + durations),
+                                   potential: potential, key: "tempo-trager", order: 0)
         }
         return nil
-    }
-
-    /// All advice lines for `player`, in the dashboard's order
-    public static func local(in game: Game, for player: Player) -> [AdviceItem] {
-        let opponent = player.opponent
-        let opponentName = game.name(for: opponent)
-        var result: [AdviceItem] = []
-        if let tempo = tempo(in: game, for: player) {
-            result.append(tempo)
-        }
-
-        // The player's own unforced errors are points the opponent scored on them
-        let ownErrors = game.unforcedErrors(by: opponent).count
-        let errorRate = game.points.isEmpty ? 0.0 : Double(ownErrors) / Double(game.points.count)
-        if ownErrors >= 3 {
-            result.append(AdviceItem(topic: .ownErrors, tone: .warning,
-                                     text: "\(ownErrors) eigen fouten - focus op concentratie en rustig spelen"))
-        } else if ownErrors >= 2 && errorRate > 0.25 {
-            result.append(AdviceItem(topic: .hurry, tone: .warning, text: "Minder haast - neem meer tijd voor je slagen"))
-        }
-
-        let forcedAgainst = game.forcedErrors(by: opponent).count
-        if forcedAgainst >= 3 {
-            result.append(AdviceItem(topic: .forcedErrors, tone: .warning,
-                                     text: "\(forcedAgainst) forced errors - racket eerder klaar voor je slag"))
-        }
-
-        let letsAgainst = game.letsRequested(by: opponent).count
-        let letsFor = game.letsRequested(by: player).count
-        if letsAgainst >= 2 {
-            result.append(AdviceItem(topic: .letsAgainst, tone: .warning,
-                                     text: "\(letsAgainst) lets tegen - beweeg sneller weg naar de T na je slag"))
-        }
-
-        let opponentErrors = game.unforcedErrors(by: player).count
-        if opponentErrors >= 3 {
-            result.append(AdviceItem(topic: .opponentErrors, tone: .success,
-                                     text: "\(opponentName) maakt \(opponentErrors) fouten - blijf druk zetten"))
-        }
-
-        let opponentServicePoints = game.servicePoints(by: opponent).count
-        if opponentServicePoints >= 2 {
-            result.append(AdviceItem(topic: .opponentServicePoints, tone: .warning,
-                                     text: "\(opponentName) scoort \(opponentServicePoints) servicepunten - racket vroeg omhoog bij de return"))
-        }
-        let ownServicePoints = game.servicePoints(by: player).count
-        if ownServicePoints >= 2 {
-            result.append(AdviceItem(topic: .ownServicePoints, tone: .success,
-                                     text: "Je hebt \(ownServicePoints) servicepunten - je service werkt, blijf zo serveren!"))
-        }
-
-        if letsFor >= 2 && letsAgainst < 2 {
-            result.append(AdviceItem(topic: .letsFor, tone: .success, text: "\(letsFor) lets mee - je beweegt goed naar de bal"))
-        }
-
-        if let zone = game.bestZone(for: opponent) {
-            result.append(AdviceItem(topic: .avoidZone, tone: .warning,
-                                     text: "Vermijd \(zone.rawValue) - daar is \(opponentName) sterk"))
-        }
-        let recommended = game.recommendedZones(against: opponent)
-        if !recommended.isEmpty {
-            var names: [String] = []
-            for zone in recommended {
-                names.append(zone.rawValue)
-            }
-            result.append(AdviceItem(topic: .playTo, tone: .success, text: "Speel naar: \(names.joined(separator: ", "))"))
-        }
-        if let shot = game.bestShotType(for: player) {
-            result.append(AdviceItem(topic: .bestShot, tone: .info, text: "Je \(shot.rawValue) is effectief, blijf dit gebruiken"))
-        }
-        return result
     }
 
     /// The player's scoring shots, most first (at most `limit`). A volley

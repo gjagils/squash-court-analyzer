@@ -11,7 +11,6 @@
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
 		A1000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000004 /* Assets.xcassets */; };
 		A1000006 /* ScoreboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000006 /* ScoreboardView.swift */; };
-		A1000012 /* AnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000012 /* AnalysisView.swift */; };
 		A1000013 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000013 /* DesignSystem.swift */; };
 		A1000016 /* SavedMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000016 /* SavedMatch.swift */; };
 		A1000017 /* SavedGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000017 /* SavedGame.swift */; };
@@ -80,7 +79,6 @@
 		A2000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A2000004 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A2000006 /* ScoreboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardView.swift; sourceTree = "<group>"; };
-		A2000012 /* AnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisView.swift; sourceTree = "<group>"; };
 		A2000013 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		A2000016 /* SavedMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedMatch.swift; sourceTree = "<group>"; };
 		A2000017 /* SavedGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedGame.swift; sourceTree = "<group>"; };
@@ -195,7 +193,6 @@
 				A2000002 /* ContentView.swift */,
 				B2000082 /* HomeView.swift */,
 				A2000006 /* ScoreboardView.swift */,
-				A2000012 /* AnalysisView.swift */,
 				A2000019 /* ShotTypeSelectorView.swift */,
 				A2000020 /* AppIconView.swift */,
 				A2000021 /* MatchHistoryView.swift */,
@@ -388,7 +385,6 @@
 				A1000002 /* ContentView.swift in Sources */,
 				B1000082 /* HomeView.swift in Sources */,
 				A1000006 /* ScoreboardView.swift in Sources */,
-				A1000012 /* AnalysisView.swift in Sources */,
 				A1000013 /* DesignSystem.swift in Sources */,
 				A1000016 /* SavedMatch.swift in Sources */,
 				A1000017 /* SavedGame.swift in Sources */,

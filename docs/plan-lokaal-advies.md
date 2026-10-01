@@ -1,10 +1,31 @@
 # Voorstel: betere regels voor het lokale coachadvies
 
-Status: **voorstel** (1 oktober 2026), nog niet gebouwd. Geldt voor iOS en
+Status: **gebouwd** op `codex/android-phase4` (1 oktober 2026). Geldt voor iOS en
 Android tegelijk: de regels staan in `SquashAnalyzerCore` (`CoachAdvice`), het
 dashboard op beide platforms toont ze alleen.
 
-## Wat er nu gebeurt (kort)
+## Besluiten van Gerd-Jan (1 oktober 2026)
+
+1. Drempels zoals voorgesteld (5 punten totaal, 3 per rij of kant, 50% en 70%).
+2. Geen vinkje Linkshandig: links/rechts is gezien vanuit de speler die je
+   coacht, de coach staat ernaast.
+3. Maximaal 5 regels, **op volgorde van potentie**: meeste verloren punten of
+   kansen eerst. Gebouwd als `potential` = aantal punten in het geding; wat al
+   goed gaat telt voor 0,6 (lets mee 0,5, beste slag per rij 0,5, "Vermijd
+   [vak]" 0,8). Bij gelijke potentie gaat een waarschuwing voor.
+4. Patronen over games benoemen: een bevinding die ook in een eerdere game van
+   de wedstrijd optrad krijgt "Net als in game 1." en de helft van die eerdere
+   potentie erbij.
+5. Geen "boven het blik": gewone taal ("Speel daar wat hoger en veiliger").
+
+Gebouwd in `CoachAdviceRules.swift` (`CourtSide`, `AreaTally`, `ZoneProfile`),
+`AdviceRules.swift` (de regels) en `CoachAdvice.local(in:for:match:)`; de tabel
+is `ZoneProfileTable` (SquashAnalyzerUI) op iOS en Android. De kans-regel voor
+de tegenstander is "waar maakt de tegenstander fouten" ("waar verliest de
+tegenstander" is hetzelfde als "waar win jij" en zou dubbel zijn). Het oude,
+ongebruikte iOS-scherm `AnalysisView` is verwijderd.
+
+## Wat er vóór deze versie gebeurde (kort)
 
 Per speler en per game: tempo (korte of lange rally's), eigen fouten en haast,
 forced errors, lets, fouten en servicepunten van de tegenstander, "Vermijd

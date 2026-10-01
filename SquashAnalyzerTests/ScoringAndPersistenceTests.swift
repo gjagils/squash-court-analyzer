@@ -234,7 +234,6 @@ final class ScoringAndPersistenceTests: XCTestCase {
         let game = Game()
         XCTAssertNil(game.bestZone(for: .player1))
         XCTAssertNil(game.bestShotType(for: .player1))
-        XCTAssertNil(game.worstZone(for: .player1))
     }
 
     func testUnforcedErrorScoresImmediately() {

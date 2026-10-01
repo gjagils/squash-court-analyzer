@@ -32,18 +32,22 @@ final class CoachAdviceTests: XCTestCase {
         XCTAssertEqual(CoachAdvice.formatDuration(130), "2:10")
     }
 
-    func testLocalAdviceInTheDashboardOrder() {
+    func testLocalAdviceMostPotentialFirst() {
         let advice = CoachAdvice.local(in: game(), for: Player.player1)
-        var topics: [AdviceTopic] = []
+        var texts: [String] = []
         for item in advice {
-            topics.append(item.topic)
+            texts.append(item.text)
         }
-        XCTAssertEqual(topics, [AdviceTopic.speedUp, AdviceTopic.ownErrors, AdviceTopic.playTo, AdviceTopic.bestShot])
-        XCTAssertEqual(advice[0].text, "Versnel het spel! Je gewonnen punten duren gem. 3s, verloren 20s")
-        XCTAssertEqual(advice[0].tone, AdviceTone.info)
-        XCTAssertEqual(advice[1].text, "3 eigen fouten - focus op concentratie en rustig spelen")
-        XCTAssertEqual(advice[2].text, "Speel naar: Voor Links")
-        XCTAssertEqual(advice[3].text, "Je Drive is effectief, blijf dit gebruiken")
+        // Hugo's 3 own errors are points to win back; what goes well counts for less
+        XCTAssertEqual(texts, [
+            "3 eigen fouten: blijf geconcentreerd en speel rustig.",
+            "Je wint je punten vooral voorin (5 van 5). Blijf de voorhoeken zoeken.",
+            "Je scoort vooral aan de linkerkant (5 van 5). Speel vaker die kant op.",
+            "Voorin werkt je drive het best (5 punten).",
+            "Versnel het spel: je gewonnen punten duren gemiddeld 3s, je verloren punten 20s.",
+        ])
+        XCTAssertEqual(advice[0].tone, AdviceTone.warning)
+        XCTAssertEqual(advice[4].topic, AdviceTopic.speedUp)
     }
 
     func testTheOpponentSeesTheOtherSide() {
@@ -52,9 +56,13 @@ final class CoachAdviceTests: XCTestCase {
         for item in advice {
             texts.append(item.text)
         }
-        XCTAssertTrue(texts.contains("Hugo maakt 3 fouten - blijf druk zetten"))
-        XCTAssertTrue(texts.contains("Vermijd Voor Links - daar is Hugo sterk"))
-        XCTAssertTrue(texts.contains("Vertraag het spel! Je gewonnen punten duren gem. 20s, verloren 3s"))
+        XCTAssertEqual(texts, [
+            "Je verliest de meeste punten voorin (5 van 5). Hugo maakt het kort af: sta dichter bij de T en reageer eerder op korte ballen.",
+            "Je verliest de meeste punten aan de linkerkant (5 van 5). Daar is Hugo sterk.",
+            "Vermijd Voor Links: daar scoort Hugo het meest (5 punten).",
+            "Vertraag het spel: je gewonnen punten duren gemiddeld 20s, je verloren punten 3s.",
+            "Hugo maakt 3 fouten: blijf druk zetten.",
+        ])
     }
 
     func testNoTempoAdviceBelowFourPoints() {

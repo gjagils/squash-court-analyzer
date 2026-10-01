@@ -88,7 +88,8 @@ class AICoachTest {
         compose.onNodeWithText("ANALYSE").performClick()
 
         awaitText("GAME-ANALYSE")
-        awaitText("Je Drive is effectief, blijf dit gebruiken")
+        awaitText("Voorin werkt je drive het best (10 punten).")
+        awaitText("Waar vallen de punten")
         compose.onAllNodesWithText("Stel je API key in bij Instellingen").onFirst().performScrollTo().assertIsDisplayed()
         compose.onAllNodesWithContentDescription("Sluiten").onLast().performClick()
         awaitText("VOLGENDE GAME")

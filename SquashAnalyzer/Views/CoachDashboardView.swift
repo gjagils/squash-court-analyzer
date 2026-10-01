@@ -1,5 +1,6 @@
 import SwiftUI
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 
 /// Compact coach dashboard with local + AI-powered tactical advice
 struct CoachDashboardView: View {
@@ -391,7 +392,7 @@ struct CoachDashboardView: View {
     // MARK: - Local Advice Card
     private var localAdviceCard: some View {
         // The rules and wording live in SquashAnalyzerCore (`CoachAdvice`), shared with Android
-        let advice = CoachAdvice.local(in: game, for: selectedPlayer)
+        let advice = CoachAdvice.local(in: game, for: selectedPlayer, match: match)
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -400,6 +401,15 @@ struct CoachDashboardView: View {
                 Text("Tactisch Advies")
                     .font(AppFonts.label(14))
                     .foregroundColor(AppColors.textPrimary)
+            }
+
+            // Shared with Android: the counts the advice is based on
+            ZoneProfileTable(profile: ZoneProfile.of(game, for: selectedPlayer))
+
+            if advice.isEmpty {
+                Text("Nog te weinig punten voor advies.")
+                    .font(AppFonts.caption(12))
+                    .foregroundColor(AppColors.textMuted)
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -434,8 +444,12 @@ struct CoachDashboardView: View {
         case .ownServicePoints: return "bolt.fill"
         case .letsFor: return "figure.run"
         case .avoidZone: return "exclamationmark.triangle"
-        case .playTo: return "target"
         case .bestShot: return "star"
+        case .wonArea: return "target"
+        case .lostArea: return "arrow.down.right.circle"
+        case .errorArea: return "xmark.circle"
+        case .opening: return "scope"
+        case .volleys, .opponentVolleys: return "bolt.circle"
         }
     }
 

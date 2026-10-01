@@ -107,6 +107,7 @@ public enum AICoachPrompt {
         let court = game.heatmapLayout == CourtLayout.nine
             ? "9 vakken (voor/midden/achter × links/midden/rechts)"
             : "6 vakken (voor/midden/achter × links/rechts)"
+        let profile = ZoneProfile.of(game, for: player)
         let bestZone = game.bestZone(for: player)?.rawValue ?? "geen"
         let bestShot = game.bestShotType(for: player)?.rawValue ?? "geen"
         let worstZone = game.bestZone(for: opponent)?.rawValue ?? "geen"
@@ -136,7 +137,12 @@ public enum AICoachPrompt {
 
         De baan is verdeeld in \(court). Links/rechts is de forehand- of backhandkant, afhankelijk van de speler.
 
-        PUNTEN PER ZONE (winners + forced errors):
+        WAAR DE PUNTEN VALLEN (per rij en kant):
+        - Gewonnen (eigen winners + forced errors): \(ZoneProfile.describe(profile.won))
+        - Verloren (winners + forced errors tegenstander): \(ZoneProfile.describe(profile.lost))
+        - Eigen fouten: \(ZoneProfile.describe(profile.errors))
+
+        PUNTEN PER ZONE (alle punten met een zone):
         \(zoneStats.isEmpty ? "geen data" : zoneStats.joined(separator: "\n"))
 
         SLAGEN:

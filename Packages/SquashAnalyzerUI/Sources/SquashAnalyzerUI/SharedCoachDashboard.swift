@@ -380,9 +380,12 @@ public struct SharedCoachDashboardView: View {
     // MARK: Advice
 
     private var localAdvice: some View {
-        let items = CoachAdvice.local(in: game, for: player)
+        // With the match, so findings that also showed in an earlier game are named
+        let items = CoachAdvice.local(in: game, for: player, match: match)
         return VStack(alignment: .leading, spacing: 10) {
             sectionTitle("Tactisch advies")
+            ZoneProfileTable(profile: ZoneProfile.of(game, for: player))
+                .padding(.bottom, 4)
             if items.isEmpty {
                 Text("Nog te weinig punten voor advies.")
                     .font(.system(size: 12))

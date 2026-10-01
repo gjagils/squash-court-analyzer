@@ -27,6 +27,8 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
+                        manualSection
+
                         courtSection
 
                         teamSection
@@ -99,6 +101,29 @@ struct SettingsView: View {
         .padding(.vertical, 16)
     }
 
+    // MARK: - Manual Section
+    /// The iPhone manual on the website (Android links to its own page)
+    private var manualSection: some View {
+        Link(destination: UserManual.iPhone) {
+            HStack(spacing: 12) {
+                Image(systemName: "book").foregroundColor(AppColors.warmOrange)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Handleiding").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary)
+                    Text("Per tegel uitgelegd hoe alles werkt, op squashanalyzer.com")
+                        .font(AppFonts.caption(11))
+                        .foregroundColor(AppColors.textMuted)
+                        .multilineTextAlignment(.leading)
+                }
+                Spacer()
+                Image(systemName: "arrow.up.right").foregroundColor(AppColors.textMuted)
+            }
+            .padding()
+            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        }
+        .accessibilityLabel("Open de handleiding")
+    }
+
     // MARK: - Court Section
     private var courtSection: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -111,6 +136,8 @@ struct SettingsView: View {
                 Text("9 vakken").tag(CourtLayout.nine.rawValue)
             }
             .pickerStyle(.segmented)
+            // Dark segments so the unselected "9 vakken" stays readable on the dark card
+            .environment(\.colorScheme, .dark)
             Text("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak: voorin Drop, Boast en Kill, in het midden Kill, Drive, Cross en Boast, achterin Drive, Cross en Lob.")
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)

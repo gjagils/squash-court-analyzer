@@ -294,6 +294,8 @@ public struct SharedSettingsView: View {
             LeaguePalette.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
+                    manualSection
+                        .padding(.bottom, 20)
                     courtSection
                         .padding(.bottom, 20)
                     HStack(spacing: 8) {
@@ -345,6 +347,24 @@ public struct SharedSettingsView: View {
         .onAppear {
             draft = teamURL
             hasKey = aiCoach?.keyStore.hasOpenAIKey == true
+        }
+    }
+
+    /// The Android manual on the website (iOS links to the iPhone page)
+    private var manualSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Handleiding")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(LeaguePalette.text)
+            Text("Per tegel uitgelegd hoe alles werkt, op squashanalyzer.com.")
+                .font(.system(size: 13))
+                .foregroundColor(LeaguePalette.secondary)
+            Link(destination: UserManual.android) {
+                Text("Open de handleiding")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(LeaguePalette.orange)
+            }
+            .accessibilityLabel("Open de handleiding")
         }
     }
 

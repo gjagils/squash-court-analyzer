@@ -221,3 +221,26 @@ Geef die twee aan Claude. Die zet ze in `website/.well-known/assetlinks.json`
 
 Zie `docs/android-port.md`, plan kaartdelen, stap 5. Nodig: de twee
 vingerafdrukken uit B6 en akkoord om de website bij te werken.
+
+## Uploaden met het script (sinds 2026-10-01)
+
+Net als TestFlight gaat een Android-testbuild nu vanaf de Mac, zonder de Play Console:
+
+```bash
+scripts/play_upload.py --bump
+```
+```bash
+cd Android && ./gradlew :app:bundleRelease
+```
+```bash
+scripts/play_upload.py --notes release-notes/android-X-N.md --name "X (N)"
+```
+
+- `--bump` verhoogt `versionCode` in `app/build.gradle.kts`; `versionName` pas je zelf aan.
+- De release-notes (Nederlands, max. 500 tekens) staan in `release-notes/android-<versie>-<code>.md`.
+- `--check` laat de tracks en de laatste release zien: zo zie je of de toegang werkt.
+- De sleutel van het serviceaccount staat in `~/.android-keys` (nooit in de repo, ook in 1Password).
+  Het script ondertekent het verzoek met openssl en stuurt alleen een tijdelijk toegangsbewijs mee.
+- Upload-sleutel (`squashanalyzer-upload.jks`) en wachtwoorden: zie B1.
+
+Gedaan: 0.1 (1) met de hand, 0.2 (2) met het script.

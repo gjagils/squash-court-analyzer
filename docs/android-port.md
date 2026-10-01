@@ -2176,3 +2176,36 @@ Bijgewerkt 1 oktober 2026 (tweede ronde):
   wedstrijd/Deel score, Sluiten, Undo laatste punt en Stop wedstrijd/Bekijk
   stand, precies als iOS had. De losse iOS-onderdelen (`ResultOverlayCard`,
   `GameResultChips`, `OverlayUndoButton`, `MatchBadgesStrip`, …) zijn weg.
+
+## Verschillenronde iOS ↔ Android (1 oktober 2026)
+
+Een vergelijking van alle flows leverde een lijst verschillen op; uitgangspunt
+was iOS, behalve waar Android het al beter deed. Gelijkgetrokken:
+
+- Stoppen/hervatten coach (Core `Match.stopAction`, `resumeMessage`,
+  `ResumePromptCard`), scheidsrechter-details, het eindvenster
+  (`MatchResultOverlay`) en de tijdlijn (`RefereeScoringTimeline`).
+- Afgeronde wedstrijden (kopjes en kaarten als iOS, rijkere
+  `MatchHistorySummary`), het badgescherm met verdienmomenten, Instellingen
+  (volgorde, "Over AI Coach", geldige Mijn team-link met Verwijder op iOS),
+  Mijn team op iOS (datum, opnieuw laden, Nederlandse fout).
+- Coach: mini-tijdlijn in het scorebord, avatar/naam aanraakbaar, COACH
+  DASHBOARD met Sluiten, AI-kaart met Opnieuw proberen (iOS), let-melding als
+  iOS, rallyklok met icoon, stip bij het laatste punt, iconen en zandkleur in
+  het dashboard, slagen met balkjes.
+- Startscherm (`MatchSetupView`) als iOS' MatchStartView; "Kies speler" met
+  foto's, Nieuwe speler en een spelersknop rechtsboven; na "Uitslag aanvullen"
+  terug naar het startscherm; een analyse uit de lijst sluit de lijst.
+- Spelers: medailleknop naar alle badges, menu bij lang indrukken, foto kiezen
+  door op de avatar te tikken, focuslabels en notities als iOS.
+- Deel score: voorbeeld met WhatsApp-opmaak (vet, cursief, ```-blokken).
+- Scheidsrechter: achtergrond (`GlowBackground`), klokken met iconen, Undo met
+  rand, goud deelicoon, games bovenin als tekst; foto ook op naam
+  (`PlayerPhotos`), zoals iOS.
+- Kaartafbeelding zonder rand en met titels op twee regels; importknoppen met
+  iconen.
+
+Bewust verschillend: back-up (iOS iCloud en handmatig in Afgeronde wedstrijden,
+Android een gekozen map vanuit Instellingen), delen van een
+scheidsrechterwedstrijd uit de lijst op iOS (iOS bewaart geen rally's), en de
+vorm van de teamimport (iOS menu, Android eigen scherm).

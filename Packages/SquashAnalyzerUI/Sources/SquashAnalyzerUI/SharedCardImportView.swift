@@ -39,15 +39,23 @@ public struct SharedCardImportView: View {
                 if let preview {
                     if let linked = preview.linkedPlayer {
                         Section {
-                            Button("Bijwerken bij \(linked.name)") { importCard(to: linked.id) }
-                                .foregroundColor(BadgePalette.gold)
-                                .disabled(isImporting)
+                            Button { importCard(to: linked.id) } label: {
+                                HStack(spacing: 8) {
+                                    AppSymbol("arrow.triangle.2.circlepath", size: 16, color: BadgePalette.gold)
+                                    Text("Bijwerken bij \(linked.name)").foregroundColor(BadgePalette.gold)
+                                }
+                            }
+                            .disabled(isImporting)
                         }
                     } else {
                         Section("Koppel aan") {
-                            Button("Nieuwe speler \(snapshot.name)") { importCard(to: nil) }
-                                .foregroundColor(BadgePalette.gold)
-                                .disabled(isImporting)
+                            Button { importCard(to: nil) } label: {
+                                HStack(spacing: 8) {
+                                    AppSymbol("person.badge.plus", size: 16, color: BadgePalette.gold)
+                                    Text("Nieuwe speler \(snapshot.name)").foregroundColor(BadgePalette.gold)
+                                }
+                            }
+                            .disabled(isImporting)
                             ForEach(preview.players) { player in
                                 Button { importCard(to: player.id) } label: {
                                     HStack {

@@ -29,6 +29,12 @@ public enum MatchSetupMode {
 public struct MatchSetupView: View {
     let playerStore: any PlayerProfileStore
     let mode: MatchSetupMode
+    /// Photos in the player list and the editor; nil shows initials
+    let photoStore: (any PlayerPhotoStore)?
+    let filePicker: (any PlayerFilePicker)?
+    @State private var photos: [String: Data] = [:]
+    /// A player being added or edited from the list (as iOS' player management)
+    @State private var editing: PlayerProfile? = nil
     let onCancel: (() -> Void)?
     let onStart: (MatchSetupChoice) -> Void
 
@@ -43,9 +49,12 @@ public struct MatchSetupView: View {
     @State private var gamesBefore1 = 0
     @State private var gamesBefore2 = 0
 
-    public init(playerStore: any PlayerProfileStore, mode: MatchSetupMode, onCancel: (() -> Void)? = nil,
+    public init(playerStore: any PlayerProfileStore, mode: MatchSetupMode, photoStore: (any PlayerPhotoStore)? = nil,
+                filePicker: (any PlayerFilePicker)? = nil, onCancel: (() -> Void)? = nil,
                 onStart: @escaping (MatchSetupChoice) -> Void) {
         self.playerStore = playerStore
+        self.photoStore = photoStore
+        self.filePicker = filePicker
         self.mode = mode
         self.onCancel = onCancel
         self.onStart = onStart
@@ -84,14 +93,36 @@ public struct MatchSetupView: View {
             }
             .padding(24)
         }
-        .task { players = (try? await playerStore.loadPlayers()) ?? [] }
+        .task { await reloadPlayers() }
         .sheet(isPresented: pickerIsPresented) {
             NavigationStack {
-                List(players) { player in
-                    Button(player.name) { pick(player) }
-                        .foregroundColor(SetupPalette.text)
+                List {
+                    Button { editing = PlayerProfile() } label: {
+                        HStack(spacing: 10) {
+                            AppSymbol("plus", size: 16, color: SetupPalette.gold)
+                            Text("Nieuwe speler").foregroundColor(SetupPalette.gold)
+                        }
+                    }
+                    ForEach(players) { player in
+                        Button { choose(player) } label: {
+                            HStack(spacing: 12) {
+                                PlayerPhotoView(photo: photos[player.id], name: player.name, size: 36, color: SetupPalette.gold)
+                                Text(player.name).foregroundColor(SetupPalette.text)
+                                Spacer()
+                            }
+                        }
+                    }
                 }
-                .navigationTitle("Kies speler")
+                .navigationTitle(pickingSlot == 0 ? "Spelers" : "Kies speler")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Sluiten") { pickingSlot = nil }
+                    }
+                }
+                .sheet(item: $editing) { player in
+                    PlayerProfileEditor(player: player, store: playerStore, photo: photos[player.id], photoStore: photoStore,
+                                        filePicker: filePicker) { await reloadPlayers() }
+                }
             }
         }
     }
@@ -103,6 +134,15 @@ public struct MatchSetupView: View {
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .tracking(3)
                 .foregroundColor(SetupPalette.text)
+            HStack {
+                Spacer()
+                Button { pickingSlot = 0 } label: {
+                    AppSymbol("person.2.circle", size: 22, color: SetupPalette.gold)
+                        .frame(width: 44, height: 32)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Spelers beheren")
+            }
             if let onCancel {
                 HStack {
                     Button(action: onCancel) {
@@ -137,7 +177,7 @@ public struct MatchSetupView: View {
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(color.opacity(0.4), lineWidth: 1))
                     .foregroundColor(SetupPalette.text)
                 Button("Kies speler") { pickingSlot = slot }
-                    .disabled(players.isEmpty)
+                    .foregroundColor(color)
             }
             // Coaching focus only matters when coaching, as on iOS
             if isCoach && !focus.isEmpty {
@@ -252,6 +292,17 @@ public struct MatchSetupView: View {
             player1GamesBefore: late ? gamesBefore1 : 0, player2GamesBefore: late ? gamesBefore2 : 0,
             player1Focus: focus(player1Pick, currentName: player1Name), player2Focus: focus(player2Pick, currentName: player2Name)
         ))
+    }
+
+    private func reloadPlayers() async {
+        players = (try? await playerStore.loadPlayers()) ?? []
+        if let photoStore { photos = (try? await photoStore.photos()) ?? [:] }
+    }
+
+    /// From "Kies speler" the tapped player goes into the slot; from the players
+    /// button in the header (slot 0) it opens the player to edit
+    private func choose(_ player: PlayerProfile) {
+        if pickingSlot == 0 { editing = player } else { pick(player) }
     }
 
     private var pickerIsPresented: Binding<Bool> {

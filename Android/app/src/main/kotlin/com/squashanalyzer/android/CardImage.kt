@@ -57,10 +57,6 @@ object CardImage {
         val bitmap = Bitmap.createBitmap(WIDTH, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawColor(Color.rgb(18, 15, 12))
-        val border = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE; strokeWidth = 4f; color = Color.argb(110, 232, 144, 42)
-        }
-        canvas.drawRoundRect(RectF(12f, 12f, WIDTH - 12f, height - 12f), 48f, 48f, border)
 
         val gold = Color.rgb(232, 184, 87)
         val text = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -104,9 +100,28 @@ object CardImage {
             small.typeface = Typeface.DEFAULT
             small.color = Color.rgb(179, 175, 168)
             small.textSize = 26f
-            canvas.drawText(shorten(kind.title, small, cell - 12f), centre, y + BADGE + 84f, small)
+            // Up to two lines, as iOS' card picture
+            wrapTwo(kind.title, small, cell - 12f).forEachIndexed { line, part ->
+                canvas.drawText(part, centre, y + BADGE + 84f + line * 30f, small)
+            }
         }
         return bitmap
+    }
+
+    /** The title on one line, or split over two at a word; a second line too long is shortened */
+    private fun wrapTwo(title: String, paint: Paint, width: Float): List<String> {
+        if (paint.measureText(title) <= width) return listOf(title)
+        val words = title.split(" ")
+        var first = ""
+        var index = 0
+        while (index < words.size) {
+            val next = if (first.isEmpty()) words[index] else "$first ${words[index]}"
+            if (paint.measureText(next) > width && first.isNotEmpty()) break
+            first = next
+            index++
+        }
+        val rest = words.drop(index).joinToString(" ")
+        return if (rest.isEmpty()) listOf(shorten(first, paint, width)) else listOf(shorten(first, paint, width), shorten(rest, paint, width))
     }
 
     private fun shorten(title: String, paint: Paint, width: Float): String {

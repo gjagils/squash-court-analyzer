@@ -23,9 +23,8 @@ public struct SharedScoreboardView: View {
     }
 
     private func photo(for player: Player) -> Data? {
-        let id = player == Player.player1 ? match?.player1Id : match?.player2Id
-        guard let id else { return nil }
-        return photos[id.uuidString]
+        PlayerPhotos.photo(in: photos, id: player == Player.player1 ? match?.player1Id : match?.player2Id,
+                           name: game.name(for: player))
     }
 
     public var body: some View {
@@ -285,9 +284,7 @@ public struct CoachScoringView: View {
 
     public var body: some View {
         ZStack {
-            LinearGradient(colors: [CoachPalette.backgroundMedium, CoachPalette.backgroundDark],
-                           startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            GlowBackground()
 
             VStack(spacing: 12) {
                 header
@@ -332,7 +329,8 @@ public struct CoachScoringView: View {
                 SharedCompleteResultView(match: match, onSave: { winners in
                     if match.completeResult(with: winners) {
                         showingComplete = false
-                        onMatchChanged(match)
+                        // Saved and on to a new match, as on iOS
+                        if let onNewMatch { onNewMatch() } else { onMatchChanged(match) }
                     }
                 }, onCancel: { showingComplete = false })
             }
@@ -374,7 +372,7 @@ public struct CoachScoringView: View {
                         analysedGame = match.games[match.currentGameIndex - 1]
                         showingAnalysis = true
                     } label: {
-                        AppSymbol("chart.bar.fill", size: 20, color: CoachPalette.textSecondary)
+                        AppSymbol("chart.bar.xaxis", size: 18, color: CoachPalette.gold)
                             .frame(width: 36, height: 32)
                     }
                     .buttonStyle(.plain)
@@ -524,7 +522,7 @@ public struct CoachScoringView: View {
     // MARK: - Result card (as on iOS)
 
     private func photo(_ player: Player) -> Data? {
-        (player == Player.player1 ? match.player1Id : match.player2Id).flatMap { photos[$0.uuidString] }
+        PlayerPhotos.photo(in: photos, id: player == Player.player1 ? match.player1Id : match.player2Id, name: match.name(for: player))
     }
 
     private var badgeEarnings: [MatchBadgeEarning] {
@@ -536,7 +534,7 @@ public struct CoachScoringView: View {
 
     /// Game over and match over, the same card as iOS' GameOverOverlay
     private var resultCard: some View {
-        var secondary: [ResultButton] = [ResultButton("Analyse", icon: "chart.bar.fill") {
+        var secondary: [ResultButton] = [ResultButton("Analyse", icon: "chart.bar.xaxis") {
             analysedGame = game
             showingAnalysis = true
         }]
@@ -585,7 +583,9 @@ public struct CoachScoringView: View {
     private var rallyTimer: some View {
         let seconds = max(0, Int(now.timeIntervalSince(game.lastPointTime)))
         let text = (seconds / 60 < 10 ? "0" : "") + "\(seconds / 60):" + (seconds % 60 < 10 ? "0" : "") + "\(seconds % 60)"
-        return VStack(alignment: .leading, spacing: 0) {
+        return HStack(spacing: 6) {
+            AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
+            VStack(alignment: .leading, spacing: 1) {
             Text("RALLY")
                 .font(.system(size: 8, weight: .medium, design: .rounded))
                 .tracking(1)
@@ -593,6 +593,7 @@ public struct CoachScoringView: View {
             Text(text)
                 .font(.system(size: 14, weight: .bold, design: .monospaced))
                 .foregroundColor(CoachPalette.textSecondary)
+            }
         }
         .opacity(game.isGameOver || match.isMatchOver ? 0.0 : 1.0)
         .accessibilityLabel("Rallytijd \(text)")
@@ -601,8 +602,14 @@ public struct CoachScoringView: View {
     /// "Gerard: Winner · Volley drop · Voor Links" (Core's Point.summary, as on iOS)
     private var lastPointLine: some View {
         Group {
-            if let last = game.points.last {
-                Text("\(game.name(for: last.scorer)): \(last.summary)")
+            // Coloured dot and hidden while a point is entered, as on iOS
+            if let last = game.points.last, game.selectedPlayer == nil {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(last.scorer == Player.player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue)
+                        .frame(width: 6, height: 6)
+                    Text("\(game.name(for: last.scorer)): \(last.summary)")
+                }
             } else {
                 Text(" ")
             }
@@ -613,25 +620,65 @@ public struct CoachScoringView: View {
         .frame(height: 16)
     }
 
+    /// "Wie vraagt de let?", as iOS' LetSelectorOverlay: tapping beside it cancels
     private var letOverlay: some View {
-        overlayCard {
-            Text("LET")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .tracking(2)
-                .foregroundColor(CoachPalette.textPrimary)
-            Text("Wie vraagt de let?")
-                .font(.system(size: 14))
-                .foregroundColor(CoachPalette.textSecondary)
-            HStack(spacing: 10) {
-                overlayButton(match.player1Name, CoachPalette.warmOrange) { callLet(Player.player1) }
-                overlayButton(match.player2Name, CoachPalette.steelBlue) { callLet(Player.player2) }
+        ZStack {
+            Color.black.opacity(0.7)
+                .ignoresSafeArea()
+                .onTapGesture { showingLet = false }
+            VStack(spacing: 20) {
+                Text("LET")
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .tracking(3)
+                    .foregroundColor(CoachPalette.gold)
+                Text("Wie vraagt de let?")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(CoachPalette.textSecondary)
+                HStack(spacing: 16) {
+                    letButton(Player.player1, CoachPalette.warmOrange)
+                    letButton(Player.player2, CoachPalette.steelBlue)
+                }
+                if game.totalLets > 0 {
+                    Text("Lets deze game: \(game.totalLets)")
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundColor(CoachPalette.textMuted)
+                }
+                Button { showingLet = false } label: {
+                    Text("Annuleren")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(CoachPalette.textSecondary)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 10)
+                        .background(Color.white.opacity(0.1))
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
             }
-            Text("Lets deze game: \(game.lets.count)")
-                .font(.system(size: 12))
-                .foregroundColor(CoachPalette.textMuted)
-            Button("Annuleren") { showingLet = false }
-                .foregroundColor(CoachPalette.textSecondary)
+            .padding(24)
+            .background(CoachPalette.backgroundMedium)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(CoachPalette.gold.opacity(0.3), lineWidth: 1))
+            .padding(.horizontal, 40)
         }
+    }
+
+    private func letButton(_ player: Player, _ color: Color) -> some View {
+        Button { callLet(player) } label: {
+            VStack(spacing: 8) {
+                AppSymbol("arrow.counterclockwise", size: 24, color: CoachPalette.textPrimary)
+                Text(match.name(for: player))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundColor(CoachPalette.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+            .background(color.opacity(0.2))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(color, lineWidth: 2))
+        }
+        .buttonStyle(.plain)
     }
 
     private func callLet(_ player: Player) {

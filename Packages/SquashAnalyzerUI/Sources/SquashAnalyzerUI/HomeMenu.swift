@@ -215,6 +215,8 @@ public struct AndroidHomeView: View {
     @State private var showingReferee = false
     @State private var showingBadges = false
     @State private var showingHistory = false
+    /// A coach match opened for its analysis from Afgeronde wedstrijden
+    @State private var analysedMatch: Match? = nil
     @State private var showingSettings = false
     @State private var showingTeam = false
     @State private var team: LeagueTeamSnapshot?
@@ -273,20 +275,24 @@ public struct AndroidHomeView: View {
                                         photoStore: photoStore, filePicker: filePicker, shareCard: shareCard)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
-                    CoachSessionView(store: matchStore, playerStore: playerStore, photoStore: photoStore, aiCoach: aiCoach, shareText: shareText,
+                    CoachSessionView(store: matchStore, playerStore: playerStore, photoStore: photoStore, filePicker: filePicker, aiCoach: aiCoach, shareText: shareText,
                                      historyStore: historyStore, settings: SettingsContext(aiCoach: aiCoach, backup: backup),
                                      onExit: { showingCoach = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingReferee) {
-                    RefereeSessionView(store: refereeMatchStore, playerStore: playerStore, photoStore: photoStore, shareText: shareText, onExit: { showingReferee = false })
+                    RefereeSessionView(store: refereeMatchStore, playerStore: playerStore, photoStore: photoStore, filePicker: filePicker, shareText: shareText, onExit: { showingReferee = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingBadges) {
                     SharedBadgeCatalogView()
                 }
                 .navigationDestination(isPresented: $showingHistory) {
-                    SharedMatchHistoryView(store: historyStore, aiCoach: aiCoach, shareText: shareText)
+                    SharedMatchHistoryView(store: historyStore, aiCoach: aiCoach, shareText: shareText) { match in
+                        // As on iOS: the list closes and the analysis opens
+                        showingHistory = false
+                        analysedMatch = match
+                    }
                 }
                 .navigationDestination(isPresented: $showingSettings) {
                     SharedSettingsView(aiCoach: aiCoach, backup: backup)
@@ -303,6 +309,12 @@ public struct AndroidHomeView: View {
                 SharedCardImportView(snapshot: snapshot, store: cardImportStore) { imported in
                     if imported { cardInbox.finishImport() } else { cardInbox.pending = nil }
                 }
+            }
+        }
+        .sheet(isPresented: Binding(get: { analysedMatch != nil }, set: { if !$0 { analysedMatch = nil } })) {
+            if let match = analysedMatch {
+                SharedCoachDashboardView(match: match, game: match.games.last ?? match.currentGame, aiCoach: aiCoach,
+                                         shareText: shareText) { analysedMatch = nil }
             }
         }
         .preferredColorScheme(.dark)

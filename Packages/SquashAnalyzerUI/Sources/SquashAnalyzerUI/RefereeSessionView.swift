@@ -10,6 +10,8 @@ public struct RefereeSessionView: View {
     let playerStore: any PlayerProfileStore
     /// Player photos for the scoreboard; nil shows the plain avatar
     let photoStore: (any PlayerPhotoStore)?
+    /// Picking a photo when adding a player from "Kies speler"
+    let filePicker: (any PlayerFilePicker)?
     @State private var photos: [String: Data] = [:]
     let onExit: @MainActor () -> Void
     /// The platform share sheet, for "Deel score"
@@ -27,12 +29,13 @@ public struct RefereeSessionView: View {
     /// (changes meanwhile go through `saveAgain`); only leaving waits for it
     @State private var saving = false
 
-    public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, shareText: ((String) -> Void)? = nil,
+    public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil, shareText: ((String) -> Void)? = nil,
                 onExit: @escaping @MainActor () -> Void) {
         self.shareText = shareText
         self.store = store
         self.playerStore = playerStore
         self.photoStore = photoStore
+        self.filePicker = filePicker
         self.onExit = onExit
     }
 
@@ -51,7 +54,7 @@ public struct RefereeSessionView: View {
                                  onCancel: { close() })
                 .disabled(busy || failed)
             } else if showingSetup {
-                MatchSetupView(playerStore: playerStore, mode: .referee, onCancel: { close() }) { choice in
+                MatchSetupView(playerStore: playerStore, mode: .referee, photoStore: photoStore, filePicker: filePicker, onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }
                 .disabled(busy || failed)
@@ -78,7 +81,7 @@ public struct RefereeSessionView: View {
             }
         }
         .task {
-            if let photoStore { photos = (try? await photoStore.photos()) ?? [:] }
+            photos = await PlayerPhotos.load(photoStore: photoStore, playerStore: playerStore)
             if match == nil && pending == nil && !showingSetup { await load() }
         }
     }

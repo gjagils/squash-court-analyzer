@@ -90,6 +90,7 @@ public struct PlayerDirectoryView: View {
     @State private var errorMessage = ""
     @State private var showingError = false
     @State private var badgesForPlayer: PlayerProfile? = nil
+    @State private var showingCatalog = false
     @State private var showingTeamImport = false
     @State private var photos: [String: Data] = [:]
 
@@ -129,6 +130,13 @@ public struct PlayerDirectoryView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                     Spacer(minLength: 8)
+                    // All badges, as iOS' medal button in Spelers
+                    Button { showingCatalog = true } label: {
+                        AppSymbol("medal", size: 20, color: PlayerStyle.gold)
+                            .frame(width: 36, height: 32)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Alle badges")
                     if teamImporter != nil {
                         Button { showingTeamImport = true } label: {
                             // AppSymbol: Skip's Label(systemImage:) draws a warning triangle for this symbol
@@ -167,7 +175,7 @@ public struct PlayerDirectoryView: View {
                     VStack(spacing: 12) {
                         Image(systemName: "person.crop.circle").font(.system(size: 48))
                         Text("Nog geen spelers opgeslagen").font(.headline)
-                        Text("Voeg je eerste speler toe met +.")
+                        Text("Tik op + om een speler toe te voegen,\nof importeer een team (zip met team.json en foto's)")
                     }
                     .foregroundColor(PlayerStyle.muted)
                     .multilineTextAlignment(.center)
@@ -183,30 +191,41 @@ public struct PlayerDirectoryView: View {
                                         HStack(spacing: 12) {
                                             PlayerPhotoView(photo: photos[player.id], name: player.name, size: 44, color: PlayerStyle.gold)
                                             VStack(alignment: .leading, spacing: 5) {
-                                                Text(player.name).font(.headline)
+                                                HStack(spacing: 8) {
+                                                    Text(player.name).font(.headline)
+                                                    // Badge count right after the name, as on iOS
+                                                    if let count = badgeCounts[player.id], count > 0 {
+                                                        HStack(spacing: 3) {
+                                                            AppSymbol("medal.fill", size: 11, color: PlayerStyle.gold)
+                                                            Text("\(count)")
+                                                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                                                .foregroundColor(PlayerStyle.gold)
+                                                        }
+                                                    }
+                                                }
                                                 if !player.coachingFocusAreas.isEmpty {
-                                                    Text(player.coachingFocusAreas.joined(separator: " · "))
-                                                        .font(.caption).foregroundColor(PlayerStyle.muted)
+                                                    HStack(spacing: 6) {
+                                                        ForEach(player.coachingFocusAreas, id: \.self) { tag in
+                                                            Text(tag)
+                                                                .font(.system(size: 10, weight: .medium, design: .rounded))
+                                                                .foregroundColor(PlayerStyle.gold)
+                                                                .padding(.horizontal, 8)
+                                                                .padding(.vertical, 3)
+                                                                .background(PlayerStyle.gold.opacity(0.15))
+                                                                .clipShape(Capsule())
+                                                        }
+                                                    }
+                                                } else if !player.coachingNotes.isEmpty {
+                                                    Text(player.coachingNotes)
+                                                        .font(.system(size: 11)).foregroundColor(PlayerStyle.muted)
+                                                        .lineLimit(1)
                                                 }
                                             }
                                         }
                                     }
                                     .buttonStyle(.plain)
-                                    .accessibilityLabel("Badges van \(player.name)")
+                                    .accessibilityLabel(badgeCounts[player.id].map { $0 > 0 ? "\($0) badges van \(player.name)" : "Badges van \(player.name)" } ?? "Badges van \(player.name)")
                                     Spacer()
-                                    if let count = badgeCounts[player.id], count > 0 {
-                                        Button { badgesForPlayer = player } label: {
-                                            HStack(spacing: 4) {
-                                                AppSymbol("medal.fill", size: 14, color: PlayerStyle.gold)
-                                                Text("\(count)")
-                                            }
-                                            .font(.system(size: 13, weight: .semibold, design: .rounded))
-                                            .foregroundColor(PlayerStyle.gold)
-                                            .padding(.horizontal, 10).padding(.vertical, 8)
-                                            .background(Capsule().fill(PlayerStyle.gold.opacity(0.12)))
-                                        }
-                                        .accessibilityLabel("\(count) badges van \(player.name)")
-                                    }
                                     Button { editing = player } label: {
                                         Image(systemName: "pencil").frame(width: 44, height: 44)
                                     }.accessibilityLabel("Bewerk \(player.name)")
@@ -221,6 +240,15 @@ public struct PlayerDirectoryView: View {
                                 .padding(12)
                                 .background(Color.white.opacity(0.05))
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
+                                // Long press, as on iOS
+                                .contextMenu {
+                                    Button("Badges") { badgesForPlayer = player }
+                                    Button("Bewerken") { editing = player }
+                                    Button("Verwijderen", role: .destructive) {
+                                        deleting = player
+                                        confirmDelete = true
+                                    }
+                                }
                                 .disabled(isDeleting)
                             }
                         }.padding(.horizontal, 16).padding(.bottom, 24)
@@ -229,6 +257,9 @@ public struct PlayerDirectoryView: View {
             }
         }
         .navigationTitle("Spelers")
+        .navigationDestination(isPresented: $showingCatalog) {
+            SharedBadgeCatalogView()
+        }
         .task(id: cardInbox.importCount) { await reload() }
         .sheet(isPresented: $showingTeamImport) {
             if let teamImporter {
@@ -294,7 +325,7 @@ public struct PlayerDirectoryView: View {
     }
 }
 
-private struct PlayerProfileEditor: View {
+struct PlayerProfileEditor: View {
     let store: any PlayerProfileStore
     let photoStore: (any PlayerPhotoStore)?
     let filePicker: (any PlayerFilePicker)?
@@ -311,21 +342,19 @@ private struct PlayerProfileEditor: View {
 
     private var photoSection: some View {
         VStack(spacing: 10) {
-            PlayerPhotoView(photo: photo, name: player.name.isEmpty ? "?" : player.name, size: 96, color: PlayerStyle.gold)
-            HStack(spacing: 20) {
-                Button(photo == nil ? "Kies foto" : "Andere foto") {
-                    Task {
-                        do {
-                            if let picked = try await filePicker?.pickPhoto() {
-                                photo = picked
-                                photoChanged = true
-                            }
-                        } catch {
-                            photoFailed = true
-                        }
-                    }
+            // Tap the avatar to pick a photo, as on iOS (camera badge bottom right)
+            Button { pickPhoto() } label: {
+                ZStack(alignment: .bottomTrailing) {
+                    PlayerPhotoView(photo: photo, name: player.name.isEmpty ? "?" : player.name, size: 96, color: PlayerStyle.gold)
+                    AppSymbol("camera.fill", size: 13, color: PlayerStyle.background)
+                        .frame(width: 28, height: 28)
+                        .background(PlayerStyle.gold)
+                        .clipShape(Circle())
                 }
-                .foregroundColor(PlayerStyle.gold)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(photo == nil ? "Kies foto" : "Andere foto")
+            HStack(spacing: 20) {
                 if photo != nil {
                     Button("Foto verwijderen") {
                         photo = nil
@@ -333,6 +362,19 @@ private struct PlayerProfileEditor: View {
                     }
                     .foregroundColor(PlayerStyle.muted)
                 }
+            }
+        }
+    }
+
+    private func pickPhoto() {
+        Task {
+            do {
+                if let picked = try await filePicker?.pickPhoto() {
+                    photo = picked
+                    photoChanged = true
+                }
+            } catch {
+                photoFailed = true
             }
         }
     }

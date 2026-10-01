@@ -33,9 +33,7 @@ public struct RefereeScoringView: View {
 
     public var body: some View {
         ZStack {
-            LinearGradient(colors: [CoachPalette.backgroundMedium, CoachPalette.backgroundDark],
-                           startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            GlowBackground()
 
             VStack(spacing: 12) {
                 header
@@ -76,7 +74,7 @@ public struct RefereeScoringView: View {
     }
 
     private func photo(_ player: Player) -> Data? {
-        (player == Player.player1 ? match.player1Id : match.player2Id).flatMap { photos[$0.uuidString] }
+        PlayerPhotos.photo(in: photos, id: player == Player.player1 ? match.player1Id : match.player2Id, name: match.name(for: player))
     }
 
     private var badgeEarnings: [MatchBadgeEarning] {
@@ -137,7 +135,7 @@ public struct RefereeScoringView: View {
             Spacer()
             if shareText != nil {
                 Button { sharingNow = true } label: {
-                    AppSymbol("square.and.arrow.up", size: 20, color: CoachPalette.warmOrange)
+                    AppSymbol("square.and.arrow.up", size: 20, color: CoachPalette.gold)
                         .frame(width: 74, height: 32, alignment: .trailing)
                 }
                 .buttonStyle(.plain)
@@ -167,17 +165,15 @@ public struct RefereeScoringView: View {
             }
             .font(.system(size: 13, weight: .bold, design: .rounded))
             if !match.completedGames.isEmpty || match.firstGameNumber > 1 {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(1..<match.firstGameNumber, id: \.self) { number in
-                            gameChip("G\(number): –", color: CoachPalette.textMuted)
-                        }
-                        ForEach(match.completedGames) { game in
-                            let color = game.winner == .player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue
-                            gameChip("G\(game.number): \(game.player1Score)-\(game.player2Score)", color: color)
-                        }
+                // Plain small text, as on iOS
+                HStack(spacing: 10) {
+                    ForEach(1..<match.firstGameNumber, id: \.self) { number in
+                        gameChip("G\(number): –", color: CoachPalette.textMuted)
                     }
-                    .padding(.horizontal, 20)
+                    ForEach(match.completedGames) { game in
+                        let color = game.winner == .player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue
+                        gameChip("G\(game.number): \(game.player1Score)-\(game.player2Score)", color: color.opacity(0.75))
+                    }
                 }
             }
         }
@@ -186,11 +182,8 @@ public struct RefereeScoringView: View {
 
     private func gameChip(_ text: String, color: Color) -> some View {
         Text(text)
-            .font(.system(size: 10, weight: .bold, design: .rounded))
+            .font(.system(size: 9, weight: .medium, design: .rounded))
             .foregroundColor(color)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
-            .background(RoundedRectangle(cornerRadius: 8).fill(color.opacity(0.10)))
     }
 
     private var playerColumns: some View {
@@ -210,7 +203,7 @@ public struct RefereeScoringView: View {
 
         return VStack(spacing: 8) {
             PlayerAvatarPlaceholder(color: color, size: 48, active: isServer,
-                                    photo: (player == Player.player1 ? match.player1Id : match.player2Id).flatMap { photos[$0.uuidString] })
+                                    photo: PlayerPhotos.photo(in: photos, id: player == Player.player1 ? match.player1Id : match.player2Id, name: match.name(for: player)))
             Text(match.name(for: player))
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundColor(highlight.name)
@@ -313,9 +306,11 @@ public struct RefereeScoringView: View {
     private var timers: some View {
         let _ = now
         return HStack {
-            timer("MATCH", match.matchDuration)
+            AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
+            timer("MATCH", match.matchDuration, alignment: .leading)
             Spacer()
-            timer("GAME", match.currentGameDuration)
+            timer("GAME", match.currentGameDuration, alignment: .trailing)
+            AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
         }
         .padding(.horizontal, 24)
         .task {
@@ -326,16 +321,16 @@ public struct RefereeScoringView: View {
         }
     }
 
-    private func timer(_ label: String, _ seconds: TimeInterval) -> some View {
+    private func timer(_ label: String, _ seconds: TimeInterval, alignment: HorizontalAlignment) -> some View {
         let total = Int(seconds)
         let text = (total / 60 < 10 ? "0" : "") + "\(total / 60):" + (total % 60 < 10 ? "0" : "") + "\(total % 60)"
-        return VStack(spacing: 0) {
+        return VStack(alignment: alignment, spacing: 1) {
             Text(label)
-                .font(.system(size: 9, weight: .medium, design: .rounded))
+                .font(.system(size: 8, weight: .medium, design: .rounded))
                 .tracking(1)
                 .foregroundColor(CoachPalette.textMuted)
             Text(text)
-                .font(.system(size: 18, weight: .bold, design: .monospaced))
+                .font(.system(size: 16, weight: .bold, design: .monospaced))
                 .foregroundColor(CoachPalette.textSecondary)
         }
         .accessibilityLabel("\(label == "MATCH" ? "Wedstrijdtijd" : "Gametijd") \(text)")
@@ -353,8 +348,10 @@ public struct RefereeScoringView: View {
             .font(.system(size: 16, weight: .bold, design: .rounded))
             .foregroundColor(match.canUndo ? CoachPalette.textPrimary : CoachPalette.textMuted)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(match.canUndo ? 0.07 : 0.03)))
+            .padding(.vertical, 16)
+            .background(Color.white.opacity(match.canUndo ? 0.07 : 0.03))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(match.canUndo ? 0.15 : 0.06), lineWidth: 1))
         }
         .buttonStyle(.plain)
         .disabled(!match.canUndo)

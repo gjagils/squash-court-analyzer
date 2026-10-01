@@ -9,6 +9,8 @@ public struct SharedMatchHistoryView: View {
     let store: any MatchHistoryStore
     let aiCoach: AICoachContext?
     let shareText: ((String) -> Void)?
+    /// Opening an analysis leaves the list, as on iOS; nil shows it over the list
+    let onOpenAnalysis: ((Match) -> Void)?
 
     @State private var entries: [MatchHistorySummary] = []
     @State private var isLoading = true
@@ -24,8 +26,10 @@ public struct SharedMatchHistoryView: View {
     @State private var completing: Match? = nil
     @State private var message: String? = nil
 
-    public init(store: any MatchHistoryStore, aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil) {
+    public init(store: any MatchHistoryStore, aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil,
+                onOpenAnalysis: ((Match) -> Void)? = nil) {
         self.store = store
+        self.onOpenAnalysis = onOpenAnalysis
         self.aiCoach = aiCoach
         self.shareText = shareText
     }
@@ -410,7 +414,11 @@ public struct SharedMatchHistoryView: View {
                 message = "Deze wedstrijd kon niet worden geopend."
                 return
             }
-            if analysis { analysed = match } else { completing = match }
+            if analysis {
+                if let onOpenAnalysis { onOpenAnalysis(match) } else { analysed = match }
+            } else {
+                completing = match
+            }
         }
     }
 

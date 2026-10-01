@@ -9,6 +9,8 @@ public struct CoachSessionView: View {
     let playerStore: any PlayerProfileStore
     /// Player photos for the scoreboard; nil shows the plain avatar
     let photoStore: (any PlayerPhotoStore)?
+    /// Picking a photo when adding a player from "Kies speler"
+    let filePicker: (any PlayerFilePicker)?
     @State private var photos: [String: Data] = [:]
     let onExit: @MainActor () -> Void
     /// AI Coach in the game analysis; nil hides the AI part
@@ -34,7 +36,7 @@ public struct CoachSessionView: View {
     /// (changes meanwhile go through `saveAgain`); only leaving waits for it
     @State private var saving = false
 
-    public init(store: any CoachMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, aiCoach: AICoachContext? = nil,
+    public init(store: any CoachMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil, aiCoach: AICoachContext? = nil,
                 shareText: ((String) -> Void)? = nil, historyStore: (any MatchHistoryStore)? = nil, settings: SettingsContext? = nil,
                 onExit: @escaping @MainActor () -> Void) {
         self.store = store
@@ -44,6 +46,7 @@ public struct CoachSessionView: View {
         self.aiCoach = aiCoach
         self.playerStore = playerStore
         self.photoStore = photoStore
+        self.filePicker = filePicker
         self.onExit = onExit
     }
 
@@ -66,7 +69,7 @@ public struct CoachSessionView: View {
                                  onCancel: { close() })
                 .disabled(busy || failed)
             } else if showingSetup {
-                MatchSetupView(playerStore: playerStore, mode: .coach, onCancel: { close() }) { choice in
+                MatchSetupView(playerStore: playerStore, mode: .coach, photoStore: photoStore, filePicker: filePicker, onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }
                 .disabled(busy || failed)
@@ -93,7 +96,7 @@ public struct CoachSessionView: View {
             }
         }
         .task {
-            if let photoStore { photos = (try? await photoStore.photos()) ?? [:] }
+            photos = await PlayerPhotos.load(photoStore: photoStore, playerStore: playerStore)
             if match == nil && pending == nil && !showingSetup { await load() }
         }
         .sheet(isPresented: $showingHistory) {

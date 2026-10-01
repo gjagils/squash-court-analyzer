@@ -242,15 +242,23 @@ public struct SharedCoachDashboardView: View {
         let won = game.averageDurationWon(by: player)
         let lost = game.averageDurationLost(by: player)
         return HStack(spacing: 8) {
-            stat("Gewonnen", won.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", DashboardPalette.green)
-            stat("Verloren", lost.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", DashboardPalette.red)
-            stat("Beste zone", game.bestZone(for: player)?.rawValue ?? "-", DashboardPalette.gold)
-            stat("Beste slag", game.bestShotType(for: player)?.rawValue ?? "-", DashboardPalette.orange)
+            stat("Gewonnen", won.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", DashboardPalette.green, icon: "timer")
+            stat("Verloren", lost.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", DashboardPalette.red, icon: "timer")
+            stat("Beste zone", game.bestZone(for: player)?.rawValue ?? "-", DashboardPalette.gold, icon: "mappin")
+            stat("Beste slag", game.bestShotType(for: player)?.rawValue ?? "-", DashboardPalette.orange, icon: "star.fill",
+                 shot: game.bestShotType(for: player))
         }
     }
 
-    private func stat(_ label: String, _ value: String, _ tint: Color) -> some View {
+    /// With an icon on top, as iOS' QuickStatBadge
+    private func stat(_ label: String, _ value: String, _ tint: Color, icon: String, shot: ShotType? = nil) -> some View {
         VStack(spacing: 4) {
+            if let shot {
+                ShotIconView(type: shot, color: tint, size: 14)
+                    .frame(height: 14)
+            } else {
+                AppSymbol(icon, size: 12, color: tint)
+            }
             Text(value)
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(tint)
@@ -294,6 +302,10 @@ public struct SharedCoachDashboardView: View {
                     }
                 }
             }
+            // Sand court underneath, as on iOS
+            .padding(6)
+            .background(Color(red: 0.82, green: 0.72, blue: 0.60).opacity(0.3))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
         }
         .padding(12)
         .frame(maxWidth: .infinity)
@@ -313,20 +325,42 @@ public struct SharedCoachDashboardView: View {
                     .foregroundColor(DashboardPalette.muted)
             }
             ForEach(0..<top.count, id: \.self) { index in
-                HStack {
-                    Text(top[index].name)
-                        .font(.system(size: 11))
-                        .foregroundColor(DashboardPalette.secondary)
-                    Spacer()
-                    Text("\(top[index].count)")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(DashboardPalette.gold)
-                }
+                shotRow(top[index], most: mostShots(top))
             }
         }
         .padding(12)
         .frame(maxWidth: .infinity)
         .background(RoundedRectangle(cornerRadius: 12).fill(DashboardPalette.card))
+    }
+
+    private func mostShots(_ top: [ShotCount]) -> Int {
+        var most = 1
+        for item in top { most = max(most, item.count) }
+        return most
+    }
+
+    /// Icon, name, a small bar and the count, as on iOS
+    private func shotRow(_ item: ShotCount, most: Int) -> some View {
+        HStack(spacing: 6) {
+            ShotIconView(type: item.shot, color: DashboardPalette.gold, size: 14)
+                .frame(width: 14, height: 14)
+            Text(item.name)
+                .font(.system(size: 10))
+                .foregroundColor(DashboardPalette.secondary)
+                .lineLimit(1)
+            Spacer(minLength: 2)
+            HStack(spacing: 0) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(DashboardPalette.gold.opacity(0.6))
+                    .frame(width: max(CGFloat(4), CGFloat(40) * CGFloat(item.count) / CGFloat(most)), height: 8)
+                Spacer(minLength: 0)
+            }
+            .frame(width: 40, height: 8)
+            Text("\(item.count)")
+                .font(.system(size: 10))
+                .foregroundColor(DashboardPalette.text)
+                .frame(width: 16, alignment: .trailing)
+        }
     }
 
     private var pointTypes: some View {

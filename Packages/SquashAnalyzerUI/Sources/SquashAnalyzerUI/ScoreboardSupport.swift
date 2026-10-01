@@ -134,3 +134,45 @@ public struct PlayerAvatarPlaceholder: View {
         .frame(width: size, height: size)
     }
 }
+
+/// Player photos for the scoreboards and result cards, by picked player id
+/// and, as on iOS (`PlayerAvatar`), by name: a typed-in name that matches a
+/// saved player shows that player's photo too.
+enum PlayerPhotos {
+    static func nameKey(_ name: String) -> String { "name:" + name }
+
+    /// Photos by id plus "name:<name>" entries for every saved player with a photo
+    @MainActor
+    static func load(photoStore: (any PlayerPhotoStore)?, playerStore: any PlayerProfileStore) async -> [String: Data] {
+        guard let photoStore else { return [:] }
+        var result = (try? await photoStore.photos()) ?? [:]
+        let players = (try? await playerStore.loadPlayers()) ?? []
+        for player in players {
+            if let photo = result[player.id] { result[nameKey(player.name)] = photo }
+        }
+        return result
+    }
+
+    static func photo(in photos: [String: Data], id: UUID?, name: String) -> Data? {
+        if let id, let photo = photos[id.uuidString] { return photo }
+        return photos[nameKey(name.trimmingCharacters(in: .whitespaces))]
+    }
+}
+
+/// iOS' AppBackground for the shared screens: dark base, a warm glow from the
+/// bottom, a faint one from the top and a dark vignette
+struct GlowBackground: View {
+    var body: some View {
+        ZStack {
+            CoachPalette.backgroundDark
+            RadialGradient(colors: [Color(red: 1.0, green: 0.45, blue: 0.1).opacity(0.15),
+                                    Color(red: 1.0, green: 0.45, blue: 0.1).opacity(0.08), Color.clear],
+                           center: .bottom, startRadius: 100, endRadius: 600)
+            RadialGradient(colors: [CoachPalette.warmOrange.opacity(0.05), Color.clear],
+                           center: .top, startRadius: 0, endRadius: 400)
+            RadialGradient(colors: [Color.clear, Color.black.opacity(0.6)],
+                           center: .center, startRadius: 150, endRadius: 500)
+        }
+        .ignoresSafeArea()
+    }
+}

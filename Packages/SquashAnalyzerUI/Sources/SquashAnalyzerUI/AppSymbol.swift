@@ -19,6 +19,11 @@ import androidx.compose.material.icons.filled.FrontHand
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Settings
@@ -95,6 +100,11 @@ struct AppSymbol: View {
         case "flag.checkered": return Icons.Filled.SportsScore
         case "gearshape": return Icons.Filled.Settings
         case "timer": return Icons.Filled.Timer
+        case "camera.fill": return Icons.Filled.PhotoCamera
+        case "person.badge.plus": return Icons.Filled.PersonAdd
+        case "person.2.circle": return Icons.Filled.Groups
+        case "mappin": return Icons.Filled.Place
+        case "sparkles": return Icons.Filled.AutoAwesome
         case "square.and.arrow.up": return Icons.Filled.Share
         case "chevron.left": return Icons.AutoMirrored.Filled.KeyboardArrowLeft
         case "chevron.right": return Icons.AutoMirrored.Filled.KeyboardArrowRight

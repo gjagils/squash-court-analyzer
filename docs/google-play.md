@@ -244,3 +244,10 @@ scripts/play_upload.py --notes release-notes/android-X-N.md --name "X (N)"
 - Upload-sleutel (`squashanalyzer-upload.jks`) en wachtwoorden: zie B1.
 
 Gedaan: 0.1 (1) met de hand, 0.2 (2) met het script.
+
+## Store-vermelding met het script (sinds 2026-10-01)
+
+`scripts/play_listing.py` zet de Nederlandse store-vermelding vanuit de repo: teksten en
+contactgegevens uit `Android/play/listing-nl-NL.json`, icoon en feature graphic uit
+`Android/play/`, en de telefoon-schermafdrukken uit `Android/play/screenshots/`
+(1080×2160, bijgesneden emulatorbeelden; die map staat in .gitignore). Eerst `--dry-run`.

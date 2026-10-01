@@ -1,4 +1,5 @@
 import XCTest
+import SquashAnalyzerCore
 import SwiftData
 @testable import SquashAnalyzer
 
@@ -121,5 +122,57 @@ final class MigrationTests: XCTestCase {
                                        earnedAt: Date(), opponentName: "Kristian", awardedBy: "test"))
         try context.save()
         XCTAssertEqual(try context.fetch(FetchDescriptor<SavedBadgeAward>()).count, 1)
+    }
+
+    /// V5 runs on Gerd-Jan's iPhone with real data: V6 only adds the volley flag
+    @MainActor
+    func testStoreFromVersion5MigratesToVolleyFlag() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("v5-\(UUID().uuidString).store")
+        defer {
+            for suffix in ["", "-shm", "-wal"] { try? FileManager.default.removeItem(atPath: url.path + suffix) }
+        }
+        let matchId = UUID()
+        let cardId = UUID()
+
+        do {
+            typealias V5 = SquashAnalyzerSchemaV5
+            let container = try ModelContainer(
+                for: Schema(versionedSchema: V5.self),
+                configurations: [ModelConfiguration(url: url, cloudKitDatabase: .none)]
+            )
+            let context = container.mainContext
+            let match = V5.SavedMatch(id: matchId, player1Name: "Paul", player2Name: "Kristian", matchStartingServer: "Speler 1", bestOf: 5, savedAt: Date())
+            match.player1Id = cardId
+            let game = V5.SavedGame(id: UUID(), gameNumber: 1, player1Name: "Paul", player2Name: "Kristian", player1Score: 1, player2Score: 0, startingServer: "Speler 1", winner: nil)
+            let point = V5.SavedPoint(id: UUID(), pointNumber: 1, scorer: "Speler 1", pointType: "Winner", zone: "Voor Midden", shotType: "Volley",
+                                      server: "Speler 1", player1Score: 1, player2Score: 0, timestamp: Date(), duration: 4)
+            point.game = game
+            game.points = [point]
+            game.match = match
+            match.games = [game]
+            context.insert(match)
+            context.insert(V5.SavedBadgeAward(id: UUID(), cardId: cardId, badge: "five-in-a-row", matchId: matchId, earnedAt: Date(), opponentName: "Kristian", awardedBy: "test"))
+            try context.save()
+        }
+
+        let container = try ModelContainer(
+            for: Schema(versionedSchema: SquashAnalyzerCurrentSchema.self),
+            migrationPlan: SquashAnalyzerMigrationPlan.self,
+            configurations: [ModelConfiguration(url: url, cloudKitDatabase: .none)]
+        )
+        let context = container.mainContext
+        let match = try XCTUnwrap(context.fetch(FetchDescriptor<SavedMatch>()).first)
+        XCTAssertEqual(match.id, matchId)
+        XCTAssertEqual(match.player1Id, cardId)
+        let point = try XCTUnwrap(match.games.first?.points.first)
+        XCTAssertFalse(point.isVolley)
+        // The old "Volley" shot and the middle-column zone stay readable
+        XCTAssertEqual(point.pointShotType, ShotType.volley)
+        XCTAssertEqual(point.pointZone, CourtZone.frontMiddle)
+        XCTAssertEqual(try context.fetch(FetchDescriptor<SavedBadgeAward>()).count, 1)
+
+        point.isVolley = true
+        try context.save()
+        XCTAssertTrue(try XCTUnwrap(context.fetch(FetchDescriptor<SavedPoint>()).first).isVolley)
     }
 }

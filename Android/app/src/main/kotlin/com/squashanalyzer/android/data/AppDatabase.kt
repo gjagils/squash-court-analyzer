@@ -16,7 +16,7 @@ import squash.analyzer.core.BadgeKind
         RefereeMatchEntity::class, RefereeGameEntity::class, RefereePointEntity::class, RefereeCurrentPointEntity::class,
         BadgeAwardEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -36,6 +36,20 @@ abstract class AppDatabase : RoomDatabase() {
          * and iOS removes those outright — carried over they would block the
          * badge for good and travel in card links as deletions.
          */
+        /** Points remember the volley switch ("Uit de lucht"); existing points were no volleys */
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Only when missing (tests that rewind the version of a current database already have it)
+                val hasColumn = db.query("PRAGMA table_info(points)").use { cursor ->
+                    val name = cursor.getColumnIndex("name")
+                    var found = false
+                    while (cursor.moveToNext()) if (cursor.getString(name) == "isVolley") found = true
+                    found
+                }
+                if (!hasColumn) db.execSQL("ALTER TABLE points ADD COLUMN isVolley INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         val MIGRATION_5_6 = object : Migration(5, 6) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("""
@@ -196,7 +210,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "squash-analyzer.db",
                 ).addCallback(enableForeignKeys)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                     .build().also { instance = it }
             }
     }

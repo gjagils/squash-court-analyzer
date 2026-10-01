@@ -66,7 +66,7 @@ class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardS
                     points = game.points.mapIndexed { i, point ->
                         PointRecord(point.id.uuidString, i + 1, point.scorer.rawValue, point.pointType.rawValue,
                             point.zone?.rawValue ?: "", point.shotType?.rawValue ?: "", point.server.rawValue,
-                            point.player1Score, point.player2Score, millis(point.timestamp), point.duration)
+                            point.player1Score, point.player2Score, millis(point.timestamp), point.duration, point.isVolley)
                     },
                     lets = game.lets.mapIndexed { i, call ->
                         LetRecord(call.id.uuidString, i + 1, call.requestedBy.rawValue, call.server.rawValue,
@@ -107,7 +107,7 @@ class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardS
                     zone = if (point.zone.isEmpty()) null else requireNotNull(CourtZone.init(rawValue = point.zone)),
                     shotType = if (point.shotType.isEmpty()) null else requireNotNull(ShotType.init(rawValue = point.shotType)),
                     server = player(point.server), player1Score = point.player1Score, player2Score = point.player2Score,
-                    timestamp = date(point.timestamp), duration = point.duration)
+                    timestamp = date(point.timestamp), duration = point.duration, isVolley = point.isVolley)
             })
             game.lets = SwiftArray(saved.lets.map { call ->
                 LetCall(id = uuid(call.id), requestedBy = player(call.requestedBy), server = player(call.server),

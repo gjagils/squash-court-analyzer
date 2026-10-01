@@ -134,7 +134,8 @@ final class SavedGame {
                     player1Score: sp.player1Score,
                     player2Score: sp.player2Score,
                     timestamp: sp.timestamp,
-                    duration: sp.duration
+                    duration: sp.duration,
+                    isVolley: sp.isVolley
                 )
             }
         game.lets = lets

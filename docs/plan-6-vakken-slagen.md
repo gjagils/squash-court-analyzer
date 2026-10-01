@@ -110,6 +110,24 @@ de volleyschakelaar pas vanaf stap 3.
 
 ## Fase 2 — Opslag en volley-vlag (iOS)
 
+**AFGEROND 2026-10-01** op `codex/android-phase4`:
+- **iOS**: bevroren `SquashAnalyzerSchemaV5` (volledige kopie van de 8
+  modellen zoals ze in builds 13–14 stonden), nieuw `SquashAnalyzerSchemaV6`
+  (huidig), lichte migratie `v5ToV6`; `SavedPoint.isVolley: Bool = false`,
+  mee in `SavedPoint.from(_:)` en `SavedGame` → `Point`.
+  `MigrationTests.testStoreFromVersion5MigratesToVolleyFlag`: een echte
+  V5-store met een oude "Volley"-slag in een middenvak migreert, punten
+  houden hun slag/vak, `isVolley` begint op `false` en kan daarna worden gezet.
+- **Back-upformaat** (Core): `PointExportData.isVolley: Bool?`, alleen
+  geschreven als `true`, zodat bestaande back-ups en het vastgepinde
+  controlegetal ongewijzigd blijven; iOS en Android lezen en schrijven het.
+- **Android**: Room versie 7, `MIGRATION_6_7` voegt `points.isVolley`
+  (standaard 0) toe, alleen als de kolom ontbreekt (tests die een huidige
+  database terugzetten hebben hem al). `PointEntity`/`PointRecord`,
+  `MatchStore`, `RoomCoachMatchStore` en `RoomBackupStore` nemen het mee.
+  Op de emulator een v6-installatie bijgewerkt en gestart zonder fout;
+  `RoomBackupStoreTest` controleert een volley-kill via Room → back-up → Room.
+
 ### 2.1 Volley opslaan
 - `Point` krijgt `isVolley: Bool` (standaard `false`).
 - `SavedPoint` krijgt `var isVolley: Bool = false`.

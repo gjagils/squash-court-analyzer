@@ -198,9 +198,12 @@ public struct PointExportData: Codable, Equatable, Sendable {
     public let player2Score: Int
     public let duration: Double
     public let timestamp: Date?
+    /// Volley switch; written only when true, absent in older backups
+    public var isVolley: Bool? = nil
 
     public init(id: String?, pointNumber: Int, scorer: String, pointType: String, zone: String, shotType: String,
-                server: String, player1Score: Int, player2Score: Int, duration: Double, timestamp: Date?) {
+                server: String, player1Score: Int, player2Score: Int, duration: Double, timestamp: Date?,
+                isVolley: Bool? = nil) {
         self.id = id
         self.pointNumber = pointNumber
         self.scorer = scorer
@@ -212,6 +215,7 @@ public struct PointExportData: Codable, Equatable, Sendable {
         self.player2Score = player2Score
         self.duration = duration
         self.timestamp = timestamp
+        self.isVolley = isVolley
     }
 }
 
@@ -317,7 +321,8 @@ extension PointExportData {
                                scorer: players.contains(scorer) ? scorer : Player.player1.rawValue,
                                pointType: type.rawValue, zone: zoneValue, shotType: shotValue,
                                server: players.contains(server) ? server : Player.player1.rawValue,
-                               player1Score: player1Score, player2Score: player2Score, duration: duration, timestamp: timestamp)
+                               player1Score: player1Score, player2Score: player2Score, duration: duration, timestamp: timestamp,
+                               isVolley: isVolley == true ? true : nil)
     }
 }
 

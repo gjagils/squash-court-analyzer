@@ -16,6 +16,8 @@ final class SavedPoint {
     var player2Score: Int
     var timestamp: Date
     var duration: Double    // Rally duration in seconds
+    /// Played out of the air ("Uit de lucht"); schema V6, older points `false`
+    var isVolley: Bool = false
 
     var game: SavedGame?
 
@@ -30,7 +32,8 @@ final class SavedPoint {
         player1Score: Int,
         player2Score: Int,
         timestamp: Date = Date(),
-        duration: TimeInterval = 0
+        duration: TimeInterval = 0,
+        isVolley: Bool = false
     ) {
         self.id = id
         self.pointNumber = pointNumber
@@ -43,6 +46,7 @@ final class SavedPoint {
         self.player2Score = player2Score
         self.timestamp = timestamp
         self.duration = duration
+        self.isVolley = isVolley
     }
 
     // MARK: - Computed Properties
@@ -95,7 +99,8 @@ final class SavedPoint {
             player1Score: point.player1Score,
             player2Score: point.player2Score,
             timestamp: point.timestamp,
-            duration: point.duration
+            duration: point.duration,
+            isVolley: point.isVolley
         )
     }
 }

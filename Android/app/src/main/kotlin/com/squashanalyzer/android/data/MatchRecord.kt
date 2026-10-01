@@ -56,6 +56,7 @@ data class PointRecord(
     val player2Score: Int,
     val timestamp: Long,
     val duration: Double,
+    val isVolley: Boolean = false,
 )
 
 data class LetRecord(

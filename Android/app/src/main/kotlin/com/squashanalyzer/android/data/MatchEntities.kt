@@ -83,6 +83,8 @@ data class PointEntity(
     val player2Score: Int,
     val timestamp: Long,
     val duration: Double,
+    /** Volley switch ("Uit de lucht"), version 7 */
+    @ColumnInfo(defaultValue = "0") val isVolley: Boolean = false,
 )
 
 @Entity(

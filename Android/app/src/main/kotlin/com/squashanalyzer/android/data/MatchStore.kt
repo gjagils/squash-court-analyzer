@@ -64,6 +64,7 @@ class MatchStore(private val dao: MatchDao) {
                     player2Score = point.player2Score,
                     timestamp = point.timestamp,
                     duration = point.duration,
+                    isVolley = point.isVolley,
                 )
             }
         }
@@ -126,6 +127,7 @@ class MatchStore(private val dao: MatchDao) {
                         player2Score = it.player2Score,
                         timestamp = it.timestamp,
                         duration = it.duration,
+                        isVolley = it.isVolley,
                     )
                 },
                 lets = dao.letsForGame(game.id).map {

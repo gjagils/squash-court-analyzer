@@ -26,7 +26,7 @@ class RoomBackupStoreTest {
     private lateinit var b: AppDatabase
 
     private fun open(name: String) = Room.databaseBuilder(context, AppDatabase::class.java, name)
-        .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6)
+        .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7)
         .allowMainThreadQueries().build()
 
     @Before fun before() {
@@ -80,7 +80,8 @@ class RoomBackupStoreTest {
         val match = Match()
         match.setupMatch(player1 = "Hugo", player2 = "Jaïr", startingServer = Player.player1,
             player1Id = UUID(uuidString = "1B2C3D4E-5F60-4718-8293-A4B5C6D7E8F9"))
-        repeat(6) { match.currentGame.addPoint(to = Player.player1, pointType = PointType.winner, at = CourtZone.frontLeft, with = ShotType.drive) }
+        repeat(5) { match.currentGame.addPoint(to = Player.player1, pointType = PointType.winner, at = CourtZone.frontLeft, with = ShotType.drive) }
+        match.currentGame.addPoint(to = Player.player1, pointType = PointType.winner, at = CourtZone.frontRight, with = ShotType.kill, isVolley = true)
         match.currentGame.addLet(requestedBy = Player.player2)
         coachStore(a).save(match)
         assertTrue(a.badgeAwardDao().all().isNotEmpty())
@@ -99,6 +100,10 @@ class RoomBackupStoreTest {
         assertEquals(6, resumed.currentGame.player1Score)
         assertEquals(1, resumed.currentGame.lets.count)
         assertEquals(match.player1Id, resumed.player1Id)
+        // The volley switch and Kill survive Room → backup file → Room
+        val last = resumed.currentGame.points.toList().last()
+        assertEquals(ShotType.kill, last.shotType)
+        assertTrue(last.isVolley)
     }
 
     @Test fun mergingKeepsWhatIsThereAndADeletionWins() = runTest {

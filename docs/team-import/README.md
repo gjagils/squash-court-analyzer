@@ -47,3 +47,15 @@ Er is geen uploadformulier. Gerd-Jan zet teams online, op verzoek van een captai
 6. **Verwijderen of bijwerken** op verzoek: vervang of verwijder het bestand op de server, binnen een maand. Een speler weghalen = nieuwe zip zonder die speler.
 
 Houd lokaal (buiten git) een lijstje bij welke code bij welk team en welke captain hoort, zodat een verwijderverzoek snel af te handelen is.
+
+## Voorbeeldspelers bij installatie
+
+De app levert twee voorbeeldspelers mee, **Bombardino** en **Whiskey** (met foto),
+zodat je meteen een wedstrijd met "Kies speler" kunt proberen. Ze zitten als
+gewone team-zip in `Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/voorbeeldspelers.zip`
+(foto's 512 px) en gaan via dezelfde teamimport erin: iOS
+`TeamImportService.addSamplePlayersIfNew`, Android in `MainActivity`. Dat gebeurt
+één keer (`SamplePlayers`, UserDefaults-sleutel `samplePlayersSeeded`) en alleen
+als er nog geen spelers zijn, dus bestaande gebruikers krijgen ze niet bij een
+update. Verwijder je ze, dan komen ze niet terug. Niet tijdens tests en
+screenshot-scenario's.

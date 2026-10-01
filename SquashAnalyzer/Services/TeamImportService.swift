@@ -1,5 +1,6 @@
 import Foundation
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 import SwiftData
 
 // The format, the checks and the summary are shared with Android
@@ -39,6 +40,18 @@ enum TeamImportService {
             throw TeamImportError.unavailable
         }
         return try importTeam(zipData: data, context: context)
+    }
+
+    /// Bombardino and Whiskey on a fresh install (SquashAnalyzerUI's SamplePlayers):
+    /// once, and only when there are no players yet. Not during tests.
+    @MainActor
+    static func addSamplePlayersIfNew(context: ModelContext) {
+        guard SamplePlayers.isPending,
+              ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
+        defer { SamplePlayers.markDone() }
+        guard (try? context.fetchCount(FetchDescriptor<SavedPlayer>())) == 0,
+              let data = SamplePlayers.zipData() else { return }
+        _ = try? importTeam(zipData: data, context: context)
     }
 
     /// Validates the whole file before touching the database, then adds or updates players.

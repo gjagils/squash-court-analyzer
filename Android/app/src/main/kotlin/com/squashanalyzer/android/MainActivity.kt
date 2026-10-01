@@ -4,6 +4,9 @@ import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import androidx.room.withTransaction
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import squash.analyzer.ui.SamplePlayers
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.SystemBarStyle
@@ -78,6 +81,19 @@ class MainActivity : AppCompatActivity() {
         autoBackup = AutoBackup(this, backupStore, appVersion)
         val backup = BackupContext(store = backupStore, files = ActivityBackupFiles(this), appVersion = appVersion, auto = autoBackup)
         val teamImporter = RoomTeamImporter(db)
+        // Bombardino and Whiskey on a fresh install, as on iOS (SamplePlayers):
+        // once, only without players, never during instrumented tests
+        if (SamplePlayers.isPending && !isInstrumentedTest()) {
+            lifecycleScope.launch {
+                try {
+                    val zip = SamplePlayers.zipData()
+                    if (zip != null && playerStore.loadPlayers().isEmpty) teamImporter.importTeam(zip = zip)
+                } catch (e: Exception) {
+                    android.util.Log.w("SamplePlayers", "Voorbeeldspelers niet toegevoegd", e)
+                }
+                SamplePlayers.markDone()
+            }
+        }
         val playerFiles = ActivityPlayerFiles(this)
         val aiCoach = AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport()))
         setContent {
@@ -118,5 +134,12 @@ class MainActivity : AppCompatActivity() {
         val id = java.util.UUID.randomUUID().toString().uppercase()
         prefs.edit().putString("badgeInstallId", id).apply()
         return id
+    }
+
+    private fun isInstrumentedTest(): Boolean = try {
+        Class.forName("androidx.test.platform.app.InstrumentationRegistry")
+        true
+    } catch (e: ClassNotFoundException) {
+        false
     }
 }

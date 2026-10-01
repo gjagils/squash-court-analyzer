@@ -188,6 +188,7 @@ struct ContentView: View {
                 return
             }
             #endif
+            TeamImportService.addSamplePlayersIfNew(context: modelContext)
             checkForInterruptedMatch()
             showingStartupPersistenceWarning = startupPersistenceWarning != nil
         }

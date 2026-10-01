@@ -39,6 +39,9 @@ abstract class PlayerDao {
     }
 
     /** Links the player to a shared card; null means the card is the player's own id */
+    @Query("UPDATE players SET photoData = :photo WHERE id = :id")
+    abstract suspend fun setPhoto(id: String, photo: ByteArray)
+
     @Query("UPDATE players SET cardId = :cardId WHERE id = :id")
     abstract suspend fun setCardId(id: String, cardId: String?)
 

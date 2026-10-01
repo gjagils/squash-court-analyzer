@@ -232,13 +232,17 @@ public struct AndroidHomeView: View {
     private let aiCoach: AICoachContext?
     /// Backups in Instellingen (Android supplies Room and the file pickers)
     private let backup: BackupContext?
+    /// Spelers → Team via link (Android supplies download, unzip and Room)
+    private let teamImporter: (any TeamLinkImporter)?
 
     public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 historyStore: any MatchHistoryStore,
                 matchStore: any CoachMatchStore, refereeMatchStore: any RefereeMatchStore,
                 shareText: @escaping (String) -> Void,
                 cardInbox: CardInbox, cardImportStore: any CardImportStore,
-                leagueTeamFetcher: LeagueTeamFetcher, aiCoach: AICoachContext? = nil, backup: BackupContext? = nil) {
+                leagueTeamFetcher: LeagueTeamFetcher, aiCoach: AICoachContext? = nil, backup: BackupContext? = nil,
+                teamImporter: (any TeamLinkImporter)? = nil) {
+        self.teamImporter = teamImporter
         self.leagueTeamFetcher = leagueTeamFetcher
         self.backup = backup
         self.aiCoach = aiCoach
@@ -256,7 +260,7 @@ public struct AndroidHomeView: View {
         NavigationStack {
             homeContent
                 .navigationDestination(isPresented: $showingPlayers) {
-                    PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox)
+                    PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox, teamImporter: teamImporter)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
                     CoachSessionView(store: matchStore, playerStore: playerStore, aiCoach: aiCoach, shareText: shareText, onExit: { showingCoach = false })

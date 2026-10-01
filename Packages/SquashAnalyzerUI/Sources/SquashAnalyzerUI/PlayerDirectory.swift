@@ -69,7 +69,7 @@ public struct PlayerProfileFields: View {
     }
 }
 
-private enum PlayerStyle {
+enum PlayerStyle {
     static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
     static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
     static let muted = Color(red: 0.70, green: 0.68, blue: 0.65)
@@ -90,13 +90,17 @@ public struct PlayerDirectoryView: View {
     @State private var errorMessage = ""
     @State private var showingError = false
     @State private var badgesForPlayer: PlayerProfile? = nil
+    @State private var showingTeamImport = false
 
     private let shareText: (String) -> Void
     /// Reloads after a card link was imported while this screen was open
     private let cardInbox: CardInbox
+    /// Spelers → Team: import a team from a squashanalyzer.com/teams link
+    private let teamImporter: (any TeamLinkImporter)?
 
     public init(store: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
-                shareText: @escaping (String) -> Void, cardInbox: CardInbox) {
+                shareText: @escaping (String) -> Void, cardInbox: CardInbox, teamImporter: (any TeamLinkImporter)? = nil) {
+        self.teamImporter = teamImporter
         self.store = store
         self.badgeStore = badgeStore
         self.shareText = shareText
@@ -113,6 +117,14 @@ public struct PlayerDirectoryView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                     Spacer(minLength: 8)
+                    if teamImporter != nil {
+                        Button { showingTeamImport = true } label: {
+                            Label("Team", systemImage: "square.and.arrow.down")
+                                .lineLimit(1)
+                        }
+                        .accessibilityLabel("Team importeren")
+                        .disabled(isLoading || isDeleting || loadFailed)
+                    }
                     Button { editing = PlayerProfile() } label: {
                         Label("Toevoegen", systemImage: "plus")
                             .lineLimit(1)
@@ -201,6 +213,11 @@ public struct PlayerDirectoryView: View {
         }
         .navigationTitle("Spelers")
         .task(id: cardInbox.importCount) { await reload() }
+        .sheet(isPresented: $showingTeamImport) {
+            if let teamImporter {
+                SharedTeamImportView(importer: teamImporter, onImported: { await reload() }) { showingTeamImport = false }
+            }
+        }
         .sheet(item: $editing) { player in
             PlayerProfileEditor(player: player, store: store) { await reload() }
         }

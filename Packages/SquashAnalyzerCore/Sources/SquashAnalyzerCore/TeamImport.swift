@@ -196,3 +196,10 @@ public enum TeamImport {
 public protocol TeamDownloader: Sendable {
     func download(_ url: URL) async throws -> Data
 }
+
+/// Imports the team behind a squashanalyzer.com/teams link into the player
+/// list; Android's Spelers screen gets one (download, unzip, photos, Room).
+/// iOS has its own `TeamImportService` with SwiftData.
+public protocol TeamLinkImporter: Sendable {
+    func importTeam(link: String) async throws -> TeamImportResult
+}

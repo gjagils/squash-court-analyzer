@@ -13,5 +13,11 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Live meekijken: lets a local test server (http://<ip>:8080) work; the internet still needs HTTPS -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

@@ -290,7 +290,7 @@ public struct CoachScoringView: View {
 
             VStack(spacing: 12) {
                 header
-                SharedScoreboardView(game: game, match: match, photos: photos, onServiceChanged: { onMatchChanged(match) }) { player in handleScoreTap(player) }
+                SharedScoreboardView(game: game, match: match, photos: photos, onServiceChanged: { matchChanged() }) { player in handleScoreTap(player) }
                     .padding(.horizontal, 20)
 
                 HStack(spacing: 12) {
@@ -332,7 +332,7 @@ public struct CoachScoringView: View {
                     if match.completeResult(with: winners) {
                         showingComplete = false
                         // Saved and on to a new match, as on iOS
-                        if let onNewMatch { onNewMatch() } else { onMatchChanged(match) }
+                        if let onNewMatch { onNewMatch() } else { matchChanged() }
                     }
                 }, onCancel: { showingComplete = false })
             }
@@ -366,6 +366,10 @@ public struct CoachScoringView: View {
                     }
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(CoachPalette.textSecondary)
+                }
+                if !match.isMatchOver {
+                    LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot() }, share: shareText)
+                        .padding(.leading, 8)
                 }
                 Spacer()
                 // The previous game's analysis while playing, from game 2 on (as on iOS)
@@ -527,7 +531,7 @@ public struct CoachScoringView: View {
             withAnimation(.easeInOut(duration: 0.2)) {
                 game.start()
             }
-            onMatchChanged(match)
+            matchChanged()
         }) {
             HStack(spacing: 10) {
                 AppSymbol("play.fill", size: 16, color: Color.black.opacity(0.8))
@@ -543,6 +547,12 @@ public struct CoachScoringView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Start game \(match.currentGameNumber)")
+    }
+
+    /// Save (the session's store) and send the new state to live viewers
+    private func matchChanged() {
+        onMatchChanged(match)
+        LiveShareSync.send(matchId: match.id, snapshot: match.liveSnapshot())
     }
 
     private var cancelButton: some View {
@@ -593,7 +603,7 @@ public struct CoachScoringView: View {
         } else {
             primary = ResultButton("Volgende game") {
                 match.onGameEnd()
-                onMatchChanged(match)
+                matchChanged()
             }
         }
         return MatchResultOverlay(
@@ -605,7 +615,7 @@ public struct CoachScoringView: View {
                 // Back in play: the match is no longer finished
                 match.status = MatchStatus.inProgress
                 game.undoLastPoint()
-                onMatchChanged(match)
+                matchChanged()
             },
             link: match.isMatchOver ? nil : ResultButton("Stop wedstrijd") { requestStop() }
         )
@@ -726,7 +736,7 @@ public struct CoachScoringView: View {
     private func callLet(_ player: Player) {
         game.addLet(requestedBy: player)
         showingLet = false
-        onMatchChanged(match)
+        matchChanged()
     }
 
     /// Stop, as on iOS (Core's Match.stopAction): a finished match is saved
@@ -736,10 +746,17 @@ public struct CoachScoringView: View {
         case .finish:
             onExit()
         case .discard:
+            stopLive()
             if let onDiscard { onDiscard() } else { onExit() }
         case .ask:
             showingStop = true
         }
+    }
+
+    /// The match ends here without a final score: viewers see it is over
+    private func stopLive() {
+        guard LiveShare.shared.isLive(match.id) else { return }
+        Task { await LiveShare.shared.stop() }
     }
 
     private var stopOverlay: some View {
@@ -758,6 +775,7 @@ public struct CoachScoringView: View {
             if let onAbandon {
                 overlayButton("Opslaan als incompleet", CoachPalette.textSecondary) {
                     showingStop = false
+                    stopLive()
                     onAbandon()
                 }
             }
@@ -768,6 +786,7 @@ public struct CoachScoringView: View {
             if let onDiscard {
                 overlayButton("Niet opslaan", Color(red: 0.90, green: 0.40, blue: 0.35)) {
                     showingStop = false
+                    stopLive()
                     onDiscard()
                 }
             }
@@ -814,7 +833,7 @@ public struct CoachScoringView: View {
             coachActionButton("UNDO", icon: "arrow.uturn.backward",
                               disabled: game.selectedZone != nil || !game.canUndo || match.isMatchOver) {
                 game.undoLastPoint()
-                onMatchChanged(match)
+                matchChanged()
             }
         }
     }
@@ -859,7 +878,7 @@ public struct CoachScoringView: View {
         }
         errorKind = nil
         if game.scoringStep == .selectPlayer {
-            onMatchChanged(match)
+            matchChanged()
         }
     }
 
@@ -869,7 +888,7 @@ public struct CoachScoringView: View {
             game.selectZone(zone)
         }
         if game.scoringStep == .selectPlayer {
-            onMatchChanged(match)
+            matchChanged()
         }
     }
 
@@ -878,6 +897,6 @@ public struct CoachScoringView: View {
             game.addPoint(shotType: shotType, isVolley: volley)
         }
         volley = false
-        onMatchChanged(match)
+        matchChanged()
     }
 }

@@ -13,6 +13,8 @@ struct RefereeView: View {
     @State private var showingMatchOver = false
     @State private var showingShareSheet = false
     @State private var savedRefereeMatch: SavedRefereeMatch? = nil
+    /// The live link to share (WhatsApp), see LiveShareButton
+    @State private var liveShareItems: ShareItemsWrapper? = nil
 
     init(match: RefereeMatch, onDismiss: @escaping () -> Void) {
         _match = State(initialValue: match)
@@ -31,6 +33,8 @@ struct RefereeView: View {
         } else {
             RefereeInProgressStore.save(match)
         }
+        // Live viewers get the new state; the final one deletes the session
+        LiveShareSync.send(matchId: match.id, snapshot: match.liveSnapshot)
     }
 
     var body: some View {
@@ -119,6 +123,9 @@ struct RefereeView: View {
         // Every rally, call and box change is kept, so Sluiten or closing the app can be resumed
         .onChange(of: progressKey) { _, _ in keepProgress() }
         .onAppear { keepProgress() }
+        .sheet(item: $liveShareItems) { wrapper in
+            ShareSheet(items: wrapper.items)
+        }
         .onChange(of: match.lastCallText) { _, call in
             guard let call else { return }
             Task {
@@ -139,6 +146,13 @@ struct RefereeView: View {
                 }
                 .font(AppFonts.body(14))
                 .foregroundColor(AppColors.textSecondary)
+            }
+
+            if !match.isMatchOver {
+                LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot }) { text in
+                    liveShareItems = ShareItemsWrapper(items: [text])
+                }
+                .padding(.leading, 8)
             }
 
             Spacer()

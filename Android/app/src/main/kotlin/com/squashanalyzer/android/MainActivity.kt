@@ -23,12 +23,14 @@ import skip.ui.UIApplication
 import squash.analyzer.core.CardInbox
 import squash.analyzer.core.LeagueTeamFetcher
 import squash.analyzer.core.AICoachClient
+import squash.analyzer.core.LiveShare
 import squash.analyzer.ui.AICoachContext
 import squash.analyzer.ui.BackupContext
 import com.squashanalyzer.android.backup.ActivityBackupFiles
 import com.squashanalyzer.android.backup.AutoBackup
 import com.squashanalyzer.android.data.RoomBackupStore
 import com.squashanalyzer.android.aicoach.HttpAICoachTransport
+import com.squashanalyzer.android.live.HttpLiveTransport
 import com.squashanalyzer.android.aicoach.KeystoreAPIKeyStore
 import com.squashanalyzer.android.league.HttpLeaguePageLoader
 import com.squashanalyzer.android.team.RoomTeamImporter
@@ -96,6 +98,8 @@ class MainActivity : AppCompatActivity() {
         }
         val playerFiles = ActivityPlayerFiles(this)
         val aiCoach = AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport()))
+        // Live meekijken: the shared LiveShare sends the state through this (server/live)
+        LiveShare.shared.transport = HttpLiveTransport()
         setContent {
             val stateHolder = rememberSaveableStateHolder()
             stateHolder.SaveableStateProvider(true) {

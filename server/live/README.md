@@ -36,7 +36,7 @@ app.
      meeste proxies).
 4. Controleer: `https://<domein>/health` geeft `{"ok":true,...}`.
 
-Het adres staat in de app in `LiveShare.baseURL`
+Het adres staat in de app in `LiveShare.defaultBaseURL`
 (`Packages/SquashAnalyzerCore/Sources/SquashAnalyzerCore/LiveShare.swift`).
 Pas het daar aan als je een ander domein kiest.
 
@@ -72,5 +72,9 @@ PORT=8080 node server.js      # dan http://localhost:8080/health
 ```
 
 Ook zonder eigen domein te proberen op het lokale netwerk: zet in de app
-tijdelijk `LiveShare.baseURL` op `http://<ip-van-de-mac>:8080`. iOS staat dan
-gewone `http` naar het lokale netwerk toe (`NSAllowsLocalNetworking`).
+tijdelijk `LiveShare.defaultBaseURL` op `http://<ip-van-de-mac>:8080`.
+- iOS staat gewone `http` naar het lokale netwerk toe (`NSAllowsLocalNetworking`
+  in `Info.plist`).
+- Android staat `http` alleen in de **debug-build** toe
+  (`Android/app/src/debug/res/xml/network_security_config.xml`). De
+  release-build blijft alleen HTTPS.

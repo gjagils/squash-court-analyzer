@@ -85,7 +85,7 @@ public struct RefereeScoringView: View {
 
     private func undoLastPoint() {
         withAnimation(.easeInOut(duration: 0.15)) { match.undo() }
-        onMatchChanged(match)
+        matchChanged()
     }
 
     @ViewBuilder
@@ -109,12 +109,18 @@ public struct RefereeScoringView: View {
                 player1Photo: photo(Player.player1), player2Photo: photo(Player.player2),
                 primary: ResultButton("Volgende game") {
                     withAnimation(.easeInOut(duration: 0.15)) { match.confirmNextGame() }
-                    onMatchChanged(match)
+                    matchChanged()
                 },
                 onUndo: { undoLastPoint() },
                 link: ResultButton("Bekijk stand") { hiddenResult = resultKey }
             )
         }
+    }
+
+    /// Save and send the new state to live viewers
+    private func matchChanged() {
+        onMatchChanged(match)
+        LiveShareSync.send(matchId: match.id, snapshot: match.liveSnapshot)
     }
 
     private var header: some View {
@@ -127,6 +133,10 @@ public struct RefereeScoringView: View {
                 .font(.system(size: 14, weight: .medium, design: .rounded))
             }
             .foregroundColor(CoachPalette.textSecondary)
+            if !match.isMatchOver {
+                LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot }, share: shareText)
+                    .padding(.leading, 8)
+            }
             Spacer()
             Text("SCHEIDSRECHTER")
                 .font(.system(size: 15, weight: .bold, design: .rounded))
@@ -218,14 +228,14 @@ public struct RefereeScoringView: View {
                 disabled: match.isGameOver
             ) { side in
                 withAnimation(.easeInOut(duration: 0.15)) { match.overrideSide(to: side) }
-                onMatchChanged(match)
+                matchChanged()
             }
             .opacity(isServer ? 1.0 : 0.0)
             .allowsHitTesting(isServer)
 
             Button(action: {
                 withAnimation(.easeInOut(duration: 0.15)) { match.awardPoint(to: player) }
-                onMatchChanged(match)
+                matchChanged()
             }) {
                 VStack(spacing: 4) {
                     Text("\(score)")
@@ -261,17 +271,17 @@ public struct RefereeScoringView: View {
     private var actionGrid: some View {
         VStack(spacing: 8) {
             HStack(spacing: 8) {
-                actionButton("LET CALL", color: CoachPalette.warmOrange) { match.callLet(); onMatchChanged(match) }
-                actionButton("LET CALL", color: CoachPalette.coolBlue) { match.callLet(); onMatchChanged(match) }
+                actionButton("LET CALL", color: CoachPalette.warmOrange) { match.callLet(); matchChanged() }
+                actionButton("LET CALL", color: CoachPalette.coolBlue) { match.callLet(); matchChanged() }
             }
             HStack(spacing: 8) {
-                actionButton("STROKE", color: CoachPalette.warmRed) { match.callStroke(to: .player1); onMatchChanged(match) }
-                actionButton("STROKE", color: CoachPalette.coolIndigo) { match.callStroke(to: .player2); onMatchChanged(match) }
+                actionButton("STROKE", color: CoachPalette.warmRed) { match.callStroke(to: .player1); matchChanged() }
+                actionButton("STROKE", color: CoachPalette.coolIndigo) { match.callStroke(to: .player2); matchChanged() }
             }
             if match.isGameOver && !match.isMatchOver {
                 Button("VOLGENDE GAME") {
                     withAnimation(.easeInOut(duration: 0.15)) { match.confirmNextGame() }
-                    onMatchChanged(match)
+                    matchChanged()
                 }
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundColor(CoachPalette.backgroundDark)
@@ -339,7 +349,7 @@ public struct RefereeScoringView: View {
     private var undoButton: some View {
         Button(action: {
             withAnimation(.easeInOut(duration: 0.15)) { match.undo() }
-            onMatchChanged(match)
+            matchChanged()
         }) {
             HStack(spacing: 8) {
                 AppSymbol("arrow.uturn.backward", size: 16, color: match.canUndo ? CoachPalette.textPrimary : CoachPalette.textMuted)

@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import SquashAnalyzerCore
 
 @main
 struct SquashAnalyzerApp: App {
@@ -7,6 +8,8 @@ struct SquashAnalyzerApp: App {
     let persistenceWarning: String?
 
     init() {
+        // Live meekijken: the shared LiveShare sends the state through URLSession (server/live)
+        LiveShare.shared.transport = URLSessionLiveTransport()
         // Explicitly disable SwiftData's CloudKit mirroring: the store stays local.
         // iCloud Drive holds the file backups (ExportService); player cards are
         // shared as links (CardSnapshot), not through CloudKit.

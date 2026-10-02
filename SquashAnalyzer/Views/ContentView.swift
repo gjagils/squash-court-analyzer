@@ -37,6 +37,8 @@ struct ContentView: View {
     @State private var volley = false
     /// Down / Out / Service / Grond for an unforced error; cleared after every point
     @State private var errorKind: ErrorKind? = nil
+    /// The live link to share (WhatsApp), see LiveShareButton
+    @State private var liveShareItems: ShareItemsWrapper? = nil
 
     private var currentGame: Game {
         match.currentGame
@@ -265,6 +267,9 @@ struct ContentView: View {
         } message: {
             Text(startupPersistenceWarning ?? "")
         }
+        .sheet(item: $liveShareItems) { wrapper in
+            ShareSheet(items: wrapper.items)
+        }
     }
 
     #if DEBUG
@@ -312,6 +317,14 @@ struct ContentView: View {
             persistenceErrorMessage = error.localizedDescription
             showingPersistenceError = true
         }
+        // Live viewers get the new state; the final one deletes the session
+        LiveShareSync.send(matchId: match.id, snapshot: match.liveSnapshot())
+    }
+
+    /// The match ends without a final score: stop live sharing
+    private func stopLive() {
+        guard LiveShare.shared.isLive(match.id) else { return }
+        Task { await LiveShare.shared.stop() }
     }
 
     private func finishOrAbandonCurrentMatch() {
@@ -341,6 +354,7 @@ struct ContentView: View {
 
     private func discardCurrentMatch() {
         guard !showingSetup else { return }
+        stopLive()
         do {
             try SwiftDataMatchRepository(context: modelContext).delete(match)
         } catch {
@@ -351,6 +365,7 @@ struct ContentView: View {
 
     private func abandonCurrentMatch() {
         guard !showingSetup else { return }
+        stopLive()
         do {
             try SwiftDataMatchRepository(context: modelContext).markAbandoned(match)
         } catch {
@@ -425,6 +440,13 @@ struct ContentView: View {
                     }
                     .font(AppFonts.body(14))
                     .foregroundColor(AppColors.textSecondary)
+                }
+
+                if !match.isMatchOver {
+                    LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot() }) { text in
+                        liveShareItems = ShareItemsWrapper(items: [text])
+                    }
+                    .padding(.leading, 8)
                 }
 
                 Spacer()
@@ -597,6 +619,7 @@ struct ContentView: View {
                 currentGame.start()
             }
             startRallyTimer()
+            LiveShareSync.send(matchId: match.id, snapshot: match.liveSnapshot())
         }) {
             HStack(spacing: 10) {
                 Image(systemName: "play.fill")

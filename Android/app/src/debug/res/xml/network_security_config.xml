@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- sbn.toernooi.nl (Mijn team) chains up to Sectigo Public Server
+     Authentication Root R46, which older Android versions (14 and lower) do
+     not have. Trust it for that host only, next to the system roots. The
+     certificate comes from the macOS root store, SHA-256
+     7B:B6:47:A6:2A:EE:AC:88:BF:25:7A:A5:22:D0:1F:FE:A3:95:E0:AB:45:C7:3F:93:F6:56:54:EC:38:F2:5A:06,
+     valid until 2046. -->
+<!-- Debug builds only (this file overrides main/res/xml for debug): plain
+     http is allowed so live meekijken can be tried against a test server on
+     the local network (server/live, http://<ip>:8080). Release builds use the
+     main config, where everything stays HTTPS. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+    <domain-config>
+        <domain includeSubdomains="false">sbn.toernooi.nl</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="@raw/sectigo_public_server_root_r46" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

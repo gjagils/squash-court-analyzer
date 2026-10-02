@@ -2209,3 +2209,20 @@ Bewust verschillend: back-up (iOS iCloud en handmatig in Afgeronde wedstrijden,
 Android een gekozen map vanuit Instellingen), delen van een
 scheidsrechterwedstrijd uit de lijst op iOS (iOS bewaart geen rally's), en de
 vorm van de teamimport (iOS menu, Android eigen scherm).
+
+## Soort fout, Start en live meekijken (2026-10-03, nog niet op Android gebouwd)
+
+Gebouwd in de cloud zonder Mac, dus **nog niet door Skip gehaald**. Core is op
+Linux getest (zie `docs/lokaal-testen-oktober.md`). Nieuw gedeeld:
+`ErrorKind` en `LiveShare` (Core, `@MainActor @Observable` met
+`static let shared`), `ErrorKindToggle` en `LiveShareButton` (UI, met
+`.alert`). Room gaat naar versie 9 (`points.errorKind`, `MIGRATION_8_9`).
+Android verstuurt live via `live/HttpLiveTransport.kt`; `MainActivity` zet
+`LiveShare.shared.transport`. Debug-builds staan `http` toe
+(`src/debug/res/xml/network_security_config.xml`) om tegen een lokale
+live-server te testen. Om Skip-valkuilen te ontlopen staan enum-types voluit
+(`ErrorKind.service`), is er een struct in plaats van een tuple
+(`ErrorKindCount`), en worden opgeslagen waarden via `allCases` gelezen
+(`ErrorKind.from(stored:)`). Live-updates lopen niet via `onChange` maar via
+een expliciete `matchChanged()` waar de wedstrijd al werd opgeslagen.
+

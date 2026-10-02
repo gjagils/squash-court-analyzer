@@ -391,7 +391,8 @@ enum ExportService {
                 player2Score: $0.player2Score,
                 duration: $0.duration,
                 timestamp: $0.timestamp,
-                isVolley: $0.isVolley ? true : nil
+                isVolley: $0.isVolley ? true : nil,
+                errorKind: $0.errorKind.isEmpty ? nil : $0.errorKind
             )
         }
         let lets = game.lets.sorted { $0.letNumber < $1.letNumber }.map {
@@ -499,7 +500,8 @@ enum ExportService {
                 player2Score: pd.player2Score,
                 timestamp: pd.timestamp ?? Date(),
                 duration: pd.duration,
-                isVolley: pd.isVolley ?? false
+                isVolley: pd.isVolley ?? false,
+                errorKind: ErrorKind.from(stored: pd.errorKind)
             )
             sp.game = savedGame
             savedGame.points.append(sp)

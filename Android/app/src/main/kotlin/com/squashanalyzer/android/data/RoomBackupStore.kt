@@ -126,6 +126,7 @@ class RoomBackupStore(private val db: AppDatabase) : BackupStore {
                         player1Score = point.player1Score, player2Score = point.player2Score,
                         duration = point.duration, timestamp = date(point.timestamp),
                         isVolley = if (point.isVolley) true else null,
+                        errorKind = point.errorKind.ifEmpty { null },
                     )
                 }),
                 lets = SwiftArray(game.lets.map { call ->
@@ -185,6 +186,7 @@ class RoomBackupStore(private val db: AppDatabase) : BackupStore {
                 server = point.server, player1Score = point.player1Score, player2Score = point.player2Score,
                 timestamp = point.timestamp?.let(::millis) ?: millis(game.savedAt), duration = point.duration,
                 isVolley = point.isVolley == true,
+                errorKind = point.errorKind ?: "",
             )
         },
         lets = game.lets.toList().map { call ->

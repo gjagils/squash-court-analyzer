@@ -26,7 +26,7 @@ class RoomBackupStoreTest {
     private lateinit var b: AppDatabase
 
     private fun open(name: String) = Room.databaseBuilder(context, AppDatabase::class.java, name)
-        .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8)
+        .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8, AppDatabase.MIGRATION_8_9)
         .allowMainThreadQueries().build()
 
     @Before fun before() {
@@ -84,6 +84,7 @@ class RoomBackupStoreTest {
             player1Id = UUID(uuidString = "1B2C3D4E-5F60-4718-8293-A4B5C6D7E8F9"))
         repeat(5) { match.currentGame.addPoint(to = Player.player1, pointType = PointType.winner, at = CourtZone.frontLeft, with = ShotType.drive) }
         match.currentGame.addPoint(to = Player.player1, pointType = PointType.winner, at = CourtZone.frontRight, with = ShotType.kill, isVolley = true)
+        match.currentGame.addPoint(to = Player.player2, pointType = PointType.unforcedError, at = null, with = null, errorKind = ErrorKind.viaFloor)
         match.currentGame.addLet(requestedBy = Player.player2)
         coachStore(a).save(match)
         assertTrue(a.badgeAwardDao().all().isNotEmpty())
@@ -100,12 +101,16 @@ class RoomBackupStoreTest {
         val resumed = coachStore(b).loadInProgress()!!
         assertEquals(match.id, resumed.id)
         assertEquals(6, resumed.currentGame.player1Score)
+        assertEquals(1, resumed.currentGame.player2Score)
         assertEquals(1, resumed.currentGame.lets.count)
         assertEquals(match.player1Id, resumed.player1Id)
-        // The volley switch and Kill survive Room → backup file → Room
-        val last = resumed.currentGame.points.toList().last()
-        assertEquals(ShotType.kill, last.shotType)
-        assertTrue(last.isVolley)
+        // The volley switch, Kill and the kind of unforced error survive Room → backup file → Room
+        val points = resumed.currentGame.points.toList()
+        val kill = points[points.size - 2]
+        assertEquals(ShotType.kill, kill.shotType)
+        assertTrue(kill.isVolley)
+        assertEquals(ErrorKind.viaFloor, points.last().errorKind)
+        assertTrue(resumed.currentGame.isStarted)
     }
 
     @Test fun mergingKeepsWhatIsThereAndADeletionWins() = runTest {

@@ -35,8 +35,20 @@ public class Game: Identifiable {
     /// All lets called in this game
     public var lets: [LetCall] = []
 
-    /// Timestamp of game start or last point (for calculating rally duration)
+    /// Timestamp of the Start tap or the last point (for calculating rally duration)
     public var lastPointTime: Date = Date()
+
+    /// When play started: the coach's Start tap at the first serve, or the
+    /// first point or let when Start was skipped. nil = warming up or the break
+    /// before this game, which never counts as a rally.
+    public var startedAt: Date? = nil
+
+    /// `startedAt` came from the first point rather than the Start tap, so
+    /// undoing that point goes back to before the start
+    private var startedByFirstPoint = false
+
+    /// Play has started in this game (Start tapped, or a point or let recorded)
+    public var isStarted: Bool { startedAt != nil }
 
     /// Currently selected player (for scoring flow - step 1)
     public var selectedPlayer: Player? = nil
@@ -47,9 +59,9 @@ public class Game: Identifiable {
     /// Currently selected zone (for scoring flow - step 3)
     public var selectedZone: CourtZone? = nil
 
-    /// Input preference: also record where an unforced error was made (the
-    /// "tik op de score" flow asks for a zone before scoring one)
-    public var zoneForUnforcedErrors: Bool = false
+    /// Kind of unforced error picked on the Down/Out/Service/Grond switch,
+    /// handed in with the "Unforced error" tap
+    private var pendingErrorKind: ErrorKind? = nil
 
     /// Track previous server for undo
     private var previousServers: [Player] = []
@@ -119,14 +131,16 @@ public class Game: Identifiable {
         selectedZone = nil
     }
 
-    /// Select a point type (step 2 of scoring)
-    public func selectPointType(_ pointType: PointType) {
+    /// Select a point type (step 2 of scoring). `errorKind` comes from the
+    /// switch next to "Unforced error" and is only kept for that type.
+    public func selectPointType(_ pointType: PointType, errorKind: ErrorKind? = nil) {
         guard let player = selectedPlayer else { return }
         guard !pointType.serverOnly || player == currentServer else { return }
         selectedPointType = pointType
         selectedZone = nil
+        pendingErrorKind = pointType == PointType.unforcedError ? errorKind : nil
 
-        // Unforced error: no zone or shot — score immediately (unless the zone is wanted).
+        // Unforced error: no zone or shot (the kind of error says enough), score immediately.
         // Service point: the ball landed in the receiver's back quarter, opposite the
         // service box, so the zone is known without a tap.
         if pointType == .servicePoint {
@@ -137,9 +151,48 @@ public class Game: Identifiable {
         }
     }
 
-    /// Whether this point type asks for a zone in the current input preference
+    /// Whether this point type asks for a zone (an unforced error never does:
+    /// where it went wrong matters less than how, see `ErrorKind`)
     public func needsZone(_ pointType: PointType) -> Bool {
-        pointType.requiresZone || (pointType == .unforcedError && zoneForUnforcedErrors)
+        pointType.requiresZone
+    }
+
+    /// Kinds of unforced error that fit when `scorer` wins on the opponent's
+    /// error: a service fault only when the opponent was serving
+    public func errorKindOptions(whenScoring scorer: Player) -> [ErrorKind] {
+        ErrorKind.options(errorByServer: currentServer != scorer)
+    }
+
+    // MARK: - Start of the game
+
+    /// The coach taps Start at the first serve; from then the rally clock runs
+    public func start(at date: Date = Date()) {
+        guard startedAt == nil else { return }
+        startedAt = date
+        startedByFirstPoint = false
+        lastPointTime = date
+    }
+
+    /// After a game is restored from the store: a game with points was under
+    /// way, so going on with it needs no Start tap (the Start tap of a game
+    /// without points is not stored)
+    public func restoreStart() {
+        guard startedAt == nil, let first = points.first else { return }
+        startedAt = first.timestamp.addingTimeInterval(-first.duration)
+        startedByFirstPoint = false
+    }
+
+    /// Take back a Start tap as long as no point has been played
+    public func undoStart() {
+        guard points.isEmpty else { return }
+        startedAt = nil
+        startedByFirstPoint = false
+    }
+
+    /// Seconds of the rally under way, 0 before the start
+    public func rallySeconds(at date: Date = Date()) -> TimeInterval {
+        guard startedAt != nil else { return 0.0 }
+        return max(0.0, date.timeIntervalSince(lastPointTime))
     }
 
     /// Back quarter a serve from `side` lands in (cross-court from the box)
@@ -162,7 +215,8 @@ public class Game: Identifiable {
     public func addPoint(shotType: ShotType?, isVolley: Bool = false) {
         guard let player = selectedPlayer, let pointType = selectedPointType else { return }
         let zone = selectedZone
-        addPoint(to: player, pointType: pointType, at: zone, with: shotType, isVolley: isVolley)
+        addPoint(to: player, pointType: pointType, at: zone, with: shotType, isVolley: isVolley,
+                 errorKind: pendingErrorKind)
     }
 
     /// Clear the current selection
@@ -170,6 +224,7 @@ public class Game: Identifiable {
         selectedPlayer = nil
         selectedPointType = nil
         selectedZone = nil
+        pendingErrorKind = nil
     }
 
     /// Go back one step in the scoring flow
@@ -184,7 +239,8 @@ public class Game: Identifiable {
     }
 
     /// Add a point with all details
-    public func addPoint(to player: Player, pointType: PointType, at zone: CourtZone?, with shotType: ShotType?, isVolley: Bool = false) {
+    public func addPoint(to player: Player, pointType: PointType, at zone: CourtZone?, with shotType: ShotType?, isVolley: Bool = false,
+                         errorKind: ErrorKind? = nil) {
         guard !isGameOver else { return }
 
         // Save current server, service box and point time for undo
@@ -192,9 +248,16 @@ public class Game: Identifiable {
         previousSides.append(serverSide)
         previousPointTimes.append(lastPointTime)
 
-        // Calculate rally duration (time since last point or game start)
+        // Rally duration: since the last point or the Start tap. Without a Start
+        // tap the first rally is not timed (it would hold the warm-up or the break).
         let now = Date()
-        let duration = now.timeIntervalSince(lastPointTime)
+        var duration = 0.0
+        if startedAt == nil {
+            startedAt = now
+            startedByFirstPoint = true
+        } else {
+            duration = max(0.0, now.timeIntervalSince(lastPointTime))
+        }
 
         let nextScore = ScoringEngine().score(
             afterPointFor: player,
@@ -214,7 +277,9 @@ public class Game: Identifiable {
             player2Score: player2Score,
             duration: duration,
             // Only a shot can be played out of the air, and never a lob
-            isVolley: isVolley && (shotType?.allowsVolley ?? false)
+            isVolley: isVolley && (shotType?.allowsVolley ?? false),
+            // Only an unforced error has a kind
+            errorKind: pointType == PointType.unforcedError ? errorKind : nil
         )
         points.append(point)
 
@@ -235,6 +300,7 @@ public class Game: Identifiable {
         selectedPlayer = nil
         selectedPointType = nil
         selectedZone = nil
+        pendingErrorKind = nil
     }
 
     /// Undo the last point
@@ -263,6 +329,12 @@ public class Game: Identifiable {
             lastPointTime = previousPointTime
         }
 
+        // The first point started the game (no Start tap): back to before the start
+        if points.isEmpty && startedByFirstPoint {
+            startedAt = nil
+            startedByFirstPoint = false
+        }
+
         selectedPlayer = nil
         selectedPointType = nil
         selectedZone = nil
@@ -279,6 +351,9 @@ public class Game: Identifiable {
         previousSides = []
         previousPointTimes = []
         lastPointTime = Date()
+        startedAt = nil
+        startedByFirstPoint = false
+        pendingErrorKind = nil
         selectedPlayer = nil
         selectedPointType = nil
         selectedZone = nil
@@ -294,8 +369,12 @@ public class Game: Identifiable {
         )
         lets.append(letCall)
 
-        // Reset the rally timer since the rally is replayed
+        // Reset the rally timer since the rally is replayed; a let also means play is under way
         lastPointTime = Date()
+        if startedAt == nil {
+            startedAt = lastPointTime
+            startedByFirstPoint = false
+        }
 
         // Clear any selection in progress
         selectedPlayer = nil
@@ -377,6 +456,16 @@ public class Game: Identifiable {
         points.filter { $0.scorer == player && $0.pointType == .unforcedError }
     }
 
+    /// How often `player` made each kind of unforced error (the points the
+    /// opponent won on them); errors without a kind are left out
+    public func errorKindCounts(madeBy player: Player) -> [ErrorKind: Int] {
+        var counts: [ErrorKind: Int] = [:]
+        for point in unforcedErrors(by: player.opponent) {
+            if let kind = point.errorKind { counts[kind] = (counts[kind] ?? 0) + 1 }
+        }
+        return counts
+    }
+
     /// Points a player won with a volley: the switch, or an older "Volley" shot
     public func volleysWon(by player: Player) -> [Point] {
         points.filter { $0.scorer == player && ($0.isVolley || $0.shotType == ShotType.volley) }
@@ -404,7 +493,7 @@ public class Game: Identifiable {
 
     /// Get points won in a specific zone by a player (winners + forced errors only)
     public func pointsWon(by player: Player, in zone: CourtZone) -> Int {
-        points.filter { $0.scorer == player && $0.zone == zone }.count
+        points.filter { $0.scorer == player && $0.zone == zone && $0.pointType != PointType.unforcedError }.count
     }
 
     /// Get points won with a specific shot type (winners + forced errors only)
@@ -465,10 +554,17 @@ public class Game: Identifiable {
     }
 
     // MARK: - Duration Analysis
+    // Only timed rallies count: the first rally of a game entered without a
+    // Start tap has no duration (see `Point.isTimed`).
+
+    /// Rallies with a known duration
+    public var timedPoints: [Point] {
+        points.filter { $0.isTimed }
+    }
 
     /// Average duration of points won by a player (in seconds)
     public func averageDurationWon(by player: Player) -> TimeInterval? {
-        let wonPoints = pointsWon(by: player)
+        let wonPoints = timedPoints.filter { $0.scorer == player }
         guard !wonPoints.isEmpty else { return nil }
         let totalDuration = wonPoints.reduce(0.0) { $0 + $1.duration }
         return totalDuration / Double(wonPoints.count)
@@ -476,7 +572,7 @@ public class Game: Identifiable {
 
     /// Average duration of points lost by a player (in seconds)
     public func averageDurationLost(by player: Player) -> TimeInterval? {
-        let lostPoints = pointsLost(by: player)
+        let lostPoints = timedPoints.filter { $0.scorer == player.opponent }
         guard !lostPoints.isEmpty else { return nil }
         let totalDuration = lostPoints.reduce(0.0) { $0 + $1.duration }
         return totalDuration / Double(lostPoints.count)
@@ -484,28 +580,30 @@ public class Game: Identifiable {
 
     /// Average duration of all points in the game
     public func averagePointDuration() -> TimeInterval? {
-        guard !points.isEmpty else { return nil }
-        let totalDuration = points.reduce(0.0) { $0 + $1.duration }
-        return totalDuration / Double(points.count)
+        let timed = timedPoints
+        guard !timed.isEmpty else { return nil }
+        let totalDuration = timed.reduce(0.0) { $0 + $1.duration }
+        return totalDuration / Double(timed.count)
     }
 
     /// Longest point in the game
     public func longestPoint() -> Point? {
-        points.max(by: { $0.duration < $1.duration })
+        timedPoints.max(by: { $0.duration < $1.duration })
     }
 
     /// Shortest point in the game
     public func shortestPoint() -> Point? {
-        points.min(by: { $0.duration < $1.duration })
+        timedPoints.min(by: { $0.duration < $1.duration })
     }
 
     /// Win percentage for short rallies (below median duration)
     public func shortRallyWinPercentage(for player: Player) -> Double? {
-        guard points.count >= 2 else { return nil }
-        let sortedDurations = points.map { $0.duration }.sorted()
+        let timed = timedPoints
+        guard timed.count >= 2 else { return nil }
+        let sortedDurations = timed.map { $0.duration }.sorted()
         let medianDuration = sortedDurations[sortedDurations.count / 2]
 
-        let shortRallies = points.filter { $0.duration < medianDuration }
+        let shortRallies = timed.filter { $0.duration < medianDuration }
         guard !shortRallies.isEmpty else { return nil }
 
         let won = shortRallies.filter { $0.scorer == player }.count
@@ -514,11 +612,12 @@ public class Game: Identifiable {
 
     /// Win percentage for long rallies (above median duration)
     public func longRallyWinPercentage(for player: Player) -> Double? {
-        guard points.count >= 2 else { return nil }
-        let sortedDurations = points.map { $0.duration }.sorted()
+        let timed = timedPoints
+        guard timed.count >= 2 else { return nil }
+        let sortedDurations = timed.map { $0.duration }.sorted()
         let medianDuration = sortedDurations[sortedDurations.count / 2]
 
-        let longRallies = points.filter { $0.duration >= medianDuration }
+        let longRallies = timed.filter { $0.duration >= medianDuration }
         guard !longRallies.isEmpty else { return nil }
 
         let won = longRallies.filter { $0.scorer == player }.count

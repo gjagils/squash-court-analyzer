@@ -16,7 +16,7 @@ import squash.analyzer.core.BadgeKind
         RefereeMatchEntity::class, RefereeGameEntity::class, RefereePointEntity::class, RefereeCurrentPointEntity::class,
         BadgeAwardEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -36,6 +36,20 @@ abstract class AppDatabase : RoomDatabase() {
          * and iOS removes those outright — carried over they would block the
          * badge for good and travel in card links as deletions.
          */
+        /** Unforced errors remember how they went wrong (Down, Out, Service, Via de grond); existing points: not recorded */
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Only when missing (tests that rewind the version of a current database already have it)
+                val hasColumn = db.query("PRAGMA table_info(points)").use { cursor ->
+                    val name = cursor.getColumnIndex("name")
+                    var found = false
+                    while (cursor.moveToNext()) if (cursor.getString(name) == "errorKind") found = true
+                    found
+                }
+                if (!hasColumn) db.execSQL("ALTER TABLE points ADD COLUMN errorKind TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
         /** A referee match remembers who served the first rally of its game, so undo works after resuming */
         val MIGRATION_7_8 = object : Migration(7, 8) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -225,7 +239,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "squash-analyzer.db",
                 ).addCallback(enableForeignKeys)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
                     .build().also { instance = it }
             }
     }

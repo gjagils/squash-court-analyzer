@@ -989,13 +989,221 @@ enum SquashAnalyzerSchemaV5: VersionedSchema {
     }
 }
 
-// MARK: - Version 6 (current): volley flag
+// MARK: - Version 6 (TestFlight build 16 / Android 0.3): volley flag
 
-/// The live model classes. `SavedPoint` gains `isVolley` (the "Uit de lucht"
-/// switch, docs/plan-6-vakken-slagen.md) with a default, so this is a
-/// lightweight migration; existing points keep `false`.
+/// Frozen copy of the models as they were when version 6 shipped: version 5
+/// plus `SavedPoint.isVolley` (the "Uit de lucht" switch). Never edit these.
 enum SquashAnalyzerSchemaV6: VersionedSchema {
     static var versionIdentifier = Schema.Version(6, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        [SavedMatch.self, SavedGame.self, SavedPoint.self, SavedLet.self, SavedPlayer.self, SavedRefereeMatch.self, SavedBadgeAward.self, SavedPlayerCard.self]
+    }
+
+    @Model
+    final class SavedMatch {
+        var id: UUID
+        var player1Name: String
+        var player2Name: String
+        var matchStartingServer: String
+        var bestOf: Int
+        var savedAt: Date
+        var updatedAt: Date = Date()
+        var status: String = MatchStatus.completed.rawValue
+        var player1CoachingFocus: [String] = []
+        var player2CoachingFocus: [String] = []
+        var player1CoachingNotes: String = ""
+        var player2CoachingNotes: String = ""
+        var player1GamesBefore: Int = 0
+        var player2GamesBefore: Int = 0
+        var player1GamesAfter: Int = 0
+        var player2GamesAfter: Int = 0
+        var player1Id: UUID? = nil
+        var player2Id: UUID? = nil
+        @Relationship(deleteRule: .cascade, inverse: \SavedGame.match)
+        var games: [SavedGame] = []
+
+        init(id: UUID, player1Name: String, player2Name: String, matchStartingServer: String, bestOf: Int, savedAt: Date) {
+            self.id = id
+            self.player1Name = player1Name
+            self.player2Name = player2Name
+            self.matchStartingServer = matchStartingServer
+            self.bestOf = bestOf
+            self.savedAt = savedAt
+        }
+    }
+
+    @Model
+    final class SavedGame {
+        var id: UUID
+        var gameNumber: Int
+        var player1Name: String
+        var player2Name: String
+        var player1Score: Int
+        var player2Score: Int
+        var startingServer: String
+        var winner: String?
+        var match: SavedMatch?
+        var savedAt: Date = Date()
+        @Relationship(deleteRule: .cascade, inverse: \SavedPoint.game)
+        var points: [SavedPoint] = []
+        @Relationship(deleteRule: .cascade, inverse: \SavedLet.game)
+        var lets: [SavedLet] = []
+
+        init(id: UUID, gameNumber: Int, player1Name: String, player2Name: String, player1Score: Int, player2Score: Int, startingServer: String, winner: String?) {
+            self.id = id
+            self.gameNumber = gameNumber
+            self.player1Name = player1Name
+            self.player2Name = player2Name
+            self.player1Score = player1Score
+            self.player2Score = player2Score
+            self.startingServer = startingServer
+            self.winner = winner
+        }
+    }
+
+    @Model
+    final class SavedPoint {
+        var id: UUID
+        var pointNumber: Int
+        var scorer: String
+        var pointType: String
+        var zone: String
+        var shotType: String
+        var server: String
+        var player1Score: Int
+        var player2Score: Int
+        var timestamp: Date
+        var duration: Double
+        var isVolley: Bool = false
+        var game: SavedGame?
+
+        init(id: UUID, pointNumber: Int, scorer: String, pointType: String, zone: String, shotType: String, server: String, player1Score: Int, player2Score: Int, timestamp: Date, duration: Double) {
+            self.id = id
+            self.pointNumber = pointNumber
+            self.scorer = scorer
+            self.pointType = pointType
+            self.zone = zone
+            self.shotType = shotType
+            self.server = server
+            self.player1Score = player1Score
+            self.player2Score = player2Score
+            self.timestamp = timestamp
+            self.duration = duration
+        }
+    }
+
+    @Model
+    final class SavedLet {
+        var id: UUID
+        var letNumber: Int
+        var requestedBy: String
+        var server: String
+        var player1Score: Int
+        var player2Score: Int
+        var timestamp: Date
+        var game: SavedGame?
+
+        init(id: UUID, letNumber: Int, requestedBy: String, server: String, player1Score: Int, player2Score: Int, timestamp: Date) {
+            self.id = id
+            self.letNumber = letNumber
+            self.requestedBy = requestedBy
+            self.server = server
+            self.player1Score = player1Score
+            self.player2Score = player2Score
+            self.timestamp = timestamp
+        }
+    }
+
+    @Model
+    final class SavedPlayer {
+        var id: UUID
+        var name: String
+        var coachingFocusAreas: [String]
+        var coachingNotes: String
+        var createdAt: Date
+        @Attribute(.externalStorage) var photoData: Data? = nil
+        var cardId: UUID? = nil
+
+        init(id: UUID, name: String, coachingFocusAreas: [String], coachingNotes: String, createdAt: Date) {
+            self.id = id
+            self.name = name
+            self.coachingFocusAreas = coachingFocusAreas
+            self.coachingNotes = coachingNotes
+            self.createdAt = createdAt
+        }
+    }
+
+    @Model
+    final class SavedRefereeMatch {
+        var player1Name: String
+        var player2Name: String
+        var bestOf: Int
+        var gameResults: [RefereeGameResult]
+        var savedAt: Date
+        var player1GamesBefore: Int = 0
+        var player2GamesBefore: Int = 0
+        var matchId: UUID? = nil
+        var player1Id: UUID? = nil
+        var player2Id: UUID? = nil
+
+        init(player1Name: String, player2Name: String, bestOf: Int, gameResults: [RefereeGameResult], savedAt: Date) {
+            self.player1Name = player1Name
+            self.player2Name = player2Name
+            self.bestOf = bestOf
+            self.gameResults = gameResults
+            self.savedAt = savedAt
+        }
+    }
+
+    @Model
+    final class SavedBadgeAward {
+        var id: UUID
+        var cardId: UUID
+        var badge: String
+        var matchId: UUID
+        var earnedAt: Date
+        var opponentName: String
+        var awardedBy: String
+        var deletedAt: Date? = nil
+        var cloudSystemFields: Data? = nil
+
+        init(id: UUID, cardId: UUID, badge: String, matchId: UUID, earnedAt: Date, opponentName: String, awardedBy: String) {
+            self.id = id
+            self.cardId = cardId
+            self.badge = badge
+            self.matchId = matchId
+            self.earnedAt = earnedAt
+            self.opponentName = opponentName
+            self.awardedBy = awardedBy
+        }
+    }
+
+    @Model
+    final class SavedPlayerCard {
+        var cardId: UUID
+        var name: String
+        var isOwner: Bool
+        var zoneOwnerName: String
+        var shareURL: String? = nil
+        var systemFields: Data? = nil
+
+        init(cardId: UUID, name: String, isOwner: Bool, zoneOwnerName: String) {
+            self.cardId = cardId
+            self.name = name
+            self.isOwner = isOwner
+            self.zoneOwnerName = zoneOwnerName
+        }
+    }
+}
+
+// MARK: - Version 7 (current): kind of unforced error
+
+/// The live model classes. `SavedPoint` gains `errorKind` (Down, Out, Service
+/// or Via de grond; empty = not recorded) with a default, so this is a
+/// lightweight migration; existing points keep "".
+enum SquashAnalyzerSchemaV7: VersionedSchema {
+    static var versionIdentifier = Schema.Version(7, 0, 0)
 
     static var models: [any PersistentModel.Type] {
         [SavedMatch.self, SavedGame.self, SavedPoint.self, SavedLet.self, SavedPlayer.self, SavedRefereeMatch.self, SavedBadgeAward.self, SavedPlayerCard.self]
@@ -1003,14 +1211,14 @@ enum SquashAnalyzerSchemaV6: VersionedSchema {
 }
 
 /// Alias for the schema the app runs on; bump when a new version is added.
-typealias SquashAnalyzerCurrentSchema = SquashAnalyzerSchemaV6
+typealias SquashAnalyzerCurrentSchema = SquashAnalyzerSchemaV7
 
 enum SquashAnalyzerMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
-        [SquashAnalyzerSchemaV0.self, SquashAnalyzerSchemaV1.self, SquashAnalyzerSchemaV2.self, SquashAnalyzerSchemaV3.self, SquashAnalyzerSchemaV4.self, SquashAnalyzerSchemaV5.self, SquashAnalyzerSchemaV6.self]
+        [SquashAnalyzerSchemaV0.self, SquashAnalyzerSchemaV1.self, SquashAnalyzerSchemaV2.self, SquashAnalyzerSchemaV3.self, SquashAnalyzerSchemaV4.self, SquashAnalyzerSchemaV5.self, SquashAnalyzerSchemaV6.self, SquashAnalyzerSchemaV7.self]
     }
 
-    static var stages: [MigrationStage] { [v0ToV1, v1ToV2, v2ToV3, v3ToV4, v4ToV5, v5ToV6] }
+    static var stages: [MigrationStage] { [v0ToV1, v1ToV2, v2ToV3, v3ToV4, v4ToV5, v5ToV6, v6ToV7] }
 
     /// New SavedMatch attributes all have defaults, so this is a lightweight migration.
     static let v0ToV1 = MigrationStage.lightweight(
@@ -1042,6 +1250,12 @@ enum SquashAnalyzerMigrationPlan: SchemaMigrationPlan {
     static let v5ToV6 = MigrationStage.lightweight(
         fromVersion: SquashAnalyzerSchemaV5.self,
         toVersion: SquashAnalyzerSchemaV6.self
+    )
+
+    /// `SavedPoint.errorKind` has a default
+    static let v6ToV7 = MigrationStage.lightweight(
+        fromVersion: SquashAnalyzerSchemaV6.self,
+        toVersion: SquashAnalyzerSchemaV7.self
     )
 }
 

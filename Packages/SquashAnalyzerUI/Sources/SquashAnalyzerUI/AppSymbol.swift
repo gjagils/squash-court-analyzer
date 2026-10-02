@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.HourglassBottom
 import androidx.compose.material.icons.filled.Psychology
@@ -141,6 +142,7 @@ struct AppSymbol: View {
         case "person.fill": return Icons.Filled.Person
         case "arrow.right": return Icons.AutoMirrored.Filled.ArrowForward
         case "arrow.left": return Icons.AutoMirrored.Filled.ArrowBack
+        case "play.fill": return Icons.Filled.PlayArrow
         default: return nil
         }
     }

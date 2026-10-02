@@ -85,6 +85,8 @@ data class PointEntity(
     val duration: Double,
     /** Volley switch ("Uit de lucht"), version 7 */
     @ColumnInfo(defaultValue = "0") val isVolley: Boolean = false,
+    /** Kind of unforced error (ErrorKind raw value, "" = not recorded), version 9 */
+    @ColumnInfo(defaultValue = "") val errorKind: String = "",
 )
 
 @Entity(

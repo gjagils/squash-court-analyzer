@@ -6,7 +6,7 @@ public extension Match {
             games: games.map { game in
                 BadgeGame(rallies: game.points.map { point in
                               BadgeRally(winner: point.scorer, shot: point.shotType, pointType: point.pointType, zone: point.zone,
-                                         duration: point.duration, isVolley: point.isVolley)
+                                         duration: point.isTimed ? point.duration : nil, isVolley: point.isVolley)
                           },
                           winner: game.winner)
             },

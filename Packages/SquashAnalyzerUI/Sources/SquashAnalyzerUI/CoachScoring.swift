@@ -261,6 +261,8 @@ public struct CoachScoringView: View {
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     /// "Uit de lucht" for the point being entered; off again after every point
     @State private var volley = false
+    /// Down / Out / Service / Grond for an unforced error; cleared after every point
+    @State private var errorKind: ErrorKind? = nil
 
     public init(match: Match, aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil,
                 photos: [String: Data] = [:],
@@ -409,7 +411,7 @@ public struct CoachScoringView: View {
             } else {
                 switch game.scoringStep {
                 case .selectPlayer:
-                    Text("Tik op de score van wie scoort")
+                    Text(game.isStarted ? "Tik op de score van wie scoort" : "Tik START bij de eerste service")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(CoachPalette.textSecondary)
                 case .selectPointType:
@@ -439,12 +441,26 @@ public struct CoachScoringView: View {
     private var scoreTapStage: some View {
         switch game.scoringStep {
         case .selectPlayer:
-            Color.clear
+            VStack {
+                Spacer(minLength: 0)
+                if !game.isStarted && !game.isGameOver && !match.isMatchOver {
+                    startButton
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 24)
         case .selectPointType:
             VStack(spacing: 8) {
                 Spacer(minLength: 0)
                 ForEach(PointType.allCases) { type in
                     if !type.serverOnly || game.selectedPlayer == game.currentServer {
+                        if type == PointType.unforcedError {
+                            // How it went wrong; the court is not asked for an unforced error
+                            ErrorKindToggle(selection: $errorKind,
+                                            available: game.errorKindOptions(whenScoring: game.selectedPlayer ?? Player.player1),
+                                            color: playerColor)
+                                .padding(.top, 4)
+                        }
                         PointTypeButton(pointType: type, color: playerColor, compact: true) {
                             selectPointType(type)
                         }
@@ -504,10 +520,36 @@ public struct CoachScoringView: View {
         }
     }
 
+    /// START at the first serve of a game: from then the rally clock runs, so
+    /// the warm-up and the break between games never count as a rally
+    private var startButton: some View {
+        Button(action: {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                game.start()
+            }
+            onMatchChanged(match)
+        }) {
+            HStack(spacing: 10) {
+                AppSymbol("play.fill", size: 16, color: Color.black.opacity(0.8))
+                Text("START GAME \(match.currentGameNumber)")
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .tracking(1)
+                    .foregroundColor(Color.black.opacity(0.8))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(CoachPalette.gold)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Start game \(match.currentGameNumber)")
+    }
+
     private var cancelButton: some View {
         Button(action: {
             game.clearSelection()
             volley = false
+            errorKind = nil
         }) {
             Text("Annuleer")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -581,7 +623,7 @@ public struct CoachScoringView: View {
 
     /// Time since the last point or let, like iOS' rally timer
     private var rallyTimer: some View {
-        let seconds = max(0, Int(now.timeIntervalSince(game.lastPointTime)))
+        let seconds = Int(game.rallySeconds(at: now))
         let text = (seconds / 60 < 10 ? "0" : "") + "\(seconds / 60):" + (seconds % 60 < 10 ? "0" : "") + "\(seconds % 60)"
         return HStack(spacing: 6) {
             AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
@@ -804,16 +846,18 @@ public struct CoachScoringView: View {
             if game.selectedPlayer == player {
                 game.clearSelection()
             } else {
-                game.zoneForUnforcedErrors = true
                 game.selectPlayer(player)
             }
+            errorKind = nil
         }
     }
 
     private func selectPointType(_ pointType: PointType) {
+        let kind = pointType == PointType.unforcedError ? errorKind : nil
         withAnimation(.easeInOut(duration: 0.2)) {
-            game.selectPointType(pointType)
+            game.selectPointType(pointType, errorKind: kind)
         }
+        errorKind = nil
         if game.scoringStep == .selectPlayer {
             onMatchChanged(match)
         }

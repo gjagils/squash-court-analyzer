@@ -81,7 +81,7 @@ final class SavedGame {
     }
 
     func pointsWon(by player: Player, in zone: CourtZone) -> Int {
-        points.filter { $0.scorerPlayer == player && $0.pointZone == zone }.count
+        points.filter { $0.scorerPlayer == player && $0.pointZone == zone && $0.savedPointType != .unforcedError }.count
     }
 
     func pointsWon(by player: Player, with shotType: ShotType) -> Int {
@@ -92,7 +92,7 @@ final class SavedGame {
 
     /// Average duration of points won by a player
     func averageDurationWon(by player: Player) -> TimeInterval? {
-        let wonPoints = pointsWon(by: player)
+        let wonPoints = pointsWon(by: player).filter { $0.duration > 0 }
         guard !wonPoints.isEmpty else { return nil }
         let totalDuration = wonPoints.reduce(0) { $0 + $1.duration }
         return totalDuration / Double(wonPoints.count)
@@ -100,7 +100,7 @@ final class SavedGame {
 
     /// Average duration of points lost by a player
     func averageDurationLost(by player: Player) -> TimeInterval? {
-        let lostPoints = points.filter { $0.scorerPlayer == player.opponent }
+        let lostPoints = points.filter { $0.scorerPlayer == player.opponent && $0.duration > 0 }
         guard !lostPoints.isEmpty else { return nil }
         let totalDuration = lostPoints.reduce(0) { $0 + $1.duration }
         return totalDuration / Double(lostPoints.count)
@@ -135,7 +135,8 @@ final class SavedGame {
                     player2Score: sp.player2Score,
                     timestamp: sp.timestamp,
                     duration: sp.duration,
-                    isVolley: sp.isVolley
+                    isVolley: sp.isVolley,
+                    errorKind: sp.pointErrorKind
                 )
             }
         game.lets = lets
@@ -150,6 +151,8 @@ final class SavedGame {
                     timestamp: sl.timestamp
                 )
             }
+        // A game with points was under way: going on with it needs no Start tap
+        game.restoreStart()
         // The winner of the last rally serves next; the service box is not stored,
         // so it falls back to the hand-out box until Links/Rechts is tapped.
         game.restoreServiceState()

@@ -57,6 +57,7 @@ data class PointRecord(
     val timestamp: Long,
     val duration: Double,
     val isVolley: Boolean = false,
+    val errorKind: String = "",
 )
 
 data class LetRecord(

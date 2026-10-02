@@ -18,6 +18,8 @@ final class SavedPoint {
     var duration: Double    // Rally duration in seconds
     /// Played out of the air ("Uit de lucht"); schema V6, older points `false`
     var isVolley: Bool = false
+    /// Kind of unforced error (`ErrorKind` raw value); schema V7, "" = not recorded
+    var errorKind: String = ""
 
     var game: SavedGame?
 
@@ -33,7 +35,8 @@ final class SavedPoint {
         player2Score: Int,
         timestamp: Date = Date(),
         duration: TimeInterval = 0,
-        isVolley: Bool = false
+        isVolley: Bool = false,
+        errorKind: ErrorKind? = nil
     ) {
         self.id = id
         self.pointNumber = pointNumber
@@ -47,6 +50,11 @@ final class SavedPoint {
         self.timestamp = timestamp
         self.duration = duration
         self.isVolley = isVolley
+        self.errorKind = errorKind?.rawValue ?? ""
+    }
+
+    var pointErrorKind: ErrorKind? {
+        ErrorKind.from(stored: errorKind)
     }
 
     // MARK: - Computed Properties
@@ -100,7 +108,8 @@ final class SavedPoint {
             player2Score: point.player2Score,
             timestamp: point.timestamp,
             duration: point.duration,
-            isVolley: point.isVolley
+            isVolley: point.isVolley,
+            errorKind: point.errorKind
         )
     }
 }

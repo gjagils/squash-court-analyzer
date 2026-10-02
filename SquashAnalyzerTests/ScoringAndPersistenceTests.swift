@@ -207,27 +207,16 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertNil(saved.pointShotType)
     }
 
-    func testUnforcedErrorCanRecordTheZoneWhenAsked() {
+    func testUnforcedErrorKindSurvivesPersistence() {
         let game = Game()
-        game.zoneForUnforcedErrors = true
         game.selectPlayer(.player2)
-        game.selectPointType(.unforcedError)
-        XCTAssertEqual(game.player2Score, 0, "waits for the zone")
-        XCTAssertEqual(game.scoringStep, .selectZone)
+        game.selectPointType(.unforcedError, errorKind: .viaFloor)
+        XCTAssertEqual(game.player2Score, 1, "no zone step for an unforced error")
+        XCTAssertNil(game.points.last?.zone)
 
-        game.selectZone(.frontLeft)
-        XCTAssertEqual(game.player2Score, 1)
-        XCTAssertEqual(game.points.last?.pointType, .unforcedError)
-        XCTAssertEqual(game.points.last?.zone, .frontLeft)
-        XCTAssertNil(game.points.last?.shotType)
-        XCTAssertNil(game.selectedPlayer)
-
-        // Default behaviour is unchanged
-        let plain = Game()
-        plain.selectPlayer(.player1)
-        plain.selectPointType(.unforcedError)
-        XCTAssertEqual(plain.player1Score, 1)
-        XCTAssertNil(plain.points.last?.zone)
+        let saved = SavedPoint.from(try! XCTUnwrap(game.points.last), pointNumber: 1)
+        XCTAssertEqual(saved.errorKind, "Via de grond")
+        XCTAssertEqual(saved.pointErrorKind, .viaFloor)
     }
 
     func testEmptyStatisticsHaveNoInventedBestResult() {

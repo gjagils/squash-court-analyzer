@@ -35,6 +35,8 @@ struct ContentView: View {
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     /// "Uit de lucht" for the point being entered; off again after every point
     @State private var volley = false
+    /// Down / Out / Service / Grond for an unforced error; cleared after every point
+    @State private var errorKind: ErrorKind? = nil
 
     private var currentGame: Game {
         match.currentGame
@@ -460,7 +462,7 @@ struct ContentView: View {
         Group {
             switch currentGame.scoringStep {
             case .selectPlayer:
-                Text("Tik op de score van wie scoort")
+                Text(currentGame.isStarted ? "Tik op de score van wie scoort" : "Tik START bij de eerste service")
                     .font(AppFonts.body(14))
                     .foregroundColor(AppColors.textSecondary)
             case .selectPointType:
@@ -522,12 +524,27 @@ struct ContentView: View {
         let color: Color = currentGame.selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.steelBlue
         switch currentGame.scoringStep {
         case .selectPlayer:
-            Color.clear
+            VStack {
+                Spacer(minLength: 0)
+                if !currentGame.isStarted && !currentGame.isGameOver && !match.isMatchOver {
+                    startButton
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 24)
+            .transition(.opacity)
         case .selectPointType:
             VStack(spacing: 8) {
                 Spacer(minLength: 0)
                 ForEach(PointType.allCases) { type in
                     if !type.serverOnly || currentGame.selectedPlayer == currentGame.currentServer {
+                        if type == .unforcedError {
+                            // How it went wrong; the court is not asked for an unforced error
+                            ErrorKindToggle(selection: $errorKind,
+                                            available: currentGame.errorKindOptions(whenScoring: currentGame.selectedPlayer ?? .player1),
+                                            color: color)
+                                .padding(.top, 4)
+                        }
                         PointTypeButton(pointType: type, color: color, compact: true) { handleInlinePointType(type) }
                     }
                 }
@@ -572,6 +589,32 @@ struct ContentView: View {
         }
     }
 
+    /// START at the first serve of a game: from then the rally clock runs, so
+    /// the warm-up and the break between games never count as a rally
+    private var startButton: some View {
+        Button(action: {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                currentGame.start()
+            }
+            startRallyTimer()
+        }) {
+            HStack(spacing: 10) {
+                Image(systemName: "play.fill")
+                    .font(.system(size: 16, weight: .bold))
+                Text("START GAME \(match.currentGameNumber)")
+                    .font(AppFonts.label(15))
+                    .tracking(1)
+            }
+            .foregroundColor(Color.black.opacity(0.8))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(AppColors.accentGold)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Start game \(match.currentGameNumber)")
+    }
+
     private var cancelButton: some View {
         Button(action: cancelInlinePoint) {
             Text("Annuleer")
@@ -588,20 +631,23 @@ struct ContentView: View {
             if currentGame.selectedPlayer == player {
                 currentGame.clearSelection()
             } else {
-                currentGame.zoneForUnforcedErrors = true
                 currentGame.selectPlayer(player)
             }
+            errorKind = nil
         }
     }
 
     private func handleInlinePointType(_ pointType: PointType) {
+        let kind = pointType == .unforcedError ? errorKind : nil
         withAnimation(.easeInOut(duration: 0.2)) {
-            currentGame.selectPointType(pointType)
+            currentGame.selectPointType(pointType, errorKind: kind)
         }
+        errorKind = nil
     }
 
     private func cancelInlinePoint() {
         volley = false
+        errorKind = nil
         withAnimation(.easeInOut(duration: 0.2)) {
             currentGame.clearSelection()
         }
@@ -657,9 +703,9 @@ struct ContentView: View {
     // MARK: - Rally Timer
     private func startRallyTimer() {
         stopRallyTimer()
-        rallyElapsedTime = Date().timeIntervalSince(currentGame.lastPointTime)
+        rallyElapsedTime = currentGame.rallySeconds()
         rallyTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            rallyElapsedTime = Date().timeIntervalSince(currentGame.lastPointTime)
+            rallyElapsedTime = currentGame.rallySeconds()
         }
     }
 

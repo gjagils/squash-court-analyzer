@@ -74,7 +74,8 @@ class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardS
                     points = game.points.mapIndexed { i, point ->
                         PointRecord(point.id.uuidString, i + 1, point.scorer.rawValue, point.pointType.rawValue,
                             point.zone?.rawValue ?: "", point.shotType?.rawValue ?: "", point.server.rawValue,
-                            point.player1Score, point.player2Score, millis(point.timestamp), point.duration, point.isVolley)
+                            point.player1Score, point.player2Score, millis(point.timestamp), point.duration, point.isVolley,
+                            point.errorKind?.rawValue ?: "")
                     },
                     lets = game.lets.mapIndexed { i, call ->
                         LetRecord(call.id.uuidString, i + 1, call.requestedBy.rawValue, call.server.rawValue,
@@ -115,7 +116,8 @@ class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardS
                     zone = if (point.zone.isEmpty()) null else requireNotNull(CourtZone.init(rawValue = point.zone)),
                     shotType = if (point.shotType.isEmpty()) null else requireNotNull(ShotType.init(rawValue = point.shotType)),
                     server = player(point.server), player1Score = point.player1Score, player2Score = point.player2Score,
-                    timestamp = date(point.timestamp), duration = point.duration, isVolley = point.isVolley)
+                    timestamp = date(point.timestamp), duration = point.duration, isVolley = point.isVolley,
+                    errorKind = if (point.errorKind.isEmpty()) null else ErrorKind.init(rawValue = point.errorKind))
             })
             game.lets = SwiftArray(saved.lets.map { call ->
                 LetCall(id = uuid(call.id), requestedBy = player(call.requestedBy), server = player(call.server),
@@ -130,6 +132,8 @@ class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardS
             saved.serviceState?.let { game.serverSide = requireNotNull(ServerSide.init(rawValue = JSONObject(it).getString("side"))) }
             // Time spent with the app closed is not part of the next rally.
             game.lastPointTime = Date()
+            // A game with points was under way: going on with it needs no Start tap
+            game.restoreStart()
             game
         })
         match.currentGameIndex = row.games.lastIndex

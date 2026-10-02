@@ -175,4 +175,51 @@ final class MigrationTests: XCTestCase {
         try context.save()
         XCTAssertTrue(try XCTUnwrap(context.fetch(FetchDescriptor<SavedPoint>()).first).isVolley)
     }
+
+    /// Build 16 / Android 0.3 wrote V6: V7 only adds the kind of unforced error
+    @MainActor
+    func testStoreFromVersion6MigratesToErrorKind() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("v6-\(UUID().uuidString).store")
+        defer {
+            for suffix in ["", "-shm", "-wal"] { try? FileManager.default.removeItem(atPath: url.path + suffix) }
+        }
+
+        do {
+            typealias V6 = SquashAnalyzerSchemaV6
+            let container = try ModelContainer(
+                for: Schema(versionedSchema: V6.self),
+                configurations: [ModelConfiguration(url: url, cloudKitDatabase: .none)]
+            )
+            let context = container.mainContext
+            let match = V6.SavedMatch(id: UUID(), player1Name: "Paul", player2Name: "Kristian", matchStartingServer: "Speler 1", bestOf: 5, savedAt: Date())
+            let game = V6.SavedGame(id: UUID(), gameNumber: 1, player1Name: "Paul", player2Name: "Kristian", player1Score: 1, player2Score: 1, startingServer: "Speler 1", winner: nil)
+            let volley = V6.SavedPoint(id: UUID(), pointNumber: 1, scorer: "Speler 1", pointType: "Winner", zone: "Voor Links", shotType: "Drop",
+                                       server: "Speler 1", player1Score: 1, player2Score: 0, timestamp: Date(), duration: 4)
+            volley.isVolley = true
+            let error = V6.SavedPoint(id: UUID(), pointNumber: 2, scorer: "Speler 2", pointType: "Unforced Error", zone: "", shotType: "",
+                                      server: "Speler 1", player1Score: 1, player2Score: 1, timestamp: Date(), duration: 3)
+            volley.game = game
+            error.game = game
+            game.points = [volley, error]
+            game.match = match
+            match.games = [game]
+            context.insert(match)
+            try context.save()
+        }
+
+        let container = try ModelContainer(
+            for: Schema(versionedSchema: SquashAnalyzerCurrentSchema.self),
+            migrationPlan: SquashAnalyzerMigrationPlan.self,
+            configurations: [ModelConfiguration(url: url, cloudKitDatabase: .none)]
+        )
+        let context = container.mainContext
+        let points = try context.fetch(FetchDescriptor<SavedPoint>()).sorted { $0.pointNumber < $1.pointNumber }
+        XCTAssertEqual(points.count, 2)
+        XCTAssertTrue(points[0].isVolley, "the volley flag survives")
+        XCTAssertNil(points[1].pointErrorKind, "older errors have no kind")
+
+        points[1].errorKind = ErrorKind.down.rawValue
+        try context.save()
+        XCTAssertEqual(try context.fetch(FetchDescriptor<SavedPoint>()).first { $0.pointNumber == 2 }?.pointErrorKind, .down)
+    }
 }

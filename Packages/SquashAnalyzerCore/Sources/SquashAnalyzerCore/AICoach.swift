@@ -128,7 +128,7 @@ public enum AICoachPrompt {
         - Totaal punten verloren: \(game.pointsWon(by: opponent).count)
         - Winners geslagen: \(game.winners(by: player).count)
         - Forced errors afgedwongen: \(game.forcedErrors(by: player).count)
-        - Eigen unforced errors: \(game.unforcedErrors(by: opponent).count)
+        - Eigen unforced errors: \(game.unforcedErrors(by: opponent).count) (soort: \(ErrorKind.summary(game.errorKindCounts(madeBy: player)) ?? "niet vastgelegd"))
         - Cadeautjes (unforced errors tegenstander): \(game.unforcedErrors(by: player).count)
         - Strokes toegekend: \(game.strokes(by: player).count)
         - Servicepunten (direct uit de service): \(game.servicePoints(by: player).count)
@@ -138,6 +138,7 @@ public enum AICoachPrompt {
         - Zone waar tegenstander scoorde: \(worstZone)
 
         De baan is verdeeld in \(court). Links/rechts is de forehand- of backhandkant, afhankelijk van de speler.
+        Een unforced error heeft geen zone maar een soort: Down (in de tin), Out (buiten de baan), Service (servicefout) of Grond (bal eerst op de vloer).
 
         WAAR DE PUNTEN VALLEN (per rij en kant):
         - Gewonnen (eigen winners + forced errors): \(ZoneProfile.describe(profile.won))

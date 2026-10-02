@@ -39,6 +39,9 @@ public enum GameSummaryText {
         • Servicepunten: \(p1Service) | Strokes: \(p1Strokes)
         """
 
+        if let kinds = ErrorKind.summary(game.errorKindCounts(madeBy: Player.player1)) {
+            text += "\n• Soort fouten: \(kinds)"
+        }
         if let zone = game.bestZone(for: Player.player1) {
             text += "\n• Beste zone: \(zone.rawValue)"
         }
@@ -51,6 +54,9 @@ public enum GameSummaryText {
         • Servicepunten: \(p2Service) | Strokes: \(p2Strokes)
         """
 
+        if let kinds = ErrorKind.summary(game.errorKindCounts(madeBy: Player.player2)) {
+            text += "\n• Soort fouten: \(kinds)"
+        }
         if let zone = game.bestZone(for: Player.player2) {
             text += "\n• Beste zone: \(zone.rawValue)"
         }

@@ -377,6 +377,12 @@ public struct SharedCoachDashboardView: View {
                 countBadge("Eigen fouten", game.unforcedErrors(by: player.opponent).count, DashboardPalette.red)
                 countBadge("Strokes", game.strokes(by: player).count, Color(red: 0.85, green: 0.30, blue: 0.30))
             }
+            // How the own unforced errors went: "Down 2 · Out 1"
+            if let kinds = ErrorKind.summary(game.errorKindCounts(madeBy: player)) {
+                Text("Eigen fouten: \(kinds)")
+                    .font(.system(size: 11))
+                    .foregroundColor(DashboardPalette.secondary)
+            }
         }
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 12).fill(DashboardPalette.card))

@@ -626,6 +626,13 @@ struct CoachDashboardView: View {
                 PointTypeBadge(label: "Eigen fouten", count: ownErrors, color: .red)
                 PointTypeBadge(label: "Strokes", count: strokes, color: AppColors.warmRed)
             }
+
+            // How the own unforced errors went: "Down 2 · Out 1"
+            if let kinds = ErrorKind.summary(game.errorKindCounts(madeBy: selectedPlayer)) {
+                Text("Eigen fouten: \(kinds)")
+                    .font(AppFonts.caption(11))
+                    .foregroundColor(AppColors.textSecondary)
+            }
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)

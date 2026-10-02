@@ -89,6 +89,20 @@ final class ErrorKindAndStartTests: XCTestCase {
         XCTAssertNil(odd.normalized.errorKind)
     }
 
+    func testAdviceNamesTheErrorThatKeepsComingBack() {
+        let game = Game()
+        for _ in 0..<3 {
+            game.addPoint(to: Player.player2, pointType: PointType.unforcedError, at: nil, with: nil, errorKind: ErrorKind.down)
+        }
+        game.addPoint(to: Player.player2, pointType: PointType.unforcedError, at: nil, with: nil, errorKind: ErrorKind.out)
+        let texts = AdviceRules.candidates(in: game, for: Player.player1).map { $0.item.text }
+        XCTAssertTrue(texts.contains("3× in de tin: mik iets hoger boven de tin."))
+        // One error of a kind is no pattern
+        let once = Game()
+        once.addPoint(to: Player.player2, pointType: PointType.unforcedError, at: nil, with: nil, errorKind: ErrorKind.service)
+        XCTAssertNil(AdviceRules.mostCommonErrorKind(in: once, madeBy: Player.player1))
+    }
+
     // MARK: - Start of the game
 
     func testWarmUpDoesNotCountAsTheFirstRally() {

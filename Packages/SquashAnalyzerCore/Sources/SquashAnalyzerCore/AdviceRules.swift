@@ -103,6 +103,11 @@ enum AdviceRules {
         } else if ownErrors >= 2 && errorRate > 0.25 {
             add(AdviceTopic.hurry, AdviceTone.warning, "Minder haast: neem meer tijd voor je slagen.", Double(ownErrors), "haast")
         }
+        // The kind of error that keeps coming back (Down/Out/Service/Grond)
+        if let common = mostCommonErrorKind(in: game, madeBy: player) {
+            add(AdviceTopic.ownErrors, AdviceTone.warning, errorKindTip(common.kind, count: common.count),
+                Double(common.count), "fout-\(common.kind.rawValue)")
+        }
         let forcedAgainst = game.forcedErrors(by: opponent).count
         if forcedAgainst >= 3 {
             add(AdviceTopic.forcedErrors, AdviceTone.warning, "\(forcedAgainst) forced errors: heb je racket eerder klaar voor je slag.",
@@ -189,6 +194,31 @@ enum AdviceRules {
         return result
     }
 
+    /// The kind of unforced error `player` made most, when it happened at least twice
+    static func mostCommonErrorKind(in game: Game, madeBy player: Player) -> ErrorKindCount? {
+        let counts = game.errorKindCounts(madeBy: player)
+        var best: ErrorKind? = nil
+        var most = 1
+        for kind in ErrorKind.allCases {
+            let count = counts[kind] ?? 0
+            if count > most {
+                most = count
+                best = kind
+            }
+        }
+        guard let best else { return nil }
+        return ErrorKindCount(kind: best, count: most)
+    }
+
+    static func errorKindTip(_ kind: ErrorKind, count: Int) -> String {
+        switch kind {
+        case .down: return "\(count)× in de tin: mik iets hoger boven de tin."
+        case .out: return "\(count)× out: minder risico, houd de bal onder de outlijn."
+        case .service: return "\(count) servicefouten: neem je tijd en speel een veilige service."
+        case .viaFloor: return "\(count)× via de grond: kom laag en blijf achter de bal."
+        }
+    }
+
     /// The shot that won most points (winners and forced errors) in a row,
     /// with at least 3; a volley counts as the same shot
     static func bestShot(in game: Game, for player: Player, row: CourtRow) -> ShotCount? {
@@ -214,4 +244,11 @@ enum AdviceRules {
         if texts.count <= 1 { return texts.first ?? "" }
         return texts.dropLast().joined(separator: ", ") + " en " + texts[texts.count - 1]
     }
+}
+
+/// A kind of unforced error and how often it happened (a struct, not a tuple:
+/// tuple labels are fragile in Skip's Kotlin, see docs/android-port.md)
+struct ErrorKindCount {
+    let kind: ErrorKind
+    let count: Int
 }

@@ -74,6 +74,9 @@ public struct RefereeSessionView: View {
                         if let match { persist(match, exit: exitAfterSave) }
                         else { Task { await load() } }
                     }
+                    // Every screen has a way out, also when saving or loading fails
+                    Button(match == nil ? "Terug naar home" : "Sluiten zonder opslaan") { close() }
+                        .foregroundColor(CoachPalette.textSecondary)
                 }
                 .foregroundColor(CoachPalette.textPrimary)
                 .padding(24).background(CoachPalette.backgroundMedium)

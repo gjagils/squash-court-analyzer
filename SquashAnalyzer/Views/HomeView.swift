@@ -47,7 +47,14 @@ struct HomeView: View {
             PlayerManagementView()
         }
         .sheet(isPresented: $showingBadgeCatalog) {
-            NavigationStack { BadgeCatalogView() }
+            NavigationStack {
+                BadgeCatalogView()
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Sluiten") { showingBadgeCatalog = false }
+                        }
+                    }
+            }
         }
         .fullScreenCover(item: $createdRefereeMatch) { m in
             RefereeView(match: m) { createdRefereeMatch = nil }

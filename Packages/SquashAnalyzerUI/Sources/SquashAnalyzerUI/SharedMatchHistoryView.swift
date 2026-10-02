@@ -119,6 +119,11 @@ public struct SharedMatchHistoryView: View {
                     }
                 }
                 .navigationTitle("Speler")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Sluiten") { choosingPlayer = false }
+                    }
+                }
             }
         }
         .sheet(isPresented: Binding(get: { analysed != nil }, set: { if !$0 { analysed = nil } })) {

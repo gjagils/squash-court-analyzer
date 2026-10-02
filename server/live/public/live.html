@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>{{TITLE}}</title>
+<meta property="og:title" content="{{TITLE}}">
+<meta property="og:description" content="{{DESCRIPTION}}">
+<meta property="og:url" content="{{URL}}">
+<meta property="og:image" content="{{IMAGE}}">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#000000">
+<style>
+  :root {
+    --bg: #000000; --card: #161410; --gold: #E8902A; --orange: #F28D26; --blue: #7F9AA8;
+    --text-1: #F2EFEA; --text-2: #B3AFA8; --text-3: #807C75; --border: rgba(255,255,255,0.08); --live: #E5484D;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text-1); min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased; display: flex; justify-content: center; padding: 20px 16px 40px;
+  }
+  main { width: 100%; max-width: 440px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .brand { font-size: 12px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text-2); }
+  .brand span { color: var(--gold); }
+  .badge { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; padding: 5px 10px; border-radius: 999px;
+           border: 1px solid var(--border); color: var(--text-2); text-transform: uppercase; }
+  .badge.live { color: #fff; background: var(--live); border-color: var(--live); }
+  .badge.live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #fff;
+                        margin-right: 6px; vertical-align: 1px; animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.3; } }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
+  .status { text-align: center; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+            color: var(--gold); margin-bottom: 14px; min-height: 18px; }
+  .row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 14px; padding: 10px 0; }
+  .row + .row { border-top: 1px solid var(--border); }
+  .name { font-size: 20px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .p1 .name { color: var(--orange); } .p2 .name { color: var(--blue); }
+  .serve { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); margin-left: 8px;
+           vertical-align: 3px; visibility: hidden; }
+  .serving .serve { visibility: visible; }
+  .side { font-size: 11px; color: var(--text-3); margin-left: 4px; visibility: hidden; }
+  .serving .side { visibility: visible; }
+  .games { font-size: 15px; font-weight: 700; color: var(--text-2); min-width: 22px; text-align: center;
+           border: 1px solid var(--border); border-radius: 8px; padding: 4px 6px; }
+  .points { font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 64px; text-align: right; }
+  .winner .name > span:first-child::after { content: " 🏆"; }
+  .history { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+  .chip { font-size: 13px; color: var(--text-2); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px;
+          font-variant-numeric: tabular-nums; }
+  .last { margin-top: 14px; text-align: center; font-size: 13px; color: var(--text-2); min-height: 18px; }
+  .updated { margin-top: 14px; text-align: center; font-size: 12px; color: var(--text-3); }
+  .notice { margin-top: 16px; text-align: center; font-size: 14px; color: var(--text-2); line-height: 1.5; }
+  .notice strong { color: var(--text-1); }
+  footer { margin-top: 26px; text-align: center; font-size: 12px; color: var(--text-3); line-height: 1.6; }
+  footer a { color: var(--gold); text-decoration: none; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="brand">Squash <span>Analyzer</span></div>
+    <div class="badge" id="badge">Verbinden…</div>
+  </header>
+
+  <section class="card" id="board" hidden>
+    <div class="status" id="status"></div>
+    <div class="row p1" id="row1">
+      <div class="name"><span id="name1"></span><span class="serve" aria-hidden="true"></span><span class="side" id="side1"></span></div>
+      <div class="games" id="games1" title="Games">0</div>
+      <div class="points" id="points1">0</div>
+    </div>
+    <div class="row p2" id="row2">
+      <div class="name"><span id="name2"></span><span class="serve" aria-hidden="true"></span><span class="side" id="side2"></span></div>
+      <div class="games" id="games2" title="Games">0</div>
+      <div class="points" id="points2">0</div>
+    </div>
+    <div class="history" id="history"></div>
+    <div class="last" id="last"></div>
+    <div class="updated" id="updated"></div>
+  </section>
+
+  <p class="notice" id="notice" hidden></p>
+
+  <footer>
+    Live gedeeld vanuit <a href="https://squashanalyzer.com">Squash Analyzer</a>.<br>
+    Alleen voornamen en de stand; na de wedstrijd wordt alles gewist.
+  </footer>
+</main>
+<script>
+(function () {
+  var id = '{{ID}}';
+  var $ = function (x) { return document.getElementById(x); };
+  var lastReceived = 0;
+  var hadState = false;
+  var ended = false;
+
+  var statusText = {
+    warmup: 'Inspelen…',
+    playing: null,
+    between: 'Pauze tussen de games',
+    finished: 'Afgelopen'
+  };
+
+  function render(s) {
+    hadState = true;
+    $('board').hidden = false;
+    $('name1').textContent = s.p1;
+    $('name2').textContent = s.p2;
+    $('points1').textContent = s.score[0];
+    $('points2').textContent = s.score[1];
+    $('games1').textContent = s.gamesWon[0];
+    $('games2').textContent = s.gamesWon[1];
+    var live = s.status !== 'finished';
+    $('row1').classList.toggle('serving', live && s.server === 1);
+    $('row2').classList.toggle('serving', live && s.server === 2);
+    $('side1').textContent = s.side === 'L' ? 'links' : 'rechts';
+    $('side2').textContent = s.side === 'L' ? 'links' : 'rechts';
+    $('row1').classList.toggle('winner', s.winner === 1);
+    $('row2').classList.toggle('winner', s.winner === 2);
+    var gameNumber = s.gamesWon[0] + s.gamesWon[1] + (s.status === 'playing' || s.status === 'warmup' ? 1 : 0);
+    var text = statusText[s.status];
+    if (s.status === 'playing') text = 'Game ' + gameNumber + ' · best of ' + s.bestOf;
+    if (s.status === 'finished' && s.winner) text = (s.winner === 1 ? s.p1 : s.p2) + ' wint ' +
+      Math.max(s.gamesWon[0], s.gamesWon[1]) + '-' + Math.min(s.gamesWon[0], s.gamesWon[1]);
+    $('status').textContent = text || '';
+    var history = $('history');
+    history.textContent = '';
+    s.games.forEach(function (g) {
+      var chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = g[0] + '-' + g[1];
+      history.appendChild(chip);
+    });
+    $('last').textContent = s.lastPoint || '';
+    lastReceived = Date.now();
+    setBadge(live && !ended ? 'live' : 'done');
+    tick();
+  }
+
+  function setBadge(kind) {
+    var badge = $('badge');
+    badge.className = 'badge' + (kind === 'live' ? ' live' : '');
+    badge.textContent = kind === 'live' ? 'Live' : kind === 'done' ? 'Afgelopen' : kind === 'lost' ? 'Geen verbinding' : 'Verbinden…';
+  }
+
+  function tick() {
+    if (!lastReceived || ended) { $('updated').textContent = ''; return; }
+    var seconds = Math.round((Date.now() - lastReceived) / 1000);
+    var text = seconds < 5 ? 'Zojuist bijgewerkt' : seconds < 60 ? seconds + ' s geleden bijgewerkt'
+      : Math.round(seconds / 60) + ' min geleden bijgewerkt';
+    if (seconds > 300) text += ' · geen nieuws van de baan';
+    $('updated').textContent = text;
+  }
+  setInterval(tick, 1000);
+
+  function showEnded() {
+    ended = true;
+    setBadge('done');
+    $('updated').textContent = '';
+    var notice = $('notice');
+    notice.hidden = false;
+    notice.innerHTML = hadState
+      ? '<strong>De wedstrijd is afgelopen.</strong> Dit was de eindstand; de livesessie is gewist.'
+      : '<strong>Deze livewedstrijd is afgelopen</strong> of de link klopt niet.';
+  }
+
+  if (!window.EventSource) {
+    $('notice').hidden = false;
+    $('notice').textContent = 'Deze browser kan de stand niet live volgen.';
+    return;
+  }
+  var source = new EventSource('/api/live/' + encodeURIComponent(id) + '/events');
+  source.addEventListener('state', function (e) {
+    try { render(JSON.parse(e.data).snapshot); } catch (err) {}
+  });
+  source.addEventListener('ended', function (e) {
+    try { var data = JSON.parse(e.data); if (data.snapshot) render(data.snapshot); } catch (err) {}
+    source.close();
+    showEnded();
+  });
+  source.onerror = function () {
+    if (ended) return;
+    if (source.readyState === EventSource.CLOSED) {
+      showEnded();
+    } else if (hadState) {
+      setBadge('lost');
+    }
+  };
+})();
+</script>
+</body>
+</html>

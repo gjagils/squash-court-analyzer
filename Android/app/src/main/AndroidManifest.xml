@@ -20,9 +20,9 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Player card links, the same ones iOS shares. Verified App Links
-                 need website/.well-known/assetlinks.json (card sharing step 5);
-                 until then Android offers "open with" for these. -->
+            <!-- Player card links, the same ones iOS shares. Verified through
+                 website/.well-known/assetlinks.json (Play signing key and upload
+                 key); a debug build is signed differently and gets "open with". -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

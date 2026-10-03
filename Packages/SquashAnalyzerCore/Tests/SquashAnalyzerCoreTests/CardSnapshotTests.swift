@@ -96,5 +96,7 @@ final class CardSnapshotTests: XCTestCase {
         XCTAssertNil(CardSnapshot(url: URL(string: "https://example.com/kaart/#" + iosPayload)!))
         XCTAssertNil(CardSnapshot(url: URL(string: "https://squashanalyzer.com/kaart/")!))
         XCTAssertNil(CardSnapshot(url: URL(string: "https://squashanalyzer.com/kaart/#nietgeldig")!))
+        XCTAssertNil(CardSnapshot(url: URL(string: "https://squashanalyzer.com/kaartspel#" + iosPayload)!))
+        XCTAssertNotNil(CardSnapshot(url: URL(string: "https://squashanalyzer.com/kaart#" + iosPayload)!))
     }
 }

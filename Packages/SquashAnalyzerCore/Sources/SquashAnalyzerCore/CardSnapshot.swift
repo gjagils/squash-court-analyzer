@@ -139,7 +139,9 @@ public struct CardSnapshot: Codable, Equatable, Sendable {
     /// Reads a card link from the website or the app's own scheme; nil for any other URL
     public init?(url: URL) {
         let host = url.host ?? ""
-        let isWeb = (host == "squashanalyzer.com" || host == "www.squashanalyzer.com") && url.path.hasPrefix("/kaart")
+        // "/kaart" or "/kaart/…", not just anything that starts with those letters
+        let isCardPath = url.path == "/kaart" || url.path.hasPrefix("/kaart/")
+        let isWeb = (host == "squashanalyzer.com" || host == "www.squashanalyzer.com") && isCardPath
         let isApp = url.scheme == "squashanalyzer" && host == "kaart"
         guard isWeb || isApp, let fragment = url.fragment, !fragment.isEmpty else { return nil }
         // Assigned directly, not via `guard let snapshot = try? ...; self = snapshot`:

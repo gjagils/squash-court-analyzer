@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.squashanalyzer.android",
+      "sha256_cert_fingerprints": [
+        "08:32:96:3D:89:C2:49:DC:3C:FC:97:D6:3B:36:16:8F:B1:7C:54:A3:5A:9B:79:BE:9C:9C:A4:E6:9D:0E:85:63",
+        "74:48:87:03:79:20:87:B7:87:B6:55:B1:3C:21:2C:2E:0E:E8:32:80:82:00:C2:FD:ED:68:EF:B0:63:3D:5B:54"
+      ]
+    }
+  }
+]

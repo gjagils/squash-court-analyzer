@@ -1,14 +1,18 @@
 # Portainer stack (Stacks → Add stack → Repository): repository
 # gjagils/squash-court-analyzer, compose path server/live/docker-compose.yml.
-# PUBLIC_URL is the address people get in WhatsApp; the reverse proxy in front
-# (Nginx Proxy Manager, Traefik, Caddy, ...) handles HTTPS for that domain and
-# forwards to port 8080 of this container. See server/live/README.md.
+# PUBLIC_URL is the address people get in WhatsApp; whatever is in front
+# (here a Cloudflare Tunnel: live.squashanalyzer.com → http://<nas>:LIVE_PORT)
+# handles HTTPS. See server/live/README.md.
 services:
   squash-live:
     build: .
     image: squash-live:latest
     container_name: squash-live
     restart: unless-stopped
+    # Docker's default bridge: the NAS has no address pool left for a new
+    # network per stack ("could not find an available, non-overlapping IPv4
+    # address pool")
+    network_mode: bridge
     environment:
       PUBLIC_URL: ${PUBLIC_URL:-https://live.squashanalyzer.com}
       # Minutes without an update before a session is removed (lost phone, no network)

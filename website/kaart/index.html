@@ -95,9 +95,26 @@
       return Uint8Array.from(binary, c => c.charCodeAt(0));
     }
 
+    // The same limits as the apps (CardSnapshot): a real card is a few KB
+    const MAX_PAYLOAD = 64 * 1024;
+    const MAX_INFLATED = 256 * 1024;
+
+    // Read in chunks and stop past the limit, so a tiny "zip bomb" cannot fill memory
     async function inflate(bytes) {
-      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
-      return await new Response(stream).text();
+      const reader = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw")).getReader();
+      const chunks = [];
+      let total = 0;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        total += value.length;
+        if (total > MAX_INFLATED) { await reader.cancel(); throw new Error("too large"); }
+        chunks.push(value);
+      }
+      const all = new Uint8Array(total);
+      let offset = 0;
+      for (const chunk of chunks) { all.set(chunk, offset); offset += chunk.length; }
+      return new TextDecoder().decode(all);
     }
 
     function el(tag, className, text) {
@@ -154,6 +171,7 @@
       const status = document.getElementById("status");
       if (!payload) { status.textContent = "Deze link bevat geen kaart."; return; }
       try {
+        if (payload.length > MAX_PAYLOAD) throw new Error("too long");
         const card = JSON.parse(await inflate(decodeBase64Url(payload)));
         if (!card || typeof card.n !== "string") throw new Error("geen kaart");
         render(card, payload);

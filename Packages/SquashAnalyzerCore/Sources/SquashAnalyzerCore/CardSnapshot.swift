@@ -1,5 +1,8 @@
 import Foundation
 #if !SKIP
+import Compression
+#endif
+#if !SKIP
 import CryptoKit
 #endif
 
@@ -118,7 +121,13 @@ public struct CardSnapshot: Codable, Equatable, Sendable {
         URL(string: CardSnapshot.webBase + (try payload()))!
     }
 
+    /// A link longer than this is refused before decoding (a real card is a few KB)
+    static let maxPayloadLength = 64 * 1024
+    /// Decompressing stops past this, so a tiny "zip bomb" cannot fill memory
+    static let maxInflatedBytes = 256 * 1024
+
     public init(payload: String) throws {
+        guard payload.count <= CardSnapshot.maxPayloadLength else { throw CardSnapshotError.unreadable }
         var base64 = payload.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
         let padding = (4 - base64.count % 4) % 4
         for _ in 0..<padding { base64 += "=" }
@@ -179,11 +188,28 @@ public struct CardSnapshot: Codable, Equatable, Sendable {
                 throw CardSnapshotError.unreadable
             }
             output.write(buffer, 0, count)
+            if output.size() > maxInflatedBytes {
+                inflater.end()
+                throw CardSnapshotError.unreadable
+            }
         }
         inflater.end()
         return Data(platformValue: output.toByteArray())
         #else
-        return try (data as NSData).decompressed(using: .zlib) as Data
+        // Streamed, so decompressing stops as soon as the output is too large
+        var output = Data()
+        let filter = try OutputFilter(.decompress, using: .zlib) { chunk in
+            guard let chunk else { return }
+            output.append(chunk)
+            if output.count > maxInflatedBytes { throw CardSnapshotError.unreadable }
+        }
+        do {
+            try filter.write(data)
+            try filter.finalize()
+        } catch {
+            throw CardSnapshotError.unreadable
+        }
+        return output
         #endif
     }
 }

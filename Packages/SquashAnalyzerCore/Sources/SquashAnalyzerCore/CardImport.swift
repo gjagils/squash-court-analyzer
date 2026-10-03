@@ -83,8 +83,19 @@ public final class CardInbox {
     /// for anything that is not a readable card link.
     @discardableResult
     public func receive(_ link: String) -> Bool {
-        guard let url = URL(string: link), let snapshot = CardSnapshot(url: url) else { return false }
+        guard let snapshot = CardInbox.snapshot(from: link) else { return false }
         pending = snapshot
         return true
+    }
+
+    /// Decodes a link without touching the inbox, so Android can do it off the
+    /// main thread and hand the result to `accept` afterwards
+    public static func snapshot(from link: String) -> CardSnapshot? {
+        guard let url = URL(string: link) else { return nil }
+        return CardSnapshot(url: url)
+    }
+
+    public func accept(_ snapshot: CardSnapshot) {
+        pending = snapshot
     }
 }

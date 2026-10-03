@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.room.withTransaction
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import squash.analyzer.ui.SamplePlayers
 import androidx.activity.compose.setContent
@@ -128,10 +130,14 @@ class MainActivity : AppCompatActivity() {
         receiveCardLink(intent)
     }
 
+    /** Decoded off the main thread (a link is untrusted input), handed over on it */
     private fun receiveCardLink(intent: Intent?) {
         if (intent?.action != Intent.ACTION_VIEW) return
         val link = intent.dataString ?: return
-        cardInbox.receive(link)
+        lifecycleScope.launch {
+            val snapshot = withContext(Dispatchers.Default) { CardInbox.snapshot(from = link) }
+            if (snapshot != null) cardInbox.accept(snapshot)
+        }
     }
 
     /** Identifies this install as the awarding coach, like iOS' `BadgeAwarder.installId` */

@@ -67,6 +67,30 @@ final class CardSnapshotTests: XCTestCase {
         XCTAssertEqual(CardSnapshot(url: appURL), snapshot)
     }
 
+    /// A tiny link that unpacks to megabytes is refused, not decompressed in full (T6)
+    func testAZipBombIsRefused() throws {
+        let zeros = Data(count: 2 * 1024 * 1024)
+        let bomb = try CardSnapshot.deflate(zeros).base64EncodedString()
+        XCTAssertLessThan(bomb.count, CardSnapshot.maxPayloadLength, "small enough to pass the length check")
+        XCTAssertFalse(reads(bomb))
+        XCTAssertNil(CardSnapshot(url: URL(string: CardSnapshot.appBase + bomb)!))
+    }
+
+    func testATooLongLinkIsRefused() {
+        let long = String(repeating: "A", count: CardSnapshot.maxPayloadLength + 4)
+        XCTAssertFalse(reads(long))
+    }
+
+    /// Whether the payload reads (XCTAssertThrowsError is not in SkipUnit)
+    private func reads(_ payload: String) -> Bool {
+        do {
+            _ = try CardSnapshot(payload: payload)
+            return true
+        } catch {
+            return false
+        }
+    }
+
     func testOtherURLsAreNotCards() {
         XCTAssertNil(CardSnapshot(url: URL(string: "https://squashanalyzer.com/privacy.html#abc")!))
         XCTAssertNil(CardSnapshot(url: URL(string: "https://example.com/kaart/#" + iosPayload)!))

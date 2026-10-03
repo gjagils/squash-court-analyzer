@@ -2284,3 +2284,6 @@ moeten worden (ssh naar github.com).
     `#if !SKIP`.** De Android-build draait eerst `swift build` van
     SquashAnalyzerUI op de Mac, dus voor macOS; iOS-API's als
     `.topBarLeading` en `.sharedBackgroundVisibility` bestaan daar niet.
+12. **`XCTAssertThrowsError` bestaat niet in SkipUnit.** Schrijf een kleine
+    helper met `do { try …; return true } catch { return false }` (zie
+    `CardSnapshotTests.reads`, `BackupTests.thrown`).

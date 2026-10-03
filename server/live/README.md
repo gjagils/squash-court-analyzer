@@ -63,9 +63,11 @@ Pas het daar aan als je een ander domein kiest.
 |---|---|---|---|
 | `POST` | `/api/live` | app | nieuwe sessie: `{id, writeKey, url}` |
 | `PUT` | `/api/live/:id` | app, `Authorization: Bearer <writeKey>` | hele stand vervangen |
+| `PUT` | `/api/live/:id/photos` | app, met sleutel | spelersfoto's, één keer na het aanmaken: `{p1, p2}` als base64-JPEG (max 24 KB elk) of `null` |
 | `DELETE` | `/api/live/:id` | app, met sleutel | sessie meteen weg (Live stoppen) |
 | `GET` | `/api/live/:id` | kijker | huidige stand |
-| `GET` | `/api/live/:id/events` | kijker | Server-Sent Events: `state`, `ended` |
+| `GET` | `/api/live/:id/events` | kijker | Server-Sent Events: `state` (met `photos: [bool, bool]` en `photoVersion`), `ended` |
+| `GET` | `/api/live/:id/photo/1` of `/2` | kijker | foto van speler 1 of 2 (`image/jpeg`, `Cache-Control: no-store`) |
 | `GET` | `/l/:id` | kijker | kijkpagina, met linkpreview "🔴 Live: Jan – Piet" |
 | `GET` | `/health` | proxy/Portainer | gezondheidscheck |
 
@@ -79,6 +81,9 @@ De stand (`LiveSnapshot` in de app):
 
 `status` is `warmup`, `playing`, `between` of `finished`. Alleen deze velden
 worden bewaard. Namen worden ook op de server nog tot een voornaam ingekort.
+Foto's (alleen als "Foto's van de spelers meesturen" aan staat) moeten echte
+JPEG's zijn (begin `FF D8 FF`) van hoogstens 24 KB; iets anders telt als geen
+foto. Ze staan alleen in het geheugen en gaan weg met de sessie.
 
 ## Lokaal testen
 

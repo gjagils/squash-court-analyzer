@@ -6,6 +6,8 @@ import SquashAnalyzerUI
 /// Full-screen referee / scorekeeper view
 struct RefereeView: View {
     @Environment(\.modelContext) private var modelContext
+    /// Photos for the live page (LIVE button)
+    @Query private var livePlayers: [SavedPlayer]
     @State private var match: RefereeMatch
     let onDismiss: () -> Void
 
@@ -149,7 +151,8 @@ struct RefereeView: View {
             }
 
             if !match.isMatchOver {
-                LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot }) { text in
+                LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot },
+                                photos: { [livePlayers.photo(named: match.player1Name), livePlayers.photo(named: match.player2Name)] }) { text in
                     liveShareItems = ShareItemsWrapper(items: [text])
                 }
             }

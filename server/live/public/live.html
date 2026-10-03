@@ -35,7 +35,13 @@
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
   .status { text-align: center; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
             color: var(--gold); margin-bottom: 14px; min-height: 18px; }
-  .row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 14px; padding: 10px 0; }
+  .row { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 14px; padding: 10px 0; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; display: block;
+            border: 2px solid var(--border); background: var(--card); }
+  .p1 .avatar { border-color: var(--orange); } .p2 .avatar { border-color: var(--blue); }
+  .initial { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+             font-size: 18px; font-weight: 700; border: 2px solid var(--border); }
+  .p1 .initial { color: var(--orange); border-color: var(--orange); } .p2 .initial { color: var(--blue); border-color: var(--blue); }
   .row + .row { border-top: 1px solid var(--border); }
   .name { font-size: 20px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .p1 .name { color: var(--orange); } .p2 .name { color: var(--blue); }
@@ -70,11 +76,13 @@
   <section class="card" id="board" hidden>
     <div class="status" id="status"></div>
     <div class="row p1" id="row1">
+      <div><img class="avatar" id="photo1" alt="" hidden><div class="initial" id="initial1" aria-hidden="true"></div></div>
       <div class="name"><span id="name1"></span><span class="serve" aria-hidden="true"></span><span class="side" id="side1"></span></div>
       <div class="games" id="games1" title="Games">0</div>
       <div class="points" id="points1">0</div>
     </div>
     <div class="row p2" id="row2">
+      <div><img class="avatar" id="photo2" alt="" hidden><div class="initial" id="initial2" aria-hidden="true"></div></div>
       <div class="name"><span id="name2"></span><span class="serve" aria-hidden="true"></span><span class="side" id="side2"></span></div>
       <div class="games" id="games2" title="Games">0</div>
       <div class="points" id="points2">0</div>
@@ -88,7 +96,7 @@
 
   <footer>
     Live gedeeld vanuit <a href="https://squashanalyzer.com">Squash Analyzer</a>.<br>
-    Alleen voornamen en de stand; 2 uur na de wedstrijd wordt alles gewist.
+    Alleen voornamen, de stand en eventueel een kleine spelersfoto;<br>2 uur na de wedstrijd wordt alles gewist.
   </footer>
 </main>
 <script>
@@ -107,11 +115,30 @@
     finished: 'Afgelopen'
   };
 
-  function render(s) {
+  /** The players' thumbnails when the coach shares them, otherwise the first letter */
+  var shownPhotos = ['', ''];
+  function renderPhotos(data, s) {
+    var photos = (data && data.photos) || [false, false];
+    for (var i = 0; i < 2; i++) {
+      var img = $('photo' + (i + 1));
+      var initial = $('initial' + (i + 1));
+      var src = photos[i] ? '/api/live/' + encodeURIComponent(id) + '/photo/' + (i + 1) + '?v=' + (data.photoVersion || 0) : '';
+      if (src !== shownPhotos[i]) {
+        shownPhotos[i] = src;
+        if (src) img.src = src; else img.removeAttribute('src');
+      }
+      img.hidden = !src;
+      initial.hidden = !!src;
+      initial.textContent = ((i === 0 ? s.p1 : s.p2) || '?').charAt(0).toUpperCase();
+    }
+  }
+
+  function render(s, data) {
     hadState = true;
     $('board').hidden = false;
     $('name1').textContent = s.p1;
     $('name2').textContent = s.p2;
+    renderPhotos(data, s);
     $('points1').textContent = s.score[0];
     $('points2').textContent = s.score[1];
     $('games1').textContent = s.gamesWon[0];
@@ -182,10 +209,11 @@
   }
   var source = new EventSource('/api/live/' + encodeURIComponent(id) + '/events');
   source.addEventListener('state', function (e) {
-    try { render(JSON.parse(e.data).snapshot); } catch (err) {}
+    try { var data = JSON.parse(e.data); render(data.snapshot, data); } catch (err) {}
   });
   source.addEventListener('ended', function (e) {
-    try { var data = JSON.parse(e.data); if (data.snapshot) render(data.snapshot); } catch (err) {}
+    // The session is gone, and so are its photos: show the letters
+    try { var data = JSON.parse(e.data); if (data.snapshot) render(data.snapshot, null); } catch (err) {}
     source.close();
     showEnded();
   });

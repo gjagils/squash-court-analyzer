@@ -13,15 +13,19 @@ public struct LiveShareButton: View {
     let matchId: UUID
     let snapshot: () -> LiveSnapshot
     let share: ((String) -> Void)?
+    /// Both players' photos (as stored); sent as thumbnails when "Foto's meesturen" is on
+    let photos: (() -> [Data?])?
 
     @State private var busy = false
     @State private var showingMenu = false
     @State private var failed = false
     @AppStorage(LiveShare.enabledKey) private var enabled = true
+    @AppStorage(LiveShare.photosKey) private var sendPhotos = true
 
-    public init(matchId: UUID, snapshot: @escaping () -> LiveSnapshot, share: ((String) -> Void)?) {
+    public init(matchId: UUID, snapshot: @escaping () -> LiveSnapshot, photos: (() -> [Data?])? = nil, share: ((String) -> Void)?) {
         self.matchId = matchId
         self.snapshot = snapshot
+        self.photos = photos
         self.share = share
     }
 
@@ -68,7 +72,7 @@ public struct LiveShareButton: View {
             }
             Button("Annuleren", role: .cancel) {}
         } message: {
-            Text(live.offline ? "Geen verbinding: de stand gaat weer mee zodra er netwerk is." : "Kijkers volgen de stand via de link. 2 uur na de wedstrijd wordt alles gewist; Live stoppen wist het meteen.")
+            Text(live.offline ? "Geen verbinding: de stand gaat weer mee zodra er netwerk is." : "Kijkers volgen de stand via de link. 2 uur na de wedstrijd wordt alles gewist (ook de foto's); Live stoppen wist het meteen.")
         }
         .alert("Live delen lukte niet", isPresented: $failed) {
             // No .cancel role: with only a cancel button Skip adds its own "OK" (two OKs on Android)
@@ -89,9 +93,15 @@ public struct LiveShareButton: View {
         }
         busy = true
         let state = snapshot()
+        let stored = sendPhotos ? photos?() : nil
         Task {
             do {
-                _ = try await live.start(matchId: matchId, snapshot: state)
+                // Small thumbnails, made only when the photos go along
+                var thumbnails: LivePhotos? = nil
+                if let stored, stored.count == 2 {
+                    thumbnails = LivePhotoThumbnail.photos(player1: stored[0], player2: stored[1])
+                }
+                _ = try await live.start(matchId: matchId, snapshot: state, photos: thumbnails)
                 busy = false
                 shareLink()
             } catch {

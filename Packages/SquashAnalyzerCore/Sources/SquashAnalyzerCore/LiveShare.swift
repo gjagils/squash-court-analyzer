@@ -19,6 +19,33 @@ public enum LiveStatus: String, Codable, Sendable {
 
 /// The whole state of a live-shared match. Always the full state, never a
 /// change, so an undone rally or a missed send fixes itself with the next one.
+/// The players' photos for the viewer page: small JPEG thumbnails, base64,
+/// sent once after the session is made (not with every rally). Only when the
+/// coach has "Foto's meesturen" on; the server keeps them in memory with the
+/// session and drops them with it.
+public struct LivePhotos: Codable, Equatable, Sendable {
+    public var p1: String?
+    public var p2: String?
+
+    /// The server refuses larger ones (server/live maxPhotoBytes)
+    public static let maxBytes = 24 * 1024
+
+    public init(player1: Data?, player2: Data?) {
+        p1 = LivePhotos.encoded(player1)
+        p2 = LivePhotos.encoded(player2)
+    }
+
+    public var isEmpty: Bool { p1 == nil && p2 == nil }
+
+    static func encoded(_ jpeg: Data?) -> String? {
+        guard let jpeg, jpeg.count > 3, jpeg.count <= LivePhotos.maxBytes else { return nil }
+        // JPEG only (FF D8 FF, the same check as the server), which in base64
+        // always starts with "/9j/"; reading bytes out of Data is not in Skip
+        let encoded = jpeg.base64EncodedString()
+        return encoded.hasPrefix("/9j/") ? encoded : nil
+    }
+}
+
 public struct LiveSnapshot: Codable, Equatable, Sendable {
     public var p1: String
     public var p2: String
@@ -186,6 +213,8 @@ public final class LiveShare {
     /// Settings switch "Live meekijken" (on by default): only then the
     /// scoring screens show the LIVE button
     public static let enabledKey = "liveSharingEnabled"
+    /// Instellingen: send the players' photos along (on by default)
+    public static let photosKey = "liveSharingPhotos"
 
     public static let shared = LiveShare()
 
@@ -204,6 +233,8 @@ public final class LiveShare {
     private var sessionId: String? = nil
     private var writeKey: String? = nil
     private var pending: LiveSnapshot? = nil
+    /// Sent after creating the session, and again when it had to be made again
+    private var photos: LivePhotos? = nil
     private var sending = false
     /// Let go of the session once the final state is sent
     private var finishing = false
@@ -221,10 +252,11 @@ public final class LiveShare {
 
     /// Starts sharing `matchId` and returns the link. Sharing another match
     /// first stops the old one.
-    public func start(matchId id: UUID, snapshot: LiveSnapshot) async throws -> String {
+    public func start(matchId id: UUID, snapshot: LiveSnapshot, photos: LivePhotos? = nil) async throws -> String {
         // `self.` everywhere: in Kotlin the parameter is called `matchId` too
         if let link, self.matchId == id { return link }
         if self.matchId != nil { await stop() }
+        self.photos = photos
         try await create(snapshot)
         self.matchId = id
         linkChanged = false
@@ -298,6 +330,7 @@ public final class LiveShare {
         link = nil
         matchId = nil
         pending = nil
+        photos = nil
         finishing = false
         linkChanged = false
         offline = false
@@ -325,6 +358,17 @@ public final class LiveShare {
         writeKey = created.writeKey
         link = created.url
         offline = false
+        await sendPhotos()
+    }
+
+    /// The photos, if any; a failure only means viewers see the first letters
+    private func sendPhotos() async {
+        guard let photos, !photos.isEmpty, let transport, let id = sessionId, let key = writeKey,
+              let url = URL(string: "\(baseURL)/api/live/\(id)/photos"),
+              let body = try? JSONEncoder().encode(photos) else { return }
+        _ = try? await transport.send(method: "PUT", url: url,
+                                      headers: ["Content-Type": "application/json", "Authorization": "Bearer \(key)"],
+                                      body: body)
     }
 
     private func flush() async {

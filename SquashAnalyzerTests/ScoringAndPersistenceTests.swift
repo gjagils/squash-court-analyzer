@@ -2,6 +2,8 @@ import XCTest
 import SwiftData
 @testable import SquashAnalyzer
 import SquashAnalyzerCore
+import SquashAnalyzerUI
+import UIKit
 
 final class ScoringAndPersistenceTests: XCTestCase {
     func testGameEndsAtElevenWithTwoPointLead() {
@@ -688,5 +690,31 @@ final class RecoveryAndImportTests: XCTestCase {
         let imported = try XCTUnwrap(container.mainContext.fetch(FetchDescriptor<SavedMatch>()).first)
         XCTAssertEqual(imported.player1Name, "Een")
         XCTAssertEqual(imported.games.first?.points.count, 1)
+    }
+}
+
+/// Photos on the live page: a small square JPEG the server accepts
+final class LivePhotoThumbnailTests: XCTestCase {
+
+    func testAPhotoBecomesASmallSquareJPEG() throws {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1200, height: 800))
+        let photo = renderer.image { context in
+            UIColor.orange.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 1200, height: 800))
+            UIColor.blue.setFill()
+            context.fill(CGRect(x: 300, y: 100, width: 600, height: 600))
+        }.jpegData(compressionQuality: 0.9)
+
+        let thumbnail = try XCTUnwrap(LivePhotoThumbnail.jpeg(from: photo))
+        XCTAssertLessThanOrEqual(thumbnail.count, LivePhotos.maxBytes)
+        let image = try XCTUnwrap(UIImage(data: thumbnail))
+        XCTAssertEqual(image.size.width, CGFloat(LivePhotoThumbnail.side))
+        XCTAssertEqual(image.size.height, CGFloat(LivePhotoThumbnail.side))
+        XCTAssertNotNil(LivePhotos(player1: thumbnail, player2: nil).p1, "the server's JPEG check passes")
+    }
+
+    func testNoPhotoOrNoImageGivesNothing() {
+        XCTAssertNil(LivePhotoThumbnail.jpeg(from: nil))
+        XCTAssertNil(LivePhotoThumbnail.jpeg(from: Data("geen foto".utf8)))
     }
 }

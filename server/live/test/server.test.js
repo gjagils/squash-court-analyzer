@@ -2,7 +2,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('node:http');
-const { createLiveServer, validateSnapshot, cleanName } = require('../server.js');
+const { createLiveServer, validateSnapshot, cleanName, cleanPhoto } = require('../server.js');
 
 const snapshot = {
   p1: 'Jan de Vries', p2: 'Piet', bestOf: 5, games: [[11, 8]], score: [3, 2], gamesWon: [1, 0],
@@ -259,6 +259,48 @@ test('stopping the server tells viewers the session ended', async () => {
   assert.equal(received[1].event, 'ended');
   assert.equal(received[1].data.reason, 'restart');
   assert.equal(live.sessions.size, 0);
+});
+
+// A tiny valid JPEG start (FF D8 FF) with some bytes; the server only checks the header and the size
+const jpeg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(200, 7)]).toString('base64');
+
+test('photos: only small JPEGs are kept', () => {
+  assert.ok(cleanPhoto(jpeg, 24 * 1024));
+  assert.equal(cleanPhoto(Buffer.from('<svg onload=alert(1)>').toString('base64'), 24 * 1024), null, 'not a JPEG');
+  assert.equal(cleanPhoto(Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), Buffer.alloc(30000)]).toString('base64'), 24 * 1024), null, 'too large');
+  assert.equal(cleanPhoto('not base64 !', 24 * 1024), null);
+  assert.equal(cleanPhoto(42, 24 * 1024), null);
+});
+
+test('photos are sent once, shown to viewers and gone with the session', async () => {
+  const live = await start();
+  try {
+    const { id, writeKey } = (await call(live.base, 'POST', '/api/live', snapshot)).json;
+    const before = await call(live.base, 'GET', `/api/live/${id}`);
+    assert.deepEqual(before.json.photos, [false, false]);
+
+    assert.equal((await call(live.base, 'PUT', `/api/live/${id}/photos`, { p1: jpeg, p2: 'kapot' })).status, 401, 'needs the key');
+    assert.equal((await call(live.base, 'PUT', `/api/live/${id}/photos`, { p1: jpeg, p2: 'kapot' }, writeKey)).status, 204);
+    const after = await call(live.base, 'GET', `/api/live/${id}`);
+    assert.deepEqual(after.json.photos, [true, false], 'an invalid photo is simply no photo');
+    assert.equal(after.json.photoVersion, 1);
+
+    const image = await fetch(`${live.base}/api/live/${id}/photo/1`);
+    assert.equal(image.status, 200);
+    assert.equal(image.headers.get('content-type'), 'image/jpeg');
+    assert.equal(image.headers.get('cache-control'), 'no-store');
+    assert.equal((await call(live.base, 'GET', `/api/live/${id}/photo/2`)).status, 404);
+    assert.equal((await call(live.base, 'GET', `/api/live/${id}/photo/3`)).status, 404);
+
+    // A rally keeps the photos
+    await call(live.base, 'PUT', `/api/live/${id}`, { ...snapshot, score: [4, 2] }, writeKey);
+    assert.deepEqual((await call(live.base, 'GET', `/api/live/${id}`)).json.photos, [true, false]);
+
+    await call(live.base, 'DELETE', `/api/live/${id}`, undefined, writeKey);
+    assert.equal((await call(live.base, 'GET', `/api/live/${id}/photo/1`)).status, 404, 'gone with the session');
+  } finally {
+    await live.stop();
+  }
 });
 
 test('health check', async () => {

@@ -4,7 +4,8 @@
 // The app creates a session, sends the whole match state after every rally and
 // deletes the session when the match is over. Viewers follow it in the
 // browser through Server-Sent Events. Nothing is written to disk: sessions live
-// in memory only and hold first names and scores, nothing else.
+// in memory only and hold first names and scores, and the players' photos as
+// small thumbnails when the coach shares them; nothing else.
 //
 // No dependencies: node:http and node:crypto only.
 
@@ -19,6 +20,8 @@ const DEFAULTS = {
   publicUrl: (process.env.PUBLIC_URL || '').replace(/\/+$/, ''),
   maxSessions: Number(process.env.MAX_SESSIONS || 200),
   maxBodyBytes: 4096,
+  // Player photos (optional, sent once): a small JPEG thumbnail each
+  maxPhotoBytes: 24 * 1024,
   // A session nobody updates for this long is removed (lost phone, no network)
   idleMs: Number(process.env.IDLE_MINUTES || 120) * 60 * 1000,
   // Session creations per IP per minute, and in total
@@ -43,6 +46,17 @@ function cleanName(value, fallback) {
   const first = value.trim().split(/\s+/)[0] || '';
   const kept = Array.from(first).filter((c) => /\p{L}|[-']/u.test(c)).join('').slice(0, NAME_MAX);
   return kept || fallback;
+}
+
+/** A base64 JPEG thumbnail as a Buffer, or null (wrong type, not a JPEG, too large) */
+function cleanPhoto(value, maxBytes) {
+  if (typeof value !== 'string' || value.length > Math.ceil(maxBytes / 3) * 4 + 4) return null;
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(value)) return null;
+  const bytes = Buffer.from(value, 'base64');
+  if (bytes.length < 4 || bytes.length > maxBytes) return null;
+  // JPEG starts with FF D8 FF
+  if (bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes[2] !== 0xff) return null;
+  return bytes;
 }
 
 function cleanInt(value, min, max) {
@@ -126,17 +140,17 @@ function createLiveServer(options = {}) {
     res.end(body === undefined ? '' : isJson ? JSON.stringify(body) : body);
   }
 
-  function readBody(req) {
+  function readBody(req, limit = config.maxBodyBytes) {
     return new Promise((resolve, reject) => {
       let size = 0;
       const chunks = [];
       req.on('data', (chunk) => {
         size += chunk.length;
         // Too large: keep reading (so the client gets the answer) but keep nothing
-        if (size <= config.maxBodyBytes) chunks.push(chunk);
+        if (size <= limit) chunks.push(chunk);
       });
       req.on('end', () => {
-        if (size > config.maxBodyBytes) return reject(Object.assign(new Error('Te groot'), { status: 413 }));
+        if (size > limit) return reject(Object.assign(new Error('Te groot'), { status: 413 }));
         if (size === 0) return resolve(null);
         try {
           resolve(JSON.parse(Buffer.concat(chunks).toString('utf8')));
@@ -153,6 +167,16 @@ function createLiveServer(options = {}) {
     const given = Buffer.from(header.startsWith('Bearer ') ? header.slice(7) : '');
     const expected = Buffer.from(session.key);
     return given.length === expected.length && crypto.timingSafeEqual(given, expected);
+  }
+
+  /** What viewers get with every state: whether there is a photo per player, and its version (for the image URL) */
+  function stateMessage(session) {
+    return {
+      snapshot: session.snapshot,
+      updatedAt: session.updatedAt,
+      photos: [Boolean(session.photos[0]), Boolean(session.photos[1])],
+      photoVersion: session.photoVersion,
+    };
   }
 
   function broadcast(session, event, data) {
@@ -278,12 +302,28 @@ function createLiveServer(options = {}) {
       let newSessionId = newId();
       while (sessions.has(newSessionId)) newSessionId = newId();
       const key = crypto.randomBytes(32).toString('base64url');
-      sessions.set(newSessionId, { key, snapshot, updatedAt: now(), viewers: new Set() });
+      sessions.set(newSessionId, { key, snapshot, updatedAt: now(), viewers: new Set(), photos: [null, null], photoVersion: 0 });
       return send(res, 201, { id: newSessionId, writeKey: key, url: `${baseUrl(req)}/l/${newSessionId}` });
     }
 
-    if (!id || parts.length > 4) return send(res, 404, 'Not found');
+    if (!id || parts.length > 5) return send(res, 404, 'Not found');
     const session = sessions.get(id);
+
+    // GET /api/live/:id/photo/1 or 2: a player's thumbnail, for the viewer page
+    if (req.method === 'GET' && parts[3] === 'photo' && parts.length === 5) {
+      const index = parts[4] === '1' ? 0 : parts[4] === '2' ? 1 : -1;
+      const photo = session && index >= 0 ? session.photos[index] : null;
+      if (!photo) return send(res, 404, 'Not found');
+      res.writeHead(200, {
+        'Content-Type': 'image/jpeg',
+        'Content-Length': photo.length,
+        // Not kept by browsers or Cloudflare: gone with the session
+        'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
+      });
+      return res.end(photo);
+    }
+    if (parts.length === 5) return send(res, 404, 'Not found');
 
     // GET /api/live/:id/events: Server-Sent Events for viewers
     if (req.method === 'GET' && parts[3] === 'events') {
@@ -299,7 +339,7 @@ function createLiveServer(options = {}) {
         'X-Accel-Buffering': 'no',
       });
       res.write('retry: 3000\n\n');
-      res.write(`event: state\ndata: ${JSON.stringify({ snapshot: session.snapshot, updatedAt: session.updatedAt })}\n\n`);
+      res.write(`event: state\ndata: ${JSON.stringify(stateMessage(session))}\n\n`);
       session.viewers.add(res);
       const ping = setInterval(() => res.write(': ping\n\n'), 25000);
       req.on('close', () => {
@@ -308,15 +348,27 @@ function createLiveServer(options = {}) {
       });
       return undefined;
     }
-    if (parts.length !== 3) return send(res, 404, 'Not found');
+    if (parts.length !== 3 && !(parts.length === 4 && parts[3] === 'photos')) return send(res, 404, 'Not found');
 
     // GET /api/live/:id: current state
-    if (req.method === 'GET') {
+    if (req.method === 'GET' && parts.length === 3) {
       if (!session) return send(res, 404, { error: 'Afgelopen' });
-      return send(res, 200, { snapshot: session.snapshot, updatedAt: session.updatedAt });
+      return send(res, 200, stateMessage(session));
     }
     if (!session) return send(res, 404, { error: 'Onbekende sessie' });
     if (!authorized(req, session)) return send(res, 401, { error: 'Geen toegang' });
+
+    // PUT /api/live/:id/photos: the players' thumbnails, once after creating
+    // ({ p1, p2 }: base64 JPEG or null; a missing or invalid one is no photo)
+    if (req.method === 'PUT' && parts[3] === 'photos') {
+      const body = await readBody(req, config.maxPhotoBytes * 3);
+      if (!body || typeof body !== 'object') return send(res, 400, { error: 'Ongeldige foto\'s' });
+      session.photos = [cleanPhoto(body.p1, config.maxPhotoBytes), cleanPhoto(body.p2, config.maxPhotoBytes)];
+      session.photoVersion += 1;
+      broadcast(session, 'state', stateMessage(session));
+      return send(res, 204);
+    }
+    if (parts.length !== 3) return send(res, 404, 'Not found');
 
     // PUT /api/live/:id: the whole new state
     if (req.method === 'PUT') {
@@ -324,7 +376,7 @@ function createLiveServer(options = {}) {
       if (!snapshot) return send(res, 400, { error: 'Ongeldige stand' });
       session.snapshot = snapshot;
       session.updatedAt = now();
-      broadcast(session, 'state', { snapshot, updatedAt: session.updatedAt });
+      broadcast(session, 'state', stateMessage(session));
       return send(res, 204);
     }
 
@@ -355,7 +407,7 @@ function createLiveServer(options = {}) {
   return { server, sessions, sweep, config, shutdown };
 }
 
-module.exports = { createLiveServer, validateSnapshot, cleanName };
+module.exports = { createLiveServer, validateSnapshot, cleanName, cleanPhoto };
 
 if (require.main === module) {
   const { server, config, shutdown } = createLiveServer();

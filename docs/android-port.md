@@ -2287,3 +2287,8 @@ moeten worden (ssh naar github.com).
 12. **`XCTAssertThrowsError` bestaat niet in SkipUnit.** Schrijf een kleine
     helper met `do { try …; return true } catch { return false }` (zie
     `CardSnapshotTests.reads`, `BackupTests.thrown`).
+13. **Losse bytes uit `Data` lezen of `Data` uit bytes maken kan niet in Core.**
+    `Data([0xFF, …])`, `Data(repeating:count:)`, `data[0]` en
+    `data.prefix(3) == Data(…)` transpileren niet (of naar een verouderde
+    constructor). Werk via base64: een JPEG begint in base64 altijd met `/9j/`
+    (`LivePhotos.encoded`), en tests maken bytes met `Data(base64Encoded:)`.

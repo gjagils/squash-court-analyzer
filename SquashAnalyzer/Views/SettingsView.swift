@@ -21,6 +21,7 @@ struct SettingsView: View {
     @AppStorage(AutomaticBackup.enabledKey) private var automaticBackup = true
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     @AppStorage(LiveShare.enabledKey) private var liveSharing = true
+    @AppStorage(LiveShare.photosKey) private var livePhotos = true
 
     var body: some View {
         ZStack {
@@ -188,7 +189,14 @@ struct SettingsView: View {
                     .foregroundColor(AppColors.textPrimary)
             }
             .tint(AppColors.warmOrange)
-            Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen en de stand; 2 uur na de wedstrijd wordt alles gewist.")
+            Toggle(isOn: $livePhotos) {
+                Text("Foto's van de spelers meesturen")
+                    .font(AppFonts.label(14))
+                    .foregroundColor(liveSharing ? AppColors.textPrimary : AppColors.textMuted)
+            }
+            .tint(AppColors.warmOrange)
+            .disabled(!liveSharing)
+            Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.")
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)

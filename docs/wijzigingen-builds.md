@@ -27,6 +27,9 @@ Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `ma
   kijkers volgen de stand in de browser. Uit te zetten in Instellingen
   (standaard aan). De eindstand blijft 2 uur zichtbaar en wordt dan gewist;
   zonder netwerk gaat de eindstand alsnog mee zodra er weer verbinding is.
+- **Foto's op de livepagina:** staat er een foto bij een speler, dan ziet wie
+  meekijkt die naast de naam (een kleine versie, alleen zolang de wedstrijd live
+  is). Uit te zetten in Instellingen: "Foto's van de spelers meesturen".
 - **Deel score:** drie keuzes, Scorekaart, Verslag of Plaatje, met één knop
   Delen. Het plaatje heeft de spelersfoto's in de cirkels. De optie "Kort" is
   weg.
@@ -80,8 +83,8 @@ Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `ma
 - [ ] Testen op Gerd-Jans iPhone en de Android-telefoon (ook met vergrote tekst).
 - [ ] Screenshots App Store en Play, en de handleiding op de website.
 - [ ] Releasenotes schrijven uit dit overzicht (`release-notes/`); `concept-volgende-build.md` is verouderd.
-- [ ] Privacytekst: live meekijken (2 uur bewaren) staat klaar in
-      `website/privacy.html`, nog niet gepubliceerd.
+- [ ] Privacytekst (live meekijken: 2 uur bewaren, foto's) publiceren:
+      `website/privacy.html` is bijgewerkt.
 - [ ] Website bijwerken (homepage, nieuws).
 - [ ] Google Play Gegevensveiligheid nalopen (`Android/play/data-safety.csv`):
       nu alleen "andere content, verzameld, optioneel" (live meekijken). Komen

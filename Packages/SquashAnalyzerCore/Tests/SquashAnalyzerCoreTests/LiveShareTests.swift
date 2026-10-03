@@ -183,6 +183,44 @@ final class LiveShareTests: XCTestCase {
         XCTAssertTrue(live.isLive(second.id))
     }
 
+    /// Bytes from base64: Data([UInt8]) is not in Skip. "/9j/" is FF D8 FF (a JPEG)
+    private func bytes(_ base64: String) -> Data {
+        Data(base64Encoded: base64) ?? Data()
+    }
+
+    func testOnlySmallJPEGsBecomeLivePhotos() {
+        let jpeg = bytes("/9j/4AECAw==")
+        let photos = LivePhotos(player1: jpeg, player2: bytes("iVBORw0K"))
+        XCTAssertEqual(photos.p1, "/9j/4AECAw==")
+        XCTAssertNil(photos.p2, "a PNG is not sent")
+        let large = bytes("/9j/" + String(repeating: "A", count: 32_800))
+        XCTAssertTrue(large.count > LivePhotos.maxBytes)
+        XCTAssertNil(LivePhotos(player1: large, player2: nil).p1, "too large")
+        XCTAssertTrue(LivePhotos(player1: nil, player2: nil).isEmpty)
+    }
+
+    /// The photos go once, right after the session is made (not with every rally)
+    @MainActor
+    func testPhotosAreSentOnceAfterStarting() async throws {
+        let transport = FakeLiveTransport()
+        let live = LiveShare(transport: transport)
+        live.baseURL = "https://live.test"
+        let match = Match()
+        let photos = LivePhotos(player1: bytes("/9j/4AkA"), player2: nil)
+        _ = try await live.start(matchId: match.id, snapshot: match.liveSnapshot(), photos: photos)
+        XCTAssertEqual(transport.requests.map { $0.method }, ["POST", "PUT"])
+        XCTAssertEqual(transport.requests[1].url, "https://live.test/api/live/abc/photos")
+
+        live.update(matchId: match.id, snapshot: match.liveSnapshot())
+        try await waitUntil { transport.requests.count >= 3 }
+        XCTAssertEqual(transport.requests[2].url, "https://live.test/api/live/abc", "a rally sends only the score")
+
+        // Without photos (setting off) nothing extra is sent
+        let other = LiveShare(transport: FakeLiveTransport())
+        other.baseURL = "https://live.test"
+        _ = try await other.start(matchId: UUID(), snapshot: match.liveSnapshot(), photos: nil)
+    }
+
     @MainActor
     func testWithoutAServerStartingFails() async {
         let live = LiveShare(transport: nil)

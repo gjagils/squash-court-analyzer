@@ -143,7 +143,8 @@ public struct RefereeScoringView: View {
             }
             .foregroundColor(SharedColors.textSecondary)
             if !match.isMatchOver {
-                LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot }, share: shareText)
+                LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot },
+                                photos: { [photo(Player.player1), photo(Player.player2)] }, share: shareText)
             }
             Spacer()
             Text("Scheidsrechter")

@@ -6,7 +6,8 @@ buildnummer, en de releasenotes (`release-notes/`) worden eruit geschreven.
 
 ## Volgende build (nog niet geüpload; nummers bepalen bij de upload)
 
-Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `main`, 3 oktober.
+Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `main` (`b694cf5`), 3 oktober.
+De live-server met foto's draait al in productie; de privacytekst staat online.
 
 ### Nieuw voor de gebruiker
 - **Homepagina vernieuwd** (Clubhuis-stijl, Codex): logo, naam SquashAnalyzer en
@@ -62,10 +63,15 @@ Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `ma
   worden samen in één keer opgeslagen.
 - Android-back-up via Google laat de versleutelde API key en tijdelijke
   plaatjes buiten de back-up (die werkt op een ander toestel toch niet).
-- VoiceOver/TalkBack: STROKE-knoppen noemen de speler, de uitslag wordt als één
+- VoiceOver/TalkBack: iconen worden niet meer als "chevron.right" voorgelezen;
+  STROKE-knoppen noemen de speler, de uitslag wordt als één
   zin voorgelezen, de verborgen L/R-keuze van de ontvanger wordt overgeslagen.
 
 ### Onder de motorkap
+- Automatische tests op GitHub bij elke push (projectregels, live-server, Core
+  in Swift en Kotlin, iOS, Android) en `scripts/lint.sh` (T23).
+- Extra tests voor deelteksten, Stop, AI-modelkeuze, live, herstel en import (T25).
+- Taal: alleen Nederlands, squashtermen blijven Engels (T24).
 - SwiftData V7 (`SavedPoint.errorKind`), Room 9. Back-upformaat 3 alleen als er
   scheidsrechterwedstrijden in zitten, anders 2 zoals voorheen.
 - Serviceregel en wedstrijdstand op één plek in Core (`ScoringEngine`).
@@ -83,8 +89,7 @@ Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `ma
 - [ ] Testen op Gerd-Jans iPhone en de Android-telefoon (ook met vergrote tekst).
 - [ ] Screenshots App Store en Play, en de handleiding op de website.
 - [ ] Releasenotes schrijven uit dit overzicht (`release-notes/`); `concept-volgende-build.md` is verouderd.
-- [ ] Privacytekst (live meekijken: 2 uur bewaren, foto's) publiceren:
-      `website/privacy.html` is bijgewerkt.
+- [x] Privacytekst (live meekijken: 2 uur bewaren, foto's) gepubliceerd (3 okt).
 - [ ] Website bijwerken (homepage, nieuws).
 - [ ] Google Play Gegevensveiligheid nalopen (`Android/play/data-safety.csv`):
       nu alleen "andere content, verzameld, optioneel" (live meekijken). Komen

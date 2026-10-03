@@ -31,6 +31,8 @@ struct ContentView: View {
     @State private var showingStartupPersistenceWarning = false
     /// A player card link that was opened and waits for the import sheet (shared with Android)
     @State private var cardInbox = CardInbox()
+    /// The import sheet for `cardInbox.pending` is on screen
+    @State private var showingCardImport = false
     /// 6 or 9 zones, a setting (Instellingen)
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     /// "Uit de lucht" for the point being entered; off again after every point
@@ -222,15 +224,15 @@ struct ContentView: View {
             if phase == .background {
                 AutomaticBackup.runIfDue(context: modelContext)
             }
+            // A link that arrived during a cold start, before there was a window
+            if phase == .active { presentPendingCard() }
         }
         // A player card link (website or squashanalyzer://kaart#…)
         .onOpenURL { url in
             cardInbox.receive(url.absoluteString)
         }
-        .onChange(of: cardInbox.pending) { _, snapshot in
-            if let snapshot {
-                CardImportPresenter.present(snapshot, container: modelContext.container) { cardInbox.pending = nil }
-            }
+        .onChange(of: cardInbox.pending) { _, _ in
+            presentPendingCard()
         }
         .alert(Match.stopTitle, isPresented: $showingCancelConfirm) {
             // Stays in progress; the Coach tile offers it again (as on Android)
@@ -676,6 +678,21 @@ struct ContentView: View {
     private func handleErrorKind(_ kind: ErrorKind?) {
         withAnimation(.easeInOut(duration: 0.2)) {
             currentGame.selectErrorKind(kind)
+        }
+    }
+
+    /// Shows the import sheet for a pending card link. At a cold start there is
+    /// no window yet: tried again a few times, and whenever the app becomes active.
+    private func presentPendingCard(attempt: Int = 0) {
+        guard let snapshot = cardInbox.pending, !showingCardImport else { return }
+        let shown = CardImportPresenter.present(snapshot, container: modelContext.container) {
+            cardInbox.pending = nil
+            showingCardImport = false
+        }
+        if shown {
+            showingCardImport = true
+        } else if attempt < 20 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { presentPendingCard(attempt: attempt + 1) }
         }
     }
 

@@ -259,9 +259,12 @@ struct CardImportSheet: View {
 /// match, the history), so an opened card link never has to wait.
 @MainActor
 enum CardImportPresenter {
-    static func present(_ snapshot: CardSnapshot, container: ModelContainer, onClose: @escaping () -> Void) {
+    /// Presents the import sheet on top of whatever is showing. False when
+    /// there is no window yet (a cold start from a link): try again later.
+    @discardableResult
+    static func present(_ snapshot: CardSnapshot, container: ModelContainer, onClose: @escaping () -> Void) -> Bool {
         guard let root = UIApplication.shared.connectedScenes
-            .compactMap({ ($0 as? UIWindowScene)?.keyWindow?.rootViewController }).first else { return }
+            .compactMap({ ($0 as? UIWindowScene)?.keyWindow?.rootViewController }).first else { return false }
         var top = root
         while let presented = top.presentedViewController, !presented.isBeingDismissed { top = presented }
         var host: UIViewController?
@@ -273,5 +276,6 @@ enum CardImportPresenter {
         controller.isModalInPresentation = true
         host = controller
         top.present(controller, animated: true)
+        return true
     }
 }

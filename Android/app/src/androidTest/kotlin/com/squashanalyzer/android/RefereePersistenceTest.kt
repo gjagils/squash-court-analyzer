@@ -45,7 +45,7 @@ class RefereePersistenceTest {
     }
     private fun closeSaved() {
         compose.onNodeWithText("Sluiten").performClick()
-        awaitText("SQUASH ANALYZER")
+        awaitText("SquashAnalyzer")
     }
 
     @Test fun pointIsSavedAndResumedAfterActivityRestart() {

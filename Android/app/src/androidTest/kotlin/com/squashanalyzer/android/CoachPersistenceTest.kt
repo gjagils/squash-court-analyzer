@@ -41,6 +41,14 @@ class CoachPersistenceTest {
         compose.onNodeWithContentDescription("Coach").performClick()
         awaitText("Hervatten")
         compose.onNodeWithText("Hervatten").performClick()
+        // A game without rallies waits for START GAME at the first service
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("Tik op de score van wie scoort").fetchSemanticsNodes().isNotEmpty() ||
+                compose.onAllNodesWithText("START GAME 1").fetchSemanticsNodes().isNotEmpty()
+        }
+        if (compose.onAllNodesWithText("START GAME 1").fetchSemanticsNodes().isNotEmpty()) {
+            compose.onNodeWithText("START GAME 1").performClick()
+        }
         awaitText("Tik op de score van wie scoort")
     }
     private fun closeSaved() {
@@ -51,12 +59,12 @@ class CoachPersistenceTest {
         // A match without any rally is dropped without asking (Match.stopAction)
         compose.waitUntil(10_000) {
             compose.onAllNodesWithText("Bewaar en ga later verder").fetchSemanticsNodes().isNotEmpty() ||
-                compose.onAllNodesWithText("SQUASH ANALYZER").fetchSemanticsNodes().isNotEmpty()
+                compose.onAllNodesWithText("SquashAnalyzer").fetchSemanticsNodes().isNotEmpty()
         }
         if (compose.onAllNodesWithText("Bewaar en ga later verder").fetchSemanticsNodes().isNotEmpty()) {
             compose.onNodeWithText("Bewaar en ga later verder").performClick()
         }
-        awaitText("SQUASH ANALYZER")
+        awaitText("SquashAnalyzer")
     }
 
     @Test fun pointIsSavedAndResumedAfterActivityRestartAndUndoIsDurable() {

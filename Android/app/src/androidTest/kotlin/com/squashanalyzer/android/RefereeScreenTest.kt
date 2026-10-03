@@ -40,6 +40,6 @@ class RefereeScreenTest {
         compose.onAllNodesWithText("LET CALL").onFirst().performClick()
         awaitText("LET")
         compose.onNodeWithText("Sluiten").performClick()
-        awaitText("SQUASH ANALYZER")
+        awaitText("SquashAnalyzer")
     }
 }

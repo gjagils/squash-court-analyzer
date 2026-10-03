@@ -22,31 +22,34 @@ public struct HomeMenuHeader: View {
     }
 
     public var body: some View {
-        HStack {
-            Color.clear.frame(width: 44, height: 44)
-            Spacer()
-            Text("SQUASH ANALYZER")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(HomePalette.text)
-                .tracking(2)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-            Spacer()
+        HStack(spacing: 10) {
+            Image("home-logo", bundle: .module)
+                .resizable().scaledToFit().frame(width: 58, height: 58)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("SquashAnalyzer")
+                    .font(.system(size: 23, weight: .bold, design: .rounded))
+                    .foregroundColor(HomePalette.text)
+                Text("Jouw spel scherp in beeld. Voor jou en je team.")
+                    .font(.system(size: 12))
+                    .foregroundColor(HomePalette.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
             if let onSettings {
                 Button(action: onSettings) {
                     Image(systemName: "gearshape")
                         .font(.system(size: 21))
                         .foregroundColor(HomePalette.secondary)
-                        .frame(width: 44, height: 44)
+                        .frame(width: 48, height: 48)
                 }
                 .accessibilityLabel("Instellingen")
-            } else {
-                Color.clear.frame(width: 44, height: 44)
             }
         }
-        .padding(.horizontal, 13)
-        .padding(.vertical, 5)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 12)
     }
+
 }
 
 public struct HomeMenuTiles: View {
@@ -66,14 +69,87 @@ public struct HomeMenuTiles: View {
     }
 
     public var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible())], spacing: 14) {
-            HomeMenuTile(title: "Coach", icon: .coach, action: onCoach)
-            HomeMenuTile(title: "Scheidsrechter", icon: .referee, action: onReferee)
-            HomeMenuTile(title: "Afgeronde wedstrijden", icon: .history, action: onHistory)
-            HomeMenuTile(title: "Spelers", icon: .players, action: onPlayers)
-            HomeMenuTile(title: "Badges", icon: .badges, action: onBadges)
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Klaar om te spelen?")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(HomePalette.text)
+            HStack(spacing: 12) {
+                HomeMenuTile(title: "Coach", subtitle: "Start met coachen", icon: .coach, action: onCoach)
+                HomeMenuTile(title: "Scheidsrechter", subtitle: "Start met fluiten", icon: .referee, action: onReferee)
+            }
+            VStack(spacing: 0) {
+                menuRow("Afgeronde wedstrijden", icon: .history, action: onHistory)
+                Divider().overlay(Color.white.opacity(0.09))
+                menuRow("Spelers", icon: .players, action: onPlayers)
+                Divider().overlay(Color.white.opacity(0.09))
+                menuRow("Badges", icon: .badges, action: onBadges)
+            }
         }
         .padding(.horizontal, 24)
+    }
+
+    private func menuRow(_ title: String, icon: HomeTileIcon, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                HomeTileIconView(icon: icon, color: HomePalette.orange, size: 23)
+                Text(title).font(.system(size: 14))
+                Spacer()
+                Image(systemName: "chevron.right").font(.system(size: 12))
+            }
+            .foregroundColor(HomePalette.text)
+            .frame(minHeight: 50)
+            #if !SKIP
+            .contentShape(Rectangle())
+            #endif
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+    }
+}
+
+/// Identical home team presentation for both native hosts; loading and navigation stay with the host.
+public struct HomeTeamSummary: View {
+    private let snapshot: LeagueTeamSnapshot
+    public init(snapshot: LeagueTeamSnapshot) { self.snapshot = snapshot }
+
+    public var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Jouw team").font(.system(size: 14, weight: .semibold))
+                Spacer()
+                Text("Competitie").font(.system(size: 12)).foregroundColor(HomePalette.secondary)
+            }
+            VStack(alignment: .leading, spacing: 10) {
+                Text("MIJN TEAM").font(.system(size: 11, weight: .semibold))
+                    .tracking(1.4).foregroundColor(HomePalette.orange)
+                Text(snapshot.name).font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 28) {
+                    stat("STAND", snapshot.rank)
+                    stat("GESPEELD", snapshot.played)
+                    stat("PUNTEN", snapshot.points)
+                }
+                if let next = snapshot.nextFixture() {
+                    Divider().overlay(Color.white.opacity(0.15))
+                    Text("Volgende · \(LeagueDates.day(next.date)) · \(next.home) – \(next.away)")
+                        .font(.system(size: 12)).foregroundColor(HomePalette.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(16).frame(maxWidth: .infinity, alignment: .leading)
+            .background(HomePalette.card)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(HomePalette.orange.opacity(0.35), lineWidth: 1))
+        }
+        .foregroundColor(HomePalette.text)
+    }
+
+    private func stat(_ title: String, _ value: Int?) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(value.map { String($0) } ?? "–")
+                .font(.system(size: 24, weight: .bold, design: .rounded)).foregroundColor(HomePalette.orange)
+            Text(title).font(.system(size: 10)).foregroundColor(HomePalette.secondary)
+        }
     }
 }
 
@@ -81,11 +157,14 @@ private enum HomePalette {
     static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
     static let secondary = Color(red: 0.70, green: 0.68, blue: 0.65)
     static let orange = Color(red: 0.95, green: 0.55, blue: 0.15)
+    // Precomposited orange at 10% on black, identical on SwiftUI and Compose.
+    static let card = Color(red: 0.095, green: 0.055, blue: 0.015)
 }
 
 /// All tiles share one accent colour, so the icon is what tells them apart
 private struct HomeMenuTile: View {
     let title: String
+    let subtitle: String
     let icon: HomeTileIcon
     let action: () -> Void
 
@@ -101,12 +180,16 @@ private struct HomeMenuTile: View {
                     .foregroundColor(HomePalette.text)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
-                    .minimumScaleFactor(0.85)
+                Text(subtitle)
+                    .font(.system(size: 12))
+                    .foregroundColor(HomePalette.secondary)
+                    .multilineTextAlignment(.center)
             }
             .padding(.horizontal, 8)
             .frame(maxWidth: .infinity)
-            .frame(height: 110)
-            .background(RoundedRectangle(cornerRadius: 16).fill(color.opacity(0.10)))
+            .frame(minHeight: 110)
+            .background(HomePalette.card)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(color.opacity(0.35), lineWidth: 1))
         }
         .buttonStyle(.plain)
@@ -322,14 +405,11 @@ public struct AndroidHomeView: View {
 
     private var homeContent: some View {
         ZStack {
-            LinearGradient(colors: [Color(red: 0.12, green: 0.10, blue: 0.08),
-                                    Color(red: 0.06, green: 0.05, blue: 0.04)],
-                           startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            Color.black.ignoresSafeArea()
             VStack(spacing: 0) {
-                HomeMenuHeader { showingSettings = true }
                 ScrollView {
-                    VStack(spacing: 20) {
+                    VStack(spacing: 16) {
+                        HomeMenuHeader { showingSettings = true }
                         SharedLeagueTeamCard(fetcher: leagueTeamFetcher) { snapshot in
                             team = snapshot
                             showingTeam = true

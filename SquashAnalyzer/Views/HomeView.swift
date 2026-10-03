@@ -95,13 +95,12 @@ struct HomeView: View {
 
     private var homeContent: some View {
         ZStack {
-            AppBackground()
+            Color.black.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                header
-
                 ScrollView {
-                    VStack(spacing: 20) {
+                    VStack(spacing: 16) {
+                        header
                         LeagueTeamCard()
 
                         tileGrid

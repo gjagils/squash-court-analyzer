@@ -21,7 +21,7 @@ class HomeScreenTest {
         compose.onNodeWithContentDescription("Instellingen").assertIsDisplayed().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithText("Mijn team").fetchSemanticsNodes().isNotEmpty() }
         pressBack()
-        compose.onNodeWithText("SQUASH ANALYZER").assertIsDisplayed()
+        compose.onNodeWithText("SquashAnalyzer").assertIsDisplayed()
     }
 
     @Test fun everyDestinationOpensAScreenAndReturnsHome() {

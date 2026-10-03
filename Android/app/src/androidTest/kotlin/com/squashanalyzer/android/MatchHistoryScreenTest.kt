@@ -54,6 +54,6 @@ class MatchHistoryScreenTest {
         awaitText("HistoryP1")
         awaitText("HistoryP2")
         pressBack()
-        awaitText("SQUASH ANALYZER")
+        awaitText("SquashAnalyzer")
     }
 }

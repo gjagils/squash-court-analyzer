@@ -21,6 +21,6 @@ class BadgeCatalogScreenTest {
         compose.onNodeWithText("Alle badges").assertIsDisplayed()
         compose.onNodeWithText("5 points in a row").assertIsDisplayed()
         pressBack()
-        compose.onNodeWithText("SQUASH ANALYZER").assertIsDisplayed()
+        compose.onNodeWithText("SquashAnalyzer").assertIsDisplayed()
     }
 }

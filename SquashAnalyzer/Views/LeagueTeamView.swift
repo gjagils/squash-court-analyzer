@@ -1,5 +1,6 @@
 import SwiftUI
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 
 struct LeagueTeamCard: View {
     @AppStorage(CoachInputSettings.teamURLKey) private var teamURL = ""
@@ -12,17 +13,12 @@ struct LeagueTeamCard: View {
         Group {
             if let snapshot {
                 Button { showingTeam = true } label: {
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack { Label("MIJN TEAM", systemImage: "person.3.fill").font(AppFonts.caption(11)).tracking(1.4); Spacer(); Image(systemName: "chevron.right") }
-                        Text(snapshot.name).font(AppFonts.title(20))
-                        HStack(spacing: 16) { stat("STAND", snapshot.rank.map(String.init) ?? "–"); stat("GESPEELD", snapshot.played.map(String.init) ?? "–"); stat("PUNTEN", snapshot.points.map(String.init) ?? "–") }
-                        if let next = snapshot.nextFixture() { Text("Volgende · \(LeagueDay.text(next.date)) · \(next.home) – \(next.away)").font(AppFonts.caption(12)).foregroundColor(AppColors.textSecondary) }
-                    }.foregroundColor(AppColors.textPrimary).padding(16).frame(maxWidth: .infinity, alignment: .leading)
+                    HomeTeamSummary(snapshot: snapshot)
                 }.buttonStyle(.plain).sheet(isPresented: $showingTeam) { LeagueTeamDetailView(initial: snapshot) }
             } else if !teamURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 HStack { if loading { ProgressView().tint(AppColors.warmOrange) }; Text(loading ? "Mijn team laden…" : (errorMessage ?? "Team laden niet gelukt")).font(AppFonts.caption(12)).foregroundColor(AppColors.textSecondary); Spacer(); if !loading { Button("Opnieuw") { load() }.foregroundColor(AppColors.warmOrange) } }.padding(16)
             }
-        }.background(RoundedRectangle(cornerRadius: 14).fill(AppColors.backgroundMedium)).overlay(RoundedRectangle(cornerRadius: 14).stroke(AppColors.warmOrange.opacity(0.32), lineWidth: 1)).padding(.horizontal, 24).task(id: teamURL) { load() }
+        }.padding(.horizontal, 24).task(id: teamURL) { load() }
     }
     private func stat(_ title: String, _ value: String) -> some View { VStack(alignment: .leading, spacing: 2) { Text(title).font(AppFonts.caption(9)).foregroundColor(AppColors.textMuted); Text(value).font(AppFonts.title(16)).foregroundColor(AppColors.accentGold) } }
     private func load() {

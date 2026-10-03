@@ -80,50 +80,7 @@ public struct SharedLeagueTeamCard: View {
     }
 
     private func card(_ snapshot: LeagueTeamSnapshot) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                HomeTileIconView(icon: .players, color: LeaguePalette.orange, size: 16)
-                Text("MIJN TEAM")
-                    .font(.system(size: 11, weight: .semibold))
-                    .tracking(1.4)
-                Spacer()
-                Image(systemName: "chevron.right")
-            }
-            .foregroundColor(LeaguePalette.orange)
-            Text(snapshot.name)
-                .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(LeaguePalette.text)
-                .lineLimit(1)
-            HStack(spacing: 20) {
-                stat("STAND", snapshot.rank)
-                stat("GESPEELD", snapshot.played)
-                stat("PUNTEN", snapshot.points)
-            }
-            if let next = snapshot.nextFixture() {
-                Text("Volgende · \(LeagueDates.day(next.date)) · \(next.home) – \(next.away)")
-                    .font(.system(size: 12))
-                    .foregroundColor(LeaguePalette.secondary)
-                    .lineLimit(2)
-            }
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(LeaguePalette.card)
-                .overlay(RoundedRectangle(cornerRadius: 14).stroke(LeaguePalette.orange.opacity(0.32), lineWidth: 1))
-        )
-    }
-
-    private func stat(_ title: String, _ value: Int?) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title)
-                .font(.system(size: 9))
-                .foregroundColor(LeaguePalette.muted)
-            Text(value.map { number in String(number) } ?? "–")
-                .font(.system(size: 16, weight: .bold, design: .rounded))
-                .foregroundColor(LeaguePalette.gold)
-        }
+        HomeTeamSummary(snapshot: snapshot)
     }
 
     private func load() async {

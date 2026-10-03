@@ -53,7 +53,7 @@ class CoachStopTest {
         compose.onNodeWithText("Stop").performClick()
         awaitText(choice)
         compose.onNodeWithText(choice).performClick()
-        awaitText("SQUASH ANALYZER")
+        awaitText("SquashAnalyzer")
     }
 
     @Test fun letCallIsSavedAndIncompleteIsKept() {

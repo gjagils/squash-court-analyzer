@@ -468,3 +468,50 @@ final class ScoringAndPersistenceTests: XCTestCase {
 
     private static let androidBackupBase64 = "ewogICJhcHBWZXJzaW9uIiA6ICJBbmRyb2lkIDAuMSIsCiAgImNoZWNrc3VtIiA6ICJhNDAyZjY2MmMzYWY4YzUwOTZhZTJkZTdhYjg0MmYwNzlkMzRmNmM3ZmMxNGE5NTU5YjAxZjkzNjMwMTVjZTdlIiwKICAiY3JlYXRlZEF0IiA6ICIyMDI2LTEwLTAxVDA3OjA1OjUyWiIsCiAgImZvcm1hdFZlcnNpb24iIDogMiwKICAicGF5bG9hZCIgOiB7CiAgICAiYmFja3VwRGF0ZSIgOiAiMjAyNi0xMC0wMVQwNzowNTo1MloiLAogICAgImJhZGdlQXdhcmRzIiA6IFsKICAgICAgewogICAgICAgICJhd2FyZGVkQnkiIDogImluc3RhbGwtQSIsCiAgICAgICAgImJhZGdlIiA6ICJmaXZlLWluLWEtcm93IiwKICAgICAgICAiY2FyZElkIiA6ICIwQTNDN0UxRC0yQjQ0LTRGMTAtOUMzQS01RDZFN0Y4MDkxQTIiLAogICAgICAgICJlYXJuZWRBdCIgOiAiMjAyNi0wOS0yMVQxNDoxMzoyMFoiLAogICAgICAgICJtYXRjaElkIiA6ICI2RjFDMkIzQS00RDVFLTRGNjAtOEE3Qi05QzBEMUUyRjNBNEIiLAogICAgICAgICJvcHBvbmVudE5hbWUiIDogIkphw69yIPCfjr4iCiAgICAgIH0KICAgIF0sCiAgICAibWF0Y2hlcyIgOiBbCiAgICAgIHsKICAgICAgICAiYmVzdE9mIiA6IDUsCiAgICAgICAgImdhbWVzIiA6IFsKICAgICAgICAgIHsKICAgICAgICAgICAgImdhbWVOdW1iZXIiIDogMSwKICAgICAgICAgICAgImlkIiA6ICJBQUFBQUFBQS1CQkJCLTRDQ0MtOERERC1FRUVFRUVFRUVFRUUiLAogICAgICAgICAgICAibGV0cyIgOiBbCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgImlkIiA6ICIyRTk4RTZDNS04Njg0LTRCNEQtOEM4RC02NjQ4N0ZGNDc5NTYiLAogICAgICAgICAgICAgICAgImxldE51bWJlciIgOiAxLAogICAgICAgICAgICAgICAgInBsYXllcjFTY29yZSIgOiAxLAogICAgICAgICAgICAgICAgInBsYXllcjJTY29yZSIgOiAxLAogICAgICAgICAgICAgICAgInJlcXVlc3RlZEJ5IiA6ICJTcGVsZXIgMiIsCiAgICAgICAgICAgICAgICAic2VydmVyIiA6ICJTcGVsZXIgMSIsCiAgICAgICAgICAgICAgICAidGltZXN0YW1wIiA6ICIyMDI2LTA5LTIxVDE0OjEzOjIwWiIKICAgICAgICAgICAgICB9CiAgICAgICAgICAgIF0sCiAgICAgICAgICAgICJwbGF5ZXIxTmFtZSIgOiAiUGF1bCBTdMOpZW5rcyIsCiAgICAgICAgICAgICJwbGF5ZXIxU2NvcmUiIDogMTEsCiAgICAgICAgICAgICJwbGF5ZXIyTmFtZSIgOiAiSmHDr3Ig8J+OviIsCiAgICAgICAgICAgICJwbGF5ZXIyU2NvcmUiIDogOSwKICAgICAgICAgICAgInBvaW50cyIgOiBbCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgImR1cmF0aW9uIiA6IDMuMjUsCiAgICAgICAgICAgICAgICAiaWQiIDogIjExMTExMTExLTIyMjItNDMzMy04NDQ0LTU1NTU1NTU1NTU1NSIsCiAgICAgICAgICAgICAgICAicGxheWVyMVNjb3JlIiA6IDEsCiAgICAgICAgICAgICAgICAicGxheWVyMlNjb3JlIiA6IDAsCiAgICAgICAgICAgICAgICAicG9pbnROdW1iZXIiIDogMSwKICAgICAgICAgICAgICAgICJwb2ludFR5cGUiIDogIldpbm5lciIsCiAgICAgICAgICAgICAgICAic2NvcmVyIiA6ICJTcGVsZXIgMSIsCiAgICAgICAgICAgICAgICAic2VydmVyIiA6ICJTcGVsZXIgMSIsCiAgICAgICAgICAgICAgICAic2hvdFR5cGUiIDogIkRyaXZlIiwKICAgICAgICAgICAgICAgICJ0aW1lc3RhbXAiIDogIjIwMjYtMDktMjFUMTQ6MTM6MjBaIiwKICAgICAgICAgICAgICAgICJ6b25lIiA6ICJWb29yIExpbmtzIgogICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgImR1cmF0aW9uIiA6IDEyLAogICAgICAgICAgICAgICAgImlkIiA6ICJCRDYxRjI4OS0xQUJFLTQ1QkEtOTNFMi01MTQ2NUNGMDg2NTciLAogICAgICAgICAgICAgICAgInBsYXllcjFTY29yZSIgOiAxLAogICAgICAgICAgICAgICAgInBsYXllcjJTY29yZSIgOiAxLAogICAgICAgICAgICAgICAgInBvaW50TnVtYmVyIiA6IDIsCiAgICAgICAgICAgICAgICAicG9pbnRUeXBlIiA6ICJVbmZvcmNlZCBFcnJvciIsCiAgICAgICAgICAgICAgICAic2NvcmVyIiA6ICJTcGVsZXIgMiIsCiAgICAgICAgICAgICAgICAic2VydmVyIiA6ICJTcGVsZXIgMSIsCiAgICAgICAgICAgICAgICAic2hvdFR5cGUiIDogIiIsCiAgICAgICAgICAgICAgICAidGltZXN0YW1wIiA6ICIyMDI2LTA5LTIxVDE0OjEzOjIwWiIsCiAgICAgICAgICAgICAgICAiem9uZSIgOiAiIgogICAgICAgICAgICAgIH0KICAgICAgICAgICAgXSwKICAgICAgICAgICAgInNhdmVkQXQiIDogIjIwMjYtMDktMjFUMTQ6MTM6MjBaIiwKICAgICAgICAgICAgInN0YXJ0aW5nU2VydmVyIiA6ICJTcGVsZXIgMSIsCiAgICAgICAgICAgICJ3aW5uZXIiIDogIlNwZWxlciAxIgogICAgICAgICAgfQogICAgICAgIF0sCiAgICAgICAgImlkIiA6ICI2RjFDMkIzQS00RDVFLTRGNjAtOEE3Qi05QzBEMUUyRjNBNEIiLAogICAgICAgICJtYXRjaFN0YXJ0aW5nU2VydmVyIiA6ICJTcGVsZXIgMSIsCiAgICAgICAgInBsYXllcjFDb2FjaGluZ0ZvY3VzIiA6IFsKICAgICAgICAgICJCYWNraGFuZCIsCiAgICAgICAgICAiRHJvcCIKICAgICAgICBdLAogICAgICAgICJwbGF5ZXIxQ29hY2hpbmdOb3RlcyIgOiAiTGV0IG9wIFwibGVuZ3RlXCIgXC8gdGVtcG8iLAogICAgICAgICJwbGF5ZXIxR2FtZXNBZnRlciIgOiAwLAogICAgICAgICJwbGF5ZXIxR2FtZXNCZWZvcmUiIDogMSwKICAgICAgICAicGxheWVyMUlkIiA6ICIwQTNDN0UxRC0yQjQ0LTRGMTAtOUMzQS01RDZFN0Y4MDkxQTIiLAogICAgICAgICJwbGF5ZXIxTmFtZSIgOiAiUGF1bCBTdMOpZW5rcyIsCiAgICAgICAgInBsYXllcjJDb2FjaGluZ0ZvY3VzIiA6IFsKCiAgICAgICAgXSwKICAgICAgICAicGxheWVyMkNvYWNoaW5nTm90ZXMiIDogIiIsCiAgICAgICAgInBsYXllcjJHYW1lc0FmdGVyIiA6IDAsCiAgICAgICAgInBsYXllcjJHYW1lc0JlZm9yZSIgOiAwLAogICAgICAgICJwbGF5ZXIyTmFtZSIgOiAiSmHDr3Ig8J+OviIsCiAgICAgICAgInNhdmVkQXQiIDogIjIwMjYtMDktMjFUMTQ6MTM6MjBaIiwKICAgICAgICAic3RhdHVzIiA6ICJjb21wbGV0ZWQiLAogICAgICAgICJ1cGRhdGVkQXQiIDogIjIwMjYtMDktMjFUMTQ6MTM6MjBaIgogICAgICB9LAogICAgICB7CiAgICAgICAgImJlc3RPZiIgOiA1LAogICAgICAgICJnYW1lcyIgOiBbCiAgICAgICAgICB7CiAgICAgICAgICAgICJnYW1lTnVtYmVyIiA6IDEsCiAgICAgICAgICAgICJpZCIgOiAiQkJCQkJCQkItQ0NDQy00RERELThFRUUtRkZGRkZGRkZGRkZGIiwKICAgICAgICAgICAgImxldHMiIDogWwoKICAgICAgICAgICAgXSwKICAgICAgICAgICAgInBsYXllcjFOYW1lIiA6ICJPdWQiLAogICAgICAgICAgICAicGxheWVyMVNjb3JlIiA6IDAsCiAgICAgICAgICAgICJwbGF5ZXIyTmFtZSIgOiAiU3BlbCIsCiAgICAgICAgICAgICJwbGF5ZXIyU2NvcmUiIDogMSwKICAgICAgICAgICAgInBvaW50cyIgOiBbCiAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgImR1cmF0aW9uIiA6IDQsCiAgICAgICAgICAgICAgICAiaWQiIDogIjFCMTAzMzg4LTYwRDQtNDY4My05QjY0LTIxQjRGMDMxQ0I2MyIsCiAgICAgICAgICAgICAgICAicGxheWVyMVNjb3JlIiA6IDAsCiAgICAgICAgICAgICAgICAicGxheWVyMlNjb3JlIiA6IDEsCiAgICAgICAgICAgICAgICAicG9pbnROdW1iZXIiIDogMSwKICAgICAgICAgICAgICAgICJwb2ludFR5cGUiIDogIlNlcnZpY2UgUG9pbnQiLAogICAgICAgICAgICAgICAgInNjb3JlciIgOiAiU3BlbGVyIDIiLAogICAgICAgICAgICAgICAgInNlcnZlciIgOiAiU3BlbGVyIDIiLAogICAgICAgICAgICAgICAgInNob3RUeXBlIiA6ICIiLAogICAgICAgICAgICAgICAgInRpbWVzdGFtcCIgOiAiMjAyNi0wOS0yMVQxNDoxMzoyMFoiLAogICAgICAgICAgICAgICAgInpvbmUiIDogIkFjaHRlciBMaW5rcyIKICAgICAgICAgICAgICB9CiAgICAgICAgICAgIF0sCiAgICAgICAgICAgICJzYXZlZEF0IiA6ICIyMDI2LTA5LTIxVDE0OjEzOjIwWiIsCiAgICAgICAgICAgICJzdGFydGluZ1NlcnZlciIgOiAiU3BlbGVyIDIiCiAgICAgICAgICB9CiAgICAgICAgXSwKICAgICAgICAiaWQiIDogIkJCQkJCQkJCLUNDQ0MtNERERC04RUVFLUZGRkZGRkZGRkZGRiIsCiAgICAgICAgIm1hdGNoU3RhcnRpbmdTZXJ2ZXIiIDogIlNwZWxlciAyIiwKICAgICAgICAicGxheWVyMUNvYWNoaW5nRm9jdXMiIDogWwoKICAgICAgICBdLAogICAgICAgICJwbGF5ZXIxQ29hY2hpbmdOb3RlcyIgOiAiIiwKICAgICAgICAicGxheWVyMUdhbWVzQWZ0ZXIiIDogMCwKICAgICAgICAicGxheWVyMUdhbWVzQmVmb3JlIiA6IDAsCiAgICAgICAgInBsYXllcjFOYW1lIiA6ICJPdWQiLAogICAgICAgICJwbGF5ZXIyQ29hY2hpbmdGb2N1cyIgOiBbCgogICAgICAgIF0sCiAgICAgICAgInBsYXllcjJDb2FjaGluZ05vdGVzIiA6ICIiLAogICAgICAgICJwbGF5ZXIyR2FtZXNBZnRlciIgOiAwLAogICAgICAgICJwbGF5ZXIyR2FtZXNCZWZvcmUiIDogMCwKICAgICAgICAicGxheWVyMk5hbWUiIDogIlNwZWwiLAogICAgICAgICJzYXZlZEF0IiA6ICIyMDI2LTA5LTIxVDE0OjEzOjIwWiIsCiAgICAgICAgInN0YXR1cyIgOiAiY29tcGxldGVkIiwKICAgICAgICAidXBkYXRlZEF0IiA6ICIyMDI2LTA5LTIxVDE0OjEzOjIwWiIKICAgICAgfQogICAgXSwKICAgICJwbGF5ZXJzIiA6IFsKICAgICAgewogICAgICAgICJjb2FjaGluZ0ZvY3VzQXJlYXMiIDogWwogICAgICAgICAgIkRyb3AiCiAgICAgICAgXSwKICAgICAgICAiY29hY2hpbmdOb3RlcyIgOiAiIiwKICAgICAgICAiY3JlYXRlZEF0IiA6ICIyMDI2LTA5LTIxVDE0OjEzOjIwWiIsCiAgICAgICAgImlkIiA6ICIwQTNDN0UxRC0yQjQ0LTRGMTAtOUMzQS01RDZFN0Y4MDkxQTIiLAogICAgICAgICJuYW1lIiA6ICJQYXVsIFN0w6llbmtzIgogICAgICB9CiAgICBdLAogICAgInN0YW5kYWxvbmVHYW1lcyIgOiBbCgogICAgXSwKICAgICJ2ZXJzaW9uIiA6IDIKICB9LAogICJzY2hlbWFWZXJzaW9uIiA6ICIxLjAuMCIKfQ=="
 }
+
+// "Deel als plaatje": the share picture renders, also with long names. With
+// RESULT_CARD_PNG_DIR set (xcodebuild: TEST_RUNNER_RESULT_CARD_PNG_DIR) the
+// pictures are written there as PNG, for the docs.
+final class ResultCardImageTests: XCTestCase {
+    private func game(_ number: Int, _ a: Int, _ b: Int, _ winner: Player?) -> MatchShareReport.Game {
+        MatchShareReport.Game(number: number, player1Score: a, player2Score: b, winner: winner,
+                              duration: nil, rallyWinners: [], strokes: 0)
+    }
+
+    @MainActor
+    private func render(_ report: MatchShareReport, name: String) throws {
+        let image = try XCTUnwrap(ResultCardImage.render(ResultCard.from(report)))
+        XCTAssertGreaterThan(image.size.width, 200)
+        XCTAssertGreaterThan(image.size.height, 200)
+        // No transparent edge (WhatsApp shows it as a black or white bar)
+        let cgImage = try XCTUnwrap(image.cgImage)
+        var pixel = [UInt8](repeating: 0, count: 4)
+        pixel.withUnsafeMutableBytes { buffer in
+            let context = CGContext(data: buffer.baseAddress, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
+                                    space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+            // The top left pixel lands on the 1×1 context
+            context?.draw(cgImage, in: CGRect(x: 0, y: -CGFloat(cgImage.height - 1), width: CGFloat(cgImage.width), height: CGFloat(cgImage.height)))
+        }
+        XCTAssertEqual(pixel[3], 255, "top left corner is opaque")
+        if let dir = ProcessInfo.processInfo.environment["RESULT_CARD_PNG_DIR"], let data = image.pngData() {
+            try data.write(to: URL(fileURLWithPath: dir).appendingPathComponent("ios-deel-als-plaatje-\(name).png"))
+        }
+    }
+
+    @MainActor
+    func testMatchOverWithLongNames() throws {
+        let games = [game(1, 15, 17, .player2), game(2, 11, 8, .player1), game(3, 11, 9, .player1),
+                     game(4, 7, 11, .player2), game(5, 6, 11, .player2)]
+        try render(MatchShareReport(player1Name: "Luis Delft", player2Name: "Niels van Sevenhoven", bestOf: 5, firstGameNumber: 1,
+                                    player1Games: 2, player2Games: 3, matchWinner: .player2, games: games,
+                                    startedAt: Date(), duration: 0), name: "wedstrijd")
+    }
+
+    @MainActor
+    func testDuringAGame() throws {
+        let games = [game(1, 11, 8, .player1), game(2, 4, 3, nil)]
+        try render(MatchShareReport(player1Name: "Jan", player2Name: "Niels van Sevenhoven", bestOf: 5, firstGameNumber: 1,
+                                    player1Games: 1, player2Games: 0, matchWinner: nil, games: games,
+                                    startedAt: Date(), duration: 0), name: "tussenstand")
+    }
+}

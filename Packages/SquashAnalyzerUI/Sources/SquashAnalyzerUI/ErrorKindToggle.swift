@@ -35,7 +35,9 @@ public struct ErrorKindToggle: View {
         } label: {
             // Four equal chips side by side: icon above the word so they fit a small phone
             VStack(spacing: 3) {
+                // Fixed height: the figure of SERVICE is taller and pushed its word down
                 AppSymbol(kind.icon, size: 13, color: isOn ? Color.black.opacity(0.8) : tint)
+                    .frame(height: 16.0)
                 Text(kind.title.uppercased())
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .lineLimit(1)

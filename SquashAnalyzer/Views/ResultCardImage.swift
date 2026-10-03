@@ -124,7 +124,17 @@ struct ResultCardImage: View {
     static func render(_ card: ResultCard) -> UIImage? {
         let renderer = ImageRenderer(content: ResultCardImage(card: card))
         renderer.scale = 3
-        return renderer.uiImage
+        guard let image = renderer.uiImage else { return nil }
+        // ImageRenderer leaves a few transparent rows above and below the card,
+        // which WhatsApp shows as a black or white edge: draw it on the card colour
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = image.scale
+        format.opaque = true
+        return UIGraphicsImageRenderer(size: image.size, format: format).image { context in
+            UIColor(red: 0.12, green: 0.105, blue: 0.09, alpha: 1).setFill()
+            context.fill(CGRect(origin: .zero, size: image.size))
+            image.draw(at: .zero)
+        }
     }
 }
 

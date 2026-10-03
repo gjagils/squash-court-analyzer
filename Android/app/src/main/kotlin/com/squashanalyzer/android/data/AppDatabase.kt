@@ -17,7 +17,8 @@ import squash.analyzer.core.BadgeKind
         BadgeAwardEntity::class,
     ],
     version = 9,
-    exportSchema = false,
+    // schemas/…/9.json: from version 10 on, migrations can be tested with MigrationTestHelper
+    exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun matchDao(): MatchDao

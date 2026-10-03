@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+: what Google's cloud backup and device-to-device transfer take.
+     The encrypted API key is left out: its Keystore key never leaves this
+     phone, so on another phone it cannot be decrypted anyway. Shared pictures
+     in cache/ are temporary. Matches, players and badges do go along. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="squash-analyzer-secure.xml" />
+        <exclude domain="root" path="cache/" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="squash-analyzer-secure.xml" />
+        <exclude domain="root" path="cache/" />
+    </device-transfer>
+</data-extraction-rules>

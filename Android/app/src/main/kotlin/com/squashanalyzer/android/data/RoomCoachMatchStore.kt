@@ -15,22 +15,30 @@ class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardS
         // Capture the entire mutable model before the first suspension. The UI
         // serializes edits; Room's upsert replaces all children atomically.
         val snapshot = capture(match)
-        store.upsert(snapshot)
+        // The match and its badges in one transaction (T22)
+        badgeAwardStore.inTransaction {
+            store.upsert(snapshot)
+            syncBadges(match)
+        }
         match.status = CoreStatus.init(rawValue = snapshot.status)!!
         match.updatedAt = date(snapshot.updatedAt)
-        syncBadges(match)
     }
 
     override suspend fun abandon(match: Match) {
         val snapshot = capture(match).copy(status = MatchStatus.ABANDONED)
-        store.upsert(snapshot)
+        badgeAwardStore.inTransaction {
+            store.upsert(snapshot)
+            syncBadges(match)
+        }
         match.status = CoreStatus.abandoned
-        syncBadges(match)
     }
 
     override suspend fun discard(match: Match) {
-        store.delete(capture(match))
-        badgeAwardStore.removeMatch(match.id.uuidString)
+        val snapshot = capture(match)
+        badgeAwardStore.inTransaction {
+            store.delete(snapshot)
+            badgeAwardStore.removeMatch(match.id.uuidString)
+        }
     }
 
     /** A saved match by id, as the live model (Afgeronde wedstrijden) */

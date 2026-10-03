@@ -17,6 +17,12 @@ val uploadStorePassword = providers.gradleProperty("SQUASH_UPLOAD_STORE_PASSWORD
 val uploadKeyPassword = providers.gradleProperty("SQUASH_UPLOAD_KEY_PASSWORD").orNull
 val hasUploadKey = uploadStoreFile.exists() && uploadStorePassword != null && uploadKeyPassword != null
 
+// Room writes the database schema per version into schemas/ (committed), so
+// a future migration (9 -> 10) can be tested with MigrationTestHelper
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
     namespace = "com.squashanalyzer.android"
     compileSdk = 36

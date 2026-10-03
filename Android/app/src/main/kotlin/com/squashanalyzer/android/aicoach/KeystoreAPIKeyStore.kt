@@ -24,9 +24,9 @@ class KeystoreAPIKeyStore(context: Context) : APIKeyStore {
     private val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     override var openAIAPIKey: String?
-        get() = synchronized(this) { read() }
-        set(value) = synchronized(this) {
-            if (value.isNullOrEmpty()) prefs.edit().remove(KEY).apply() else write(value)
+        get() = synchronized(LOCK) { read() }
+        set(value) = synchronized(LOCK) {
+            if (value.isNullOrEmpty() || !write(value)) prefs.edit().remove(KEY).apply()
         }
 
     private fun secretKey(): SecretKey {
@@ -43,11 +43,20 @@ class KeystoreAPIKeyStore(context: Context) : APIKeyStore {
         return generator.generateKey()
     }
 
-    private fun write(value: String) {
+    /**
+     * False when the Keystore refused (locked, broken or missing, as on some
+     * devices and in tests); the caller then clears the old value, so reading
+     * back says "not set" and Instellingen shows "Opslaan is niet gelukt"
+     * instead of crashing or keeping a stale key.
+     */
+    private fun write(value: String): Boolean = try {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, secretKey())
         val sealed = cipher.iv + cipher.doFinal(value.toByteArray(Charsets.UTF_8))
         prefs.edit().putString(KEY, Base64.encodeToString(sealed, Base64.NO_WRAP)).apply()
+        true
+    } catch (e: Exception) {
+        false
     }
 
     /** Nil when nothing is stored or the value cannot be decrypted (e.g. a new Keystore key) */
@@ -64,6 +73,8 @@ class KeystoreAPIKeyStore(context: Context) : APIKeyStore {
     }
 
     companion object {
+        /** One lock for every instance: they share the same preferences and Keystore entry */
+        private val LOCK = Any()
         private const val ANDROID_KEYSTORE = "AndroidKeyStore"
         private const val ALIAS = "squashanalyzer.openai"
         private const val TRANSFORMATION = "AES/GCM/NoPadding"

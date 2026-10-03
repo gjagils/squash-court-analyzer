@@ -42,6 +42,9 @@ class BadgeAwardStore(
     private val transaction: suspend (suspend () -> Unit) -> Unit = { it() },
 ) : PlayerBadgeSummaryStore, CardImportStore {
 
+    /** Runs `block` as one database transaction: a match and its badges are saved together or not at all */
+    suspend fun inTransaction(block: suspend () -> Unit) = transaction(block)
+
     /** Matches with at least one badge that was not deleted (medal on a history card) */
     suspend fun matchIdsWithBadges(): Set<String> =
         dao.all().filter { it.deletedAt == null }.map { it.matchId }.toSet()

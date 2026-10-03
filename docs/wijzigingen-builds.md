@@ -53,6 +53,12 @@ Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `ma
   "Opgeslagen!"); "Nieuwe wedstrijd" meldt het als de oude niet kon worden
   opgeslagen; een beschadigd bestand van een lopende scheidsrechterwedstrijd wordt
   opgeruimd; exportbestanden krijgen een veilige naam (ook met / of : in een naam).
+- Android: het deelplaatje en de badgekaart worden buiten de hoofdthread
+  gemaakt (geen hapering bij Delen); een weigerende Keystore laat de app niet
+  meer crashen bij het bewaren van de API key; een wedstrijd en zijn badges
+  worden samen in één keer opgeslagen.
+- Android-back-up via Google laat de versleutelde API key en tijdelijke
+  plaatjes buiten de back-up (die werkt op een ander toestel toch niet).
 - VoiceOver/TalkBack: STROKE-knoppen noemen de speler, de uitslag wordt als één
   zin voorgelezen, de verborgen L/R-keuze van de ontvanger wordt overgeslagen.
 
@@ -74,6 +80,10 @@ Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `ma
 - [ ] Privacytekst: live meekijken (2 uur bewaren) staat klaar in
       `website/privacy.html`, nog niet gepubliceerd.
 - [ ] Website bijwerken (homepage, nieuws).
+- [ ] Google Play Gegevensveiligheid nalopen (`Android/play/data-safety.csv`):
+      nu alleen "andere content, verzameld, optioneel" (live meekijken). Komen
+      spelersfoto's op de livepagina, dan ook "Foto's"; AI Coach stuurt
+      wedstrijddata naar OpenAI met de eigen sleutel van de gebruiker.
 
 ## iOS 2.2 build 16 en Android 0.3 (3), 1 oktober 2026
 

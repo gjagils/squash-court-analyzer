@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.room.withTransaction
 import androidx.lifecycle.lifecycleScope
+import squash.analyzer.core.ResultCard
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -110,13 +111,15 @@ class MainActivity : AppCompatActivity() {
         // Live meekijken: the shared LiveShare sends the state through this (server/live)
         LiveShare.shared.transport = HttpLiveTransport()
         // "Deel als plaatje" in Deel score: the result card as a PNG (ResultImage)
-        ResultImageSharing.share = { card -> startActivity(ResultImage.shareIntent(this, card)) }
+        // The PNG is drawn and written off the main thread; the static hook is
+        // cleared in onDestroy so it never keeps an old Activity alive
+        ResultImageSharing.share = resultImageShare
         setContent {
             val stateHolder = rememberSaveableStateHolder()
             stateHolder.SaveableStateProvider(true) {
                 PresentationRoot(defaultColorScheme = ColorScheme.dark, context = ComposeContext()) { context ->
                     Box(modifier = context.modifier.fillMaxSize()) {
-                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach, backup = backup, teamImporter = teamImporter, photoStore = playerStore, filePicker = playerFiles, shareCard = { snapshot, text -> startActivity(CardImage.shareIntent(this@MainActivity, snapshot, text)) })
+                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach, backup = backup, teamImporter = teamImporter, photoStore = playerStore, filePicker = playerFiles, shareCard = { snapshot, text -> shareOffMainThread { CardImage.shareIntent(this@MainActivity, snapshot, text) } })
                             // Page titles 20 sp semibold on every top bar, as PageTitleStyle on iOS (docs/style/README.md)
                             .material3TopAppBar { options ->
                                 val title = options.title
@@ -137,6 +140,21 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         lifecycleScope.launch { LiveShare.shared.retryPending() }
+    }
+
+    private val resultImageShare: (ResultCard) -> Unit = { card -> shareOffMainThread { ResultImage.shareIntent(this, card) } }
+
+    /** Renders a share picture on Dispatchers.IO, then opens the share sheet */
+    private fun shareOffMainThread(makeIntent: () -> Intent) {
+        lifecycleScope.launch {
+            val intent = withContext(Dispatchers.IO) { runCatching(makeIntent).getOrNull() } ?: return@launch
+            startActivity(intent)
+        }
+    }
+
+    override fun onDestroy() {
+        if (ResultImageSharing.share === resultImageShare) ResultImageSharing.share = null
+        super.onDestroy()
     }
 
     override fun onStop() {

@@ -534,3 +534,7 @@ footer {
 }
 .shots .beta-tag { bottom: 34px; font-size: 10px; padding: 3px 7px; }
 .beta-note { font-size: 13px; color: var(--text-3); text-align: center; margin: -28px auto 8px; max-width: 640px; padding: 0 24px; }
+
+/* ── Vrijwillige donatie ────────────────────────────────────── */
+.donate-card { max-width: 640px; margin: 0 auto; text-align: center; }
+.donate-card .home-links { justify-content: center; }

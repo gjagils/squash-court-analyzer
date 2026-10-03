@@ -1,18 +1,24 @@
 import SwiftUI
+import SwiftData
 import SquashAnalyzerCore
 
-/// Lets the coach or referee pick one of the WhatsApp layouts, shows how it will
-/// read in the chat and hands the text to the system share sheet. The last used
-/// layout is remembered (one setting for both modes).
+/// "Deel score": Scorekaart, Verslag or Plaatje, a preview of how it will look
+/// in the chat, and one Delen button for the system share sheet. The choice is
+/// remembered (one setting for coach and referee, the same on Android).
 struct MatchShareSheet: View {
     let report: MatchShareReport
 
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("refereeShareStyle") private var storedStyle = MatchShareStyle.compact.rawValue
+    @AppStorage(MatchShareChoice.storageKey) private var storedChoice = MatchShareChoice.scorecard.rawValue
+    @Query private var players: [SavedPlayer]
     @State private var shareItems: ShareItemsWrapper? = nil
 
-    private var style: MatchShareStyle {
-        MatchShareStyle(rawValue: storedStyle) ?? .compact
+    private var choice: MatchShareChoice { MatchShareChoice.from(stored: storedChoice) }
+
+    /// The result card with the players' photos, as on the end-of-game card
+    private var card: ResultCard {
+        ResultCard.from(report).withPhotos(players.photo(named: report.player1Name),
+                                           players.photo(named: report.player2Name))
     }
 
     var body: some View {
@@ -22,42 +28,40 @@ struct MatchShareSheet: View {
             VStack(spacing: 18) {
                 header
 
-                styleTabs
+                choiceTabs
                     .padding(.horizontal, 20)
 
-                Text(style.subtitle)
+                Text(choice.subtitle)
                     .font(AppFonts.caption(12))
                     .foregroundColor(AppColors.textMuted)
 
-                // The preview hugs its text like a chat bubble; long reports scroll
                 ScrollView {
-                    WhatsAppPreview(text: report.text(style: style))
-                        .padding(16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color.white.opacity(0.055))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(Color.white.opacity(0.10), lineWidth: 1)
-                                )
-                        )
-                        .padding(.horizontal, 20)
+                    if let style = choice.textStyle {
+                        // The preview hugs its text like a chat bubble; long reports scroll
+                        WhatsAppPreview(text: report.text(style: style))
+                            .padding(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.white.opacity(0.055))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(Color.white.opacity(0.10), lineWidth: 1)
+                                    )
+                            )
+                            .padding(.horizontal, 20)
+                    } else {
+                        // The picture as it will be sent
+                        ResultCardImage(card: card, width: nil)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.10), lineWidth: 1))
+                            .padding(.horizontal, 20)
+                    }
                 }
                 .scrollBounceBehavior(.basedOnSize)
 
-                HardwareButton(title: "Delen", color: AppColors.warmOrange) {
-                    shareItems = ShareItemsWrapper(items: [report.text(style: style)])
-                }
-                .padding(.horizontal, 20)
-
-                // The result card as a picture (WhatsApp, Instagram, …)
-                HardwareButton(title: "Deel als plaatje", color: AppColors.accentGold, style: .outlined) {
-                    if let image = ResultCardImage.render(ResultCard.from(report)) {
-                        shareItems = ShareItemsWrapper(items: [image])
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 24)
+                HardwareButton(title: "Delen", color: AppColors.warmOrange) { share() }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
             }
         }
         .sheet(item: $shareItems) { wrapper in
@@ -65,16 +69,17 @@ struct MatchShareSheet: View {
         }
     }
 
+    private func share() {
+        if let style = choice.textStyle {
+            shareItems = ShareItemsWrapper(items: [report.text(style: style)])
+        } else if let image = ResultCardImage.render(card) {
+            shareItems = ShareItemsWrapper(items: [image])
+        }
+    }
+
     private var header: some View {
         HStack {
-            Button(action: { dismiss() }) {
-                HStack(spacing: 4) {
-                    Image(systemName: "xmark")
-                    Text("Sluiten")
-                }
-                .font(AppFonts.body(14))
-                .foregroundColor(AppColors.textSecondary)
-            }
+            CloseButton { dismiss() }
 
             Spacer()
 
@@ -86,8 +91,7 @@ struct MatchShareSheet: View {
             Spacer()
 
             // Balances the close button so the title sits centred
-            Text("Sluiten")
-                .font(AppFonts.body(14))
+            CloseButton {}
                 .hidden()
         }
         .padding(.horizontal, 20)
@@ -95,11 +99,11 @@ struct MatchShareSheet: View {
         .padding(.bottom, 4)
     }
 
-    private var styleTabs: some View {
+    private var choiceTabs: some View {
         HStack(spacing: 8) {
-            ForEach(MatchShareStyle.allCases) { option in
-                let active = option == style
-                Button(action: { withAnimation(.easeInOut(duration: 0.15)) { storedStyle = option.rawValue } }) {
+            ForEach(MatchShareChoice.allCases) { option in
+                let active = option == choice
+                Button(action: { withAnimation(.easeInOut(duration: 0.15)) { storedChoice = option.rawValue } }) {
                     Text(option.title)
                         .font(AppFonts.label(13))
                         .foregroundColor(active ? AppColors.backgroundDark : AppColors.accentGold)

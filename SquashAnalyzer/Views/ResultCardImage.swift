@@ -7,6 +7,8 @@ import SquashAnalyzerCore
 /// draws the same card on a Canvas (`ResultImage.kt`).
 struct ResultCardImage: View {
     let card: ResultCard
+    /// 420 for the exported picture; nil fills the width (the preview in Deel score)
+    var width: CGFloat? = 420
 
     private let background = Color(red: 0.12, green: 0.105, blue: 0.09)
     private let chipBackground = Color(red: 0.17, green: 0.165, blue: 0.17)
@@ -75,19 +77,29 @@ struct ResultCardImage: View {
         }
         .padding(.horizontal, 28)
         .padding(.vertical, 36)
-        .frame(width: 420)
+        .frame(width: width)
+        .frame(maxWidth: width == nil ? .infinity : nil)
         .background(background)
     }
 
     private func side(_ player: Player) -> some View {
         VStack(spacing: 10) {
             ZStack {
+                // The player's photo (Spelers) when there is one, else a person
+                if let data = card.photo(for: player), let photo = UIImage(data: data) {
+                    Image(uiImage: photo)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 64, height: 64)
+                        .clipShape(Circle())
+                } else {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 26))
+                        .foregroundColor(color(player).opacity(0.7))
+                }
                 Circle()
                     .stroke(color(player).opacity(0.7), lineWidth: 3)
                     .frame(width: 64, height: 64)
-                Image(systemName: "person.fill")
-                    .font(.system(size: 26))
-                    .foregroundColor(color(player).opacity(0.7))
             }
             Text(card.name(for: player))
                 .font(.system(size: 17, weight: .semibold, design: .rounded))

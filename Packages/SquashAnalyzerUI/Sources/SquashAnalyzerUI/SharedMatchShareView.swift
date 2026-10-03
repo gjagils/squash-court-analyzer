@@ -1,14 +1,14 @@
 import SwiftUI
 import SquashAnalyzerCore
 
-/// "Deel score" on Android: pick one of the three WhatsApp layouts (Core's
-/// `MatchShareReport`, the same text as iOS' `MatchShareSheet`), see how it
-/// reads, then hand it to the share sheet. The layout is remembered with the
-/// same key as iOS, one setting for coach and referee.
-/// "Deel als plaatje" on Android: the app sets this at start (it draws Core's
+/// "Deel score" on Android: Scorekaart, Verslag or Plaatje (Core's
+/// `MatchShareChoice`, the same choices and texts as iOS' `MatchShareSheet`),
+/// a preview, and one Delen button. The choice is remembered with the same key
+/// as iOS, one setting for coach and referee.
+/// The picture on Android: the app sets this at start (it draws Core's
 /// `ResultCard` on a Canvas and shares the PNG, `ResultImage.kt`). nil hides
-/// the button. A setting at app level instead of yet another init parameter
-/// through every screen that shares a score.
+/// the Plaatje choice. A setting at app level instead of yet another init
+/// parameter through every screen that shares a score.
 public enum ResultImageSharing {
     @MainActor public static var share: ((ResultCard) -> Void)? = nil
 }
@@ -17,16 +17,32 @@ public struct SharedMatchShareView: View {
     let report: MatchShareReport
     let shareText: (String) -> Void
     let onClose: () -> Void
+    let player1Photo: Data?
+    let player2Photo: Data?
 
-    @AppStorage("refereeShareStyle") private var storedStyle = MatchShareStyle.compact.rawValue
+    @AppStorage(MatchShareChoice.storageKey) private var storedChoice = MatchShareChoice.scorecard.rawValue
 
-    public init(report: MatchShareReport, shareText: @escaping (String) -> Void, onClose: @escaping () -> Void) {
+    public init(report: MatchShareReport, player1Photo: Data? = nil, player2Photo: Data? = nil,
+                shareText: @escaping (String) -> Void, onClose: @escaping () -> Void) {
         self.report = report
+        self.player1Photo = player1Photo
+        self.player2Photo = player2Photo
         self.shareText = shareText
         self.onClose = onClose
     }
 
-    private var style: MatchShareStyle { MatchShareStyle(rawValue: storedStyle) ?? MatchShareStyle.compact }
+    private var choices: [MatchShareChoice] {
+        ResultImageSharing.share == nil ? MatchShareChoice.allCases.filter { $0 != MatchShareChoice.picture } : MatchShareChoice.allCases
+    }
+
+    private var choice: MatchShareChoice {
+        let stored = MatchShareChoice.from(stored: storedChoice)
+        return choices.contains(stored) ? stored : MatchShareChoice.scorecard
+    }
+
+    private var card: ResultCard {
+        ResultCard.from(report).withPhotos(player1Photo, player2Photo)
+    }
 
     public var body: some View {
         ZStack {
@@ -34,18 +50,22 @@ public struct SharedMatchShareView: View {
             VStack(spacing: 18) {
                 header
                 styleTabs
-                Text(style.subtitle)
+                Text(choice.subtitle)
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundColor(DashboardPalette.muted)
-                // The preview reads like the chat: *bold*, _italic_ and ``` blocks, as on iOS
                 ScrollView {
-                    WhatsAppPreview(text: report.text(style: style))
-                        .padding(16)
-                        .background(Color.white.opacity(0.055))
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.10), lineWidth: 1))
+                    if let style = choice.textStyle {
+                        // The preview reads like the chat: *bold*, _italic_ and ``` blocks, as on iOS
+                        WhatsAppPreview(text: report.text(style: style))
+                            .padding(16)
+                            .background(Color.white.opacity(0.055))
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.10), lineWidth: 1))
+                    } else {
+                        ResultCardPreview(card: card)
+                    }
                 }
-                Button { shareText(report.text(style: style)) } label: {
+                Button { share() } label: {
                     Text("DELEN")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .tracking(1)
@@ -56,25 +76,18 @@ public struct SharedMatchShareView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
-                if let shareImage = ResultImageSharing.share {
-                    // The result card as a picture (WhatsApp, Instagram, …)
-                    Button { shareImage(ResultCard.from(report)) } label: {
-                        Text("DEEL ALS PLAATJE")
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .tracking(1)
-                            .foregroundColor(DashboardPalette.gold)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(DashboardPalette.gold.opacity(0.10))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(DashboardPalette.gold.opacity(0.4), lineWidth: 1))
-                    }
-                    .buttonStyle(.plain)
-                }
                 Spacer().frame(height: 24)
             }
             .padding(.horizontal, 20)
             .padding(.top, 22)
+        }
+    }
+
+    private func share() {
+        if let style = choice.textStyle {
+            shareText(report.text(style: style))
+        } else if let shareImage = ResultImageSharing.share {
+            shareImage(card)
         }
     }
 
@@ -103,9 +116,9 @@ public struct SharedMatchShareView: View {
 
     private var styleTabs: some View {
         HStack(spacing: 8) {
-            ForEach(MatchShareStyle.allCases) { option in
-                let active = option == style
-                Button { storedStyle = option.rawValue } label: {
+            ForEach(choices) { option in
+                let active = option == choice
+                Button { storedChoice = option.rawValue } label: {
                     Text(option.title)
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundColor(active ? DashboardPalette.background : DashboardPalette.gold)

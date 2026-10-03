@@ -265,3 +265,45 @@ public enum MatchShareStyle: String, CaseIterable, Identifiable {
         }
     }
 }
+
+/// The choices in "Deel score" (iOS and Android): two text layouts and the
+/// result card as a picture. Stored with the old key "refereeShareStyle";
+/// the old "Kort" (compact) is no longer offered and falls back to the scorecard.
+public enum MatchShareChoice: String, CaseIterable, Identifiable {
+    case scorecard, report, picture
+
+    public static let storageKey = "refereeShareStyle"
+
+    public var id: String { rawValue }
+
+    public var title: String {
+        switch self {
+        case .scorecard: return "Scorekaart"
+        case .report: return "Verslag"
+        case .picture: return "Plaatje"
+        }
+    }
+
+    public var subtitle: String {
+        switch self {
+        case .scorecard: return "Tabel met alle games"
+        case .report: return "Per game, met tijden en statistieken"
+        case .picture: return "De uitslag als afbeelding, met de spelers"
+        }
+    }
+
+    /// The text layout; nil for the picture
+    public var textStyle: MatchShareStyle? {
+        switch self {
+        case .scorecard: return MatchShareStyle.scorecard
+        case .report: return MatchShareStyle.report
+        case .picture: return nil
+        }
+    }
+
+    /// Looked up through `allCases` (Skip, docs/android-port.md); anything
+    /// else, the old "compact" included, is the scorecard
+    public static func from(stored raw: String) -> MatchShareChoice {
+        MatchShareChoice.allCases.first { $0.rawValue == raw } ?? MatchShareChoice.scorecard
+    }
+}

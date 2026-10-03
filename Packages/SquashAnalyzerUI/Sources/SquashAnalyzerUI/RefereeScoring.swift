@@ -50,7 +50,8 @@ public struct RefereeScoringView: View {
             }
 
             if sharingNow, let shareText {
-                SharedMatchShareView(report: match.shareReport, shareText: shareText) {
+                SharedMatchShareView(report: match.shareReport, player1Photo: photo(Player.player1), player2Photo: photo(Player.player2),
+                                     shareText: shareText) {
                     sharingNow = false
                     // Back to the result card, as on iOS
                     if match.isMatchOver { hiddenResult = nil }

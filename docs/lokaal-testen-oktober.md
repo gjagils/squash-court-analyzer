@@ -91,8 +91,9 @@ Er was geen Mac (Xcode, Skip) en geen Docker beschikbaar. Dus:
 
 **Deel als plaatje**
 - [ ] Coach en scheidsrechter: na een game en na de wedstrijd → Deel score →
-      "Deel als plaatje" → een PNG zoals het eindvenster (titel, namen, grote
-      stand, winnaar, chips per game)
+      tabs Scorekaart · Verslag · Plaatje (Kort is weg) → bij Plaatje een
+      voorbeeld zoals het eindvenster, met de foto's van gekozen spelers →
+      één knop Delen
 - [ ] Ook tijdens een game (titel "TUSSENSTAND")
 - [ ] Lange namen ("Niels van Sevenhoven") passen
 - iOS: `ResultCardImage.swift` (nieuw bestand, ook in het Xcode-project gezet).

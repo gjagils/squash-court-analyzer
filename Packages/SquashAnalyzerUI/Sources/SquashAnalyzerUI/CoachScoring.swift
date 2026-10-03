@@ -627,7 +627,8 @@ public struct CoachScoringView: View {
         )
         .sheet(isPresented: $showingShare) {
             if let shareText {
-                SharedMatchShareView(report: match.shareReport, shareText: shareText) { showingShare = false }
+                SharedMatchShareView(report: match.shareReport, player1Photo: photo(Player.player1), player2Photo: photo(Player.player2),
+                                     shareText: shareText) { showingShare = false }
             }
         }
         .sheet(isPresented: $showingBadges) {

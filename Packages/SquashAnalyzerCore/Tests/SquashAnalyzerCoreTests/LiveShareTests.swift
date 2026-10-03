@@ -217,6 +217,24 @@ final class ResultCardTests: XCTestCase {
         XCTAssertEqual(card.winnerText, "Luis wint game 1")
     }
 
+    func testPhotosTravelWithTheCard() {
+        let card = ResultCard.from(report(games: [game(1, 11, 8, Player.player1)], p1: 1, p2: 0, winner: nil))
+        XCTAssertNil(card.photo(for: Player.player1))
+        let photo = "foto".data(using: String.Encoding.utf8) ?? Data()
+        let withPhotos = card.withPhotos(photo, nil)
+        XCTAssertEqual(withPhotos.photo(for: Player.player1), photo)
+        XCTAssertNil(withPhotos.photo(for: Player.player2))
+        XCTAssertEqual(withPhotos.title, card.title)
+    }
+
+    func testShareChoicesWithoutKort() {
+        XCTAssertEqual(MatchShareChoice.allCases.map { $0.title }, ["Scorekaart", "Verslag", "Plaatje"])
+        XCTAssertEqual(MatchShareChoice.from(stored: "compact"), MatchShareChoice.scorecard, "old Kort falls back")
+        XCTAssertEqual(MatchShareChoice.from(stored: "report"), MatchShareChoice.report)
+        XCTAssertNil(MatchShareChoice.picture.textStyle)
+        XCTAssertEqual(MatchShareChoice.scorecard.textStyle, MatchShareStyle.scorecard)
+    }
+
     func testDuringAGameShowsTheStand() {
         let card = ResultCard.from(report(games: [game(1, 11, 8, Player.player1), game(2, 4, 6, nil)], p1: 1, p2: 0, winner: nil))
         XCTAssertEqual(card.title, "TUSSENSTAND")

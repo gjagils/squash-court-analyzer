@@ -3,6 +3,9 @@ package com.squashanalyzer.android
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Rect
+import android.graphics.Path
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -74,10 +77,16 @@ object ResultImage {
             val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 style = Paint.Style.STROKE; strokeWidth = 7f; color = color(player); alpha = 180
             }
+            // The player's photo (Spelers) in the circle, else a person
+            val photo = card.photo(for_ = player)?.platformValue?.let { BitmapFactory.decodeByteArray(it, 0, it.size) }
+            if (photo != null) {
+                drawCirclePhoto(canvas, photo, x, 300f, 80f)
+            } else {
+                val person = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = color(player); alpha = 180 }
+                canvas.drawCircle(x, 282f, 22f, person)
+                canvas.drawRoundRect(RectF(x - 40f, 312f, x + 40f, 346f), 20f, 20f, person)
+            }
             canvas.drawCircle(x, 300f, 84f, ring)
-            val person = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = color(player); alpha = 180 }
-            canvas.drawCircle(x, 282f, 22f, person)
-            canvas.drawRoundRect(RectF(x - 40f, 312f, x + 40f, 346f), 20f, 20f, person)
             val name = paint(42f, if (player == Player.player1) textSecondary else color(player), bold = true)
             val lines = wrapTwo(card.name(for_ = player), name, WIDTH * 0.42f)
             lines.forEachIndexed { line, text -> canvas.drawText(text, x, 450f + line * 50f, name) }
@@ -132,6 +141,17 @@ object ResultImage {
         canvas.drawCircle(centre - footerWidth / 2f - 24f, 1129f, 9f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = gold })
         canvas.drawText(card.footer, centre + 8f, 1140f, footer)
         return bitmap
+    }
+
+    /** The photo cropped to a circle (centre square, scaled to fill) */
+    private fun drawCirclePhoto(canvas: Canvas, photo: Bitmap, cx: Float, cy: Float, radius: Float) {
+        val side = minOf(photo.width, photo.height)
+        val source = Rect((photo.width - side) / 2, (photo.height - side) / 2, (photo.width + side) / 2, (photo.height + side) / 2)
+        val target = RectF(cx - radius, cy - radius, cx + radius, cy + radius)
+        val save = canvas.save()
+        canvas.clipPath(Path().apply { addCircle(cx, cy, radius, Path.Direction.CW) })
+        canvas.drawBitmap(photo, source, target, Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG))
+        canvas.restoreToCount(save)
     }
 
     private fun shrinkToFit(paint: Paint, text: String, width: Float) {

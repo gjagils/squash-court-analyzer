@@ -27,6 +27,10 @@ public struct ResultCard: Equatable {
     public let winnerText: String?
     public let chips: [Chip]
     public let footer: String
+    /// The players' photos (Spelers), drawn in the circles instead of the
+    /// person icon; nil when the player has none
+    public var player1Photo: Data? = nil
+    public var player2Photo: Data? = nil
 
     public init(title: String, player1Name: String, player2Name: String, player1Score: Int, player2Score: Int,
                 winner: Player?, winnerText: String?, chips: [Chip], footer: String = "Squash Analyzer") {
@@ -43,6 +47,18 @@ public struct ResultCard: Equatable {
 
     public func name(for player: Player) -> String {
         player == Player.player1 ? player1Name : player2Name
+    }
+
+    public func photo(for player: Player) -> Data? {
+        player == Player.player1 ? player1Photo : player2Photo
+    }
+
+    /// The same card with the players' photos
+    public func withPhotos(_ photo1: Data?, _ photo2: Data?) -> ResultCard {
+        var card = self
+        card.player1Photo = photo1
+        card.player2Photo = photo2
+        return card
     }
 
     /// The card for the state of a match: the end of the match, the game that

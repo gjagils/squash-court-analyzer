@@ -431,3 +431,20 @@ extension BadgeEngine {
         }
     }
 }
+
+extension MatchBadgeEarning {
+    /// What each picked player earned in this match, for the result card;
+    /// typed-in players (no id) and players without a badge are left out
+    public static func earnings(player1Id: UUID?, player1Name: String, player2Id: UUID?, player2Name: String,
+                                badgeInput: BadgeMatchInput) -> [MatchBadgeEarning] {
+        let earnedByPlayer = BadgeEngine().badges(for: badgeInput)
+        var result: [MatchBadgeEarning] = []
+        if let id = player1Id, let earned = earnedByPlayer[Player.player1], !earned.isEmpty {
+            result.append(MatchBadgeEarning(player: Player.player1, playerId: id, name: player1Name, badges: Array(earned)))
+        }
+        if let id = player2Id, let earned = earnedByPlayer[Player.player2], !earned.isEmpty {
+            result.append(MatchBadgeEarning(player: Player.player2, playerId: id, name: player2Name, badges: Array(earned)))
+        }
+        return result
+    }
+}

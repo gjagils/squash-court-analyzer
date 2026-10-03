@@ -230,7 +230,8 @@ enum CoachPalette {
 /// machine + all three risky shared views + persistence), matching the scope
 /// cut already made for phase 5's Spelers (no photos/badges/team-import).
 public struct CoachScoringView: View {
-    @State private var match: Match
+    /// Observed, not owned: the session owns the match (a new match is a new value here)
+    let match: Match
     let aiCoach: AICoachContext?
     let shareText: ((String) -> Void)?
     let onMatchChanged: (Match) -> Void
@@ -268,7 +269,7 @@ public struct CoachScoringView: View {
                 onMatchChanged: @escaping (Match) -> Void, onAbandon: (() -> Void)? = nil, onDiscard: (() -> Void)? = nil,
                 onHistory: (() -> Void)? = nil, onSettings: (() -> Void)? = nil, onNewMatch: (() -> Void)? = nil,
                 onExit: @escaping () -> Void) {
-        _match = State(initialValue: match)
+        self.match = match
         self.onNewMatch = onNewMatch
         self.onHistory = onHistory
         self.onSettings = onSettings

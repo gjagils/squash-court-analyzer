@@ -20,14 +20,9 @@ public struct RefereeSessionView: View {
     @State private var match: RefereeMatch? = nil
     @State private var pending: RefereeMatch? = nil
     @State private var showingSetup = false
-    @State private var busy = true
-    @State private var failed = false
-    @State private var exitAfterSave = false
-    /// A change came in while saving; save once more when done
-    @State private var saveAgain = false
-    /// Saving a point in the background: the screen stays usable, no overlay
-    /// (changes meanwhile go through `saveAgain`); only leaving waits for it
-    @State private var saving = false
+    /// The session's writes, one at a time (SessionSaver, T19): points save in
+    /// the background, finishing waits for a save that is still running
+    @State private var saver = SessionSaver(busy: true)
 
     public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil, shareText: ((String) -> Void)? = nil,
                 onExit: @escaping @MainActor () -> Void) {
@@ -46,32 +41,32 @@ public struct RefereeSessionView: View {
                 RefereeScoringView(match: match, shareText: shareText, photos: photos, onMatchChanged: { changed in
                     persist(changed, exit: false)
                 }, onExit: { persist(match, exit: true) })
-                .disabled(busy || failed)
+                .disabled(saver.busy || saver.failed)
             } else if let pending {
                 ResumePromptCard(message: pending.resumeMessage,
                                  onResume: { match = pending; self.pending = nil },
                                  onNew: { startFresh(abandoning: pending) },
                                  onCancel: { close() })
-                .disabled(busy || failed)
+                .disabled(saver.busy || saver.failed)
             } else if showingSetup {
                 MatchSetupView(playerStore: playerStore, mode: .referee, photoStore: photoStore, filePicker: filePicker, onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }
-                .disabled(busy || failed)
+                .disabled(saver.busy || saver.failed)
             }
-            if busy || (saving && exitAfterSave) {
+            if saver.busy || (saver.saving && saver.exitAfterSave) {
                 ProgressView(match == nil && pending == nil && !showingSetup ? "Laden…" : "Even opslaan…")
                     .padding(24).background(CoachPalette.backgroundMedium)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
             }
-            if failed {
+            if saver.failed {
                 VStack(spacing: 16) {
                     Text(match == nil ? "Wedstrijd kon niet worden geladen" : "Opslaan is niet gelukt")
                         .font(.headline)
                     Text("Probeer het opnieuw. Je huidige invoer blijft in dit scherm staan.")
                         .multilineTextAlignment(.center)
                     Button("Opnieuw proberen") {
-                        if let match { persist(match, exit: exitAfterSave) }
+                        if let match { persist(match, exit: saver.exitAfterSave) }
                         else { Task { await load() } }
                     }
                     // Every screen has a way out, also when saving or loading fails
@@ -84,6 +79,7 @@ public struct RefereeSessionView: View {
             }
         }
         .task {
+            saver.onExit = { close() }
             photos = await PlayerPhotos.load(photoStore: photoStore, playerStore: playerStore)
             if match == nil && pending == nil && !showingSetup { await load() }
         }
@@ -92,69 +88,37 @@ public struct RefereeSessionView: View {
     /// "Nieuwe wedstrijd" on the resume question: the old one goes into
     /// Afgeronde wedstrijden as incomplete (an empty one is dropped), then setup
     private func startFresh(abandoning old: RefereeMatch) {
-        busy = true
-        Task { @MainActor in
-            do {
-                try await store.abandon(old)
-                pending = nil
-                showingSetup = true
-            } catch { failed = true }
-            busy = false
+        saver.start {
+            try await store.abandon(old)
+            pending = nil
+            showingSetup = true
         }
     }
 
     private func load() async {
-        busy = true
-        failed = false
-        do {
+        await saver.perform {
             if let saved = try await store.loadInProgress() { pending = saved }
             else { showingSetup = true }
-        } catch { failed = true }
-        busy = false
+        }
     }
 
     private func startNewMatch(_ choice: MatchSetupChoice) {
         showingSetup = false
-        busy = true
-        failed = false
-        Task { @MainActor in
-            let fresh = RefereeMatch(player1Name: choice.player1Name, player2Name: choice.player2Name, bestOf: 5,
-                                     startingServer: choice.startingServer,
-                                     player1GamesBefore: choice.player1GamesBefore, player2GamesBefore: choice.player2GamesBefore)
-            fresh.player1Id = choice.player1Id.flatMap { UUID(uuidString: $0) }
-            fresh.player2Id = choice.player2Id.flatMap { UUID(uuidString: $0) }
-            match = fresh
-            do { try await store.save(fresh) } catch { failed = true }
-            busy = false
-        }
+        let fresh = RefereeMatch(player1Name: choice.player1Name, player2Name: choice.player2Name, bestOf: 5,
+                                 startingServer: choice.startingServer,
+                                 player1GamesBefore: choice.player1GamesBefore, player2GamesBefore: choice.player2GamesBefore)
+        fresh.player1Id = choice.player1Id.flatMap { UUID(uuidString: $0) }
+        fresh.player2Id = choice.player2Id.flatMap { UUID(uuidString: $0) }
+        match = fresh
+        saver.start { try await store.save(fresh) }
     }
 
     /// Saves `value`. A change while a save is running is saved right after
     /// it (with the latest state), never dropped.
+    /// Saves `value` in the background; a change during a save is saved right
+    /// after it with the latest state (SessionSaver)
     private func persist(_ value: RefereeMatch, exit: Bool) {
-        if exit { exitAfterSave = true }
-        if saving || busy {
-            saveAgain = true
-            return
-        }
-        saving = true
-        failed = false
-        Task { @MainActor in
-            do {
-                try await store.save(value)
-                if saveAgain, let latest = match {
-                    saveAgain = false
-                    saving = false
-                    persist(latest, exit: false)
-                    return
-                }
-                saving = false
-                if exitAfterSave { close() }
-            } catch {
-                saving = false
-                failed = true
-            }
-        }
+        saver.save(exit: exit) { try await store.save(value) }
     }
 
     @MainActor private func close() {

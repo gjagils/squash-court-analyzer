@@ -45,15 +45,8 @@ public struct SharedMatchBadgesStrip: View {
     /// `RefereeMatch` already expose `badgeInput`.
     public static func earnings(player1Id: UUID?, player1Name: String, player2Id: UUID?, player2Name: String,
                                  badgeInput: BadgeMatchInput) -> [MatchBadgeEarning] {
-        let earnedByPlayer = BadgeEngine().badges(for: badgeInput)
-        var result: [MatchBadgeEarning] = []
-        if let id = player1Id, let earned = earnedByPlayer[.player1], !earned.isEmpty {
-            result.append(MatchBadgeEarning(player: .player1, playerId: id, name: player1Name, badges: Array(earned)))
-        }
-        if let id = player2Id, let earned = earnedByPlayer[.player2], !earned.isEmpty {
-            result.append(MatchBadgeEarning(player: .player2, playerId: id, name: player2Name, badges: Array(earned)))
-        }
-        return result
+        MatchBadgeEarning.earnings(player1Id: player1Id, player1Name: player1Name, player2Id: player2Id, player2Name: player2Name,
+                                   badgeInput: badgeInput)
     }
 }
 

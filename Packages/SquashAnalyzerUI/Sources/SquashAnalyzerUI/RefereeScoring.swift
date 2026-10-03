@@ -6,7 +6,8 @@ import SquashAnalyzerCore
 /// tap a score for a rally, choose Links/Rechts for the server, call LET or
 /// STROKE, undo mistakes, and continue after a finished game.
 public struct RefereeScoringView: View {
-    @State private var match: RefereeMatch
+    /// Observed, not owned: the session owns the match (a new match is a new value here)
+    let match: RefereeMatch
     let onMatchChanged: (RefereeMatch) -> Void
     let onExit: @MainActor () -> Void
     let shareText: ((String) -> Void)?
@@ -23,7 +24,7 @@ public struct RefereeScoringView: View {
 
     public init(match: RefereeMatch, shareText: ((String) -> Void)? = nil, photos: [String: Data] = [:],
                 onMatchChanged: @escaping (RefereeMatch) -> Void, onExit: @escaping @MainActor () -> Void) {
-        _match = State(initialValue: match)
+        self.match = match
         self.photos = photos
         self.shareText = shareText
         self.onMatchChanged = onMatchChanged

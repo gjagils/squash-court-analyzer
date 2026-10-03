@@ -78,19 +78,8 @@ public struct SharedCoachDashboardView: View {
                         aiCard
                     }
                     // As on iOS; Skip's sheet is not full height, so keep it clear of the system bar
-                    Button(action: onClose) {
-                        Text("SLUITEN")
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .tracking(1)
-                            .foregroundColor(SharedColors.textSecondary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(SharedColors.textSecondary.opacity(0.12))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.textSecondary.opacity(0.35), lineWidth: 1))
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.bottom, 48)
+                    ActionButton("SLUITEN", color: SharedColors.textSecondary, action: onClose)
+                        .padding(.bottom, 48)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)

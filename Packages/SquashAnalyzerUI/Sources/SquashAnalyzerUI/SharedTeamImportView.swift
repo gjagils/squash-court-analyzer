@@ -43,31 +43,13 @@ struct SharedTeamImportView: View {
                     .padding(12)
                     .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.06)))
                     .disabled(isImporting)
-                Button(action: start) {
-                    Text(isImporting ? "Bezig met importeren…" : "IMPORTEREN")
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundColor(SharedColors.background)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(SharedColors.gold)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .buttonStyle(.plain)
-                .disabled(isImporting || link.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                ActionButton(isImporting ? "Bezig met importeren…" : "IMPORTEREN", style: .filled, color: SharedColors.gold,
+                             disabled: isImporting || link.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, action: start)
                 if filePicker != nil {
                     Text("Of kies een team-zip van je telefoon.")
                         .font(.system(size: 14))
                         .foregroundColor(SharedColors.textSecondary)
-                    Button(action: pickZip) {
-                        Text("KIES ZIP-BESTAND")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundColor(SharedColors.gold)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.gold.opacity(0.6), lineWidth: 1))
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isImporting)
+                    ActionButton("KIES ZIP-BESTAND", color: SharedColors.gold, disabled: isImporting, action: pickZip)
                 }
                 if let resultText {
                     Text(resultText)

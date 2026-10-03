@@ -72,20 +72,9 @@ public struct SharedPlayerBadgesView: View {
                             }
                         }
                         section("DELEN") {
-                            Button { Task { await shareCard() } } label: {
-                                HStack(spacing: 8) {
-                                    AppSymbol("square.and.arrow.up", size: 14, color: SharedColors.background)
-                                    Text("DEEL KAART")
-                                        .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                        .tracking(1)
-                                        .foregroundColor(SharedColors.background)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(SharedColors.gold)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            ActionButton("DEEL KAART", icon: "square.and.arrow.up", style: .filled, color: SharedColors.gold) {
+                                Task { await shareCard() }
                             }
-                            .buttonStyle(.plain)
                             .accessibilityLabel("Deel kaart")
                         }
                     }

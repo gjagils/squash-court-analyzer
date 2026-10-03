@@ -219,75 +219,21 @@ public struct MatchResultOverlay: View {
     }
 
     private func filledButton(_ button: ResultButton) -> some View {
-        Button(action: button.action) {
-            Text(button.title.uppercased())
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .tracking(1)
-                .foregroundColor(SharedColors.background)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(SharedColors.accent)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-        .buttonStyle(.plain)
+        ActionButton(button.title.uppercased(), style: .filled, action: button.action)
     }
 
     private func outlinedButton(_ button: ResultButton) -> some View {
-        let color = SharedColors.textSecondary
-        return Button(action: button.action) {
-            Text(button.title.uppercased())
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .tracking(1)
-                .foregroundColor(color)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(color.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.35), lineWidth: 1))
-        }
-        .buttonStyle(.plain)
+        ActionButton(button.title.uppercased(), color: SharedColors.textSecondary, action: button.action)
     }
 
     /// Outlined gold button with an icon; two of them share a row
     private func goldButton(_ button: ResultButton) -> some View {
-        let color = SharedColors.gold
-        return Button(action: button.action) {
-            HStack(spacing: 6) {
-                if let icon = button.icon {
-                    AppSymbol(icon, size: 12, color: color, weight: .semibold)
-                }
-                Text(button.title.uppercased())
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .tracking(1)
-                    .foregroundColor(color)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(color.opacity(0.12))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.35), lineWidth: 1))
-        }
-        .buttonStyle(.plain)
+        ActionButton(button.title.uppercased(), icon: button.icon, color: SharedColors.gold, action: button.action)
     }
 
     /// "Undo laatste punt", so a mis-tap on the final point can still be corrected
     private func undoButton(_ action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 6) {
-                AppSymbol("arrow.uturn.backward", size: 12, color: SharedColors.textSecondary, weight: .semibold)
-                Text("Undo laatste punt")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundColor(SharedColors.textSecondary)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .background(Color.white.opacity(0.06))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.14), lineWidth: 1))
-        }
-        .buttonStyle(.plain)
+        ActionButton("Undo laatste punt", icon: "arrow.uturn.backward", color: SharedColors.textSecondary, action: action)
     }
 }
 

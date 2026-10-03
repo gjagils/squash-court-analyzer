@@ -42,6 +42,17 @@ De live-server met foto's draait al in productie; de privacytekst staat online.
 - **Kaartlinks:** openen ook als de app nog niet draaide (iOS); op Android openen
   links van squashanalyzer.com direct in de app (assetlinks).
 
+### Anders op de iPhone (door T20, gelijk aan Android)
+- Coach en Scheidsrechter vragen zelf "Wedstrijd hervatten?" en hebben de
+  gedeelde wedstrijdstart; een lopende wedstrijd staat niet meer in Afgeronde
+  wedstrijden (de tegel biedt hem aan).
+- Badges per speler en de badgecatalogus zijn de gedeelde schermen.
+- Afgeronde wedstrijden: de gedeelde lijst; losse games van vroeger staan nog in
+  de back-up maar niet in de lijst. Back-up maken, terugzetten, delen en een
+  wedstrijd importeren staan nu in Instellingen.
+- Bij "Kies speler" in de wedstrijdstart kan op de iPhone nog geen foto worden
+  gekozen (dat kan in Spelers).
+
 ### Opgelost
 - Scheidsrechter: de STROKE-banner verschijnt weer; Sluiten wacht tot er is
   opgeslagen; na Undo komt het eindvenster weer terug als de game opnieuw wordt
@@ -84,6 +95,7 @@ De live-server met foto's draait al in productie; de privacytekst staat online.
 - iPhone draait coach, scheidsrechter, analyse en Afgeronde wedstrijden nu op
   dezelfde gedeelde schermen als Android (T20); ruim 4.000 regels iPhone-code weg.
   De back-upknoppen (iCloud, terugzetten, delen, importeren) staan in Instellingen.
+- Knoppen overal gelijk (één `ActionButton`: gevuld, met rand of alleen tekst) (T17).
 - Alle kleuren uit één bron (`SharedColors`, volgens de stijlgids); oude
   LED-/hardware-onderdelen weg (T17). Zichtbaar: het blauw in de analyse is iets
   lichter, gedempte tekst op badges/dashboard een fractie donkerder.

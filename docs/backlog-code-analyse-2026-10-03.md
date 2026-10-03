@@ -2,9 +2,10 @@
 
 Bron: `docs/code-analyse-2026-10-03.md`, gebaseerd op `main` = `bfd68ec`. Regelnummers kunnen verschuiven; zoek op symboolnaam.
 
-> **Stand 3 oktober (avond):** T1–T19 en T21–T25 gedaan en op `main`. T16 en T17
-> gedeeltelijk: de view-wissels (T16) en één `ActionButton` (T17) gaan mee in de
-> designronde. T20 (iOS over op de gedeelde schermen) komt na de testronde.
+> **Stand 3 oktober (avond):** alle tickets T1–T25 gedaan en op `main`. T20: de
+> iPhone gebruikt de gedeelde coach, scheidsrechter, analyse, wedstrijdlijst en
+> badgeschermen (SwiftData-stores in `SquashAnalyzer/Services/SwiftDataStores.swift`);
+> daarmee zijn ook de view-wissels van T16 gedaan. T17: één `ActionButton`.
 > Wat er per build verandert: docs/wijzigingen-builds.md.
 
 > **Bijgewerkt na `bfd68ec` (zelfde dag, tot `1a13053`):** unforced error kiest nu

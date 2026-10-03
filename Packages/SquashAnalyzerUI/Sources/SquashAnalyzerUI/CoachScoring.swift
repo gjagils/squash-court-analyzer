@@ -785,17 +785,7 @@ public struct CoachScoringView: View {
     }
 
     private func overlayButton(_ title: String, _ color: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
-                .lineLimit(1)
-                .foregroundColor(color)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(color.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-        .buttonStyle(.plain)
+        ActionButton(title, color: color, action: action)
     }
 
     // MARK: - Bottom actions
@@ -815,22 +805,7 @@ public struct CoachScoringView: View {
     }
 
     private func coachActionButton(_ title: String, icon: String, disabled: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 6) {
-                AppSymbol(icon, size: 13, color: disabled ? SharedColors.textMuted : SharedColors.textPrimary)
-                Text(title).font(.system(size: 13, weight: .bold, design: .rounded)).tracking(1)
-            }
-            .foregroundColor(disabled ? SharedColors.textMuted : SharedColors.textPrimary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(SharedColors.textPrimary.opacity(disabled ? 0.04 : 0.10))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.textPrimary.opacity(disabled ? 0.08 : 0.3), lineWidth: 1))
-            )
-        }
-        .buttonStyle(.plain)
-        .disabled(disabled)
+        ActionButton(title, icon: icon, color: SharedColors.textPrimary, disabled: disabled, action: action)
     }
 
     // MARK: - Handlers (mirror ContentView.swift's coach handlers)

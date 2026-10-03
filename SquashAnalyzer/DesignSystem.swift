@@ -101,68 +101,6 @@ struct SportsPanel<Content: View>: View {
 
 // MARK: - Reusable Components
 
-/// Hardware-style action button
-struct HardwareButton: View {
-    enum Style {
-        /// Solid accent fill with dark text – primary call to action
-        case filled
-        /// Low-opacity tint with a thin stroke and coloured text – secondary action
-        case outlined
-    }
-
-    let title: String
-    let subtitle: String?
-    let color: Color
-    let style: Style
-    let action: () -> Void
-    var isSelected: Bool = false
-
-    init(title: String, subtitle: String? = nil, color: Color,
-         style: Style = .filled, isSelected: Bool = false, action: @escaping () -> Void) {
-        self.title = title
-        self.subtitle = subtitle
-        self.color = color
-        self.style = style
-        self.isSelected = isSelected
-        self.action = action
-    }
-
-    private var foreground: Color {
-        style == .filled ? AppColors.backgroundDark : color
-    }
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 2) {
-                if let subtitle = subtitle {
-                    Text(subtitle.uppercased())
-                        .font(AppFonts.caption(9))
-                        .foregroundColor(foreground.opacity(0.7))
-                        .tracking(1.5)
-                }
-                Text(title.uppercased())
-                    .font(AppFonts.label(14))
-                    .foregroundColor(foreground)
-                    .tracking(1)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(style == .filled ? color : color.opacity(0.12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(
-                                isSelected ? Color.white.opacity(0.8) : color.opacity(style == .filled ? 0 : 0.35),
-                                lineWidth: 1
-                            )
-                    )
-            )
-        }
-        .buttonStyle(.plain)
-    }
-}
-
 
 // MARK: - Close button
 
@@ -233,8 +171,8 @@ struct AppBackground: View {
                     .padding(20)
             }
             HStack(spacing: 16) {
-                HardwareButton(title: "Niels", subtitle: "Punt", color: AppColors.warmOrange) { }
-                HardwareButton(title: "Paul", subtitle: "Punt", color: AppColors.steelBlue, style: .outlined) { }
+                ActionButton("NIELS", style: .filled) { }
+                ActionButton("PAUL", color: AppColors.steelBlue) { }
             }
         }
         .padding(20)

@@ -65,17 +65,7 @@ public struct SharedMatchShareView: View {
                         ResultCardPreview(card: card)
                     }
                 }
-                Button { share() } label: {
-                    Text("DELEN")
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .tracking(1)
-                        .foregroundColor(SharedColors.background)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(SharedColors.accent)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .buttonStyle(.plain)
+                ActionButton("DELEN", style: .filled) { share() }
                 Spacer().frame(height: 24)
             }
             .padding(.horizontal, 20)

@@ -78,18 +78,8 @@ public struct MatchSetupView: View {
                 serverPicker
                 lateStartSection
 
-                Button(action: start) {
-                    Text(isCoach ? "START WEDSTRIJD" : "START SCHEIDSRECHTER")
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .tracking(1)
-                        .foregroundColor(SharedColors.background)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(SharedColors.accent)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .buttonStyle(.plain)
-                .disabled(!headStartIsValid)
+                ActionButton(isCoach ? "START WEDSTRIJD" : "START SCHEIDSRECHTER", style: .filled,
+                             disabled: !headStartIsValid, action: start)
             }
             .padding(24)
         }

@@ -76,7 +76,7 @@ struct SettingsView: View {
                 .textInputAutocapitalization(.never).autocorrectionDisabled()
                 .padding().background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
             HStack(spacing: 12) {
-                HardwareButton(title: "Bewaar teamlink", subtitle: nil, color: AppColors.warmOrange) {
+                ActionButton("BEWAAR TEAMLINK", style: .filled, color: AppColors.warmOrange) {
                     do {
                         let link = try LeagueTeamLink(teamDraft)
                         teamURL = link.url.absoluteString
@@ -87,7 +87,7 @@ struct SettingsView: View {
                     }
                 }
                 if !teamURL.isEmpty {
-                    HardwareButton(title: "Verwijder", color: AppColors.textSecondary, style: .outlined) {
+                    ActionButton("VERWIJDER", color: AppColors.textSecondary) {
                         teamURL = ""
                         teamDraft = ""
                         teamSaveMessage = "Teamlink verwijderd"
@@ -293,11 +293,8 @@ struct SettingsView: View {
             }
 
             // Save Button
-            HardwareButton(
-                title: showingSaveConfirmation ? "Opgeslagen!" : "Bewaar API Key",
-                subtitle: nil,
-                color: showingSaveConfirmation ? Color.green : AppColors.accentGold
-            ) {
+            ActionButton(showingSaveConfirmation ? "OPGESLAGEN!" : "BEWAAR API KEY", style: .filled,
+                         color: showingSaveConfirmation ? SharedColors.positive : AppColors.accentGold) {
                 saveAPIKey()
             }
 
@@ -432,12 +429,12 @@ struct BackupActionsView: View {
     var body: some View {
         VStack(spacing: 10) {
             HStack(spacing: 10) {
-                HardwareButton(title: "Nu naar iCloud", color: AppColors.warmOrange, style: .outlined) { saveToiCloud() }
-                HardwareButton(title: "Terugzetten", color: AppColors.warmOrange, style: .outlined) { showingBackupImporter = true }
+                ActionButton("NU NAAR ICLOUD", color: AppColors.warmOrange) { saveToiCloud() }
+                ActionButton("TERUGZETTEN", color: AppColors.warmOrange) { showingBackupImporter = true }
             }
             HStack(spacing: 10) {
-                HardwareButton(title: "Delen", color: AppColors.textSecondary, style: .outlined) { shareBackup() }
-                HardwareButton(title: "Wedstrijd importeren", color: AppColors.textSecondary, style: .outlined) { showingMatchImporter = true }
+                ActionButton("DELEN", color: AppColors.textSecondary) { shareBackup() }
+                ActionButton("WEDSTRIJD IMPORTEREN", color: AppColors.textSecondary) { showingMatchImporter = true }
             }
         }
         .fileImporter(isPresented: $showingBackupImporter, allowedContentTypes: [.json]) { result in

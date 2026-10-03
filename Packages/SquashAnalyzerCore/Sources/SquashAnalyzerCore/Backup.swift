@@ -256,6 +256,15 @@ public struct PointExportData: Codable, Equatable, Sendable {
     /// Kind of unforced error (`ErrorKind` raw value); written only when known, absent in older backups
     public var errorKind: String? = nil
 
+    /// Whole milliseconds, so Swift and Kotlin write the number the same way
+    /// (Kotlin writes 0.0004 as "4.0E-4", which broke the checksum on the other
+    /// side). Applied when a backup is made; a file being read keeps its values.
+    /// Int(x + 0.5) instead of rounded(): Kotlin rounds .5 to even.
+    static func milliseconds(_ seconds: Double) -> Double {
+        guard seconds > 0.0 else { return 0.0 }
+        return Double(Int(seconds * 1000.0 + 0.5)) / 1000.0
+    }
+
     public init(id: String?, pointNumber: Int, scorer: String, pointType: String, zone: String, shotType: String,
                 server: String, player1Score: Int, player2Score: Int, duration: Double, timestamp: Date?,
                 isVolley: Bool? = nil, errorKind: String? = nil) {
@@ -268,7 +277,7 @@ public struct PointExportData: Codable, Equatable, Sendable {
         self.server = server
         self.player1Score = player1Score
         self.player2Score = player2Score
-        self.duration = duration
+        self.duration = PointExportData.milliseconds(duration)
         self.timestamp = timestamp
         self.isVolley = isVolley
         self.errorKind = errorKind

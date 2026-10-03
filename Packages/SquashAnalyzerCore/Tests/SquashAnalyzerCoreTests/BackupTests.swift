@@ -107,6 +107,21 @@ final class BackupTests: XCTestCase {
         XCTAssertEqual(BackupCodec.formatVersion(for: backup), 2)
     }
 
+    /// T12: rally durations print the same in Swift and Kotlin JSON
+    func testDurationsPrintTheSameOnBothPlatforms() throws {
+        var texts: [String] = []
+        for duration in [0.0004, 3.3333333333, 1234.5678, 0.001, 12.0] {
+            let point = PointExportData(id: nil, pointNumber: 1, scorer: "Speler 1", pointType: "Winner", zone: "", shotType: "",
+                                        server: "Speler 1", player1Score: 1, player2Score: 0, duration: duration, timestamp: nil)
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.sortedKeys]
+            let json = String(data: try encoder.encode(point), encoding: .utf8) ?? ""
+            let start = json.range(of: "\"duration\":")!.upperBound
+            texts.append(String(json[start...].prefix { $0 != "," }))
+        }
+        XCTAssertEqual(texts, ["0", "3.333", "1234.568", "0.001", "12"])
+    }
+
     func testOldIOSPointsAreNormalized() {
         let ace = PointExportData(id: nil, pointNumber: 1, scorer: "Speler 2", pointType: "Winner", zone: "Achter Links", shotType: "Ace",
                                   server: "Speler 2", player1Score: 0, player2Score: 1, duration: 4, timestamp: nil).normalized

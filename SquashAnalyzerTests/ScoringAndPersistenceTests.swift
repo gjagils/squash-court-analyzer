@@ -426,6 +426,41 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertEqual(restored.currentGame.currentServer, .player1)
     }
 
+    /// "Voeg toe" twice with the same file adds nothing the second time (T1)
+    @MainActor
+    func testImportingTheSameBackupTwiceAddsNoDuplicates() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let container = try ModelContainer(for: Schema(versionedSchema: SquashAnalyzerCurrentSchema.self),
+                                           migrationPlan: SquashAnalyzerMigrationPlan.self, configurations: [config])
+        let context = container.mainContext
+        let player = SavedPlayer(id: UUID(), name: "Jan", coachingFocusAreas: [], coachingNotes: "", createdAt: Date(), photoData: nil)
+        context.insert(player)
+        let match = Match()
+        match.setupMatch(player1: "Jan", player2: "Piet", startingServer: .player1)
+        match.currentGame.addPoint(to: .player1, pointType: .unforcedError, at: nil, with: nil)
+        try SwiftDataMatchRepository(context: context).upsert(match)
+        let loose = SavedGame(id: UUID(), gameNumber: 1, player1Name: "Los", player2Name: "Spel",
+                              player1Score: 11, player2Score: 4, startingServer: .player1, winner: .player1)
+        context.insert(loose)
+        try context.save()
+
+        let backup = try ExportService.exportFullBackup(players: try context.fetch(FetchDescriptor<SavedPlayer>()),
+                                                        matches: try context.fetch(FetchDescriptor<SavedMatch>()),
+                                                        standaloneGames: [loose])
+        func counts() throws -> [Int] {
+            [try context.fetchCount(FetchDescriptor<SavedPlayer>()), try context.fetchCount(FetchDescriptor<SavedMatch>()),
+             try context.fetchCount(FetchDescriptor<SavedGame>()), try context.fetchCount(FetchDescriptor<SavedPoint>())]
+        }
+        let before = try counts()
+
+        let first = try ExportService.importFullBackup(backup, context: context)
+        XCTAssertEqual(first.players, 0, "everything is already there")
+        XCTAssertEqual(first.matches, 0)
+        XCTAssertEqual(first.games, 0)
+        _ = try ExportService.importFullBackup(backup, context: context)
+        XCTAssertEqual(try counts(), before)
+    }
+
     @MainActor
     func testBackupRejectsInvalidChecksumBeforeImport() throws {
         let data = try ExportService.exportFullBackup(players: [], matches: [], standaloneGames: [])

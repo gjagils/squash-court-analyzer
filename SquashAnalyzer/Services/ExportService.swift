@@ -201,11 +201,15 @@ enum ExportService {
     // MARK: - Full Backup Import
 
     /// Imports a full backup. Returns counts of (players, matches, standaloneGames) imported.
+    /// Merges like Android's `RoomBackupStore`: a player, match or loose game
+    /// whose id is already there is skipped, so importing the same file twice
+    /// adds nothing the second time.
     static func importFullBackup(_ data: Data, context: ModelContext) throws -> (players: Int, matches: Int, games: Int) {
         let backup = try decodeAndValidateBackup(data)
 
         var playerCount = 0
         for pd in backup.players {
+            if let id = UUID(uuidString: pd.id), try exists(SavedPlayer.self, id: id, context: context) { continue }
             let player = SavedPlayer(
                 id: UUID(uuidString: pd.id) ?? UUID(),
                 name: pd.name,
@@ -221,12 +225,14 @@ enum ExportService {
 
         var matchCount = 0
         for matchData in backup.matches {
+            if let id = matchData.id.flatMap(UUID.init(uuidString:)), try exists(SavedMatch.self, id: id, context: context) { continue }
             importMatch(matchData, context: context)
             matchCount += 1
         }
 
         var gameCount = 0
         for gameData in backup.standaloneGames {
+            if let id = gameData.id.flatMap(UUID.init(uuidString:)), try exists(SavedGame.self, id: id, context: context) { continue }
             importGame(gameData, context: context, matchRef: nil)
             gameCount += 1
         }
@@ -442,8 +448,26 @@ enum ExportService {
         }
     }
 
+    /// Whether a record with this id is already in the store
+    private static func exists(_ type: SavedPlayer.Type, id: UUID, context: ModelContext) throws -> Bool {
+        var descriptor = FetchDescriptor<SavedPlayer>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        return try context.fetchCount(descriptor) > 0
+    }
+
+    private static func exists(_ type: SavedMatch.Type, id: UUID, context: ModelContext) throws -> Bool {
+        var descriptor = FetchDescriptor<SavedMatch>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        return try context.fetchCount(descriptor) > 0
+    }
+
+    private static func exists(_ type: SavedGame.Type, id: UUID, context: ModelContext) throws -> Bool {
+        var descriptor = FetchDescriptor<SavedGame>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        return try context.fetchCount(descriptor) > 0
+    }
+
     private static func importMatch(_ matchData: MatchExportData, context: ModelContext) {
-        // Check for duplicate (same players + savedAt)
         let savedMatch = SavedMatch(
             id: matchData.id.flatMap { UUID(uuidString: $0) } ?? UUID(),
             player1Name: matchData.player1Name,

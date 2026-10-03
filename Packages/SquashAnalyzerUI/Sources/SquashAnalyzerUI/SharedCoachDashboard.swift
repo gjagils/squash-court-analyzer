@@ -122,9 +122,7 @@ public struct SharedCoachDashboardView: View {
                 }
             }
             Button(action: onClose) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(SharedColors.textSecondary)
+                AppSymbol("xmark", size: 16, color: SharedColors.textSecondary, weight: .medium)
                     .padding(10)
                     .background(Circle().fill(Color.white.opacity(0.1)))
             }

@@ -164,7 +164,7 @@ public struct PlayerDirectoryView: View {
                 } else if players.isEmpty {
                     Spacer()
                     VStack(spacing: 12) {
-                        Image(systemName: "person.crop.circle").font(.system(size: 48))
+                        AppSymbol("person.crop.circle", size: 48, color: SharedColors.textSecondary)
                         Text("Nog geen spelers opgeslagen").font(.headline)
                         Text("Tik op + om een speler toe te voegen,\nof importeer een team (zip met team.json en foto's)")
                     }
@@ -218,13 +218,13 @@ public struct PlayerDirectoryView: View {
                                     .accessibilityLabel(badgeCounts[player.id].map { $0 > 0 ? "\($0) badges van \(player.name)" : "Badges van \(player.name)" } ?? "Badges van \(player.name)")
                                     Spacer()
                                     Button { editing = player } label: {
-                                        Image(systemName: "pencil").frame(width: 44, height: 44)
+                                        AppSymbol("pencil", size: 18, color: SharedColors.textPrimary).frame(width: 44, height: 44)
                                     }.accessibilityLabel("Bewerk \(player.name)")
                                     Button {
                                         deleting = player
                                         confirmDelete = true
                                     } label: {
-                                        Image(systemName: "trash").frame(width: 44, height: 44)
+                                        AppSymbol("trash", size: 18, color: SharedColors.textPrimary).frame(width: 44, height: 44)
                                     }.accessibilityLabel("Verwijder \(player.name)")
                                 }
                                 .foregroundColor(SharedColors.textPrimary)

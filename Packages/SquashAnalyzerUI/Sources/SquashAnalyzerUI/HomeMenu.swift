@@ -38,9 +38,7 @@ public struct HomeMenuHeader: View {
             Spacer(minLength: 0)
             if let onSettings {
                 Button(action: onSettings) {
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 21))
-                        .foregroundColor(SharedColors.textSecondary)
+                    AppSymbol("gearshape", size: 21, color: SharedColors.textSecondary)
                         .frame(width: 48, height: 48)
                 }
                 .accessibilityLabel("Instellingen")
@@ -94,7 +92,7 @@ public struct HomeMenuTiles: View {
                 HomeTileIconView(icon: icon, color: SharedColors.accent, size: 23)
                 Text(title).font(.system(size: 14))
                 Spacer()
-                Image(systemName: "chevron.right").font(.system(size: 12))
+                AppSymbol("chevron.right", size: 12, color: SharedColors.textPrimary)
             }
             .foregroundColor(SharedColors.textPrimary)
             .frame(minHeight: 50)

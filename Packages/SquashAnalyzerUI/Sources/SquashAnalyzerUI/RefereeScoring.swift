@@ -136,7 +136,7 @@ public struct RefereeScoringView: View {
         HStack {
             Button(action: close) {
                 HStack(spacing: 6) {
-                    Image(systemName: "xmark")
+                    AppSymbol("xmark", size: 13, color: SharedColors.textSecondary)
                     Text("Sluiten")
                 }
                 .font(.system(size: 14, weight: .medium, design: .rounded))

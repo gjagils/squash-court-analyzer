@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Delete
@@ -113,6 +115,8 @@ struct AppSymbol: View {
         case "xmark": return Icons.Filled.Close
         case "square.and.arrow.down": return Icons.Filled.Download
         case "trash": return Icons.Filled.Delete
+        case "pencil": return Icons.Filled.Edit
+        case "person.crop.circle": return Icons.Filled.AccountCircle
         case "chart.bar.fill", "chart.bar.xaxis": return Icons.Filled.BarChart
         case "crown.fill": return Icons.Filled.EmojiEvents
         case "flag.checkered": return Icons.Filled.SportsScore

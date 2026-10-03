@@ -18,6 +18,8 @@ services:
       # Minutes without an update before a session is removed (lost phone, no network)
       IDLE_MINUTES: ${IDLE_MINUTES:-120}
       MAX_SESSIONS: ${MAX_SESSIONS:-200}
+      # Behind the Cloudflare Tunnel: the client IP comes from CF-Connecting-IP
+      TRUST_PROXY: ${TRUST_PROXY:-1}
     ports:
       - "${LIVE_PORT:-8080}:8080"
     read_only: true

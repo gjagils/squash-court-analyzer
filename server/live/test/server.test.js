@@ -155,7 +155,7 @@ test('idle sessions are swept', async () => {
 });
 
 test('limits: body size, creations per minute, number of sessions', async () => {
-  const live = await start({ createsPerMinute: 2, maxSessions: 3 });
+  const live = await start({ createsPerMinute: 2, maxSessions: 3, trustProxy: true });
   try {
     const big = await call(live.base, 'POST', '/api/live', { ...snapshot, lastPoint: 'x'.repeat(5000) });
     assert.equal(big.status, 413);
@@ -170,6 +170,62 @@ test('limits: body size, creations per minute, number of sessions', async () => 
   } finally {
     await live.stop();
   }
+});
+
+test('without TRUST_PROXY a forged X-Forwarded-For does not get past the limit', async () => {
+  const live = await start({ createsPerMinute: 1 });
+  try {
+    assert.equal((await call(live.base, 'POST', '/api/live', snapshot)).status, 201);
+    const forged = await fetch(`${live.base}/api/live`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': '10.9.9.9', 'CF-Connecting-IP': '10.8.8.8' },
+      body: JSON.stringify(snapshot),
+    });
+    assert.equal(forged.status, 429);
+  } finally {
+    await live.stop();
+  }
+});
+
+test('behind the tunnel CF-Connecting-IP is the client, and there is a global limit', async () => {
+  const live = await start({ createsPerMinute: 1, globalCreatesPerMinute: 2, trustProxy: true });
+  const post = (ip) => fetch(`${live.base}/api/live`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': ip }, body: JSON.stringify(snapshot),
+  });
+  try {
+    assert.equal((await post('10.0.0.1')).status, 201);
+    assert.equal((await post('10.0.0.1')).status, 429, 'per IP');
+    assert.equal((await post('10.0.0.2')).status, 201);
+    assert.equal((await post('10.0.0.3')).status, 429, 'global');
+  } finally {
+    await live.stop();
+  }
+});
+
+test('viewers per session are limited', async () => {
+  const live = await start({ maxViewersPerSession: 1 });
+  try {
+    const created = await call(live.base, 'POST', '/api/live', snapshot);
+    const first = readEvents(`${live.base}/api/live/${created.json.id}/events`, 2);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const second = await fetch(`${live.base}/api/live/${created.json.id}/events`);
+    assert.equal(second.status, 503);
+    await call(live.base, 'DELETE', `/api/live/${created.json.id}`, undefined, created.json.writeKey);
+    await first;
+  } finally {
+    await live.stop();
+  }
+});
+
+test('stopping the server tells viewers the session ended', async () => {
+  const live = await start();
+  const created = await call(live.base, 'POST', '/api/live', snapshot);
+  const events = readEvents(`${live.base}/api/live/${created.json.id}/events`, 2);
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  await new Promise((resolve) => live.shutdown(resolve));
+  const received = await events;
+  assert.equal(received[1].event, 'ended');
+  assert.equal(received[1].data.reason, 'restart');
+  assert.equal(live.sessions.size, 0);
 });
 
 test('health check', async () => {

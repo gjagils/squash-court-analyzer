@@ -36,7 +36,13 @@ Algemeen:
 2. Environment variables:
    - `PUBLIC_URL`: het adres dat in WhatsApp komt, bijvoorbeeld
      `https://live.squashanalyzer.com` (zonder `/` aan het eind)
-   - optioneel `LIVE_PORT` (standaard 8080), `IDLE_MINUTES` (120), `MAX_SESSIONS` (200)
+   - optioneel `LIVE_PORT` (standaard 8080), `IDLE_MINUTES` (120), `MAX_SESSIONS` (200),
+     `CREATES_PER_MINUTE` per IP (10), `GLOBAL_CREATES_PER_MINUTE` (60),
+     `MAX_VIEWERS_PER_SESSION` (200), `MAX_VIEWERS` (2000)
+   - `TRUST_PROXY=1` (standaard in de compose): het IP van de bezoeker komt uit
+     `CF-Connecting-IP`/`X-Forwarded-For`. Alleen aan achter een proxy die je
+     zelf beheert; zonder die vlag telt het socket-adres, zodat niemand de
+     limiet omzeilt met een verzonnen header.
 3. **Reverse proxy**: laat het domein van `PUBLIC_URL` met HTTPS doorverwijzen
    naar poort `LIVE_PORT` van deze host.
    - Zet buffering uit voor `/api/live/*/events` (Server-Sent Events). Bij

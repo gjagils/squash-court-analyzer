@@ -21,8 +21,15 @@ const DEFAULTS = {
   maxBodyBytes: 4096,
   // A session nobody updates for this long is removed (lost phone, no network)
   idleMs: Number(process.env.IDLE_MINUTES || 120) * 60 * 1000,
-  // Session creations per IP per minute
+  // Session creations per IP per minute, and in total
   createsPerMinute: Number(process.env.CREATES_PER_MINUTE || 10),
+  globalCreatesPerMinute: Number(process.env.GLOBAL_CREATES_PER_MINUTE || 60),
+  // Viewers (open SSE streams) per session and in total
+  maxViewersPerSession: Number(process.env.MAX_VIEWERS_PER_SESSION || 200),
+  maxViewers: Number(process.env.MAX_VIEWERS || 2000),
+  // Only behind a proxy we control (Cloudflare Tunnel) may the client IP come
+  // from a header; otherwise anyone could pick a new IP per request
+  trustProxy: process.env.TRUST_PROXY === '1',
   sweepMs: 60 * 1000,
 };
 
@@ -95,6 +102,8 @@ function createLiveServer(options = {}) {
   const sessions = new Map();
   /** ip -> [timestamps] */
   const creates = new Map();
+  /** All creations, for the global limit */
+  let allCreates = [];
   const viewerPage = fs.readFileSync(path.join(__dirname, 'public', 'live.html'), 'utf8');
 
   function newId() {
@@ -171,21 +180,43 @@ function createLiveServer(options = {}) {
       const recent = times.filter((t) => t > minuteAgo);
       if (recent.length) creates.set(ip, recent); else creates.delete(ip);
     }
+    allCreates = allCreates.filter((t) => t > minuteAgo);
   }
 
   function allowCreate(ip) {
     const minuteAgo = now() - 60 * 1000;
+    allCreates = allCreates.filter((t) => t > minuteAgo);
+    if (allCreates.length >= config.globalCreatesPerMinute) return false;
     const recent = (creates.get(ip) || []).filter((t) => t > minuteAgo);
     if (recent.length >= config.createsPerMinute) return false;
     recent.push(now());
     creates.set(ip, recent);
+    allCreates.push(now());
     return true;
   }
 
   function clientIp(req) {
-    // Behind the reverse proxy the client is in X-Forwarded-For
-    const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
-    return forwarded || req.socket.remoteAddress || 'unknown';
+    if (config.trustProxy) {
+      // Cloudflare Tunnel: the visitor is in CF-Connecting-IP (also first in X-Forwarded-For)
+      const cf = String(req.headers['cf-connecting-ip'] || '').trim();
+      if (cf) return cf;
+      const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+      if (forwarded) return forwarded;
+    }
+    return req.socket.remoteAddress || 'unknown';
+  }
+
+  function viewerCount() {
+    let count = 0;
+    for (const session of sessions.values()) count += session.viewers.size;
+    return count;
+  }
+
+  /** Stopping (container restart): viewers learn the session ended, then everything closes */
+  function shutdown(callback) {
+    for (const id of Array.from(sessions.keys())) removeSession(id, 'restart');
+    server.close(callback);
+    if (typeof server.closeAllConnections === 'function') server.closeAllConnections();
   }
 
   function baseUrl(req) {
@@ -205,7 +236,8 @@ function createLiveServer(options = {}) {
       .replaceAll('{{DESCRIPTION}}', escapeHtml(description))
       .replaceAll('{{URL}}', escapeHtml(`${baseUrl(req)}/l/${id}`))
       .replaceAll('{{IMAGE}}', escapeHtml(`${baseUrl(req)}/logo.png`))
-      .replaceAll('{{ID}}', escapeHtml(id));
+      // In a script: a JSON string literal, "<" escaped so it cannot end the tag
+      .replaceAll('{{ID_JSON}}', JSON.stringify(id).replace(/</g, '\\u003c'));
   }
 
   async function handle(req, res) {
@@ -256,6 +288,9 @@ function createLiveServer(options = {}) {
     // GET /api/live/:id/events: Server-Sent Events for viewers
     if (req.method === 'GET' && parts[3] === 'events') {
       if (!session) return send(res, 404, { error: 'Afgelopen' });
+      if (session.viewers.size >= config.maxViewersPerSession || viewerCount() >= config.maxViewers) {
+        return send(res, 503, { error: 'Te veel kijkers, probeer het zo opnieuw' });
+      }
       res.writeHead(200, {
         'Content-Type': 'text/event-stream; charset=utf-8',
         'Cache-Control': 'no-store',
@@ -317,15 +352,15 @@ function createLiveServer(options = {}) {
   const timer = setInterval(sweep, config.sweepMs);
   timer.unref();
   server.on('close', () => clearInterval(timer));
-  return { server, sessions, sweep, config };
+  return { server, sessions, sweep, config, shutdown };
 }
 
 module.exports = { createLiveServer, validateSnapshot, cleanName };
 
 if (require.main === module) {
-  const { server, config } = createLiveServer();
+  const { server, config, shutdown } = createLiveServer();
   server.listen(config.port, () => console.log(`squash-live listening on ${config.port}`));
-  const stop = () => server.close(() => process.exit(0));
+  const stop = () => shutdown(() => process.exit(0));
   process.on('SIGTERM', stop);
   process.on('SIGINT', stop);
 }

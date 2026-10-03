@@ -2210,7 +2210,7 @@ Android een gekozen map vanuit Instellingen), delen van een
 scheidsrechterwedstrijd uit de lijst op iOS (iOS bewaart geen rally's), en de
 vorm van de teamimport (iOS menu, Android eigen scherm).
 
-## Soort fout, Start en live meekijken (2026-10-03, nog niet op Android gebouwd)
+## Soort fout, Start en live meekijken (2026-10-03, op 3 oktober lokaal gebouwd en getest)
 
 Gebouwd in de cloud zonder Mac, dus **nog niet door Skip gehaald**. Core is op
 Linux getest (zie `docs/lokaal-testen-oktober.md`). Nieuw gedeeld:
@@ -2255,3 +2255,26 @@ Gevonden toen de cloud-branch voor het eerst door Skip/Kotlin ging:
 6. **Async-tests: wacht op het eindresultaat, niet op een tussenstap.** Op
    Android logt de nep-transport het POST-verzoek terwijl `create` nog niet
    klaar is; `waitUntil { requests.count >= 3 }` was daar te vroeg.
+7. **Statics worden in Kotlin van boven naar beneden geïnitialiseerd.**
+   `static let shared = LiveShare()` stond vóór `static let defaultBaseURL`;
+   de init van `shared` las `defaultBaseURL` terwijl die nog `null` was. In
+   Swift gaat dat goed (statics zijn lui), op Android ging elk live-verzoek
+   naar `null/api/live`. **Vuistregel: zet een `static let shared = …()`
+   altijd ónder de statics die de init gebruikt.** Test:
+   `LiveShareTests.testSharedUsesTheDefaultAddress`.
+8. **Een `.alert` met alleen een `role: .cancel`-knop krijgt op Android twee
+   knoppen**: Skip vult de ontbrekende bevestigknop zelf met "OK". Geef de
+   enige knop dus geen rol (`Button("OK") {}`).
+9. **Een titel naast een extra kopknop breekt op Android af** ("SCHEIDSRECHTE
+   / R"): Compose maakt de tekst smaller in plaats van te krimpen. Zet
+   `.lineLimit(1)` + `.minimumScaleFactor(…)` op titels in een `HStack` met
+   knoppen.
+10. **`ImageRenderer` laat een paar doorzichtige pixelrijen boven en onder**
+    (iOS, niet Skip-specifiek). In WhatsApp wordt dat een zwarte of witte
+    rand; `ResultCardImage.render` tekent het plaatje daarom op een
+    ondoorzichtige achtergrond.
+
+Om lokaal te bouwen in een worktree: `JAVA_HOME` op de JBR van Android Studio
+en `ANDROID_HOME=~/Library/Android/sdk` (er is daar geen `local.properties`).
+`xcodebuild` moet buiten de sandbox draaien als de packages nog opgehaald
+moeten worden (ssh naar github.com).

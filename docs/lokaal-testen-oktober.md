@@ -117,3 +117,84 @@ Er was geen Mac (Xcode, Skip) en geen Docker beschikbaar. Dus:
   verschijnt START opnieuw.
 - `website/privacy.html` heeft een alinea "Live meekijken" gekregen; nalezen
   en publiceren vóór een externe build.
+
+## Resultaat lokale run (3 oktober 2026, Mac, Claude)
+
+Alles is op de Mac gebouwd en getest. Geen TestFlight- of Play-upload, geen
+versienummers opgehoogd, niets op een echt toestel gezet (alleen de
+iOS-simulator en de Android-emulator).
+
+| Stap | Resultaat | Toelichting |
+|---|:-:|---|
+| 1. Core (`swift test`, `skip test`) | 🟢 | Eerst rood: 4 Skip/Kotlin-fouten. Nu 107/107 op macOS én in Kotlin (Robolectric) |
+| 2. iOS (`xcodebuild test`) | 🟢 | Meteen groen; nu 78 tests, waaronder `testStoreFromVersion6MigratesToErrorKind` en `testUnforcedErrorKindSurvivesPersistence`. Geen concurrency-waarschuwingen in de nieuwe code |
+| 3. Android (`testDebugUnitTest assembleDebug`) | 🟢 | Meteen groen; 60 tests (1 nieuw: Room 8→9-migratie) |
+| 4. Live-server (`npm test`) | 🟢 | 8/8 (Node via Homebrew op de Mac gezet) |
+| 5. Visueel | 🟢 | Screenshots hieronder; 4 opmaakfouten hersteld |
+| 6. Live meekijken echt | 🟢 | iOS-simulator én Android-emulator tegen `server/live` lokaal; URL daarna teruggezet |
+
+### Hersteld
+
+- `330288e` **Core door Skip/Kotlin**
+  - `ErrorKind.out` heet nu `outOfCourt`: `out` is een Kotlin-sleutelwoord
+    (syntaxfout). De opgeslagen waarde blijft `"Out"`, dus geen migratie.
+  - **Echte bug in `LiveShare`**: in Kotlin verborg het parameterlabel
+    `matchId` de property, waardoor `guard matchId == id` altijd waar was. Een
+    update van een andere wedstrijd zou zijn verstuurd. Nu `self.matchId`.
+  - `Character.isLetter` bestaat niet in Skip (voornaam inkorten).
+  - Een async-test wachtte op het verkeerde moment.
+- `d69676c` **Test voor Room 8→9**: punten uit 0.3 openen met soort onbekend.
+- `f1de87e` **Deelplaatje iOS** had boven en onder een doorzichtige rand (in
+  WhatsApp een zwarte of witte balk); nu ondoorzichtig, met een test die het
+  plaatje rendert (ook met lange namen). **Schakelaar**: het SERVICE-label
+  stond lager dan de andere drie.
+- `b74dbed` **Live meekijken werkte op Android helemaal niet**: Kotlin
+  initialiseert statics van boven naar beneden, waardoor
+  `LiveShare.shared.baseURL` `null` was (elk verzoek naar `null/api/live`).
+  Met een test die dit vangt. Verder: de foutmelding toonde op Android twee
+  keer **OK**, en de titel brak af als **"SCHEIDSRECHTE / R"** naast de
+  LIVE-knop.
+- Nieuwe Skip-valkuilen staan in `docs/android-port.md` (punten 1 t/m 10
+  onder "Lokale run op de Mac").
+
+### Live meekijken: wat er echt getest is
+
+- iOS coach: LIVE → deelmenu "Volg Jan – Niels live: …"; elk punt komt als
+  PUT op de server; undo volgt; de kijkpagina in Safari toont de stand en
+  ververst via Server-Sent Events (3–0 → 3–1 meteen binnen); LIVE opnieuw →
+  "Link opnieuw delen / Live stoppen"; stoppen = sessie weg (link geeft
+  "Afgelopen"). Alleen voornamen op de server ("Niels", niet "van
+  Sevenhoven").
+- iOS scheidsrechter: LIVE → deelmenu met link.
+- Android scheidsrechter (na de fix): POST, PUT per punt, DELETE bij stoppen.
+- Niet in de app getest: het automatisch verwijderen na de laatste rally van
+  de wedstrijd (wel gedekt door `testStartUpdateFinishDeletesTheSession`) en
+  vliegtuigmodus.
+
+### Screenshots (`docs/screenshots-oktober/`)
+
+| Wat | iOS | Android |
+|---|---|---|
+| START GAME + LIVE-knop (coach) | `ios-coach-start-game-live.png` | `android-coach-start-game-live.png` |
+| DOWN · OUT · SERVICE · GROND | `ios-coach-unforced-error-soort.png`, `ios-coach-unforced-error-uitgelijnd.png` | `android-coach-unforced-error-soort.png` |
+| Dashboard "Eigen fouten: …" + advies | `ios-dashboard-eigen-fouten.png`, `ios-dashboard-advies.png` | `android-dashboard-eigen-fouten.png` |
+| Deel als plaatje | `ios-deel-als-plaatje-wedstrijd.png`, `ios-deel-als-plaatje-tussenstand.png` | `android-deel-als-plaatje-game.png` |
+| LIVE scheidsrechter | `ios-scheidsrechter-live.png` | `android-scheidsrechter-live.png` (vóór de fix: `android-scheidsrechter-titel-voor.png`) |
+| Live delen / menu | `ios-live-delen.png`, `ios-live-menu.png` | `android-live-delen.png`, `android-live-menu.png` |
+| Kijkpagina in de browser | `live-kijkpagina.png` | |
+
+### Nog open
+
+- **Migratie op echte data** (build 16 op de iPhone, 0.3 op de A13): niet
+  gedaan, want niets op echte toestellen. In de tests werken V6→V7 en Room 8→9.
+- **Domein live-server**: `live.squashanalyzer.com` (DNS + reverse proxy +
+  Portainer-stack) bestaat nog niet. Tot dan geeft LIVE in een echte build
+  "Live delen lukte niet".
+- **Verschil Android ↔ iOS** (bestond al, niet van deze branch): een lopende
+  coachwedstrijd staat op iOS als INCOMPLEET in Afgeronde wedstrijden, op
+  Android niet.
+- **Bestaand, niet van deze branch**: een hervatte scheidsrechterswedstrijd
+  van 1 oktober toonde op iOS een wedstrijdklok van "2247:12" (de klok telt
+  vanaf de start, ook over dagen heen).
+- De "Deel als plaatje"-knop op iOS is via een test gerenderd, niet in de app
+  doorgetikt (op Android wel, tot en met het deelmenu).

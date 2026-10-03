@@ -108,6 +108,12 @@ De live-server met foto's draait al in productie; de privacytekst staat online.
 - [ ] Website bijwerken (homepage, nieuws).
 - [x] Google Play Gegevensveiligheid: Naam en Foto's toegevoegd (3 okt, via de API).
 
+## Backlog (gemeld door Gerd-Jan, 3 oktober)
+
+- [ ] Livepagina: bij een lange naam (Bombardino) is "rechts" niet meer te lezen.
+      Een lange naam mag over 2 regels; daaronder in klein lettertype een
+      bolletje voor wie serveert en aan welke kant.
+
 ## iOS 2.2 build 16 en Android 0.3 (3), 1 oktober 2026
 
 Zie `release-notes/2.2-16.md` en `release-notes/android-0.3-3.md`.

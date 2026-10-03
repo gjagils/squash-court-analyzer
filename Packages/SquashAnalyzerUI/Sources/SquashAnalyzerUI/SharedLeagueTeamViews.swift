@@ -7,13 +7,13 @@ import SquashAnalyzerCore
 // never collide); both use Core's `LeagueTeamFetcher` and the same storage keys.
 
 enum LeaguePalette {
-    static let orange = Color(red: 0.96, green: 0.55, blue: 0.20)
+    static let orange = Color(red: 0.95, green: 0.55, blue: 0.15)
     static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
     static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let secondary = Color(red: 0.75, green: 0.73, blue: 0.70)
+    static let secondary = Color(red: 0.70, green: 0.68, blue: 0.65)
     static let muted = Color(red: 0.55, green: 0.53, blue: 0.50)
     static let card = Color(red: 0.14, green: 0.12, blue: 0.10)
-    static let background = Color(red: 0.06, green: 0.05, blue: 0.04)
+    static let background = Color.black
 }
 
 enum LeagueDates {
@@ -178,7 +178,7 @@ public struct SharedLeagueTeamDetailView: View {
                 .padding(24)
             }
         }
-        .navigationTitle("Mijn team")
+        .pageTitle("Mijn team")
     }
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
@@ -317,7 +317,7 @@ public struct SharedSettingsView: View {
                 .padding(24)
             }
         }
-        .navigationTitle("Instellingen")
+        .pageTitle("Instellingen")
         .onAppear {
             draft = teamURL
             hasKey = aiCoach?.keyStore.hasOpenAIKey == true

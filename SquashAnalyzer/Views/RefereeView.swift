@@ -156,10 +156,11 @@ struct RefereeView: View {
 
             Spacer()
 
-            Text("SCHEIDSRECHTER")
-                .font(AppFonts.title(14))
+            Text("Scheidsrechter")
+                .font(PageTitleStyle.font)
                 .foregroundColor(AppColors.textPrimary)
-                .tracking(2)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
 
             Spacer()
 

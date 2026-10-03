@@ -113,7 +113,7 @@ public struct MatchSetupView: View {
                         }
                     }
                 }
-                .navigationTitle(pickingSlot == 0 ? "Spelers" : "Kies speler")
+                .pageTitle(pickingSlot == 0 ? "Spelers" : "Kies speler")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Sluiten") { pickingSlot = nil }
@@ -130,9 +130,8 @@ public struct MatchSetupView: View {
     /// "‹ Home", the mode in capitals, as on iOS
     private var header: some View {
         ZStack {
-            Text(isCoach ? "COACH" : "SCHEIDSRECHTER")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .tracking(3)
+            Text(isCoach ? "Coach" : "Scheidsrechter")
+                .font(PageTitleStyle.font)
                 .foregroundColor(SetupPalette.text)
             HStack {
                 Spacer()
@@ -338,5 +337,5 @@ private enum SetupPalette {
     static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
     static let orange = Color(red: 0.95, green: 0.55, blue: 0.15)
     static let blue = Color(red: 0.35, green: 0.45, blue: 0.55)
-    static let background = Color(red: 0.06, green: 0.05, blue: 0.04)
+    static let background = Color.black
 }

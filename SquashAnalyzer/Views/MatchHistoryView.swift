@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 
 /// Which kind of saved matches the history shows
 enum HistoryKindFilter: String, CaseIterable, Identifiable {
@@ -137,10 +138,9 @@ struct MatchHistoryView: View {
 
             Spacer()
 
-            Text("WEDSTRIJDEN")
-                .font(AppFonts.title(18))
+            Text("Wedstrijden")
+                .font(PageTitleStyle.font)
                 .foregroundColor(AppColors.textPrimary)
-                .tracking(3)
 
             Spacer()
 

@@ -94,7 +94,7 @@ public struct SharedPlayerBadgesView: View {
                 }
             }
         }
-        .navigationTitle(playerName)
+        .pageTitle(playerName)
         .alert("Delen lukt niet", isPresented: $shareFailed) {
             Button("OK", role: .cancel) { }
         } message: {
@@ -266,7 +266,7 @@ struct SharedBadgeMomentsView: View {
             }
             .scrollContentBackground(.hidden)
         }
-        .navigationTitle(kind.title)
+        .pageTitle(kind.title)
     }
 
     /// "1 okt 2026 16:20", like iOS' medium date with short time

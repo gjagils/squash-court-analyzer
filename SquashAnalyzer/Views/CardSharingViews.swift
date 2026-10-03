@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerUI
 import SwiftData
 import SquashAnalyzerCore
 
@@ -215,8 +216,7 @@ struct CardImportSheet: View {
             }
             .scrollContentBackground(.hidden)
             .background(AppBackground())
-            .navigationTitle("Spelerskaart")
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle("Spelerskaart")
             .toolbar {
                 CloseToolbarItem(title: "Annuleren") { close() }
             }

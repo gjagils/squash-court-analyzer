@@ -75,7 +75,7 @@ public struct SharedCardImportView: View {
                     }
                 }
             }
-            .navigationTitle("Spelerskaart")
+            .pageTitle("Spelerskaart")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Annuleren") { onClose(false) }

@@ -10,6 +10,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import squash.analyzer.ui.SamplePlayers
 import androidx.activity.compose.setContent
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.SystemBarStyle
 import androidx.appcompat.app.AppCompatActivity
@@ -61,6 +66,7 @@ class MainActivity : AppCompatActivity() {
     private val cardInbox = CardInbox()
     private lateinit var autoBackup: AutoBackup
 
+    @OptIn(ExperimentalMaterial3Api::class) // material3TopAppBar options (page title size)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         UIApplication.launch(this)
@@ -110,7 +116,15 @@ class MainActivity : AppCompatActivity() {
             stateHolder.SaveableStateProvider(true) {
                 PresentationRoot(defaultColorScheme = ColorScheme.dark, context = ComposeContext()) { context ->
                     Box(modifier = context.modifier.fillMaxSize()) {
-                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach, backup = backup, teamImporter = teamImporter, photoStore = playerStore, filePicker = playerFiles, shareCard = { snapshot, text -> startActivity(CardImage.shareIntent(this@MainActivity, snapshot, text)) }).Compose(context = context.content())
+                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach, backup = backup, teamImporter = teamImporter, photoStore = playerStore, filePicker = playerFiles, shareCard = { snapshot, text -> startActivity(CardImage.shareIntent(this@MainActivity, snapshot, text)) })
+                            // Page titles 20 sp semibold on every top bar, as PageTitleStyle on iOS (docs/style/README.md)
+                            .material3TopAppBar { options ->
+                                val title = options.title
+                                options.copy(title = {
+                                    ProvideTextStyle(MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.SemiBold)) { title() }
+                                })
+                            }
+                            .Compose(context = context.content())
                     }
                 }
                 SideEffect { stateHolder.removeState(true) }

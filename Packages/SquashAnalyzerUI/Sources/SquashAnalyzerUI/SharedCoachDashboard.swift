@@ -14,10 +14,10 @@ public struct AICoachContext {
 }
 
 enum DashboardPalette {
-    static let background = Color(red: 0.06, green: 0.05, blue: 0.04)
+    static let background = Color.black
     static let card = Color.white.opacity(0.05)
     static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let secondary = Color(red: 0.75, green: 0.73, blue: 0.70)
+    static let secondary = Color(red: 0.70, green: 0.68, blue: 0.65)
     static let muted = Color(red: 0.55, green: 0.53, blue: 0.50)
     static let orange = Color(red: 0.95, green: 0.55, blue: 0.15)
     static let blue = Color(red: 0.45, green: 0.60, blue: 0.75)
@@ -144,9 +144,8 @@ public struct SharedCoachDashboardView: View {
 
     private var titleBlock: some View {
         VStack(spacing: 4) {
-            Text("COACH DASHBOARD")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
-                .tracking(3)
+            Text("Coach dashboard")
+                .font(PageTitleStyle.font)
                 .foregroundColor(DashboardPalette.text)
             if let winner = game.winner {
                 Text("\(game.name(for: winner)) wint!")

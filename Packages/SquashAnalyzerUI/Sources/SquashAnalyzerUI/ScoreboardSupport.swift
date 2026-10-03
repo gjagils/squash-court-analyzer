@@ -8,7 +8,7 @@ import SquashAnalyzerCore
 /// minimal, matching color constants.
 private enum ScoreboardPalette {
     static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let backgroundDark = Color(red: 0.06, green: 0.05, blue: 0.04)
+    static let backgroundDark = Color.black
 }
 
 /// The text colours of a player's column on the coach and referee screens,
@@ -161,18 +161,10 @@ enum PlayerPhotos {
 
 /// iOS' AppBackground for the shared screens: dark base, a warm glow from the
 /// bottom, a faint one from the top and a dark vignette
+/// Screen background: true black (docs/style/tokens.json)
 struct GlowBackground: View {
     var body: some View {
-        ZStack {
-            CoachPalette.backgroundDark
-            RadialGradient(colors: [Color(red: 1.0, green: 0.45, blue: 0.1).opacity(0.15),
-                                    Color(red: 1.0, green: 0.45, blue: 0.1).opacity(0.08), Color.clear],
-                           center: .bottom, startRadius: 100, endRadius: 600)
-            RadialGradient(colors: [CoachPalette.warmOrange.opacity(0.05), Color.clear],
-                           center: .top, startRadius: 0, endRadius: 400)
-            RadialGradient(colors: [Color.clear, Color.black.opacity(0.6)],
-                           center: .center, startRadius: 150, endRadius: 500)
-        }
-        .ignoresSafeArea()
+        Color.black
+            .ignoresSafeArea()
     }
 }

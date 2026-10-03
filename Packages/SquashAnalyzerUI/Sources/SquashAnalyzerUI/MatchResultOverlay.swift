@@ -530,7 +530,7 @@ public struct SharedMatchBadgesSheet: View {
                     .padding(20)
                 }
             }
-            .navigationTitle("Badges")
+            .pageTitle("Badges")
             .toolbar {
                 #if os(iOS) && !SKIP
                 // iOS: "✕ Sluiten" top left, like every other screen (CloseButton in the app)

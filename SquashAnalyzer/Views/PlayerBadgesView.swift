@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerUI
 import SwiftData
 import SquashAnalyzerCore
 
@@ -43,8 +44,7 @@ struct MatchBadgesSheet: View {
                 }
             }
             .background(AppBackground())
-            .navigationTitle("Badges")
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle("Badges")
             .toolbar {
                 CloseToolbarItem { dismiss() }
             }
@@ -61,8 +61,7 @@ struct PlayerBadgesView: View {
     var body: some View {
         PlayerBadgesContent(player: player, highlightMatchId: nil)
             .background(AppBackground())
-            .navigationTitle(player.name)
-            .navigationBarTitleDisplayMode(.inline)
+            .pageTitle(player.name)
     }
 }
 
@@ -256,8 +255,7 @@ struct BadgeMomentsView: View {
         }
         .scrollContentBackground(.hidden)
         .background(AppBackground())
-        .navigationTitle(kind.title)
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle(kind.title)
     }
 
     private func delete(_ award: SavedBadgeAward) {
@@ -309,8 +307,7 @@ struct BadgeCatalogView: View {
         }
         .scrollContentBackground(.hidden)
         .background(AppBackground())
-        .navigationTitle("Alle badges")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageTitle("Alle badges")
     }
 
     private func tag(_ text: String) -> some View {

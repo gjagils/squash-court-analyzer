@@ -173,7 +173,7 @@ struct MatchStartView: View {
     @State private var createdRefereeMatch: RefereeMatch? = nil
 
     private var title: String {
-        mode == .coach ? "COACH" : "SCHEIDSRECHTER"
+        mode == .coach ? "Coach" : "Scheidsrechter"
     }
 
     var body: some View {
@@ -195,9 +195,8 @@ struct MatchStartView: View {
                     Spacer()
 
                     Text(title)
-                        .font(AppFonts.title(18))
+                        .font(PageTitleStyle.font)
                         .foregroundColor(AppColors.textPrimary)
-                        .tracking(2)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
 

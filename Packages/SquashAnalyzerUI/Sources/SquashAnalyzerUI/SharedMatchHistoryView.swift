@@ -108,7 +108,7 @@ public struct SharedMatchHistoryView: View {
                                          onCancel: { completing = nil })
             }
         }
-        .navigationTitle("Wedstrijden")
+        .pageTitle("Wedstrijden")
         .task { await load() }
         .sheet(isPresented: $choosingPlayer) {
             NavigationStack {
@@ -118,7 +118,7 @@ public struct SharedMatchHistoryView: View {
                         Button(name) { playerFilter = name; choosingPlayer = false }
                     }
                 }
-                .navigationTitle("Speler")
+                .pageTitle("Speler")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Sluiten") { choosingPlayer = false }
@@ -496,5 +496,5 @@ private enum HistoryPalette {
     static let orange = Color(red: 0.95, green: 0.55, blue: 0.15)
     static let dim = Color(red: 0.50, green: 0.48, blue: 0.45)
     static let card = Color(red: 0.12, green: 0.10, blue: 0.08)
-    static let background = Color(red: 0.06, green: 0.05, blue: 0.04)
+    static let background = Color.black
 }

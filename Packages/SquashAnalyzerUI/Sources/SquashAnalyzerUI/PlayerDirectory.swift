@@ -73,7 +73,7 @@ enum PlayerStyle {
     static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
     static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
     static let muted = Color(red: 0.70, green: 0.68, blue: 0.65)
-    static let background = Color(red: 0.06, green: 0.05, blue: 0.04)
+    static let background = Color.black
 }
 
 public struct PlayerDirectoryView: View {
@@ -125,10 +125,7 @@ public struct PlayerDirectoryView: View {
             PlayerStyle.background.ignoresSafeArea()
             VStack(spacing: 16) {
                 HStack {
-                    // Shrink the title rather than wrap it on narrow screens or large text
-                    Text("SPELERS").font(.system(size: 22, weight: .bold, design: .rounded)).tracking(2)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
+                    // The page title is in the top bar (pageTitle); only the actions here
                     Spacer(minLength: 8)
                     // All badges, as iOS' medal button in Spelers
                     Button { showingCatalog = true } label: {
@@ -256,7 +253,7 @@ public struct PlayerDirectoryView: View {
                 }
             }
         }
-        .navigationTitle("Spelers")
+        .pageTitle("Spelers")
         .navigationDestination(isPresented: $showingCatalog) {
             SharedBadgeCatalogView()
         }

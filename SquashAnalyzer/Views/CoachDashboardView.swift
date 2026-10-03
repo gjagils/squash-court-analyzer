@@ -117,10 +117,9 @@ struct CoachDashboardView: View {
                 HStack {
                     Image(systemName: "figure.run")
                         .foregroundColor(AppColors.accentGold)
-                    Text("COACH DASHBOARD")
-                        .font(AppFonts.title(20))
+                    Text("Coach dashboard")
+                        .font(PageTitleStyle.font)
                         .foregroundColor(AppColors.textPrimary)
-                        .tracking(3)
                 }
 
                 if let winner = game.winner {

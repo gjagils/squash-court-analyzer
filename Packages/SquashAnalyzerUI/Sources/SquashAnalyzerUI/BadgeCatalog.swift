@@ -56,9 +56,9 @@ public struct BadgeMedallion: View {
 enum BadgePalette {
     static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
     static let textPrimary = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let textSecondary = Color(red: 0.75, green: 0.73, blue: 0.70)
+    static let textSecondary = Color(red: 0.70, green: 0.68, blue: 0.65)
     static let textMuted = Color(red: 0.55, green: 0.53, blue: 0.50)
-    static let backgroundDark = Color(red: 0.06, green: 0.05, blue: 0.04)
+    static let backgroundDark = Color.black
 }
 
 /// The full badge catalog: every badge there is, locked/unlocked state aside.
@@ -108,7 +108,7 @@ public struct SharedBadgeCatalogView: View {
         }
         .scrollContentBackground(.hidden)
         .background(BadgePalette.backgroundDark.ignoresSafeArea())
-        .navigationTitle("Alle badges")
+        .pageTitle("Alle badges")
     }
 
     private func tag(_ text: String) -> some View {

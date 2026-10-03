@@ -4,14 +4,21 @@
 
 De homepage wordt in deze wijziging doorgevoerd voor iOS en Android. De overige schermen krijgen **geen redesign**. De HTML-previews in `docs/homepage-options/pages.html` zijn door de gebruiker afgewezen en mogen niet als implementatiereferentie dienen.
 
-## Nog uit te voeren
+## Stand (3 oktober, Claude Code)
 
-- [ ] Inventariseer afwijkende kleuren op vervolgschermen in iOS en het gedeelde Skip/Android-package.
-- [ ] Trek alleen achtergrond (echt zwart), primaire/secundaire tekst en algemene oranje accenten gelijk met `docs/style/tokens.json`.
-- [ ] Behoud layout, afstanden, knoppen, kaartvormen en bestaande tekstgroottes; uitzondering: paginatitels hieronder.
-- [ ] Maak paginatitels consistent 20 pt op iOS / 20 sp op Android, met gewone schrijfwijze: Coach, Scheidsrechter, Coach dashboard, Wedstrijden, Spelers, Alle badges, Mijn team, Instellingen. Laat dynamische speler- en badgenamen intact.
-- [ ] Behoud functionele kleuren: oranje/blauw voor de spelers, koel blauw/indigo voor rechter scheidsrechteracties, rood voor STROKE/fouten, baan- en badgekleuren. Gebruik namen/labels naast kleur.
+- [x] Inventariseer afwijkende kleuren op vervolgschermen in iOS en het gedeelde Skip/Android-package.
+- [x] Trek alleen achtergrond (echt zwart), primaire/secundaire tekst en algemene oranje accenten gelijk met `docs/style/tokens.json`.
+- [x] Behoud layout, afstanden, knoppen, kaartvormen en bestaande tekstgroottes; uitzondering: paginatitels hieronder.
+- [x] Maak paginatitels consistent 20 pt op iOS / 20 sp op Android, met gewone schrijfwijze: Coach, Scheidsrechter, Coach dashboard, Wedstrijden, Spelers, Alle badges, Mijn team, Instellingen. Laat dynamische speler- en badgenamen intact.
+- [x] Behoud functionele kleuren: oranje/blauw voor de spelers, koel blauw/indigo voor rechter scheidsrechteracties, rood voor STROKE/fouten, baan- en badgekleuren. Gebruik namen/labels naast kleur.
 - [ ] Controleer beide platformen met standaard en vergrote tekst. Test navigatie en bestaande flows; beperk de verandering tot presentatie.
+
+Uitgevoerd:
+- Schermachtergronden echt zwart: `AppBackground` (iOS) en `GlowBackground` (gedeeld) zonder oranje gloed; de achtergrondtokens in alle lokale paletten op `Color.black`.
+- Secundaire tekst overal `#B3ADA6` (was op badges, teamkaart, dashboard en badgestrook iets lichter); het afwijkende oranje van Mijn team gelijk aan `#F28C26`.
+- Kaartkleuren, knoppen, spelerskleuren, LET/STROKE en baankleuren zijn niet veranderd.
+- Paginatitels: `pageTitle(_:)` en `PageTitleStyle` (20 pt semibold) in `PageTitle.swift`; op Android zet `MainActivity` elke titelbalk op 20 sp semibold en staan de titels compact naast de terugpijl. Eigen koppen (Coach, Scheidsrechter, Coach dashboard, Wedstrijden, Spelers, Kies speler, Instellingen) in gewone schrijfwijze op 20 pt. Op Android stond "Spelers" dubbel (titelbalk en kop); de kop is weg.
+- Gecontroleerd met standaardtekst op de iPhone 17 Pro Max-simulator en de Android-emulator. Nog te doen bij het testen op de toestellen: vergrote tekst.
 
 ## Relevante bronnen
 

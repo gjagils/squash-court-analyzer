@@ -1,5 +1,6 @@
 import SwiftUI
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 
 /// Settings keys shared with other screens
 enum CoachInputSettings {
@@ -103,10 +104,9 @@ struct SettingsView: View {
 
             Spacer()
 
-            Text("INSTELLINGEN")
-                .font(AppFonts.title(18))
+            Text("Instellingen")
+                .font(PageTitleStyle.font)
                 .foregroundColor(AppColors.textPrimary)
-                .tracking(3)
 
             Spacer()
 

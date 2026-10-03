@@ -210,7 +210,7 @@ enum CoachPalette {
     static let textPrimary = Color(red: 0.95, green: 0.93, blue: 0.90)
     static let textSecondary = Color(red: 0.70, green: 0.68, blue: 0.65)
     static let textMuted = Color(red: 0.50, green: 0.48, blue: 0.45)
-    static let backgroundDark = Color(red: 0.06, green: 0.05, blue: 0.04)
+    static let backgroundDark = Color.black
     static let backgroundMedium = Color(red: 0.12, green: 0.10, blue: 0.08)
     static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
     static let coolBlue = Color(red: 0.42, green: 0.58, blue: 0.82)
@@ -353,10 +353,10 @@ public struct CoachScoringView: View {
 
     private var header: some View {
         ZStack {
-            Text("COACH")
-                .font(.system(size: 14, weight: .bold, design: .rounded))
+            Text("Coach")
+                .font(PageTitleStyle.font)
                 .foregroundColor(CoachPalette.textPrimary)
-                .tracking(2)
+                .lineLimit(1)
             HStack {
                 Button { requestStop() } label: {
                     HStack(spacing: 4) {

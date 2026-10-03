@@ -140,10 +140,9 @@ public struct RefereeScoringView: View {
                 LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot }, share: shareText)
             }
             Spacer()
-            Text("SCHEIDSRECHTER")
-                .font(.system(size: 15, weight: .bold, design: .rounded))
+            Text("Scheidsrechter")
+                .font(PageTitleStyle.font)
                 .foregroundColor(CoachPalette.textPrimary)
-                .tracking(2)
                 // With the LIVE button next to it the title broke into "SCHEIDSRECHTE / R" on Android
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)

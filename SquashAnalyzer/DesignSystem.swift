@@ -26,7 +26,7 @@ struct AppColors {
 
     // MARK: Background Colors
     /// Dark background with warm undertone
-    static let backgroundDark = Color(red: 0.06, green: 0.05, blue: 0.04)
+    static let backgroundDark = Color.black
     static let backgroundMedium = Color(red: 0.12, green: 0.10, blue: 0.08)
 
     // MARK: Panel Colors
@@ -432,49 +432,11 @@ struct CloseToolbarItem: ToolbarContent {
 }
 
 // MARK: - Background
+/// Screen background: true black (docs/style/tokens.json)
 struct AppBackground: View {
     var body: some View {
-        ZStack {
-            // Base dark color
-            AppColors.backgroundDark
-
-            // Warm orange radial glow from edges
-            RadialGradient(
-                colors: [
-                    AppColors.warmOrangeGlow.opacity(0.15),
-                    AppColors.warmOrangeGlow.opacity(0.08),
-                    Color.clear
-                ],
-                center: .bottom,
-                startRadius: 100,
-                endRadius: 600
-            )
-
-            // Top subtle glow
-            RadialGradient(
-                colors: [
-                    AppColors.warmOrange.opacity(0.05),
-                    Color.clear
-                ],
-                center: .top,
-                startRadius: 0,
-                endRadius: 400
-            )
-
-            // Dark vignette overlay
-            RadialGradient(
-                colors: [Color.clear, Color.black.opacity(0.6)],
-                center: .center,
-                startRadius: 150,
-                endRadius: 500
-            )
-
-            // Subtle noise texture
-            Rectangle()
-                .fill(Color.white.opacity(0.02))
-                .blendMode(.overlay)
-        }
-        .ignoresSafeArea()
+        Color.black
+            .ignoresSafeArea()
     }
 }
 

@@ -50,10 +50,9 @@ struct PlayerManagementView: View {
                         Spacer(minLength: 8)
 
                         // Five controls share one row: shrink the title rather than wrap it
-                        Text(isPickerMode ? "KIES SPELER" : "SPELERS")
-                            .font(AppFonts.title(18))
+                        Text(isPickerMode ? "Kies speler" : "Spelers")
+                            .font(PageTitleStyle.font)
                             .foregroundColor(AppColors.textPrimary)
-                            .tracking(3)
                             .lineLimit(1)
                             .minimumScaleFactor(0.6)
 

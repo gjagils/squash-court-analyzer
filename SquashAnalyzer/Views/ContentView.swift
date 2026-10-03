@@ -431,10 +431,10 @@ struct ContentView: View {
     // MARK: - Header View (same layout as the referee top bar)
     private var headerView: some View {
         ZStack {
-            Text("COACH")
-                .font(AppFonts.title(14))
+            Text("Coach")
+                .font(PageTitleStyle.font)
                 .foregroundColor(AppColors.textPrimary)
-                .tracking(2)
+                .lineLimit(1)
 
             HStack {
                 // Stop match

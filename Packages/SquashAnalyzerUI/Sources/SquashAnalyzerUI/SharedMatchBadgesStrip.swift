@@ -59,5 +59,5 @@ public struct SharedMatchBadgesStrip: View {
 
 private enum StripPalette {
     static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
-    static let textSecondary = Color(red: 0.75, green: 0.73, blue: 0.70)
+    static let textSecondary = Color(red: 0.70, green: 0.68, blue: 0.65)
 }

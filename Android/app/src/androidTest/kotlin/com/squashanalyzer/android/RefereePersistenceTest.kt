@@ -41,7 +41,7 @@ class RefereePersistenceTest {
         compose.onNodeWithContentDescription("Scheidsrechter").performClick()
         awaitText("Hervatten")
         compose.onNodeWithText("Hervatten").performClick()
-        awaitText("SCHEIDSRECHTER")
+        awaitText("Scheidsrechter")
     }
     private fun closeSaved() {
         compose.onNodeWithText("Sluiten").performClick()

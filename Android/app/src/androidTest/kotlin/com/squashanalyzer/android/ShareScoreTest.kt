@@ -88,7 +88,7 @@ class ShareScoreTest {
         compose.onAllNodesWithContentDescription("Sluiten").onLast().performClick()
 
         compose.onNodeWithText("ANALYSE").performClick()
-        awaitText("COACH DASHBOARD")
+        awaitText("Coach dashboard")
         compose.onNodeWithContentDescription("Deel game-analyse").performClick()
         sharedTextContains("SQUASH GAME ANALYSE")
     }

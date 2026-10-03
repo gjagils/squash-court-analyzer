@@ -19,7 +19,7 @@ app.
 ## Draaien in Portainer
 
 **Zo staat het nu (3 oktober 2026):** stack `squash-live` (id 109) op de NAS,
-`LIVE_PORT=3002`, `PUBLIC_URL=https://live.squashanalyzer.com`, met de
+branch `main`, `LIVE_PORT=3002`, `PUBLIC_URL=https://live.squashanalyzer.com`, met de
 Cloudflare Tunnel als voorkant (public hostname `live` →
 `http://192.168.68.120:3002`). Een aparte reverse proxy is dan niet nodig: de
 tunnel doet HTTPS en geeft `X-Forwarded-For` door. De compose gebruikt

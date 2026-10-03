@@ -188,13 +188,12 @@ iOS-simulator en de Android-emulator).
 - **Migratie op echte data** (build 16 op de iPhone, 0.3 op de A13): niet
   gedaan, want niets op echte toestellen. In de tests werken V6→V7 en Room 8→9.
 - ~~Domein live-server~~ **staat live sinds 3 oktober**: Portainer-stack
-  `squash-live` (id 109, NAS, poort 3002, branch `claude/tender-rubin-yw2rzz`)
+  `squash-live` (id 109, NAS, poort 3002, branch `main`)
   achter de Cloudflare Tunnel (`live.squashanalyzer.com` →
   `http://192.168.68.120:3002`). Getest: `/health`, aanmaken, live-updates via
   Cloudflare (binnen 2 s bij de kijker), verwijderen, en de iOS-app in de
   simulator tegen de echte server (link, stand per punt, kijkpagina, stoppen;
-  screenshot `live-kijkpagina-productie.png`). Zet de stack na de merge op
-  `main` (Portainer → stack → Git-instellingen).
+  screenshot `live-kijkpagina-productie.png`).
 - **Verschil Android ↔ iOS** (bestond al, niet van deze branch): een lopende
   coachwedstrijd staat op iOS als INCOMPLEET in Afgeronde wedstrijden, op
   Android niet.

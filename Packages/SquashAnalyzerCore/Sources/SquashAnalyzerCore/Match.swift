@@ -70,17 +70,17 @@ public class Match: Identifiable {
 
     // MARK: - Computed Properties
 
+    /// The game being played. Pure: `init` and `startNewGame` make the games, and
+    /// `completeResult` never leaves the list empty. Only when `games` was
+    /// emptied from outside, a detached empty game is returned (not added).
     public var currentGame: Game {
-        guard currentGameIndex < games.count else {
-            // Create first game if none exists
-            let game = Game()
-            game.player1Name = player1Name
-            game.player2Name = player2Name
-            game.assignStartingServer(matchStartingServer)
-            games.append(game)
-            return game
-        }
-        return games[currentGameIndex]
+        if currentGameIndex < games.count { return games[currentGameIndex] }
+        if let last = games.last { return last }
+        let game = Game()
+        game.player1Name = player1Name
+        game.player2Name = player2Name
+        game.assignStartingServer(matchStartingServer)
+        return game
     }
 
     public var player1GamesWon: Int {
@@ -172,7 +172,8 @@ public class Match: Identifiable {
     @discardableResult
     public func completeResult(with winners: [Player]) -> Bool {
         guard isValidResultCompletion(winners) else { return false }
-        if let last = games.last, last.winner == nil, last.points.isEmpty, last.lets.isEmpty {
+        // An untouched last game goes, but the match always keeps one game
+        if games.count > 1, let last = games.last, last.winner == nil, last.points.isEmpty, last.lets.isEmpty {
             games.removeLast()
         }
         player1GamesAfter = winners.filter { $0 == .player1 }.count

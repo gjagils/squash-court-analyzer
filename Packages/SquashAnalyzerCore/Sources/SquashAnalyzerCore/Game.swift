@@ -38,6 +38,9 @@ public class Game: Identifiable {
     /// Timestamp of the Start tap or the last point (for calculating rally duration)
     public var lastPointTime: Date = Date()
 
+    /// The clock for points and lets; tests set a fixed one to assert durations exactly
+    public var now: () -> Date = { Date() }
+
     /// When play started: the coach's Start tap at the first serve, or the
     /// first point or let when Start was skipped. nil = warming up or the break
     /// before this game, which never counts as a rally.
@@ -264,7 +267,7 @@ public class Game: Identifiable {
 
         // Rally duration: since the last point or the Start tap. Without a Start
         // tap the first rally is not timed (it would hold the warm-up or the break).
-        let now = Date()
+        let now = self.now()
         var duration = 0.0
         if startedAt == nil {
             startedAt = now
@@ -289,6 +292,7 @@ public class Game: Identifiable {
             server: currentServer,
             player1Score: player1Score,
             player2Score: player2Score,
+            timestamp: now,
             duration: duration,
             // Only a shot can be played out of the air, and never a lob
             isVolley: isVolley && (shotType?.allowsVolley ?? false),
@@ -362,7 +366,7 @@ public class Game: Identifiable {
         previousServers = []
         previousSides = []
         previousPointTimes = []
-        lastPointTime = Date()
+        lastPointTime = now()
         startedAt = nil
         startedByFirstPoint = false
         pendingErrorKind = nil
@@ -373,16 +377,18 @@ public class Game: Identifiable {
 
     /// Record a let (replay of rally)
     public func addLet(requestedBy player: Player) {
+        guard !isGameOver else { return }
         let letCall = LetCall(
             requestedBy: player,
             server: currentServer,
             player1Score: player1Score,
-            player2Score: player2Score
+            player2Score: player2Score,
+            timestamp: now()
         )
         lets.append(letCall)
 
         // Reset the rally timer since the rally is replayed; a let also means play is under way
-        lastPointTime = Date()
+        lastPointTime = now()
         if startedAt == nil {
             startedAt = lastPointTime
             startedByFirstPoint = false

@@ -113,6 +113,8 @@ public class RefereeMatch: Identifiable {
     /// a saved match so undo can be rebuilt after resuming (`rebuildUndo`).
     public var openingServer: Player?
     public var openingSide: ServerSide?
+    /// The clock for rallies and games; tests set a fixed one to assert durations exactly
+    public var now: () -> Date = { Date() }
 
     public init(id: UUID = UUID(), player1Name: String, player2Name: String, bestOf: Int, startingServer: Player,
                 player1GamesBefore: Int = 0, player2GamesBefore: Int = 0, matchStartedAt: Date = Date()) {
@@ -160,7 +162,7 @@ public class RefereeMatch: Identifiable {
         }
         undoStack.append(.point(prevServer: currentServer, prevSide: serverSide, prevP1Score: player1Score, prevP2Score: player2Score, prevLastPointAt: lastPointAt))
         if scorer == .player1 { player1Score += 1 } else { player2Score += 1 }
-        lastPointAt = Date()
+        lastPointAt = now()
         let next = ScoringEngine().service(afterRallyWonBy: scorer, from: ServiceState(server: currentServer, side: serverSide),
                                            handOutSide: handOutSide(for: scorer))
         currentServer = next.server
@@ -243,19 +245,19 @@ public class RefereeMatch: Identifiable {
         openingServer = nil
         openingSide = nil
         lastCallText = nil
-        gameStartedAt = Date()
+        gameStartedAt = now()
         lastPointAt = nil
         currentServer = winner
         serverSide = handOutSide(for: winner)
     }
 
     public var currentGameDuration: TimeInterval {
-        let end = isGameOver ? (lastPointAt ?? Date()) : Date()
+        let end = isGameOver ? (lastPointAt ?? now()) : now()
         return max(0.0, end.timeIntervalSince(gameStartedAt))
     }
 
     public var matchDuration: TimeInterval {
-        let end = isMatchOver ? (lastPointAt ?? Date()) : Date()
+        let end = isMatchOver ? (lastPointAt ?? now()) : now()
         return max(0.0, end.timeIntervalSince(matchStartedAt))
     }
 

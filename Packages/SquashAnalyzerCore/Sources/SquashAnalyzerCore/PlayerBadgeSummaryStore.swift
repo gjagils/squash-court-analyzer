@@ -24,6 +24,10 @@ public struct BadgeMoment: Identifiable, Equatable, Sendable {
 public protocol PlayerBadgeSummaryStore: Sendable {
     func badges(forPlayer playerId: String) async throws -> [BadgeKind]
 
+    /// How many different badges each player has, in one go for the player
+    /// list (instead of one `badges(forPlayer:)` per player)
+    func badgeCounts(forPlayers playerIds: [String]) async throws -> [String: Int]
+
     /// The player's card as a shareable snapshot: every award on their card,
     /// deletions included, oldest first, like iOS' `CardStore.snapshot(for:)`.
     /// Nil when the player no longer exists.

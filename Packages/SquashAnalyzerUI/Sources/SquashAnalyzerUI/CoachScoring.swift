@@ -250,8 +250,8 @@ public struct CoachScoringView: View {
     @State private var showingStop = false
     @State private var showingLet = false
     @State private var showingComplete = false
-    /// Ticks every second for the rally timer
-    @State private var now = Date()
+    /// Badges earned in this match, worked out once when the match ends
+    @State private var badgeEarnings: [MatchBadgeEarning] = []
     /// The finished game shown in the analysis sheet
     @State private var analysedGame: Game?
     @State private var showingAnalysis = false
@@ -293,7 +293,7 @@ public struct CoachScoringView: View {
                     .padding(.horizontal, 20)
 
                 HStack(spacing: 12) {
-                    rallyTimer
+                    RallyClock(game: game, hidden: game.isGameOver || match.isMatchOver)
                     instructionText
                     Spacer(minLength: 0)
                 }
@@ -336,11 +336,8 @@ public struct CoachScoringView: View {
                 }, onCancel: { showingComplete = false })
             }
         }
-        .task {
-            while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
-                now = Date()
-            }
+        .task(id: match.isMatchOver) {
+            badgeEarnings = computeBadgeEarnings()
         }
         .sheet(isPresented: $showingAnalysis) {
             SharedCoachDashboardView(match: match, game: analysedGame ?? game, aiCoach: aiCoach, shareText: shareText) {
@@ -583,7 +580,7 @@ public struct CoachScoringView: View {
         PlayerPhotos.photo(in: photos, id: player == Player.player1 ? match.player1Id : match.player2Id, name: match.name(for: player))
     }
 
-    private var badgeEarnings: [MatchBadgeEarning] {
+    private func computeBadgeEarnings() -> [MatchBadgeEarning] {
         guard match.isMatchOver else { return [] }
         return SharedMatchBadgesStrip.earnings(player1Id: match.player1Id, player1Name: match.player1Name,
                                                player2Id: match.player2Id, player2Name: match.player2Name,
@@ -638,25 +635,6 @@ public struct CoachScoringView: View {
 
     // MARK: - Rally timer, last point, let and stop
 
-    /// Time since the last point or let, like iOS' rally timer
-    private var rallyTimer: some View {
-        let seconds = Int(game.rallySeconds(at: now))
-        let text = (seconds / 60 < 10 ? "0" : "") + "\(seconds / 60):" + (seconds % 60 < 10 ? "0" : "") + "\(seconds % 60)"
-        return HStack(spacing: 6) {
-            AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
-            VStack(alignment: .leading, spacing: 1) {
-            Text("RALLY")
-                .font(.system(size: 8, weight: .medium, design: .rounded))
-                .tracking(1)
-                .foregroundColor(CoachPalette.textMuted)
-            Text(text)
-                .font(.system(size: 14, weight: .bold, design: .monospaced))
-                .foregroundColor(CoachPalette.textSecondary)
-            }
-        }
-        .opacity(game.isGameOver || match.isMatchOver ? 0.0 : 1.0)
-        .accessibilityLabel("Rallytijd \(text)")
-    }
 
     /// "Gerard: Winner · Volley drop · Voor Links" (Core's Point.summary, as on iOS)
     private var lastPointLine: some View {
@@ -909,5 +887,39 @@ public struct CoachScoringView: View {
         }
         volley = false
         matchChanged()
+    }
+}
+
+/// Time since the last point or let, like iOS' rally timer. A view of its own:
+/// only this ticks every second, not the whole scoring screen (T18).
+struct RallyClock: View {
+    let game: Game
+    let hidden: Bool
+    @State private var now = Date()
+
+    var body: some View {
+        let seconds = Int(game.rallySeconds(at: now))
+        let text = (seconds / 60 < 10 ? "0" : "") + "\(seconds / 60):" + (seconds % 60 < 10 ? "0" : "") + "\(seconds % 60)"
+        return HStack(spacing: 6) {
+            AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
+            VStack(alignment: .leading, spacing: 1) {
+            Text("RALLY")
+                .font(.system(size: 8, weight: .medium, design: .rounded))
+                .tracking(1)
+                .foregroundColor(CoachPalette.textMuted)
+            Text(text)
+                .font(.system(size: 14, weight: .bold, design: .monospaced))
+                .foregroundColor(CoachPalette.textSecondary)
+            }
+        }
+        .opacity(hidden ? 0.0 : 1.0)
+        .accessibilityLabel("Rallytijd \(text)")
+        // Stops ticking while the game is over
+        .task(id: hidden) {
+            while !Task.isCancelled && !hidden {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                now = Date()
+            }
+        }
     }
 }

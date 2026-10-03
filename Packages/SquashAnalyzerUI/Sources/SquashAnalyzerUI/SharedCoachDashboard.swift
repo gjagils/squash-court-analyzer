@@ -38,6 +38,8 @@ public struct SharedCoachDashboardView: View {
     @State private var player: Player = Player.player1
     @State private var gameIndex: Int
     @State private var advice: TacticalAdvice?
+    /// Read once when the screen opens: the Keychain/Keystore is not free (T18)
+    @State private var hasKey = false
     @State private var aiError: String?
     @State private var loadingAI = false
 
@@ -67,6 +69,7 @@ public struct SharedCoachDashboardView: View {
     public var body: some View {
         ZStack {
             DashboardPalette.background.ignoresSafeArea()
+                .onAppear { hasKey = aiCoach?.keyStore.hasOpenAIKey == true }
             ScrollView {
                 VStack(spacing: 14) {
                     header
@@ -499,7 +502,6 @@ public struct SharedCoachDashboardView: View {
 
     // MARK: AI Coach
 
-    private var hasKey: Bool { aiCoach?.keyStore.hasOpenAIKey == true }
 
     private var aiCard: some View {
         VStack(alignment: .leading, spacing: 10) {

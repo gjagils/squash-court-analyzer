@@ -21,45 +21,37 @@ struct PlayerPhotoView: View {
     let color: Color
 
     var body: some View {
-        if let photo, hasImage(photo) {
-            image(photo)
-        } else {
-            Text(String(name.prefix(1)).uppercased())
-                .font(.system(size: size * 0.45, weight: .bold, design: .rounded))
-                .foregroundColor(color)
-                .frame(width: size, height: size)
-                .background(color.opacity(0.15))
-                .clipShape(Circle())
-        }
-    }
-
-    private func hasImage(_ data: Data) -> Bool {
+        // Decoded once per render; the bytes are drawn straight from the result (T18)
         #if SKIP
-        return BitmapFactory.decodeByteArray(data.platformValue, 0, data.count) != nil
-        #elseif canImport(UIKit)
-        return UIImage(data: data) != nil
-        #else
-        return false
-        #endif
-    }
-
-    @ViewBuilder
-    private func image(_ data: Data) -> some View {
-        #if SKIP
-        ComposeView { context in
-            if let bitmap = BitmapFactory.decodeByteArray(data.platformValue, 0, data.count) {
+        if let photo, let bitmap = BitmapFactory.decodeByteArray(photo.platformValue, 0, photo.count) {
+            ComposeView { context in
                 Image(bitmap: bitmap.asImageBitmap(), contentDescription: nil, contentScale: ContentScale.Crop,
                       modifier: context.modifier.size(size.dp).clip(CircleShape))
             }
+        } else {
+            initial
         }
         #elseif canImport(UIKit)
-        Image(uiImage: UIImage(data: data) ?? UIImage())
-            .resizable()
-            .scaledToFill()
-            .frame(width: size, height: size)
-            .clipShape(Circle())
+        if let photo, let image = UIImage(data: photo) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .clipShape(Circle())
+        } else {
+            initial
+        }
         #else
-        EmptyView()
+        initial
         #endif
+    }
+
+    private var initial: some View {
+        Text(String(name.prefix(1)).uppercased())
+            .font(.system(size: size * 0.45, weight: .bold, design: .rounded))
+            .foregroundColor(color)
+            .frame(width: size, height: size)
+            .background(color.opacity(0.15))
+            .clipShape(Circle())
     }
 }

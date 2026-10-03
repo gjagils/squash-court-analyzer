@@ -301,11 +301,7 @@ public struct PlayerDirectoryView: View {
         do {
             players = try await store.loadPlayers()
             loadFailed = false
-            var counts: [String: Int] = [:]
-            for player in players {
-                counts[player.id] = (try? await badgeStore.badges(forPlayer: player.id))?.count ?? 0
-            }
-            badgeCounts = counts
+            badgeCounts = (try? await badgeStore.badgeCounts(forPlayers: players.map { player in player.id })) ?? [:]
             if let photoStore {
                 photos = (try? await photoStore.photos()) ?? [:]
             }

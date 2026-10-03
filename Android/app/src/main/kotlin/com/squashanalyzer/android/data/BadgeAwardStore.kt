@@ -16,6 +16,7 @@ import squash.analyzer.core.CardImportStore
 import squash.analyzer.core.CardSnapshot
 import squash.analyzer.core.Player
 import squash.analyzer.core.PlayerBadgeSummaryStore
+import skip.lib.Dictionary
 import squash.analyzer.core.ScoringEngine
 import squash.analyzer.core.SquashScore
 
@@ -55,6 +56,18 @@ class BadgeAwardStore(
 
     override suspend fun badges(forPlayer: String): SwiftArray<BadgeKind> =
         SwiftArray(activeAwards(forPlayer).map { it.badge }.distinct().mapNotNull { BadgeKind.init(rawValue = it) })
+
+    override suspend fun badgeCounts(forPlayers: SwiftArray<String>): Dictionary<String, Int> {
+        // One query for all active awards, grouped by card
+        val wanted = forPlayers.toSet()
+        val cards = playerDao.all().filter { it.id in wanted }.associate { it.id to (it.cardId ?: it.id) }
+        val kindsPerCard = dao.allActive().groupBy { it.cardId }.mapValues { (_, rows) ->
+            rows.map { it.badge }.distinct().count { BadgeKind.init(rawValue = it) != null }
+        }
+        val result = Dictionary<String, Int>()
+        for (id in forPlayers) result[id] = cards[id]?.let { kindsPerCard[it] } ?: 0
+        return result
+    }
 
     override suspend fun moments(forPlayer: String): SwiftArray<BadgeMoment> =
         SwiftArray(activeAwards(forPlayer).sortedByDescending { it.earnedAt }.mapNotNull { row ->

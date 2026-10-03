@@ -14,8 +14,8 @@ public struct RefereeScoringView: View {
     let photos: [String: Data]
     /// Sharing the stand during the match (the share icon in the header)
     @State private var sharingNow = false
-    /// Ticks every second for the match and game timers
-    @State private var now = Date()
+    /// Badges earned in this match, worked out once when the match ends
+    @State private var badgeEarnings: [MatchBadgeEarning] = []
     /// The game end whose result card was put aside ("Bekijk stand"); a new
     /// game end, or the same one after an undo and a new point, shows it again
     @State private var hiddenResult: String? = nil
@@ -39,7 +39,7 @@ public struct RefereeScoringView: View {
                 gameHeader
                 playerColumns
                 actionGrid
-                timers
+                RefereeTimers(match: match)
                 undoButton
             }
             .padding(.bottom, 20)
@@ -56,6 +56,10 @@ public struct RefereeScoringView: View {
                     if match.isMatchOver { hiddenResult = nil }
                 }
             }
+
+            Color.clear
+                .frame(width: 0, height: 0)
+                .task(id: match.isMatchOver) { badgeEarnings = computeBadgeEarnings() }
 
             if let call = match.lastCallText {
                 callFlash(call)
@@ -77,8 +81,9 @@ public struct RefereeScoringView: View {
         PlayerPhotos.photo(in: photos, id: player == Player.player1 ? match.player1Id : match.player2Id, name: match.name(for: player))
     }
 
-    private var badgeEarnings: [MatchBadgeEarning] {
-        SharedMatchBadgesStrip.earnings(player1Id: match.player1Id, player1Name: match.player1Name,
+    private func computeBadgeEarnings() -> [MatchBadgeEarning] {
+        guard match.isMatchOver else { return [] }
+        return SharedMatchBadgesStrip.earnings(player1Id: match.player1Id, player1Name: match.player1Name,
                                         player2Id: match.player2Id, player2Name: match.player2Name,
                                         badgeInput: match.badgeInput)
     }
@@ -316,39 +321,6 @@ public struct RefereeScoringView: View {
         .disabled(match.isGameOver)
     }
 
-    /// MATCH and GAME time, as on iOS
-    private var timers: some View {
-        let _ = now
-        return HStack {
-            AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
-            timer("MATCH", match.matchDuration, alignment: .leading)
-            Spacer()
-            timer("GAME", match.currentGameDuration, alignment: .trailing)
-            AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
-        }
-        .padding(.horizontal, 24)
-        .task {
-            while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
-                now = Date()
-            }
-        }
-    }
-
-    private func timer(_ label: String, _ seconds: TimeInterval, alignment: HorizontalAlignment) -> some View {
-        let total = Int(seconds)
-        let text = (total / 60 < 10 ? "0" : "") + "\(total / 60):" + (total % 60 < 10 ? "0" : "") + "\(total % 60)"
-        return VStack(alignment: alignment, spacing: 1) {
-            Text(label)
-                .font(.system(size: 8, weight: .medium, design: .rounded))
-                .tracking(1)
-                .foregroundColor(CoachPalette.textMuted)
-            Text(text)
-                .font(.system(size: 16, weight: .bold, design: .monospaced))
-                .foregroundColor(CoachPalette.textSecondary)
-        }
-        .accessibilityLabel("\(label == "MATCH" ? "Wedstrijdtijd" : "Gametijd") \(text)")
-    }
 
     private var undoButton: some View {
         Button(action: { undoLastPoint() }) {
@@ -384,5 +356,45 @@ public struct RefereeScoringView: View {
     /// "Even opslaan…" and the retry card can show (no own dismiss here)
     @MainActor private func close() {
         onExit()
+    }
+}
+
+/// MATCH and GAME time, as on iOS. A view of its own: only this ticks every
+/// second, not the whole referee screen (T18).
+struct RefereeTimers: View {
+    let match: RefereeMatch
+    @State private var now = Date()
+
+    var body: some View {
+        let _ = now
+        return HStack {
+            AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
+            timer("MATCH", match.matchDuration, alignment: .leading)
+            Spacer()
+            timer("GAME", match.currentGameDuration, alignment: .trailing)
+            AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
+        }
+        .padding(.horizontal, 24)
+        .task(id: match.isMatchOver) {
+            while !Task.isCancelled && !match.isMatchOver {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                now = Date()
+            }
+        }
+    }
+
+    private func timer(_ label: String, _ seconds: TimeInterval, alignment: HorizontalAlignment) -> some View {
+        let total = Int(seconds)
+        let text = (total / 60 < 10 ? "0" : "") + "\(total / 60):" + (total % 60 < 10 ? "0" : "") + "\(total % 60)"
+        return VStack(alignment: alignment, spacing: 1) {
+            Text(label)
+                .font(.system(size: 8, weight: .medium, design: .rounded))
+                .tracking(1)
+                .foregroundColor(CoachPalette.textMuted)
+            Text(text)
+                .font(.system(size: 16, weight: .bold, design: .monospaced))
+                .foregroundColor(CoachPalette.textSecondary)
+        }
+        .accessibilityLabel("\(label == "MATCH" ? "Wedstrijdtijd" : "Gametijd") \(text)")
     }
 }

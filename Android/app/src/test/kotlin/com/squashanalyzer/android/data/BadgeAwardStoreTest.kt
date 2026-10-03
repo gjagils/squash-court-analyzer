@@ -7,6 +7,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import skip.lib.Array as SwiftArray
 import org.junit.Assert.*
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -125,5 +126,20 @@ class BadgeAwardStoreTest {
         // The deletion travels with the next shared card
         val card = badgeStore.cardSnapshot(playerId.uuidString)!!
         assertTrue(card.awards.toList().any { it.deletedAt != null })
+    }
+
+    /** The player list counts every player's badges in one go, the same as badges(forPlayer:) one by one */
+    @Test fun badgeCountsMatchThePerPlayerCount() = runTest {
+        val hugo = player()
+        val linked = player(name = "Kaart", cardId = UUID().uuidString)
+        val none = player(name = "Leeg")
+        coachAdapter.save(matchWithFiveInARow(hugo))
+        coachAdapter.save(matchWithFiveInARow(linked))
+
+        val ids = listOf(hugo, linked, none).map { it.uuidString }
+        val counts = badgeStore.badgeCounts(forPlayers = SwiftArray(ids))
+        for (id in ids) assertEquals(badgeStore.badges(forPlayer = id).count, counts[id])
+        assertTrue(counts[hugo.uuidString]!! > 0)
+        assertEquals(0, counts[none.uuidString])
     }
 }

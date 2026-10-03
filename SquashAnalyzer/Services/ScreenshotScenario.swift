@@ -111,7 +111,6 @@ enum ScreenshotScenario: String, CaseIterable {
         for (i, p) in game2.enumerated() {
             if i == 6 { match.callStroke(to: p) } else { match.awardPoint(to: p) }
         }
-        match.lastCallText = nil
         return match
     }
 

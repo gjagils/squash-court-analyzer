@@ -192,9 +192,10 @@ public class RefereeMatch: Identifiable {
 
     public func clearCallText() { lastCallText = nil }
 
+    /// After the point: `awardPoint` clears the banner, so setting it first lost it
     public func callStroke(to player: Player) {
-        lastCallText = "STROKE -> \(name(for: player).uppercased())"
         awardPoint(to: player, isStroke: true)
+        lastCallText = "STROKE -> \(name(for: player).uppercased())"
     }
 
     public func undo() {

@@ -57,7 +57,8 @@ public struct LiveShareButton: View {
             Text(live.offline ? "Geen verbinding: de stand gaat weer mee zodra er netwerk is." : "Kijkers volgen de stand via de link. Na de wedstrijd wordt alles gewist.")
         }
         .alert("Live delen lukte niet", isPresented: $failed) {
-            Button("OK", role: .cancel) {}
+            // No .cancel role: with only a cancel button Skip adds its own "OK" (two OKs on Android)
+            Button("OK") {}
         } message: {
             Text("Controleer de internetverbinding en probeer het opnieuw.")
         }

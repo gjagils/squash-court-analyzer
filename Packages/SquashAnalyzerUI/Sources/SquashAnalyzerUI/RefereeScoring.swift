@@ -142,6 +142,9 @@ public struct RefereeScoringView: View {
                 .font(.system(size: 15, weight: .bold, design: .rounded))
                 .foregroundColor(CoachPalette.textPrimary)
                 .tracking(2)
+                // With the LIVE button next to it the title broke into "SCHEIDSRECHTE / R" on Android
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
             Spacer()
             if shareText != nil {
                 Button { sharingNow = true } label: {

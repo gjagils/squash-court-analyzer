@@ -178,10 +178,12 @@ public enum LiveShareError: Error, Equatable {
 @MainActor
 @Observable
 public final class LiveShare {
-    public static let shared = LiveShare()
-
-    /// Address of the live server (server/live, behind the reverse proxy)
+    /// Address of the live server (server/live, behind the reverse proxy).
+    /// Above `shared`: Kotlin initialises statics top to bottom, and `shared`
+    /// reads this in its `baseURL`; the other way round it was null on Android.
     public static let defaultBaseURL = "https://live.squashanalyzer.com"
+
+    public static let shared = LiveShare()
 
     public var transport: (any LiveTransport)? = nil
     public var baseURL: String = LiveShare.defaultBaseURL

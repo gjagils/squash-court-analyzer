@@ -117,6 +117,13 @@ final class LiveShareTests: XCTestCase {
         XCTAssertEqual(transport.requests.last?.method, "PUT")
     }
 
+    /// On Android statics are set top to bottom: `shared` once got a null address
+    @MainActor
+    func testSharedUsesTheDefaultAddress() {
+        XCTAssertEqual(LiveShare.shared.baseURL, LiveShare.defaultBaseURL)
+        XCTAssertTrue(LiveShare.shared.baseURL.hasPrefix("https://"))
+    }
+
     @MainActor
     func testWithoutAServerStartingFails() async {
         let live = LiveShare(transport: nil)

@@ -245,3 +245,146 @@ enum RefereeInProgressStore {
         try? FileManager.default.removeItem(at: url)
     }
 }
+
+// MARK: - Coach matches
+
+/// Coachwedstrijden through `SwiftDataMatchRepository` (as before), for the
+/// shared `CoachSessionView`
+@MainActor
+final class SwiftDataCoachMatchStore: CoachMatchStore {
+    private let repository: SwiftDataMatchRepository
+
+    init(context: ModelContext) {
+        repository = SwiftDataMatchRepository(context: context)
+    }
+
+    func loadInProgress() async throws -> Match? {
+        try repository.mostRecentInProgressMatch()
+    }
+
+    func save(_ match: Match) async throws {
+        // A decided match is finished (Android's store does the same)
+        if match.isMatchOver { match.status = .completed }
+        try repository.upsert(match)
+    }
+
+    func abandon(_ match: Match) async throws {
+        try repository.markAbandoned(match)
+    }
+
+    func discard(_ match: Match) async throws {
+        try repository.delete(match)
+    }
+}
+
+// MARK: - Afgeronde wedstrijden
+
+/// Finished and abandoned coach and referee matches for the shared
+/// `SharedMatchHistoryView`. A match still in progress is not listed: the
+/// Coach and Scheidsrechter tiles offer it again (as on Android).
+@MainActor
+final class SwiftDataMatchHistoryStore: MatchHistoryStore {
+    private let context: ModelContext
+
+    init(context: ModelContext) {
+        self.context = context
+    }
+
+    func loadHistory() async throws -> [MatchHistorySummary] {
+        let withBadges = Set(try context.fetch(FetchDescriptor<SavedBadgeAward>())
+            .filter { $0.deletedAt == nil }.map { $0.matchId })
+        let inProgress = MatchStatus.inProgress.rawValue
+        let coach = try context.fetch(FetchDescriptor<SavedMatch>(predicate: #Predicate { $0.status != inProgress }))
+            .map { saved -> MatchHistorySummary in
+                let games = saved.games.sorted { $0.gameNumber < $1.gameNumber }.compactMap { game -> HistoryGameScore? in
+                    guard let winner = game.winner else { return nil }
+                    return HistoryGameScore(player1Score: game.player1Score, player2Score: game.player2Score, winner: winner)
+                }
+                return MatchHistorySummary(
+                    id: saved.id.uuidString, kind: "coach", player1Name: saved.player1Name, player2Name: saved.player2Name,
+                    player1Games: saved.player1GamesWon, player2Games: saved.player2GamesWon,
+                    status: saved.status, updatedAt: saved.updatedAt, games: games,
+                    untrackedBefore: saved.player1GamesBefore + saved.player2GamesBefore,
+                    untrackedAfter: saved.player1GamesAfter + saved.player2GamesAfter,
+                    bestOf: saved.bestOf, hasBadges: withBadges.contains(saved.id))
+            }
+        var referee: [MatchHistorySummary] = []
+        for saved in try context.fetch(FetchDescriptor<SavedRefereeMatch>()) {
+            let id = refereeId(saved)
+            let games = saved.gameResults.sorted { $0.number < $1.number }.map {
+                HistoryGameScore(player1Score: $0.player1Score, player2Score: $0.player2Score, winner: $0.winnerRaw)
+            }
+            referee.append(MatchHistorySummary(
+                id: id.uuidString, kind: "referee", player1Name: saved.player1Name, player2Name: saved.player2Name,
+                player1Games: saved.player1GamesWon, player2Games: saved.player2GamesWon,
+                status: saved.winnerName == nil ? MatchStatus.abandoned.rawValue : MatchStatus.completed.rawValue,
+                updatedAt: saved.savedAt, games: games,
+                untrackedBefore: saved.player1GamesBefore + saved.player2GamesBefore,
+                bestOf: saved.bestOf, hasBadges: withBadges.contains(id)))
+        }
+        if context.hasChanges { try context.save() }
+        return (coach + referee).sorted { $0.updatedAt > $1.updatedAt }
+    }
+
+    func coachMatch(id: String) async throws -> Match? {
+        try savedMatch(id)?.toMatch()
+    }
+
+    /// Only the game scores are kept for a referee match (for sharing the result)
+    func refereeMatch(id: String) async throws -> RefereeMatch? {
+        guard let saved = try savedRefereeMatch(id) else { return nil }
+        let match = RefereeMatch(id: refereeId(saved), player1Name: saved.player1Name, player2Name: saved.player2Name,
+                                 bestOf: saved.bestOf, startingServer: .player1,
+                                 player1GamesBefore: saved.player1GamesBefore, player2GamesBefore: saved.player2GamesBefore)
+        match.completedGames = saved.gameResults.sorted { $0.number < $1.number }.compactMap { result in
+            guard let winner = Player(rawValue: result.winnerRaw) else { return nil }
+            return CompletedRefereeGame(number: result.number, player1Score: result.player1Score,
+                                        player2Score: result.player2Score, winner: winner)
+        }
+        return match
+    }
+
+    func saveCoachMatch(_ match: Match) async throws {
+        try SwiftDataMatchRepository(context: context).upsert(match)
+    }
+
+    func delete(_ entry: MatchHistorySummary) async throws {
+        if entry.kind == "coach" {
+            if let saved = try savedMatch(entry.id) {
+                try BadgeAwarder(context: context).markAwardsDeleted(forMatch: saved.id)
+                context.delete(saved)
+            }
+        } else if let saved = try savedRefereeMatch(entry.id) {
+            try BadgeAwarder(context: context).markAwardsDeleted(forMatch: refereeId(saved))
+            context.delete(saved)
+        }
+        try context.save()
+    }
+
+    /// Referee matches saved before badges have no id yet: given one now, so a row can be opened or deleted
+    private func refereeId(_ saved: SavedRefereeMatch) -> UUID {
+        if let id = saved.matchId { return id }
+        let id = UUID()
+        saved.matchId = id
+        return id
+    }
+
+    private func savedMatch(_ id: String) throws -> SavedMatch? {
+        guard let uuid = UUID(uuidString: id) else { return nil }
+        return try context.fetch(FetchDescriptor<SavedMatch>(predicate: #Predicate { $0.id == uuid })).first
+    }
+
+    private func savedRefereeMatch(_ id: String) throws -> SavedRefereeMatch? {
+        guard let uuid = UUID(uuidString: id) else { return nil }
+        return try context.fetch(FetchDescriptor<SavedRefereeMatch>(predicate: #Predicate { $0.matchId == uuid })).first
+    }
+}
+
+// MARK: - AI Coach
+
+/// The Keychain key and URLSession sender for the shared analysis screen
+enum IOSAICoach {
+    static var context: AICoachContext {
+        AICoachContext(keyStore: APIKeyManager.shared, client: AICoachClient(transport: URLSessionAICoachTransport()))
+    }
+}

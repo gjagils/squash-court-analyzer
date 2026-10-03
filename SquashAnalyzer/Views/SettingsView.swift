@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import SquashAnalyzerCore
 import SquashAnalyzerUI
 
@@ -223,6 +224,7 @@ struct SettingsView: View {
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
+            BackupActionsView()
         }
         .padding()
         .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
@@ -411,4 +413,124 @@ struct InfoRow: View {
 // MARK: - Preview
 #Preview {
     SettingsView(isPresented: .constant(true))
+}
+
+// MARK: - Backup actions
+
+/// Back-up now to iCloud Drive, restore one, share a backup file or import a
+/// single shared match (before T20 these sat behind "…" in the iPhone's own
+/// Afgeronde wedstrijden).
+struct BackupActionsView: View {
+    @Environment(\.modelContext) private var modelContext
+    @State private var showingBackupImporter = false
+    @State private var showingMatchImporter = false
+    @State private var pendingBackupData: Data? = nil
+    @State private var showingReplaceConfirm = false
+    @State private var message: String? = nil
+    @State private var messageTitle = ""
+
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                HardwareButton(title: "Nu naar iCloud", color: AppColors.warmOrange, style: .outlined) { saveToiCloud() }
+                HardwareButton(title: "Terugzetten", color: AppColors.warmOrange, style: .outlined) { showingBackupImporter = true }
+            }
+            HStack(spacing: 10) {
+                HardwareButton(title: "Delen", color: AppColors.textSecondary, style: .outlined) { shareBackup() }
+                HardwareButton(title: "Wedstrijd importeren", color: AppColors.textSecondary, style: .outlined) { showingMatchImporter = true }
+            }
+        }
+        .fileImporter(isPresented: $showingBackupImporter, allowedContentTypes: [.json]) { result in
+            if let data = read(result) {
+                pendingBackupData = data
+                showingReplaceConfirm = true
+            }
+        }
+        .fileImporter(isPresented: $showingMatchImporter, allowedContentTypes: [.json]) { result in
+            guard let data = read(result) else { return }
+            do {
+                try ExportService.importFromJSON(data, context: modelContext)
+                show("Import gelukt!", "De wedstrijd is geïmporteerd.")
+            } catch {
+                show("Import mislukt", error.localizedDescription)
+            }
+        }
+        .alert("Alles vervangen?", isPresented: $showingReplaceConfirm) {
+            Button("Vervang alles", role: .destructive) { restore(replacing: true) }
+            Button("Voeg toe", role: .cancel) { restore(replacing: false) }
+        } message: {
+            Text("Wil je alle bestaande data verwijderen en vervangen door de back-up, of de back-up toevoegen aan wat er al is?")
+        }
+        .alert(messageTitle, isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(message ?? "")
+        }
+    }
+
+    private func show(_ title: String, _ text: String) {
+        messageTitle = title
+        message = text
+    }
+
+    private func read(_ result: Result<URL, Error>) -> Data? {
+        do {
+            let url = try result.get()
+            guard url.startAccessingSecurityScopedResource() else {
+                show("Import mislukt", "Geen toegang tot bestand")
+                return nil
+            }
+            defer { url.stopAccessingSecurityScopedResource() }
+            return try Data(contentsOf: url)
+        } catch {
+            show("Import mislukt", error.localizedDescription)
+            return nil
+        }
+    }
+
+    private func backupData() throws -> Data {
+        try ExportService.exportFullBackup(
+            players: try modelContext.fetch(FetchDescriptor<SavedPlayer>()),
+            matches: try modelContext.fetch(FetchDescriptor<SavedMatch>()),
+            standaloneGames: try modelContext.fetch(FetchDescriptor<SavedGame>(predicate: #Predicate { $0.match == nil })),
+            badgeAwards: try modelContext.fetch(FetchDescriptor<SavedBadgeAward>()),
+            refereeMatches: try modelContext.fetch(FetchDescriptor<SavedRefereeMatch>()))
+    }
+
+    private func saveToiCloud() {
+        do {
+            guard let dir = ExportService.iCloudDirectory else { throw ExportService.iCloudError.unavailable }
+            let url = try ExportService.writeBackup(try backupData(), to: dir)
+            show("Back-up opgeslagen!", "'\(url.lastPathComponent)' staat in iCloud Drive, in de Bestanden-app onder iCloud Drive → Squash Analyzer.")
+        } catch {
+            show("Back-up mislukt", error.localizedDescription)
+        }
+    }
+
+    private func shareBackup() {
+        do {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let url = try ExportService.writeToTempFile(try backupData(), filename: "squash-backup-\(formatter.string(from: Date())).json")
+            IOSShare.present([url])
+        } catch {
+            show("Back-up mislukt", error.localizedDescription)
+        }
+    }
+
+    private func restore(replacing: Bool) {
+        guard let data = pendingBackupData else { return }
+        pendingBackupData = nil
+        do {
+            if replacing {
+                let result = try ExportService.replaceWithBackup(data, context: modelContext)
+                show("Back-up hersteld", "\(result.players) spelers, \(result.matches) wedstrijden, \(result.games) losse games.")
+            } else {
+                let result = try ExportService.importFullBackup(data, context: modelContext)
+                show("Back-up toegevoegd", "\(result.players) spelers, \(result.matches) wedstrijden, \(result.games) losse games.")
+            }
+        } catch {
+            show("Terugzetten mislukt", error.localizedDescription)
+        }
+    }
 }

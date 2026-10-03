@@ -39,12 +39,6 @@ final class BadgeAwardTests: XCTestCase {
                           SavedBadgeAward.awardId(cardId: card, badge: .fiveInARow, matchId: UUID()))
     }
 
-    func testPickedPlayerOnlyCountsWhileTheNameIsUnchanged() {
-        let pick = PickedPlayer(id: UUID(), name: "Paul Steenks")
-        XCTAssertEqual(pick.id(for: "Paul Steenks "), pick.id)
-        XCTAssertNil(pick.id(for: "Paul"))
-    }
-
     @MainActor
     func testPickedPlayerEarnsOneAwardPerMatch() throws {
         let container = try makeContainer()

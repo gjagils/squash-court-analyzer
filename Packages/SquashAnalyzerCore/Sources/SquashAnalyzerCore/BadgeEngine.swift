@@ -381,13 +381,17 @@ public struct BadgeEngine {
         var earned: Set<BadgeKind> = []
         let winsBefore = before.filter(\.won).count
         if match.won && winsBefore == 0 { earned.insert(.offTheMark) }
-        if match.won && winsBefore == 9 { earned.insert(.tenOutOfTen) }
+        // ">=": a player who reached the mark without the badge (missed earlier,
+        // or deleted and earned again) still gets it; earnedElsewhere stops a second one
+        if match.won && winsBefore >= 9 { earned.insert(.tenOutOfTen) }
         if match.won && before.count >= 2 && before.suffix(2).allSatisfy(\.won) { earned.insert(.hatTrick) }
+        // Exactly the 5th win against this opponent: Nemesis can be earned again
+        // against someone else, so it is not a once-badge and ">=" would repeat it
         if match.won && !match.opponentKey.isEmpty
             && before.filter({ $0.won && $0.opponentKey == match.opponentKey }).count == 4 {
             earned.insert(.nemesis)
         }
-        if before.count == 24 { earned.insert(.veteran) }
+        if before.count >= 24 { earned.insert(.veteran) }
         let pointsBefore = before.reduce(0) { $0 + $1.pointsWon }
         if pointsBefore < 100 && pointsBefore + match.pointsWon >= 100 { earned.insert(.centurion) }
         return earned.subtracting(earnedElsewhere)

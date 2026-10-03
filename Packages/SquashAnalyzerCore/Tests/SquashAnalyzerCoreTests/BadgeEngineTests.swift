@@ -138,6 +138,11 @@ final class BadgeEngineTests: XCTestCase {
         let ten = history(Array(repeating: true, count: 10), points: 0)
         XCTAssertTrue(engine.careerBadges(in: ten[9].matchId, history: ten, earnedElsewhere: []).contains(.tenOutOfTen))
         XCTAssertFalse(engine.careerBadges(in: ten[8].matchId, history: ten, earnedElsewhere: []).contains(.tenOutOfTen))
+
+        // T14: 12 wins and no badge yet still earns it; once it is there, not again
+        let twelve = history(Array(repeating: true, count: 13), points: 0)
+        XCTAssertTrue(engine.careerBadges(in: twelve[12].matchId, history: twelve, earnedElsewhere: []).contains(.tenOutOfTen))
+        XCTAssertFalse(engine.careerBadges(in: twelve[12].matchId, history: twelve, earnedElsewhere: [.tenOutOfTen]).contains(.tenOutOfTen))
     }
 
     // MARK: - Set 05 / 06
@@ -193,10 +198,18 @@ final class BadgeEngineTests: XCTestCase {
         }
         XCTAssertTrue(engine.careerBadges(in: kristian[4].matchId, history: kristian, earnedElsewhere: []).contains(.nemesis))
         XCTAssertFalse(engine.careerBadges(in: kristian[3].matchId, history: kristian, earnedElsewhere: []).contains(.nemesis))
+        let sixth = kristian + [BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: 10), won: true, pointsWon: 0, opponentKey: "kristian")]
+        XCTAssertFalse(engine.careerBadges(in: sixth[5].matchId, history: sixth, earnedElsewhere: []).contains(.nemesis),
+                       "not again against the same opponent")
 
         let many = (0..<25).map { i in
             BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval(i)), won: false, pointsWon: 0, opponentKey: "x\(i)")
         }
         XCTAssertEqual(engine.careerBadges(in: many[24].matchId, history: many, earnedElsewhere: []), [.veteran])
+        let more = (0..<30).map { i in
+            BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval(i)), won: false, pointsWon: 0, opponentKey: "y\(i)")
+        }
+        XCTAssertEqual(engine.careerBadges(in: more[29].matchId, history: more, earnedElsewhere: []), [.veteran], "past 25 still")
+        XCTAssertTrue(engine.careerBadges(in: more[29].matchId, history: more, earnedElsewhere: [.veteran]).isEmpty)
     }
 }

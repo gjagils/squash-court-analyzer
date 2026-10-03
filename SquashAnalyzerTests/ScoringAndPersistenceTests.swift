@@ -461,6 +461,41 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertEqual(try counts(), before)
     }
 
+    /// Referee matches are in the backup (T2): export → replace → back, and an
+    /// older file without them leaves the referee history alone
+    @MainActor
+    func testRefereeMatchesSurviveABackupRestore() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let container = try ModelContainer(for: Schema(versionedSchema: SquashAnalyzerCurrentSchema.self),
+                                           migrationPlan: SquashAnalyzerMigrationPlan.self, configurations: [config])
+        let context = container.mainContext
+        let referee = SavedRefereeMatch(player1Name: "Jan", player2Name: "Piet", bestOf: 3,
+                                        gameResults: [RefereeGameResult(number: 1, player1Score: 11, player2Score: 7, winner: .player1),
+                                                      RefereeGameResult(number: 2, player1Score: 12, player2Score: 10, winner: .player1)])
+        referee.matchId = UUID()
+        context.insert(referee)
+        try context.save()
+
+        let withReferee = try ExportService.exportFullBackup(players: [], matches: [], standaloneGames: [],
+                                                             refereeMatches: [referee])
+        let withoutReferee = try ExportService.exportFullBackup(players: [], matches: [], standaloneGames: [])
+
+        // An older file (no referee matches) keeps the history
+        _ = try ExportService.replaceWithBackup(withoutReferee, context: context)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<SavedRefereeMatch>()), 1)
+
+        _ = try ExportService.replaceWithBackup(withReferee, context: context)
+        let restored = try context.fetch(FetchDescriptor<SavedRefereeMatch>())
+        XCTAssertEqual(restored.count, 1)
+        XCTAssertEqual(restored.first?.matchId, referee.matchId)
+        XCTAssertEqual(restored.first?.winnerName, "Jan")
+        XCTAssertEqual(restored.first?.gameScoresText, "11-7, 12-10")
+
+        // Merging the same file again adds nothing
+        _ = try ExportService.importFullBackup(withReferee, context: context)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<SavedRefereeMatch>()), 1)
+    }
+
     @MainActor
     func testBackupRejectsInvalidChecksumBeforeImport() throws {
         let data = try ExportService.exportFullBackup(players: [], matches: [], standaloneGames: [])

@@ -1855,8 +1855,10 @@ Darwin gemaakte tekst en checksum vast en draait ook op Android.
   samenvoegen niet dubbel toevoegt). Oude iOS-punten met slag "Stroke"/"Ace"
   worden via `PointExportData.normalized` (Core) stroke/servicepunt;
   onbekende zone/slag/speler valt terug in plaats van het terugzetten te
-  breken. Scheidsrechterwedstrijden zitten (net als op iOS) niet in het
-  formaat en blijven bij vervangen staan.
+  breken. Scheidsrechterwedstrijden zitten sinds 3 oktober 2026 in het
+  formaat (versie 3, alleen de uitslag per game; `RefereeMatchBackupData`).
+  Een bestand zonder scheidsrechterwedstrijden blijft versie 2, zodat oudere
+  apps het kunnen lezen, en laat ze bij vervangen staan.
 - **UI**: Instellingen → **Back-up**: "Maak back-up" (systeem-opslaanscherm,
   bv. Google Drive of Downloads; naam `squash-backup-jjjj-mm-dd-uummss.json`)
   en "Zet back-up terug" (systeem-openscherm → vraag met datum en aantallen

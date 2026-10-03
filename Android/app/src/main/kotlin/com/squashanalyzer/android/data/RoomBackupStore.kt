@@ -17,12 +17,16 @@ import squash.analyzer.core.MatchExportData
 import squash.analyzer.core.Player
 import squash.analyzer.core.PlayerBackupData
 import squash.analyzer.core.PointExportData
+import squash.analyzer.core.RefereeMatchBackupData
+import squash.analyzer.core.ServerSide
 
 /**
  * The Android side of the shared backup file (Core's `FullBackup` /
  * `BackupCodec`, the same file iOS writes): players, coach matches and badge
- * awards out of Room, and back in. Referee matches are not part of the
- * format, on either platform. A restore runs in one transaction.
+ * awards out of Room, and back in, plus the result of finished and
+ * incomplete referee matches (format 3; their rallies stay on the phone).
+ * A restore runs in one transaction. Replacing only clears the referee
+ * matches when the file has them, so an older file keeps that history.
  *
  * Merging (not replacing) adds only players and matches whose id is not there
  * yet, and merges awards like everywhere else: a deletion always wins. Loose
@@ -30,6 +34,7 @@ import squash.analyzer.core.PointExportData
  */
 class RoomBackupStore(private val db: AppDatabase) : BackupStore {
     private val matches = MatchStore(db.matchDao())
+    private val refereeMatches = RefereeMatchStore(db.refereeMatchDao())
 
     override suspend fun makeBackup(): FullBackup {
         val players = db.playerDao().all().map { row ->
@@ -45,10 +50,12 @@ class RoomBackupStore(private val db: AppDatabase) : BackupStore {
                 opponentName = row.opponentName, awardedBy = row.awardedBy, deletedAt = row.deletedAt?.let(::date),
             )
         }
+        val referee = refereeMatches.history().map(::exportReferee)
         return FullBackup(
             version = 2, backupDate = Date(), players = SwiftArray(players),
             matches = SwiftArray(matches.all().map(::export)), standaloneGames = SwiftArray(),
             badgeAwards = if (awards.isEmpty()) null else SwiftArray(awards),
+            refereeMatches = if (referee.isEmpty()) null else SwiftArray(referee),
         )
     }
 
@@ -62,6 +69,7 @@ class RoomBackupStore(private val db: AppDatabase) : BackupStore {
                 db.playerDao().deleteAll()
                 db.matchDao().deleteAllMatches()
                 db.badgeAwardDao().deleteAll()
+                if (backup.refereeMatches != null) db.refereeMatchDao().deleteAll()
             }
             for (player in backup.players) {
                 if (db.playerDao().byId(player.id) != null) continue
@@ -99,8 +107,61 @@ class RoomBackupStore(private val db: AppDatabase) : BackupStore {
                     db.badgeAwardDao().markDeleted(id, deletedAt)
                 }
             }
+            for (referee in backup.refereeMatches?.toList().orEmpty()) {
+                if (db.refereeMatchDao().matchById(referee.id) != null) continue
+                refereeMatches.upsert(importReferee(referee))
+                restoredMatches++
+                games += referee.games.count
+            }
         }
         return BackupCounts(players = players, matches = restoredMatches, games = games, badges = badges)
+    }
+
+    // MARK: Referee matches
+
+    /** The result per game; the deciding game is still on the board, not among the completed ones */
+    private fun exportReferee(match: RefereeMatchRecord): RefereeMatchBackupData {
+        val games = match.completedGames.map { game ->
+            RefereeMatchBackupData.Game(number = game.number, player1Score = game.player1Score,
+                player2Score = game.player2Score, winner = game.winner)
+        }.toMutableList()
+        gameWinner(match.player1Score, match.player2Score)?.let { winner ->
+            games.add(RefereeMatchBackupData.Game(number = match.currentGameNumber, player1Score = match.player1Score,
+                player2Score = match.player2Score, winner = winner))
+        }
+        return RefereeMatchBackupData(
+            id = match.id, player1Name = match.player1Name, player2Name = match.player2Name,
+            player1Id = match.player1Id, player2Id = match.player2Id, bestOf = match.bestOf,
+            player1GamesBefore = match.player1GamesBefore, player2GamesBefore = match.player2GamesBefore,
+            games = SwiftArray(games), savedAt = date(match.savedAt), status = match.status,
+        )
+    }
+
+    /** A restored match has every game among the completed ones and an empty board */
+    private fun importReferee(data: RefereeMatchBackupData): RefereeMatchRecord {
+        val saved = millis(data.savedAt)
+        val games = data.games.toList()
+        return RefereeMatchRecord(
+            id = data.id, player1Name = data.player1Name, player2Name = data.player2Name,
+            player1Id = data.player1Id, player2Id = data.player2Id, bestOf = data.bestOf,
+            player1GamesBefore = data.player1GamesBefore, player2GamesBefore = data.player2GamesBefore,
+            player1Score = 0, player2Score = 0, currentServer = Player.player1.rawValue,
+            serverSide = ServerSide.right.rawValue,
+            currentGameNumber = data.player1GamesBefore + data.player2GamesBefore + games.size + 1,
+            matchStartedAt = saved, gameStartedAt = saved, savedAt = saved, updatedAt = saved,
+            status = data.status,
+            completedGames = games.map { game ->
+                RefereeGameRecord(id = UUID().uuidString, number = game.number, player1Score = game.player1Score,
+                    player2Score = game.player2Score, winner = game.winner, duration = 0.0)
+            },
+        )
+    }
+
+    /** A finished game: 11 or more and two clear (Core's ScoringEngine) */
+    private fun gameWinner(p1: Int, p2: Int): String? = when {
+        p1 >= 11 && p1 - p2 >= 2 -> Player.player1.rawValue
+        p2 >= 11 && p2 - p1 >= 2 -> Player.player2.rawValue
+        else -> null
     }
 
     // MARK: Room → backup

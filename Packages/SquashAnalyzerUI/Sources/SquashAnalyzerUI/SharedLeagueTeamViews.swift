@@ -492,7 +492,7 @@ public struct SharedSettingsView: View {
             Text("Back-up")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(LeaguePalette.text)
-            Text("Bewaar spelers, coachwedstrijden en badges in een bestand, bijvoorbeeld op Google Drive. Een back-up van Android kun je ook op een iPhone terugzetten, en andersom. Scheidsrechterwedstrijden zitten er (net als op iOS) niet in.")
+            Text("Bewaar spelers, coach- en scheidsrechterwedstrijden en badges in een bestand, bijvoorbeeld op Google Drive. Een back-up van Android kun je ook op een iPhone terugzetten, en andersom.")
                 .font(.system(size: 13))
                 .foregroundColor(LeaguePalette.secondary)
             HStack(spacing: 12) {

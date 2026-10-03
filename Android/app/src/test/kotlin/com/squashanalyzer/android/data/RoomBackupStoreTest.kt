@@ -11,6 +11,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import skip.foundation.Data
+import skip.foundation.Date
 import skip.foundation.UUID
 import squash.analyzer.core.*
 
@@ -74,6 +75,40 @@ class RoomBackupStoreTest {
         assertEquals(2, RoomMatchHistoryStore(MatchStore(a.matchDao()), RefereeMatchStore(a.refereeMatchDao()), coachStore(a),
             RoomRefereeMatchStore(RefereeMatchStore(a.refereeMatchDao()), BadgeAwardStore(a.badgeAwardDao(), a.playerDao(), MatchStore(a.matchDao()), RefereeMatchStore(a.refereeMatchDao()), "test")),
             BadgeAwardStore(a.badgeAwardDao(), a.playerDao(), MatchStore(a.matchDao()), RefereeMatchStore(a.refereeMatchDao()), "test")).loadHistory().count)
+    }
+
+    /** Referee matches are in the file (format 3) and come back with their result (T2) */
+    @Test fun refereeMatchesRoundTripAndOlderFilesKeepThem() = runTest {
+        val record = RefereeMatchRecord(
+            id = "9F8E7D6C-5B4A-4392-8180-706F5E4D3C2B", player1Name = "Jan", player2Name = "Piet", bestOf = 3,
+            player1Score = 11, player2Score = 9, currentServer = Player.player1.rawValue, serverSide = "Rechts",
+            currentGameNumber = 2, matchStartedAt = 1_790_000_000_000, gameStartedAt = 1_790_000_000_000,
+            savedAt = 1_790_000_000_000, updatedAt = 1_790_000_000_000, status = "completed",
+            completedGames = listOf(RefereeGameRecord(id = "G1", number = 1, player1Score = 11, player2Score = 4,
+                winner = Player.player1.rawValue, duration = 0.0)),
+        )
+        RefereeMatchStore(a.refereeMatchDao()).upsert(record)
+
+        val file = BackupCodec.encode(RoomBackupStore(a).makeBackup(), appVersion = "test")
+        val backup = BackupCodec.decode(file)
+        assertEquals(1, backup.refereeMatches?.count)
+        assertEquals(2, backup.refereeMatches?.toList()?.first()?.games?.count) // the deciding game is included
+
+        // An older file without referee matches leaves the history alone
+        RefereeMatchStore(b.refereeMatchDao()).upsert(record.copy(id = "11111111-2222-4333-8444-555555555555"))
+        val older = FullBackup(version = 2, backupDate = Date(), players = skip.lib.Array(), matches = skip.lib.Array(),
+            standaloneGames = skip.lib.Array())
+        RoomBackupStore(b).restore(older, replacing = true)
+        assertEquals(1, RefereeMatchStore(b.refereeMatchDao()).history().size)
+
+        RoomBackupStore(b).restore(backup, replacing = true)
+        val restored = RefereeMatchStore(b.refereeMatchDao()).history()
+        assertEquals(listOf("9F8E7D6C-5B4A-4392-8180-706F5E4D3C2B"), restored.map { it.id })
+        assertEquals(listOf("11-4", "11-9"), restored.single().completedGames.map { "${it.player1Score}-${it.player2Score}" })
+        assertEquals("completed", restored.single().status)
+
+        // Merging the same file again adds nothing
+        assertEquals(0, RoomBackupStore(b).restore(backup, replacing = false).matches)
     }
 
     @Test fun anAndroidBackupRoundTripsIntoAnEmptyInstall() = runTest {

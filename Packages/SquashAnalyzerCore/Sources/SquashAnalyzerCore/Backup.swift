@@ -17,15 +17,68 @@ public struct FullBackup: Codable, Equatable, Sendable {
     public let standaloneGames: [GameExportData]
     /// Badge awards including deleted ones (absent in backups made before badges)
     public var badgeAwards: [BadgeAwardBackupData]? = nil
+    /// Finished and incomplete referee matches (absent before format 3, and
+    /// when there are none, so such a file stays readable by older apps)
+    public var refereeMatches: [RefereeMatchBackupData]? = nil
 
     public init(version: Int, backupDate: Date, players: [PlayerBackupData], matches: [MatchExportData],
-                standaloneGames: [GameExportData], badgeAwards: [BadgeAwardBackupData]? = nil) {
+                standaloneGames: [GameExportData], badgeAwards: [BadgeAwardBackupData]? = nil,
+                refereeMatches: [RefereeMatchBackupData]? = nil) {
         self.version = version
         self.backupDate = backupDate
         self.players = players
         self.matches = matches
         self.standaloneGames = standaloneGames
         self.badgeAwards = badgeAwards
+        self.refereeMatches = refereeMatches
+    }
+}
+
+/// A referee match in the backup: what both platforms keep of a finished (or
+/// incomplete) match, the result per game. iOS only stores this much; Android
+/// also keeps the rallies, which the backup leaves out.
+public struct RefereeMatchBackupData: Codable, Equatable, Sendable {
+    public struct Game: Codable, Equatable, Sendable {
+        public let number: Int
+        public let player1Score: Int
+        public let player2Score: Int
+        /// Player raw value
+        public let winner: String
+
+        public init(number: Int, player1Score: Int, player2Score: Int, winner: String) {
+            self.number = number
+            self.player1Score = player1Score
+            self.player2Score = player2Score
+            self.winner = winner
+        }
+    }
+
+    public let id: String
+    public let player1Name: String
+    public let player2Name: String
+    public let player1Id: String?
+    public let player2Id: String?
+    public let bestOf: Int
+    public let player1GamesBefore: Int
+    public let player2GamesBefore: Int
+    public let games: [Game]
+    public let savedAt: Date
+    /// MatchStatus raw value: "completed" or "abandoned" (incomplete)
+    public let status: String
+
+    public init(id: String, player1Name: String, player2Name: String, player1Id: String?, player2Id: String?,
+                bestOf: Int, player1GamesBefore: Int, player2GamesBefore: Int, games: [Game], savedAt: Date, status: String) {
+        self.id = id
+        self.player1Name = player1Name
+        self.player2Name = player2Name
+        self.player1Id = player1Id
+        self.player2Id = player2Id
+        self.bestOf = bestOf
+        self.player1GamesBefore = player1GamesBefore
+        self.player2GamesBefore = player2GamesBefore
+        self.games = games
+        self.savedAt = savedAt
+        self.status = status
     }
 }
 
@@ -263,9 +316,17 @@ public enum BackupCodec {
         return hex
     }
 
-    /// A version-2 backup file: an envelope with the checksum around the payload
+    /// The envelope version a backup is written with: 3 when it has referee
+    /// matches, else 2, so a file without them stays readable by older apps
+    /// (they recompute the checksum without fields they do not know)
+    public static func formatVersion(for backup: FullBackup) -> Int {
+        if let referee = backup.refereeMatches, !referee.isEmpty { return 3 }
+        return 2
+    }
+
+    /// A version-2 or 3 backup file: an envelope with the checksum around the payload
     public static func encode(_ backup: FullBackup, appVersion: String, createdAt: Date = Date()) throws -> Data {
-        let envelope = BackupEnvelope(formatVersion: 2, schemaVersion: "1.0.0", appVersion: appVersion, createdAt: createdAt,
+        let envelope = BackupEnvelope(formatVersion: formatVersion(for: backup), schemaVersion: "1.0.0", appVersion: appVersion, createdAt: createdAt,
                                       checksum: checksum(of: try canonicalData(for: backup)), payload: backup)
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
@@ -273,13 +334,15 @@ public enum BackupCodec {
         return try encoder.encode(envelope)
     }
 
-    /// Reads a backup file: a version-2 envelope (checksum verified) or an
+    /// Reads a backup file: a version-2 or 3 envelope (checksum verified) or an
     /// old version-1 file. Throws before anything is changed on the device.
     public static func decode(_ data: Data) throws -> FullBackup {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         if let envelope = try? decoder.decode(BackupEnvelope.self, from: data) {
-            guard envelope.formatVersion == 2 else { throw BackupValidationError.unsupportedVersion(envelope.formatVersion) }
+            guard envelope.formatVersion == 2 || envelope.formatVersion == 3 else {
+                throw BackupValidationError.unsupportedVersion(envelope.formatVersion)
+            }
             guard checksum(of: try canonicalData(for: envelope.payload)) == envelope.checksum else {
                 throw BackupValidationError.checksumMismatch
             }

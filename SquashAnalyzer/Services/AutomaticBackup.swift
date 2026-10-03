@@ -28,7 +28,8 @@ enum AutomaticBackup {
                 players: try context.fetch(FetchDescriptor<SavedPlayer>()),
                 matches: try context.fetch(FetchDescriptor<SavedMatch>()),
                 standaloneGames: try context.fetch(FetchDescriptor<SavedGame>(predicate: #Predicate { $0.match == nil })),
-                badgeAwards: try context.fetch(FetchDescriptor<SavedBadgeAward>())
+                badgeAwards: try context.fetch(FetchDescriptor<SavedBadgeAward>()),
+                refereeMatches: try context.fetch(FetchDescriptor<SavedRefereeMatch>())
             )
             UserDefaults.standard.set(now, forKey: lastKey)
         } catch {

@@ -158,7 +158,8 @@ enum ExportService {
         players: [SavedPlayer],
         matches: [SavedMatch],
         standaloneGames: [SavedGame],
-        badgeAwards: [SavedBadgeAward] = []
+        badgeAwards: [SavedBadgeAward] = [],
+        refereeMatches: [SavedRefereeMatch] = []
     ) throws -> Data {
         let playerData = players.map {
             PlayerBackupData(
@@ -184,13 +185,15 @@ enum ExportService {
         }
         let matchData = matches.map { matchExportData(from: $0) }
         let gameData = standaloneGames.map { gameExportData(from: $0) }
+        let refereeData = refereeMatches.map { refereeBackupData(from: $0) }
         let backup = FullBackup(
             version: 2,
             backupDate: Date(),
             players: playerData,
             matches: matchData,
             standaloneGames: gameData,
-            badgeAwards: awardData.isEmpty ? nil : awardData
+            badgeAwards: awardData.isEmpty ? nil : awardData,
+            refereeMatches: refereeData.isEmpty ? nil : refereeData
         )
         return try BackupCodec.encode(
             backup,
@@ -238,6 +241,11 @@ enum ExportService {
         }
 
         try importBadgeAwards(backup.badgeAwards ?? [], context: context)
+        for data in backup.refereeMatches ?? [] {
+            if let id = UUID(uuidString: data.id), try refereeMatchExists(id: id, context: context) { continue }
+            context.insert(savedRefereeMatch(from: data))
+            matchCount += 1
+        }
 
         try context.save()
         return (playerCount, matchCount, gameCount)
@@ -246,7 +254,7 @@ enum ExportService {
     /// Deletes all existing data then imports the backup (clean restore).
     static func replaceWithBackup(_ data: Data, context: ModelContext) throws -> (players: Int, matches: Int, games: Int) {
         // Validate completely before touching the user's existing data.
-        _ = try decodeAndValidateBackup(data)
+        let backup = try decodeAndValidateBackup(data)
         // Delete existing data
         try context.delete(model: SavedPoint.self)
         try context.delete(model: SavedLet.self)
@@ -254,6 +262,11 @@ enum ExportService {
         try context.delete(model: SavedMatch.self)
         try context.delete(model: SavedPlayer.self)
         try context.delete(model: SavedBadgeAward.self)
+        // Only when the file has them (format 3): an older file would otherwise
+        // wipe the referee history it never contained
+        if backup.refereeMatches != nil {
+            try context.delete(model: SavedRefereeMatch.self)
+        }
         try context.save()
 
         return try importFullBackup(data, context: context)
@@ -321,12 +334,14 @@ enum ExportService {
         players: [SavedPlayer],
         matches: [SavedMatch],
         standaloneGames: [SavedGame],
-        badgeAwards: [SavedBadgeAward] = []
+        badgeAwards: [SavedBadgeAward] = [],
+        refereeMatches: [SavedRefereeMatch] = []
     ) throws -> URL {
         guard let dir = iCloudDirectory else {
             throw iCloudError.unavailable
         }
-        let data = try exportFullBackup(players: players, matches: matches, standaloneGames: standaloneGames, badgeAwards: badgeAwards)
+        let data = try exportFullBackup(players: players, matches: matches, standaloneGames: standaloneGames,
+                                        badgeAwards: badgeAwards, refereeMatches: refereeMatches)
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd-HHmmss"
         let filename = "squash-backup-\(formatter.string(from: Date())).json"
@@ -446,6 +461,51 @@ enum ExportService {
             award.deletedAt = data.deletedAt
             context.insert(award)
         }
+    }
+
+    private static func refereeBackupData(from match: SavedRefereeMatch) -> RefereeMatchBackupData {
+        RefereeMatchBackupData(
+            id: (match.matchId ?? UUID()).uuidString,
+            player1Name: match.player1Name,
+            player2Name: match.player2Name,
+            player1Id: match.player1Id?.uuidString,
+            player2Id: match.player2Id?.uuidString,
+            bestOf: match.bestOf,
+            player1GamesBefore: match.player1GamesBefore,
+            player2GamesBefore: match.player2GamesBefore,
+            games: match.gameResults.sorted { $0.number < $1.number }.map {
+                RefereeMatchBackupData.Game(number: $0.number, player1Score: $0.player1Score,
+                                            player2Score: $0.player2Score, winner: $0.winnerRaw)
+            },
+            savedAt: match.savedAt,
+            status: match.winnerName == nil ? MatchStatus.abandoned.rawValue : MatchStatus.completed.rawValue
+        )
+    }
+
+    /// iOS keeps only the result; the status follows from the games
+    private static func savedRefereeMatch(from data: RefereeMatchBackupData) -> SavedRefereeMatch {
+        let match = SavedRefereeMatch(
+            player1Name: data.player1Name,
+            player2Name: data.player2Name,
+            bestOf: data.bestOf,
+            gameResults: data.games.map {
+                RefereeGameResult(number: $0.number, player1Score: $0.player1Score, player2Score: $0.player2Score,
+                                  winner: Player(rawValue: $0.winner) ?? .player1)
+            },
+            savedAt: data.savedAt,
+            player1GamesBefore: data.player1GamesBefore,
+            player2GamesBefore: data.player2GamesBefore
+        )
+        match.matchId = UUID(uuidString: data.id)
+        match.player1Id = data.player1Id.flatMap(UUID.init(uuidString:))
+        match.player2Id = data.player2Id.flatMap(UUID.init(uuidString:))
+        return match
+    }
+
+    private static func refereeMatchExists(id: UUID, context: ModelContext) throws -> Bool {
+        var descriptor = FetchDescriptor<SavedRefereeMatch>(predicate: #Predicate { $0.matchId == id })
+        descriptor.fetchLimit = 1
+        return try context.fetchCount(descriptor) > 0
     }
 
     /// Whether a record with this id is already in the store

@@ -81,6 +81,32 @@ final class BackupTests: XCTestCase {
         XCTAssertEqual(garbage as? BackupValidationError, BackupValidationError.unreadable)
     }
 
+    /// Referee matches (format 3): the same JSON on both platforms; a backup
+    /// without them stays format 2, byte for byte (the golden test above)
+    func testRefereeMatchesMakeFormat3() throws {
+        let date = Date(timeIntervalSince1970: 1_790_000_000)
+        var backup = BackupTests.sample()
+        XCTAssertEqual(BackupCodec.formatVersion(for: backup), 2)
+        backup.refereeMatches = [RefereeMatchBackupData(
+            id: "9F8E7D6C-5B4A-4392-8180-706F5E4D3C2B", player1Name: "Jan", player2Name: "Piet",
+            player1Id: nil, player2Id: "0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2", bestOf: 5,
+            player1GamesBefore: 0, player2GamesBefore: 1,
+            games: [RefereeMatchBackupData.Game(number: 2, player1Score: 11, player2Score: 7, winner: "Speler 1")],
+            savedAt: date, status: "abandoned")]
+        XCTAssertEqual(BackupCodec.formatVersion(for: backup), 3)
+
+        let canonical = String(data: try BackupCodec.canonicalData(for: backup), encoding: .utf8) ?? ""
+        XCTAssertTrue(canonical.contains("\"refereeMatches\":[{\"bestOf\":5,\"games\":[{\"number\":2,\"player1Score\":11,\"player2Score\":7,\"winner\":\"Speler 1\"}],\"id\":\"9F8E7D6C-5B4A-4392-8180-706F5E4D3C2B\",\"player1GamesBefore\":0,\"player1Name\":\"Jan\",\"player2GamesBefore\":1,\"player2Id\":\"0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2\",\"player2Name\":\"Piet\",\"savedAt\":\"2026-09-21T14:13:20Z\",\"status\":\"abandoned\"}]"), canonical)
+
+        let data = try BackupCodec.encode(backup, appVersion: "test")
+        XCTAssertTrue((String(data: data, encoding: .utf8) ?? "").contains("\"formatVersion\" : 3"))
+        XCTAssertEqual(try BackupCodec.decode(data), backup)
+
+        // An empty list is not written as format 3
+        backup.refereeMatches = []
+        XCTAssertEqual(BackupCodec.formatVersion(for: backup), 2)
+    }
+
     func testOldIOSPointsAreNormalized() {
         let ace = PointExportData(id: nil, pointNumber: 1, scorer: "Speler 2", pointType: "Winner", zone: "Achter Links", shotType: "Ace",
                                   server: "Speler 2", player1Score: 0, player2Score: 1, duration: 4, timestamp: nil).normalized

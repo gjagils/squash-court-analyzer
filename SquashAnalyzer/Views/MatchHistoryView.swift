@@ -487,7 +487,8 @@ struct MatchHistoryView: View {
                 players: allPlayers,
                 matches: savedMatches,
                 standaloneGames: standaloneGames,
-                badgeAwards: badgeAwards
+                badgeAwards: badgeAwards,
+                refereeMatches: refereeMatches
             )
             iCloudSaveMessage = "'\(url.lastPathComponent)' is opgeslagen in iCloud Drive. Je kunt het terugvinden in de Bestanden-app onder iCloud Drive → Squash Analyzer."
             showingICloudSuccess = true
@@ -504,7 +505,8 @@ struct MatchHistoryView: View {
                 players: allPlayers,
                 matches: savedMatches,
                 standaloneGames: standaloneGames,
-                badgeAwards: badgeAwards
+                badgeAwards: badgeAwards,
+                refereeMatches: refereeMatches
             )
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"

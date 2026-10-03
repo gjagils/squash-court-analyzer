@@ -56,7 +56,7 @@ final class LiveShareTests: XCTestCase {
     // MARK: - Sending
 
     @MainActor
-    func testStartUpdateFinishDeletesTheSession() async throws {
+    func testFinishSendsTheFinalScoreAndKeepsItForViewers() async throws {
         let transport = FakeLiveTransport()
         let live = LiveShare(transport: transport)
         live.baseURL = "https://live.test"
@@ -79,11 +79,23 @@ final class LiveShareTests: XCTestCase {
         // Another match's update is never sent
         live.update(matchId: UUID(), snapshot: match.liveSnapshot())
 
+        // Match over: the final score goes, and the server keeps it for viewers
+        // (it removes the session 2 hours later); this phone lets go
         await live.finish(matchId: match.id, snapshot: match.liveSnapshot())
-        try await waitUntil { transport.requests.last?.method == "DELETE" }
-        XCTAssertEqual(transport.requests.map { $0.method }, ["POST", "PUT", "PUT", "DELETE"])
-        XCTAssertFalse(live.isLive(match.id))
+        try await waitUntil { !live.isLive(match.id) }
+        XCTAssertEqual(transport.requests.map { $0.method }, ["POST", "PUT", "PUT"])
         XCTAssertNil(live.link)
+    }
+
+    @MainActor
+    func testStopDeletesTheSessionAtOnce() async throws {
+        let transport = FakeLiveTransport()
+        let live = LiveShare(transport: transport)
+        let match = Match()
+        _ = try await live.start(matchId: match.id, snapshot: match.liveSnapshot())
+        await live.stop()
+        XCTAssertEqual(transport.requests.last?.method, "DELETE")
+        XCTAssertFalse(live.isLive(match.id))
     }
 
     @MainActor

@@ -369,7 +369,6 @@ public struct CoachScoringView: View {
                 }
                 if !match.isMatchOver {
                     LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot() }, share: shareText)
-                        .padding(.leading, 8)
                 }
                 Spacer()
                 // The previous game's analysis while playing, from game 2 on (as on iOS)

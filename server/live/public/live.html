@@ -88,7 +88,7 @@
 
   <footer>
     Live gedeeld vanuit <a href="https://squashanalyzer.com">Squash Analyzer</a>.<br>
-    Alleen voornamen en de stand; na de wedstrijd wordt alles gewist.
+    Alleen voornamen en de stand; 2 uur na de wedstrijd wordt alles gewist.
   </footer>
 </main>
 <script>
@@ -98,6 +98,7 @@
   var lastReceived = 0;
   var hadState = false;
   var ended = false;
+  var finished = false;
 
   var statusText = {
     warmup: 'Inspelen…',
@@ -116,6 +117,11 @@
     $('games1').textContent = s.gamesWon[0];
     $('games2').textContent = s.gamesWon[1];
     var live = s.status !== 'finished';
+    finished = !live;
+    if (finished && !ended) {
+      $('notice').hidden = false;
+      $('notice').innerHTML = '<strong>Eindstand.</strong> Deze pagina blijft nog 2 uur na de wedstrijd te zien.';
+    }
     $('row1').classList.toggle('serving', live && s.server === 1);
     $('row2').classList.toggle('serving', live && s.server === 2);
     $('side1').textContent = s.side === 'L' ? 'links' : 'rechts';
@@ -149,7 +155,7 @@
   }
 
   function tick() {
-    if (!lastReceived || ended) { $('updated').textContent = ''; return; }
+    if (!lastReceived || ended || finished) { $('updated').textContent = ''; return; }
     var seconds = Math.round((Date.now() - lastReceived) / 1000);
     var text = seconds < 5 ? 'Zojuist bijgewerkt' : seconds < 60 ? seconds + ' s geleden bijgewerkt'
       : Math.round(seconds / 60) + ' min geleden bijgewerkt';
@@ -165,7 +171,7 @@
     var notice = $('notice');
     notice.hidden = false;
     notice.innerHTML = hadState
-      ? '<strong>De wedstrijd is afgelopen.</strong> Dit was de eindstand; de livesessie is gewist.'
+      ? '<strong>De wedstrijd is afgelopen.</strong> Dit was de laatste stand; de livesessie is gewist.'
       : '<strong>Deze livewedstrijd is afgelopen</strong> of de link klopt niet.';
   }
 

@@ -135,7 +135,6 @@ public struct RefereeScoringView: View {
             .foregroundColor(CoachPalette.textSecondary)
             if !match.isMatchOver {
                 LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot }, share: shareText)
-                    .padding(.leading, 8)
             }
             Spacer()
             Text("SCHEIDSRECHTER")

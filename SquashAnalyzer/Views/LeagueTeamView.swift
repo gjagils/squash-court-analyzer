@@ -55,7 +55,7 @@ struct LeagueTeamDetailView: View {
             section("SPELERS") { ForEach(snapshot.players) { player in HStack { Text(player.name).foregroundColor(AppColors.textPrimary); Spacer(); Text(player.record).font(AppFonts.caption(12)).foregroundColor(AppColors.textSecondary) }.padding(.vertical, 4) } }
             Text("Bijgewerkt: \(LeagueDay.text(snapshot.updatedAt)) \(LeagueDay.time(snapshot.updatedAt))").font(AppFonts.caption(11)).foregroundColor(AppColors.textMuted)
         }.padding(24) } }.navigationTitle("Mijn team").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Sluiten") { dismiss() } } } }
+            .toolbar { CloseToolbarItem { dismiss() } } }
     }
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View { VStack(alignment: .leading, spacing: 8) { Text(title).font(AppFonts.caption(11)).tracking(1.4).foregroundColor(AppColors.warmOrange); VStack(alignment: .leading) { content() }.padding(12).background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.04))) } }
 }

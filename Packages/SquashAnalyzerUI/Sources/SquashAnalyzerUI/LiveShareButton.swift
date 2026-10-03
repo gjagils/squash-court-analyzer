@@ -5,6 +5,9 @@ import SquashAnalyzerCore
 /// Not live: tap to start live sharing and share the link (WhatsApp). Live: a
 /// red ● LIVE; tap to share the link again or stop. The state itself is sent
 /// by `LiveShareSync` after every rally; see docs/plan-live-meekijken.md.
+/// Only shown when "Live meekijken" is on in Instellingen (off by default), or
+/// while this match is live so it can always be stopped. Brings its own
+/// leading gap, so a hidden button leaves none.
 public struct LiveShareButton: View {
     let matchId: UUID
     let snapshot: () -> LiveSnapshot
@@ -13,6 +16,7 @@ public struct LiveShareButton: View {
     @State private var busy = false
     @State private var showingMenu = false
     @State private var failed = false
+    @AppStorage(LiveShare.enabledKey) private var enabled = false
 
     public init(matchId: UUID, snapshot: @escaping () -> LiveSnapshot, share: ((String) -> Void)?) {
         self.matchId = matchId
@@ -24,9 +28,16 @@ public struct LiveShareButton: View {
 
     public var body: some View {
         let isLive = live.isLive(matchId)
+        if enabled || isLive {
+            button(isLive: isLive)
+                .padding(.leading, 8.0)
+        }
+    }
+
+    private func button(isLive: Bool) -> some View {
         let newLink = isLive && live.linkChanged
         let red = Color(red: 0.90, green: 0.28, blue: 0.30)
-        Button(action: tap) {
+        return Button(action: tap) {
             HStack(spacing: 5) {
                 Circle()
                     .fill(isLive ? Color.white : red)
@@ -54,7 +65,7 @@ public struct LiveShareButton: View {
             }
             Button("Annuleren", role: .cancel) {}
         } message: {
-            Text(live.offline ? "Geen verbinding: de stand gaat weer mee zodra er netwerk is." : "Kijkers volgen de stand via de link. Na de wedstrijd wordt alles gewist.")
+            Text(live.offline ? "Geen verbinding: de stand gaat weer mee zodra er netwerk is." : "Kijkers volgen de stand via de link. 2 uur na de wedstrijd wordt alles gewist; Live stoppen wist het meteen.")
         }
         .alert("Live delen lukte niet", isPresented: $failed) {
             // No .cancel role: with only a cancel button Skip adds its own "OK" (two OKs on Android)

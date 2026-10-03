@@ -218,9 +218,7 @@ struct CardImportSheet: View {
             .navigationTitle("Spelerskaart")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuleren") { close() }
-                }
+                CloseToolbarItem(title: "Annuleren") { close() }
             }
             .alert("Koppelen mislukt", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("OK", role: .cancel) { }

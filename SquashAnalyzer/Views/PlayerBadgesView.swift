@@ -46,9 +46,7 @@ struct MatchBadgesSheet: View {
             .navigationTitle("Badges")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Klaar") { dismiss() }
-                }
+                CloseToolbarItem { dismiss() }
             }
         }
         .preferredColorScheme(.dark)

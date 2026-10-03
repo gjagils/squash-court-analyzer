@@ -532,12 +532,40 @@ public struct SharedMatchBadgesSheet: View {
             }
             .navigationTitle("Badges")
             .toolbar {
+                #if os(iOS) && !SKIP
+                // iOS: "✕ Sluiten" top left, like every other screen (CloseButton in the app)
+                if #available(iOS 26.0, *) {
+                    ToolbarItem(placement: .topBarLeading) { closeButton }
+                        .sharedBackgroundVisibility(.hidden)
+                } else {
+                    ToolbarItem(placement: .topBarLeading) { closeButton }
+                }
+                #else
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Klaar") { onClose() }
                 }
+                #endif
             }
         }
     }
+
+    #if os(iOS) && !SKIP
+    private var closeButton: some View {
+        Button { onClose() } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "xmark")
+                Text("Sluiten")
+            }
+            .font(.system(size: 14, weight: .medium, design: .rounded))
+            .foregroundColor(CoachPalette.textSecondary)
+            .lineLimit(1)
+            .fixedSize()
+            // Toolbars draw icons a size up; keep the ✕ as small as on Spelers
+            .imageScale(.medium)
+        }
+        .buttonStyle(.plain)
+    }
+    #endif
 
     private func playerSection(_ earning: MatchBadgeEarning) -> some View {
         VStack(alignment: .leading, spacing: 10) {

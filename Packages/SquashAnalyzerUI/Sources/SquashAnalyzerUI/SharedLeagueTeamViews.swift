@@ -277,6 +277,7 @@ public struct SharedSettingsView: View {
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
+    @AppStorage(LiveShare.enabledKey) private var liveSharing = false
     @State private var draft = ""
     @State private var message: String?
     @State private var messageIsError = false
@@ -308,6 +309,8 @@ public struct SharedSettingsView: View {
                     manualSection
                         .padding(.bottom, 20)
                     courtSection
+                        .padding(.bottom, 20)
+                    liveSection
                         .padding(.bottom, 20)
                     HStack(spacing: 8) {
                         HomeTileIconView(icon: .players, color: LeaguePalette.orange, size: 20)
@@ -379,6 +382,23 @@ public struct SharedSettingsView: View {
                     .foregroundColor(LeaguePalette.orange)
             }
             .accessibilityLabel("Open de handleiding")
+        }
+    }
+
+    private var liveSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Live meekijken")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(LeaguePalette.text)
+            Toggle(isOn: $liveSharing) {
+                Text("Knop LIVE bij Coach en Scheidsrechter")
+                    .font(.system(size: 14))
+                    .foregroundColor(LeaguePalette.text)
+            }
+            .tint(LeaguePalette.orange)
+            Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen en de stand; 2 uur na de wedstrijd wordt alles gewist.")
+                .font(.system(size: 12))
+                .foregroundColor(LeaguePalette.muted)
         }
     }
 

@@ -50,9 +50,7 @@ struct HomeView: View {
             NavigationStack {
                 BadgeCatalogView()
                     .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Sluiten") { showingBadgeCatalog = false }
-                        }
+                        CloseToolbarItem { showingBadgeCatalog = false }
                     }
             }
         }

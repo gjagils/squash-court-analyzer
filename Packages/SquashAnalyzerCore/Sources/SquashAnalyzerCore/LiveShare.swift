@@ -183,6 +183,10 @@ public final class LiveShare {
     /// reads this in its `baseURL`; the other way round it was null on Android.
     public static let defaultBaseURL = "https://live.squashanalyzer.com"
 
+    /// Settings switch "Live meekijken" (off by default): only then the
+    /// scoring screens show the LIVE button
+    public static let enabledKey = "liveSharingEnabled"
+
     public static let shared = LiveShare()
 
     public var transport: (any LiveTransport)? = nil
@@ -231,12 +235,14 @@ public final class LiveShare {
         Task { await flush() }
     }
 
-    /// The match is over: send the final state, then delete the session at once
+    /// The match is over: send the final state and let go of the session. It
+    /// is not deleted: viewers keep the final score until the server removes
+    /// it, 2 hours after this last update. "Live stoppen" does delete at once.
     public func finish(matchId id: UUID, snapshot: LiveSnapshot) async {
         guard self.matchId == id, sessionId != nil else { return }
         pending = snapshot
         finishing = true
-        // A send under way picks up the final state and deletes afterwards
+        // A send under way picks up the final state and lets go afterwards
         if !sending { await flush() }
     }
 
@@ -244,6 +250,13 @@ public final class LiveShare {
     public func stop() async {
         let id = sessionId
         let key = writeKey
+        reset()
+        guard let id, let key, let transport, let url = URL(string: "\(baseURL)/api/live/\(id)") else { return }
+        _ = try? await transport.send(method: "DELETE", url: url, headers: ["Authorization": "Bearer \(key)"], body: nil)
+    }
+
+    /// Forget the session on this phone only (the server keeps it)
+    private func reset() {
         sessionId = nil
         writeKey = nil
         link = nil
@@ -252,8 +265,6 @@ public final class LiveShare {
         finishing = false
         linkChanged = false
         offline = false
-        guard let id, let key, let transport, let url = URL(string: "\(baseURL)/api/live/\(id)") else { return }
-        _ = try? await transport.send(method: "DELETE", url: url, headers: ["Authorization": "Bearer \(key)"], body: nil)
     }
 
     /// Clears the "share the new link" note once the coach shared it
@@ -293,9 +304,9 @@ public final class LiveShare {
             }
         }
         sending = false
-        // Match over: gone at once, also when the last send failed (the server
-        // forgets it anyway after its idle time)
-        if finishing { await stop() }
+        // Match over: this phone lets go; the server keeps the final score for
+        // viewers and removes it after its idle time (2 hours)
+        if finishing { reset() }
     }
 
     /// Sends one state; a session the server no longer knows is made again

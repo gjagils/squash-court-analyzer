@@ -18,6 +18,7 @@ struct SettingsView: View {
     @State private var teamDraft = ""
     @AppStorage(AutomaticBackup.enabledKey) private var automaticBackup = true
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
+    @AppStorage(LiveShare.enabledKey) private var liveSharing = false
 
     var body: some View {
         ZStack {
@@ -32,6 +33,8 @@ struct SettingsView: View {
                         manualSection
 
                         courtSection
+
+                        liveSection
 
                         teamSection
 
@@ -157,6 +160,29 @@ struct SettingsView: View {
             // Dark segments so the unselected "9 vakken" stays readable on the dark card
             .environment(\.colorScheme, .dark)
             Text("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak: voorin Drop, Boast en Kill, in het midden Kill, Drive, Cross en Boast, achterin Drive, Cross en Lob.")
+                .font(AppFonts.caption(11))
+                .foregroundColor(AppColors.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+    }
+
+    // MARK: - Live Section
+    private var liveSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "dot.radiowaves.left.and.right").foregroundColor(AppColors.warmOrange)
+                Text("Live meekijken").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary)
+            }
+            Toggle(isOn: $liveSharing) {
+                Text("Knop LIVE bij Coach en Scheidsrechter")
+                    .font(AppFonts.label(14))
+                    .foregroundColor(AppColors.textPrimary)
+            }
+            .tint(AppColors.warmOrange)
+            Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen en de stand; 2 uur na de wedstrijd wordt alles gewist.")
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)

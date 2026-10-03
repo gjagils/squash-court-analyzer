@@ -2278,3 +2278,7 @@ Om lokaal te bouwen in een worktree: `JAVA_HOME` op de JBR van Android Studio
 en `ANDROID_HOME=~/Library/Android/sdk` (er is daar geen `local.properties`).
 `xcodebuild` moet buiten de sandbox draaien als de packages nog opgehaald
 moeten worden (ssh naar github.com).
+11. **iOS-only code in de gedeelde UI: `#if os(iOS) && !SKIP`, niet alleen
+    `#if !SKIP`.** De Android-build draait eerst `swift build` van
+    SquashAnalyzerUI op de Mac, dus voor macOS; iOS-API's als
+    `.topBarLeading` en `.sharedBackgroundVisibility` bestaan daar niet.

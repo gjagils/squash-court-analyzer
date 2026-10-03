@@ -152,7 +152,6 @@ struct RefereeView: View {
                 LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot }) { text in
                     liveShareItems = ShareItemsWrapper(items: [text])
                 }
-                .padding(.leading, 8)
             }
 
             Spacer()

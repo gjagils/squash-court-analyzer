@@ -406,6 +406,51 @@ struct LEDColon: View {
     }
 }
 
+// MARK: - Close button
+
+/// "✕ Sluiten" as on Spelers: the one close button of the app (also for
+/// "Annuleren"). Grey text, no capsule.
+struct CloseButton: View {
+    var title: String = "Sluiten"
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                Image(systemName: "xmark")
+                Text(title)
+            }
+            .font(AppFonts.body(14))
+            .foregroundColor(AppColors.textSecondary)
+            .lineLimit(1)
+            .fixedSize()
+            // Toolbars draw icons a size up; keep the ✕ as small as on Spelers
+            .imageScale(.medium)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// `CloseButton` top left in a navigation bar, without the glass capsule
+/// iOS 26 puts around toolbar buttons, so it looks like the one on Spelers
+struct CloseToolbarItem: ToolbarContent {
+    var title: String = "Sluiten"
+    let action: () -> Void
+
+    var body: some ToolbarContent {
+        if #available(iOS 26.0, *) {
+            ToolbarItem(placement: .topBarLeading) {
+                CloseButton(title: title, action: action)
+            }
+            .sharedBackgroundVisibility(.hidden)
+        } else {
+            ToolbarItem(placement: .topBarLeading) {
+                CloseButton(title: title, action: action)
+            }
+        }
+    }
+}
+
 // MARK: - Background
 struct AppBackground: View {
     var body: some View {

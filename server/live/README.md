@@ -7,9 +7,10 @@ app.
 
 - **Alleen voornamen en de stand**, alleen in het geheugen. Er is geen
   database en er wordt niets naar schijf geschreven.
-- **Na de wedstrijd direct weg**: de app stuurt de eindstand en verwijdert
-  daarna meteen de sessie. Wie de pagina open had, houdt de eindstand in beeld.
-  Wie later op de link tikt, ziet "afgelopen".
+- **2 uur na de wedstrijd weg**: de app stuurt de eindstand en laat de sessie
+  dan los. Kijkers zien de eindstand nog tot de server de sessie 2 uur na de
+  laatste update verwijdert (`IDLE_MINUTES`). Daarna toont de link
+  "afgelopen". Tikt de coach op **Live stoppen**, dan is de sessie meteen weg.
 - **Vangnet**: een sessie zonder update van 2 uur wordt automatisch verwijderd
   (bijvoorbeeld een lege telefoon). In te stellen met `IDLE_MINUTES`.
 - Herstart van de container = alle sessies weg. De app maakt dan bij het
@@ -56,7 +57,7 @@ Pas het daar aan als je een ander domein kiest.
 |---|---|---|---|
 | `POST` | `/api/live` | app | nieuwe sessie: `{id, writeKey, url}` |
 | `PUT` | `/api/live/:id` | app, `Authorization: Bearer <writeKey>` | hele stand vervangen |
-| `DELETE` | `/api/live/:id` | app, met sleutel | sessie meteen weg |
+| `DELETE` | `/api/live/:id` | app, met sleutel | sessie meteen weg (Live stoppen) |
 | `GET` | `/api/live/:id` | kijker | huidige stand |
 | `GET` | `/api/live/:id/events` | kijker | Server-Sent Events: `state`, `ended` |
 | `GET` | `/l/:id` | kijker | kijkpagina, met linkpreview "🔴 Live: Jan – Piet" |

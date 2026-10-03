@@ -3,77 +3,33 @@ import SquashAnalyzerCore
 import SquashAnalyzerUI
 
 // MARK: - Design System
-/// Digital Classic Sports Interface - Design System
-/// A warm, modern sports interface combining classic LED scoreboards,
-/// soft materials, subtle depth, and calm high-contrast action buttons.
+/// The iPhone screens' names for the shared style tokens. The values live in
+/// SquashAnalyzerUI's `SharedColors` (docs/style/tokens.json), so iOS and
+/// Android cannot drift apart (T17).
 
 // MARK: - Colors
-struct AppColors {
-    // MARK: Primary Action Colors
-    /// Warm orange - Player 1 / Primary action
-    static let warmOrange = Color(red: 0.95, green: 0.55, blue: 0.15)
-    static let warmOrangeDark = Color(red: 0.80, green: 0.42, blue: 0.08)
-    static let warmOrangeLight = Color(red: 1.0, green: 0.68, blue: 0.35)
-    static let warmOrangeGlow = Color(red: 1.0, green: 0.45, blue: 0.1)
+enum AppColors {
+    /// Brand orange, player 1, primary action
+    static let warmOrange = SharedColors.accent
+    /// Player 2
+    static let steelBlue = SharedColors.steelBlue
+    static let steelBlueLight = SharedColors.steelBlueLight
 
-    /// Steel blue - Player 2 / Secondary action
-    static let steelBlue = Color(red: 0.35, green: 0.45, blue: 0.55)
-    static let steelBlueDark = Color(red: 0.25, green: 0.32, blue: 0.42)
-    static let steelBlueLight = Color(red: 0.50, green: 0.58, blue: 0.68)
+    static let backgroundDark = SharedColors.background
+    static let backgroundMedium = SharedColors.surface
 
-    /// Alias for deepBlue (used in some views)
-    static let deepBlue = steelBlue
+    static let courtSand = SharedColors.courtSand
 
-    // MARK: Background Colors
-    /// Dark background with warm undertone
-    static let backgroundDark = Color.black
-    static let backgroundMedium = Color(red: 0.12, green: 0.10, blue: 0.08)
+    static let textPrimary = SharedColors.textPrimary
+    static let textSecondary = SharedColors.textSecondary
+    static let textMuted = SharedColors.textMuted
 
-    // MARK: Panel Colors
-    /// Metallic silver/gray panel
-    static let panelSilver = Color(red: 0.72, green: 0.70, blue: 0.68)
-    static let panelSilverDark = Color(red: 0.55, green: 0.52, blue: 0.50)
-    static let panelSilverLight = Color(red: 0.85, green: 0.83, blue: 0.80)
+    static let accentGold = SharedColors.gold
 
-    // MARK: Court Colors - Sand/Wood
-    static let courtSand = Color(red: 0.82, green: 0.72, blue: 0.60)
-    static let courtSandDark = Color(red: 0.70, green: 0.58, blue: 0.45)
-    static let courtSandLight = Color(red: 0.90, green: 0.82, blue: 0.72)
-
-    /// Court lines - Warm terracotta/orange-red
-    static let courtLine = Color(red: 0.75, green: 0.42, blue: 0.32)
-    static let courtLineLight = Color(red: 0.82, green: 0.50, blue: 0.40)
-
-    // MARK: LED Display Colors
-    /// LED segment colors (warm golden glow)
-    static let ledActive = Color(red: 1.0, green: 0.88, blue: 0.55)
-    static let ledInactive = Color(red: 0.18, green: 0.16, blue: 0.14)
-    static let ledBackground = Color(red: 0.08, green: 0.07, blue: 0.06)
-    static let ledGlow = Color(red: 1.0, green: 0.75, blue: 0.30)
-
-    // MARK: Text Colors
-    static let textPrimary = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let textSecondary = Color(red: 0.70, green: 0.68, blue: 0.65)
-    static let textMuted = Color(red: 0.50, green: 0.48, blue: 0.45)
-
-    // MARK: Accent Colors
-    static let accentGold     = Color(red: 0.90, green: 0.72, blue: 0.35)
-    static let accentGoldDark = Color(red: 0.70, green: 0.54, blue: 0.22)
-
-    /// Warm neutral – secondary / save buttons (no cold blue)
-    static let warmNeutral     = Color(red: 0.32, green: 0.26, blue: 0.18)
-    static let warmNeutralDark = Color(red: 0.22, green: 0.17, blue: 0.11)
-
-    static let serverIndicator = Color(red: 1.0, green: 0.60, blue: 0.15)
-
-    // MARK: Cool accents – player 2 column of the referee action grid
-    // (sky → blue → indigo mirrors gold → orange → red on the player 1 side)
-    static let coolSky    = Color(red: 0.56, green: 0.74, blue: 0.92)
-    static let coolBlue   = Color(red: 0.42, green: 0.58, blue: 0.82)
-    static let coolIndigo = Color(red: 0.55, green: 0.47, blue: 0.90)
-
-    /// Stroke / penalty on the player 1 side
-    static let warmRed = Color(red: 0.85, green: 0.30, blue: 0.30)
+    /// Referee actions of the right-hand player, and STROKE of the left-hand one
+    static let coolBlue = SharedColors.coolBlue
+    static let coolIndigo = SharedColors.coolIndigo
+    static let warmRed = SharedColors.warmRed
 }
 
 // MARK: - Typography
@@ -99,9 +55,6 @@ struct AppFonts {
     }
 
     /// Button text
-    static func button(_ size: CGFloat = 16) -> Font {
-        .system(size: size, weight: .bold, design: .rounded)
-    }
 
     /// Small caption
     static func caption(_ size: CGFloat = 10) -> Font {
@@ -109,14 +62,8 @@ struct AppFonts {
     }
 
     /// Player name in scoreboard
-    static func playerName(_ size: CGFloat = 16) -> Font {
-        .system(size: size, weight: .bold, design: .default)
-    }
 
     /// Monospace font for timers
-    static func mono(_ size: CGFloat = 14) -> Font {
-        .system(size: size, weight: .medium, design: .monospaced)
-    }
 }
 
 // MARK: - Referee-style surfaces
@@ -149,79 +96,6 @@ struct SportsPanel<Content: View>: View {
 
 // MARK: - Reusable Components
 
-/// Hardware-style panel with metallic look
-struct HardwarePanel<Content: View>: View {
-    let content: Content
-
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-
-    var body: some View {
-        content
-            .background(
-                ZStack {
-                    // Base metallic gradient
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    AppColors.panelSilverLight,
-                                    AppColors.panelSilver,
-                                    AppColors.panelSilverDark
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-
-                    // Inner shadow effect
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(
-                            LinearGradient(
-                                colors: [Color.white.opacity(0.5), Color.clear],
-                                startPoint: .top,
-                                endPoint: .center
-                            ),
-                            lineWidth: 1
-                        )
-                }
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(Color.black.opacity(0.3), lineWidth: 1)
-            )
-            .shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
-    }
-}
-
-/// LED Display background with inset effect
-struct LEDDisplayBackground: View {
-    var body: some View {
-        ZStack {
-            // Dark inset background
-            RoundedRectangle(cornerRadius: 8)
-                .fill(AppColors.ledBackground)
-
-            // Inner border (inset effect)
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.black.opacity(0.8), lineWidth: 3)
-
-            // Subtle inner highlight
-            RoundedRectangle(cornerRadius: 6)
-                .stroke(
-                    LinearGradient(
-                        colors: [Color.white.opacity(0.05), Color.clear],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ),
-                    lineWidth: 1
-                )
-                .padding(3)
-        }
-    }
-}
-
 /// Hardware-style action button
 struct HardwareButton: View {
     enum Style {
@@ -238,8 +112,7 @@ struct HardwareButton: View {
     let action: () -> Void
     var isSelected: Bool = false
 
-    /// `colorDark` is kept for call-site compatibility; the flat style no longer uses it.
-    init(title: String, subtitle: String? = nil, color: Color, colorDark: Color? = nil,
+    init(title: String, subtitle: String? = nil, color: Color,
          style: Style = .filled, isSelected: Bool = false, action: @escaping () -> Void) {
         self.title = title
         self.subtitle = subtitle
@@ -285,106 +158,6 @@ struct HardwareButton: View {
     }
 }
 
-
-/// Seven-segment LED digit display
-struct LEDDigit: View {
-    let digit: Int
-    let size: CGFloat
-
-    // Segment patterns for 0-9
-    private let segments: [[Bool]] = [
-        [true, true, true, true, true, true, false],     // 0
-        [false, true, true, false, false, false, false], // 1
-        [true, true, false, true, true, false, true],    // 2
-        [true, true, true, true, false, false, true],    // 3
-        [false, true, true, false, false, true, true],   // 4
-        [true, false, true, true, false, true, true],    // 5
-        [true, false, true, true, true, true, true],     // 6
-        [true, true, true, false, false, false, false],  // 7
-        [true, true, true, true, true, true, true],      // 8
-        [true, true, true, true, false, true, true],     // 9
-    ]
-
-    var body: some View {
-        let pattern = digit >= 0 && digit <= 9 ? segments[digit] : segments[0]
-
-        Canvas { context, canvasSize in
-            let w = canvasSize.width
-            let h = canvasSize.height
-            let segmentThickness = h * 0.12
-            let gap: CGFloat = 2
-            let cornerRadius = segmentThickness * 0.3
-
-            // Segment positions and sizes
-            let horizontalWidth = w - segmentThickness * 2 - gap * 2
-            let verticalHeight = (h - segmentThickness * 3) / 2 - gap
-
-            // Draw all segments (inactive first, then active on top)
-            // Horizontal segments: top (0), middle (6), bottom (3)
-            // Vertical segments: top-left (5), top-right (1), bottom-left (4), bottom-right (2)
-
-            let segmentDefs: [(CGRect, Bool, Bool)] = [
-                // Top horizontal
-                (CGRect(x: segmentThickness + gap, y: 0, width: horizontalWidth, height: segmentThickness), true, pattern[0]),
-                // Top-right vertical
-                (CGRect(x: w - segmentThickness, y: segmentThickness + gap, width: segmentThickness, height: verticalHeight), false, pattern[1]),
-                // Bottom-right vertical
-                (CGRect(x: w - segmentThickness, y: h / 2 + gap, width: segmentThickness, height: verticalHeight), false, pattern[2]),
-                // Bottom horizontal
-                (CGRect(x: segmentThickness + gap, y: h - segmentThickness, width: horizontalWidth, height: segmentThickness), true, pattern[3]),
-                // Bottom-left vertical
-                (CGRect(x: 0, y: h / 2 + gap, width: segmentThickness, height: verticalHeight), false, pattern[4]),
-                // Top-left vertical
-                (CGRect(x: 0, y: segmentThickness + gap, width: segmentThickness, height: verticalHeight), false, pattern[5]),
-                // Middle horizontal
-                (CGRect(x: segmentThickness + gap, y: h / 2 - segmentThickness / 2, width: horizontalWidth, height: segmentThickness), true, pattern[6]),
-            ]
-
-            for (rect, _, isOn) in segmentDefs {
-                let path = RoundedRectangle(cornerRadius: cornerRadius).path(in: rect)
-                let color = isOn ? AppColors.ledActive : AppColors.ledInactive
-                context.fill(path, with: .color(color))
-
-                // Glow for active segments
-                if isOn {
-                    context.fill(path, with: .color(AppColors.ledGlow.opacity(0.3)))
-                }
-            }
-        }
-        .frame(width: size * 0.55, height: size)
-    }
-}
-
-/// Two-digit LED score display
-struct LEDScoreDisplay: View {
-    let score: Int
-    let size: CGFloat
-
-    var body: some View {
-        HStack(spacing: size * 0.06) {
-            LEDDigit(digit: score / 10, size: size)
-            LEDDigit(digit: score % 10, size: size)
-        }
-        .shadow(color: AppColors.ledGlow.opacity(0.4), radius: 8, x: 0, y: 0)
-    }
-}
-
-/// Colon separator for score display
-struct LEDColon: View {
-    let size: CGFloat
-
-    var body: some View {
-        VStack(spacing: size * 0.25) {
-            Circle()
-                .fill(AppColors.ledActive)
-                .frame(width: size * 0.12, height: size * 0.12)
-            Circle()
-                .fill(AppColors.ledActive)
-                .frame(width: size * 0.12, height: size * 0.12)
-        }
-        .shadow(color: AppColors.ledGlow.opacity(0.4), radius: 4, x: 0, y: 0)
-    }
-}
 
 // MARK: - Close button
 
@@ -444,81 +217,21 @@ struct AppBackground: View {
 #Preview("Design System") {
     ZStack {
         AppBackground()
-
         VStack(spacing: 20) {
-            // Title
-            Text("SQUASH ANALYZER")
-                .font(AppFonts.title(20))
+            Text("Coach")
+                .font(PageTitleStyle.font)
                 .foregroundColor(AppColors.textPrimary)
-                .tracking(3)
-
-            // LED Display
-            HardwarePanel {
-                VStack(spacing: 0) {
-                    Text("SQUASH")
-                        .font(AppFonts.caption(10))
-                        .foregroundColor(AppColors.textMuted)
-                        .tracking(2)
-                        .padding(.top, 8)
-
-                    HStack {
-                        // Player names
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack(spacing: 6) {
-                                ServerIndicator(isServing: false)
-                                Text("NIELS")
-                                    .font(AppFonts.playerName(16))
-                                    .foregroundColor(AppColors.textPrimary)
-                            }
-                            HStack(spacing: 6) {
-                                ServerIndicator(isServing: true)
-                                Text("PAUL")
-                                    .font(AppFonts.playerName(16))
-                                    .foregroundColor(AppColors.textPrimary)
-                            }
-                        }
-
-                        Spacer()
-
-                        // LED Score
-                        HStack(spacing: 8) {
-                            LEDScoreDisplay(score: 0, size: 50)
-                            LEDColon(size: 50)
-                            LEDScoreDisplay(score: 0, size: 50)
-                        }
-                        .padding(12)
-                        .background(LEDDisplayBackground())
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 12)
-                }
+            SportsPanel(accent: AppColors.warmOrange) {
+                Text("Kies wie scoort")
+                    .font(AppFonts.body(14))
+                    .foregroundColor(AppColors.textSecondary)
+                    .padding(20)
             }
-            .padding(.horizontal, 20)
-
-            // Instruction
-            Text("Kies wie scoort")
-                .font(AppFonts.body(14))
-                .foregroundColor(AppColors.textSecondary)
-
-            Spacer().frame(height: 150)
-
-            // Buttons
             HStack(spacing: 16) {
-                HardwareButton(
-                    title: "Niels",
-                    subtitle: "Punt",
-                    color: AppColors.warmOrange,
-                    colorDark: AppColors.warmOrangeDark
-                ) { }
-
-                HardwareButton(
-                    title: "Paul",
-                    subtitle: "Punt",
-                    color: AppColors.steelBlue,
-                    colorDark: AppColors.steelBlueDark
-                ) { }
+                HardwareButton(title: "Niels", subtitle: "Punt", color: AppColors.warmOrange) { }
+                HardwareButton(title: "Paul", subtitle: "Punt", color: AppColors.steelBlue, style: .outlined) { }
             }
-            .padding(.horizontal, 24)
         }
+        .padding(20)
     }
 }

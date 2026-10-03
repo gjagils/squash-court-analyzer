@@ -1,13 +1,6 @@
 import SwiftUI
 import SquashAnalyzerCore
 
-enum ShotPalette {
-    static let warmOrange = Color(red: 0.95, green: 0.55, blue: 0.15)
-    static let steelBlue = Color(red: 0.35, green: 0.45, blue: 0.55)
-    static let textPrimary = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let textSecondary = Color(red: 0.70, green: 0.68, blue: 0.65)
-    static let backgroundMedium = Color(red: 0.12, green: 0.10, blue: 0.08)
-}
 
 /// Public so both the shared coach flow and CoachScoring.swift can reuse it.
 public struct ShotTypeButton: View {
@@ -38,13 +31,13 @@ public struct ShotTypeButton: View {
                             .blur(radius: 8)
                             .opacity(0.7)
                     }
-                    ShotIconView(type: shotType, color: isPressed ? color : ShotPalette.textPrimary, size: 28)
+                    ShotIconView(type: shotType, color: isPressed ? color : SharedColors.textPrimary, size: 28)
                 }
                 .frame(height: 32)
 
                 Text(shotType.rawValue.uppercased())
                     .font(.system(size: 10, weight: .medium, design: .rounded))
-                    .foregroundColor(isPressed ? color : ShotPalette.textSecondary)
+                    .foregroundColor(isPressed ? color : SharedColors.textSecondary)
                     .tracking(0.5)
             }
             .frame(maxWidth: .infinity)
@@ -65,7 +58,7 @@ public struct ShotTypeButton: View {
 
 struct ShotIconView: View {
     let type: ShotType
-    var color: Color = ShotPalette.textPrimary
+    var color: Color = SharedColors.textPrimary
     var size: CGFloat = 28
 
     /// SF Symbols draw smaller than their font size; Material icons fill their box
@@ -99,7 +92,7 @@ struct ShotIconView: View {
 
 /// Vertical arrow, top to bottom (was a `Canvas` drawing; see file header).
 struct DriveIcon: View {
-    var color: Color = ShotPalette.textPrimary
+    var color: Color = SharedColors.textPrimary
     var size: CGFloat = 40
 
     var body: some View {
@@ -118,7 +111,7 @@ struct DriveIcon: View {
 
 /// Kill: a steep arrow driven down to just above the tin (the short line)
 struct KillIcon: View {
-    var color: Color = ShotPalette.textPrimary
+    var color: Color = SharedColors.textPrimary
     var size: CGFloat = 40
 
     var body: some View {
@@ -139,7 +132,7 @@ struct KillIcon: View {
 
 /// Arc rising then curving down, with an open arrowhead (was `Canvas`).
 struct LobIcon: View {
-    var color: Color = ShotPalette.textPrimary
+    var color: Color = SharedColors.textPrimary
     var size: CGFloat = 40
 
     var body: some View {
@@ -168,7 +161,7 @@ struct LobIcon: View {
 
 /// Ball bouncing off the side wall then the front wall (was `Canvas`).
 struct BoastIcon: View {
-    var color: Color = ShotPalette.textPrimary
+    var color: Color = SharedColors.textPrimary
     var size: CGFloat = 40
 
     var body: some View {

@@ -47,7 +47,7 @@ public struct CoachSessionView: View {
 
     public var body: some View {
         ZStack {
-            CoachPalette.backgroundDark.ignoresSafeArea()
+            SharedColors.background.ignoresSafeArea()
             if let match {
                 CoachScoringView(match: match, aiCoach: aiCoach, shareText: shareText, photos: photos, onMatchChanged: { changed in
                     persist(changed, exit: false)
@@ -71,7 +71,7 @@ public struct CoachSessionView: View {
             }
             if saver.busy || (saver.saving && saver.exitAfterSave) {
                 ProgressView(match == nil && pending == nil && !showingSetup ? "Laden…" : "Even opslaan…")
-                    .padding(24).background(CoachPalette.backgroundMedium)
+                    .padding(24).background(SharedColors.surface)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
             }
             if saver.failed {
@@ -86,10 +86,10 @@ public struct CoachSessionView: View {
                     }
                     // Every screen has a way out, also when saving or loading fails
                     Button(match == nil ? "Terug naar home" : "Sluiten zonder opslaan") { close() }
-                        .foregroundColor(CoachPalette.textSecondary)
+                        .foregroundColor(SharedColors.textSecondary)
                 }
-                .foregroundColor(CoachPalette.textPrimary)
-                .padding(24).background(CoachPalette.backgroundMedium)
+                .foregroundColor(SharedColors.textPrimary)
+                .padding(24).background(SharedColors.surface)
                 .clipShape(RoundedRectangle(cornerRadius: 16)).padding(20)
             }
         }

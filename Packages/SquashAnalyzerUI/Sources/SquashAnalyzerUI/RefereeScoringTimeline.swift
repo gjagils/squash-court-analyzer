@@ -124,6 +124,6 @@ public struct RefereeScoringTimeline: View {
     }
 
     private static func color(for player: Player) -> Color {
-        player == .player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue
+        player == .player1 ? SharedColors.accent : SharedColors.steelBlue
     }
 }

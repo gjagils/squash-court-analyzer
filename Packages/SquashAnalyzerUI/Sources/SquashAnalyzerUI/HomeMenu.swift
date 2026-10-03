@@ -29,10 +29,10 @@ public struct HomeMenuHeader: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("SquashAnalyzer")
                     .font(.system(size: 23, weight: .bold, design: .rounded))
-                    .foregroundColor(HomePalette.text)
+                    .foregroundColor(SharedColors.textPrimary)
                 Text("Jouw spel scherp in beeld. Voor jou en je team.")
                     .font(.system(size: 12))
-                    .foregroundColor(HomePalette.secondary)
+                    .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
@@ -40,7 +40,7 @@ public struct HomeMenuHeader: View {
                 Button(action: onSettings) {
                     Image(systemName: "gearshape")
                         .font(.system(size: 21))
-                        .foregroundColor(HomePalette.secondary)
+                        .foregroundColor(SharedColors.textSecondary)
                         .frame(width: 48, height: 48)
                 }
                 .accessibilityLabel("Instellingen")
@@ -72,7 +72,7 @@ public struct HomeMenuTiles: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Klaar om te spelen?")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(HomePalette.text)
+                .foregroundColor(SharedColors.textPrimary)
             HStack(spacing: 12) {
                 HomeMenuTile(title: "Coach", subtitle: "Start met coachen", icon: .coach, action: onCoach)
                 HomeMenuTile(title: "Scheidsrechter", subtitle: "Start met fluiten", icon: .referee, action: onReferee)
@@ -91,12 +91,12 @@ public struct HomeMenuTiles: View {
     private func menuRow(_ title: String, icon: HomeTileIcon, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                HomeTileIconView(icon: icon, color: HomePalette.orange, size: 23)
+                HomeTileIconView(icon: icon, color: SharedColors.accent, size: 23)
                 Text(title).font(.system(size: 14))
                 Spacer()
                 Image(systemName: "chevron.right").font(.system(size: 12))
             }
-            .foregroundColor(HomePalette.text)
+            .foregroundColor(SharedColors.textPrimary)
             .frame(minHeight: 50)
             #if !SKIP
             .contentShape(Rectangle())
@@ -117,11 +117,11 @@ public struct HomeTeamSummary: View {
             HStack {
                 Text("Jouw team").font(.system(size: 14, weight: .semibold))
                 Spacer()
-                Text("Competitie").font(.system(size: 12)).foregroundColor(HomePalette.secondary)
+                Text("Competitie").font(.system(size: 12)).foregroundColor(SharedColors.textSecondary)
             }
             VStack(alignment: .leading, spacing: 10) {
                 Text("MIJN TEAM").font(.system(size: 11, weight: .semibold))
-                    .tracking(1.4).foregroundColor(HomePalette.orange)
+                    .tracking(1.4).foregroundColor(SharedColors.accent)
                 Text(snapshot.name).font(.system(size: 20, weight: .semibold, design: .rounded))
                     .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 28) {
@@ -132,34 +132,27 @@ public struct HomeTeamSummary: View {
                 if let next = snapshot.nextFixture() {
                     Divider().overlay(Color.white.opacity(0.15))
                     Text("Volgende · \(LeagueDates.day(next.date)) · \(next.home) – \(next.away)")
-                        .font(.system(size: 12)).foregroundColor(HomePalette.secondary)
+                        .font(.system(size: 12)).foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .padding(16).frame(maxWidth: .infinity, alignment: .leading)
-            .background(HomePalette.card)
+            .background(SharedColors.brandCard)
             .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(HomePalette.orange.opacity(0.35), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
         }
-        .foregroundColor(HomePalette.text)
+        .foregroundColor(SharedColors.textPrimary)
     }
 
     private func stat(_ title: String, _ value: Int?) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(value.map { String($0) } ?? "–")
-                .font(.system(size: 24, weight: .bold, design: .rounded)).foregroundColor(HomePalette.orange)
-            Text(title).font(.system(size: 10)).foregroundColor(HomePalette.secondary)
+                .font(.system(size: 24, weight: .bold, design: .rounded)).foregroundColor(SharedColors.accent)
+            Text(title).font(.system(size: 10)).foregroundColor(SharedColors.textSecondary)
         }
     }
 }
 
-private enum HomePalette {
-    static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let secondary = Color(red: 0.70, green: 0.68, blue: 0.65)
-    static let orange = Color(red: 0.95, green: 0.55, blue: 0.15)
-    // Precomposited orange at 10% on black, identical on SwiftUI and Compose.
-    static let card = Color(red: 0.095, green: 0.055, blue: 0.015)
-}
 
 /// All tiles share one accent colour, so the icon is what tells them apart
 private struct HomeMenuTile: View {
@@ -168,7 +161,7 @@ private struct HomeMenuTile: View {
     let icon: HomeTileIcon
     let action: () -> Void
 
-    private var color: Color { HomePalette.orange }
+    private var color: Color { SharedColors.accent }
 
     var body: some View {
         Button(action: action) {
@@ -177,18 +170,18 @@ private struct HomeMenuTile: View {
                 Text(title.uppercased())
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .tracking(1)
-                    .foregroundColor(HomePalette.text)
+                    .foregroundColor(SharedColors.textPrimary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                 Text(subtitle)
                     .font(.system(size: 12))
-                    .foregroundColor(HomePalette.secondary)
+                    .foregroundColor(SharedColors.textSecondary)
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal, 8)
             .frame(maxWidth: .infinity)
             .frame(minHeight: 110)
-            .background(HomePalette.card)
+            .background(SharedColors.brandCard)
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(color.opacity(0.35), lineWidth: 1))
         }

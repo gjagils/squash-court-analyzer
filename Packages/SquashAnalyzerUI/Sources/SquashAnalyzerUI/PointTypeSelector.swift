@@ -33,11 +33,11 @@ public struct PointTypeButton: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(pointType.title.uppercased())
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0.95, green: 0.93, blue: 0.90))
+                        .foregroundColor(SharedColors.textPrimary)
                         .tracking(0.5)
                     Text(pointType.description)
                         .font(.system(size: 11, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0.70, green: 0.68, blue: 0.65))
+                        .foregroundColor(SharedColors.textSecondary)
                 }
 
                 Spacer()

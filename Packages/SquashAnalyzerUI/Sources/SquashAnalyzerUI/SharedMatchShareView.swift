@@ -46,13 +46,13 @@ public struct SharedMatchShareView: View {
 
     public var body: some View {
         ZStack {
-            DashboardPalette.background.ignoresSafeArea()
+            SharedColors.background.ignoresSafeArea()
             VStack(spacing: 18) {
                 header
                 styleTabs
                 Text(choice.subtitle)
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(DashboardPalette.muted)
+                    .foregroundColor(SharedColors.textMuted)
                 ScrollView {
                     if let style = choice.textStyle {
                         // The preview reads like the chat: *bold*, _italic_ and ``` blocks, as on iOS
@@ -69,10 +69,10 @@ public struct SharedMatchShareView: View {
                     Text("DELEN")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .tracking(1)
-                        .foregroundColor(DashboardPalette.background)
+                        .foregroundColor(SharedColors.background)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(DashboardPalette.orange)
+                        .background(SharedColors.accent)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
@@ -97,14 +97,14 @@ public struct SharedMatchShareView: View {
             Text("DEEL SCORE")
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .tracking(2)
-                .foregroundColor(DashboardPalette.text)
+                .foregroundColor(SharedColors.textPrimary)
             HStack {
                 Button(action: onClose) {
                     HStack(spacing: 4) {
-                        AppSymbol("xmark", size: 14, color: DashboardPalette.secondary)
+                        AppSymbol("xmark", size: 14, color: SharedColors.textSecondary)
                         Text("Sluiten")
                             .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(DashboardPalette.secondary)
+                            .foregroundColor(SharedColors.textSecondary)
                     }
                 }
                 .buttonStyle(.plain)
@@ -121,12 +121,12 @@ public struct SharedMatchShareView: View {
                 Button { storedChoice = option.rawValue } label: {
                     Text(option.title)
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundColor(active ? DashboardPalette.background : DashboardPalette.gold)
+                        .foregroundColor(active ? SharedColors.background : SharedColors.gold)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(active ? DashboardPalette.gold : DashboardPalette.gold.opacity(0.10))
+                        .background(active ? SharedColors.gold : SharedColors.gold.opacity(0.10))
                         .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(DashboardPalette.gold.opacity(active ? 0.0 : 0.3), lineWidth: 1))
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(SharedColors.gold.opacity(active ? 0.0 : 0.3), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
             }
@@ -146,7 +146,7 @@ struct WhatsAppPreview: View {
                 if let mono = block.mono {
                     Text(mono)
                         .font(.system(size: 12, design: .monospaced))
-                        .foregroundColor(DashboardPalette.text)
+                        .foregroundColor(SharedColors.textPrimary)
                         .padding(.vertical, 2)
                 } else {
                     line(block.segments)
@@ -162,7 +162,7 @@ struct WhatsAppPreview: View {
                 Text(segment.text)
                     .font(.system(size: 15, weight: segment.bold ? .bold : .regular))
                     .italic(segment.italic)
-                    .foregroundColor(DashboardPalette.text)
+                    .foregroundColor(SharedColors.textPrimary)
             }
         }
     }

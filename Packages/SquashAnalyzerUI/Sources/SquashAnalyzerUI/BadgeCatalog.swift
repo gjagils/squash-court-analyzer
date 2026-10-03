@@ -43,7 +43,7 @@ public struct BadgeMedallion: View {
             if showsTitle {
                 Text(kind.title)
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(isLocked ? BadgePalette.textMuted : BadgePalette.textPrimary)
+                    .foregroundColor(isLocked ? SharedColors.textMuted : SharedColors.textPrimary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -53,13 +53,6 @@ public struct BadgeMedallion: View {
     }
 }
 
-enum BadgePalette {
-    static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
-    static let textPrimary = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let textSecondary = Color(red: 0.70, green: 0.68, blue: 0.65)
-    static let textMuted = Color(red: 0.55, green: 0.53, blue: 0.50)
-    static let backgroundDark = Color.black
-}
 
 /// The full badge catalog: every badge there is, locked/unlocked state aside.
 /// No player or award data needed, so this is reachable without any setup.
@@ -74,7 +67,7 @@ public struct SharedBadgeCatalogView: View {
             Section {
                 Text("Spelers die je kiest via \"Kies speler\" verdienen badges tijdens een wedstrijd, in coach- en scheidsrechtermodus. Badges met het label Coach vragen om de slagen die alleen coachmodus bijhoudt.")
                     .font(.system(size: 12))
-                    .foregroundColor(BadgePalette.textSecondary)
+                    .foregroundColor(SharedColors.textSecondary)
                     .listRowBackground(Color.clear)
             }
             ForEach(BadgeKind.Category.allCases, id: \.self) { category in
@@ -85,10 +78,10 @@ public struct SharedBadgeCatalogView: View {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(kind.title)
                                     .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(BadgePalette.textPrimary)
+                                    .foregroundColor(SharedColors.textPrimary)
                                 Text(kind.detail)
                                     .font(.system(size: 12))
-                                    .foregroundColor(BadgePalette.textSecondary)
+                                    .foregroundColor(SharedColors.textSecondary)
                                 HStack(spacing: 6) {
                                     if kind.coachOnly { tag("Coach") }
                                     if kind.isOnce { tag("Eén keer") }
@@ -102,12 +95,12 @@ public struct SharedBadgeCatalogView: View {
                     Text(category.rawValue.uppercased())
                         .font(.system(size: 11, weight: .semibold))
                         .tracking(1.5)
-                        .foregroundColor(BadgePalette.gold)
+                        .foregroundColor(SharedColors.gold)
                 }
             }
         }
         .scrollContentBackground(.hidden)
-        .background(BadgePalette.backgroundDark.ignoresSafeArea())
+        .background(SharedColors.background.ignoresSafeArea())
         .pageTitle("Alle badges")
     }
 
@@ -115,9 +108,9 @@ public struct SharedBadgeCatalogView: View {
         Text(text.uppercased())
             .font(.system(size: 9, weight: .semibold))
             .tracking(1)
-            .foregroundColor(BadgePalette.gold)
+            .foregroundColor(SharedColors.gold)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
-            .background(Capsule().stroke(BadgePalette.gold.opacity(0.5), lineWidth: 1))
+            .background(Capsule().stroke(SharedColors.gold.opacity(0.5), lineWidth: 1))
     }
 }

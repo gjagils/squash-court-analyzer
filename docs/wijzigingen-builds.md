@@ -72,6 +72,9 @@ Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `ma
 - Scoreschermen tekenen niet meer elke seconde helemaal opnieuw (alleen de klok
   tikt); badges één keer berekend; spelerslijst telt badges in één keer (T18).
 - Eén geteste opslaglogica voor coach en scheidsrechter (`SessionSaver`, T19).
+- Alle kleuren uit één bron (`SharedColors`, volgens de stijlgids); oude
+  LED-/hardware-onderdelen weg (T17). Zichtbaar: het blauw in de analyse is iets
+  lichter, gedempte tekst op badges/dashboard een fractie donkerder.
 
 ### Nog doen vóór de upload
 - [ ] Testen op Gerd-Jans iPhone en de Android-telefoon (ook met vergrote tekst).

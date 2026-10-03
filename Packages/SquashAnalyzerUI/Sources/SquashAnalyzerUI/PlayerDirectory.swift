@@ -38,8 +38,8 @@ public struct PlayerProfileFields: View {
                                 .font(.system(size: 12, weight: .medium, design: .rounded))
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
-                                .foregroundColor(selected ? Color.black : PlayerStyle.text)
-                                .background(selected ? PlayerStyle.gold : Color.white.opacity(0.08))
+                                .foregroundColor(selected ? Color.black : SharedColors.textPrimary)
+                                .background(selected ? SharedColors.gold : Color.white.opacity(0.08))
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)
@@ -60,21 +60,15 @@ public struct PlayerProfileFields: View {
             }
         }
         .font(.system(size: 16, design: .rounded))
-        .foregroundColor(PlayerStyle.text)
+        .foregroundColor(SharedColors.textPrimary)
     }
 
     private func caption(_ title: String) -> some View {
         Text(title).font(.system(size: 11, weight: .semibold, design: .rounded))
-            .tracking(1).foregroundColor(PlayerStyle.gold)
+            .tracking(1).foregroundColor(SharedColors.gold)
     }
 }
 
-enum PlayerStyle {
-    static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
-    static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let muted = Color(red: 0.70, green: 0.68, blue: 0.65)
-    static let background = Color.black
-}
 
 public struct PlayerDirectoryView: View {
     private let store: any PlayerProfileStore
@@ -122,14 +116,14 @@ public struct PlayerDirectoryView: View {
 
     public var body: some View {
         ZStack {
-            PlayerStyle.background.ignoresSafeArea()
+            SharedColors.background.ignoresSafeArea()
             VStack(spacing: 16) {
                 HStack {
                     // The page title is in the top bar (pageTitle); only the actions here
                     Spacer(minLength: 8)
                     // All badges, as iOS' medal button in Spelers
                     Button { showingCatalog = true } label: {
-                        AppSymbol("medal", size: 20, color: PlayerStyle.gold)
+                        AppSymbol("medal", size: 20, color: SharedColors.gold)
                             .frame(width: 36, height: 32)
                     }
                     .buttonStyle(.plain)
@@ -138,7 +132,7 @@ public struct PlayerDirectoryView: View {
                         Button { showingTeamImport = true } label: {
                             // AppSymbol: Skip's Label(systemImage:) draws a warning triangle for this symbol
                             HStack(spacing: 6) {
-                                AppSymbol("square.and.arrow.down", size: 18, color: PlayerStyle.gold)
+                                AppSymbol("square.and.arrow.down", size: 18, color: SharedColors.gold)
                                 Text("Team").lineLimit(1)
                             }
                         }
@@ -152,7 +146,7 @@ public struct PlayerDirectoryView: View {
                     .accessibilityLabel("Speler toevoegen")
                     .disabled(isLoading || isDeleting || loadFailed)
                 }
-                .foregroundColor(PlayerStyle.gold)
+                .foregroundColor(SharedColors.gold)
                 .padding(.horizontal, 24)
                 .padding(.top, 12)
 
@@ -163,9 +157,9 @@ public struct PlayerDirectoryView: View {
                 } else if loadFailed {
                     Spacer()
                     Text("Spelers konden niet worden geladen.")
-                        .foregroundColor(PlayerStyle.muted)
+                        .foregroundColor(SharedColors.textSecondary)
                     Button("Opnieuw laden") { Task { await reload() } }
-                        .tint(PlayerStyle.gold)
+                        .tint(SharedColors.gold)
                     Spacer()
                 } else if players.isEmpty {
                     Spacer()
@@ -174,7 +168,7 @@ public struct PlayerDirectoryView: View {
                         Text("Nog geen spelers opgeslagen").font(.headline)
                         Text("Tik op + om een speler toe te voegen,\nof importeer een team (zip met team.json en foto's)")
                     }
-                    .foregroundColor(PlayerStyle.muted)
+                    .foregroundColor(SharedColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(24)
                     Spacer()
@@ -186,17 +180,17 @@ public struct PlayerDirectoryView: View {
                                     // Tap the player for their badges, as on iOS
                                     Button { badgesForPlayer = player } label: {
                                         HStack(spacing: 12) {
-                                            PlayerPhotoView(photo: photos[player.id], name: player.name, size: 44, color: PlayerStyle.gold)
+                                            PlayerPhotoView(photo: photos[player.id], name: player.name, size: 44, color: SharedColors.gold)
                                             VStack(alignment: .leading, spacing: 5) {
                                                 HStack(spacing: 8) {
                                                     Text(player.name).font(.headline)
                                                     // Badge count right after the name, as on iOS
                                                     if let count = badgeCounts[player.id], count > 0 {
                                                         HStack(spacing: 3) {
-                                                            AppSymbol("medal.fill", size: 11, color: PlayerStyle.gold)
+                                                            AppSymbol("medal.fill", size: 11, color: SharedColors.gold)
                                                             Text("\(count)")
                                                                 .font(.system(size: 11, weight: .medium, design: .rounded))
-                                                                .foregroundColor(PlayerStyle.gold)
+                                                                .foregroundColor(SharedColors.gold)
                                                         }
                                                     }
                                                 }
@@ -205,16 +199,16 @@ public struct PlayerDirectoryView: View {
                                                         ForEach(player.coachingFocusAreas, id: \.self) { tag in
                                                             Text(tag)
                                                                 .font(.system(size: 10, weight: .medium, design: .rounded))
-                                                                .foregroundColor(PlayerStyle.gold)
+                                                                .foregroundColor(SharedColors.gold)
                                                                 .padding(.horizontal, 8)
                                                                 .padding(.vertical, 3)
-                                                                .background(PlayerStyle.gold.opacity(0.15))
+                                                                .background(SharedColors.gold.opacity(0.15))
                                                                 .clipShape(Capsule())
                                                         }
                                                     }
                                                 } else if !player.coachingNotes.isEmpty {
                                                     Text(player.coachingNotes)
-                                                        .font(.system(size: 11)).foregroundColor(PlayerStyle.muted)
+                                                        .font(.system(size: 11)).foregroundColor(SharedColors.textSecondary)
                                                         .lineLimit(1)
                                                 }
                                             }
@@ -233,7 +227,7 @@ public struct PlayerDirectoryView: View {
                                         Image(systemName: "trash").frame(width: 44, height: 44)
                                     }.accessibilityLabel("Verwijder \(player.name)")
                                 }
-                                .foregroundColor(PlayerStyle.text)
+                                .foregroundColor(SharedColors.textPrimary)
                                 .padding(12)
                                 .background(Color.white.opacity(0.05))
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -338,10 +332,10 @@ struct PlayerProfileEditor: View {
             // Tap the avatar to pick a photo, as on iOS (camera badge bottom right)
             Button { pickPhoto() } label: {
                 ZStack(alignment: .bottomTrailing) {
-                    PlayerPhotoView(photo: photo, name: player.name.isEmpty ? "?" : player.name, size: 96, color: PlayerStyle.gold)
-                    AppSymbol("camera.fill", size: 13, color: PlayerStyle.background)
+                    PlayerPhotoView(photo: photo, name: player.name.isEmpty ? "?" : player.name, size: 96, color: SharedColors.gold)
+                    AppSymbol("camera.fill", size: 13, color: SharedColors.background)
                         .frame(width: 28, height: 28)
-                        .background(PlayerStyle.gold)
+                        .background(SharedColors.gold)
                         .clipShape(Circle())
                 }
             }
@@ -353,7 +347,7 @@ struct PlayerProfileEditor: View {
                         photo = nil
                         photoChanged = true
                     }
-                    .foregroundColor(PlayerStyle.muted)
+                    .foregroundColor(SharedColors.textSecondary)
                 }
             }
         }
@@ -385,7 +379,7 @@ struct PlayerProfileEditor: View {
 
     var body: some View {
         ZStack {
-            PlayerStyle.background.ignoresSafeArea()
+            SharedColors.background.ignoresSafeArea()
             ScrollView {
                 VStack(spacing: 24) {
                     Text(isNew ? "SPELER TOEVOEGEN" : "SPELER BEWERKEN")
@@ -416,11 +410,11 @@ struct PlayerProfileEditor: View {
                             }
                         }
                         .buttonStyle(.borderedProminent)
-                        .tint(PlayerStyle.gold)
+                        .tint(SharedColors.gold)
                         .disabled(!player.isValid || isSaving)
                     }
                 }
-                .foregroundColor(PlayerStyle.text)
+                .foregroundColor(SharedColors.textPrimary)
                 .padding(24)
                 .disabled(isSaving)
             }

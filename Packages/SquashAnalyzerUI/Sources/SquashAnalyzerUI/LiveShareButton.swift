@@ -37,9 +37,9 @@ public struct LiveShareButton: View {
 
     private func button(isLive: Bool) -> some View {
         let newLink = isLive && live.linkChanged
-        let red = Color(red: 0.90, green: 0.28, blue: 0.30)
+        let red = SharedColors.warmRed
         // Not live yet: grey, so red always means viewers can follow along
-        let grey = CoachPalette.textSecondary
+        let grey = SharedColors.textSecondary
         return Button(action: tap) {
             HStack(spacing: 5) {
                 Circle()

@@ -6,15 +6,6 @@ import SquashAnalyzerCore
 // `LeagueTeamCard` / `LeagueTeamDetailView` (named `Shared...` here so the two
 // never collide); both use Core's `LeagueTeamFetcher` and the same storage keys.
 
-enum LeaguePalette {
-    static let orange = Color(red: 0.95, green: 0.55, blue: 0.15)
-    static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
-    static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let secondary = Color(red: 0.70, green: 0.68, blue: 0.65)
-    static let muted = Color(red: 0.55, green: 0.53, blue: 0.50)
-    static let card = Color(red: 0.14, green: 0.12, blue: 0.10)
-    static let background = Color.black
-}
 
 enum LeagueDates {
     static func day(_ date: Date) -> String {
@@ -64,15 +55,15 @@ public struct SharedLeagueTeamCard: View {
                     }
                     Text(loading ? "Mijn team laden…" : (errorMessage ?? "Team laden niet gelukt"))
                         .font(.system(size: 12))
-                        .foregroundColor(LeaguePalette.secondary)
+                        .foregroundColor(SharedColors.textSecondary)
                     Spacer()
                     if !loading {
                         Button("Opnieuw") { Task { await load() } }
-                            .foregroundColor(LeaguePalette.orange)
+                            .foregroundColor(SharedColors.accent)
                     }
                 }
                 .padding(16)
-                .background(RoundedRectangle(cornerRadius: 14).fill(LeaguePalette.card))
+                .background(RoundedRectangle(cornerRadius: 14).fill(SharedColors.surfaceRaised))
             }
         }
         .padding(.horizontal, 24)
@@ -114,29 +105,29 @@ public struct SharedLeagueTeamDetailView: View {
 
     public var body: some View {
         ZStack {
-            LeaguePalette.background.ignoresSafeArea()
+            SharedColors.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(snapshot.name)
                             .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(LeaguePalette.text)
+                            .foregroundColor(SharedColors.textPrimary)
                         Text("\(snapshot.division) · \(snapshot.competition)")
                             .font(.system(size: 12))
-                            .foregroundColor(LeaguePalette.secondary)
+                            .foregroundColor(SharedColors.textSecondary)
                     }
                     section("STAND") {
                         ForEach(snapshot.standings) { row in
                             HStack {
                                 Text("\(row.rank)")
-                                    .foregroundColor(row.name == snapshot.name ? LeaguePalette.orange : LeaguePalette.muted)
+                                    .foregroundColor(row.name == snapshot.name ? SharedColors.accent : SharedColors.textMuted)
                                     .frame(width: 26, alignment: .leading)
                                 Text(row.name)
-                                    .foregroundColor(LeaguePalette.text)
+                                    .foregroundColor(SharedColors.textPrimary)
                                     .fontWeight(row.name == snapshot.name ? .bold : .regular)
                                 Spacer()
                                 Text("\(row.points) pt")
-                                    .foregroundColor(LeaguePalette.gold)
+                                    .foregroundColor(SharedColors.gold)
                             }
                             .padding(.vertical, 5)
                         }
@@ -146,15 +137,15 @@ public struct SharedLeagueTeamDetailView: View {
                             HStack(spacing: 10) {
                                 Text(LeagueDates.day(fixture.date))
                                     .font(.system(size: 11))
-                                    .foregroundColor(LeaguePalette.muted)
+                                    .foregroundColor(SharedColors.textMuted)
                                     .frame(width: 82, alignment: .leading)
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(fixture.home).foregroundColor(LeaguePalette.text)
-                                    Text(fixture.away).foregroundColor(LeaguePalette.secondary)
+                                    Text(fixture.home).foregroundColor(SharedColors.textPrimary)
+                                    Text(fixture.away).foregroundColor(SharedColors.textSecondary)
                                 }
                                 Spacer()
                                 Text(fixture.score ?? LeagueDates.time(fixture.date))
-                                    .foregroundColor(fixture.score == nil ? LeaguePalette.muted : LeaguePalette.gold)
+                                    .foregroundColor(fixture.score == nil ? SharedColors.textMuted : SharedColors.gold)
                             }
                             .padding(.vertical, 5)
                         }
@@ -162,18 +153,18 @@ public struct SharedLeagueTeamDetailView: View {
                     section("SPELERS") {
                         ForEach(snapshot.players) { player in
                             HStack {
-                                Text(player.name).foregroundColor(LeaguePalette.text)
+                                Text(player.name).foregroundColor(SharedColors.textPrimary)
                                 Spacer()
                                 Text(player.record)
                                     .font(.system(size: 12))
-                                    .foregroundColor(LeaguePalette.secondary)
+                                    .foregroundColor(SharedColors.textSecondary)
                             }
                             .padding(.vertical, 4)
                         }
                     }
                     Text("Bijgewerkt: \(LeagueDates.day(snapshot.updatedAt)) \(LeagueDates.time(snapshot.updatedAt))")
                         .font(.system(size: 11))
-                        .foregroundColor(LeaguePalette.muted)
+                        .foregroundColor(SharedColors.textMuted)
                 }
                 .padding(24)
             }
@@ -186,7 +177,7 @@ public struct SharedLeagueTeamDetailView: View {
             Text(title)
                 .font(.system(size: 11, weight: .semibold))
                 .tracking(1.4)
-                .foregroundColor(LeaguePalette.orange)
+                .foregroundColor(SharedColors.accent)
             VStack(alignment: .leading, spacing: 0) {
                 content()
             }
@@ -260,7 +251,7 @@ public struct SharedSettingsView: View {
 
     public var body: some View {
         ZStack {
-            LeaguePalette.background.ignoresSafeArea()
+            SharedColors.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     manualSection
@@ -270,35 +261,35 @@ public struct SharedSettingsView: View {
                     liveSection
                         .padding(.bottom, 20)
                     HStack(spacing: 8) {
-                        HomeTileIconView(icon: .players, color: LeaguePalette.orange, size: 20)
+                        HomeTileIconView(icon: .players, color: SharedColors.accent, size: 20)
                         Text("Mijn team")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(LeaguePalette.text)
+                            .foregroundColor(SharedColors.textPrimary)
                     }
                     Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
                         .font(.system(size: 13))
-                        .foregroundColor(LeaguePalette.secondary)
+                        .foregroundColor(SharedColors.textSecondary)
                     TextField("https://sbn.toernooi.nl/league/.../team/...", text: $draft)
                         .accessibilityLabel("Teamlink")
                         // No autocapitalization/URL-keyboard modifiers: this package also builds
                         // for macOS; the link check is case-insensitive where it matters
                         .autocorrectionDisabled()
-                        .foregroundColor(LeaguePalette.text)
+                        .foregroundColor(SharedColors.textPrimary)
                         .padding()
                         .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
                     HStack(spacing: 12) {
                         Button("Bewaar teamlink") { save() }
                             .buttonStyle(.borderedProminent)
-                            .tint(LeaguePalette.orange)
+                            .tint(SharedColors.accent)
                         if !teamURL.isEmpty {
                             Button("Verwijder") { remove() }
-                                .foregroundColor(LeaguePalette.secondary)
+                                .foregroundColor(SharedColors.textSecondary)
                         }
                     }
                     if let message {
                         Text(message)
                             .font(.system(size: 12))
-                            .foregroundColor(messageIsError ? Color(red: 0.95, green: 0.40, blue: 0.35) : Color(red: 0.45, green: 0.80, blue: 0.45))
+                            .foregroundColor(messageIsError ? SharedColors.error : SharedColors.positive)
                     }
                     // Same order as iOS: back-up, then AI Coach and what it is
                     if backup != nil {
@@ -329,14 +320,14 @@ public struct SharedSettingsView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Handleiding")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(LeaguePalette.text)
+                .foregroundColor(SharedColors.textPrimary)
             Text("Per tegel uitgelegd hoe alles werkt, op squashanalyzer.com.")
                 .font(.system(size: 13))
-                .foregroundColor(LeaguePalette.secondary)
+                .foregroundColor(SharedColors.textSecondary)
             Link(destination: UserManual.android) {
                 Text("Open de handleiding")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(LeaguePalette.orange)
+                    .foregroundColor(SharedColors.accent)
             }
             .accessibilityLabel("Open de handleiding")
         }
@@ -346,16 +337,16 @@ public struct SharedSettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Live meekijken")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(LeaguePalette.text)
+                .foregroundColor(SharedColors.textPrimary)
             Toggle(isOn: $liveSharing) {
                 Text("Knop LIVE bij Coach en Scheidsrechter")
                     .font(.system(size: 14))
-                    .foregroundColor(LeaguePalette.text)
+                    .foregroundColor(SharedColors.textPrimary)
             }
-            .tint(LeaguePalette.orange)
+            .tint(SharedColors.accent)
             Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen en de stand; 2 uur na de wedstrijd wordt alles gewist.")
                 .font(.system(size: 12))
-                .foregroundColor(LeaguePalette.muted)
+                .foregroundColor(SharedColors.textMuted)
         }
     }
 
@@ -363,7 +354,7 @@ public struct SharedSettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Baanindeling")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(LeaguePalette.text)
+                .foregroundColor(SharedColors.textPrimary)
             Picker("Baanindeling", selection: $courtLayout) {
                 Text("6 vakken").tag(CourtLayout.six.rawValue)
                 Text("9 vakken").tag(CourtLayout.nine.rawValue)
@@ -371,7 +362,7 @@ public struct SharedSettingsView: View {
             .pickerStyle(.segmented)
             Text("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak.")
                 .font(.system(size: 12))
-                .foregroundColor(LeaguePalette.muted)
+                .foregroundColor(SharedColors.textMuted)
         }
     }
 
@@ -379,43 +370,43 @@ public struct SharedSettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("AI Coach")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(LeaguePalette.text)
+                .foregroundColor(SharedColors.textPrimary)
             Text("Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach.")
                 .font(.system(size: 13))
-                .foregroundColor(LeaguePalette.secondary)
+                .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 8) {
                 if showingKey {
                     TextField("sk-...", text: $keyDraft)
                         .accessibilityLabel("OpenAI API key")
                         .autocorrectionDisabled()
-                        .foregroundColor(LeaguePalette.text)
+                        .foregroundColor(SharedColors.textPrimary)
                 } else {
                     SecureField("sk-...", text: $keyDraft)
                         .accessibilityLabel("OpenAI API key")
-                        .foregroundColor(LeaguePalette.text)
+                        .foregroundColor(SharedColors.textPrimary)
                 }
                 Button(showingKey ? "Verberg" : "Toon") { showingKey.toggle() }
-                    .foregroundColor(LeaguePalette.secondary)
+                    .foregroundColor(SharedColors.textSecondary)
             }
             .padding()
             .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
             HStack(spacing: 12) {
                 Button("Bewaar API key") { saveKey() }
                     .buttonStyle(.borderedProminent)
-                    .tint(LeaguePalette.gold)
+                    .tint(SharedColors.gold)
                     .disabled(keyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 if hasKey {
                     Button("Verwijder key") { removeKey() }
-                        .foregroundColor(LeaguePalette.secondary)
+                        .foregroundColor(SharedColors.textSecondary)
                 }
             }
             HStack(spacing: 8) {
                 Circle()
-                    .fill(hasKey ? Color(red: 0.45, green: 0.80, blue: 0.45) : Color(red: 0.95, green: 0.40, blue: 0.35))
+                    .fill(hasKey ? SharedColors.positive : SharedColors.error)
                     .frame(width: 8, height: 8)
                 Text(keyMessage ?? (hasKey ? "API key geconfigureerd" : "Geen API key ingesteld"))
                     .font(.system(size: 12))
-                    .foregroundColor(LeaguePalette.muted)
+                    .foregroundColor(SharedColors.textMuted)
             }
         }
     }
@@ -425,7 +416,7 @@ public struct SharedSettingsView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Over AI Coach")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(LeaguePalette.text)
+                .foregroundColor(SharedColors.textPrimary)
             infoRow("Veilig", "Je API key wordt versleuteld op dit toestel bewaard")
             infoRow("Kosten", "~€0.01 per analyse (het goedkoopste beschikbare model)")
             infoRow("Internet vereist", "AI advies werkt alleen met internetverbinding")
@@ -437,10 +428,10 @@ public struct SharedSettingsView: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(LeaguePalette.text)
+                .foregroundColor(SharedColors.textPrimary)
             Text(detail)
                 .font(.system(size: 12))
-                .foregroundColor(LeaguePalette.secondary)
+                .foregroundColor(SharedColors.textSecondary)
         }
     }
 
@@ -448,17 +439,17 @@ public struct SharedSettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Back-up")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(LeaguePalette.text)
+                .foregroundColor(SharedColors.textPrimary)
             Text("Bewaar spelers, coach- en scheidsrechterwedstrijden en badges in een bestand, bijvoorbeeld op Google Drive. Een back-up van Android kun je ook op een iPhone terugzetten, en andersom.")
                 .font(.system(size: 13))
-                .foregroundColor(LeaguePalette.secondary)
+                .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 12) {
                 Button("Maak back-up") { makeBackup() }
                     .buttonStyle(.borderedProminent)
-                    .tint(LeaguePalette.orange)
+                    .tint(SharedColors.accent)
                     .disabled(backupBusy)
                 Button("Zet back-up terug") { pickBackup() }
-                    .foregroundColor(LeaguePalette.orange)
+                    .foregroundColor(SharedColors.accent)
                     .disabled(backupBusy)
             }
             if let auto = backup?.auto {
@@ -470,7 +461,7 @@ public struct SharedSettingsView: View {
             if let backupMessage {
                 Text(backupMessage)
                     .font(.system(size: 12))
-                    .foregroundColor(backupIsError ? Color(red: 0.95, green: 0.40, blue: 0.35) : Color(red: 0.45, green: 0.80, blue: 0.45))
+                    .foregroundColor(backupIsError ? SharedColors.error : SharedColors.positive)
             }
         }
         .alert("Back-up terugzetten?", isPresented: $askingRestore) {
@@ -486,23 +477,23 @@ public struct SharedSettingsView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Automatische back-up")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(LeaguePalette.text)
+                .foregroundColor(SharedColors.textPrimary)
                 .padding(.top, 8)
             if let folder = autoFolder {
                 Text("Aan · map \u{201C}\(folder)\u{201D}\(autoLast.map { date in " · laatste \(Self.shortDate(date))" } ?? "")")
                     .font(.system(size: 12))
-                    .foregroundColor(LeaguePalette.secondary)
+                    .foregroundColor(SharedColors.textSecondary)
                 Button("Uitzetten") {
                     auto.turnOff()
                     refreshAuto()
                 }
-                .foregroundColor(LeaguePalette.secondary)
+                .foregroundColor(SharedColors.textSecondary)
             } else {
                 Text("Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in een map die je kiest (bijvoorbeeld Documenten). De 7 nieuwste blijven bewaard.")
                     .font(.system(size: 12))
-                    .foregroundColor(LeaguePalette.muted)
+                    .foregroundColor(SharedColors.textMuted)
                 Button("Aanzetten en map kiezen") { turnOnAuto(auto) }
-                    .foregroundColor(LeaguePalette.orange)
+                    .foregroundColor(SharedColors.accent)
                     .disabled(backupBusy)
             }
         }

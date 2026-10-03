@@ -20,22 +20,22 @@ struct SharedCompleteResultView: View {
                 Text("UITSLAG AANVULLEN")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
                     .tracking(2)
-                    .foregroundColor(CoachPalette.textPrimary)
+                    .foregroundColor(SharedColors.textPrimary)
                 Text("Kies per gemiste game wie hem won.")
                     .font(.system(size: 13))
-                    .foregroundColor(CoachPalette.textSecondary)
+                    .foregroundColor(SharedColors.textSecondary)
                 Text("Nu: \(match.player1Name) \(match.player1GamesWon) – \(match.player2GamesWon) \(match.player2Name)")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(CoachPalette.textSecondary)
+                    .foregroundColor(SharedColors.textSecondary)
 
                 ForEach(0..<winners.count, id: \.self) { index in
                     HStack {
                         Text("Game \(match.firstUnrecordedGameNumber + index)")
-                            .foregroundColor(CoachPalette.textSecondary)
+                            .foregroundColor(SharedColors.textSecondary)
                         Spacer()
                         Text(match.name(for: winners[index]))
                             .fontWeight(.semibold)
-                            .foregroundColor(winners[index] == Player.player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue)
+                            .foregroundColor(winners[index] == Player.player1 ? SharedColors.accent : SharedColors.steelBlue)
                     }
                     .font(.system(size: 14))
                 }
@@ -43,22 +43,22 @@ struct SharedCompleteResultView: View {
                 if !isDecided && winners.count < 5 {
                     Text("Game \(match.firstUnrecordedGameNumber + winners.count): wie won?")
                         .font(.system(size: 13))
-                        .foregroundColor(CoachPalette.textPrimary)
+                        .foregroundColor(SharedColors.textPrimary)
                     HStack(spacing: 10) {
-                        choice(Player.player1, CoachPalette.warmOrange)
-                        choice(Player.player2, CoachPalette.steelBlue)
+                        choice(Player.player1, SharedColors.accent)
+                        choice(Player.player2, SharedColors.steelBlue)
                     }
                 }
 
                 if !winners.isEmpty {
                     Button("Laatste game wissen") { winners.removeLast() }
-                        .foregroundColor(CoachPalette.textSecondary)
+                        .foregroundColor(SharedColors.textSecondary)
                 }
 
                 HStack(spacing: 10) {
                     Button(action: onCancel) {
                         Text("Annuleren")
-                            .foregroundColor(CoachPalette.textSecondary)
+                            .foregroundColor(SharedColors.textSecondary)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                     }
@@ -66,10 +66,10 @@ struct SharedCompleteResultView: View {
                     Button { onSave(winners) } label: {
                         Text("Opslaan")
                             .fontWeight(.bold)
-                            .foregroundColor(CoachPalette.backgroundDark)
+                            .foregroundColor(SharedColors.background)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(isDecided ? CoachPalette.warmOrange : CoachPalette.textMuted)
+                            .background(isDecided ? SharedColors.accent : SharedColors.textMuted)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .buttonStyle(.plain)
@@ -77,8 +77,8 @@ struct SharedCompleteResultView: View {
                 }
             }
             .padding(24)
-            .background(RoundedRectangle(cornerRadius: 20).fill(CoachPalette.backgroundMedium))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(CoachPalette.warmOrange.opacity(0.4), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 20).fill(SharedColors.surface))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(SharedColors.accent.opacity(0.4), lineWidth: 1))
             .padding(24)
         }
     }

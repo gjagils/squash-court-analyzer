@@ -19,37 +19,37 @@ struct SharedTeamImportView: View {
 
     var body: some View {
         ZStack {
-            PlayerStyle.background.ignoresSafeArea()
+            SharedColors.background.ignoresSafeArea()
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Text("TEAM IMPORTEREN")
                         .font(.system(size: 18, weight: .bold, design: .rounded))
                         .tracking(2)
-                        .foregroundColor(PlayerStyle.gold)
+                        .foregroundColor(SharedColors.gold)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                     Spacer()
                     Button(action: onClose) {
-                        AppSymbol("xmark", size: 18, color: PlayerStyle.text)
+                        AppSymbol("xmark", size: 18, color: SharedColors.textPrimary)
                             .frame(width: 44, height: 44)
                     }
                     .accessibilityLabel("Sluiten")
                 }
                 Text("Plak de teamlink die je hebt gekregen, zoals https://squashanalyzer.com/teams/…/team.zip. Spelers met dezelfde naam worden bijgewerkt, nieuwe worden toegevoegd.")
                     .font(.system(size: 14))
-                    .foregroundColor(PlayerStyle.muted)
+                    .foregroundColor(SharedColors.textSecondary)
                 TextField("https://squashanalyzer.com/teams/…", text: $link)
-                    .foregroundColor(PlayerStyle.text)
+                    .foregroundColor(SharedColors.textPrimary)
                     .padding(12)
                     .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.06)))
                     .disabled(isImporting)
                 Button(action: start) {
                     Text(isImporting ? "Bezig met importeren…" : "IMPORTEREN")
                         .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundColor(PlayerStyle.background)
+                        .foregroundColor(SharedColors.background)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(PlayerStyle.gold)
+                        .background(SharedColors.gold)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
@@ -57,14 +57,14 @@ struct SharedTeamImportView: View {
                 if filePicker != nil {
                     Text("Of kies een team-zip van je telefoon.")
                         .font(.system(size: 14))
-                        .foregroundColor(PlayerStyle.muted)
+                        .foregroundColor(SharedColors.textSecondary)
                     Button(action: pickZip) {
                         Text("KIES ZIP-BESTAND")
                             .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundColor(PlayerStyle.gold)
+                            .foregroundColor(SharedColors.gold)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
-                            .background(RoundedRectangle(cornerRadius: 12).stroke(PlayerStyle.gold.opacity(0.6), lineWidth: 1))
+                            .background(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.gold.opacity(0.6), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                     .disabled(isImporting)
@@ -72,12 +72,12 @@ struct SharedTeamImportView: View {
                 if let resultText {
                     Text(resultText)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(PlayerStyle.gold)
+                        .foregroundColor(SharedColors.gold)
                 }
                 if let errorText {
                     Text(errorText)
                         .font(.system(size: 14))
-                        .foregroundColor(Color(red: 0.90, green: 0.40, blue: 0.35))
+                        .foregroundColor(SharedColors.error)
                 }
                 Spacer()
             }

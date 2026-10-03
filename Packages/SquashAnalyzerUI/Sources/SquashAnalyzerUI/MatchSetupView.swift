@@ -72,8 +72,8 @@ public struct MatchSetupView: View {
             VStack(spacing: 22) {
                 header
 
-                playerRow(label: "Speler 1", name: $player1Name, slot: 1, color: SetupPalette.orange, focus: focus(player1Pick, currentName: player1Name))
-                playerRow(label: "Speler 2", name: $player2Name, slot: 2, color: SetupPalette.blue, focus: focus(player2Pick, currentName: player2Name))
+                playerRow(label: "Speler 1", name: $player1Name, slot: 1, color: SharedColors.accent, focus: focus(player1Pick, currentName: player1Name))
+                playerRow(label: "Speler 2", name: $player2Name, slot: 2, color: SharedColors.steelBlue, focus: focus(player2Pick, currentName: player2Name))
 
                 serverPicker
                 lateStartSection
@@ -82,10 +82,10 @@ public struct MatchSetupView: View {
                     Text(isCoach ? "START WEDSTRIJD" : "START SCHEIDSRECHTER")
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .tracking(1)
-                        .foregroundColor(SetupPalette.background)
+                        .foregroundColor(SharedColors.background)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(SetupPalette.orange)
+                        .background(SharedColors.accent)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
@@ -99,15 +99,15 @@ public struct MatchSetupView: View {
                 List {
                     Button { editing = PlayerProfile() } label: {
                         HStack(spacing: 10) {
-                            AppSymbol("plus", size: 16, color: SetupPalette.gold)
-                            Text("Nieuwe speler").foregroundColor(SetupPalette.gold)
+                            AppSymbol("plus", size: 16, color: SharedColors.gold)
+                            Text("Nieuwe speler").foregroundColor(SharedColors.gold)
                         }
                     }
                     ForEach(players) { player in
                         Button { choose(player) } label: {
                             HStack(spacing: 12) {
-                                PlayerPhotoView(photo: photos[player.id], name: player.name, size: 36, color: SetupPalette.gold)
-                                Text(player.name).foregroundColor(SetupPalette.text)
+                                PlayerPhotoView(photo: photos[player.id], name: player.name, size: 36, color: SharedColors.gold)
+                                Text(player.name).foregroundColor(SharedColors.textPrimary)
                                 Spacer()
                             }
                         }
@@ -132,11 +132,11 @@ public struct MatchSetupView: View {
         ZStack {
             Text(isCoach ? "Coach" : "Scheidsrechter")
                 .font(PageTitleStyle.font)
-                .foregroundColor(SetupPalette.text)
+                .foregroundColor(SharedColors.textPrimary)
             HStack {
                 Spacer()
                 Button { pickingSlot = 0 } label: {
-                    AppSymbol("person.2.circle", size: 22, color: SetupPalette.gold)
+                    AppSymbol("person.2.circle", size: 22, color: SharedColors.gold)
                         .frame(width: 44, height: 32)
                 }
                 .buttonStyle(.plain)
@@ -146,10 +146,10 @@ public struct MatchSetupView: View {
                 HStack {
                     Button(action: onCancel) {
                         HStack(spacing: 4) {
-                            AppSymbol("chevron.left", size: 14, color: SetupPalette.muted)
+                            AppSymbol("chevron.left", size: 14, color: SharedColors.textSecondary)
                             Text("Home")
                                 .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(SetupPalette.muted)
+                                .foregroundColor(SharedColors.textSecondary)
                         }
                     }
                     .buttonStyle(.plain)
@@ -174,7 +174,7 @@ public struct MatchSetupView: View {
                     .background(Color.white.opacity(0.08))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(color.opacity(0.4), lineWidth: 1))
-                    .foregroundColor(SetupPalette.text)
+                    .foregroundColor(SharedColors.textPrimary)
                 Button("Kies speler") { pickingSlot = slot }
                     .foregroundColor(color)
             }
@@ -200,10 +200,10 @@ public struct MatchSetupView: View {
         VStack(spacing: 10) {
             Text("Wie serveert eerst?")
                 .font(.system(size: 14, weight: .medium, design: .rounded))
-                .foregroundColor(SetupPalette.muted)
+                .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 10) {
-                serverButton(Player.player1, name1, SetupPalette.orange)
-                serverButton(Player.player2, name2, SetupPalette.blue)
+                serverButton(Player.player1, name1, SharedColors.accent)
+                serverButton(Player.player2, name2, SharedColors.steelBlue)
             }
         }
     }
@@ -219,7 +219,7 @@ public struct MatchSetupView: View {
                 Text(name)
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .lineLimit(1)
-                    .foregroundColor(selected ? color : SetupPalette.text)
+                    .foregroundColor(selected ? color : SharedColors.textPrimary)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
@@ -240,9 +240,9 @@ public struct MatchSetupView: View {
                          ? "Start bij game \(1 + gamesBefore1 + gamesBefore2) · stand \(gamesBefore1) – \(gamesBefore2)"
                          : (lateStart ? "Later instappen" : "Later instappen?"))
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(hasHeadStart ? SetupPalette.gold : SetupPalette.muted)
+                        .foregroundColor(hasHeadStart ? SharedColors.gold : SharedColors.textSecondary)
                     AppSymbol(lateStart ? "chevron.up" : "chevron.down", size: 12,
-                              color: hasHeadStart ? SetupPalette.gold : SetupPalette.muted)
+                              color: hasHeadStart ? SharedColors.gold : SharedColors.textSecondary)
                 }
             }
             .buttonStyle(.plain)
@@ -250,13 +250,13 @@ public struct MatchSetupView: View {
                 Text("GAMES GEWONNEN")
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .tracking(1)
-                    .foregroundColor(SetupPalette.gold)
-                gamesRow(name1, color: SetupPalette.orange, value: gamesBefore1, onMinus: { gamesBefore1 = max(0, gamesBefore1 - 1) }, onPlus: { gamesBefore1 = min(2, gamesBefore1 + 1) })
-                gamesRow(name2, color: SetupPalette.blue, value: gamesBefore2, onMinus: { gamesBefore2 = max(0, gamesBefore2 - 1) }, onPlus: { gamesBefore2 = min(2, gamesBefore2 + 1) })
+                    .foregroundColor(SharedColors.gold)
+                gamesRow(name1, color: SharedColors.accent, value: gamesBefore1, onMinus: { gamesBefore1 = max(0, gamesBefore1 - 1) }, onPlus: { gamesBefore1 = min(2, gamesBefore1 + 1) })
+                gamesRow(name2, color: SharedColors.steelBlue, value: gamesBefore2, onMinus: { gamesBefore2 = max(0, gamesBefore2 - 1) }, onPlus: { gamesBefore2 = min(2, gamesBefore2 + 1) })
                 if !headStartIsValid {
                     Text("Met deze stand is de wedstrijd al beslist")
                         .font(.system(size: 12))
-                        .foregroundColor(SetupPalette.muted)
+                        .foregroundColor(SharedColors.textSecondary)
                 }
             }
         }
@@ -274,7 +274,7 @@ public struct MatchSetupView: View {
                 .accessibilityLabel("Minder games voor \(name)")
             Text("\(value)")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(SetupPalette.text)
+                .foregroundColor(SharedColors.textPrimary)
                 .frame(width: 28)
             Button(action: onPlus) { Text("+").font(.system(size: 22, weight: .bold)).frame(width: 44, height: 36) }
                 .buttonStyle(.plain)
@@ -335,11 +335,3 @@ public struct MatchSetupView: View {
     }
 }
 
-private enum SetupPalette {
-    static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let muted = Color(red: 0.70, green: 0.68, blue: 0.65)
-    static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
-    static let orange = Color(red: 0.95, green: 0.55, blue: 0.15)
-    static let blue = Color(red: 0.35, green: 0.45, blue: 0.55)
-    static let background = Color.black
-}

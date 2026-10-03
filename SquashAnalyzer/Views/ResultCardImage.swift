@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerUI
 import UIKit
 import SquashAnalyzerCore
 
@@ -10,9 +11,9 @@ struct ResultCardImage: View {
     /// 420 for the exported picture; nil fills the width (the preview in Deel score)
     var width: CGFloat? = 420
 
-    private let background = Color(red: 0.12, green: 0.105, blue: 0.09)
-    private let chipBackground = Color(red: 0.17, green: 0.165, blue: 0.17)
-    private let muted = Color(red: 0.56, green: 0.54, blue: 0.52)
+    private let background = SharedColors.pictureBackground
+    private let chipBackground = SharedColors.pictureChip
+    private let muted = SharedColors.pictureMuted
 
     private func color(_ player: Player) -> Color {
         player == .player1 ? AppColors.warmOrange : AppColors.steelBlueLight
@@ -143,7 +144,7 @@ struct ResultCardImage: View {
         format.scale = image.scale
         format.opaque = true
         return UIGraphicsImageRenderer(size: image.size, format: format).image { context in
-            UIColor(red: 0.12, green: 0.105, blue: 0.09, alpha: 1).setFill()
+            UIColor(SharedColors.pictureBackground).setFill()
             context.fill(CGRect(origin: .zero, size: image.size))
             image.draw(at: .zero)
         }

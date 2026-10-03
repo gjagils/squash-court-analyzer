@@ -19,12 +19,12 @@ public struct SharedMatchBadgesStrip: View {
                 Text("BADGES VERDIEND")
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .tracking(1.5)
-                    .foregroundColor(StripPalette.gold)
+                    .foregroundColor(SharedColors.gold)
                 ForEach(earnings) { earning in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(earning.name)
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
-                            .foregroundColor(StripPalette.textSecondary)
+                            .foregroundColor(SharedColors.textSecondary)
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {
                                 ForEach(earning.badges) { badge in
@@ -50,7 +50,3 @@ public struct SharedMatchBadgesStrip: View {
     }
 }
 
-private enum StripPalette {
-    static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
-    static let textSecondary = Color(red: 0.70, green: 0.68, blue: 0.65)
-}

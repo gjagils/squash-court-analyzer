@@ -46,14 +46,14 @@ public struct SharedScoreboardView: View {
         VStack(spacing: 3) {
             Text("GAME \(match?.currentGameNumber ?? 1)")
                 .font(.system(size: 10, weight: .medium, design: .rounded))
-                .foregroundColor(CoachPalette.textMuted)
+                .foregroundColor(SharedColors.textMuted)
                 .tracking(2)
             Text("\(match?.player1GamesWon ?? 0) – \(match?.player2GamesWon ?? 0)")
                 .font(.system(size: 22, weight: .bold, design: .monospaced))
-                .foregroundColor(CoachPalette.textPrimary)
+                .foregroundColor(SharedColors.textPrimary)
             Text("GAMES")
                 .font(.system(size: 8, weight: .medium, design: .rounded))
-                .foregroundColor(CoachPalette.textMuted)
+                .foregroundColor(SharedColors.textMuted)
                 .tracking(1.5)
 
             pointsTimeline
@@ -72,7 +72,7 @@ public struct SharedScoreboardView: View {
         let rows = 5
         var recent: [Point] = []
         for point in game.points.suffix(rows).reversed() { recent.append(point) }
-        let serverColor = game.currentServer == Player.player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue
+        let serverColor = game.currentServer == Player.player1 ? SharedColors.accent : SharedColors.steelBlue
 
         return VStack(spacing: 0) {
             ZStack {
@@ -102,7 +102,7 @@ public struct SharedScoreboardView: View {
 
     private func timelineRow(_ point: Point, width: CGFloat, rowHeight: CGFloat) -> some View {
         let isLeft = point.scorer == Player.player1
-        let color = isLeft ? CoachPalette.warmOrange : CoachPalette.steelBlue
+        let color = isLeft ? SharedColors.accent : SharedColors.steelBlue
         let score = isLeft ? point.player1Score : point.player2Score
         let dotSize = CGFloat(8)
         let inner = width / CGFloat(2) - dotSize / CGFloat(2)
@@ -149,7 +149,7 @@ public struct SharedScoreboardView: View {
     }
 
     private func playerColumn(_ player: Player) -> some View {
-        let color = player == .player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue
+        let color = player == .player1 ? SharedColors.accent : SharedColors.steelBlue
         let score = player == .player1 ? game.player1Score : game.player2Score
         let isServing = game.currentServer == player
         let isScoring = game.selectedPlayer == player
@@ -206,19 +206,6 @@ public struct SharedScoreboardView: View {
     }
 }
 
-enum CoachPalette {
-    static let warmOrange = Color(red: 0.95, green: 0.55, blue: 0.15)
-    static let steelBlue = Color(red: 0.35, green: 0.45, blue: 0.55)
-    static let textPrimary = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let textSecondary = Color(red: 0.70, green: 0.68, blue: 0.65)
-    static let textMuted = Color(red: 0.50, green: 0.48, blue: 0.45)
-    static let backgroundDark = Color.black
-    static let backgroundMedium = Color(red: 0.12, green: 0.10, blue: 0.08)
-    static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
-    static let coolBlue = Color(red: 0.42, green: 0.58, blue: 0.82)
-    static let coolIndigo = Color(red: 0.55, green: 0.47, blue: 0.90)
-    static let warmRed = Color(red: 0.85, green: 0.30, blue: 0.30)
-}
 
 /// Coach mode's scoring screen, shared between iOS and Android. Reproduces
 /// the app's "score-tap" flow (the default input mode — see
@@ -355,16 +342,16 @@ public struct CoachScoringView: View {
         ZStack {
             Text("Coach")
                 .font(PageTitleStyle.font)
-                .foregroundColor(CoachPalette.textPrimary)
+                .foregroundColor(SharedColors.textPrimary)
                 .lineLimit(1)
             HStack {
                 Button { requestStop() } label: {
                     HStack(spacing: 4) {
-                        AppSymbol("xmark", size: 14, color: CoachPalette.textSecondary)
+                        AppSymbol("xmark", size: 14, color: SharedColors.textSecondary)
                         Text("Stop")
                     }
                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(CoachPalette.textSecondary)
+                    .foregroundColor(SharedColors.textSecondary)
                 }
                 if !match.isMatchOver {
                     LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot() }, share: shareText)
@@ -376,7 +363,7 @@ public struct CoachScoringView: View {
                         analysedGame = match.games[match.currentGameIndex - 1]
                         showingAnalysis = true
                     } label: {
-                        AppSymbol("chart.bar.xaxis", size: 18, color: CoachPalette.gold)
+                        AppSymbol("chart.bar.xaxis", size: 18, color: SharedColors.gold)
                             .frame(width: 36, height: 32)
                     }
                     .buttonStyle(.plain)
@@ -384,7 +371,7 @@ public struct CoachScoringView: View {
                 }
                 if let onHistory {
                     Button(action: onHistory) {
-                        AppSymbol("clock.arrow.circlepath", size: 20, color: CoachPalette.textSecondary)
+                        AppSymbol("clock.arrow.circlepath", size: 20, color: SharedColors.textSecondary)
                             .frame(width: 36, height: 32)
                     }
                     .buttonStyle(.plain)
@@ -392,7 +379,7 @@ public struct CoachScoringView: View {
                 }
                 if let onSettings {
                     Button(action: onSettings) {
-                        AppSymbol("gearshape", size: 20, color: CoachPalette.textSecondary)
+                        AppSymbol("gearshape", size: 20, color: SharedColors.textSecondary)
                             .frame(width: 36, height: 32)
                     }
                     .buttonStyle(.plain)
@@ -415,7 +402,7 @@ public struct CoachScoringView: View {
                 case .selectPlayer:
                     Text(game.isStarted ? "Tik op de score van wie scoort" : "Tik START bij de eerste service")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(CoachPalette.textSecondary)
+                        .foregroundColor(SharedColors.textSecondary)
                 case .selectPointType:
                     Text("Hoe werd het punt gewonnen?")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
@@ -438,7 +425,7 @@ public struct CoachScoringView: View {
     }
 
     private var playerColor: Color {
-        game.selectedPlayer == .player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue
+        game.selectedPlayer == .player1 ? SharedColors.accent : SharedColors.steelBlue
     }
 
     // MARK: - Score-tap flow (staged middle area, mirrors ContentView.scoreTapStage)
@@ -549,7 +536,7 @@ public struct CoachScoringView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(CoachPalette.gold)
+            .background(SharedColors.gold)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
@@ -569,7 +556,7 @@ public struct CoachScoringView: View {
         }) {
             Text("Annuleer")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundColor(CoachPalette.textMuted)
+                .foregroundColor(SharedColors.textMuted)
                 .padding(.vertical, 6)
         }
         .buttonStyle(.plain)
@@ -646,7 +633,7 @@ public struct CoachScoringView: View {
             if let last = game.points.last, game.selectedPlayer == nil {
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(last.scorer == Player.player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue)
+                        .fill(last.scorer == Player.player1 ? SharedColors.accent : SharedColors.steelBlue)
                         .frame(width: 6, height: 6)
                     Text("\(game.name(for: last.scorer)): \(last.summary)")
                 }
@@ -655,7 +642,7 @@ public struct CoachScoringView: View {
             }
         }
         .font(.system(size: 11))
-        .foregroundColor(CoachPalette.textMuted)
+        .foregroundColor(SharedColors.textMuted)
         .lineLimit(1)
         .frame(height: 16)
     }
@@ -670,23 +657,23 @@ public struct CoachScoringView: View {
                 Text("LET")
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                     .tracking(3)
-                    .foregroundColor(CoachPalette.gold)
+                    .foregroundColor(SharedColors.gold)
                 Text("Wie vraagt de let?")
                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(CoachPalette.textSecondary)
+                    .foregroundColor(SharedColors.textSecondary)
                 HStack(spacing: 16) {
-                    letButton(Player.player1, CoachPalette.warmOrange)
-                    letButton(Player.player2, CoachPalette.steelBlue)
+                    letButton(Player.player1, SharedColors.accent)
+                    letButton(Player.player2, SharedColors.steelBlue)
                 }
                 if game.totalLets > 0 {
                     Text("Lets deze game: \(game.totalLets)")
                         .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundColor(CoachPalette.textMuted)
+                        .foregroundColor(SharedColors.textMuted)
                 }
                 Button { showingLet = false } label: {
                     Text("Annuleren")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundColor(CoachPalette.textSecondary)
+                        .foregroundColor(SharedColors.textSecondary)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 10)
                         .background(Color.white.opacity(0.1))
@@ -695,9 +682,9 @@ public struct CoachScoringView: View {
                 .buttonStyle(.plain)
             }
             .padding(24)
-            .background(CoachPalette.backgroundMedium)
+            .background(SharedColors.surface)
             .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(CoachPalette.gold.opacity(0.3), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.gold.opacity(0.3), lineWidth: 1))
             .padding(.horizontal, 40)
         }
     }
@@ -705,10 +692,10 @@ public struct CoachScoringView: View {
     private func letButton(_ player: Player, _ color: Color) -> some View {
         Button { callLet(player) } label: {
             VStack(spacing: 8) {
-                AppSymbol("arrow.counterclockwise", size: 24, color: CoachPalette.textPrimary)
+                AppSymbol("arrow.counterclockwise", size: 24, color: SharedColors.textPrimary)
                 Text(match.name(for: player))
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundColor(CoachPalette.textPrimary)
+                    .foregroundColor(SharedColors.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
@@ -751,35 +738,35 @@ public struct CoachScoringView: View {
         overlayCard {
             Text(Match.stopTitle)
                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(CoachPalette.textPrimary)
+                .foregroundColor(SharedColors.textPrimary)
             Text(match.stopMessage)
                 .font(.system(size: 13))
-                .foregroundColor(CoachPalette.textSecondary)
+                .foregroundColor(SharedColors.textSecondary)
                 .multilineTextAlignment(.center)
-            overlayButton("Bewaar en ga later verder", CoachPalette.warmOrange) {
+            overlayButton("Bewaar en ga later verder", SharedColors.accent) {
                 showingStop = false
                 onExit()
             }
             if let onAbandon {
-                overlayButton("Opslaan als incompleet", CoachPalette.textSecondary) {
+                overlayButton("Opslaan als incompleet", SharedColors.textSecondary) {
                     showingStop = false
                     stopLive()
                     onAbandon()
                 }
             }
-            overlayButton("Uitslag aanvullen", CoachPalette.textSecondary) {
+            overlayButton("Uitslag aanvullen", SharedColors.textSecondary) {
                 showingStop = false
                 showingComplete = true
             }
             if let onDiscard {
-                overlayButton("Niet opslaan", Color(red: 0.90, green: 0.40, blue: 0.35)) {
+                overlayButton("Niet opslaan", SharedColors.error) {
                     showingStop = false
                     stopLive()
                     onDiscard()
                 }
             }
             Button("Doorspelen") { showingStop = false }
-                .foregroundColor(CoachPalette.textSecondary)
+                .foregroundColor(SharedColors.textSecondary)
         }
     }
 
@@ -790,8 +777,8 @@ public struct CoachScoringView: View {
                 content()
             }
             .padding(24)
-            .background(RoundedRectangle(cornerRadius: 20).fill(CoachPalette.backgroundMedium))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(CoachPalette.warmOrange.opacity(0.4), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 20).fill(SharedColors.surface))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(SharedColors.accent.opacity(0.4), lineWidth: 1))
             .padding(24)
         }
     }
@@ -829,16 +816,16 @@ public struct CoachScoringView: View {
     private func coachActionButton(_ title: String, icon: String, disabled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 6) {
-                AppSymbol(icon, size: 13, color: disabled ? CoachPalette.textMuted : CoachPalette.textPrimary)
+                AppSymbol(icon, size: 13, color: disabled ? SharedColors.textMuted : SharedColors.textPrimary)
                 Text(title).font(.system(size: 13, weight: .bold, design: .rounded)).tracking(1)
             }
-            .foregroundColor(disabled ? CoachPalette.textMuted : CoachPalette.textPrimary)
+            .foregroundColor(disabled ? SharedColors.textMuted : SharedColors.textPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(CoachPalette.textPrimary.opacity(disabled ? 0.04 : 0.10))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(CoachPalette.textPrimary.opacity(disabled ? 0.08 : 0.3), lineWidth: 1))
+                    .fill(SharedColors.textPrimary.opacity(disabled ? 0.04 : 0.10))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.textPrimary.opacity(disabled ? 0.08 : 0.3), lineWidth: 1))
             )
         }
         .buttonStyle(.plain)
@@ -904,15 +891,15 @@ struct RallyClock: View {
         let seconds = Int(game.rallySeconds(at: now))
         let text = (seconds / 60 < 10 ? "0" : "") + "\(seconds / 60):" + (seconds % 60 < 10 ? "0" : "") + "\(seconds % 60)"
         return HStack(spacing: 6) {
-            AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
+            AppSymbol("timer", size: 12, color: SharedColors.gold.opacity(0.5))
             VStack(alignment: .leading, spacing: 1) {
             Text("RALLY")
                 .font(.system(size: 8, weight: .medium, design: .rounded))
                 .tracking(1)
-                .foregroundColor(CoachPalette.textMuted)
+                .foregroundColor(SharedColors.textMuted)
             Text(text)
                 .font(.system(size: 14, weight: .bold, design: .monospaced))
-                .foregroundColor(CoachPalette.textSecondary)
+                .foregroundColor(SharedColors.textSecondary)
             }
         }
         .opacity(hidden ? 0.0 : 1.0)

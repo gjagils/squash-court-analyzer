@@ -285,8 +285,7 @@ struct MatchStartView: View {
                     HardwareButton(
                         title: "Start Wedstrijd",
                         subtitle: nil,
-                        color: AppColors.warmOrange,
-                        colorDark: AppColors.warmOrangeDark
+                        color: AppColors.warmOrange
                     ) {
                         startMatch()
                     }
@@ -295,8 +294,7 @@ struct MatchStartView: View {
                     HardwareButton(
                         title: "Start Scheidsrechter",
                         subtitle: nil,
-                        color: AppColors.warmOrange,
-                        colorDark: AppColors.warmOrangeDark
+                        color: AppColors.warmOrange
                     ) {
                         startReferee()
                     }

@@ -7,15 +7,15 @@ import SquashAnalyzerCore
 struct ResultCardPreview: View {
     let card: ResultCard
 
-    private let background = Color(red: 0.12, green: 0.105, blue: 0.09)
-    private let muted = Color(red: 0.56, green: 0.54, blue: 0.52)
+    private let background = SharedColors.pictureBackground
+    private let muted = SharedColors.pictureMuted
 
     private func color(_ player: Player) -> Color {
-        player == Player.player1 ? DashboardPalette.orange : DashboardPalette.blue
+        player == Player.player1 ? SharedColors.accent : SharedColors.steelBlueLight
     }
 
     private func scoreColor(_ player: Player) -> Color {
-        guard let winner = card.winner else { return DashboardPalette.text }
+        guard let winner = card.winner else { return SharedColors.textPrimary }
         return winner == player ? color(player) : muted
     }
 
@@ -24,7 +24,7 @@ struct ResultCardPreview: View {
             Text(card.title)
                 .font(.system(size: 20, weight: .bold, design: .rounded))
                 .tracking(4)
-                .foregroundColor(DashboardPalette.text)
+                .foregroundColor(SharedColors.textPrimary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             HStack(alignment: .top, spacing: 12) {
@@ -45,7 +45,7 @@ struct ResultCardPreview: View {
             if let text = card.winnerText {
                 Text(text)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(card.winner == nil ? DashboardPalette.secondary : color(card.winner ?? Player.player1))
+                    .foregroundColor(card.winner == nil ? SharedColors.textSecondary : color(card.winner ?? Player.player1))
                     .multilineTextAlignment(.center)
             }
             HStack(spacing: 6) {
@@ -57,10 +57,10 @@ struct ResultCardPreview: View {
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                             .lineLimit(1)
                     }
-                    .foregroundColor(chip.winner == nil ? DashboardPalette.secondary : color(chip.winner ?? Player.player1))
+                    .foregroundColor(chip.winner == nil ? SharedColors.textSecondary : color(chip.winner ?? Player.player1))
                     .padding(.vertical, 6)
                     .padding(.horizontal, 6)
-                    .background(chip.winner == Player.player1 ? DashboardPalette.orange.opacity(0.16) : Color.white.opacity(0.06))
+                    .background(chip.winner == Player.player1 ? SharedColors.accent.opacity(0.16) : Color.white.opacity(0.06))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
             }
@@ -82,7 +82,7 @@ struct ResultCardPreview: View {
             PlayerAvatarPlaceholder(color: color(player), size: 56, active: true, photo: card.photo(for: player))
             Text(card.name(for: player))
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundColor(player == Player.player1 ? DashboardPalette.secondary : color(player))
+                .foregroundColor(player == Player.player1 ? SharedColors.textSecondary : color(player))
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
         }

@@ -2,14 +2,6 @@ import SwiftUI
 import Foundation
 import SquashAnalyzerCore
 
-/// Small pieces shared between coach's `ScoreboardView` and referee mode's own
-/// scoring screen. Same private-palette pattern as HomeMenu.swift/CourtView.swift:
-/// the app's DesignSystem.swift stays app-only, so shared views keep their own
-/// minimal, matching color constants.
-private enum ScoreboardPalette {
-    static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let backgroundDark = Color.black
-}
 
 /// The text colours of a player's column on the coach and referee screens,
 /// on iOS and Android: the server's name and score in white, the receiver's in
@@ -21,9 +13,9 @@ public struct ServerHighlight {
     public let caption: Color
 
     public init(color: Color, isServer: Bool) {
-        name = isServer ? ScoreboardPalette.text : color
-        score = isServer ? ScoreboardPalette.text : color
-        caption = isServer ? ScoreboardPalette.text.opacity(0.8) : color.opacity(0.55)
+        name = isServer ? SharedColors.textPrimary : color
+        score = isServer ? SharedColors.textPrimary : color
+        caption = isServer ? SharedColors.textPrimary.opacity(0.8) : color.opacity(0.55)
     }
 }
 
@@ -64,12 +56,12 @@ public struct ServiceSideSelector: View {
         return Button(action: { onSelect(box) }) {
             HStack(spacing: 3) {
                 if preferredSide == box {
-                    AppSymbol("pin.fill", size: 7, color: active ? ScoreboardPalette.backgroundDark : color.opacity(0.4))
+                    AppSymbol("pin.fill", size: 7, color: active ? SharedColors.background : color.opacity(0.4))
                 }
                 Text(label)
                     .font(.system(size: compact ? 11.0 : 12.0, weight: .bold, design: .rounded))
             }
-            .foregroundColor(active ? ScoreboardPalette.backgroundDark : color.opacity(0.4))
+            .foregroundColor(active ? SharedColors.background : color.opacity(0.4))
             .padding(.horizontal, compact ? 8.0 : 10.0)
             .padding(.vertical, compact ? 4.0 : 5.0)
             .background(
@@ -96,9 +88,9 @@ public struct ServerIndicator: View {
 
     public var body: some View {
         Circle()
-            .fill(isServing ? Color(red: 1.0, green: 0.60, blue: 0.15) : Color.clear)
+            .fill(isServing ? SharedColors.serverIndicator : Color.clear)
             .frame(width: 8, height: 8)
-            .shadow(color: isServing ? Color(red: 1.0, green: 0.60, blue: 0.15).opacity(0.8) : .clear, radius: 4, x: 0, y: 0)
+            .shadow(color: isServing ? SharedColors.serverIndicator.opacity(0.8) : .clear, radius: 4, x: 0, y: 0)
     }
 }
 

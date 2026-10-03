@@ -16,20 +16,20 @@ struct ResumePromptCard: View {
             VStack(spacing: 14) {
                 Text("Wedstrijd hervatten?")
                     .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(CoachPalette.textPrimary)
+                    .foregroundColor(SharedColors.textPrimary)
                 Text(message)
                     .font(.system(size: 13))
-                    .foregroundColor(CoachPalette.textSecondary)
+                    .foregroundColor(SharedColors.textSecondary)
                     .multilineTextAlignment(.center)
-                button("Hervatten", CoachPalette.warmOrange, action: onResume)
-                button("Nieuwe wedstrijd", CoachPalette.warmRed, action: onNew)
+                button("Hervatten", SharedColors.accent, action: onResume)
+                button("Nieuwe wedstrijd", SharedColors.warmRed, action: onNew)
                 Button("Annuleren", action: onCancel)
-                    .foregroundColor(CoachPalette.textSecondary)
+                    .foregroundColor(SharedColors.textSecondary)
             }
             .padding(24)
-            .background(CoachPalette.backgroundMedium)
+            .background(SharedColors.surface)
             .clipShape(RoundedRectangle(cornerRadius: 20))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(CoachPalette.warmOrange.opacity(0.4), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(SharedColors.accent.opacity(0.4), lineWidth: 1))
             .padding(24)
         }
     }

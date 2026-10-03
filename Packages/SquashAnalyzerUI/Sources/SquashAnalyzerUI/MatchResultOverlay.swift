@@ -55,7 +55,7 @@ public struct MatchResultOverlay: View {
     }
 
     static func color(for player: Player) -> Color {
-        player == Player.player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue
+        player == Player.player1 ? SharedColors.accent : SharedColors.steelBlue
     }
 
     public var body: some View {
@@ -74,7 +74,7 @@ public struct MatchResultOverlay: View {
         VStack(spacing: 22) {
             Text(result.title)
                 .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(CoachPalette.textPrimary)
+                .foregroundColor(SharedColors.textPrimary)
                 .tracking(3)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
@@ -83,7 +83,7 @@ public struct MatchResultOverlay: View {
                 side(Player.player1, name: result.player1Name, score: result.player1Score, photo: player1Photo)
                 Text("–")
                     .font(.system(size: 35, weight: .bold, design: .rounded))
-                    .foregroundColor(CoachPalette.textMuted)
+                    .foregroundColor(SharedColors.textMuted)
                     .padding(.bottom, 14)
                 side(Player.player2, name: result.player2Name, score: result.player2Score, photo: player2Photo)
             }
@@ -112,7 +112,7 @@ public struct MatchResultOverlay: View {
                             .frame(width: 8, height: 8)
                         Text(note)
                             .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundColor(CoachPalette.textMuted)
+                            .foregroundColor(SharedColors.textMuted)
                     }
                 }
             }
@@ -140,7 +140,7 @@ public struct MatchResultOverlay: View {
                     Button(action: link.action) {
                         Text(link.title)
                             .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(CoachPalette.textMuted)
+                            .foregroundColor(SharedColors.textMuted)
                     }
                     .buttonStyle(.plain)
                     .padding(.top, 2)
@@ -150,7 +150,7 @@ public struct MatchResultOverlay: View {
         .padding(.horizontal, 24)
         .padding(.vertical, 28)
         .frame(maxWidth: .infinity)
-        .background(CoachPalette.backgroundMedium)
+        .background(SharedColors.surface)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .overlay(
             RoundedRectangle(cornerRadius: 20)
@@ -165,12 +165,12 @@ public struct MatchResultOverlay: View {
             PlayerAvatarPlaceholder(color: color, size: 44, active: won, photo: photo)
             Text(name)
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundColor(won ? color : CoachPalette.textSecondary)
+                .foregroundColor(won ? color : SharedColors.textSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             Text("\(score)")
                 .font(.system(size: 64, weight: .bold, design: .rounded))
-                .foregroundColor(won ? color : CoachPalette.textPrimary.opacity(0.55))
+                .foregroundColor(won ? color : SharedColors.textPrimary.opacity(0.55))
         }
         .frame(maxWidth: .infinity)
     }
@@ -178,7 +178,7 @@ public struct MatchResultOverlay: View {
     private var chips: some View {
         HStack(spacing: 6) {
             ForEach(0..<result.untracked, id: \.self) { index in
-                chip(number: index + 1, score: "–", color: CoachPalette.textMuted)
+                chip(number: index + 1, score: "–", color: SharedColors.textMuted)
             }
             ForEach(result.games) { game in
                 chip(number: game.number, score: "\(game.player1Score)-\(game.player2Score)", color: Self.color(for: game.winner))
@@ -208,11 +208,11 @@ public struct MatchResultOverlay: View {
     private func caption(_ line: ResultCaptionLine) -> some View {
         HStack(spacing: 5) {
             if line.showsTimer {
-                AppSymbol("timer", size: 11, color: CoachPalette.gold.opacity(0.6))
+                AppSymbol("timer", size: 11, color: SharedColors.gold.opacity(0.6))
             }
             Text(line.text)
                 .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundColor(CoachPalette.textSecondary)
+                .foregroundColor(SharedColors.textSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
@@ -223,17 +223,17 @@ public struct MatchResultOverlay: View {
             Text(button.title.uppercased())
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .tracking(1)
-                .foregroundColor(CoachPalette.backgroundDark)
+                .foregroundColor(SharedColors.background)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(CoachPalette.warmOrange)
+                .background(SharedColors.accent)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
     }
 
     private func outlinedButton(_ button: ResultButton) -> some View {
-        let color = CoachPalette.textSecondary
+        let color = SharedColors.textSecondary
         return Button(action: button.action) {
             Text(button.title.uppercased())
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -250,7 +250,7 @@ public struct MatchResultOverlay: View {
 
     /// Outlined gold button with an icon; two of them share a row
     private func goldButton(_ button: ResultButton) -> some View {
-        let color = CoachPalette.gold
+        let color = SharedColors.gold
         return Button(action: button.action) {
             HStack(spacing: 6) {
                 if let icon = button.icon {
@@ -276,10 +276,10 @@ public struct MatchResultOverlay: View {
     private func undoButton(_ action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 6) {
-                AppSymbol("arrow.uturn.backward", size: 12, color: CoachPalette.textSecondary, weight: .semibold)
+                AppSymbol("arrow.uturn.backward", size: 12, color: SharedColors.textSecondary, weight: .semibold)
                 Text("Undo laatste punt")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundColor(CoachPalette.textSecondary)
+                    .foregroundColor(SharedColors.textSecondary)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
@@ -305,7 +305,7 @@ public struct MatchBadgesRow: View {
     }
 
     public var body: some View {
-        let color = CoachPalette.gold
+        let color = SharedColors.gold
         return Button(action: onTap) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
@@ -339,7 +339,7 @@ public struct MatchBadgesRow: View {
             }
             Text("\(earning.name) · " + (earning.badges.count == 1 ? earning.badges[0].title : "\(earning.badges.count) badges"))
                 .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundColor(CoachPalette.textPrimary)
+                .foregroundColor(SharedColors.textPrimary)
                 .lineLimit(1)
         }
     }
@@ -359,7 +359,7 @@ public struct SharedMatchBadgesSheet: View {
     public var body: some View {
         NavigationStack {
             ZStack {
-                CoachPalette.backgroundDark.ignoresSafeArea()
+                SharedColors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         ForEach(earnings) { earning in
@@ -396,7 +396,7 @@ public struct SharedMatchBadgesSheet: View {
                 Text("Sluiten")
             }
             .font(.system(size: 14, weight: .medium, design: .rounded))
-            .foregroundColor(CoachPalette.textSecondary)
+            .foregroundColor(SharedColors.textSecondary)
             .lineLimit(1)
             .fixedSize()
             // Toolbars draw icons a size up; keep the ✕ as small as on Spelers
@@ -411,17 +411,17 @@ public struct SharedMatchBadgesSheet: View {
             Text(earning.name.uppercased())
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                 .tracking(1.2)
-                .foregroundColor(CoachPalette.gold)
+                .foregroundColor(SharedColors.gold)
             ForEach(earning.badges) { kind in
                 HStack(spacing: 14) {
                     BadgeMedallion(kind: kind, size: 52, showsTitle: false)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(kind.title)
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(CoachPalette.textPrimary)
+                            .foregroundColor(SharedColors.textPrimary)
                         Text(kind.detail)
                             .font(.system(size: 12))
-                            .foregroundColor(CoachPalette.textSecondary)
+                            .foregroundColor(SharedColors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }

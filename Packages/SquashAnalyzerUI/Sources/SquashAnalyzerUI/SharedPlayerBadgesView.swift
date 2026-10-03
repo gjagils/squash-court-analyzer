@@ -55,9 +55,9 @@ public struct SharedPlayerBadgesView: View {
 
     public var body: some View {
         ZStack {
-            BadgePalette.backgroundDark.ignoresSafeArea()
+            SharedColors.background.ignoresSafeArea()
             if isLoading {
-                ProgressView("Badges laden…").foregroundColor(BadgePalette.textPrimary)
+                ProgressView("Badges laden…").foregroundColor(SharedColors.textPrimary)
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
@@ -74,15 +74,15 @@ public struct SharedPlayerBadgesView: View {
                         section("DELEN") {
                             Button { Task { await shareCard() } } label: {
                                 HStack(spacing: 8) {
-                                    AppSymbol("square.and.arrow.up", size: 14, color: BadgePalette.backgroundDark)
+                                    AppSymbol("square.and.arrow.up", size: 14, color: SharedColors.background)
                                     Text("DEEL KAART")
                                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                                         .tracking(1)
-                                        .foregroundColor(BadgePalette.backgroundDark)
+                                        .foregroundColor(SharedColors.background)
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
-                                .background(BadgePalette.gold)
+                                .background(SharedColors.gold)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                             }
                             .buttonStyle(.plain)
@@ -139,14 +139,14 @@ public struct SharedPlayerBadgesView: View {
 
     private var header: some View {
         HStack(spacing: 14) {
-            PlayerAvatarPlaceholder(color: BadgePalette.gold, size: 52, photo: photo)
+            PlayerAvatarPlaceholder(color: SharedColors.gold, size: 52, photo: photo)
             VStack(alignment: .leading, spacing: 4) {
                 Text(playerName)
                     .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(BadgePalette.textPrimary)
+                    .foregroundColor(SharedColors.textPrimary)
                 Text(moments.count == 1 ? "1 badge verdiend" : "\(moments.count) badges verdiend")
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(BadgePalette.textSecondary)
+                    .foregroundColor(SharedColors.textSecondary)
             }
         }
     }
@@ -156,7 +156,7 @@ public struct SharedPlayerBadgesView: View {
             Text(title)
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .tracking(1.5)
-                .foregroundColor(BadgePalette.textMuted)
+                .foregroundColor(SharedColors.textMuted)
             content()
         }
     }
@@ -168,11 +168,11 @@ public struct SharedPlayerBadgesView: View {
             if earned > 0 {
                 Text("\(earned)×")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundColor(BadgePalette.gold)
+                    .foregroundColor(SharedColors.gold)
             } else {
                 Text(kind.detail)
                     .font(.system(size: 10, weight: .medium, design: .rounded))
-                    .foregroundColor(BadgePalette.textMuted)
+                    .foregroundColor(SharedColors.textMuted)
                     .multilineTextAlignment(.center)
                     .lineLimit(3)
             }
@@ -218,7 +218,7 @@ struct SharedBadgeMomentsView: View {
 
     var body: some View {
         ZStack {
-            BadgePalette.backgroundDark.ignoresSafeArea()
+            SharedColors.background.ignoresSafeArea()
             List {
                 Section {
                     HStack(spacing: 14) {
@@ -226,18 +226,18 @@ struct SharedBadgeMomentsView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(kind.title)
                                 .font(.system(size: 17, weight: .bold, design: .rounded))
-                                .foregroundColor(BadgePalette.textPrimary)
+                                .foregroundColor(SharedColors.textPrimary)
                             Text(kind.detail)
                                 .font(.system(size: 12, weight: .medium, design: .rounded))
-                                .foregroundColor(BadgePalette.textSecondary)
+                                .foregroundColor(SharedColors.textSecondary)
                             if kind.coachOnly {
                                 Text("Alleen in coachmodus, waar de slagen worden bijgehouden")
                                     .font(.system(size: 11, weight: .medium, design: .rounded))
-                                    .foregroundColor(BadgePalette.textMuted)
+                                    .foregroundColor(SharedColors.textMuted)
                             } else if kind.isCareer {
                                 Text("Telt de wedstrijden op dit toestel")
                                     .font(.system(size: 11, weight: .medium, design: .rounded))
-                                    .foregroundColor(BadgePalette.textMuted)
+                                    .foregroundColor(SharedColors.textMuted)
                             }
                         }
                     }
@@ -248,13 +248,13 @@ struct SharedBadgeMomentsView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(moment.opponentName.isEmpty ? "Wedstrijd" : "Tegen \(moment.opponentName)")
                                 .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(BadgePalette.textPrimary)
+                                .foregroundColor(SharedColors.textPrimary)
                             Text(Self.dateText(moment.earnedAt))
                                 .font(.system(size: 12, weight: .medium, design: .rounded))
-                                .foregroundColor(BadgePalette.textMuted)
+                                .foregroundColor(SharedColors.textMuted)
                         }
                         // Opaque: Android draws the red swipe-to-delete layer underneath
-                        .listRowBackground(Color(red: 0.11, green: 0.10, blue: 0.09))
+                        .listRowBackground(SharedColors.surface)
                     }
                     .onDelete { offsets in
                         for index in offsets {

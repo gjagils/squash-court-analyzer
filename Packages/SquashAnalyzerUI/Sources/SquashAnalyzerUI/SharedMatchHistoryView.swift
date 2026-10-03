@@ -55,22 +55,22 @@ public struct SharedMatchHistoryView: View {
 
     public var body: some View {
         ZStack {
-            HistoryPalette.background.ignoresSafeArea()
+            SharedColors.background.ignoresSafeArea()
             if isLoading {
-                ProgressView("Wedstrijden laden…").foregroundColor(HistoryPalette.text)
+                ProgressView("Wedstrijden laden…").foregroundColor(SharedColors.textPrimary)
             } else if loadFailed {
                 VStack(spacing: 12) {
-                    Text("Wedstrijden konden niet worden geladen.").foregroundColor(HistoryPalette.muted)
+                    Text("Wedstrijden konden niet worden geladen.").foregroundColor(SharedColors.textSecondary)
                     Button("Opnieuw laden") { Task { await load() } }
                 }
             } else if entries.isEmpty {
                 VStack(spacing: 12) {
-                    AppSymbol("clock.arrow.circlepath", size: 48, color: HistoryPalette.muted)
+                    AppSymbol("clock.arrow.circlepath", size: 48, color: SharedColors.textSecondary)
                     Text("Nog geen afgeronde wedstrijden").font(.headline)
                     Text("Voltooide en afgebroken coach- en scheidsrechterwedstrijden verschijnen hier.")
                         .multilineTextAlignment(.center)
                 }
-                .foregroundColor(HistoryPalette.muted)
+                .foregroundColor(SharedColors.textSecondary)
                 .padding(24)
             } else {
                 ScrollView {
@@ -79,11 +79,11 @@ public struct SharedMatchHistoryView: View {
                         if let message {
                             Text(message)
                                 .font(.system(size: 12))
-                                .foregroundColor(HistoryPalette.gold)
+                                .foregroundColor(SharedColors.gold)
                         }
                         if shown.isEmpty {
                             Text("Geen wedstrijden met dit filter")
-                                .foregroundColor(HistoryPalette.muted)
+                                .foregroundColor(SharedColors.textSecondary)
                                 .padding(.top, 24)
                         }
                         if !coachEntries.isEmpty {
@@ -159,9 +159,9 @@ public struct SharedMatchHistoryView: View {
             Button { choosingPlayer = true } label: {
                 HStack {
                     Text(playerFilter ?? "Alle spelers")
-                        .foregroundColor(HistoryPalette.text)
+                        .foregroundColor(SharedColors.textPrimary)
                     Spacer()
-                    AppSymbol(playerFilter == nil ? "chevron.down" : "xmark", size: 14, color: HistoryPalette.muted)
+                    AppSymbol(playerFilter == nil ? "chevron.down" : "xmark", size: 14, color: SharedColors.textSecondary)
                 }
                 .padding(12)
                 .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.05)))
@@ -178,10 +178,10 @@ public struct SharedMatchHistoryView: View {
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-                .foregroundColor(selected ? HistoryPalette.background : HistoryPalette.gold)
+                .foregroundColor(selected ? SharedColors.background : SharedColors.gold)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
-                .background(selected ? HistoryPalette.gold : Color.white.opacity(0.05))
+                .background(selected ? SharedColors.gold : Color.white.opacity(0.05))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
@@ -203,11 +203,11 @@ public struct SharedMatchHistoryView: View {
 
     private func sectionHeader(_ title: String, icon: String) -> some View {
         HStack(spacing: 6) {
-            AppSymbol(icon, size: 11, color: HistoryPalette.gold)
+            AppSymbol(icon, size: 11, color: SharedColors.gold)
             Text(title)
                 .font(.system(size: 11, weight: .medium, design: .rounded))
                 .tracking(2)
-                .foregroundColor(HistoryPalette.gold)
+                .foregroundColor(SharedColors.gold)
             Spacer()
         }
         .padding(.vertical, 8)
@@ -217,14 +217,14 @@ public struct SharedMatchHistoryView: View {
         Text("INCOMPLEET")
             .font(.system(size: 9, weight: .semibold, design: .rounded))
             .tracking(1)
-            .foregroundColor(HistoryPalette.red)
+            .foregroundColor(SharedColors.warmRed)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
-            .overlay(Capsule().stroke(HistoryPalette.red.opacity(0.6), lineWidth: 1))
+            .overlay(Capsule().stroke(SharedColors.warmRed.opacity(0.6), lineWidth: 1))
     }
 
     private var medal: some View {
-        AppSymbol("medal.fill", size: 11, color: HistoryPalette.gold)
+        AppSymbol("medal.fill", size: 11, color: SharedColors.gold)
             .accessibilityLabel("Badge verdiend")
     }
 
@@ -241,7 +241,7 @@ public struct SharedMatchHistoryView: View {
             deleting = entry
             confirmDelete = true
         } label: {
-            AppSymbol("trash", size: 13, color: HistoryPalette.muted)
+            AppSymbol("trash", size: 13, color: SharedColors.textSecondary)
                 .frame(width: 32, height: 28)
         }
         .buttonStyle(.plain)
@@ -251,10 +251,10 @@ public struct SharedMatchHistoryView: View {
     private func shareButton(_ entry: MatchHistorySummary) -> some View {
         Button { share(entry) } label: {
             HStack(spacing: 4) {
-                AppSymbol("square.and.arrow.up", size: 12, color: HistoryPalette.blue)
+                AppSymbol("square.and.arrow.up", size: 12, color: SharedColors.steelBlue)
                 Text("Delen")
                     .font(.system(size: 11, weight: .medium, design: .rounded))
-                    .foregroundColor(HistoryPalette.blue)
+                    .foregroundColor(SharedColors.steelBlue)
             }
         }
         .buttonStyle(.plain)
@@ -269,33 +269,33 @@ public struct SharedMatchHistoryView: View {
                     HStack(spacing: 6) {
                         Text(Self.dateText(for: entry.updatedAt))
                             .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundColor(HistoryPalette.muted)
+                            .foregroundColor(SharedColors.textSecondary)
                         if entry.status == "abandoned" { incompleteLabel }
                         if entry.hasBadges { medal }
                         Spacer()
                         if let name = entry.winnerName {
                             HStack(spacing: 4) {
-                                AppSymbol("crown.fill", size: 10, color: HistoryPalette.gold)
+                                AppSymbol("crown.fill", size: 10, color: SharedColors.gold)
                                 Text(name)
                                     .font(.system(size: 11, weight: .medium, design: .rounded))
-                                    .foregroundColor(HistoryPalette.gold)
+                                    .foregroundColor(SharedColors.gold)
                             }
                         }
                     }
                     HStack(spacing: 16) {
-                        scoreSide(entry.player1Name, entry.player1Games, won: winner == Player.player1, color: HistoryPalette.orange)
+                        scoreSide(entry.player1Name, entry.player1Games, won: winner == Player.player1, color: SharedColors.accent)
                         VStack(spacing: 4) {
-                            Text("vs").font(.system(size: 12, weight: .medium, design: .rounded)).foregroundColor(HistoryPalette.dim)
-                            Text("-").font(.system(size: 32, weight: .bold, design: .rounded)).foregroundColor(HistoryPalette.dim)
+                            Text("vs").font(.system(size: 12, weight: .medium, design: .rounded)).foregroundColor(SharedColors.textMuted)
+                            Text("-").font(.system(size: 32, weight: .bold, design: .rounded)).foregroundColor(SharedColors.textMuted)
                         }
-                        scoreSide(entry.player2Name, entry.player2Games, won: winner == Player.player2, color: HistoryPalette.blue)
+                        scoreSide(entry.player2Name, entry.player2Games, won: winner == Player.player2, color: SharedColors.steelBlue)
                     }
                     if !chips.isEmpty {
                         HStack(spacing: 8) {
                             ForEach(0..<chips.count, id: \.self) { index in
                                 Text(chips[index])
                                     .font(.system(size: 11, weight: .medium, design: .rounded))
-                                    .foregroundColor(chips[index] == "–" ? HistoryPalette.dim.opacity(0.6) : HistoryPalette.dim)
+                                    .foregroundColor(chips[index] == "–" ? SharedColors.textMuted.opacity(0.6) : SharedColors.textMuted)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
                                     .background(Color.white.opacity(chips[index] == "–" ? 0.03 : 0.05))
@@ -310,14 +310,14 @@ public struct SharedMatchHistoryView: View {
             if entry.status == "abandoned" {
                 Button { open(entry, analysis: false) } label: {
                     HStack(spacing: 4) {
-                        AppSymbol("flag.checkered", size: 12, color: HistoryPalette.gold)
+                        AppSymbol("flag.checkered", size: 12, color: SharedColors.gold)
                         Text("Uitslag aanvullen")
                             .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundColor(HistoryPalette.gold)
+                            .foregroundColor(SharedColors.gold)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(HistoryPalette.gold.opacity(0.4), lineWidth: 1))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(SharedColors.gold.opacity(0.4), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
             }
@@ -325,10 +325,10 @@ public struct SharedMatchHistoryView: View {
             HStack {
                 Button { open(entry, analysis: true) } label: {
                     HStack(spacing: 4) {
-                        AppSymbol("chart.bar.xaxis", size: 12, color: HistoryPalette.gold)
+                        AppSymbol("chart.bar.xaxis", size: 12, color: SharedColors.gold)
                         Text("Bekijk analyse")
                             .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundColor(HistoryPalette.gold)
+                            .foregroundColor(SharedColors.gold)
                     }
                 }
                 .buttonStyle(.plain)
@@ -339,7 +339,7 @@ public struct SharedMatchHistoryView: View {
             }
         }
         .padding(16)
-        .background(HistoryPalette.card)
+        .background(SharedColors.surface)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
     }
@@ -348,48 +348,48 @@ public struct SharedMatchHistoryView: View {
         VStack(spacing: 4) {
             Text(name)
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundColor(won ? color : HistoryPalette.text)
+                .foregroundColor(won ? color : SharedColors.textPrimary)
                 .lineLimit(1)
             Text("\(games)")
                 .font(.system(size: 32, weight: .bold, design: .rounded))
-                .foregroundColor(won ? color : HistoryPalette.muted)
+                .foregroundColor(won ? color : SharedColors.textSecondary)
         }
         .frame(maxWidth: .infinity)
     }
 
     private func refereeCard(_ entry: MatchHistorySummary) -> some View {
         HStack(spacing: 14) {
-            AppSymbol("hand.raised.fill", size: 18, color: HistoryPalette.gold.opacity(0.8))
+            AppSymbol("hand.raised.fill", size: 18, color: SharedColors.gold.opacity(0.8))
                 .frame(width: 36, height: 36)
-                .background(HistoryPalette.gold.opacity(0.12))
+                .background(SharedColors.gold.opacity(0.12))
                 .clipShape(Circle())
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
                     Text(entry.player1Name)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundColor(HistoryPalette.orange)
+                        .foregroundColor(SharedColors.accent)
                         .lineLimit(1)
                     Text("vs")
                         .font(.system(size: 11, weight: .medium, design: .rounded))
-                        .foregroundColor(HistoryPalette.dim)
+                        .foregroundColor(SharedColors.textMuted)
                     Text(entry.player2Name)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundColor(HistoryPalette.blue)
+                        .foregroundColor(SharedColors.steelBlue)
                         .lineLimit(1)
                     Spacer()
                     if entry.hasBadges { medal }
                     Text("\(entry.player1Games)-\(entry.player2Games)")
                         .font(.system(size: 16, weight: .bold, design: .monospaced))
-                        .foregroundColor(HistoryPalette.text)
+                        .foregroundColor(SharedColors.textPrimary)
                 }
                 HStack(spacing: 8) {
                     Text(entry.gameScoresText)
                         .font(.system(size: 11, weight: .medium, design: .rounded))
-                        .foregroundColor(HistoryPalette.dim)
+                        .foregroundColor(SharedColors.textMuted)
                     if let name = entry.winnerName {
                         Text("· \(name) wint")
                             .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundColor(HistoryPalette.gold.opacity(0.8))
+                            .foregroundColor(SharedColors.gold.opacity(0.8))
                     } else {
                         incompleteLabel
                     }
@@ -397,7 +397,7 @@ public struct SharedMatchHistoryView: View {
                 HStack {
                     Text(Self.dateText(for: entry.updatedAt))
                         .font(.system(size: 10, weight: .medium, design: .rounded))
-                        .foregroundColor(HistoryPalette.dim.opacity(0.7))
+                        .foregroundColor(SharedColors.textMuted.opacity(0.7))
                     Spacer()
                     if shareText != nil { shareButton(entry) }
                     deleteButton(entry)
@@ -407,7 +407,7 @@ public struct SharedMatchHistoryView: View {
         .padding(14)
         .background(Color.white.opacity(0.05))
         .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(HistoryPalette.gold.opacity(0.15), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(SharedColors.gold.opacity(0.15), lineWidth: 1))
     }
 
     // MARK: Actions
@@ -486,14 +486,3 @@ public struct SharedMatchHistoryView: View {
     }
 }
 
-private enum HistoryPalette {
-    static let text = Color(red: 0.95, green: 0.93, blue: 0.90)
-    static let muted = Color(red: 0.70, green: 0.68, blue: 0.65)
-    static let gold = Color(red: 0.90, green: 0.72, blue: 0.35)
-    static let blue = Color(red: 0.35, green: 0.45, blue: 0.55)
-    static let red = Color(red: 0.85, green: 0.30, blue: 0.30)
-    static let orange = Color(red: 0.95, green: 0.55, blue: 0.15)
-    static let dim = Color(red: 0.50, green: 0.48, blue: 0.45)
-    static let card = Color(red: 0.12, green: 0.10, blue: 0.08)
-    static let background = Color.black
-}

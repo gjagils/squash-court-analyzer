@@ -111,14 +111,14 @@ public struct CourtView: View {
     }
 
     private var playerColor: Color {
-        guard let selectedPlayer else { return CourtPalette.warmOrange }
-        return selectedPlayer == .player1 ? CourtPalette.warmOrange : CourtPalette.deepBlue
+        guard let selectedPlayer else { return SharedColors.accent }
+        return selectedPlayer == .player1 ? SharedColors.accent : SharedColors.steelBlue
     }
 
 
     // MARK: - Instruction Overlay
     private func instructionOverlay(size: CGSize, player: Player) -> some View {
-        let color = player == .player1 ? CourtPalette.warmOrange : CourtPalette.deepBlue
+        let color = player == .player1 ? SharedColors.accent : SharedColors.steelBlue
 
         return VStack {
             Text("KIES EEN ZONE")
@@ -156,7 +156,7 @@ public struct CourtView: View {
             RoundedRectangle(cornerRadius: 6)
                 .fill(
                     RadialGradient(
-                        colors: [CourtPalette.accentGold.opacity(0.055), .clear],
+                        colors: [SharedColors.gold.opacity(0.055), .clear],
                         center: .center,
                         startRadius: 10,
                         endRadius: size.height * 0.65
@@ -168,7 +168,7 @@ public struct CourtView: View {
 
     // MARK: - Court Markings (no arcs)
     private func courtMarkings(size: CGSize, scale: CGFloat) -> some View {
-        let lineColor = CourtPalette.accentGold.opacity(0.62)
+        let lineColor = SharedColors.gold.opacity(0.62)
         let lineWidth: CGFloat = 1.5
 
         let shortLineY = shortLineDistance * scale
@@ -232,17 +232,8 @@ public struct CourtView: View {
     }
 }
 
-// MARK: - Shared visual chrome (small private copies, same pattern as
-// HomeMenu.swift's HomePalette / PlayerDirectory.swift's PlayerStyle: the
-// app's DesignSystem.swift stays app-only, so shared views keep their own
-// minimal, matching color/panel constants instead of pulling in the whole
-// design system).
+// MARK: - Shared visual chrome (colours from SharedColors)
 
-private enum CourtPalette {
-    static let warmOrange = Color(red: 0.95, green: 0.55, blue: 0.15)
-    static let deepBlue = Color(red: 0.35, green: 0.45, blue: 0.55)
-    static let accentGold = Color(red: 0.90, green: 0.72, blue: 0.35)
-}
 
 private struct CourtPanel<Content: View>: View {
     var accent: Color? = nil
@@ -290,7 +281,7 @@ private struct ZoneTapArea: View {
     // init always excludes) as a trailing constructor parameter, breaking a
     // trailing-closure call site (`onTap`'s value landed on `isPressed`
     // instead). Spelling the init out ourselves sidesteps the bug.
-    init(zone: CourtZone, playerColor: Color = CourtPalette.warmOrange, onTap: @escaping (CourtZone) -> Void) {
+    init(zone: CourtZone, playerColor: Color = SharedColors.accent, onTap: @escaping (CourtZone) -> Void) {
         self.zone = zone
         self.playerColor = playerColor
         self.onTap = onTap

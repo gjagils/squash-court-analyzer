@@ -20,7 +20,7 @@ extension View {
                 ToolbarItem(placement: .principal) {
                     Text(title)
                         .font(PageTitleStyle.font)
-                        .foregroundColor(Color(red: 0.95, green: 0.93, blue: 0.90))
+                        .foregroundColor(SharedColors.textPrimary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .accessibilityAddTraits(.isHeader)

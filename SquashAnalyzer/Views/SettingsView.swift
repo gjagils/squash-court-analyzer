@@ -74,7 +74,7 @@ struct SettingsView: View {
                 .textInputAutocapitalization(.never).autocorrectionDisabled()
                 .padding().background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
             HStack(spacing: 12) {
-                HardwareButton(title: "Bewaar teamlink", subtitle: nil, color: AppColors.warmOrange, colorDark: AppColors.warmOrangeDark) {
+                HardwareButton(title: "Bewaar teamlink", subtitle: nil, color: AppColors.warmOrange) {
                     do {
                         let link = try LeagueTeamLink(teamDraft)
                         teamURL = link.url.absoluteString
@@ -286,8 +286,7 @@ struct SettingsView: View {
             HardwareButton(
                 title: showingSaveConfirmation ? "Opgeslagen!" : "Bewaar API Key",
                 subtitle: nil,
-                color: showingSaveConfirmation ? Color.green : AppColors.accentGold,
-                colorDark: showingSaveConfirmation ? Color.green.opacity(0.7) : AppColors.accentGold.opacity(0.7)
+                color: showingSaveConfirmation ? Color.green : AppColors.accentGold
             ) {
                 saveAPIKey()
             }

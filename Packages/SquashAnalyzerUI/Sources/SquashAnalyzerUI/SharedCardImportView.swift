@@ -28,10 +28,10 @@ public struct SharedCardImportView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(snapshot.name)
                             .font(.system(size: 20, weight: .bold, design: .rounded))
-                            .foregroundColor(BadgePalette.textPrimary)
+                            .foregroundColor(SharedColors.textPrimary)
                         Text(preview?.summary ?? "Kaart lezen…")
                             .font(.system(size: 13))
-                            .foregroundColor(BadgePalette.textSecondary)
+                            .foregroundColor(SharedColors.textSecondary)
                     }
                     .listRowBackground(Color.clear)
                 }
@@ -41,8 +41,8 @@ public struct SharedCardImportView: View {
                         Section {
                             Button { importCard(to: linked.id) } label: {
                                 HStack(spacing: 8) {
-                                    AppSymbol("arrow.triangle.2.circlepath", size: 16, color: BadgePalette.gold)
-                                    Text("Bijwerken bij \(linked.name)").foregroundColor(BadgePalette.gold)
+                                    AppSymbol("arrow.triangle.2.circlepath", size: 16, color: SharedColors.gold)
+                                    Text("Bijwerken bij \(linked.name)").foregroundColor(SharedColors.gold)
                                 }
                             }
                             .disabled(isImporting)
@@ -51,8 +51,8 @@ public struct SharedCardImportView: View {
                         Section("Koppel aan") {
                             Button { importCard(to: nil) } label: {
                                 HStack(spacing: 8) {
-                                    AppSymbol("person.badge.plus", size: 16, color: BadgePalette.gold)
-                                    Text("Nieuwe speler \(snapshot.name)").foregroundColor(BadgePalette.gold)
+                                    AppSymbol("person.badge.plus", size: 16, color: SharedColors.gold)
+                                    Text("Nieuwe speler \(snapshot.name)").foregroundColor(SharedColors.gold)
                                 }
                             }
                             .disabled(isImporting)
@@ -60,12 +60,12 @@ public struct SharedCardImportView: View {
                                 Button { importCard(to: player.id) } label: {
                                     HStack {
                                         Text(player.name)
-                                            .foregroundColor(BadgePalette.textPrimary)
+                                            .foregroundColor(SharedColors.textPrimary)
                                         Spacer()
                                         if player.name.lowercased() == snapshot.name.lowercased() {
                                             Text("zelfde naam")
                                                 .font(.system(size: 11))
-                                                .foregroundColor(BadgePalette.textMuted)
+                                                .foregroundColor(SharedColors.textMuted)
                                         }
                                     }
                                 }

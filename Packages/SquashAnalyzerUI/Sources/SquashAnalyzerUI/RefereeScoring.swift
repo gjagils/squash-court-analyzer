@@ -141,21 +141,21 @@ public struct RefereeScoringView: View {
                 }
                 .font(.system(size: 14, weight: .medium, design: .rounded))
             }
-            .foregroundColor(CoachPalette.textSecondary)
+            .foregroundColor(SharedColors.textSecondary)
             if !match.isMatchOver {
                 LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot }, share: shareText)
             }
             Spacer()
             Text("Scheidsrechter")
                 .font(PageTitleStyle.font)
-                .foregroundColor(CoachPalette.textPrimary)
+                .foregroundColor(SharedColors.textPrimary)
                 // With the LIVE button next to it the title broke into "SCHEIDSRECHTE / R" on Android
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             Spacer()
             if shareText != nil {
                 Button { sharingNow = true } label: {
-                    AppSymbol("square.and.arrow.up", size: 20, color: CoachPalette.gold)
+                    AppSymbol("square.and.arrow.up", size: 20, color: SharedColors.gold)
                         .frame(width: 74, height: 32, alignment: .trailing)
                 }
                 .buttonStyle(.plain)
@@ -172,26 +172,26 @@ public struct RefereeScoringView: View {
         VStack(spacing: 4) {
             Text("GAME \(match.currentGameNumber)")
                 .font(.system(size: 10, weight: .medium, design: .rounded))
-                .foregroundColor(CoachPalette.textMuted)
+                .foregroundColor(SharedColors.textMuted)
                 .tracking(2)
             HStack(spacing: 8) {
                 Text(match.player1Name)
-                    .foregroundColor(CoachPalette.warmOrange)
+                    .foregroundColor(SharedColors.accent)
                 Text("\(match.player1GamesWon) – \(match.player2GamesWon)")
                     .font(.system(size: 22, weight: .bold, design: .monospaced))
-                    .foregroundColor(CoachPalette.textPrimary)
+                    .foregroundColor(SharedColors.textPrimary)
                 Text(match.player2Name)
-                    .foregroundColor(CoachPalette.steelBlue)
+                    .foregroundColor(SharedColors.steelBlue)
             }
             .font(.system(size: 13, weight: .bold, design: .rounded))
             if !match.completedGames.isEmpty || match.firstGameNumber > 1 {
                 // Plain small text, as on iOS
                 HStack(spacing: 10) {
                     ForEach(1..<match.firstGameNumber, id: \.self) { number in
-                        gameChip("G\(number): –", color: CoachPalette.textMuted)
+                        gameChip("G\(number): –", color: SharedColors.textMuted)
                     }
                     ForEach(match.completedGames) { game in
-                        let color = game.winner == .player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue
+                        let color = game.winner == .player1 ? SharedColors.accent : SharedColors.steelBlue
                         gameChip("G\(game.number): \(game.player1Score)-\(game.player2Score)", color: color.opacity(0.75))
                     }
                 }
@@ -217,7 +217,7 @@ public struct RefereeScoringView: View {
 
     private func playerColumn(_ player: Player) -> some View {
         let isServer = match.currentServer == player
-        let color = player == .player1 ? CoachPalette.warmOrange : CoachPalette.steelBlue
+        let color = player == .player1 ? SharedColors.accent : SharedColors.steelBlue
         let score = player == .player1 ? match.player1Score : match.player2Score
         let highlight = ServerHighlight(color: color, isServer: isServer)
 
@@ -283,13 +283,13 @@ public struct RefereeScoringView: View {
     private var actionGrid: some View {
         VStack(spacing: 8) {
             HStack(spacing: 8) {
-                actionButton("LET CALL", color: CoachPalette.warmOrange) { match.callLet(); matchChanged() }
-                actionButton("LET CALL", color: CoachPalette.coolBlue) { match.callLet(); matchChanged() }
+                actionButton("LET CALL", color: SharedColors.accent) { match.callLet(); matchChanged() }
+                actionButton("LET CALL", color: SharedColors.coolBlue) { match.callLet(); matchChanged() }
             }
             HStack(spacing: 8) {
-                actionButton("STROKE", color: CoachPalette.warmRed) { match.callStroke(to: .player1); matchChanged() }
+                actionButton("STROKE", color: SharedColors.warmRed) { match.callStroke(to: .player1); matchChanged() }
                     .accessibilityLabel("Stroke voor \(match.player1Name)")
-                actionButton("STROKE", color: CoachPalette.coolIndigo) { match.callStroke(to: .player2); matchChanged() }
+                actionButton("STROKE", color: SharedColors.coolIndigo) { match.callStroke(to: .player2); matchChanged() }
                     .accessibilityLabel("Stroke voor \(match.player2Name)")
             }
             if match.isGameOver && !match.isMatchOver {
@@ -298,10 +298,10 @@ public struct RefereeScoringView: View {
                     matchChanged()
                 }
                 .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(CoachPalette.backgroundDark)
+                .foregroundColor(SharedColors.background)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(CoachPalette.textPrimary)
+                .background(SharedColors.textPrimary)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
@@ -313,7 +313,7 @@ public struct RefereeScoringView: View {
             Text(title)
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .tracking(1)
-                .foregroundColor(match.isGameOver ? CoachPalette.textMuted : color)
+                .foregroundColor(match.isGameOver ? SharedColors.textMuted : color)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(
@@ -330,11 +330,11 @@ public struct RefereeScoringView: View {
     private var undoButton: some View {
         Button(action: { undoLastPoint() }) {
             HStack(spacing: 8) {
-                AppSymbol("arrow.uturn.backward", size: 16, color: match.canUndo ? CoachPalette.textPrimary : CoachPalette.textMuted)
+                AppSymbol("arrow.uturn.backward", size: 16, color: match.canUndo ? SharedColors.textPrimary : SharedColors.textMuted)
                 Text("Undo")
             }
             .font(.system(size: 16, weight: .bold, design: .rounded))
-            .foregroundColor(match.canUndo ? CoachPalette.textPrimary : CoachPalette.textMuted)
+            .foregroundColor(match.canUndo ? SharedColors.textPrimary : SharedColors.textMuted)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .background(Color.white.opacity(match.canUndo ? 0.07 : 0.03))
@@ -373,11 +373,11 @@ struct RefereeTimers: View {
     var body: some View {
         let _ = now
         return HStack {
-            AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
+            AppSymbol("timer", size: 12, color: SharedColors.gold.opacity(0.5))
             timer("MATCH", match.matchDuration, alignment: .leading)
             Spacer()
             timer("GAME", match.currentGameDuration, alignment: .trailing)
-            AppSymbol("timer", size: 12, color: CoachPalette.gold.opacity(0.5))
+            AppSymbol("timer", size: 12, color: SharedColors.gold.opacity(0.5))
         }
         .padding(.horizontal, 24)
         .task(id: match.isMatchOver) {
@@ -395,10 +395,10 @@ struct RefereeTimers: View {
             Text(label)
                 .font(.system(size: 8, weight: .medium, design: .rounded))
                 .tracking(1)
-                .foregroundColor(CoachPalette.textMuted)
+                .foregroundColor(SharedColors.textMuted)
             Text(text)
                 .font(.system(size: 16, weight: .bold, design: .monospaced))
-                .foregroundColor(CoachPalette.textSecondary)
+                .foregroundColor(SharedColors.textSecondary)
         }
         .accessibilityLabel("\(label == "MATCH" ? "Wedstrijdtijd" : "Gametijd") \(text)")
     }

@@ -187,6 +187,23 @@ touching anything Android-related, and keep it updated as phases complete.
 
 `MatchShareReport` holds the three WhatsApp layouts (Kort, Scorekaart, Verslag, `MatchShareStyle`). Coach mode (`Match.shareReport`) and referee mode (`RefereeMatch.shareReport`) both build one, and both match-over / game-over screens open the same `MatchShareSheet`, so a change to the texts or the sheet applies to both modes.
 
+## Taal (besluit T24, 3 oktober 2026)
+
+De app is alleen Nederlands: de spelers en testers zijn Nederlandse en Belgische
+squashers, en een tweede taal betekent elke tekst twee keer bijhouden (ook in de
+handleiding, de releasenotes en de website). Er komt dus geen
+`Localizable.xcstrings`; teksten staan gewoon in de code.
+
+- `defaultLocalization: "nl"` in `Packages/SquashAnalyzerUI/Package.swift` blijft:
+  het zegt alleen in welke taal de teksten staan (systeemknoppen zoals "Annuleren"
+  in sheets en de datum-/getalnotatie volgen het toestel). De Core heeft geen
+  teksten als resource; daar maakt `"en"` niets uit.
+- Squashtermen blijven zoals spelers ze zeggen: Winner, Let, Stroke, Undo, rally,
+  Heatmap, best of 5, Down/Out. Een Nederlandse vertaling ("ongedwongen fout"
+  voor Unforced error) staat er alleen als uitleg onder.
+- Mocht er ooit een Engelse versie komen: Skip ondersteunt één `.xcstrings` in
+  het UI-package voor iOS en Android tegelijk; begin daar, niet in de iOS-app.
+
 ## Tests
 
 `SquashAnalyzerTests` currently covers game completion, extension scoring, service/undo, unforced-error entry, empty statistics, repository upsert/recovery (including the restored server and the head start), backup checksum rejection, the coach WhatsApp text, the head start in both modes, completing an incomplete match (validation, persistence, backup, discard), the service rules in both modes (box alternation, hand-out, per-player preferred box, undo, next-game server), and the badge rules (5 in a row, broken runs, runs across games in both modes).

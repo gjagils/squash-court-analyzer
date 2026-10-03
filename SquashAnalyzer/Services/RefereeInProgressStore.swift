@@ -7,8 +7,10 @@ import SquashAnalyzerCore
 /// the app can be resumed, as on Android. Finished matches go to SwiftData as
 /// before (`SavedRefereeMatch`); then this file is removed.
 enum RefereeInProgressStore {
+    /// Application Support; tests point it at a folder of their own
+    static var folder = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+
     private static var url: URL {
-        let folder = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         return folder.appendingPathComponent("referee-in-progress.json")
     }

@@ -195,5 +195,7 @@ Bron: `docs/code-analyse-2026-10-03.md`, gebaseerd op `main` = `bfd68ec`. Regeln
 ### T24 · Lokalisatiebesluit
 `Packages/SquashAnalyzerUI/Package.swift` declareert `defaultLocalization: "nl"` zonder `.xcstrings`; 105 `Text("…")`-literals plus Engelse restjes ("rallies", "Heatmap", "Winners", "Undo"). Kies: Nederlands-only (verwijder `defaultLocalization`, vervang Engelse woorden) óf één `Localizable.xcstrings` (Skip ondersteunt dit).
 
+**Besluit (3 okt):** alleen Nederlands, squashtermen blijven Engels; zie ARCHITECTURE.md "Taal".
+
 ### T25 · Testdekking-achterstand (na T10)
 Nog ontbrekend: `MatchShareReport` drie teksten en ≥60-min-tak; `CoachStop.stopAction`; `BadgeInput`-mapping; `BadgeEngine.perfectTen` over spellen heen; `AICoach` fallback-takken; `LiveShare` tweede wedstrijd/`update` vóór `start`; `RefereeInProgressStore` roundtrip; `PersistenceRecovery.preserveStoreFiles`; `importFromJSON` losse wedstrijd; servertests voor viewer-cleanup en `ended` bij sweep.

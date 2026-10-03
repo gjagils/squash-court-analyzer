@@ -157,6 +157,32 @@ final class LiveShareTests: XCTestCase {
         XCTAssertTrue(LiveShare.shared.baseURL.hasPrefix("https://"))
     }
 
+    /// T25: an update before LIVE was tapped sends nothing; a second match
+    /// ends the first session and gets its own link
+    @MainActor
+    func testUpdatesBeforeStartAndASecondMatch() async throws {
+        let transport = FakeLiveTransport()
+        let live = LiveShare(transport: transport)
+        live.baseURL = "https://live.test"
+        let first = Match()
+        live.update(matchId: first.id, snapshot: first.liveSnapshot())
+        try await Task.sleep(nanoseconds: 50_000_000)
+        XCTAssertTrue(transport.requests.isEmpty, "not live yet: nothing leaves the phone")
+
+        _ = try await live.start(matchId: first.id, snapshot: first.liveSnapshot())
+        let again = try await live.start(matchId: first.id, snapshot: first.liveSnapshot())
+        XCTAssertEqual(again, "https://live.test/l/abc", "tapping LIVE again keeps the link")
+        XCTAssertEqual(transport.requests.map { $0.method }, ["POST"])
+
+        let second = Match()
+        transport.nextId = "def"
+        let link = try await live.start(matchId: second.id, snapshot: second.liveSnapshot())
+        XCTAssertEqual(link, "https://live.test/l/def")
+        XCTAssertEqual(transport.requests.map { $0.method }, ["POST", "DELETE", "POST"], "the first session is stopped")
+        XCTAssertFalse(live.isLive(first.id))
+        XCTAssertTrue(live.isLive(second.id))
+    }
+
     @MainActor
     func testWithoutAServerStartingFails() async {
         let live = LiveShare(transport: nil)

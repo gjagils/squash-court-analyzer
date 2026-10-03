@@ -612,3 +612,81 @@ final class ExportFileTests: XCTestCase {
         XCTAssertTrue(names.contains("notities.txt"), "other files are left alone")
     }
 }
+
+/// Untested paths from the code analysis (T25)
+final class RecoveryAndImportTests: XCTestCase {
+    private var folder: URL!
+
+    override func setUpWithError() throws {
+        folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    }
+
+    override func tearDownWithError() throws {
+        try? FileManager.default.removeItem(at: folder)
+    }
+
+    func testARefereeMatchInProgressComesBackAfterClosing() throws {
+        let original = RefereeInProgressStore.folder
+        RefereeInProgressStore.folder = folder
+        defer { RefereeInProgressStore.folder = original }
+
+        let match = RefereeMatch(player1Name: "Jan", player2Name: "Piet", bestOf: 5, startingServer: .player1)
+        match.awardPoint(to: .player1)
+        match.callStroke(to: .player2)
+        RefereeInProgressStore.save(match)
+
+        let restored = try XCTUnwrap(RefereeInProgressStore.load())
+        XCTAssertEqual(restored.id, match.id)
+        XCTAssertEqual(restored.player1Score, 1)
+        XCTAssertEqual(restored.player2Score, 1)
+        XCTAssertEqual(restored.pointHistory.count, 2)
+
+        RefereeInProgressStore.clear()
+        XCTAssertNil(RefereeInProgressStore.load())
+    }
+
+    func testADamagedRefereeFileIsRemoved() throws {
+        let original = RefereeInProgressStore.folder
+        RefereeInProgressStore.folder = folder
+        defer { RefereeInProgressStore.folder = original }
+
+        let file = folder.appendingPathComponent("referee-in-progress.json")
+        try Data("{ kapot".utf8).write(to: file)
+        XCTAssertNil(RefereeInProgressStore.load())
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path), "the question does not keep failing on it")
+    }
+
+    func testStoreFilesAreCopiedAsideAndNeverDeleted() throws {
+        for name in ["default.store", "default.store-wal", "default.store-shm", "notities.txt"] {
+            try Data(name.utf8).write(to: folder.appendingPathComponent(name))
+        }
+        let recovery = try XCTUnwrap(PersistenceRecovery.preserveStoreFiles(in: folder))
+        let copied = try FileManager.default.contentsOfDirectory(atPath: recovery.path).sorted()
+        XCTAssertEqual(copied, ["default.store", "default.store-shm", "default.store-wal"])
+        XCTAssertTrue(FileManager.default.fileExists(atPath: folder.appendingPathComponent("default.store").path))
+        XCTAssertNil(PersistenceRecovery.preserveStoreFiles(in: recovery.appendingPathComponent("leeg")), "nothing to keep")
+    }
+
+    @MainActor
+    func testASingleSharedMatchCanBeImported() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let container = try ModelContainer(for: Schema(versionedSchema: SquashAnalyzerCurrentSchema.self),
+                                           migrationPlan: SquashAnalyzerMigrationPlan.self, configurations: [config])
+        let repository = SwiftDataMatchRepository(context: container.mainContext)
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1)
+        match.currentGame.addPoint(to: .player1, pointType: .winner, at: .frontLeft, with: .drive)
+        try repository.upsert(match)
+        let saved = try XCTUnwrap(container.mainContext.fetch(FetchDescriptor<SavedMatch>()).first)
+        let json = try ExportService.exportJSON(from: saved)
+
+        container.mainContext.delete(saved)
+        try container.mainContext.save()
+        try ExportService.importFromJSON(json, context: container.mainContext)
+
+        let imported = try XCTUnwrap(container.mainContext.fetch(FetchDescriptor<SavedMatch>()).first)
+        XCTAssertEqual(imported.player1Name, "Een")
+        XCTAssertEqual(imported.games.first?.points.count, 1)
+    }
+}

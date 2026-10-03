@@ -154,6 +154,39 @@ test('idle sessions are swept', async () => {
   }
 });
 
+test('a viewer who leaves is removed from the session', async () => {
+  const live = await start();
+  try {
+    const { id } = (await call(live.base, 'POST', '/api/live', snapshot)).json;
+    await readEvents(`${live.base}/api/live/${id}/events`, 1);
+    // readEvents closed the connection after the first state
+    for (let i = 0; i < 20 && live.sessions.get(id).viewers.size > 0; i += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    assert.equal(live.sessions.get(id).viewers.size, 0);
+  } finally {
+    await live.stop();
+  }
+});
+
+test('viewers of an idle session hear it ended when it is swept', async () => {
+  let clock = 1_000_000;
+  const live = await start({ now: () => clock, idleMs: 1000 });
+  try {
+    const { id } = (await call(live.base, 'POST', '/api/live', snapshot)).json;
+    const events = readEvents(`${live.base}/api/live/${id}/events`, 2);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    clock += 2000;
+    live.sweep();
+    const received = await events;
+    assert.deepEqual(received.map((e) => e.event), ['state', 'ended']);
+    assert.equal(received[1].data.reason, 'idle');
+    assert.deepEqual(received[1].data.snapshot.score, [3, 2], 'the last state stays on their page');
+  } finally {
+    await live.stop();
+  }
+});
+
 test('limits: body size, creations per minute, number of sessions', async () => {
   const live = await start({ createsPerMinute: 2, maxSessions: 3, trustProxy: true });
   try {

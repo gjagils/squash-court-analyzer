@@ -1262,9 +1262,10 @@ enum SquashAnalyzerMigrationPlan: SchemaMigrationPlan {
 enum PersistenceRecovery {
     /// Copies the existing store files to a dated recovery folder. Originals are
     /// deliberately never deleted, even when opening or migration fails.
-    static func preserveStoreFiles() -> URL? {
+    /// `folder` is the app's Application Support folder; tests pass their own
+    static func preserveStoreFiles(in folder: URL? = nil) -> URL? {
         let manager = FileManager.default
-        guard let appSupport = manager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first,
+        guard let appSupport = folder ?? manager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first,
               let files = try? manager.contentsOfDirectory(at: appSupport, includingPropertiesForKeys: nil) else {
             return nil
         }

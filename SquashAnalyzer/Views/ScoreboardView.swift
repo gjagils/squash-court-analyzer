@@ -189,54 +189,6 @@ struct ScoreboardView: View {
 }
 
 // MARK: - Compact Scoreboard (for when shot selector is shown)
-struct CompactScoreboardView: View {
-    let game: Game
-
-    var body: some View {
-        HStack(spacing: 16) {
-            // Player 1
-            HStack(spacing: 8) {
-                ServerIndicator(isServing: game.currentServer == .player1)
-                Text(game.player1Name)
-                    .font(AppFonts.label(14))
-                    .foregroundColor(AppColors.textPrimary)
-            }
-
-            // Score
-            HStack(spacing: 4) {
-                Text("\(game.player1Score)")
-                    .font(AppFonts.score(28))
-                    .foregroundColor(AppColors.ledActive)
-                Text("-")
-                    .font(AppFonts.score(24))
-                    .foregroundColor(AppColors.textMuted)
-                Text("\(game.player2Score)")
-                    .font(AppFonts.score(28))
-                    .foregroundColor(AppColors.ledActive)
-            }
-            .shadow(color: AppColors.ledGlow.opacity(0.3), radius: 4, x: 0, y: 0)
-
-            // Player 2
-            HStack(spacing: 8) {
-                Text(game.player2Name)
-                    .font(AppFonts.label(14))
-                    .foregroundColor(AppColors.textPrimary)
-                ServerIndicator(isServing: game.currentServer == .player2)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(AppColors.backgroundMedium)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                )
-        )
-    }
-}
-
 // MARK: - Preview
 
 #Preview("Scoreboard") {
@@ -262,8 +214,6 @@ struct CompactScoreboardView: View {
                 return m
             }())
             .padding(.horizontal, 20)
-
-            CompactScoreboardView(game: game)
         }
     }
 }

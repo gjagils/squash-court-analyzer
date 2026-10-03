@@ -106,11 +106,6 @@ final class SavedGame {
         return totalDuration / Double(lostPoints.count)
     }
 
-    /// Total game duration (sum of all rally durations)
-    func totalGameDuration() -> TimeInterval {
-        points.reduce(0) { $0 + $1.duration }
-    }
-
     // MARK: - Conversion to Live Game
 
     /// Convert this SavedGame back to a live Game for analysis views
@@ -196,11 +191,6 @@ final class SavedGame {
     }
 
     // MARK: - Let Analysis
-
-    /// Get all lets requested by a player
-    func letsRequested(by player: Player) -> [SavedLet] {
-        lets.filter { $0.requestedByPlayer == player }
-    }
 
     /// Total number of lets in this game
     var totalLets: Int {

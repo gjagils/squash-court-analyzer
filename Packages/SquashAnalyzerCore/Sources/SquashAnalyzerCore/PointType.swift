@@ -23,16 +23,6 @@ public enum PointType: String, CaseIterable, Identifiable, Codable {
         }
     }
 
-    public var shortName: String {
-        switch self {
-        case .winner: return "W"
-        case .forcedError: return "FE"
-        case .unforcedError: return "UE"
-        case .stroke: return "STR"
-        case .servicePoint: return "SRV"
-        }
-    }
-
     public var icon: String {
         switch self {
         case .winner: return "star.fill"

@@ -136,18 +136,6 @@ public struct LeagueTeamSnapshot: Codable, Equatable, Sendable {
     }
 }
 
-public struct LeagueRubber: Identifiable, Equatable, Sendable {
-    public let id: Int
-    public let home: String
-    public let away: String
-    public let scores: [String]
-}
-
-public struct LeagueMatchDetail: Equatable, Sendable {
-    public let competitionPoints: String
-    public let rubbers: [LeagueRubber]
-}
-
 /// A link on a page: its href and its text
 struct LeagueLink {
     let path: String
@@ -340,24 +328,6 @@ public enum LeagueTeamParser {
         return result
     }
 
-    public static func detail(_ html: String) throws -> LeagueMatchDetail {
-        var rubbers: [LeagueRubber] = []
-        for block in html.components(separatedBy: "<div class=\"match\">").dropFirst() {
-            let players = links(block, containing: "/player/")
-            guard players.count >= 2 else { continue }
-            var scores: [String] = []
-            for row in LeagueRegex.matches("<ul[^>]*class=\"points\"[^>]*>(.*?)</ul>", block) {
-                var points: [String] = []
-                for item in LeagueRegex.matches("<li\\b[^>]*>(.*?)</li>", row[1]) {
-                    points.append(text(item[1]))
-                }
-                scores.append(points.joined(separator: "–"))
-            }
-            rubbers.append(LeagueRubber(id: rubbers.count, home: players[0].name, away: players[1].name, scores: scores))
-        }
-        guard html.contains("team-match__name") else { throw LeagueTeamError.changedPage }
-        return LeagueMatchDetail(competitionPoints: value("module__footer-item-value", in: html), rubbers: rubbers)
-    }
 }
 
 // MARK: - Fetching
@@ -403,10 +373,6 @@ public struct LeagueTeamFetcher: Sendable {
         let ownPath = link.url.path.lowercased()
         guard result.standings.contains(where: { row in row.id.lowercased() == ownPath }) else { throw LeagueTeamError.changedPage }
         return result
-    }
-
-    public func detail(_ url: URL) async throws -> LeagueMatchDetail {
-        try LeagueTeamParser.detail(try await page(url))
     }
 
     /// The cookie-wall consent form: functional cookies only, then back to

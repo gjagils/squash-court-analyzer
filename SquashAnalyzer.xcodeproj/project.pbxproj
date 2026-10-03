@@ -16,11 +16,10 @@
 		A1000017 /* SavedGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000017 /* SavedGame.swift */; };
 		A1000018 /* SavedPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000018 /* SavedPoint.swift */; };
 		A1000019 /* ShotTypeSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000019 /* ShotTypeSelectorView.swift */; };
-		A1000020 /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000020 /* AppIconView.swift */; };
 		A1000021 /* MatchHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000021 /* MatchHistoryView.swift */; };
 		A1000022 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000022 /* SettingsView.swift */; };
 		A1000023 /* CoachDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000023 /* CoachDashboardView.swift */; };
-		A1000024 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000024 /* OpenAIService.swift */; };
+		A1000024 /* NetworkTransports.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000024 /* NetworkTransports.swift */; };
 		A1000025 /* APIKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000025 /* APIKeyManager.swift */; };
 		A1000027 /* SavedLet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000027 /* SavedLet.swift */; };
 		A1000029 /* SavedPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000029 /* SavedPlayer.swift */; };
@@ -29,7 +28,6 @@
 		B1000090 /* AutomaticBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000090 /* AutomaticBackup.swift */; };
 		B1000091 /* RefereeInProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000091 /* RefereeInProgressStore.swift */; };
 		A1000032 /* SampleDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000032 /* SampleDataService.swift */; };
-		A1000033 /* RefereeMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000033 /* RefereeMatch.swift */; };
 		A1000034 /* RefereeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000034 /* RefereeView.swift */; };
 		A1000035 /* SavedRefereeMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000035 /* SavedRefereeMatch.swift */; };
 		B1000002 /* MatchRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000002 /* MatchRepository.swift */; };
@@ -45,7 +43,6 @@
 		B1000044 /* PlayerAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000044 /* PlayerAvatar.swift */; };
 		B1000045 /* MatchShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000045 /* MatchShareSheet.swift */; };
 		B1000092 /* ResultCardImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000092 /* ResultCardImage.swift */; };
-		B1000060 /* BadgeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000060 /* BadgeEngine.swift */; };
 		B1000061 /* BadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000061 /* BadgeView.swift */; };
 		B1000062 /* BadgeEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000062 /* BadgeEngineTests.swift */; };
 		B1000063 /* SavedBadgeAward.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000063 /* SavedBadgeAward.swift */; };
@@ -53,7 +50,7 @@
 		B1000065 /* PlayerBadgesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000065 /* PlayerBadgesView.swift */; };
 		B1000066 /* BadgeAwardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000066 /* BadgeAwardTests.swift */; };
 		B1000067 /* SavedPlayerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000067 /* SavedPlayerCard.swift */; };
-		B1000069 /* CardSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000069 /* CardSnapshot.swift */; };
+		B1000069 /* CardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000069 /* CardStore.swift */; };
 		B1000070 /* CardSharingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000070 /* CardSharingViews.swift */; };
 		B1000072 /* PlayerCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000072 /* PlayerCardTests.swift */; };
 		B1000080 /* LeagueTeamService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000080 /* LeagueTeamService.swift */; };
@@ -86,11 +83,10 @@
 		A2000017 /* SavedGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedGame.swift; sourceTree = "<group>"; };
 		A2000018 /* SavedPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPoint.swift; sourceTree = "<group>"; };
 		A2000019 /* ShotTypeSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotTypeSelectorView.swift; sourceTree = "<group>"; };
-		A2000020 /* AppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconView.swift; sourceTree = "<group>"; };
 		A2000021 /* MatchHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchHistoryView.swift; sourceTree = "<group>"; };
 		A2000022 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A2000023 /* CoachDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachDashboardView.swift; sourceTree = "<group>"; };
-		A2000024 /* OpenAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
+		A2000024 /* NetworkTransports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTransports.swift; sourceTree = "<group>"; };
 		A2000025 /* APIKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyManager.swift; sourceTree = "<group>"; };
 		A2000027 /* SavedLet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedLet.swift; sourceTree = "<group>"; };
 		A2000029 /* SavedPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlayer.swift; sourceTree = "<group>"; };
@@ -99,7 +95,6 @@
 		B2000090 /* AutomaticBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomaticBackup.swift; sourceTree = "<group>"; };
 		B2000091 /* RefereeInProgressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeInProgressStore.swift; sourceTree = "<group>"; };
 		A2000032 /* SampleDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleDataService.swift; sourceTree = "<group>"; };
-		A2000033 /* RefereeMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeMatch.swift; sourceTree = "<group>"; };
 		A2000034 /* RefereeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeView.swift; sourceTree = "<group>"; };
 		A2000035 /* SavedRefereeMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedRefereeMatch.swift; sourceTree = "<group>"; };
 		A3000001 /* SquashAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SquashAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -116,7 +111,6 @@
 		B2000044 /* PlayerAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAvatar.swift; sourceTree = "<group>"; };
 		B2000045 /* MatchShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchShareSheet.swift; sourceTree = "<group>"; };
 		B2000092 /* ResultCardImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCardImage.swift; sourceTree = "<group>"; };
-		B2000060 /* BadgeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeEngine.swift; sourceTree = "<group>"; };
 		B2000061 /* BadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeView.swift; sourceTree = "<group>"; };
 		B2000062 /* BadgeEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeEngineTests.swift; sourceTree = "<group>"; };
 		B2000063 /* SavedBadgeAward.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBadgeAward.swift; sourceTree = "<group>"; };
@@ -124,7 +118,7 @@
 		B2000065 /* PlayerBadgesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerBadgesView.swift; sourceTree = "<group>"; };
 		B2000066 /* BadgeAwardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeAwardTests.swift; sourceTree = "<group>"; };
 		B2000067 /* SavedPlayerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlayerCard.swift; sourceTree = "<group>"; };
-		B2000069 /* CardSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSnapshot.swift; sourceTree = "<group>"; };
+		B2000069 /* CardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStore.swift; sourceTree = "<group>"; };
 		B2000070 /* CardSharingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSharingViews.swift; sourceTree = "<group>"; };
 		B2000072 /* PlayerCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerCardTests.swift; sourceTree = "<group>"; };
 		B2000080 /* LeagueTeamService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeagueTeamService.swift; sourceTree = "<group>"; };
@@ -198,7 +192,6 @@
 				B2000082 /* HomeView.swift */,
 				A2000006 /* ScoreboardView.swift */,
 				A2000019 /* ShotTypeSelectorView.swift */,
-				A2000020 /* AppIconView.swift */,
 				A2000021 /* MatchHistoryView.swift */,
 				A2000022 /* SettingsView.swift */,
 				B2000081 /* LeagueTeamView.swift */,
@@ -225,7 +218,6 @@
 				A2000029 /* SavedPlayer.swift */,
 				B2000063 /* SavedBadgeAward.swift */,
 				B2000067 /* SavedPlayerCard.swift */,
-				A2000033 /* RefereeMatch.swift */,
 				A2000035 /* SavedRefereeMatch.swift */,
 			);
 			path = Models;
@@ -234,9 +226,8 @@
 		A5000007 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				B2000060 /* BadgeEngine.swift */,
 				B2000064 /* BadgeAwarder.swift */,
-				B2000069 /* CardSnapshot.swift */,
+				B2000069 /* CardStore.swift */,
 				B2000043 /* TeamImportService.swift */,
 				B2000080 /* LeagueTeamService.swift */,
 				B2000042 /* PlayerPhoto.swift */,
@@ -244,7 +235,7 @@
 				B2000031 /* ScreenshotScenario.swift */,
 				B2000002 /* MatchRepository.swift */,
 				B2000003 /* PersistenceSchema.swift */,
-				A2000024 /* OpenAIService.swift */,
+				A2000024 /* NetworkTransports.swift */,
 				A2000025 /* APIKeyManager.swift */,
 				A2000031 /* ExportService.swift */,
 				B2000090 /* AutomaticBackup.swift */,
@@ -396,11 +387,10 @@
 				A1000017 /* SavedGame.swift in Sources */,
 				A1000018 /* SavedPoint.swift in Sources */,
 				A1000019 /* ShotTypeSelectorView.swift in Sources */,
-				A1000020 /* AppIconView.swift in Sources */,
 				A1000021 /* MatchHistoryView.swift in Sources */,
 				A1000022 /* SettingsView.swift in Sources */,
 				A1000023 /* CoachDashboardView.swift in Sources */,
-				A1000024 /* OpenAIService.swift in Sources */,
+				A1000024 /* NetworkTransports.swift in Sources */,
 				A1000025 /* APIKeyManager.swift in Sources */,
 				A1000029 /* SavedPlayer.swift in Sources */,
 				A1000030 /* PlayerManagementView.swift in Sources */,
@@ -409,12 +399,10 @@
 				B1000090 /* AutomaticBackup.swift in Sources */,
 				B1000091 /* RefereeInProgressStore.swift in Sources */,
 				A1000032 /* SampleDataService.swift in Sources */,
-				A1000033 /* RefereeMatch.swift in Sources */,
 				A1000034 /* RefereeView.swift in Sources */,
 				A1000035 /* SavedRefereeMatch.swift in Sources */,
-				B1000060 /* BadgeEngine.swift in Sources */,
 				B1000070 /* CardSharingViews.swift in Sources */,
-				B1000069 /* CardSnapshot.swift in Sources */,
+				B1000069 /* CardStore.swift in Sources */,
 				B1000067 /* SavedPlayerCard.swift in Sources */,
 				B1000065 /* PlayerBadgesView.swift in Sources */,
 				B1000064 /* BadgeAwarder.swift in Sources */,

@@ -145,38 +145,4 @@ final class SavedMatch {
 
     // MARK: - Factory Method
 
-    /// Create a SavedMatch from a live Match
-    static func from(_ match: Match, context: ModelContext) -> SavedMatch {
-        let savedMatch = SavedMatch(
-            id: match.id,
-            player1Name: match.player1Name,
-            player2Name: match.player2Name,
-            matchStartingServer: match.matchStartingServer,
-            bestOf: match.bestOf,
-            updatedAt: match.updatedAt,
-            status: match.status
-        )
-
-        savedMatch.player1CoachingFocus = match.player1CoachingFocus
-        savedMatch.player2CoachingFocus = match.player2CoachingFocus
-        savedMatch.player1CoachingNotes = match.player1CoachingNotes
-        savedMatch.player2CoachingNotes = match.player2CoachingNotes
-        savedMatch.player1GamesBefore = match.player1GamesBefore
-        savedMatch.player2GamesBefore = match.player2GamesBefore
-        savedMatch.player1GamesAfter = match.player1GamesAfter
-        savedMatch.player2GamesAfter = match.player2GamesAfter
-        savedMatch.player1Id = match.player1Id
-        savedMatch.player2Id = match.player2Id
-
-        context.insert(savedMatch)
-
-        // Convert and save all games
-        for (index, game) in match.games.enumerated() {
-            let savedGame = SavedGame.from(game, gameNumber: match.gameNumber(at: index), context: context)
-            savedGame.match = savedMatch
-            savedMatch.games.append(savedGame)
-        }
-
-        return savedMatch
-    }
 }

@@ -285,26 +285,6 @@ struct HardwareButton: View {
     }
 }
 
-/// Capsule label (for wall labels)
-struct CapsuleLabel: View {
-    let text: String
-    var color: Color = AppColors.warmOrange.opacity(0.9)
-
-    var body: some View {
-        Text(text.uppercased())
-            .font(AppFonts.caption(9))
-            .foregroundColor(AppColors.textPrimary)
-            .tracking(1)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
-            .background(
-                Capsule()
-                    .fill(color)
-                    .shadow(color: color.opacity(0.5), radius: 2, x: 0, y: 1)
-            )
-    }
-}
-
 
 /// Seven-segment LED digit display
 struct LEDDigit: View {

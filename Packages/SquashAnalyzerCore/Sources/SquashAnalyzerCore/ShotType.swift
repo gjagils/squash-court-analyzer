@@ -14,19 +14,6 @@ public enum ShotType: String, CaseIterable, Identifiable, Codable, Sendable {
 
     public var id: String { rawValue }
 
-    /// Short display name
-    public var shortName: String {
-        switch self {
-        case .drive: return "DRV"
-        case .cross: return "CRS"
-        case .volley: return "VLY"
-        case .drop: return "DRP"
-        case .lob: return "LOB"
-        case .boast: return "BST"
-        case .kill: return "KIL"
-        }
-    }
-
     /// Icon for the shot type
     public var icon: String {
         switch self {

@@ -611,8 +611,4 @@ public class Game: Identifiable {
         return Double(won) / Double(longRallies.count) * 100
     }
 
-    /// Total game duration (sum of all rally durations)
-    public func totalGameDuration() -> TimeInterval {
-        points.reduce(0.0) { $0 + $1.duration }
-    }
 }

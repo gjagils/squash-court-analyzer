@@ -285,8 +285,4 @@ public class Match: Identifiable {
         allLets.count
     }
 
-    /// Lets requested by a specific player across all games
-    public func letsRequested(by player: Player) -> [LetCall] {
-        allLets.filter { $0.requestedBy == player }
-    }
 }

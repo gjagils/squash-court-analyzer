@@ -16,20 +16,6 @@ public enum CourtZone: String, CaseIterable, Identifiable, Codable, Sendable {
 
     public var id: String { rawValue }
 
-    public var shortName: String {
-        switch self {
-        case .frontLeft: return "VL"
-        case .frontMiddle: return "VM"
-        case .frontRight: return "VR"
-        case .middleLeft: return "ML"
-        case .middleMiddle: return "MM"
-        case .middleRight: return "MR"
-        case .backLeft: return "AL"
-        case .backMiddle: return "AM"
-        case .backRight: return "AR"
-        }
-    }
-
     /// Front, middle or back third of the court
     public var row: CourtRow {
         switch self {

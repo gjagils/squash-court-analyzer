@@ -15,8 +15,9 @@
     <!-- Required-reason API declarations -->
     <key>NSPrivacyAccessedAPITypes</key>
     <array>
-        <!-- FileManager: used when wiping the SwiftData store on migration failure
-             and when writing/reading iCloud Drive backup files. -->
+        <!-- FileManager: used to keep the SwiftData store files aside (never
+             deleted) when the store cannot be opened, and when writing/reading
+             iCloud Drive backup files. -->
         <dict>
             <key>NSPrivacyAccessedAPIType</key>
             <string>NSPrivacyAccessedAPICategoryFileTimestamp</string>

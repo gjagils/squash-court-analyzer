@@ -330,17 +330,13 @@ private struct ZoneTapArea: View {
 }
 
 #Preview("Court - Player Selected") {
-    CourtView(isInteractive: true, selectedPlayer: .player1) { zone in
-        print("Tapped: \(zone)")
-    }
+    CourtView(isInteractive: true, selectedPlayer: .player1) { _ in }
     .padding(20)
     .background(Color.black)
 }
 
 #Preview("Court - Player 2 Selected") {
-    CourtView(isInteractive: true, selectedPlayer: .player2) { zone in
-        print("Tapped: \(zone)")
-    }
+    CourtView(isInteractive: true, selectedPlayer: .player2) { _ in }
     .padding(20)
     .background(Color.black)
 }

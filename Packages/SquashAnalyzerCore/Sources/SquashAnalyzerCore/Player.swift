@@ -7,13 +7,6 @@ public enum Player: String, CaseIterable, Identifiable, Codable {
 
     public var id: String { rawValue }
 
-    public var shortName: String {
-        switch self {
-        case .player1: return "S1"
-        case .player2: return "S2"
-        }
-    }
-
     public var opponent: Player {
         switch self {
         case .player1: return .player2

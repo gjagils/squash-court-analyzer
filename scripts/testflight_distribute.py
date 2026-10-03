@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Wait for a build to finish processing, set its TestFlight notes, add it to beta groups
-and submit for beta review.
+and submit for beta review. Older builds are expired (testflight_expire_old.py).
 
     scripts/testflight_distribute.py --version 2.2 --build 10 --notes release-notes/2.2-10.md \
         [--groups Squashteam] [--no-review] [--timeout-minutes 45]
@@ -16,6 +16,7 @@ import time
 
 sys.path.insert(0, os.path.dirname(__file__))
 import asc_api as asc  # noqa: E402
+from testflight_expire_old import expire_old  # noqa: E402
 
 APP_ID = "6758676921"
 
@@ -59,6 +60,7 @@ def main():
     ap.add_argument("--notes", help="text file with the What to Test notes for testers")
     ap.add_argument("--groups", nargs="*", default=["Squashteam"])
     ap.add_argument("--no-review", action="store_true")
+    ap.add_argument("--keep-old", action="store_true", help="do not expire older builds")
     ap.add_argument("--timeout-minutes", type=int, default=45)
     args = ap.parse_args()
 
@@ -96,6 +98,9 @@ def main():
             "relationships": {"build": {"data": {"type": "builds", "id": build_id}}},
         }})
         print("  beta review:", sub["data"]["attributes"]["betaReviewState"])
+    # Older builds go; the previous approved one stays until this one passes review
+    if not args.keep_old:
+        expire_old()
     print("Done.")
 
 

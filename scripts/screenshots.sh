@@ -12,7 +12,7 @@ DEVICE_NAME="iPhone 17 Pro Max"
 BUNDLE_ID="com.squashanalyzer.app"
 OUT="${1:-screenshots/nl-NL}"
 DERIVED="build/DerivedData-screenshots"
-SCENARIOS=(setup coach-match coach-zone referee history dashboard)
+SCENARIOS=(home coach-match coach-zone coach-gameover referee history dashboard)
 
 UDID=$(xcrun simctl list devices available -j | python3 -c '
 import json, sys
@@ -56,5 +56,5 @@ done
 
 xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
 xcrun simctl status_bar "$UDID" clear
-sips -g pixelWidth -g pixelHeight "$OUT/01-setup.png" | tail -2 | tr -s ' ' | paste -sd' ' -
+sips -g pixelWidth -g pixelHeight "$OUT/01-home.png" | tail -2 | tr -s ' ' | paste -sd' ' -
 echo "▸ Done: ${#SCENARIOS[@]} screenshots in $OUT"

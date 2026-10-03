@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Handleiding iPhone – Squash Analyzer</title>
   <meta name="description" content="Handleiding van Squash Analyzer voor iPhone: per tegel uitgelegd hoe coachen, scheidsrechteren, wedstrijden, spelers, badges en instellingen werken." />
-  <link rel="stylesheet" href="../style.css?v=20261001" />
+  <link rel="stylesheet" href="../style.css?v=20261003b" />
   <link rel="icon" href="../logo.png?v=4" />
 </head>
 <body>
@@ -23,7 +23,8 @@
   <main class="manual">
     <div class="manual-head">
       <h1>Handleiding <span>iPhone</span></h1>
-      <p>Alles wat de app kan, per tegel op het beginscherm. Gebruik je Android? Kies dan hieronder de Android-versie.</p>
+      <p>Alles wat de app kan, per tegel op het beginscherm. Gebruik je Android? Kies dan hieronder de Android-versie. De iPhone- en Android-app hebben nu dezelfde schermen.</p>
+      <p class="where">Deze handleiding en de screenshots horen bij de bètaversie die nu getest wordt (TestFlight, build 17). Wat er te testen is: <a href="../testen.html">squashanalyzer.com/testen</a>.</p>
       <div class="platform-switch">
         <a class="active" href="iphone.html">iPhone</a>
         <a href="android.html">Android</a>
@@ -49,7 +50,7 @@
         <div class="note">Alles wat je invoert blijft op je eigen iPhone. Een coachwedstrijd wordt na elk punt automatisch bewaard.</div>
       </div>
       <div class="shots">
-        <figure><img src="img/iphone/home.jpg" alt="Beginscherm met vijf tegels" loading="lazy"><figcaption>Het beginscherm</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/home.jpg?v=17" alt="Beginscherm met vijf tegels" loading="lazy"><figcaption>Het beginscherm</figcaption></figure>
       </div>
     </section>
 
@@ -76,21 +77,23 @@
         <p class="where">Elke rally vastleggen: wie scoort, hoe, waar en met welke slag</p>
 
         <h3>Een wedstrijd starten</h3>
+        <p>Tik op de Coach-tegel. Loopt er nog een wedstrijd, dan vraagt de app eerst <span class="ui">Wedstrijd hervatten?</span>: <span class="ui">Hervatten</span>, <span class="ui">Nieuwe wedstrijd</span> (de oude komt als incompleet in Afgeronde wedstrijden) of <span class="ui">Annuleren</span>.</p>
         <ol>
           <li>Vul bij <span class="ui">Speler 1</span> en <span class="ui">Speler 2</span> een naam in, of tik op <span class="ui">Kies speler</span> om een opgeslagen speler te kiezen. Alleen gekozen spelers kunnen <a href="#badges">badges</a> verdienen.</li>
           <li>Kies bij <span class="ui">Wie serveert eerst?</span> de serveerder.</li>
           <li>Kom je later binnen? Open <span class="ui">Later instappen?</span> en vul in hoeveel games ieder al gewonnen heeft.</li>
           <li>Tik op <span class="ui">Start wedstrijd</span>. Er wordt gespeeld tot drie gewonnen games (best of 5).</li>
+          <li>Tik bij de eerste service op <span class="ui">START GAME</span>: vanaf dan loopt de rally-timer, zodat het inspelen en de pauze tussen games niet meetellen.</li>
         </ol>
 
         <h3>Een punt invoeren</h3>
         <ol>
           <li><strong>Tik op de score</strong> van de speler die het punt wint. (Nog eens tikken annuleert.)</li>
-          <li>Kies <strong>hoe</strong> het punt viel: <span class="ui">Winner</span>, <span class="ui">Forced error</span> (fout door druk), <span class="ui">Unforced error</span> (fout zonder druk), <span class="ui">Stroke</span> of <span class="ui">Servicepunt</span> (alleen voor de serveerder).</li>
+          <li>Kies <strong>hoe</strong> het punt viel: <span class="ui">Winner</span>, <span class="ui">Forced error</span> (fout door druk), <span class="ui">Unforced error</span> (fout zonder druk), <span class="ui">Stroke</span> of <span class="ui">Servicepunt</span> (alleen voor de serveerder). Bij een unforced error kies je daarna de <strong>soort fout</strong>: <span class="ui">Down</span> (in de tin), <span class="ui">Out</span>, <span class="ui">Service</span> (alleen bij de serveerder), <span class="ui">Grond</span> of <span class="ui">Weet niet</span>.</li>
           <li>Tik op de baan <strong>waar</strong> het punt viel. Standaard is de baan verdeeld in 6 vakken: voor, midden en achter, links en rechts. (Liever 9 vakken? Zie <a href="#instellingen">Instellingen</a>.)</li>
           <li>Kies de <strong>slag</strong>. Je ziet alleen slagen die bij dat vak passen: voorin Drop, Boast en Kill; in het midden Kill, Drive, Cross en Boast; achterin Drive, Cross en Lob. Was het een volley? Zet dan eerst <span class="ui">Uit de lucht</span> aan.</li>
         </ol>
-        <p>Bij een stroke of een unforced error kies je alleen het vak; een servicepunt telt meteen. Elke stap heeft een knop <span class="ui">Annuleer</span>.</p>
+        <p>Bij een stroke kies je alleen het vak, bij een unforced error alleen de soort fout; een servicepunt telt meteen. Elke stap heeft een knop <span class="ui">Annuleer</span>.</p>
         <p>Op het scorebord zie je wie serveert en uit welk vak (<span class="ui">Links</span>/<span class="ui">Rechts</span>). Klopt het vak niet, tik dan het andere aan. Tussen de spelers loopt een scorelijn met de laatste rally's, en linksboven de rally-timer.</p>
 
         <h3>Let, undo en het laatste punt</h3>
@@ -102,7 +105,10 @@
 
         <h3>Game klaar</h3>
         <p>Aan het eind van een game zie je de uitslag met de knoppen <span class="ui">Analyse</span>, <span class="ui">Deel score</span>, <span class="ui">Volgende game</span>, <span class="ui">Undo laatste punt</span> en <span class="ui">Stop wedstrijd</span>. Na de laatste game zie je ook welke <strong>badges</strong> er verdiend zijn.</p>
-        <p><span class="ui">Deel score</span> maakt een tekst voor bijvoorbeeld WhatsApp: <em>Kort</em>, <em>Scorekaart</em> of <em>Verslag</em>.</p>
+        <p><span class="ui">Deel score</span>: kies <em>Scorekaart</em> (tabel), <em>Verslag</em> (per game, met tijden) of <em>Plaatje</em> (de uitslag als afbeelding, met de spelersfoto's) en tik op <span class="ui">Delen</span>.</p>
+
+        <h3>Live meekijken</h3>
+        <p>Tik op <span class="ui">LIVE</span> bovenin en deel de link, bijvoorbeeld in de groepsapp. Wie de link opent, volgt de stand in de browser, met een kleine foto van de spelers. LIVE is grijs tot er een link is en rood zolang je live bent. Nog eens tikken: link opnieuw delen of <span class="ui">Live stoppen</span>. De eindstand blijft 2 uur zichtbaar en wordt daarna gewist. LIVE (of alleen de foto's) zet je uit in <a href="#instellingen">Instellingen</a>.</p>
 
         <h3>Analyse en AI Coach</h3>
         <p>Het coachdashboard toont per speler en per game: gemiddelde rallyduur bij winst en verlies, beste zone en slag, een <strong>heatmap</strong> van de baan, de meest gebruikte slagen (een volley staat apart, zoals <em>Volley drop</em>), de puntverdeling, het aantal punten <strong>uit de lucht</strong> en tactisch advies.</p>
@@ -117,11 +123,11 @@
         </ul>
       </div>
       <div class="shots">
-        <figure><img src="img/iphone/coach-start.jpg" alt="Coachwedstrijd starten" loading="lazy"><figcaption>Wedstrijd starten</figcaption></figure>
-        <figure><img src="img/iphone/coach.jpg" alt="Coachscherm met scorebord" loading="lazy"><figcaption>Tik op de score van wie scoort</figcaption></figure>
-        <figure><img src="img/iphone/coach-zone.jpg" alt="Baan met 6 vakken" loading="lazy"><figcaption>Kies het vak</figcaption></figure>
-        <figure><img src="img/iphone/coach-game-klaar.jpg" alt="Game klaar" loading="lazy"><figcaption>Game klaar</figcaption></figure>
-        <figure><img src="img/iphone/analyse.jpg" alt="Coachdashboard" loading="lazy"><figcaption>Analyse</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/coach-start.jpg?v=17" alt="Coachwedstrijd starten" loading="lazy"><figcaption>Wedstrijd starten</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/coach.jpg?v=17" alt="Coachscherm met scorebord" loading="lazy"><figcaption>Tik op de score van wie scoort</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/coach-zone.jpg?v=17" alt="Baan met 6 vakken" loading="lazy"><figcaption>Kies het vak</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/coach-game-klaar.jpg?v=17" alt="Game klaar" loading="lazy"><figcaption>Game klaar</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/analyse.jpg?v=17" alt="Coachdashboard" loading="lazy"><figcaption>Analyse</figcaption></figure>
       </div>
     </section>
 
@@ -139,15 +145,15 @@
           <li>In het midden staat de <strong>scorelijn</strong>: elke rally met de nieuwe stand en het vak, bijvoorbeeld <em>4R</em>. Een stroke heeft een witte rand.</li>
           <li><span class="ui">Let call</span> en <span class="ui">Stroke</span> staan per speler onder de scores.</li>
           <li>Onderaan lopen de <strong>match</strong>- en <strong>game</strong>-timer, met <span class="ui">Undo</span> voor het laatste punt.</li>
-          <li>Met het deel-icoon rechtsboven deel je de tussenstand.</li>
+          <li>Met het deel-icoon rechtsboven deel je de tussenstand; met <span class="ui">LIVE</span> volgt je team de stand in de browser (zie <a href="#coach">Coach</a>).</li>
         </ul>
         <h3>Game en wedstrijd klaar</h3>
         <p>Na een game zie je de stand en duur, met <span class="ui">Volgende game</span>, <span class="ui">Undo laatste punt</span> en <span class="ui">Bekijk stand</span>. Na <span class="ui">Bekijk stand</span> ga je verder met de knop <span class="ui">Volgende game</span> onder de scores. Na de wedstrijd: de winnaar, verdiende badges, <span class="ui">Deel score</span> en <span class="ui">Sluiten</span>.</p>
         <p>Sluit je halverwege, dan vraagt de Scheidsrechter-tegel later <span class="ui">Wedstrijd hervatten?</span>. Undo werkt na hervatten ook weer voor de lopende game.</p>
-        <div class="note">Een scheidsrechterwedstrijd wordt bewaard zodra hij klaar is. Sluit je halverwege, dan gaat hij verloren.</div>
+        <div class="note">Een scheidsrechterwedstrijd wordt na elke rally bewaard. Sluit je halverwege, dan ga je via de tegel verder; kies je daar <span class="ui">Nieuwe wedstrijd</span>, dan komt de oude als incompleet in Afgeronde wedstrijden.</div>
       </div>
       <div class="shots">
-        <figure><img src="img/iphone/scheidsrechter.jpg" alt="Scheidsrechterscherm" loading="lazy"><figcaption>Tik op de score = punt</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/scheidsrechter.jpg?v=17" alt="Scheidsrechterscherm" loading="lazy"><figcaption>Tik op de score = punt</figcaption></figure>
       </div>
     </section>
 
@@ -160,18 +166,13 @@
           <li>Filter op <span class="ui">Alles</span>, <span class="ui">Coach</span> of <span class="ui">Scheidsrechter</span>, en op één speler.</li>
           <li>Een coachwedstrijd toont de stand per game. Tik op de kaart of <span class="ui">Bekijk analyse</span> voor het dashboard, <span class="ui">Delen</span> voor een tekst en bestand, of de prullenbak om te verwijderen.</li>
           <li>Niet afgemaakt? Dan staat er <strong>INCOMPLEET</strong> bij en kun je met <span class="ui">Uitslag aanvullen</span> invullen wie de resterende games won.</li>
-          <li>Scheidsrechterwedstrijden tonen de uitslag per game; verwijderen kan met de prullenbak of lang indrukken.</li>
+          <li>Scheidsrechterwedstrijden tonen de uitslag per game; delen en verwijderen kan op de kaart.</li>
+          <li>Een wedstrijd die nog loopt staat hier niet: de Coach- of Scheidsrechter-tegel biedt hem aan.</li>
         </ul>
-        <h3>Back-ups (⋯-menu rechtsboven)</h3>
-        <ul>
-          <li><span class="ui">Backup naar iCloud</span> zet al je spelers, wedstrijden en badges in iCloud Drive (Bestanden → iCloud Drive → Squash Analyzer).</li>
-          <li><span class="ui">Backup herstellen</span>: kies <span class="ui">Voeg toe</span> (alleen wat nieuw is) of <span class="ui">Vervang alles</span>.</li>
-          <li><span class="ui">Backup delen</span> stuurt het back-upbestand naar een andere app. Back-ups zijn ook op een Android-telefoon terug te zetten.</li>
-        </ul>
-        <p>Een automatische wekelijkse back-up stel je in bij <a href="#instellingen">Instellingen</a>.</p>
+        <p>Back-ups maken en terugzetten doe je in <a href="#instellingen">Instellingen</a>.</p>
       </div>
       <div class="shots">
-        <figure><img src="img/iphone/wedstrijden.jpg" alt="Afgeronde wedstrijden" loading="lazy"><figcaption>Wedstrijden met filters</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/wedstrijden.jpg?v=17" alt="Afgeronde wedstrijden" loading="lazy"><figcaption>Wedstrijden met filters</figcaption></figure>
       </div>
     </section>
 
@@ -198,7 +199,7 @@
         <p>Open de badges van een speler en tik op <span class="ui">Deel kaart</span>. Je deelt een afbeelding met een link. Wie de link opent, ziet de kaart in de app (iPhone of Android) of in de browser en kan hem koppelen aan een eigen speler. Deel een kaart alleen met toestemming van de speler.</p>
       </div>
       <div class="shots">
-        <figure><img src="img/iphone/spelers.jpg" alt="Spelerslijst" loading="lazy"><figcaption>Spelers met badges en focus</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/spelers.jpg?v=17" alt="Spelerslijst" loading="lazy"><figcaption>Spelers met badges en focus</figcaption></figure>
       </div>
     </section>
 
@@ -211,7 +212,7 @@
         <p>Bij een speler zie je per badge hoe vaak en wanneer hij verdiend is. Een verdienmoment verwijder je door naar links te vegen.</p>
       </div>
       <div class="shots">
-        <figure><img src="img/iphone/badges.jpg" alt="Badges verdiend na een wedstrijd" loading="lazy"><figcaption>Badges</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/badges.jpg?v=17" alt="Badges verdiend na een wedstrijd" loading="lazy"><figcaption>Badges</figcaption></figure>
       </div>
     </section>
 
@@ -224,12 +225,13 @@
           <li><strong>Handleiding</strong>: opent deze pagina.</li>
           <li><strong>Baanindeling</strong>: kies <span class="ui">6 vakken</span> (standaard) of <span class="ui">9 vakken</span> met een middenkolom.</li>
           <li><strong>Mijn team</strong>: plak je teamlink van sbn.toernooi.nl en tik op <span class="ui">Bewaar teamlink</span>; alleen een geldige link wordt bewaard. <span class="ui">Verwijder</span> haalt hem weg.</li>
-          <li><strong>Back-up</strong>: <span class="ui">Wekelijkse back-up naar iCloud</span> staat standaard aan. Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in iCloud Drive; de 7 nieuwste blijven bewaard.</li>
+          <li><strong>Live meekijken</strong>: de knop <span class="ui">LIVE</span> bij Coach en Scheidsrechter, en <span class="ui">Foto's van de spelers meesturen</span>. Beide staan standaard aan.</li>
+          <li><strong>Back-up</strong>: <span class="ui">Wekelijkse back-up naar iCloud</span> staat standaard aan. Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in iCloud Drive; de 7 nieuwste blijven bewaard. Met de knoppen eronder: <span class="ui">Nu naar iCloud</span>, <span class="ui">Terugzetten</span> (kies <span class="ui">Voeg toe</span> of <span class="ui">Vervang alles</span>), <span class="ui">Delen</span> (het back-upbestand naar een andere app) en <span class="ui">Wedstrijd importeren</span> (een gedeelde wedstrijd). Back-ups zijn ook op een Android-telefoon terug te zetten.</li>
           <li><strong>AI Coach</strong>: vul je eigen OpenAI API-sleutel in en tik op <span class="ui">Bewaar API Key</span>. De sleutel staat veilig in de iPhone-sleutelhanger. Een analyse kost ongeveer € 0,01 (de app kiest het goedkoopste beschikbare model). Een leeg veld bewaren verwijdert de sleutel. Lukt het advies niet, tik dan op <span class="ui">Opnieuw proberen</span>.</li>
         </ul>
       </div>
       <div class="shots">
-        <figure><img src="img/iphone/instellingen.jpg" alt="Instellingen" loading="lazy"><figcaption>Instellingen</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/instellingen.jpg?v=17" alt="Instellingen" loading="lazy"><figcaption>Instellingen</figcaption></figure>
       </div>
     </section>
 

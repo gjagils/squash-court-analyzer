@@ -7,6 +7,8 @@ import SquashAnalyzerCore
 /// argument `-screenshot <name>`; see scripts/screenshots.sh. Debug builds only,
 /// so none of this ships in the App Store binary.
 enum ScreenshotScenario: String, CaseIterable {
+    /// The home screen as it opens
+    case home
     case setup
     case coachMatch = "coach-match"
     case coachZone = "coach-zone"

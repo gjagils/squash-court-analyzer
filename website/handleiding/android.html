@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Handleiding Android – Squash Analyzer</title>
   <meta name="description" content="Handleiding van Squash Analyzer voor Android: per tegel uitgelegd hoe coachen, scheidsrechteren, wedstrijden, spelers, badges en instellingen werken." />
-  <link rel="stylesheet" href="../style.css?v=20261001" />
+  <link rel="stylesheet" href="../style.css?v=20261003b" />
   <link rel="icon" href="../logo.png?v=4" />
 </head>
 <body>
@@ -23,7 +23,8 @@
   <main class="manual">
     <div class="manual-head">
       <h1>Handleiding <span>Android</span></h1>
-      <p>Alles wat de app kan, per tegel op het beginscherm. Gebruik je een iPhone? Kies dan hieronder de iPhone-versie.</p>
+      <p>Alles wat de app kan, per tegel op het beginscherm. Gebruik je een iPhone? Kies dan hieronder de iPhone-versie. De iPhone- en Android-app hebben nu dezelfde schermen.</p>
+      <p class="where">Deze handleiding en de screenshots horen bij de bètaversie die nu getest wordt (Google Play, versie 0.4). Wat er te testen is: <a href="../testen.html">squashanalyzer.com/testen</a>.</p>
       <div class="platform-switch">
         <a href="iphone.html">iPhone</a>
         <a class="active" href="android.html">Android</a>
@@ -49,7 +50,7 @@
         <div class="note">Coach- en scheidsrechterwedstrijden worden automatisch opgeslagen. Tik later gewoon weer op de tegel om verder te gaan.</div>
       </div>
       <div class="shots">
-        <figure><img src="img/android/home.jpg" alt="Beginscherm met vijf tegels" loading="lazy"><figcaption>Het beginscherm</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/home.jpg?v=4" alt="Beginscherm met vijf tegels" loading="lazy"><figcaption>Het beginscherm</figcaption></figure>
       </div>
     </section>
 
@@ -81,17 +82,18 @@
           <li>Vul bij <span class="ui">Speler 1</span> en <span class="ui">Speler 2</span> een naam in, of tik op <span class="ui">Kies speler</span> om een opgeslagen speler te kiezen (met <span class="ui">Nieuwe speler</span> voeg je er direct een toe). In de coachmodus zie je meteen de aandachtspunten van die speler. Alleen gekozen spelers kunnen <a href="#badges">badges</a> verdienen. Met het spelersicoon rechtsboven bewerk je je spelers.</li>
           <li>Kies bij <span class="ui">Wie serveert eerst?</span> de serveerder.</li>
           <li>Kom je later binnen? Tik op <span class="ui">Later instappen?</span> en vul met − en + in hoeveel games ieder al gewonnen heeft.</li>
-          <li>Tik op <span class="ui">Start</span>. Er wordt gespeeld tot drie gewonnen games (best of 5).</li>
+          <li>Tik op <span class="ui">Start wedstrijd</span>. Er wordt gespeeld tot drie gewonnen games (best of 5).</li>
+          <li>Tik bij de eerste service op <span class="ui">START GAME</span>: vanaf dan loopt de rally-timer, zodat het inspelen en de pauze tussen games niet meetellen.</li>
         </ol>
 
         <h3>Een punt invoeren</h3>
         <ol>
           <li><strong>Tik op de score</strong> van de speler die het punt wint.</li>
-          <li>Kies <strong>hoe</strong> het punt viel: <span class="ui">Winner</span>, <span class="ui">Forced error</span> (fout door druk), <span class="ui">Unforced error</span> (fout zonder druk), <span class="ui">Stroke</span> of <span class="ui">Servicepunt</span> (alleen voor de serveerder).</li>
+          <li>Kies <strong>hoe</strong> het punt viel: <span class="ui">Winner</span>, <span class="ui">Forced error</span> (fout door druk), <span class="ui">Unforced error</span> (fout zonder druk), <span class="ui">Stroke</span> of <span class="ui">Servicepunt</span> (alleen voor de serveerder). Bij een unforced error kies je daarna de <strong>soort fout</strong>: <span class="ui">Down</span> (in de tin), <span class="ui">Out</span>, <span class="ui">Service</span> (alleen bij de serveerder), <span class="ui">Grond</span> of <span class="ui">Weet niet</span>.</li>
           <li>Tik op de baan <strong>waar</strong> het punt viel. Standaard is de baan verdeeld in 6 vakken: voor, midden en achter, links en rechts. (Liever 9 vakken? Zie <a href="#instellingen">Instellingen</a>.)</li>
           <li>Kies de <strong>slag</strong>. Je ziet alleen slagen die bij dat vak passen: voorin Drop, Boast en Kill; in het midden Kill, Drive, Cross en Boast; achterin Drive, Cross en Lob. Was het een volley? Zet dan eerst <span class="ui">Uit de lucht</span> aan.</li>
         </ol>
-        <p>Bij een stroke of een unforced error kies je alleen het vak; een servicepunt telt meteen. Elke stap heeft een knop <span class="ui">Annuleer</span>.</p>
+        <p>Bij een stroke kies je alleen het vak, bij een unforced error alleen de soort fout; een servicepunt telt meteen. Elke stap heeft een knop <span class="ui">Annuleer</span>.</p>
         <p>Op het scorebord zie je wie serveert en uit welk vak (<span class="ui">Links</span>/<span class="ui">Rechts</span>). Klopt het vak niet, tik dan het andere aan. Links van de instructie loopt de rally-timer.</p>
 
         <h3>Let, undo en het laatste punt</h3>
@@ -103,7 +105,10 @@
 
         <h3>Game en wedstrijd klaar</h3>
         <p>Aan het eind van een game zie je de uitslag met de knoppen <span class="ui">Analyse</span>, <span class="ui">Deel score</span>, <span class="ui">Volgende game</span>, <span class="ui">Undo laatste punt</span> en <span class="ui">Stop wedstrijd</span>. Na de laatste game zie je ook welke <strong>badges</strong> er verdiend zijn (tik erop voor uitleg) en start je met <span class="ui">Nieuwe wedstrijd</span> een volgende.</p>
-        <p><span class="ui">Deel score</span> maakt een tekst voor bijvoorbeeld WhatsApp: <em>Kort</em>, <em>Scorekaart</em> of <em>Verslag</em>, met een voorbeeld zoals het in de chat verschijnt.</p>
+        <p><span class="ui">Deel score</span>: kies <em>Scorekaart</em> (tabel), <em>Verslag</em> (per game, met tijden) of <em>Plaatje</em> (de uitslag als afbeelding, met de spelersfoto's). Je ziet een voorbeeld; tik op <span class="ui">Delen</span>.</p>
+
+        <h3>Live meekijken</h3>
+        <p>Tik op <span class="ui">LIVE</span> bovenin en deel de link, bijvoorbeeld in de groepsapp. Wie de link opent, volgt de stand in de browser, met een kleine foto van de spelers. LIVE is grijs tot er een link is en rood zolang je live bent. Nog eens tikken: link opnieuw delen of <span class="ui">Live stoppen</span>. De eindstand blijft 2 uur zichtbaar en wordt daarna gewist. LIVE (of alleen de foto's) zet je uit in <a href="#instellingen">Instellingen</a>.</p>
 
         <h3>Analyse en AI Coach</h3>
         <p>Het <strong>coach dashboard</strong> toont per speler en per game: gemiddelde rallyduur bij winst en verlies, beste zone en slag, een <strong>heatmap</strong> van de baan, de meest gebruikte slagen (een volley staat apart, zoals <em>Volley cross</em>), de puntverdeling, het aantal punten <strong>uit de lucht</strong> en tactisch advies. Met <span class="ui">Deel</span> stuur je een samenvatting.</p>
@@ -121,11 +126,11 @@
         </ul>
       </div>
       <div class="shots">
-        <figure><img src="img/android/coach-start.jpg" alt="Coachwedstrijd starten" loading="lazy"><figcaption>Wedstrijd starten</figcaption></figure>
-        <figure><img src="img/android/coach-punt.jpg" alt="Soort punt kiezen" loading="lazy"><figcaption>Hoe werd het punt gewonnen?</figcaption></figure>
-        <figure><img src="img/android/coach-zone.jpg" alt="Baan met 6 vakken" loading="lazy"><figcaption>Kies het vak</figcaption></figure>
-        <figure><img src="img/android/coach-slag.jpg" alt="Slag kiezen met Uit de lucht" loading="lazy"><figcaption>Kies de slag</figcaption></figure>
-        <figure><img src="img/android/analyse.jpg" alt="Game-analyse" loading="lazy"><figcaption>Game-analyse</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-start.jpg?v=4" alt="Coachwedstrijd starten" loading="lazy"><figcaption>Wedstrijd starten</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-punt.jpg?v=4" alt="Soort punt kiezen" loading="lazy"><figcaption>Hoe werd het punt gewonnen?</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-zone.jpg?v=4" alt="Baan met 6 vakken" loading="lazy"><figcaption>Kies het vak</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-slag.jpg?v=4" alt="Slag kiezen met Uit de lucht" loading="lazy"><figcaption>Kies de slag</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/analyse.jpg?v=4" alt="Game-analyse" loading="lazy"><figcaption>Game-analyse</figcaption></figure>
       </div>
     </section>
 
@@ -143,14 +148,14 @@
           <li>In het midden staat de <strong>scorelijn</strong>: elke rally met de nieuwe stand en het vak, bijvoorbeeld <em>4R</em>.</li>
           <li><span class="ui">Let call</span> en <span class="ui">Stroke</span> staan per speler onder de scores; <span class="ui">Undo</span> maakt het laatste punt ongedaan.</li>
           <li>Daaronder lopen de <strong>match</strong>- en <strong>game</strong>-timer.</li>
-          <li>Met het deel-icoon rechtsboven deel je de tussenstand.</li>
+          <li>Met het deel-icoon rechtsboven deel je de tussenstand; met <span class="ui">LIVE</span> volgt je team de stand in de browser (zie <a href="#coach">Coach</a>).</li>
         </ul>
         <h3>Game en wedstrijd klaar</h3>
         <p>Na een game zie je de stand en duur, met <span class="ui">Volgende game</span>, <span class="ui">Undo laatste punt</span> en <span class="ui">Bekijk stand</span>. Na de wedstrijd: de winnaar, de uitslag per game, verdiende badges, <span class="ui">Deel score</span> en <span class="ui">Sluiten</span>. Undo werkt na hervatten ook weer voor de lopende game.</p>
         <div class="note">Na elke rally wordt de wedstrijd bewaard. Sluit je halverwege, dan ga je later verder via de Scheidsrechter-tegel.</div>
       </div>
       <div class="shots">
-        <figure><img src="img/android/scheidsrechter.jpg" alt="Scheidsrechterscherm" loading="lazy"><figcaption>Tik op de score = punt</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/scheidsrechter.jpg?v=4" alt="Scheidsrechterscherm" loading="lazy"><figcaption>Tik op de score = punt</figcaption></figure>
       </div>
     </section>
 
@@ -170,7 +175,7 @@
         <p>Een lopende wedstrijd vind je niet hier, maar via de Coach- of Scheidsrechter-tegel. Back-ups maak en zet je terug in <a href="#instellingen">Instellingen</a>.</p>
       </div>
       <div class="shots">
-        <figure><img src="img/android/wedstrijden.jpg" alt="Afgeronde wedstrijden" loading="lazy"><figcaption>Afgeronde wedstrijden</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/wedstrijden.jpg?v=4" alt="Afgeronde wedstrijden" loading="lazy"><figcaption>Afgeronde wedstrijden</figcaption></figure>
       </div>
     </section>
 
@@ -195,8 +200,8 @@
         <p>Tik onderaan de badges van een speler op <span class="ui">Deel kaart</span>: je deelt een afbeelding met een link naar de kaart. Krijg je zelf zo'n link, open hem dan op je telefoon. De app vraagt of je de kaart koppelt aan een <span class="ui">Nieuwe speler</span> of aan een bestaande speler. Deel een kaart alleen met toestemming van de speler.</p>
       </div>
       <div class="shots">
-        <figure><img src="img/android/spelers.jpg" alt="Spelerslijst" loading="lazy"><figcaption>Spelers</figcaption></figure>
-        <figure><img src="img/android/speler-bewerken.jpg" alt="Speler toevoegen" loading="lazy"><figcaption>Speler toevoegen</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/spelers.jpg?v=4" alt="Spelerslijst" loading="lazy"><figcaption>Spelers</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/speler-bewerken.jpg?v=4" alt="Speler toevoegen" loading="lazy"><figcaption>Speler toevoegen</figcaption></figure>
       </div>
     </section>
 
@@ -208,7 +213,7 @@
         <p>Badges verdien je automatisch tijdens wedstrijden, maar <strong>alleen met spelers die je via Kies speler hebt gekozen</strong>. De lijst is ingedeeld in <em>In één game</em>, <em>In één wedstrijd</em> en <em>Over al je wedstrijden</em>. Het label <strong>COACH</strong> betekent dat de badge alleen in de coachmodus te verdienen is; <strong>EÉN KEER</strong> dat je hem maar één keer krijgt.</p>
       </div>
       <div class="shots">
-        <figure><img src="img/android/badges.jpg" alt="Alle badges" loading="lazy"><figcaption>Alle badges</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/badges.jpg?v=4" alt="Alle badges" loading="lazy"><figcaption>Alle badges</figcaption></figure>
       </div>
     </section>
 
@@ -221,6 +226,7 @@
           <li><strong>Handleiding</strong>: opent deze pagina.</li>
           <li><strong>Baanindeling</strong>: kies <span class="ui">6 vakken</span> (standaard) of <span class="ui">9 vakken</span> met een middenkolom.</li>
           <li><strong>Mijn team</strong>: plak je teamlink van sbn.toernooi.nl en tik op <span class="ui">Bewaar teamlink</span>; <span class="ui">Verwijder</span> haalt hem weg.</li>
+          <li><strong>Live meekijken</strong>: de knop <span class="ui">LIVE</span> bij Coach en Scheidsrechter, en <span class="ui">Foto's van de spelers meesturen</span>. Beide staan standaard aan.</li>
           <li><strong>AI Coach</strong>: vul je eigen OpenAI API-sleutel in en tik op <span class="ui">Bewaar API key</span>. De sleutel wordt versleuteld op je toestel bewaard. Een analyse kost ongeveer € 0,01. Met <span class="ui">Verwijder key</span> haal je hem weg.</li>
           <li><strong>Back-up</strong>:
             <ul>
@@ -233,7 +239,7 @@
         <div class="note">Ook scheidsrechterwedstrijden zitten in de back-up (de uitslag per game).</div>
       </div>
       <div class="shots">
-        <figure><img src="img/android/instellingen.jpg" alt="Instellingen" loading="lazy"><figcaption>Instellingen</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/instellingen.jpg?v=4" alt="Instellingen" loading="lazy"><figcaption>Instellingen</figcaption></figure>
       </div>
     </section>
 

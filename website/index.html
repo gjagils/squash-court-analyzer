@@ -9,7 +9,7 @@
   <meta property="og:description" content="De professionele squash-app voor coaches en scheidsrechters." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.squashanalyzer.com" />
-  <link rel="stylesheet" href="style.css?v=20261001" />
+  <link rel="stylesheet" href="style.css?v=20261003b" />
   <!-- Favicon: replace with your own -->
   <link rel="icon" href="logo.png?v=4" />
 </head>
@@ -37,7 +37,7 @@
     <div class="hero-app-icon">
       <img src="logo.png?v=4" alt="Squash Analyzer icon">
     </div>
-    <div class="hero-badge">iPhone · Android komt eraan · Nu nog gratis</div>
+    <div class="hero-badge">iPhone · Android in bèta · Nu nog gratis</div>
     <h1>Squash <span>Analyzer</span></h1>
     <p>De app voor squashcoaches en scheidsrechters. Registreer elke rally in detail, houd de service bij zoals een scheidsrechter, verdien badges en laat AI je helpen met tactisch advies.</p>
     <div class="hero-buttons">
@@ -55,32 +55,38 @@
   <!-- ── Phone mockup strip ─────────────────────────────────── -->
   <div class="mockup-strip">
     <div class="mockup-phone">
-      <img src="screenshots/referee.png" alt="Scheidsrechter modus met rally-voor-rally scorelijn">
+      <span class="beta-tag">Bèta</span>
+      <img src="screenshots/referee.png?v=3" alt="Scheidsrechter modus met rally-voor-rally scorelijn">
     </div>
     <div class="mockup-phone center">
-      <img src="screenshots/coach.png?v=2" alt="Coach modus: tik op de baan waar het punt viel">
+      <span class="beta-tag">Bèta</span>
+      <img src="screenshots/coach.png?v=3" alt="Coach modus: tik op de score van wie scoort">
     </div>
     <div class="mockup-phone">
-      <img src="screenshots/dashboard.png" alt="Coach dashboard met puntverdeling en tactisch advies">
+      <span class="beta-tag">Bèta</span>
+      <img src="screenshots/dashboard.png?v=3" alt="Coach dashboard met puntverdeling en tactisch advies">
     </div>
   </div>
+  <p class="beta-note">Deze screenshots komen uit de bètaversie die nu getest wordt. De versie in de App Store kan er nog anders uitzien. <a href="testen.html">Wat valt er te testen?</a></p>
 
   <!-- ── Nieuws: nieuwe versie en Android ─────────────────── -->
   <section class="section" id="nieuws">
     <div class="section-label">Nieuws</div>
-    <h2>Er komt een nieuwe versie, en Squash Analyzer komt naar Android</h2>
+    <h2>Nieuwe bètaversie voor iPhone, en Android test mee</h2>
     <div class="mode-grid">
       <div class="mode-card gold">
         <div class="mode-icon">🚀</div>
-        <h3>Nieuwe versie op komst</h3>
-        <p>De volgende versie voor iPhone wordt nu getest en komt binnenkort in de App Store. Nieuw:</p>
+        <h3>Nieuwe versie in test</h3>
+        <p>De volgende versie wordt nu getest op iPhone en Android en komt daarna in de App Store en de Play Store. Nieuw:</p>
         <ul class="feature-list">
-          <li>Baan in 6 vakken (of 9), met per vak de slagen die passen</li>
-          <li>Nieuwe slag Kill en de schakelaar "Uit de lucht" voor volleys</li>
-          <li>Heatmap en slagen in de analyse passen zich aan, met een teller voor volleys</li>
-          <li>Spelerskaart met badges delen via een link, ook met Android</li>
-          <li>Wekelijkse automatische back-up in iCloud Drive</li>
+          <li>Live meekijken: deel een link en volg de stand in de browser, met spelersfoto's</li>
+          <li>Bij een unforced error ook de soort fout: down, out, service of grond</li>
+          <li>START GAME bij de eerste service, zodat het inspelen niet meetelt</li>
+          <li>Deel de score als scorekaart, verslag of plaatje</li>
+          <li>Nieuw startscherm en een rustiger, zwarte stijl</li>
+          <li>Baan in 6 of 9 vakken, de slag Kill en de schakelaar "Uit de lucht"</li>
         </ul>
+        <p><a href="testen.html">Bekijk wat er allemaal te testen is →</a></p>
         <p>Wil je hem nu al proberen? Installeer de app TestFlight van Apple en doe mee met de test. Je krijgt dan elke nieuwe testversie als eerste.</p>
         <div class="home-links">
           <a class="btn-primary" href="https://testflight.apple.com/join/QrreRemZ" target="_blank" rel="noopener">Doe mee met de iPhone-test</a>
@@ -88,9 +94,9 @@
       </div>
       <div class="mode-card orange">
         <div class="mode-icon">🤖</div>
-        <h3>Android komt eraan</h3>
-        <p>Squash Analyzer komt ook voor Android-telefoons, met de coach- en scheidsrechtermodus, badges, Mijn team en back-ups die je tussen iPhone en Android kunt uitwisselen.</p>
-        <p>Wil je hem als een van de eersten testen? Meld je aan met het e-mailadres van je Google-account (het adres waarmee je in de Play Store bent ingelogd). Je krijgt een mail zodra de test begint.</p>
+        <h3>Android in test</h3>
+        <p>Squash Analyzer draait nu ook op Android-telefoons, met dezelfde schermen als op de iPhone: coach en scheidsrechter, live meekijken, badges, Mijn team en back-ups die je tussen iPhone en Android kunt uitwisselen.</p>
+        <p>Wil je meetesten? Meld je aan met het e-mailadres van je Google-account (het adres waarmee je in de Play Store bent ingelogd). Je krijgt dan een uitnodiging voor de test.</p>
         <div class="home-links">
           <a class="btn-primary" href="mailto:info@squashanalyzer.com?subject=Aanmelden%20Android-test&amp;body=Ik%20wil%20graag%20meedoen%20met%20de%20Android-test.%0A%0AE-mailadres%20van%20mijn%20Google-account%3A%20">Meld je aan voor de Android-test</a>
         </div>
@@ -112,13 +118,16 @@
         <p>Registreer elke rally in detail: tik op de score van wie scoort, kies het punttype, het vak op de baan en de slag. Wie serveert en vanuit welk vak houdt de app bij. Na de game krijg je een analyse en tactisch advies.</p>
         <ul class="feature-list">
           <li>Winner, forced error, unforced error, stroke of servicepunt</li>
+          <li>Bij een unforced error ook de soort fout: down, out, service of grond</li>
+          <li>START GAME bij de eerste service</li>
           <li>Baan in 6 vakken, of 9 als je dat liever hebt</li>
           <li>Per vak alleen de slagen die passen, nu ook Kill</li>
           <li>Schakelaar "Uit de lucht" voor volleys</li>
           <li>Heatmap, slagen, puntverdeling en tactisch advies per game</li>
           <li>AI-coachingadvies met je eigen OpenAI-sleutel</li>
           <li>Let call, rally-timer en undo</li>
-          <li>Score delen via WhatsApp: kort, scorekaart of verslag</li>
+          <li>Score delen als scorekaart, verslag of plaatje</li>
+          <li>Live meekijken: deel een link, je team volgt de stand in de browser</li>
           <li>Wedstrijden opslaan, hervatten en terugkijken</li>
         </ul>
       </div>
@@ -132,6 +141,7 @@
           <li>Servicebox wisselt automatisch na elke gewonnen rally</li>
           <li>Links/Rechts vastzetten per speler (bijv. linkshandig)</li>
           <li>Let call &amp; stroke registratie</li>
+          <li>Live meekijken met een link, ook met spelersfoto's</li>
           <li>Rally-voor-rally scorelijn tussen de spelers</li>
           <li>Match- en gametimer, undo laatste punt</li>
           <li>Uitslag delen via WhatsApp: kort, scorekaart of verslag</li>

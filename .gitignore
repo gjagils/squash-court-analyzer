@@ -155,3 +155,6 @@ Packages/*/.build/
 
 # Team zips with names and photos: published to the website by hand, never in git
 website/teams/
+
+# Messages with private team links (not in git)
+docs/berichten/

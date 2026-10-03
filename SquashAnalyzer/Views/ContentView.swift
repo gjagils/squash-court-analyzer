@@ -142,6 +142,8 @@ struct ContentView: View {
     // MARK: - App Store screenshots (see scripts/screenshots.sh)
     private func applyScreenshotScenario(_ scenario: ScreenshotScenario) {
         switch scenario {
+        case .home:
+            break
         case .setup:
             showingCoach = true
         case .referee:

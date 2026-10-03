@@ -67,7 +67,8 @@ struct PlayerBadgesView: View {
 }
 
 /// Header, the badges new in a match, the collection with a count per badge
-/// and the badges still to earn. A badge in the collection opens its earning moments.
+/// and the badges still to earn. Every badge opens what it is for and its
+/// earning moments.
 struct PlayerBadgesContent: View {
     let player: SavedPlayer
     let highlightMatchId: UUID?
@@ -105,7 +106,13 @@ struct PlayerBadgesContent: View {
                     section("NIEUW IN DEZE WEDSTRIJD") {
                         LazyVGrid(columns: columns, spacing: 16) {
                             ForEach(newInMatch) { kind in
-                                BadgeView(kind: kind)
+                                // Tap for what the badge is for and when it was earned
+                                NavigationLink {
+                                    BadgeMomentsView(player: player, kind: kind)
+                                } label: {
+                                    BadgeView(kind: kind)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                     }

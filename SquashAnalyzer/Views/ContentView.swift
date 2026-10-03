@@ -225,7 +225,11 @@ struct ContentView: View {
                 AutomaticBackup.runIfDue(context: modelContext)
             }
             // A link that arrived during a cold start, before there was a window
-            if phase == .active { presentPendingCard() }
+            if phase == .active {
+                presentPendingCard()
+                // A live final score that could not be sent (no network) goes now
+                Task { await LiveShare.shared.retryPending() }
+            }
         }
         // A player card link (website or squashanalyzer://kaart#…)
         .onOpenURL { url in

@@ -119,6 +119,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Automatic backup, at most once a week, when the app goes to the background (after the evening's matches) */
+    /** A live final score that could not be sent (no network) goes now */
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch { LiveShare.shared.retryPending() }
+    }
+
     override fun onStop() {
         super.onStop()
         autoBackup.runIfDueInBackground()

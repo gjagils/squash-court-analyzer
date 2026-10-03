@@ -87,6 +87,27 @@ final class LiveShareTests: XCTestCase {
         XCTAssertNil(live.link)
     }
 
+    /// T13: no network at the end keeps the final score and sends it later
+    @MainActor
+    func testTheFinalScoreIsTriedAgainWhenOffline() async throws {
+        let transport = FakeLiveTransport()
+        let live = LiveShare(transport: transport)
+        // The automatic retry is far away here: Kotlin's runTest runs on virtual time
+        live.finishRetryDelay = 3600.0
+        let match = Match()
+        _ = try await live.start(matchId: match.id, snapshot: match.liveSnapshot())
+        transport.offline = true
+        await live.finish(matchId: match.id, snapshot: match.liveSnapshot())
+        XCTAssertTrue(live.isLive(match.id), "kept while the final score is not there")
+        XCTAssertTrue(live.offline)
+
+        transport.offline = false
+        await live.retryPending()
+        XCTAssertFalse(live.isLive(match.id))
+        XCTAssertEqual(transport.requests.map { $0.method }, ["POST", "PUT"], "sent once the network is back")
+        XCTAssertFalse(live.offline)
+    }
+
     @MainActor
     func testStopDeletesTheSessionAtOnce() async throws {
         let transport = FakeLiveTransport()

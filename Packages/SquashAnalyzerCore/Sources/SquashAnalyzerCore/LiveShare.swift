@@ -205,8 +205,13 @@ public final class LiveShare {
     private var writeKey: String? = nil
     private var pending: LiveSnapshot? = nil
     private var sending = false
-    /// Delete the session once the final state is sent
+    /// Let go of the session once the final state is sent
     private var finishing = false
+    /// A failed final send is tried again after this many seconds, up to `maxFinishRetries` times
+    public var finishRetryDelay: Double = 20.0
+    public static let maxFinishRetries = 30
+    private var finishRetries = 0
+    private var retryScheduled = false
 
     public init(transport: (any LiveTransport)? = nil) {
         self.transport = transport
@@ -255,8 +260,39 @@ public final class LiveShare {
         _ = try? await transport.send(method: "DELETE", url: url, headers: ["Authorization": "Bearer \(key)"], body: nil)
     }
 
+    /// Tries the final score again a little later; gives up after
+    /// `maxFinishRetries` (the server forgets the session anyway)
+    private func scheduleFinishRetry() {
+        guard !retryScheduled else { return }
+        guard finishRetries < LiveShare.maxFinishRetries else {
+            reset()
+            return
+        }
+        finishRetries += 1
+        retryScheduled = true
+        let delay = UInt64(finishRetryDelay * 1_000_000_000.0)
+        Task {
+            try? await Task.sleep(nanoseconds: delay)
+            await self.retryAfterDelay()
+        }
+    }
+
+    private func retryAfterDelay() async {
+        retryScheduled = false
+        await retryPending()
+    }
+
+    /// Sends what is still waiting (the final score after a failed send) right
+    /// away, e.g. when the app becomes active again
+    public func retryPending() async {
+        guard pending != nil, !sending, sessionId != nil else { return }
+        await flush()
+    }
+
     /// Forget the session on this phone only (the server keeps it)
     private func reset() {
+        finishRetries = 0
+        retryScheduled = false
         sessionId = nil
         writeKey = nil
         link = nil
@@ -304,9 +340,16 @@ public final class LiveShare {
             }
         }
         sending = false
-        // Match over: this phone lets go; the server keeps the final score for
-        // viewers and removes it after its idle time (2 hours)
-        if finishing { reset() }
+        // Match over: this phone lets go once the final score is there; the
+        // server keeps it for viewers and removes it after its idle time (2 hours).
+        // Not sent (no network): kept and tried again, so viewers still get it.
+        if finishing {
+            if pending == nil {
+                reset()
+            } else {
+                scheduleFinishRetry()
+            }
+        }
     }
 
     /// Sends one state; a session the server no longer knows is made again

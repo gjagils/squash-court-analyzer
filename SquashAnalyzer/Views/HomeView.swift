@@ -24,9 +24,12 @@ struct HomeView: View {
     @State private var startMode: SetupMode? = nil
     @State private var showingPlayerManagement = false
     @State private var showingBadgeCatalog = false
-    @State private var createdRefereeMatch: RefereeMatch? = nil
-    /// An unfinished referee match found when the Scheidsrechter tile is tapped
-    @State private var resumableReferee: RefereeMatch? = nil
+    /// The shared referee session (as on Android): resume question, match start and scoring
+    @State private var showingReferee = false
+    #if DEBUG
+    /// The referee screenshot scenario: straight into a match under way
+    @State private var screenshotReferee: RefereeMatch? = nil
+    #endif
     /// An unfinished coach match found when the Coach tile is tapped (as on Android)
     @State private var resumableCoach: Match? = nil
     /// "Nieuwe wedstrijd" could not put the old match away (as ContentView shows it)
@@ -56,20 +59,17 @@ struct HomeView: View {
                     }
             }
         }
-        .fullScreenCover(item: $createdRefereeMatch) { m in
-            RefereeView(match: m) { createdRefereeMatch = nil }
+        .fullScreenCover(isPresented: $showingReferee) {
+            let players = SwiftDataPlayerStore(context: modelContext)
+            RefereeSessionView(store: SwiftDataRefereeMatchStore(context: modelContext), playerStore: players,
+                               photoStore: players, shareText: { IOSShare.text($0) },
+                               onExit: { showingReferee = false })
         }
-        .alert("Wedstrijd hervatten?", isPresented: Binding(get: { resumableReferee != nil }, set: { if !$0 { resumableReferee = nil } }),
-               presenting: resumableReferee) { unfinished in
-            Button("Hervatten") { createdRefereeMatch = unfinished }
-            Button("Nieuwe wedstrijd", role: .destructive) {
-                RefereeInProgressStore.keepAsAbandoned(unfinished, in: modelContext)
-                withAnimation(.easeInOut(duration: 0.2)) { startMode = .referee }
-            }
-            Button("Annuleren", role: .cancel) {}
-        } message: { unfinished in
-            Text(unfinished.resumeMessage)
+        #if DEBUG
+        .fullScreenCover(item: $screenshotReferee) { m in
+            RefereeScoringView(match: m, onMatchChanged: { _ in }, onExit: { screenshotReferee = nil })
         }
+        #endif
         .alert("Wedstrijd hervatten?", isPresented: Binding(get: { resumableCoach != nil }, set: { if !$0 { resumableCoach = nil } }),
                presenting: resumableCoach) { unfinished in
             Button("Hervatten") { onResumeCoach?(unfinished) }
@@ -96,7 +96,7 @@ struct HomeView: View {
             // .setup lands on MatchStartView itself (see there); .referee jumps
             // straight past the tiles into a live referee screen for its screenshot
             if ScreenshotScenario.current == .referee {
-                createdRefereeMatch = ScreenshotScenario.makeRefereeMatch()
+                screenshotReferee = ScreenshotScenario.makeRefereeMatch()
             } else if ScreenshotScenario.current == .setup {
                 startMode = .coach
             }
@@ -137,14 +137,7 @@ struct HomeView: View {
                     withAnimation(.easeInOut(duration: 0.2)) { startMode = .coach }
                 }
             },
-            onReferee: {
-                // An unfinished referee match is offered first, as on Android
-                if let unfinished = RefereeInProgressStore.load() {
-                    resumableReferee = unfinished
-                } else {
-                    withAnimation(.easeInOut(duration: 0.2)) { startMode = .referee }
-                }
-            },
+            onReferee: { showingReferee = true },
             onHistory: { onViewHistory?() },
             onPlayers: { showingPlayerManagement = true },
             onBadges: { showingBadgeCatalog = true }
@@ -324,7 +317,8 @@ struct MatchStartView: View {
             PlayerManagementView()
         }
         .fullScreenCover(item: $createdRefereeMatch) { m in
-            RefereeView(match: m) { createdRefereeMatch = nil }
+            // Unreachable since the referee uses the shared session; goes with MatchStartView (T20 step 2)
+            RefereeScoringView(match: m, onMatchChanged: { _ in }, onExit: { createdRefereeMatch = nil })
         }
         #if DEBUG
         .onAppear {

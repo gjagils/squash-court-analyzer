@@ -648,6 +648,69 @@ final class RecoveryAndImportTests: XCTestCase {
         XCTAssertNil(RefereeInProgressStore.load())
     }
 
+    /// T20: the iPhone's referee store behind the shared session
+    @MainActor
+    func testTheRefereeStoreKeepsAMatchUntilItIsFinished() async throws {
+        let original = RefereeInProgressStore.folder
+        RefereeInProgressStore.folder = folder
+        defer { RefereeInProgressStore.folder = original }
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let container = try ModelContainer(for: Schema(versionedSchema: SquashAnalyzerCurrentSchema.self),
+                                           migrationPlan: SquashAnalyzerMigrationPlan.self, configurations: [config])
+        let store = SwiftDataRefereeMatchStore(context: container.mainContext)
+        let match = RefereeMatch(player1Name: "Jan", player2Name: "Piet", bestOf: 1, startingServer: .player1)
+        match.awardPoint(to: .player1)
+        try await store.save(match)
+        let underWay = try await store.loadInProgress()
+        XCTAssertEqual(underWay?.id, match.id, "under way: can be resumed")
+        XCTAssertTrue(try container.mainContext.fetch(FetchDescriptor<SavedRefereeMatch>()).isEmpty)
+
+        for _ in 0..<10 { match.awardPoint(to: .player1) }
+        XCTAssertTrue(match.isMatchOver)
+        try await store.save(match)
+        let afterFinish = try await store.loadInProgress()
+        XCTAssertNil(afterFinish)
+        let saved = try XCTUnwrap(container.mainContext.fetch(FetchDescriptor<SavedRefereeMatch>()).first)
+        XCTAssertEqual(saved.matchId, match.id)
+        XCTAssertEqual(saved.gameResults.first?.player1Score, 11)
+
+        // Undo the last rally: out of Afgeronde wedstrijden, back to resumable
+        match.undo()
+        try await store.save(match)
+        XCTAssertTrue(try container.mainContext.fetch(FetchDescriptor<SavedRefereeMatch>()).isEmpty)
+        let afterUndo = try await store.loadInProgress()
+        XCTAssertNotNil(afterUndo)
+
+        // Abandoned with rallies: kept as incomplete
+        try await store.abandon(match)
+        XCTAssertEqual(try container.mainContext.fetch(FetchDescriptor<SavedRefereeMatch>()).count, 1)
+        let afterAbandon = try await store.loadInProgress()
+        XCTAssertNil(afterAbandon)
+    }
+
+    @MainActor
+    func testThePlayerStoreReadsAndWritesSwiftData() async throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let container = try ModelContainer(for: Schema(versionedSchema: SquashAnalyzerCurrentSchema.self),
+                                           migrationPlan: SquashAnalyzerMigrationPlan.self, configurations: [config])
+        let store = SwiftDataPlayerStore(context: container.mainContext)
+        let profile = PlayerProfile(name: "  Anne  ", coachingFocusAreas: ["Backhand"])
+        try await store.savePlayer(profile)
+        var loaded = try await store.loadPlayers()
+        XCTAssertEqual(loaded.map { $0.name }, ["Anne"])
+        XCTAssertEqual(loaded.first?.id, profile.id, "the same id, so a picked player keeps its badges")
+
+        var renamed = profile
+        renamed.name = "Anne B"
+        try await store.savePlayer(renamed)
+        loaded = try await store.loadPlayers()
+        XCTAssertEqual(loaded.map { $0.name }, ["Anne B"])
+
+        try await store.deletePlayer(profile.id)
+        let remaining = try await store.loadPlayers()
+        XCTAssertTrue(remaining.isEmpty)
+    }
+
     func testADamagedRefereeFileIsRemoved() throws {
         let original = RefereeInProgressStore.folder
         RefereeInProgressStore.folder = folder

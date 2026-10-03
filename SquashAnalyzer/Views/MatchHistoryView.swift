@@ -1090,10 +1090,10 @@ struct MatchResultCompletionSheet: View {
             gameLabel(number: number)
             Image(systemName: "crown.fill")
                 .font(.system(size: 11))
-                .foregroundColor(RefereeView.color(for: winner))
+                .foregroundColor(AppColors.player( winner))
             Text(match.name(for: winner))
                 .font(AppFonts.label(14))
-                .foregroundColor(RefereeView.color(for: winner))
+                .foregroundColor(AppColors.player( winner))
                 .lineLimit(1)
             Spacer()
         }
@@ -1108,17 +1108,17 @@ struct MatchResultCompletionSheet: View {
                 Button(action: { winners.append(player) }) {
                     Text(match.name(for: player))
                         .font(AppFonts.label(13))
-                        .foregroundColor(RefereeView.color(for: player))
+                        .foregroundColor(AppColors.player( player))
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                         .background(
                             RoundedRectangle(cornerRadius: 10)
-                                .fill(RefereeView.color(for: player).opacity(0.12))
+                                .fill(AppColors.player( player).opacity(0.12))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .stroke(RefereeView.color(for: player).opacity(0.4), lineWidth: 1)
+                                        .stroke(AppColors.player( player).opacity(0.4), lineWidth: 1)
                                 )
                         )
                 }

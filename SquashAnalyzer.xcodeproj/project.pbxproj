@@ -26,9 +26,8 @@
 		A1000030 /* PlayerManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000030 /* PlayerManagementView.swift */; };
 		A1000031 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000031 /* ExportService.swift */; };
 		B1000090 /* AutomaticBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000090 /* AutomaticBackup.swift */; };
-		B1000091 /* RefereeInProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000091 /* RefereeInProgressStore.swift */; };
+		B1000091 /* SwiftDataStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000091 /* SwiftDataStores.swift */; };
 		A1000032 /* SampleDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000032 /* SampleDataService.swift */; };
-		A1000034 /* RefereeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000034 /* RefereeView.swift */; };
 		A1000035 /* SavedRefereeMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000035 /* SavedRefereeMatch.swift */; };
 		B1000002 /* MatchRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000002 /* MatchRepository.swift */; };
 		B1000003 /* PersistenceSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000003 /* PersistenceSchema.swift */; };
@@ -93,9 +92,8 @@
 		A2000030 /* PlayerManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerManagementView.swift; sourceTree = "<group>"; };
 		A2000031 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
 		B2000090 /* AutomaticBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomaticBackup.swift; sourceTree = "<group>"; };
-		B2000091 /* RefereeInProgressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeInProgressStore.swift; sourceTree = "<group>"; };
+		B2000091 /* SwiftDataStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataStores.swift; sourceTree = "<group>"; };
 		A2000032 /* SampleDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleDataService.swift; sourceTree = "<group>"; };
-		A2000034 /* RefereeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefereeView.swift; sourceTree = "<group>"; };
 		A2000035 /* SavedRefereeMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedRefereeMatch.swift; sourceTree = "<group>"; };
 		A3000001 /* SquashAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SquashAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2000002 /* MatchRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchRepository.swift; sourceTree = "<group>"; };
@@ -197,7 +195,6 @@
 				B2000081 /* LeagueTeamView.swift */,
 				A2000023 /* CoachDashboardView.swift */,
 				A2000030 /* PlayerManagementView.swift */,
-				A2000034 /* RefereeView.swift */,
 				B2000044 /* PlayerAvatar.swift */,
 				B2000061 /* BadgeView.swift */,
 				B2000065 /* PlayerBadgesView.swift */,
@@ -239,7 +236,7 @@
 				A2000025 /* APIKeyManager.swift */,
 				A2000031 /* ExportService.swift */,
 				B2000090 /* AutomaticBackup.swift */,
-				B2000091 /* RefereeInProgressStore.swift */,
+				B2000091 /* SwiftDataStores.swift */,
 				A2000032 /* SampleDataService.swift */,
 			);
 			path = Services;
@@ -397,9 +394,8 @@
 				A1000027 /* SavedLet.swift in Sources */,
 				A1000031 /* ExportService.swift in Sources */,
 				B1000090 /* AutomaticBackup.swift in Sources */,
-				B1000091 /* RefereeInProgressStore.swift in Sources */,
+				B1000091 /* SwiftDataStores.swift in Sources */,
 				A1000032 /* SampleDataService.swift in Sources */,
-				A1000034 /* RefereeView.swift in Sources */,
 				A1000035 /* SavedRefereeMatch.swift in Sources */,
 				B1000070 /* CardSharingViews.swift in Sources */,
 				B1000069 /* CardStore.swift in Sources */,

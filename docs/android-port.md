@@ -2226,3 +2226,32 @@ live-server te testen. Om Skip-valkuilen te ontlopen staan enum-types voluit
 (`ErrorKind.from(stored:)`). Live-updates lopen niet via `onChange` maar via
 een expliciete `matchChanged()` waar de wedstrijd al werd opgeslagen.
 
+
+### Lokale run op de Mac (2026-10-03): nieuwe Skip-valkuilen
+
+Gevonden toen de cloud-branch voor het eerst door Skip/Kotlin ging:
+
+1. **`Character.isLetter` bestaat niet in Skip** ("This API is not yet
+   available in Skip"). Fix: een kleine helper met `#if SKIP` →
+   `character.isLetter()` (Kotlin `Char.isLetter()`).
+2. **Geef zo'n helper geen naam die ook een Kotlin-extensie is.** Een eigen
+   `static func isLetter(_:)` in de companion verdringt `Char.isLetter()`
+   ("None of the following candidates is applicable because of a receiver
+   type mismatch"). Hernoemd naar `isNameLetter`.
+3. **`var s = ""; s.append(character)` met een `Character` werkt niet** (Kotlin
+   `String` heeft geen `append(Char)`). Schrijf `s += String(character)`.
+4. **`out` is een Kotlin-sleutelwoord: geen enum-case `out`.** Kotlin leest
+   `out("Out"),` in een enum als modifier → syntaxfout, en daarna "Unresolved
+   reference" voor alle andere cases. `ErrorKind.out` heet nu
+   `ErrorKind.outOfCourt`; de opgeslagen waarde blijft `"Out"`, dus geen
+   migratie nodig. Zelfde risico bij `in`, `is`, `object`, `fun`, `val`, `when`.
+5. **Een argumentlabel gelijk aan een property verbergt die property in
+   Kotlin.** `func start(matchId id: UUID)` wordt `fun start(matchId: UUID)`
+   met `val id = matchId`; daarna vergelijkt `matchId == id` de parameter
+   met zichzelf (altijd waar) en `matchId = id` geeft "'val' cannot be
+   reassigned". Dit was een echte logische fout in `LiveShare` (een update
+   voor een andere wedstrijd zou zijn verstuurd). **Vuistregel: schrijf
+   `self.` voor een property als een parameterlabel dezelfde naam heeft.**
+6. **Async-tests: wacht op het eindresultaat, niet op een tussenstap.** Op
+   Android logt de nep-transport het POST-verzoek terwijl `create` nog niet
+   klaar is; `waitUntil { requests.count >= 3 }` was daar te vroeg.

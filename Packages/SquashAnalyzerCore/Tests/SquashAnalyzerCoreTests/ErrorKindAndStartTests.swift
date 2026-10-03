@@ -31,7 +31,7 @@ final class ErrorKindAndStartTests: XCTestCase {
                       errorKind: ErrorKind.down)
         XCTAssertNil(game.points.last?.errorKind)
         game.selectPlayer(Player.player1)
-        game.selectPointType(PointType.winner, errorKind: ErrorKind.out)
+        game.selectPointType(PointType.winner, errorKind: ErrorKind.outOfCourt)
         game.selectZone(CourtZone.frontLeft)
         game.addPoint(shotType: ShotType.drop)
         XCTAssertNil(game.points.last?.errorKind)
@@ -51,13 +51,13 @@ final class ErrorKindAndStartTests: XCTestCase {
         let game = Game()
         game.addPoint(to: Player.player2, pointType: PointType.unforcedError, at: nil, with: nil, errorKind: ErrorKind.down)
         game.addPoint(to: Player.player2, pointType: PointType.unforcedError, at: nil, with: nil, errorKind: ErrorKind.down)
-        game.addPoint(to: Player.player2, pointType: PointType.unforcedError, at: nil, with: nil, errorKind: ErrorKind.out)
+        game.addPoint(to: Player.player2, pointType: PointType.unforcedError, at: nil, with: nil, errorKind: ErrorKind.outOfCourt)
         game.addPoint(to: Player.player1, pointType: PointType.unforcedError, at: nil, with: nil, errorKind: ErrorKind.viaFloor)
         game.addPoint(to: Player.player2, pointType: PointType.unforcedError, at: nil, with: nil)
 
         let byPlayer1 = game.errorKindCounts(madeBy: Player.player1)
         XCTAssertEqual(byPlayer1[ErrorKind.down], 2)
-        XCTAssertEqual(byPlayer1[ErrorKind.out], 1)
+        XCTAssertEqual(byPlayer1[ErrorKind.outOfCourt], 1)
         XCTAssertNil(byPlayer1[ErrorKind.viaFloor])
         XCTAssertEqual(game.errorKindCounts(madeBy: Player.player2)[ErrorKind.viaFloor], 1)
         XCTAssertEqual(ErrorKind.summary(byPlayer1), "Down 2 · Out 1")
@@ -94,7 +94,7 @@ final class ErrorKindAndStartTests: XCTestCase {
         for _ in 0..<3 {
             game.addPoint(to: Player.player2, pointType: PointType.unforcedError, at: nil, with: nil, errorKind: ErrorKind.down)
         }
-        game.addPoint(to: Player.player2, pointType: PointType.unforcedError, at: nil, with: nil, errorKind: ErrorKind.out)
+        game.addPoint(to: Player.player2, pointType: PointType.unforcedError, at: nil, with: nil, errorKind: ErrorKind.outOfCourt)
         let texts = AdviceRules.candidates(in: game, for: Player.player1).map { $0.item.text }
         XCTAssertTrue(texts.contains("3× in de tin: mik iets hoger boven de tin."))
         // One error of a kind is no pattern

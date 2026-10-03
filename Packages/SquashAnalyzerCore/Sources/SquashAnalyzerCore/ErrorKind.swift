@@ -8,7 +8,8 @@ public enum ErrorKind: String, CaseIterable, Identifiable, Codable, Sendable {
     /// Into the tin
     case down = "Down"
     /// Out of court, above the out line
-    case out = "Out"
+    /// Named outOfCourt because `out` is a Kotlin keyword (enum entry syntax error)
+    case outOfCourt = "Out"
     /// Fault on the serve
     case service = "Service"
     /// The ball hit the floor before the front wall
@@ -20,7 +21,7 @@ public enum ErrorKind: String, CaseIterable, Identifiable, Codable, Sendable {
     public var title: String {
         switch self {
         case .down: return "Down"
-        case .out: return "Out"
+        case .outOfCourt: return "Out"
         case .service: return "Service"
         case .viaFloor: return "Grond"
         }
@@ -30,7 +31,7 @@ public enum ErrorKind: String, CaseIterable, Identifiable, Codable, Sendable {
     public var icon: String {
         switch self {
         case .down: return "arrow.down.to.line"
-        case .out: return "arrow.up.circle"
+        case .outOfCourt: return "arrow.up.circle"
         case .service: return "figure.tennis"
         case .viaFloor: return "arrow.down.right.circle"
         }
@@ -39,7 +40,7 @@ public enum ErrorKind: String, CaseIterable, Identifiable, Codable, Sendable {
     public var description: String {
         switch self {
         case .down: return "Bal in de tin"
-        case .out: return "Bal buiten de baan of boven de outlijn"
+        case .outOfCourt: return "Bal buiten de baan of boven de outlijn"
         case .service: return "Servicefout"
         case .viaFloor: return "Bal raakt eerst de vloer voor de frontwand"
         }

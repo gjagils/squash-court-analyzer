@@ -213,7 +213,7 @@ enum AdviceRules {
     static func errorKindTip(_ kind: ErrorKind, count: Int) -> String {
         switch kind {
         case .down: return "\(count)× in de tin: mik iets hoger boven de tin."
-        case .out: return "\(count)× out: minder risico, houd de bal onder de outlijn."
+        case .outOfCourt: return "\(count)× out: minder risico, houd de bal onder de outlijn."
         case .service: return "\(count) servicefouten: neem je tijd en speel een veilige service."
         case .viaFloor: return "\(count)× via de grond: kom laag en blijf achter de bal."
         }

@@ -63,18 +63,27 @@ public struct LiveSnapshot: Codable, Equatable, Sendable {
         var first = ""
         for character in trimmed {
             if character == " " || character == "\t" { break }
-            first.append(character)
+            first += String(character)
         }
         var kept = ""
         for character in first {
-            if character.isLetter || character == "-" || character == "'" {
-                kept.append(character)
+            if isNameLetter(character) || character == "-" || character == "'" {
+                kept += String(character)
             }
         }
         if kept.count > maxNameLength {
             kept = String(kept.prefix(maxNameLength))
         }
         return kept.isEmpty ? fallback : kept
+    }
+
+    /// Character.isLetter is not in Skip; Kotlin's Char.isLetter() is the same test
+    static func isNameLetter(_ character: Character) -> Bool {
+        #if SKIP
+        return character.isLetter()
+        #else
+        return character.isLetter
+        #endif
     }
 
     static func number(_ player: Player) -> Int { player == Player.player1 ? 1 : 2 }
@@ -202,10 +211,11 @@ public final class LiveShare {
     /// Starts sharing `matchId` and returns the link. Sharing another match
     /// first stops the old one.
     public func start(matchId id: UUID, snapshot: LiveSnapshot) async throws -> String {
-        if let link, matchId == id { return link }
-        if matchId != nil { await stop() }
+        // `self.` everywhere: in Kotlin the parameter is called `matchId` too
+        if let link, self.matchId == id { return link }
+        if self.matchId != nil { await stop() }
         try await create(snapshot)
-        matchId = id
+        self.matchId = id
         linkChanged = false
         return link ?? ""
     }
@@ -213,7 +223,7 @@ public final class LiveShare {
     /// Sends the new state of the live match (nothing when `matchId` is not
     /// live). Sends that pile up are merged: only the newest state goes.
     public func update(matchId id: UUID, snapshot: LiveSnapshot) {
-        guard matchId == id, sessionId != nil else { return }
+        guard self.matchId == id, sessionId != nil else { return }
         pending = snapshot
         guard !sending else { return }
         Task { await flush() }
@@ -221,7 +231,7 @@ public final class LiveShare {
 
     /// The match is over: send the final state, then delete the session at once
     public func finish(matchId id: UUID, snapshot: LiveSnapshot) async {
-        guard matchId == id, sessionId != nil else { return }
+        guard self.matchId == id, sessionId != nil else { return }
         pending = snapshot
         finishing = true
         // A send under way picks up the final state and deletes afterwards

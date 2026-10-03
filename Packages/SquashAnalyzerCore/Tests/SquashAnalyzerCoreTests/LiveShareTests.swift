@@ -95,9 +95,10 @@ final class LiveShareTests: XCTestCase {
         transport.putStatus = 404
         transport.nextId = "def"
         live.update(matchId: match.id, snapshot: match.liveSnapshot())
-        try await waitUntil { transport.requests.count >= 3 }
+        // Wait for the end result, not the request: on Android the POST is
+        // logged before `create` has finished and set the new link
+        try await waitUntil { live.linkChanged }
         XCTAssertEqual(transport.requests[2].method, "POST")
-        XCTAssertTrue(live.linkChanged)
         XCTAssertEqual(live.link, LiveShare.defaultBaseURL + "/l/def")
     }
 

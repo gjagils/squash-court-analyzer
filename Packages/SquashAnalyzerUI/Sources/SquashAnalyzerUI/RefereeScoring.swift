@@ -12,7 +12,6 @@ public struct RefereeScoringView: View {
     let shareText: ((String) -> Void)?
     /// Photos of the picked players, by player id
     let photos: [String: Data]
-    @Environment(\.dismiss) private var dismiss
     /// Sharing the stand during the match (the share icon in the header)
     @State private var sharingNow = false
     /// Ticks every second for the match and game timers
@@ -60,7 +59,7 @@ public struct RefereeScoringView: View {
 
             if let call = match.lastCallText {
                 callFlash(call)
-                    .task {
+                    .task(id: call) {
                         try? await Task.sleep(nanoseconds: call.hasPrefix("LET") ? UInt64(2_000_000_000) : UInt64(1_500_000_000))
                         if match.lastCallText == call { match.clearCallText() }
                     }
@@ -84,8 +83,11 @@ public struct RefereeScoringView: View {
                                         badgeInput: match.badgeInput)
     }
 
+    /// Undo also forgets a hidden result card: winning the same point again
+    /// gives the same score, and the card must show again
     private func undoLastPoint() {
         withAnimation(.easeInOut(duration: 0.15)) { match.undo() }
+        hiddenResult = nil
         matchChanged()
     }
 
@@ -350,10 +352,7 @@ public struct RefereeScoringView: View {
     }
 
     private var undoButton: some View {
-        Button(action: {
-            withAnimation(.easeInOut(duration: 0.15)) { match.undo() }
-            matchChanged()
-        }) {
+        Button(action: { undoLastPoint() }) {
             HStack(spacing: 8) {
                 AppSymbol("arrow.uturn.backward", size: 16, color: match.canUndo ? CoachPalette.textPrimary : CoachPalette.textMuted)
                 Text("Undo")
@@ -382,8 +381,9 @@ public struct RefereeScoringView: View {
             .transition(.scale.combined(with: .opacity))
     }
 
+    /// Only tells the session view; it closes once the save is done, so
+    /// "Even opslaan…" and the retry card can show (no own dismiss here)
     @MainActor private func close() {
         onExit()
-        dismiss()
     }
 }

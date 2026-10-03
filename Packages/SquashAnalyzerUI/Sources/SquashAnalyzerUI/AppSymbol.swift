@@ -78,7 +78,14 @@ struct AppSymbol: View {
         self.weight = weight
     }
 
+    /// Decoration: the button or text next to it says what it means, so
+    /// VoiceOver/TalkBack never read out a symbol name like "chevron.right"
     var body: some View {
+        symbol.accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private var symbol: some View {
         #if SKIP
         if let vector = AppSymbol.material(name) {
             ComposeView { context in

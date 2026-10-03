@@ -80,7 +80,9 @@ final class LeagueTeamTests: XCTestCase {
 
     func testReadsTheTeamPage() throws {
         let link = try LeagueTeamLink(teamURL)
-        let (team, draw) = try LeagueTeamParser.team(teamPage, link: link)
+        let parsed = try LeagueTeamParser.team(teamPage, link: link)
+        let team = parsed.snapshot
+        let draw = parsed.draw
         XCTAssertEqual(team.name, "SC Hugo 1")
         XCTAssertEqual(team.competition, "Competitie 2026-2027")
         XCTAssertEqual(team.division, "3e divisie & B")
@@ -126,13 +128,13 @@ final class LeagueTeamTests: XCTestCase {
     }
 
     func testNextFixtureIsTheFirstNotYetPlayed() throws {
-        let (team, _) = try LeagueTeamParser.team(teamPage, link: try LeagueTeamLink(teamURL))
+        let team = try LeagueTeamParser.team(teamPage, link: try LeagueTeamLink(teamURL)).snapshot
         XCTAssertEqual(team.nextFixture(after: Date(timeIntervalSince1970: 1_790_000_000))?.home, "SC Hugo 1")
         XCTAssertNil(team.nextFixture(after: Date(timeIntervalSince1970: 1_800_000_000)))
     }
 
     func testSnapshotSurvivesTheCache() throws {
-        var (team, _) = try LeagueTeamParser.team(teamPage, link: try LeagueTeamLink(teamURL))
+        var team = try LeagueTeamParser.team(teamPage, link: try LeagueTeamLink(teamURL)).snapshot
         team.standings = try LeagueTeamParser.standings(drawPage)
         let data = try JSONEncoder().encode(team)
         let decoded = try JSONDecoder().decode(LeagueTeamSnapshot.self, from: data)
@@ -146,7 +148,7 @@ final class LeagueTeamTests: XCTestCase {
         let defaults = UserDefaults(suiteName: "league-team-tests")!
         defaults.removeObject(forKey: "sbnTeamSnapshot")
         let link = try LeagueTeamLink(teamURL)
-        let (team, _) = try LeagueTeamParser.team(teamPage, link: link)
+        let team = try LeagueTeamParser.team(teamPage, link: link).snapshot
         XCTAssertNil(LeagueTeamStorage.cachedSnapshot(for: link, in: defaults))
         LeagueTeamStorage.store(team, in: defaults)
         XCTAssertEqual(LeagueTeamStorage.cachedSnapshot(for: link, in: defaults)?.name, "SC Hugo 1")

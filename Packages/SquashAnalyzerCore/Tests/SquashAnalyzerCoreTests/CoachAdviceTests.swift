@@ -92,7 +92,7 @@ final class CoachAdviceTests: XCTestCase {
         let request = AICoachClient.prompt(game: game(), player: Player.player1, coachingFocus: ["Backhand"])
         let text = String(data: try AICoachClient.requestBody(request, model: "gpt-4.1-nano"), encoding: .utf8) ?? ""
         XCTAssertTrue(text.contains("gpt-4.1-nano"))
-        XCTAssertTrue(text.contains("\"max_completion_tokens\":500"))
+        XCTAssertTrue(text.contains("\"max_completion_tokens\":900"))
         XCTAssertTrue(text.contains("\"temperature\""))
         XCTAssertFalse(text.contains("reasoning_effort"))
         XCTAssertTrue(text.contains("Backhand"))

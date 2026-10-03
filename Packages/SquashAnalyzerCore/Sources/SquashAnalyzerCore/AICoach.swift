@@ -197,6 +197,9 @@ public struct AICoachRequest: Equatable, Sendable {
 /// gives no prices, so "cheapest" is this preference order (cheapest first),
 /// and otherwise a "nano" before a "mini" chat model.
 public enum AIModelChoice {
+    /// Cheap and quick first: the plain chat models answer in one go. gpt-5-nano
+    /// costs less per token but reasons first (more tokens, slower), so it comes
+    /// after them. Checked October 2026.
     public static let preferred = ["gpt-4.1-nano", "gpt-4o-mini", "gpt-5-nano", "gpt-4.1-mini", "gpt-5-mini"]
 
     /// Not plain chat models
@@ -267,7 +270,8 @@ public struct AICoachClient: Sendable {
                                messages: [ChatMessage(role: "system", content: request.system),
                                           ChatMessage(role: "user", content: request.user)],
                                temperature: reasoning ? nil : 0.7,
-                               maxCompletionTokens: reasoning ? 3000 : 500,
+                               // 500 cut the JSON answer off now and then (five advice lines and a summary)
+                               maxCompletionTokens: reasoning ? 3000 : 900,
                                reasoningEffort: reasoning ? "low" : nil)
         return try JSONEncoder().encode(chat)
     }

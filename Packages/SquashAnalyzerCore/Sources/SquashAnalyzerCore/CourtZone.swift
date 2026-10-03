@@ -1,7 +1,4 @@
 import Foundation
-#if canImport(CoreGraphics)
-import CoreGraphics
-#endif
 
 /// The zones on a squash court. Nine exist (3×3); the 6-zone layout uses
 /// only the left/right ones (`CourtLayout`). The raw values are stored, never
@@ -33,11 +30,6 @@ public enum CourtZone: String, CaseIterable, Identifiable, Codable, Sendable {
         }
     }
 
-    // Note for phase 2 (Skip/Android build of this package): CGFloat comes
-    // from CoreGraphics, which is Apple-only. If Skip cannot transpile this,
-    // swap the parameter type to Double here (CourtView, the only caller, can
-    // convert) rather than special-casing this one function per platform.
-
     /// Front, middle or back third of the court
     public var row: CourtRow {
         switch self {
@@ -50,43 +42,6 @@ public enum CourtZone: String, CaseIterable, Identifiable, Codable, Sendable {
     /// The middle column, which only the 9-zone layout has
     public var isMiddleColumn: Bool {
         self == .frontMiddle || self == .middleMiddle || self == .backMiddle
-    }
-
-    /// Returns the zone for a given normalized position (0-1 range), 9-zone layout
-    public static func from(x: CGFloat, y: CGFloat) -> CourtZone {
-        // x: 0 = left, 1 = right (divided into 3 columns)
-        let column: Int
-        if x < 0.33 {
-            column = 0 // Left
-        } else if x < 0.66 {
-            column = 1 // Middle
-        } else {
-            column = 2 // Right
-        }
-
-        // y: 0 = top (front wall), 1 = bottom (back wall)
-        if y < 0.33 {
-            // Front area
-            switch column {
-            case 0: return .frontLeft
-            case 1: return .frontMiddle
-            default: return .frontRight
-            }
-        } else if y < 0.66 {
-            // Middle area
-            switch column {
-            case 0: return .middleLeft
-            case 1: return .middleMiddle
-            default: return .middleRight
-            }
-        } else {
-            // Back area
-            switch column {
-            case 0: return .backLeft
-            case 1: return .backMiddle
-            default: return .backRight
-            }
-        }
     }
 }
 

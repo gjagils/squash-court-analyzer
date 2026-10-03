@@ -216,6 +216,17 @@ enum LeagueRegex {
 
 /// Deliberately scoped HTML extraction for SBN's public server-rendered pages.
 /// Required markers are validated so a cookie/error page never replaces a good cache.
+/// A parsed team page and the URL of its division's standings (a struct, not a tuple)
+public struct LeagueTeamPage {
+    public let snapshot: LeagueTeamSnapshot
+    public let draw: URL
+
+    public init(snapshot: LeagueTeamSnapshot, draw: URL) {
+        self.snapshot = snapshot
+        self.draw = draw
+    }
+}
+
 public enum LeagueTeamParser {
     static func text(_ html: String) -> String {
         var value = LeagueRegex.replace("<[^>]+>", in: html, with: " ")
@@ -249,7 +260,7 @@ public enum LeagueTeamParser {
     }
 
     /// The team page, plus the URL of its division's standings page
-    public static func team(_ html: String, link: LeagueTeamLink) throws -> (LeagueTeamSnapshot, URL) {
+    public static func team(_ html: String, link: LeagueTeamLink) throws -> LeagueTeamPage {
         let name = value("hgroup__heading", tag: "h2", in: html)
         guard !name.isEmpty, let division = links(html, containing: "/draw/").first,
               let draw = resolve(division.path, against: link.url),
@@ -294,7 +305,7 @@ public enum LeagueTeamParser {
                                           division: division.name, rank: stat("Stand", in: stats), played: stat("Gespeeld", in: stats),
                                           points: stat("Punten", in: stats),
                                           fixtures: fixtures, players: players)
-        return (snapshot, draw)
+        return LeagueTeamPage(snapshot: snapshot, draw: draw)
     }
 
     /// A link on the page as a standalone absolute URL (no base URL kept, so it
@@ -386,9 +397,9 @@ public struct LeagueTeamFetcher: Sendable {
     }
 
     public func fetch(_ link: LeagueTeamLink) async throws -> LeagueTeamSnapshot {
-        let (snapshot, draw) = try LeagueTeamParser.team(try await page(link.url), link: link)
-        var result = snapshot
-        result.standings = try LeagueTeamParser.standings(try await page(draw))
+        let teamPage = try LeagueTeamParser.team(try await page(link.url), link: link)
+        var result = teamPage.snapshot
+        result.standings = try LeagueTeamParser.standings(try await page(teamPage.draw))
         let ownPath = link.url.path.lowercased()
         guard result.standings.contains(where: { row in row.id.lowercased() == ownPath }) else { throw LeagueTeamError.changedPage }
         return result

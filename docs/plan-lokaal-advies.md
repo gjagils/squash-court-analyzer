@@ -18,7 +18,7 @@ dashboard op beide platforms toont ze alleen.
    potentie erbij.
 5. Geen "boven het blik": gewone taal ("Speel daar wat hoger en veiliger").
 
-Gebouwd in `CoachAdviceRules.swift` (`CourtSide`, `AreaTally`, `ZoneProfile`),
+Gebouwd in `ZoneProfile.swift` (`CourtSide`, `AreaTally`, `ZoneProfile`; tot oktober 2026 `CoachAdviceRules.swift`),
 `AdviceRules.swift` (de regels) en `CoachAdvice.local(in:for:match:)`; de tabel
 is `ZoneProfileTable` (SquashAnalyzerUI) op iOS en Android. De kans-regel voor
 de tegenstander is "waar maakt de tegenstander fouten" ("waar verliest de

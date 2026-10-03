@@ -244,7 +244,7 @@ public struct BadgeEngine {
         // because the rallies are one continuous sequence on court
         var current: Player?
         var run = 0
-        for rally in input.games.flatMap(\.rallies) {
+        for rally in input.games.flatMap { $0.rallies } {
             run = rally.winner == current ? run + 1 : 1
             current = rally.winner
             if run >= Self.rowLength { award(.fiveInARow, to: rally.winner) }
@@ -302,7 +302,7 @@ public struct BadgeEngine {
         // (with Volley), so a full house from before the change still counts.
         let oldSix: Set<ShotType> = [.drive, .cross, .volley, .drop, .lob, .boast]
         for player in Player.allCases {
-            let shots = Set(input.games.flatMap(\.rallies).filter { $0.winner == player }.compactMap(\.shot))
+            let shots = Set(input.games.flatMap { $0.rallies }.filter { $0.winner == player }.compactMap { $0.shot })
             if Set(ShotType.selectableCases).isSubset(of: shots) || oldSix.isSubset(of: shots) {
                 award(.fullHouse, to: player)
             }
@@ -379,12 +379,12 @@ public struct BadgeEngine {
         let match = ordered[index]
         let before = ordered[..<index]
         var earned: Set<BadgeKind> = []
-        let winsBefore = before.filter(\.won).count
+        let winsBefore = before.filter { $0.won }.count
         if match.won && winsBefore == 0 { earned.insert(.offTheMark) }
         // ">=": a player who reached the mark without the badge (missed earlier,
         // or deleted and earned again) still gets it; earnedElsewhere stops a second one
         if match.won && winsBefore >= 9 { earned.insert(.tenOutOfTen) }
-        if match.won && before.count >= 2 && before.suffix(2).allSatisfy(\.won) { earned.insert(.hatTrick) }
+        if match.won && before.count >= 2 && before.suffix(2).allSatisfy { $0.won } { earned.insert(.hatTrick) }
         // Exactly the 5th win against this opponent: Nemesis can be earned again
         // against someone else, so it is not a once-badge and ">=" would repeat it
         if match.won && !match.opponentKey.isEmpty

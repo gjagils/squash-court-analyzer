@@ -356,25 +356,6 @@ public class Game: Identifiable {
         selectedZone = nil
     }
 
-    public func reset() {
-        player1Score = 0
-        player2Score = 0
-        currentServer = startingServer
-        serverSide = handOutSide(for: startingServer)
-        points = []
-        lets = []
-        previousServers = []
-        previousSides = []
-        previousPointTimes = []
-        lastPointTime = now()
-        startedAt = nil
-        startedByFirstPoint = false
-        pendingErrorKind = nil
-        selectedPlayer = nil
-        selectedPointType = nil
-        selectedZone = nil
-    }
-
     /// Record a let (replay of rally)
     public func addLet(requestedBy player: Player) {
         guard !isGameOver else { return }
@@ -398,11 +379,6 @@ public class Game: Identifiable {
         selectedPlayer = nil
         selectedPointType = nil
         selectedZone = nil
-    }
-
-    /// Undo the last let
-    public func undoLastLet() {
-        _ = lets.popLast()
     }
 
     /// Get all lets requested by a player
@@ -531,15 +507,6 @@ public class Game: Identifiable {
         points.filter { $0.scorer == player.opponent }
     }
 
-    /// Get win percentage for a player in a specific zone
-    public func winPercentage(for player: Player, in zone: CourtZone) -> Double {
-        let won = points.filter { $0.scorer == player && $0.zone == zone }.count
-        let lost = points.filter { $0.scorer == player.opponent && $0.zone == zone }.count
-        let total = won + lost
-        guard total > 0 else { return 0 }
-        return Double(won) / Double(total) * 100
-    }
-
     /// Get total points played in a zone
     public func totalPoints(in zone: CourtZone) -> Int {
         points.filter { $0.zone == zone }.count
@@ -614,11 +581,6 @@ public class Game: Identifiable {
     /// Longest point in the game
     public func longestPoint() -> Point? {
         timedPoints.max(by: { $0.duration < $1.duration })
-    }
-
-    /// Shortest point in the game
-    public func shortestPoint() -> Point? {
-        timedPoints.min(by: { $0.duration < $1.duration })
     }
 
     /// Win percentage for short rallies (below median duration)

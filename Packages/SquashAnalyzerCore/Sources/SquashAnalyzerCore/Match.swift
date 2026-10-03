@@ -117,13 +117,6 @@ public class Match: Identifiable {
         }
     }
 
-    public func gamesWon(by player: Player) -> Int {
-        switch player {
-        case .player1: return player1GamesWon
-        case .player2: return player2GamesWon
-        }
-    }
-
     /// Start a new game in the match
     public func startNewGame() {
         let game = Game()
@@ -235,11 +228,6 @@ public class Match: Identifiable {
         player == .player1 ? player1CoachingFocus : player2CoachingFocus
     }
 
-    /// Get coaching notes for a player
-    public func coachingNotes(for player: Player) -> String {
-        player == .player1 ? player1CoachingNotes : player2CoachingNotes
-    }
-
     // MARK: - Analysis helpers
 
     /// Get all points from all games
@@ -247,102 +235,9 @@ public class Match: Identifiable {
         games.flatMap { $0.points }
     }
 
-    /// Get points for a specific game
-    public func points(forGame index: Int) -> [Point] {
-        guard index < games.count else { return [] }
-        return games[index].points
-    }
-
-    /// Total points won by player across all games
-    public func totalPointsWon(by player: Player) -> Int {
-        games.reduce(0) { $0 + $1.pointsWon(by: player).count }
-    }
-
-    /// Points won by player in a specific zone across all games
-    public func totalPointsWon(by player: Player, in zone: CourtZone) -> Int {
-        games.reduce(0) { $0 + $1.pointsWon(by: player, in: zone) }
-    }
-
-    /// Points won by player with a specific shot type across all games
-    public func totalPointsWon(by player: Player, with shotType: ShotType) -> Int {
-        allPoints.filter { $0.scorer == player && $0.shotType == shotType }.count
-    }
-
-    /// Most effective shot type for a player
-    public func mostEffectiveShot(for player: Player) -> ShotType? {
-        let shotCounts = ShotType.allCases.map { shotType in
-            (shotType: shotType, count: totalPointsWon(by: player, with: shotType))
-        }
-        guard let best = shotCounts.max(by: { $0.count < $1.count }) else { return nil }
-        return best.shotType
-    }
-
-    /// Best zone for a player across all games
-    public func bestZone(for player: Player) -> CourtZone? {
-        let zoneCounts = CourtZone.allCases.map { zone in
-            (zone: zone, count: totalPointsWon(by: player, in: zone))
-        }
-        guard let best = zoneCounts.max(by: { $0.count < $1.count }), best.count > 0 else { return nil }
-        return best.zone
-    }
-
-    // MARK: - Duration Analysis
-
-    /// Average duration of points won by a player across all games
-    public func averageDurationWon(by player: Player) -> TimeInterval? {
-        let wonPoints = allPoints.filter { $0.scorer == player && $0.isTimed }
-        guard !wonPoints.isEmpty else { return nil }
-        let totalDuration = wonPoints.reduce(0.0) { $0 + $1.duration }
-        return totalDuration / Double(wonPoints.count)
-    }
-
-    /// Average duration of points lost by a player across all games
-    public func averageDurationLost(by player: Player) -> TimeInterval? {
-        let lostPoints = allPoints.filter { $0.scorer == player.opponent && $0.isTimed }
-        guard !lostPoints.isEmpty else { return nil }
-        let totalDuration = lostPoints.reduce(0.0) { $0 + $1.duration }
-        return totalDuration / Double(lostPoints.count)
-    }
-
-    /// Average point duration across all games
-    public func averagePointDuration() -> TimeInterval? {
-        let timed = allPoints.filter { $0.isTimed }
-        guard !timed.isEmpty else { return nil }
-        let totalDuration = timed.reduce(0.0) { $0 + $1.duration }
-        return totalDuration / Double(timed.count)
-    }
-
     /// Total match duration (sum of all rally durations)
     public func totalMatchDuration() -> TimeInterval {
         allPoints.reduce(0.0) { $0 + $1.duration }
-    }
-
-    /// Win percentage for short rallies across all games
-    public func shortRallyWinPercentage(for player: Player) -> Double? {
-        let timed = allPoints.filter { $0.isTimed }
-        guard timed.count >= 2 else { return nil }
-        let sortedDurations = timed.map { $0.duration }.sorted()
-        let medianDuration = sortedDurations[sortedDurations.count / 2]
-
-        let shortRallies = timed.filter { $0.duration < medianDuration }
-        guard !shortRallies.isEmpty else { return nil }
-
-        let won = shortRallies.filter { $0.scorer == player }.count
-        return Double(won) / Double(shortRallies.count) * 100
-    }
-
-    /// Win percentage for long rallies across all games
-    public func longRallyWinPercentage(for player: Player) -> Double? {
-        let timed = allPoints.filter { $0.isTimed }
-        guard timed.count >= 2 else { return nil }
-        let sortedDurations = timed.map { $0.duration }.sorted()
-        let medianDuration = sortedDurations[sortedDurations.count / 2]
-
-        let longRallies = timed.filter { $0.duration >= medianDuration }
-        guard !longRallies.isEmpty else { return nil }
-
-        let won = longRallies.filter { $0.scorer == player }.count
-        return Double(won) / Double(longRallies.count) * 100
     }
 
     // MARK: - Export
@@ -370,7 +265,7 @@ public class Match: Identifiable {
                 return MatchShareReport.Game(number: gameNumber(at: index), player1Score: game.player1Score,
                                              player2Score: game.player2Score, winner: game.winner,
                                              duration: duration > 0 ? duration : nil,
-                                             rallyWinners: game.points.map(\.scorer),
+                                             rallyWinners: game.points.map { $0.scorer },
                                              strokes: game.points.filter { $0.pointType == .stroke }.count)
             },
             startedAt: firstPoint.map { $0.timestamp.addingTimeInterval(-$0.duration) } ?? Date(),

@@ -34,7 +34,7 @@ enum RefereeInProgressStore {
             return
         }
         let results = match.allGameResults.map {
-            RefereeGameResult(number: $0.number, player1Score: $0.p1, player2Score: $0.p2, winner: $0.winner)
+            RefereeGameResult(number: $0.number, player1Score: $0.player1Score, player2Score: $0.player2Score, winner: $0.winner)
         }
         let saved = SavedRefereeMatch(
             player1Name: match.player1Name,

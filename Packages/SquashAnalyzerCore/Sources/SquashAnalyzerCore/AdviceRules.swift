@@ -30,7 +30,7 @@ enum AdviceRules {
                                           potential: potential, key: key, order: result.count + 1))
         }
 
-        if let tempo = CoachAdvice.tempoCandidate(in: game, for: player) {
+        if let tempo = tempoCandidate(in: game, for: player) {
             result.append(tempo)
         }
 
@@ -243,6 +243,58 @@ enum AdviceRules {
         }
         if texts.count <= 1 { return texts.first ?? "" }
         return texts.dropLast().joined(separator: ", ") + " en " + texts[texts.count - 1]
+    }
+
+    static func tempoCandidate(in game: Game, for player: Player) -> AdviceCandidate? {
+        guard game.points.count >= 4 else { return nil }
+        if let shortWin = game.shortRallyWinPercentage(for: player),
+           let longWin = game.longRallyWinPercentage(for: player),
+           abs(shortWin - longWin) > 15 {
+            // The chance: the points lost in the kind of rally the player is weaker in.
+            // Over the timed rallies only, like the percentages (an untimed first
+            // rally has duration 0 and would pull the median down).
+            let timed = game.timedPoints
+            var durations: [TimeInterval] = []
+            for point in timed {
+                durations.append(point.duration)
+            }
+            durations.sort()
+            let median = durations[durations.count / 2]
+            var lostLong = 0
+            var lostShort = 0
+            for point in timed where point.scorer != player {
+                if point.duration >= median { lostLong += 1 } else { lostShort += 1 }
+            }
+            if shortWin > longWin {
+                return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.speedUp, tone: AdviceTone.success,
+                                                        text: "Versnel het spel: je wint \(Int(shortWin))% van de korte rally's en \(Int(longWin))% van de lange."),
+                                       potential: Double(lostLong), key: "tempo-sneller", order: 0)
+            }
+            return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.slowDown, tone: AdviceTone.success,
+                                                    text: "Vertraag het spel: je wint \(Int(longWin))% van de lange rally's en \(Int(shortWin))% van de korte."),
+                                   potential: Double(lostShort), key: "tempo-trager", order: 0)
+        }
+        if let won = game.averageDurationWon(by: player), let lost = game.averageDurationLost(by: player), abs(won - lost) > 3 {
+            let durations = "je gewonnen punten duren gemiddeld \(formatDuration(won)), je verloren punten \(formatDuration(lost))."
+            let potential = Double(game.pointsLost(by: player).count) / 2.0
+            if won < lost {
+                return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.speedUp, tone: AdviceTone.info, text: "Versnel het spel: " + durations),
+                                       potential: potential, key: "tempo-sneller", order: 0)
+            }
+            return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.slowDown, tone: AdviceTone.info, text: "Vertraag het spel: " + durations),
+                                   potential: potential, key: "tempo-trager", order: 0)
+        }
+        return nil
+    }
+
+    /// "12s" below a minute, "1:05" from a minute
+    static func formatDuration(_ seconds: TimeInterval) -> String {
+        if seconds < 60 {
+            return "\(Int(seconds.rounded()))s"
+        }
+        let total = Int(seconds)
+        let secs = total % 60
+        return "\(total / 60):\(secs < 10 ? "0" : "")\(secs)"
     }
 }
 

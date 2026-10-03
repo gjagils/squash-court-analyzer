@@ -47,42 +47,6 @@ public struct CompletedRefereeGame: Identifiable {
     }
 }
 
-/// One game as it appears in share texts: completed games plus the game on the board.
-public struct RefereeGameSummary {
-    public let number: Int
-    public let player1Score: Int
-    public let player2Score: Int
-    public let winner: Player?
-    public let duration: TimeInterval?
-    public let points: [RefereePointEntry]
-
-    public init(number: Int, player1Score: Int, player2Score: Int, winner: Player?, duration: TimeInterval?, points: [RefereePointEntry]) {
-        self.number = number
-        self.player1Score = player1Score
-        self.player2Score = player2Score
-        self.winner = winner
-        self.duration = duration
-        self.points = points
-    }
-
-    public var rallies: Int { player1Score + player2Score }
-    public var strokes: Int { points.filter(\.isStroke).count }
-
-    public var longestRun: (player: Player, length: Int)? {
-        var best: (Player, Int)? = nil
-        var current: (Player, Int)? = nil
-        for entry in points {
-            if let c = current, c.0 == entry.scorer {
-                current = (c.0, c.1 + 1)
-            } else {
-                current = (entry.scorer, 1)
-            }
-            if let c = current, c.1 > (best?.1 ?? 0) { best = c }
-        }
-        return best.map { (player: $0.0, length: $0.1) }
-    }
-}
-
 /// Live referee match state.
 @Observable
 public class RefereeMatch: Identifiable {
@@ -140,10 +104,14 @@ public class RefereeMatch: Identifiable {
     private var stand: MatchStand { MatchStand(bestOf: bestOf, player1Games: player1TotalGames, player2Games: player2TotalGames) }
     public var isMatchOver: Bool { stand.isOver }
     public var matchWinner: Player? { stand.winner }
-    public var allGameResults: [(number: Int, p1: Int, p2: Int, winner: Player)] {
-        let done = completedGames.map { (number: $0.number, p1: $0.player1Score, p2: $0.player2Score, winner: $0.winner) }
-        if let w = currentGameWinner { return done + [(number: currentGameNumber, p1: player1Score, p2: player2Score, winner: w)] }
-        return done
+    /// Every finished game, the one still on the board included
+    public var allGameResults: [CompletedRefereeGame] {
+        var results = completedGames
+        if let winner = currentGameWinner {
+            results.append(CompletedRefereeGame(number: currentGameNumber, player1Score: player1Score,
+                                                player2Score: player2Score, winner: winner))
+        }
+        return results
     }
     private var currentScore: SquashScore { SquashScore(player1: player1Score, player2: player2Score) }
     public var isGameOver: Bool { ScoringEngine().isGameOver(currentScore) }
@@ -226,8 +194,13 @@ public class RefereeMatch: Identifiable {
         var side: ServerSide = firstSide
         var score1 = 0
         var score2 = 0
-        for entry in pointHistory {
-            undoStack.append(.point(prevServer: server, prevSide: side, prevP1Score: score1, prevP2Score: score2, prevLastPointAt: nil))
+        // The rallies have no time of their own: before the first there was no
+        // point (nil, exact); later ones get the saved time of the last point,
+        // so the rally clock after an undo does not jump back to the game start
+        let savedLastPointAt = lastPointAt
+        for (index, entry) in pointHistory.enumerated() {
+            let previousTime: Date? = index == 0 ? nil : savedLastPointAt
+            undoStack.append(.point(prevServer: server, prevSide: side, prevP1Score: score1, prevP2Score: score2, prevLastPointAt: previousTime))
             if entry.scorer == Player.player1 { score1 += 1 } else { score2 += 1 }
             server = entry.scorer
             side = entry.side
@@ -261,21 +234,36 @@ public class RefereeMatch: Identifiable {
         return max(0.0, end.timeIntervalSince(matchStartedAt))
     }
 
-    public var gameSummaries: [RefereeGameSummary] {
-        var games = completedGames.map {
-            RefereeGameSummary(number: $0.number, player1Score: $0.player1Score, player2Score: $0.player2Score, winner: $0.winner, duration: $0.duration, points: $0.points)
+    /// The games as the share texts see them: completed ones plus the game on
+    /// the board once a rally has been played there
+    public var gameSummaries: [MatchShareReport.Game] {
+        var games: [MatchShareReport.Game] = []
+        for game in completedGames {
+            games.append(RefereeMatch.shareGame(number: game.number, player1Score: game.player1Score, player2Score: game.player2Score,
+                                                winner: game.winner, duration: game.duration, points: game.points))
         }
         if player1Score > 0 || player2Score > 0 {
-            games.append(RefereeGameSummary(number: currentGameNumber, player1Score: player1Score, player2Score: player2Score, winner: currentGameWinner, duration: currentGameDuration, points: pointHistory))
+            games.append(RefereeMatch.shareGame(number: currentGameNumber, player1Score: player1Score, player2Score: player2Score,
+                                                winner: currentGameWinner, duration: currentGameDuration, points: pointHistory))
         }
         return games
     }
 
+    private static func shareGame(number: Int, player1Score: Int, player2Score: Int, winner: Player?,
+                                  duration: TimeInterval?, points: [RefereePointEntry]) -> MatchShareReport.Game {
+        var winners: [Player] = []
+        var strokes = 0
+        for point in points {
+            winners.append(point.scorer)
+            if point.isStroke { strokes += 1 }
+        }
+        return MatchShareReport.Game(number: number, player1Score: player1Score, player2Score: player2Score, winner: winner,
+                                     duration: duration, rallyWinners: winners, strokes: strokes)
+    }
+
     public var totalRallies: Int { gameSummaries.reduce(0) { $0 + $1.rallies } }
     public var totalStrokes: Int { gameSummaries.reduce(0) { $0 + $1.strokes } }
-    public var longestRun: (player: Player, length: Int)? {
-        gameSummaries.compactMap(\.longestRun).max { $0.length < $1.length }
-    }
+    public var longestRun: PlayerRun? { shareReport.longestRun }
 
     public var whatsAppText: String { shareText(style: .compact) }
     public func shareText(style: MatchShareStyle) -> String { shareReport.text(style: style) }
@@ -288,9 +276,7 @@ public class RefereeMatch: Identifiable {
             player1Games: player1TotalGames,
             player2Games: player2TotalGames,
             matchWinner: matchWinner,
-            games: gameSummaries.map {
-                MatchShareReport.Game(number: $0.number, player1Score: $0.player1Score, player2Score: $0.player2Score, winner: $0.winner, duration: $0.duration, rallyWinners: $0.points.map(\.scorer), strokes: $0.strokes)
-            },
+            games: gameSummaries,
             startedAt: matchStartedAt,
             duration: matchDuration
         )

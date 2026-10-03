@@ -1,5 +1,16 @@
 import Foundation
 
+/// Rallies won in a row by one player (a struct, not a tuple: Skip, docs/android-port.md)
+public struct PlayerRun: Equatable {
+    public let player: Player
+    public let length: Int
+
+    public init(player: Player, length: Int) {
+        self.player = player
+        self.length = length
+    }
+}
+
 /// A match as the WhatsApp share texts see it. Coach mode (`Match.shareReport`)
 /// and referee mode (`RefereeMatch.shareReport`) both build one, so the three
 /// layouts and the share sheet are the same in both modes.
@@ -29,19 +40,21 @@ public struct MatchShareReport {
 
         public var rallies: Int { player1Score + player2Score }
 
-        /// Longest run of consecutive rallies won by one player
-        public var longestRun: (player: Player, length: Int)? {
-            var best: (Player, Int)? = nil
-            var current: (Player, Int)? = nil
+        /// Longest run of consecutive rallies won by one player (the first, on a tie)
+        public var longestRun: PlayerRun? {
+            var best: PlayerRun? = nil
+            var runner: Player? = nil
+            var length = 0
             for scorer in rallyWinners {
-                if let c = current, c.0 == scorer {
-                    current = (c.0, c.1 + 1)
+                if scorer == runner {
+                    length += 1
                 } else {
-                    current = (scorer, 1)
+                    runner = scorer
+                    length = 1
                 }
-                if let c = current, c.1 > (best?.1 ?? 0) { best = c }
+                if length > (best?.length ?? 0) { best = PlayerRun(player: scorer, length: length) }
             }
-            return best.map { (player: $0.0, length: $0.1) }
+            return best
         }
     }
 
@@ -80,8 +93,12 @@ public struct MatchShareReport {
     public var totalStrokes: Int { games.reduce(0) { $0 + $1.strokes } }
 
     /// Longest run of consecutive rallies won by one player anywhere in the match
-    public var longestRun: (player: Player, length: Int)? {
-        games.compactMap(\.longestRun).max { $0.length < $1.length }
+    public var longestRun: PlayerRun? {
+        var best: PlayerRun? = nil
+        for game in games {
+            if let run = game.longestRun, run.length > (best?.length ?? 0) { best = run }
+        }
+        return best
     }
 
     public func text(style: MatchShareStyle) -> String {

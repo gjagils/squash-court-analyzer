@@ -18,7 +18,7 @@ struct SettingsView: View {
     @State private var teamDraft = ""
     @AppStorage(AutomaticBackup.enabledKey) private var automaticBackup = true
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
-    @AppStorage(LiveShare.enabledKey) private var liveSharing = false
+    @AppStorage(LiveShare.enabledKey) private var liveSharing = true
 
     var body: some View {
         ZStack {

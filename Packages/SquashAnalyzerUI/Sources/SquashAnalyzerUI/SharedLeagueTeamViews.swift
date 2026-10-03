@@ -277,7 +277,7 @@ public struct SharedSettingsView: View {
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
-    @AppStorage(LiveShare.enabledKey) private var liveSharing = false
+    @AppStorage(LiveShare.enabledKey) private var liveSharing = true
     @State private var draft = ""
     @State private var message: String?
     @State private var messageIsError = false

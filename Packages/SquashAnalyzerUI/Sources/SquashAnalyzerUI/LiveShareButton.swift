@@ -5,7 +5,8 @@ import SquashAnalyzerCore
 /// Not live: tap to start live sharing and share the link (WhatsApp). Live: a
 /// red ● LIVE; tap to share the link again or stop. The state itself is sent
 /// by `LiveShareSync` after every rally; see docs/plan-live-meekijken.md.
-/// Only shown when "Live meekijken" is on in Instellingen (off by default), or
+/// Grey until a link is made, red once the match is live. Only shown when
+/// "Live meekijken" is on in Instellingen (on by default), or
 /// while this match is live so it can always be stopped. Brings its own
 /// leading gap, so a hidden button leaves none.
 public struct LiveShareButton: View {
@@ -16,7 +17,7 @@ public struct LiveShareButton: View {
     @State private var busy = false
     @State private var showingMenu = false
     @State private var failed = false
-    @AppStorage(LiveShare.enabledKey) private var enabled = false
+    @AppStorage(LiveShare.enabledKey) private var enabled = true
 
     public init(matchId: UUID, snapshot: @escaping () -> LiveSnapshot, share: ((String) -> Void)?) {
         self.matchId = matchId
@@ -37,22 +38,24 @@ public struct LiveShareButton: View {
     private func button(isLive: Bool) -> some View {
         let newLink = isLive && live.linkChanged
         let red = Color(red: 0.90, green: 0.28, blue: 0.30)
+        // Not live yet: grey, so red always means viewers can follow along
+        let grey = CoachPalette.textSecondary
         return Button(action: tap) {
             HStack(spacing: 5) {
                 Circle()
-                    .fill(isLive ? Color.white : red)
+                    .fill(isLive ? Color.white : grey)
                     .frame(width: 7, height: 7)
                 Text(busy ? "…" : (newLink ? "NIEUWE LINK" : "LIVE"))
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .tracking(1)
-                    .foregroundColor(isLive ? Color.white : red)
+                    .foregroundColor(isLive ? Color.white : grey)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             // .background(colour) + clipShape: filled shapes behind text misbehave on Android
-            .background(isLive ? red : red.opacity(0.10))
+            .background(isLive ? red : grey.opacity(0.10))
             .clipShape(Capsule())
-            .overlay(Capsule().stroke(red.opacity(0.6), lineWidth: 1))
+            .overlay(Capsule().stroke(isLive ? red.opacity(0.6) : grey.opacity(0.5), lineWidth: 1))
             .opacity(live.offline && isLive ? 0.6 : 1.0)
         }
         .buttonStyle(.plain)

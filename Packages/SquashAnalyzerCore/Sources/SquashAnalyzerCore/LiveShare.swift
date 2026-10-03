@@ -183,7 +183,7 @@ public final class LiveShare {
     /// reads this in its `baseURL`; the other way round it was null on Android.
     public static let defaultBaseURL = "https://live.squashanalyzer.com"
 
-    /// Settings switch "Live meekijken" (off by default): only then the
+    /// Settings switch "Live meekijken" (on by default): only then the
     /// scoring screens show the LIVE button
     public static let enabledKey = "liveSharingEnabled"
 

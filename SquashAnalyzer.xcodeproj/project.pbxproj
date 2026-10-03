@@ -41,7 +41,6 @@
 		B1000062 /* BadgeEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000062 /* BadgeEngineTests.swift */; };
 		B1000063 /* SavedBadgeAward.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000063 /* SavedBadgeAward.swift */; };
 		B1000064 /* BadgeAwarder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000064 /* BadgeAwarder.swift */; };
-		B1000065 /* PlayerBadgesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000065 /* PlayerBadgesView.swift */; };
 		B1000066 /* BadgeAwardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000066 /* BadgeAwardTests.swift */; };
 		B1000067 /* SavedPlayerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000067 /* SavedPlayerCard.swift */; };
 		B1000069 /* CardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000069 /* CardStore.swift */; };
@@ -103,7 +102,6 @@
 		B2000062 /* BadgeEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeEngineTests.swift; sourceTree = "<group>"; };
 		B2000063 /* SavedBadgeAward.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBadgeAward.swift; sourceTree = "<group>"; };
 		B2000064 /* BadgeAwarder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeAwarder.swift; sourceTree = "<group>"; };
-		B2000065 /* PlayerBadgesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerBadgesView.swift; sourceTree = "<group>"; };
 		B2000066 /* BadgeAwardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeAwardTests.swift; sourceTree = "<group>"; };
 		B2000067 /* SavedPlayerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlayerCard.swift; sourceTree = "<group>"; };
 		B2000069 /* CardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStore.swift; sourceTree = "<group>"; };
@@ -183,7 +181,6 @@
 				A2000030 /* PlayerManagementView.swift */,
 				B2000044 /* PlayerAvatar.swift */,
 				B2000061 /* BadgeView.swift */,
-				B2000065 /* PlayerBadgesView.swift */,
 				B2000070 /* CardSharingViews.swift */,
 				B2000092 /* ResultCardImage.swift */,
 			);
@@ -381,7 +378,6 @@
 				B1000070 /* CardSharingViews.swift in Sources */,
 				B1000069 /* CardStore.swift in Sources */,
 				B1000067 /* SavedPlayerCard.swift in Sources */,
-				B1000065 /* PlayerBadgesView.swift in Sources */,
 				B1000064 /* BadgeAwarder.swift in Sources */,
 				B1000063 /* SavedBadgeAward.swift in Sources */,
 				B1000044 /* PlayerAvatar.swift in Sources */,

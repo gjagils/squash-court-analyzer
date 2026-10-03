@@ -5,65 +5,6 @@ import SquashAnalyzerCore
 
 // MARK: - Share button on the badge screen
 
-/// "Deel kaart": an image of the card plus the snapshot link, for WhatsApp.
-/// The link opens in the app on iPhone and Android, or in a browser.
-struct CardShareActions: View {
-    let player: SavedPlayer
-
-    @Environment(\.modelContext) private var modelContext
-    @State private var shareItems: ShareItemsWrapper?
-    @State private var errorMessage: String?
-
-    var body: some View {
-        actionButton("Deel kaart", icon: "square.and.arrow.up") { shareSnapshot() }
-            .sheet(item: $shareItems) { wrapper in
-                ShareSheet(items: wrapper.items)
-            }
-            .alert("Delen lukt niet", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(errorMessage ?? "")
-            }
-    }
-
-    private func actionButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
-        let color = AppColors.accentGold
-        return Button(action: action) {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 12, weight: .semibold))
-                Text(title.uppercased())
-                    .font(AppFonts.label(12))
-                    .tracking(1)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .foregroundColor(color)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(color.opacity(0.12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.35), lineWidth: 1))
-            )
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func shareSnapshot() {
-        do {
-            let snapshot = try CardStore(context: modelContext).snapshot(for: player)
-            let url = try snapshot.webURL()
-            var items: [Any] = []
-            if let image = PlayerCardImage.render(snapshot: snapshot) { items.append(image) }
-            items.append("Badgekaart van \(player.name): \(url.absoluteString)")
-            shareItems = ShareItemsWrapper(items: items)
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-    }
-}
-
 // MARK: - Image of the card for WhatsApp
 
 struct PlayerCardImage: View {

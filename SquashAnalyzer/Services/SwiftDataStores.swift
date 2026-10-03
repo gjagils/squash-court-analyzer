@@ -388,3 +388,79 @@ enum IOSAICoach {
         AICoachContext(keyStore: APIKeyManager.shared, client: AICoachClient(transport: URLSessionAICoachTransport()))
     }
 }
+
+// MARK: - Badges per player
+
+/// A player's badges for the shared badge screen (`SharedPlayerBadgesView`)
+@MainActor
+final class SwiftDataBadgeSummaryStore: PlayerBadgeSummaryStore, @unchecked Sendable {
+    private let context: ModelContext
+
+    init(context: ModelContext) {
+        self.context = context
+    }
+
+    private func player(_ id: String) throws -> SavedPlayer? {
+        guard let uuid = UUID(uuidString: id) else { return nil }
+        return try context.fetch(FetchDescriptor<SavedPlayer>(predicate: #Predicate { $0.id == uuid })).first
+    }
+
+    private func activeAwards(_ playerId: String) throws -> [SavedBadgeAward] {
+        guard let card = try player(playerId)?.badgeCardId else { return [] }
+        return try context.fetch(FetchDescriptor<SavedBadgeAward>(predicate: #Predicate { $0.cardId == card && $0.deletedAt == nil }))
+    }
+
+    nonisolated func badges(forPlayer playerId: String) async throws -> [BadgeKind] {
+        try await MainActor.run {
+            var kinds: [BadgeKind] = []
+            for award in try activeAwards(playerId) {
+                if let kind = award.badgeKind, !kinds.contains(kind) { kinds.append(kind) }
+            }
+            return kinds
+        }
+    }
+
+    nonisolated func badgeCounts(forPlayers playerIds: [String]) async throws -> [String: Int] {
+        var counts: [String: Int] = [:]
+        for id in playerIds {
+            counts[id] = try await badges(forPlayer: id).count
+        }
+        return counts
+    }
+
+    nonisolated func cardSnapshot(forPlayer playerId: String) async throws -> CardSnapshot? {
+        try await MainActor.run {
+            guard let saved = try player(playerId) else { return nil }
+            return try CardStore(context: context).snapshot(for: saved)
+        }
+    }
+
+    nonisolated func moments(forPlayer playerId: String) async throws -> [BadgeMoment] {
+        try await MainActor.run {
+            try activeAwards(playerId).sorted { $0.earnedAt > $1.earnedAt }.compactMap { award in
+                guard let kind = award.badgeKind else { return nil }
+                return BadgeMoment(id: award.id.uuidString, badge: kind, earnedAt: award.earnedAt, opponentName: award.opponentName)
+            }
+        }
+    }
+
+    nonisolated func deleteMoment(_ id: String) async throws {
+        try await MainActor.run {
+            guard let uuid = UUID(uuidString: id),
+                  let award = try context.fetch(FetchDescriptor<SavedBadgeAward>(predicate: #Predicate { $0.id == uuid })).first else { return }
+            // Only marked: a recomputed match does not bring it back
+            award.deletedAt = Date()
+            try context.save()
+        }
+    }
+}
+
+extension IOSShare {
+    /// "Deel kaart" with the picture of the card (Android draws it in CardImage.kt)
+    static func card(_ snapshot: CardSnapshot, text: String) {
+        var items: [Any] = []
+        if let image = PlayerCardImage.render(snapshot: snapshot) { items.append(image) }
+        items.append(text)
+        present(items)
+    }
+}

@@ -47,7 +47,3 @@ struct URLSessionLiveTransport: LiveTransport {
     }
 }
 
-/// Service for generating tactical advice using OpenAI's GPT API
-enum OpenAIService {
-    static let client = AICoachClient(transport: URLSessionAICoachTransport())
-}

@@ -7,6 +7,8 @@ import SquashAnalyzerUI
 
 /// View for managing saved player profiles
 struct PlayerManagementView: View {
+    /// Card imports are handled app-wide (ContentView); the badge screen only needs one to refresh on
+    @State private var badgeInbox = CardInbox()
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \SavedPlayer.name) private var players: [SavedPlayer]
@@ -152,10 +154,15 @@ struct PlayerManagementView: View {
                 }
             }
             .navigationDestination(isPresented: $showingBadgeCatalog) {
-                BadgeCatalogView()
+                SharedBadgeCatalogView()
             }
             .navigationDestination(item: $playerForBadges) { player in
-                PlayerBadgesView(player: player)
+                // The shared badge screen (as on Android): badges, earning moments and "Deel kaart"
+                SharedPlayerBadgesView(playerId: player.id.uuidString, playerName: player.name, photo: player.photoData,
+                                       badgeStore: SwiftDataBadgeSummaryStore(context: modelContext),
+                                       shareText: { IOSShare.text($0) },
+                                       shareCard: { snapshot, text in IOSShare.card(snapshot, text: text) },
+                                       cardInbox: badgeInbox)
             }
             .navigationDestination(item: $playerToEdit) { player in
                 PlayerEditSheet(player: player) { name, focus, notes, photo in

@@ -612,22 +612,3 @@ enum ExportService {
         return savedGame
     }
 }
-
-// MARK: - Share Sheet
-
-struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
-}
-
-// MARK: - Share Items Wrapper (Identifiable for .sheet)
-
-struct ShareItemsWrapper: Identifiable {
-    let id = UUID()
-    let items: [Any]
-}

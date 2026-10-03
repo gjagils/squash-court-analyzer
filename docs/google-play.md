@@ -263,6 +263,11 @@ Opnieuw insturen: `POST …/applications/com.squashanalyzer.android/dataSafety` 
 `{"safetyLabels": <inhoud van het CSV-bestand>}` (zie play_upload.py voor het token).
 Verandert de app wat hij verstuurt, pas dan dit bestand aan.
 
+3 oktober 2026: **Naam** (voornamen naar de live-server) en **Foto's** (kleine
+spelersfoto op de livepagina) toegevoegd: verzameld, niet gedeeld, niet kortstondig
+(tot 2 uur), optioneel (LIVE en "Foto's meesturen" zijn uit te zetten), voor
+app-functionaliteit. Ingestuurd via de API en in de console gecontroleerd.
+
 ## Stand 1 oktober 2026 (avond)
 
 - App-inhoud volledig: privacybeleid, inloggegevens, advertenties (geen), contentclassificatie,

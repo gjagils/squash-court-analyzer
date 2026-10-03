@@ -21,7 +21,7 @@ PSL_OUTSIDE_APP_ACCOUNT_TYPES,PSL_LOGIN_WITH_OUTSIDE_APP_ID,,MULTIPLE_CHOICE,"Ho
 PSL_OUTSIDE_APP_ACCOUNT_TYPES,PSL_LOGIN_THROUGH_EMPLOYMENT_OR_ENTERPRISE_ACCOUNT,,MULTIPLE_CHOICE,Hoe worden deze accounts gemaakt?/Via werk- of bedrijfsaccounts
 PSL_OUTSIDE_APP_ACCOUNT_TYPES,PSL_OUTSIDE_APP_ACCOUNT_TYPE_OTHER,,MULTIPLE_CHOICE,Hoe worden deze accounts gemaakt?/Overig
 PSL_OUTSIDE_APP_ACCOUNT_TYPE_SPECIFY,,,MAYBE_REQUIRED,Beschrijf hoe deze accounts worden gemaakt
-PSL_DATA_TYPES_PERSONAL,PSL_NAME,,MULTIPLE_CHOICE,Persoonlijke informatie/Naam
+PSL_DATA_TYPES_PERSONAL,PSL_NAME,true,MULTIPLE_CHOICE,Persoonlijke informatie/Naam
 PSL_DATA_TYPES_PERSONAL,PSL_EMAIL,,MULTIPLE_CHOICE,Persoonlijke informatie/E-mailadres
 PSL_DATA_TYPES_PERSONAL,PSL_USER_ACCOUNT,,MULTIPLE_CHOICE,Persoonlijke informatie/Gebruikers-ID's
 PSL_DATA_TYPES_PERSONAL,PSL_ADDRESS,,MULTIPLE_CHOICE,Persoonlijke informatie/Adres
@@ -40,7 +40,7 @@ PSL_DATA_TYPES_SEARCH_AND_BROWSING,PSL_WEB_BROWSING_HISTORY,,MULTIPLE_CHOICE,Bro
 PSL_DATA_TYPES_EMAIL_AND_TEXT,PSL_EMAILS,,MULTIPLE_CHOICE,Berichten/E-mails
 PSL_DATA_TYPES_EMAIL_AND_TEXT,PSL_SMS_CALL_LOG,,MULTIPLE_CHOICE,Berichten/Sms of mms
 PSL_DATA_TYPES_EMAIL_AND_TEXT,PSL_OTHER_MESSAGES,,MULTIPLE_CHOICE,Berichten/Andere in-app berichten
-PSL_DATA_TYPES_PHOTOS_AND_VIDEOS,PSL_PHOTOS,,MULTIPLE_CHOICE,Foto's en video's/Foto's
+PSL_DATA_TYPES_PHOTOS_AND_VIDEOS,PSL_PHOTOS,true,MULTIPLE_CHOICE,Foto's en video's/Foto's
 PSL_DATA_TYPES_PHOTOS_AND_VIDEOS,PSL_VIDEOS,,MULTIPLE_CHOICE,Foto's en video's/Video's
 PSL_DATA_TYPES_AUDIO,PSL_AUDIO,,MULTIPLE_CHOICE,Audiobestanden/Spraak- of geluidsopnamen
 PSL_DATA_TYPES_AUDIO,PSL_MUSIC,,MULTIPLE_CHOICE,Audiobestanden/Muziekbestanden
@@ -59,12 +59,12 @@ PSL_DATA_TYPES_APP_ACTIVITY,PSL_APPS_ON_DEVICE,,MULTIPLE_CHOICE,App-activiteit/G
 PSL_DATA_TYPES_APP_ACTIVITY,PSL_USER_GENERATED_CONTENT,true,MULTIPLE_CHOICE,App-activiteit/Andere content van websitegebruikers
 PSL_DATA_TYPES_APP_ACTIVITY,PSL_OTHER_APP_ACTIVITY,,MULTIPLE_CHOICE,App-activiteit/Andere acties
 PSL_DATA_TYPES_IDENTIFIERS,PSL_DEVICE_ID,,MULTIPLE_CHOICE,Apparaat- of andere ID's/Apparaat- of andere ID's
-PSL_DATA_USAGE_RESPONSES:PSL_NAME:PSL_DATA_USAGE_COLLECTION_AND_SHARING,PSL_DATA_USAGE_ONLY_COLLECTED,,MULTIPLE_CHOICE,"Gegevensgebruik en -verwerking (Naam)/Worden deze gegevens verzameld, gedeeld of allebei?/Verzameld"
+PSL_DATA_USAGE_RESPONSES:PSL_NAME:PSL_DATA_USAGE_COLLECTION_AND_SHARING,PSL_DATA_USAGE_ONLY_COLLECTED,true,MULTIPLE_CHOICE,"Gegevensgebruik en -verwerking (Naam)/Worden deze gegevens verzameld, gedeeld of allebei?/Verzameld"
 PSL_DATA_USAGE_RESPONSES:PSL_NAME:PSL_DATA_USAGE_COLLECTION_AND_SHARING,PSL_DATA_USAGE_ONLY_SHARED,,MULTIPLE_CHOICE,"Gegevensgebruik en -verwerking (Naam)/Worden deze gegevens verzameld, gedeeld of allebei?/Gedeeld"
-PSL_DATA_USAGE_RESPONSES:PSL_NAME:PSL_DATA_USAGE_EPHEMERAL,,,MAYBE_REQUIRED,Gegevensgebruik en -verwerking (Naam)/Worden deze gegevens kortstondig verwerkt?
-PSL_DATA_USAGE_RESPONSES:PSL_NAME:DATA_USAGE_USER_CONTROL,PSL_DATA_USAGE_USER_CONTROL_OPTIONAL,,SINGLE_CHOICE,Gegevensgebruik en -verwerking (Naam)/Zijn deze gegevens vereist voor je app en kunnen gebruikers kiezen of deze worden verzameld?/Gebruikers kunnen kiezen of deze gegevens worden verzameld
+PSL_DATA_USAGE_RESPONSES:PSL_NAME:PSL_DATA_USAGE_EPHEMERAL,,false,MAYBE_REQUIRED,Gegevensgebruik en -verwerking (Naam)/Worden deze gegevens kortstondig verwerkt?
+PSL_DATA_USAGE_RESPONSES:PSL_NAME:DATA_USAGE_USER_CONTROL,PSL_DATA_USAGE_USER_CONTROL_OPTIONAL,true,SINGLE_CHOICE,Gegevensgebruik en -verwerking (Naam)/Zijn deze gegevens vereist voor je app en kunnen gebruikers kiezen of deze worden verzameld?/Gebruikers kunnen kiezen of deze gegevens worden verzameld
 PSL_DATA_USAGE_RESPONSES:PSL_NAME:DATA_USAGE_USER_CONTROL,PSL_DATA_USAGE_USER_CONTROL_REQUIRED,,SINGLE_CHOICE,Gegevensgebruik en -verwerking (Naam)/Zijn deze gegevens vereist voor je app en kunnen gebruikers kiezen of deze worden verzameld?/Gegevensverzameling is vereist (gebruikers kunnen deze gegevensverzameling niet uitzetten)
-PSL_DATA_USAGE_RESPONSES:PSL_NAME:DATA_USAGE_COLLECTION_PURPOSE,PSL_APP_FUNCTIONALITY,,MULTIPLE_CHOICE,Gegevensgebruik en -verwerking (Naam)/Waarom worden deze gebruikersgegevens verzameld? Selecteer alle antwoorden die van toepassing zijn./App-functionaliteit
+PSL_DATA_USAGE_RESPONSES:PSL_NAME:DATA_USAGE_COLLECTION_PURPOSE,PSL_APP_FUNCTIONALITY,true,MULTIPLE_CHOICE,Gegevensgebruik en -verwerking (Naam)/Waarom worden deze gebruikersgegevens verzameld? Selecteer alle antwoorden die van toepassing zijn./App-functionaliteit
 PSL_DATA_USAGE_RESPONSES:PSL_NAME:DATA_USAGE_COLLECTION_PURPOSE,PSL_ANALYTICS,,MULTIPLE_CHOICE,Gegevensgebruik en -verwerking (Naam)/Waarom worden deze gebruikersgegevens verzameld? Selecteer alle antwoorden die van toepassing zijn./Analyse
 PSL_DATA_USAGE_RESPONSES:PSL_NAME:DATA_USAGE_COLLECTION_PURPOSE,PSL_DEVELOPER_COMMUNICATIONS,,MULTIPLE_CHOICE,Gegevensgebruik en -verwerking (Naam)/Waarom worden deze gebruikersgegevens verzameld? Selecteer alle antwoorden die van toepassing zijn./Berichten van de ontwikkelaar
 PSL_DATA_USAGE_RESPONSES:PSL_NAME:DATA_USAGE_COLLECTION_PURPOSE,PSL_FRAUD_PREVENTION_SECURITY,,MULTIPLE_CHOICE,"Gegevensgebruik en -verwerking (Naam)/Waarom worden deze gebruikersgegevens verzameld? Selecteer alle antwoorden die van toepassing zijn./Fraudepreventie, beveiliging en naleving"
@@ -420,12 +420,12 @@ PSL_DATA_USAGE_RESPONSES:PSL_OTHER_MESSAGES:DATA_USAGE_SHARING_PURPOSE,PSL_FRAUD
 PSL_DATA_USAGE_RESPONSES:PSL_OTHER_MESSAGES:DATA_USAGE_SHARING_PURPOSE,PSL_ADVERTISING,,MULTIPLE_CHOICE,Gegevensgebruik en -verwerking (Andere in-app berichten)/Waarom worden deze gebruikersgegevens gedeeld? Selecteer alle antwoorden die van toepassing zijn./Advertenties of marketing
 PSL_DATA_USAGE_RESPONSES:PSL_OTHER_MESSAGES:DATA_USAGE_SHARING_PURPOSE,PSL_PERSONALIZATION,,MULTIPLE_CHOICE,Gegevensgebruik en -verwerking (Andere in-app berichten)/Waarom worden deze gebruikersgegevens gedeeld? Selecteer alle antwoorden die van toepassing zijn./Personalisatie
 PSL_DATA_USAGE_RESPONSES:PSL_OTHER_MESSAGES:DATA_USAGE_SHARING_PURPOSE,PSL_ACCOUNT_MANAGEMENT,,MULTIPLE_CHOICE,Gegevensgebruik en -verwerking (Andere in-app berichten)/Waarom worden deze gebruikersgegevens gedeeld? Selecteer alle antwoorden die van toepassing zijn./Accountbeheer
-PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:PSL_DATA_USAGE_COLLECTION_AND_SHARING,PSL_DATA_USAGE_ONLY_COLLECTED,,MULTIPLE_CHOICE,"Gegevensgebruik en -verwerking (Foto's)/Worden deze gegevens verzameld, gedeeld of allebei?/Verzameld"
+PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:PSL_DATA_USAGE_COLLECTION_AND_SHARING,PSL_DATA_USAGE_ONLY_COLLECTED,true,MULTIPLE_CHOICE,"Gegevensgebruik en -verwerking (Foto's)/Worden deze gegevens verzameld, gedeeld of allebei?/Verzameld"
 PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:PSL_DATA_USAGE_COLLECTION_AND_SHARING,PSL_DATA_USAGE_ONLY_SHARED,,MULTIPLE_CHOICE,"Gegevensgebruik en -verwerking (Foto's)/Worden deze gegevens verzameld, gedeeld of allebei?/Gedeeld"
-PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:PSL_DATA_USAGE_EPHEMERAL,,,MAYBE_REQUIRED,Gegevensgebruik en -verwerking (Foto's)/Worden deze gegevens kortstondig verwerkt?
-PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:DATA_USAGE_USER_CONTROL,PSL_DATA_USAGE_USER_CONTROL_OPTIONAL,,SINGLE_CHOICE,Gegevensgebruik en -verwerking (Foto's)/Zijn deze gegevens vereist voor je app en kunnen gebruikers kiezen of deze worden verzameld?/Gebruikers kunnen kiezen of deze gegevens worden verzameld
+PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:PSL_DATA_USAGE_EPHEMERAL,,false,MAYBE_REQUIRED,Gegevensgebruik en -verwerking (Foto's)/Worden deze gegevens kortstondig verwerkt?
+PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:DATA_USAGE_USER_CONTROL,PSL_DATA_USAGE_USER_CONTROL_OPTIONAL,true,SINGLE_CHOICE,Gegevensgebruik en -verwerking (Foto's)/Zijn deze gegevens vereist voor je app en kunnen gebruikers kiezen of deze worden verzameld?/Gebruikers kunnen kiezen of deze gegevens worden verzameld
 PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:DATA_USAGE_USER_CONTROL,PSL_DATA_USAGE_USER_CONTROL_REQUIRED,,SINGLE_CHOICE,Gegevensgebruik en -verwerking (Foto's)/Zijn deze gegevens vereist voor je app en kunnen gebruikers kiezen of deze worden verzameld?/Gegevensverzameling is vereist (gebruikers kunnen deze gegevensverzameling niet uitzetten)
-PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:DATA_USAGE_COLLECTION_PURPOSE,PSL_APP_FUNCTIONALITY,,MULTIPLE_CHOICE,Gegevensgebruik en -verwerking (Foto's)/Waarom worden deze gebruikersgegevens verzameld? Selecteer alle antwoorden die van toepassing zijn./App-functionaliteit
+PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:DATA_USAGE_COLLECTION_PURPOSE,PSL_APP_FUNCTIONALITY,true,MULTIPLE_CHOICE,Gegevensgebruik en -verwerking (Foto's)/Waarom worden deze gebruikersgegevens verzameld? Selecteer alle antwoorden die van toepassing zijn./App-functionaliteit
 PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:DATA_USAGE_COLLECTION_PURPOSE,PSL_ANALYTICS,,MULTIPLE_CHOICE,Gegevensgebruik en -verwerking (Foto's)/Waarom worden deze gebruikersgegevens verzameld? Selecteer alle antwoorden die van toepassing zijn./Analyse
 PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:DATA_USAGE_COLLECTION_PURPOSE,PSL_DEVELOPER_COMMUNICATIONS,,MULTIPLE_CHOICE,Gegevensgebruik en -verwerking (Foto's)/Waarom worden deze gebruikersgegevens verzameld? Selecteer alle antwoorden die van toepassing zijn./Berichten van de ontwikkelaar
 PSL_DATA_USAGE_RESPONSES:PSL_PHOTOS:DATA_USAGE_COLLECTION_PURPOSE,PSL_FRAUD_PREVENTION_SECURITY,,MULTIPLE_CHOICE,"Gegevensgebruik en -verwerking (Foto's)/Waarom worden deze gebruikersgegevens verzameld? Selecteer alle antwoorden die van toepassing zijn./Fraudepreventie, beveiliging en naleving"

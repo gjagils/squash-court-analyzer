@@ -162,3 +162,46 @@ final class FakeLiveTransport: LiveTransport, @unchecked Sendable {
         return AITransportResponse(status: 204, body: Data())
     }
 }
+
+// The share picture ("Deel als plaatje") follows the result card
+final class ResultCardTests: XCTestCase {
+    private func report(games: [MatchShareReport.Game], p1: Int, p2: Int, winner: Player?) -> MatchShareReport {
+        MatchShareReport(player1Name: "Luis", player2Name: "Niels", bestOf: 5, firstGameNumber: 1,
+                         player1Games: p1, player2Games: p2, matchWinner: winner, games: games,
+                         startedAt: Date(), duration: 0.0)
+    }
+
+    private func game(_ number: Int, _ a: Int, _ b: Int, _ winner: Player?) -> MatchShareReport.Game {
+        MatchShareReport.Game(number: number, player1Score: a, player2Score: b, winner: winner,
+                              duration: nil, rallyWinners: [], strokes: 0)
+    }
+
+    func testMatchOver() {
+        let games = [game(1, 15, 17, Player.player2), game(2, 11, 8, Player.player1), game(3, 11, 9, Player.player1),
+                     game(4, 7, 11, Player.player2), game(5, 6, 11, Player.player2)]
+        let card = ResultCard.from(report(games: games, p1: 2, p2: 3, winner: Player.player2))
+        XCTAssertEqual(card.title, "WEDSTRIJD KLAAR")
+        XCTAssertEqual(card.player1Score, 2)
+        XCTAssertEqual(card.player2Score, 3)
+        XCTAssertEqual(card.winnerText, "Niels wint de wedstrijd")
+        XCTAssertEqual(card.chips.map { $0.label }, ["G1", "G2", "G3", "G4", "G5"])
+        XCTAssertEqual(card.chips[0].score, "15-17")
+        XCTAssertEqual(card.chips[1].winner, Player.player1)
+    }
+
+    func testGameJustWonShowsItsPoints() {
+        let card = ResultCard.from(report(games: [game(1, 11, 8, Player.player1)], p1: 1, p2: 0, winner: nil))
+        XCTAssertEqual(card.title, "GAME 1 KLAAR")
+        XCTAssertEqual(card.player1Score, 11)
+        XCTAssertEqual(card.player2Score, 8)
+        XCTAssertEqual(card.winnerText, "Luis wint game 1")
+    }
+
+    func testDuringAGameShowsTheStand() {
+        let card = ResultCard.from(report(games: [game(1, 11, 8, Player.player1), game(2, 4, 6, nil)], p1: 1, p2: 0, winner: nil))
+        XCTAssertEqual(card.title, "TUSSENSTAND")
+        XCTAssertEqual(card.player1Score, 1)
+        XCTAssertEqual(card.winnerText, "Luis leidt 1-0")
+        XCTAssertNil(card.chips[1].winner)
+    }
+}

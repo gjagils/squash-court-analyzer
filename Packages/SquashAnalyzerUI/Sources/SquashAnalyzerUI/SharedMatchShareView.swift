@@ -5,6 +5,14 @@ import SquashAnalyzerCore
 /// `MatchShareReport`, the same text as iOS' `MatchShareSheet`), see how it
 /// reads, then hand it to the share sheet. The layout is remembered with the
 /// same key as iOS, one setting for coach and referee.
+/// "Deel als plaatje" on Android: the app sets this at start (it draws Core's
+/// `ResultCard` on a Canvas and shares the PNG, `ResultImage.kt`). nil hides
+/// the button. A setting at app level instead of yet another init parameter
+/// through every screen that shares a score.
+public enum ResultImageSharing {
+    @MainActor public static var share: ((ResultCard) -> Void)? = nil
+}
+
 public struct SharedMatchShareView: View {
     let report: MatchShareReport
     let shareText: (String) -> Void
@@ -48,7 +56,22 @@ public struct SharedMatchShareView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
-                .padding(.bottom, 24)
+                if let shareImage = ResultImageSharing.share {
+                    // The result card as a picture (WhatsApp, Instagram, …)
+                    Button { shareImage(ResultCard.from(report)) } label: {
+                        Text("DEEL ALS PLAATJE")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .tracking(1)
+                            .foregroundColor(DashboardPalette.gold)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(DashboardPalette.gold.opacity(0.10))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(DashboardPalette.gold.opacity(0.4), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                }
+                Spacer().frame(height: 24)
             }
             .padding(.horizontal, 20)
             .padding(.top, 22)

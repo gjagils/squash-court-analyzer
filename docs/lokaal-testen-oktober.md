@@ -87,6 +87,16 @@ Er was geen Mac (Xcode, Skip) en geen Docker beschikbaar. Dus:
 - [ ] Scheidsrechter: hetzelfde
 - [ ] Vliegtuigmodus tijdens een rally: na herstel gaat de stand weer mee
 
+**Deel als plaatje**
+- [ ] Coach en scheidsrechter: na een game en na de wedstrijd → Deel score →
+      "Deel als plaatje" → een PNG zoals het eindvenster (titel, namen, grote
+      stand, winnaar, chips per game)
+- [ ] Ook tijdens een game (titel "TUSSENSTAND")
+- [ ] Lange namen ("Niels van Sevenhoven") passen
+- iOS: `ResultCardImage.swift` (nieuw bestand, ook in het Xcode-project gezet).
+  Android: `ResultImage.kt` (Canvas), aangezet in `MainActivity` via
+  `ResultImageSharing.share`.
+
 **Sluitknoppen**
 - [ ] iOS: Home → badges: knop Sluiten
 - [ ] iOS: Mijn team-kaart → detail: knop Sluiten

@@ -19,6 +19,9 @@ NIEUW: LIVE MEEKIJKEN
 • Alleen voornamen en de stand gaan naar de server. Na de wedstrijd wordt alles meteen gewist.
 • Nog een keer op LIVE: link opnieuw delen of live stoppen.
 
+NIEUW: DEEL ALS PLAATJE
+• Bij Deel score staat nu ook "Deel als plaatje": de uitslag als afbeelding, zoals het eindvenster, met per game de stand. Handig voor de teamapp of Instagram.
+
 SLUITKNOPPEN
 • Elk scherm heeft nu een knop om te sluiten (o.a. de badgecatalogus, Mijn team en de spelersfilter).
 

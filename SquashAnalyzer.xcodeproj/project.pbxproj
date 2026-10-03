@@ -44,6 +44,7 @@
 		B1000043 /* TeamImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000043 /* TeamImportService.swift */; };
 		B1000044 /* PlayerAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000044 /* PlayerAvatar.swift */; };
 		B1000045 /* MatchShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000045 /* MatchShareSheet.swift */; };
+		B1000092 /* ResultCardImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000092 /* ResultCardImage.swift */; };
 		B1000060 /* BadgeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000060 /* BadgeEngine.swift */; };
 		B1000061 /* BadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000061 /* BadgeView.swift */; };
 		B1000062 /* BadgeEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000062 /* BadgeEngineTests.swift */; };
@@ -114,6 +115,7 @@
 		B2000043 /* TeamImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamImportService.swift; sourceTree = "<group>"; };
 		B2000044 /* PlayerAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAvatar.swift; sourceTree = "<group>"; };
 		B2000045 /* MatchShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchShareSheet.swift; sourceTree = "<group>"; };
+		B2000092 /* ResultCardImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCardImage.swift; sourceTree = "<group>"; };
 		B2000060 /* BadgeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeEngine.swift; sourceTree = "<group>"; };
 		B2000061 /* BadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeView.swift; sourceTree = "<group>"; };
 		B2000062 /* BadgeEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeEngineTests.swift; sourceTree = "<group>"; };
@@ -208,6 +210,7 @@
 				B2000065 /* PlayerBadgesView.swift */,
 				B2000070 /* CardSharingViews.swift */,
 				B2000045 /* MatchShareSheet.swift */,
+				B2000092 /* ResultCardImage.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -419,6 +422,7 @@
 				B1000044 /* PlayerAvatar.swift in Sources */,
 				B1000061 /* BadgeView.swift in Sources */,
 				B1000045 /* MatchShareSheet.swift in Sources */,
+				B1000092 /* ResultCardImage.swift in Sources */,
 				B1000043 /* TeamImportService.swift in Sources */,
 				B1000080 /* LeagueTeamService.swift in Sources */,
 				B1000081 /* LeagueTeamView.swift in Sources */,

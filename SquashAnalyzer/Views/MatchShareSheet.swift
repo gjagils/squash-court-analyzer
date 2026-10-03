@@ -49,6 +49,14 @@ struct MatchShareSheet: View {
                     shareItems = ShareItemsWrapper(items: [report.text(style: style)])
                 }
                 .padding(.horizontal, 20)
+
+                // The result card as a picture (WhatsApp, Instagram, …)
+                HardwareButton(title: "Deel als plaatje", color: AppColors.accentGold, style: .outlined) {
+                    if let image = ResultCardImage.render(ResultCard.from(report)) {
+                        shareItems = ShareItemsWrapper(items: [image])
+                    }
+                }
+                .padding(.horizontal, 20)
                 .padding(.bottom, 24)
             }
         }

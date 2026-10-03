@@ -25,6 +25,7 @@ import squash.analyzer.core.LeagueTeamFetcher
 import squash.analyzer.core.AICoachClient
 import squash.analyzer.core.LiveShare
 import squash.analyzer.ui.AICoachContext
+import squash.analyzer.ui.ResultImageSharing
 import squash.analyzer.ui.BackupContext
 import com.squashanalyzer.android.backup.ActivityBackupFiles
 import com.squashanalyzer.android.backup.AutoBackup
@@ -100,6 +101,8 @@ class MainActivity : AppCompatActivity() {
         val aiCoach = AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport()))
         // Live meekijken: the shared LiveShare sends the state through this (server/live)
         LiveShare.shared.transport = HttpLiveTransport()
+        // "Deel als plaatje" in Deel score: the result card as a PNG (ResultImage)
+        ResultImageSharing.share = { card -> startActivity(ResultImage.shareIntent(this, card)) }
         setContent {
             val stateHolder = rememberSaveableStateHolder()
             stateHolder.SaveableStateProvider(true) {

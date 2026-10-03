@@ -87,6 +87,8 @@ public struct MatchResultOverlay: View {
                     .padding(.bottom, 14)
                 side(Player.player2, name: result.player2Name, score: result.player2Score, photo: player2Photo)
             }
+            // One sentence instead of four loose pieces ("Jan", "3", "–", "Piet", "1")
+            .readAsOne("\(result.player1Name) \(result.player1Score), \(result.player2Name) \(result.player2Score)")
 
             if let winner = result.winner, let text = result.winnerText {
                 Text(text)
@@ -425,5 +427,17 @@ public struct SharedMatchBadgesSheet: View {
                 }
             }
         }
+    }
+}
+
+extension View {
+    /// Read by VoiceOver as one sentence; Skip has no accessibilityElement(children:),
+    /// so on Android the label goes on the group as it is
+    func readAsOne(_ label: String) -> some View {
+        #if SKIP
+        return self.accessibilityLabel(label)
+        #else
+        return self.accessibilityElement(children: .ignore).accessibilityLabel(label)
+        #endif
     }
 }

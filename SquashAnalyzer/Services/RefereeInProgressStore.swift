@@ -18,9 +18,15 @@ enum RefereeInProgressStore {
         try? data.write(to: url, options: .atomic)
     }
 
+    /// The unfinished match, if any. A file that cannot be read back (damaged,
+    /// or from a format this version no longer knows) is removed, so the
+    /// question "Wedstrijd hervatten?" does not keep failing on it.
     static func load() -> RefereeMatch? {
-        guard let data = try? Data(contentsOf: url),
-              let snapshot = try? JSONDecoder().decode(RefereeMatchSnapshot.self, from: data) else { return nil }
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        guard let snapshot = try? JSONDecoder().decode(RefereeMatchSnapshot.self, from: data) else {
+            clear()
+            return nil
+        }
         return RefereeMatch.restoring(snapshot)
     }
 

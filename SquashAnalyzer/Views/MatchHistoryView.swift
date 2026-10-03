@@ -1138,5 +1138,6 @@ struct MatchResultCompletionSheet: View {
         onSelectMatch: { _ in },
         onSelectGame: { _ in }
     )
-    .modelContainer(for: [SavedMatch.self, SavedGame.self, SavedPoint.self], inMemory: true)
+    // All models of the current schema: the history also reads players, badges and referee matches
+    .modelContainer(try! ModelContainer(for: Schema(SquashAnalyzerSchemaV7.models), configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
 }

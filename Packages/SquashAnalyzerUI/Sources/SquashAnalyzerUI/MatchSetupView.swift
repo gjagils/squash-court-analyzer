@@ -235,11 +235,15 @@ public struct MatchSetupView: View {
         VStack(spacing: 12) {
             Button { lateStart.toggle() } label: {
                 // Folded with games filled in, the line itself says where the match starts (as on iOS)
-                Text(hasHeadStart && headStartIsValid
-                     ? "Start bij game \(1 + gamesBefore1 + gamesBefore2) · stand \(gamesBefore1) – \(gamesBefore2) " + (lateStart ? "▴" : "▾")
-                     : (lateStart ? "Later instappen ▴" : "Later instappen? ▾"))
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(hasHeadStart ? SetupPalette.gold : SetupPalette.muted)
+                HStack(spacing: 4) {
+                    Text(hasHeadStart && headStartIsValid
+                         ? "Start bij game \(1 + gamesBefore1 + gamesBefore2) · stand \(gamesBefore1) – \(gamesBefore2)"
+                         : (lateStart ? "Later instappen" : "Later instappen?"))
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(hasHeadStart ? SetupPalette.gold : SetupPalette.muted)
+                    AppSymbol(lateStart ? "chevron.up" : "chevron.down", size: 12,
+                              color: hasHeadStart ? SetupPalette.gold : SetupPalette.muted)
+                }
             }
             .buttonStyle(.plain)
             if lateStart {

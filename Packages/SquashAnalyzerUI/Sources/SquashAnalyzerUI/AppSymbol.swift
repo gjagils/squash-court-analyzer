@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -137,6 +139,8 @@ struct AppSymbol: View {
         case "mappin": return Icons.Filled.Place
         case "sparkles": return Icons.Filled.AutoAwesome
         case "square.and.arrow.up": return Icons.Filled.Share
+        case "chevron.down": return Icons.Filled.KeyboardArrowDown
+        case "chevron.up": return Icons.Filled.KeyboardArrowUp
         case "chevron.left": return Icons.AutoMirrored.Filled.KeyboardArrowLeft
         case "chevron.right": return Icons.AutoMirrored.Filled.KeyboardArrowRight
         case "person.fill": return Icons.Filled.Person

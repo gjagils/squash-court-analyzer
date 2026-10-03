@@ -242,6 +242,8 @@ public struct RefereeScoringView: View {
             }
             .opacity(isServer ? 1.0 : 0.0)
             .allowsHitTesting(isServer)
+            // Invisible for the receiver: VoiceOver/TalkBack skip it too
+            .accessibilityHidden(!isServer)
 
             Button(action: {
                 withAnimation(.easeInOut(duration: 0.15)) { match.awardPoint(to: player) }
@@ -286,7 +288,9 @@ public struct RefereeScoringView: View {
             }
             HStack(spacing: 8) {
                 actionButton("STROKE", color: CoachPalette.warmRed) { match.callStroke(to: .player1); matchChanged() }
+                    .accessibilityLabel("Stroke voor \(match.player1Name)")
                 actionButton("STROKE", color: CoachPalette.coolIndigo) { match.callStroke(to: .player2); matchChanged() }
+                    .accessibilityLabel("Stroke voor \(match.player2Name)")
             }
             if match.isGameOver && !match.isMatchOver {
                 Button("VOLGENDE GAME") {

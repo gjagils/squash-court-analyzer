@@ -11,30 +11,39 @@ final class APIKeyManager {
 
     private init() {}
 
+    /// The key as last read or written; the Keychain is only asked once
+    private var cachedKey: String?? = nil
+
     // MARK: - OpenAI API Key
 
     var openAIAPIKey: String? {
-        get { retrieve(key: openAIKey) }
-        set {
-            if let value = newValue {
-                save(key: openAIKey, value: value)
-            } else {
-                delete(key: openAIKey)
-            }
+        get {
+            if let cachedKey { return cachedKey }
+            let key = retrieve(key: openAIKey)
+            cachedKey = .some(key)
+            return key
         }
+        set { _ = setOpenAIKey(newValue) }
     }
 
-    var hasOpenAIKey: Bool {
-        openAIAPIKey != nil && !openAIAPIKey!.isEmpty
+    /// Saves (or with nil/empty removes) the key; false when the Keychain
+    /// refused, so the screen can say so instead of "Opgeslagen!"
+    @discardableResult
+    func setOpenAIKey(_ value: String?) -> Bool {
+        cachedKey = nil
+        if let value, !value.isEmpty {
+            return save(key: openAIKey, value: value)
+        }
+        return delete(key: openAIKey)
     }
 
     // MARK: - Keychain Operations
 
-    private func save(key: String, value: String) {
-        guard let data = value.data(using: .utf8) else { return }
+    private func save(key: String, value: String) -> Bool {
+        guard let data = value.data(using: .utf8) else { return false }
 
-        // Delete existing item first
-        delete(key: key)
+        // Replace an existing item
+        guard delete(key: key) else { return false }
 
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -44,7 +53,7 @@ final class APIKeyManager {
             kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked
         ]
 
-        SecItemAdd(query as CFDictionary, nil)
+        return SecItemAdd(query as CFDictionary, nil) == errSecSuccess
     }
 
     private func retrieve(key: String) -> String? {
@@ -68,14 +77,16 @@ final class APIKeyManager {
         return string
     }
 
-    private func delete(key: String) {
+    /// True when the item is gone (also when there was none)
+    private func delete(key: String) -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: key
         ]
 
-        SecItemDelete(query as CFDictionary)
+        let status = SecItemDelete(query as CFDictionary)
+        return status == errSecSuccess || status == errSecItemNotFound
     }
 }
 

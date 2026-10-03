@@ -161,8 +161,7 @@ public struct SharedMatchHistoryView: View {
                     Text(playerFilter ?? "Alle spelers")
                         .foregroundColor(HistoryPalette.text)
                     Spacer()
-                    Text(playerFilter == nil ? "▾" : "✕")
-                        .foregroundColor(HistoryPalette.muted)
+                    AppSymbol(playerFilter == nil ? "chevron.down" : "xmark", size: 14, color: HistoryPalette.muted)
                 }
                 .padding(12)
                 .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.05)))

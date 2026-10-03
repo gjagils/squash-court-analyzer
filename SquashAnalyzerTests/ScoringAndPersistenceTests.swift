@@ -587,3 +587,28 @@ final class ResultCardImageTests: XCTestCase {
                                     startedAt: Date(), duration: 0), name: "tussenstand")
     }
 }
+
+/// Exports and the weekly iCloud backup (T21)
+final class ExportFileTests: XCTestCase {
+
+    func testPlayerNamesCannotBreakTheFileName() {
+        XCTAssertEqual(ExportService.safeFileName("squash_match_A/B_vs_Jan: 1.json"), "squash_match_A-B_vs_Jan- 1.json")
+        XCTAssertFalse(ExportService.safeFileName("../geheim.json").contains("/"))
+        XCTAssertFalse(ExportService.safeFileName(".hidden").hasPrefix("."))
+    }
+
+    func testTheBackupFolderKeepsTheNewestSeven() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try Data("andere".utf8).write(to: dir.appendingPathComponent("notities.txt"))
+        let start = Date(timeIntervalSince1970: 1_790_000_000)
+        for week in 0..<9 {
+            _ = try ExportService.writeBackup(Data("{}".utf8), to: dir, now: start.addingTimeInterval(Double(week) * 7 * 24 * 3600))
+        }
+        let names = try FileManager.default.contentsOfDirectory(atPath: dir.path)
+        XCTAssertEqual(names.filter { $0.hasPrefix(AutoBackupPlan.prefix) }.count, AutoBackupPlan.keep)
+        XCTAssertTrue(names.contains("latest-backup.json"))
+        XCTAssertTrue(names.contains("notities.txt"), "other files are left alone")
+    }
+}

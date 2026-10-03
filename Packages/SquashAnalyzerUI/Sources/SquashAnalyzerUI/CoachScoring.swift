@@ -183,6 +183,8 @@ public struct SharedScoreboardView: View {
             }
             .opacity(isServing ? 1.0 : 0.0)
             .allowsHitTesting(isServing)
+            // Invisible for the receiver: VoiceOver/TalkBack skip it too
+            .accessibilityHidden(!isServing)
 
             Button(action: { onSelectPlayer?(player) }) {
                 Text("\(score)")

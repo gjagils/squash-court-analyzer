@@ -301,9 +301,18 @@ enum ExportService {
 
     static func writeToTempFile(_ data: Data, filename: String) throws -> URL {
         let tmpDir = FileManager.default.temporaryDirectory
-        let url = tmpDir.appendingPathComponent(filename)
+        let url = tmpDir.appendingPathComponent(safeFileName(filename))
         try data.write(to: url)
         return url
+    }
+
+    /// A file name without path separators or other characters the Files app
+    /// or a share target chokes on (player names are free text: "A/B", "Jan: 1")
+    static func safeFileName(_ name: String) -> String {
+        let forbidden = CharacterSet(charactersIn: "/\\:?%*|\"<>").union(.newlines).union(.controlCharacters)
+        let cleaned = name.components(separatedBy: forbidden).joined(separator: "-")
+            .trimmingCharacters(in: .whitespaces)
+        return cleaned.isEmpty || cleaned.hasPrefix(".") ? "export" + cleaned : cleaned
     }
 
     // MARK: - iCloud Backup
@@ -342,13 +351,20 @@ enum ExportService {
         }
         let data = try exportFullBackup(players: players, matches: matches, standaloneGames: standaloneGames,
                                         badgeAwards: badgeAwards, refereeMatches: refereeMatches)
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd-HHmmss"
-        let filename = "squash-backup-\(formatter.string(from: Date())).json"
-        let fileURL = dir.appendingPathComponent(filename)
+        return try writeBackup(data, to: dir)
+    }
+
+    /// Writes a finished backup into the iCloud folder and drops the oldest
+    /// dated ones (Core's `AutoBackupPlan`, the same rule as Android). Touches
+    /// no SwiftData, so it can run off the main thread.
+    nonisolated static func writeBackup(_ data: Data, to dir: URL, now: Date = Date()) throws -> URL {
+        let fileURL = dir.appendingPathComponent(AutoBackupPlan.fileName(at: now))
         try data.write(to: fileURL, options: .atomic)
         try data.write(to: dir.appendingPathComponent("latest-backup.json"), options: .atomic)
-        rotateBackups(in: dir, keeping: 7)
+        let names = (try? FileManager.default.contentsOfDirectory(atPath: dir.path)) ?? []
+        for expired in AutoBackupPlan.filesToDelete(names) {
+            try? FileManager.default.removeItem(at: dir.appendingPathComponent(expired))
+        }
         return fileURL
     }
 
@@ -356,21 +372,6 @@ enum ExportService {
 
     private static func decodeAndValidateBackup(_ data: Data) throws -> FullBackup {
         try BackupCodec.decode(data)
-    }
-
-    private static func rotateBackups(in directory: URL, keeping limit: Int) {
-        guard let files = try? FileManager.default.contentsOfDirectory(
-            at: directory,
-            includingPropertiesForKeys: nil
-        ) else { return }
-
-        let datedBackups = files
-            .filter { $0.lastPathComponent.hasPrefix("squash-backup-") && $0.pathExtension == "json" }
-            .sorted { $0.lastPathComponent > $1.lastPathComponent }
-
-        for expired in datedBackups.dropFirst(limit) {
-            try? FileManager.default.removeItem(at: expired)
-        }
     }
 
     private static func matchExportData(from match: SavedMatch) -> MatchExportData {

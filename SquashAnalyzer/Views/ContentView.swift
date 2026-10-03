@@ -24,8 +24,6 @@ struct ContentView: View {
     @State private var showingCancelConfirm = false
     @State private var showingResultCompletion = false
     @State private var showingLetSelector = false
-    @State private var rallyElapsedTime: TimeInterval = 0
-    @State private var rallyTimer: Timer? = nil
     @State private var persistenceErrorMessage: String?
     @State private var showingPersistenceError = false
     @State private var showingStartupPersistenceWarning = false
@@ -185,7 +183,6 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.3), value: showingResultCompletion)
         .animation(.easeInOut(duration: 0.25), value: currentGame.scoringStep)
         .onAppear {
-            startRallyTimer()
             #if DEBUG
             ScreenshotScenario.importTeamIfRequested(context: modelContext)
             if let scenario = ScreenshotScenario.current {
@@ -196,26 +193,14 @@ struct ContentView: View {
             TeamImportService.addSamplePlayersIfNew(context: modelContext)
             showingStartupPersistenceWarning = startupPersistenceWarning != nil
         }
-        .onDisappear {
-            stopRallyTimer()
-        }
         .onChange(of: currentGame.points.count) { _, _ in
-            // Reset timer when a point is scored
-            rallyElapsedTime = 0
             persistMatch()
         }
         .onChange(of: currentGame.lets.count) { _, _ in
-            // Reset timer when a let is called
-            rallyElapsedTime = 0
             persistMatch()
         }
         .onChange(of: showingSetup) { _, isShowing in
-            if isShowing {
-                stopRallyTimer()
-            } else {
-                startRallyTimer()
-                if !showingHistory { persistMatch() }
-            }
+            if !isShowing && !showingHistory { persistMatch() }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .inactive || phase == .background {
@@ -396,7 +381,7 @@ struct ContentView: View {
 
                 // Rally timer and instruction text
                 HStack(spacing: 8) {
-                    RallyTimerView(elapsedTime: rallyElapsedTime)
+                    RallyTimerView(game: currentGame)
                         .opacity(currentGame.isGameOver || showingSetup ? 0 : 1)
 
                     Spacer(minLength: 0)
@@ -408,7 +393,7 @@ struct ContentView: View {
                     Spacer(minLength: 0)
 
                     // Balances the timer so the instruction stays centred
-                    RallyTimerView(elapsedTime: rallyElapsedTime)
+                    RallyTimerView(game: currentGame)
                         .hidden()
                 }
                 .padding(.horizontal, 24)
@@ -632,7 +617,6 @@ struct ContentView: View {
             withAnimation(.easeInOut(duration: 0.2)) {
                 currentGame.start()
             }
-            startRallyTimer()
             LiveShareSync.send(matchId: match.id, snapshot: match.liveSnapshot())
         }) {
             HStack(spacing: 10) {
@@ -753,34 +737,23 @@ struct ContentView: View {
         }
         volley = false
     }
-
-    // MARK: - Rally Timer
-    private func startRallyTimer() {
-        stopRallyTimer()
-        rallyElapsedTime = currentGame.rallySeconds()
-        rallyTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            rallyElapsedTime = currentGame.rallySeconds()
-        }
-    }
-
-    private func stopRallyTimer() {
-        rallyTimer?.invalidate()
-        rallyTimer = nil
-    }
 }
 
 // MARK: - Rally Timer View
+/// Time since the last point or let. A TimelineView redraws only this, once a
+/// second, instead of a Timer that re-rendered the whole coach screen (T21).
 struct RallyTimerView: View {
-    let elapsedTime: TimeInterval
-
-    private var formattedTime: String {
-        let minutes = Int(elapsedTime) / 60
-        let seconds = Int(elapsedTime) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
+    let game: Game
 
     var body: some View {
-        HStack(spacing: 6) {
+        TimelineView(.periodic(from: .now, by: 1.0)) { context in
+            clock(game.rallySeconds(at: context.date))
+        }
+    }
+
+    private func clock(_ elapsedTime: TimeInterval) -> some View {
+        let formattedTime = String(format: "%02d:%02d", Int(elapsedTime) / 60, Int(elapsedTime) % 60)
+        return HStack(spacing: 6) {
             Image(systemName: "timer")
                 .font(.system(size: 12))
                 .foregroundColor(AppColors.accentGold.opacity(0.5))

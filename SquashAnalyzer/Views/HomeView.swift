@@ -29,6 +29,8 @@ struct HomeView: View {
     @State private var resumableReferee: RefereeMatch? = nil
     /// An unfinished coach match found when the Coach tile is tapped (as on Android)
     @State private var resumableCoach: Match? = nil
+    /// "Nieuwe wedstrijd" could not put the old match away (as ContentView shows it)
+    @State private var saveErrorMessage: String? = nil
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
@@ -73,12 +75,21 @@ struct HomeView: View {
             Button("Hervatten") { onResumeCoach?(unfinished) }
             Button("Nieuwe wedstrijd", role: .destructive) {
                 let repository = SwiftDataMatchRepository(context: modelContext)
-                if unfinished.stopAction == .discard { try? repository.delete(unfinished) } else { try? repository.markAbandoned(unfinished) }
-                withAnimation(.easeInOut(duration: 0.2)) { startMode = .coach }
+                do {
+                    if unfinished.stopAction == .discard { try repository.delete(unfinished) } else { try repository.markAbandoned(unfinished) }
+                    withAnimation(.easeInOut(duration: 0.2)) { startMode = .coach }
+                } catch {
+                    saveErrorMessage = "De vorige wedstrijd kon niet worden opgeslagen als incompleet: \(error.localizedDescription)"
+                }
             }
             Button("Annuleren", role: .cancel) {}
         } message: { unfinished in
             Text(unfinished.resumeMessage)
+        }
+        .alert("Opslaan mislukt", isPresented: Binding(get: { saveErrorMessage != nil }, set: { if !$0 { saveErrorMessage = nil } })) {
+            Button("OK") {}
+        } message: {
+            Text(saveErrorMessage ?? "")
         }
         #if DEBUG
         .onAppear {

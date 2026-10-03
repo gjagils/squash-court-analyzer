@@ -44,7 +44,17 @@ Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `ma
   uitgespeeld.
 - Na het hervatten klopt de serveerkant (box) weer.
 - Live meekijken werkte niet op Android.
+- Android: een afgesloten of weggegooide wedstrijd kon terugkomen als er net nog
+  een punt werd opgeslagen; afsluiten wacht nu op die opslag.
 - Het deelplaatje had een doorzichtige rand.
+- iPhone: de wekelijkse iCloud-back-up schrijft op de achtergrond (met extra tijd
+  van iOS) in plaats van de app even te laten haperen bij wegschakelen.
+- iPhone: lukt het bewaren van de API key niet, dan zegt de app dat (in plaats van
+  "Opgeslagen!"); "Nieuwe wedstrijd" meldt het als de oude niet kon worden
+  opgeslagen; een beschadigd bestand van een lopende scheidsrechterwedstrijd wordt
+  opgeruimd; exportbestanden krijgen een veilige naam (ook met / of : in een naam).
+- VoiceOver/TalkBack: STROKE-knoppen noemen de speler, de uitslag wordt als één
+  zin voorgelezen, de verborgen L/R-keuze van de ontvanger wordt overgeslagen.
 
 ### Onder de motorkap
 - SwiftData V7 (`SavedPoint.errorKind`), Room 9. Back-upformaat 3 alleen als er
@@ -53,6 +63,9 @@ Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `ma
 - Live-server (`live.squashanalyzer.com`) met limieten per IP en op kijkers.
 - Kaartlinks begrensd op lengte en uitpaklimiet (bescherming tegen zip-bombs).
 - Opruiming: dode code, lege bestanden en publieke tuples weg (T15, T16).
+- Scoreschermen tekenen niet meer elke seconde helemaal opnieuw (alleen de klok
+  tikt); badges één keer berekend; spelerslijst telt badges in één keer (T18).
+- Eén geteste opslaglogica voor coach en scheidsrechter (`SessionSaver`, T19).
 
 ### Nog doen vóór de upload
 - [ ] Testen op Gerd-Jans iPhone en de Android-telefoon (ook met vergrote tekst).

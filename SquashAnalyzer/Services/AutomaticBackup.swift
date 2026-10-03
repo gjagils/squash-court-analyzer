@@ -1,12 +1,13 @@
 import Foundation
 import SwiftData
+import UIKit
 import SquashAnalyzerCore
 
 /// Weekly automatic backup to iCloud Drive, the iOS side of the automatic
 /// backups Android writes into a chosen folder. Same rules (Core's
 /// `AutoBackupPlan`): once a week, when the app goes to the background, so a
 /// Friday evening's matches are in it; the iCloud folder keeps the newest 7
-/// (`ExportService.saveBackupToiCloud` rotates). On by default; skipped
+/// (`ExportService.writeBackup` rotates). On by default; skipped
 /// quietly without iCloud Drive.
 @MainActor
 enum AutomaticBackup {
@@ -21,19 +22,37 @@ enum AutomaticBackup {
         UserDefaults.standard.object(forKey: lastKey) as? Date
     }
 
+    /// Called when the app goes to the background. The data is gathered on
+    /// the main thread (SwiftData), the file is written off it, with a
+    /// background task so iOS gives it time to finish.
     static func runIfDue(context: ModelContext, now: Date = Date()) {
-        guard isEnabled, AutoBackupPlan.isDue(lastBackup: lastBackup, now: now) else { return }
+        guard isEnabled, AutoBackupPlan.isDue(lastBackup: lastBackup, now: now),
+              let dir = ExportService.iCloudDirectory else { return }
+        let data: Data
         do {
-            _ = try ExportService.saveBackupToiCloud(
+            data = try ExportService.exportFullBackup(
                 players: try context.fetch(FetchDescriptor<SavedPlayer>()),
                 matches: try context.fetch(FetchDescriptor<SavedMatch>()),
                 standaloneGames: try context.fetch(FetchDescriptor<SavedGame>(predicate: #Predicate { $0.match == nil })),
                 badgeAwards: try context.fetch(FetchDescriptor<SavedBadgeAward>()),
                 refereeMatches: try context.fetch(FetchDescriptor<SavedRefereeMatch>())
             )
-            UserDefaults.standard.set(now, forKey: lastKey)
         } catch {
-            // No iCloud Drive, or writing failed: tried again the next time
+            return // tried again the next time
+        }
+        let application = UIApplication.shared
+        var taskId = UIBackgroundTaskIdentifier.invalid
+        taskId = application.beginBackgroundTask(withName: "Automatische back-up") {
+            application.endBackgroundTask(taskId)
+            taskId = .invalid
+        }
+        Task.detached(priority: .utility) {
+            let written = (try? ExportService.writeBackup(data, to: dir, now: now)) != nil
+            await MainActor.run {
+                // No iCloud Drive, or writing failed: tried again the next time
+                if written { UserDefaults.standard.set(now, forKey: lastKey) }
+                if taskId != .invalid { application.endBackgroundTask(taskId) }
+            }
         }
     }
 }

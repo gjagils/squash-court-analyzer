@@ -13,6 +13,7 @@ struct SettingsView: View {
     @State private var apiKey: String = ""
     @State private var showingAPIKey = false
     @State private var showingSaveConfirmation = false
+    @State private var keySaveFailed = false
     @AppStorage(CoachInputSettings.teamURLKey) private var teamURL = ""
     @State private var teamSaveMessage: String?
     /// What is typed; only a valid link is saved, cleaned up (as on Android)
@@ -55,6 +56,11 @@ struct SettingsView: View {
         .onAppear {
             apiKey = APIKeyManager.shared.openAIAPIKey ?? ""
             teamDraft = teamURL
+        }
+        .alert("API key niet opgeslagen", isPresented: $keySaveFailed) {
+            Button("OK") {}
+        } message: {
+            Text("De sleutel kon niet in de iPhone-sleutelhanger worden bewaard. Probeer het opnieuw.")
         }
     }
 
@@ -357,7 +363,10 @@ struct SettingsView: View {
 
     // MARK: - Actions
     private func saveAPIKey() {
-        APIKeyManager.shared.openAIAPIKey = apiKey.isEmpty ? nil : apiKey
+        guard APIKeyManager.shared.setOpenAIKey(apiKey.isEmpty ? nil : apiKey) else {
+            keySaveFailed = true
+            return
+        }
         showingSaveConfirmation = true
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {

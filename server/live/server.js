@@ -253,8 +253,8 @@ function createLiveServer(options = {}) {
     const session = sessions.get(id);
     const title = session
       ? `🔴 Live: ${session.snapshot.p1} – ${session.snapshot.p2}`
-      : 'Squash Analyzer · live';
-    const description = session ? 'Volg de wedstrijd live in Squash Analyzer' : 'Deze livewedstrijd is afgelopen.';
+      : 'SquashAnalyzer · live';
+    const description = session ? 'Volg de wedstrijd live in SquashAnalyzer' : 'Deze livewedstrijd is afgelopen.';
     return viewerPage
       .replaceAll('{{TITLE}}', escapeHtml(title))
       .replaceAll('{{DESCRIPTION}}', escapeHtml(description))

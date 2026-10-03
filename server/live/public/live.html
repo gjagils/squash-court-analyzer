@@ -13,47 +13,52 @@
 <meta name="theme-color" content="#000000">
 <style>
   :root {
-    --bg: #000000; --card: #161410; --gold: #E8902A; --orange: #F28D26; --blue: #7F9AA8;
-    --text-1: #F2EFEA; --text-2: #B3AFA8; --text-3: #807C75; --border: rgba(255,255,255,0.08); --live: #E5484D;
+    /* Huisstijl "Clubhuis" (docs/style/README.md): zwart, oranje accent, staalblauw voor speler 2 */
+    --bg: #000000; --card: #180E04; --line: rgba(242,140,38,0.35); --gold: #F28C26; --orange: #F28C26;
+    --blue: #59738C; --blue-light: #8094AD;
+    --text-1: #F2EDE6; --text-2: #B3ADA6; --text-3: #8C8680; --border: rgba(255,255,255,0.09); --live: #E5484D;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg); color: var(--text-1); min-height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased; display: flex; justify-content: center; padding: 20px 16px 40px;
   }
   main { width: 100%; max-width: 440px; }
   header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-  .brand { font-size: 12px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text-2); }
-  .brand span { color: var(--gold); }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: var(--text-1);
+           text-decoration: none; }
+  .brand img { width: 32px; height: 32px; display: block; }
   .badge { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; padding: 5px 10px; border-radius: 999px;
            border: 1px solid var(--border); color: var(--text-2); text-transform: uppercase; }
   .badge.live { color: #fff; background: var(--live); border-color: var(--live); }
   .badge.live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #fff;
                         margin-right: 6px; vertical-align: 1px; animation: pulse 1.6s ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: 0.3; } }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
   .status { text-align: center; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
-            color: var(--gold); margin-bottom: 14px; min-height: 18px; }
-  .row { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 14px; padding: 10px 0; }
-  .avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; display: block;
+            color: var(--gold); margin-bottom: 10px; min-height: 18px; }
+  .row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 10px 0; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block;
             border: 2px solid var(--border); background: var(--card); }
   .p1 .avatar { border-color: var(--orange); } .p2 .avatar { border-color: var(--blue); }
-  .initial { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  .initial { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
              font-size: 18px; font-weight: 700; border: 2px solid var(--border); }
-  .p1 .initial { color: var(--orange); border-color: var(--orange); } .p2 .initial { color: var(--blue); border-color: var(--blue); }
+  .p1 .initial { color: var(--orange); border-color: var(--orange); } .p2 .initial { color: var(--blue-light); border-color: var(--blue); }
   .row + .row { border-top: 1px solid var(--border); }
-  .name { font-size: 20px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .p1 .name { color: var(--orange); } .p2 .name { color: var(--blue); }
-  .serve { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); margin-left: 8px;
-           vertical-align: 3px; visibility: hidden; }
-  .serving .serve { visibility: visible; }
-  .side { font-size: 11px; color: var(--text-3); margin-left: 4px; visibility: hidden; }
-  .serving .side { visibility: visible; }
+  /* A long name may use two lines; who serves and from which side sits below it in small type */
+  .name { font-size: 20px; font-weight: 600; line-height: 1.2; overflow-wrap: break-word; hyphens: auto;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .p1 .name { color: var(--orange); } .p2 .name { color: var(--blue-light); }
+  .serveline { display: flex; align-items: center; gap: 6px; margin-top: 3px; font-size: 12px; color: var(--text-2);
+               white-space: nowrap; visibility: hidden; }
+  .serving .serveline { visibility: visible; }
+  .serve { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .p2 .serve { background: var(--blue-light); }
   .games { font-size: 15px; font-weight: 700; color: var(--text-2); min-width: 22px; text-align: center;
-           border: 1px solid var(--border); border-radius: 8px; padding: 4px 6px; }
-  .points { font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 64px; text-align: right; }
-  .winner .name > span:first-child::after { content: " 🏆"; }
+           border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; }
+  .points { font-size: 42px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 50px; text-align: right; }
+  .winner .name::after { content: " 🏆"; }
   .history { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
   .chip { font-size: 13px; color: var(--text-2); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px;
           font-variant-numeric: tabular-nums; }
@@ -63,13 +68,16 @@
   .notice strong { color: var(--text-1); }
   footer { margin-top: 26px; text-align: center; font-size: 12px; color: var(--text-3); line-height: 1.6; }
   footer a { color: var(--gold); text-decoration: none; }
+  @media (max-width: 360px) {
+    .card { padding: 14px; } .row { gap: 8px; } .name { font-size: 18px; } .points { font-size: 38px; min-width: 44px; }
+  }
   [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <div class="brand">Squash <span>Analyzer</span></div>
+    <a class="brand" href="https://squashanalyzer.com"><img src="/logo.png" alt="">SquashAnalyzer</a>
     <div class="badge" id="badge">Verbinden…</div>
   </header>
 
@@ -77,13 +85,13 @@
     <div class="status" id="status"></div>
     <div class="row p1" id="row1">
       <div><img class="avatar" id="photo1" alt="" hidden><div class="initial" id="initial1" aria-hidden="true"></div></div>
-      <div class="name"><span id="name1"></span><span class="serve" aria-hidden="true"></span><span class="side" id="side1"></span></div>
+      <div><div class="name" id="name1"></div><div class="serveline"><span class="serve" aria-hidden="true"></span><span id="side1"></span></div></div>
       <div class="games" id="games1" title="Games">0</div>
       <div class="points" id="points1">0</div>
     </div>
     <div class="row p2" id="row2">
       <div><img class="avatar" id="photo2" alt="" hidden><div class="initial" id="initial2" aria-hidden="true"></div></div>
-      <div class="name"><span id="name2"></span><span class="serve" aria-hidden="true"></span><span class="side" id="side2"></span></div>
+      <div><div class="name" id="name2"></div><div class="serveline"><span class="serve" aria-hidden="true"></span><span id="side2"></span></div></div>
       <div class="games" id="games2" title="Games">0</div>
       <div class="points" id="points2">0</div>
     </div>
@@ -95,7 +103,7 @@
   <p class="notice" id="notice" hidden></p>
 
   <footer>
-    Live gedeeld vanuit <a href="https://squashanalyzer.com">Squash Analyzer</a>.<br>
+    Live gedeeld vanuit <a href="https://squashanalyzer.com">SquashAnalyzer</a>.<br>
     Alleen voornamen, de stand en eventueel een kleine spelersfoto;<br>2 uur na de wedstrijd wordt alles gewist.
   </footer>
 </main>
@@ -151,8 +159,8 @@
     }
     $('row1').classList.toggle('serving', live && s.server === 1);
     $('row2').classList.toggle('serving', live && s.server === 2);
-    $('side1').textContent = s.side === 'L' ? 'links' : 'rechts';
-    $('side2').textContent = s.side === 'L' ? 'links' : 'rechts';
+    $('side1').textContent = 'serveert ' + (s.side === 'L' ? 'links' : 'rechts');
+    $('side2').textContent = 'serveert ' + (s.side === 'L' ? 'links' : 'rechts');
     $('row1').classList.toggle('winner', s.winner === 1);
     $('row2').classList.toggle('winner', s.winner === 2);
     var gameNumber = s.gamesWon[0] + s.gamesWon[1] + (s.status === 'playing' || s.status === 'warmup' ? 1 : 0);

@@ -51,7 +51,7 @@ public class Match: Identifiable {
 
     /// Games needed to win
     public var gamesToWin: Int {
-        (bestOf / 2) + 1 // 3 for best of 5
+        MatchStand.gamesToWin(bestOf: bestOf) // 3 for best of 5
     }
 
     /// Number of the first tracked game (1 unless the match was picked up later)
@@ -91,14 +91,11 @@ public class Match: Identifiable {
         player2GamesBefore + games.filter { $0.winner == .player2 }.count + player2GamesAfter
     }
 
-    public var isMatchOver: Bool {
-        player1GamesWon >= gamesToWin || player2GamesWon >= gamesToWin
-    }
+    private var stand: MatchStand { MatchStand(bestOf: bestOf, player1Games: player1GamesWon, player2Games: player2GamesWon) }
 
-    public var matchWinner: Player? {
-        guard isMatchOver else { return nil }
-        return player1GamesWon > player2GamesWon ? .player1 : .player2
-    }
+    public var isMatchOver: Bool { stand.isOver }
+
+    public var matchWinner: Player? { stand.winner }
 
     public var completedGames: [Game] {
         games.filter { $0.isGameOver }

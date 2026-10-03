@@ -303,12 +303,10 @@ public class Game: Identifiable {
         // Service rule: the server who wins a rally keeps serving from the other box.
         // On a hand-out the new server starts from their preferred box (right unless
         // Links/Rechts was tapped for that player earlier in the match).
-        if player == currentServer {
-            serverSide = serverSide.opposite
-        } else {
-            currentServer = player
-            serverSide = handOutSide(for: player)
-        }
+        let next = ScoringEngine().service(afterRallyWonBy: player, from: ServiceState(server: currentServer, side: serverSide),
+                                           handOutSide: handOutSide(for: player))
+        currentServer = next.server
+        serverSide = next.side
 
         // Clear selection after scoring
         selectedPlayer = nil
@@ -442,10 +440,17 @@ public class Game: Identifiable {
     }
 
     /// Bring the service state in line with the recorded points, e.g. after a
-    /// game is restored from the store: the winner of the last rally serves next.
+    /// game is restored from the store: the rallies are played again from the
+    /// starting server, so a server who won rallies is in the right box (not
+    /// back in their hand-out box).
     public func restoreServiceState() {
-        currentServer = points.last?.scorer ?? startingServer
-        serverSide = handOutSide(for: currentServer)
+        var scorers: [Player] = []
+        for point in points { scorers.append(point.scorer) }
+        let state = ScoringEngine().service(replaying: scorers,
+                                            from: ServiceState(server: startingServer, side: handOutSide(for: startingServer)),
+                                            handOutSide: { player in self.handOutSide(for: player) })
+        currentServer = state.server
+        serverSide = state.side
     }
 
     // MARK: - Analysis helpers

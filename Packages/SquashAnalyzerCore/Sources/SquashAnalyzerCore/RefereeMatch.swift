@@ -131,15 +131,13 @@ public class RefereeMatch: Identifiable {
 
     public var player1GamesWon: Int { player1GamesBefore + completedGames.filter { $0.winner == .player1 }.count }
     public var player2GamesWon: Int { player2GamesBefore + completedGames.filter { $0.winner == .player2 }.count }
-    public var gamesToWin: Int { (bestOf / 2) + 1 }
+    public var gamesToWin: Int { MatchStand.gamesToWin(bestOf: bestOf) }
     public var firstGameNumber: Int { 1 + player1GamesBefore + player2GamesBefore }
     public var player1TotalGames: Int { player1GamesWon + (currentGameWinner == .player1 ? 1 : 0) }
     public var player2TotalGames: Int { player2GamesWon + (currentGameWinner == .player2 ? 1 : 0) }
-    public var isMatchOver: Bool { player1TotalGames >= gamesToWin || player2TotalGames >= gamesToWin }
-    public var matchWinner: Player? {
-        guard isMatchOver else { return nil }
-        return player1TotalGames > player2TotalGames ? .player1 : .player2
-    }
+    private var stand: MatchStand { MatchStand(bestOf: bestOf, player1Games: player1TotalGames, player2Games: player2TotalGames) }
+    public var isMatchOver: Bool { stand.isOver }
+    public var matchWinner: Player? { stand.winner }
     public var allGameResults: [(number: Int, p1: Int, p2: Int, winner: Player)] {
         let done = completedGames.map { (number: $0.number, p1: $0.player1Score, p2: $0.player2Score, winner: $0.winner) }
         if let w = currentGameWinner { return done + [(number: currentGameNumber, p1: player1Score, p2: player2Score, winner: w)] }
@@ -163,12 +161,10 @@ public class RefereeMatch: Identifiable {
         undoStack.append(.point(prevServer: currentServer, prevSide: serverSide, prevP1Score: player1Score, prevP2Score: player2Score, prevLastPointAt: lastPointAt))
         if scorer == .player1 { player1Score += 1 } else { player2Score += 1 }
         lastPointAt = Date()
-        if scorer == currentServer {
-            serverSide = serverSide.opposite
-        } else {
-            currentServer = scorer
-            serverSide = handOutSide(for: scorer)
-        }
+        let next = ScoringEngine().service(afterRallyWonBy: scorer, from: ServiceState(server: currentServer, side: serverSide),
+                                           handOutSide: handOutSide(for: scorer))
+        currentServer = next.server
+        serverSide = next.side
         let scorerScore = scorer == .player1 ? player1Score : player2Score
         pointHistory.append(RefereePointEntry(scorer: scorer, score: scorerScore, side: serverSide, isStroke: isStroke))
         lastCallText = nil

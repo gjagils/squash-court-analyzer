@@ -55,10 +55,7 @@ public struct MatchHistorySummary: Identifiable, Equatable, Sendable {
 
     /// The match winner, when one side reached the games needed
     public var winner: Player? {
-        let needed = bestOf / 2 + 1
-        if player1Games >= needed { return Player.player1 }
-        if player2Games >= needed { return Player.player2 }
-        return nil
+        MatchStand(bestOf: bestOf, player1Games: player1Games, player2Games: player2Games).winner
     }
 
     public var winnerName: String? {

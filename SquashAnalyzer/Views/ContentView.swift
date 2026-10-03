@@ -36,7 +36,6 @@ struct ContentView: View {
     /// "Uit de lucht" for the point being entered; off again after every point
     @State private var volley = false
     /// Down / Out / Service / Grond for an unforced error; cleared after every point
-    @State private var errorKind: ErrorKind? = nil
     /// The live link to share (WhatsApp), see LiveShareButton
     @State private var liveShareItems: ShareItemsWrapper? = nil
 
@@ -490,6 +489,10 @@ struct ContentView: View {
                 Text("Hoe werd het punt gewonnen?")
                     .font(AppFonts.body(14))
                     .foregroundColor(currentGame.selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
+            case .selectErrorKind:
+                Text("Wat voor fout was het?")
+                    .font(AppFonts.body(14))
+                    .foregroundColor(currentGame.selectedPlayer == .player1 ? AppColors.warmOrange : AppColors.steelBlue)
             case .selectZone:
                 Text("Tik op de baan waar het punt viel")
                     .font(AppFonts.body(14))
@@ -559,15 +562,21 @@ struct ContentView: View {
                 Spacer(minLength: 0)
                 ForEach(PointType.allCases) { type in
                     if !type.serverOnly || currentGame.selectedPlayer == currentGame.currentServer {
-                        if type == .unforcedError {
-                            // How it went wrong; the court is not asked for an unforced error
-                            ErrorKindToggle(selection: $errorKind,
-                                            available: currentGame.errorKindOptions(whenScoring: currentGame.selectedPlayer ?? .player1),
-                                            color: color)
-                                .padding(.top, 4)
-                        }
                         PointTypeButton(pointType: type, color: color, compact: true) { handleInlinePointType(type) }
                     }
+                }
+                cancelButton
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 24)
+            .transition(.opacity)
+        case .selectErrorKind:
+            // How the unforced error went wrong (shared with Android); no court
+            VStack(spacing: 12) {
+                Spacer(minLength: 0)
+                ErrorKindPicker(available: currentGame.errorKindOptions(whenScoring: currentGame.selectedPlayer ?? .player1),
+                                color: color) { kind in
+                    handleErrorKind(kind)
                 }
                 cancelButton
                 Spacer(minLength: 0)
@@ -655,21 +664,23 @@ struct ContentView: View {
             } else {
                 currentGame.selectPlayer(player)
             }
-            errorKind = nil
         }
     }
 
     private func handleInlinePointType(_ pointType: PointType) {
-        let kind = pointType == .unforcedError ? errorKind : nil
         withAnimation(.easeInOut(duration: 0.2)) {
-            currentGame.selectPointType(pointType, errorKind: kind)
+            currentGame.selectPointType(pointType)
         }
-        errorKind = nil
+    }
+
+    private func handleErrorKind(_ kind: ErrorKind?) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            currentGame.selectErrorKind(kind)
+        }
     }
 
     private func cancelInlinePoint() {
         volley = false
-        errorKind = nil
         withAnimation(.easeInOut(duration: 0.2)) {
             currentGame.clearSelection()
         }

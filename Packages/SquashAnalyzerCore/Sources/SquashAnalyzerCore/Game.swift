@@ -94,6 +94,8 @@ public class Game: Identifiable {
             return .selectPlayer
         } else if selectedPointType == nil {
             return .selectPointType
+        } else if selectedPointType == PointType.unforcedError {
+            return .selectErrorKind
         } else if let type = selectedPointType, needsZone(type), selectedZone == nil {
             return .selectZone
         } else {
@@ -104,6 +106,8 @@ public class Game: Identifiable {
     public enum ScoringStep {
         case selectPlayer
         case selectPointType
+        /// After "Unforced error": Down, Out, Service or Grond (or not known)
+        case selectErrorKind
         case selectZone
         case selectShot
     }
@@ -140,15 +144,25 @@ public class Game: Identifiable {
         selectedZone = nil
         pendingErrorKind = pointType == PointType.unforcedError ? errorKind : nil
 
-        // Unforced error: no zone or shot (the kind of error says enough), score immediately.
+        // Unforced error: no zone or shot; the next step asks what kind of error
+        // it was (`selectErrorKind`), unless the kind is already given.
         // Service point: the ball landed in the receiver's back quarter, opposite the
         // service box, so the zone is known without a tap.
-        if pointType == .servicePoint {
+        if pointType == PointType.unforcedError {
+            if errorKind != nil { addPoint(shotType: nil) }
+        } else if pointType == .servicePoint {
             selectedZone = Self.serviceLandingZone(from: serverSide)
             addPoint(shotType: nil)
         } else if !needsZone(pointType) {
             addPoint(shotType: nil)
         }
+    }
+
+    /// The kind of unforced error (nil = not known): scores the point
+    public func selectErrorKind(_ kind: ErrorKind?) {
+        guard selectedPlayer != nil, selectedPointType == PointType.unforcedError else { return }
+        pendingErrorKind = kind
+        addPoint(shotType: nil)
     }
 
     /// Whether this point type asks for a zone (an unforced error never does:

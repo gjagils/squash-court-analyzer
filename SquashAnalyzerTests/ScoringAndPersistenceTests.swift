@@ -225,10 +225,12 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertNil(game.bestShotType(for: .player1))
     }
 
-    func testUnforcedErrorScoresImmediately() {
+    func testUnforcedErrorScoresOnceTheKindIsPicked() {
         let game = Game()
         game.selectPlayer(.player1)
         game.selectPointType(.unforcedError)
+        XCTAssertEqual(game.scoringStep, .selectErrorKind)
+        game.selectErrorKind(nil)
         XCTAssertEqual(game.player1Score, 1)
         XCTAssertEqual(game.points.last?.pointType, .unforcedError)
         XCTAssertNil(game.points.last?.zone)

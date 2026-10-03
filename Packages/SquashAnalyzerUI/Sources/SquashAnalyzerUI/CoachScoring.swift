@@ -262,7 +262,6 @@ public struct CoachScoringView: View {
     /// "Uit de lucht" for the point being entered; off again after every point
     @State private var volley = false
     /// Down / Out / Service / Grond for an unforced error; cleared after every point
-    @State private var errorKind: ErrorKind? = nil
 
     public init(match: Match, aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil,
                 photos: [String: Data] = [:],
@@ -421,6 +420,10 @@ public struct CoachScoringView: View {
                     Text("Hoe werd het punt gewonnen?")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
+                case .selectErrorKind:
+                    Text("Wat voor fout was het?")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(playerColor)
                 case .selectZone:
                     Text("Tik op de baan waar het punt viel")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
@@ -457,17 +460,22 @@ public struct CoachScoringView: View {
                 Spacer(minLength: 0)
                 ForEach(PointType.allCases) { type in
                     if !type.serverOnly || game.selectedPlayer == game.currentServer {
-                        if type == PointType.unforcedError {
-                            // How it went wrong; the court is not asked for an unforced error
-                            ErrorKindToggle(selection: $errorKind,
-                                            available: game.errorKindOptions(whenScoring: game.selectedPlayer ?? Player.player1),
-                                            color: playerColor)
-                                .padding(.top, 4)
-                        }
                         PointTypeButton(pointType: type, color: playerColor, compact: true) {
                             selectPointType(type)
                         }
                     }
+                }
+                cancelButton
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 24)
+        case .selectErrorKind:
+            // How the unforced error went wrong; no court for an unforced error
+            VStack(spacing: 12) {
+                Spacer(minLength: 0)
+                ErrorKindPicker(available: game.errorKindOptions(whenScoring: game.selectedPlayer ?? Player.player1),
+                                color: playerColor) { kind in
+                    handleErrorKind(kind)
                 }
                 cancelButton
                 Spacer(minLength: 0)
@@ -558,7 +566,6 @@ public struct CoachScoringView: View {
         Button(action: {
             game.clearSelection()
             volley = false
-            errorKind = nil
         }) {
             Text("Annuleer")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -866,19 +873,23 @@ public struct CoachScoringView: View {
             } else {
                 game.selectPlayer(player)
             }
-            errorKind = nil
         }
     }
 
     private func selectPointType(_ pointType: PointType) {
-        let kind = pointType == PointType.unforcedError ? errorKind : nil
         withAnimation(.easeInOut(duration: 0.2)) {
-            game.selectPointType(pointType, errorKind: kind)
+            game.selectPointType(pointType)
         }
-        errorKind = nil
         if game.scoringStep == .selectPlayer {
             matchChanged()
         }
+    }
+
+    private func handleErrorKind(_ kind: ErrorKind?) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            game.selectErrorKind(kind)
+        }
+        matchChanged()
     }
 
     private func handleZoneTap(_ zone: CourtZone) {

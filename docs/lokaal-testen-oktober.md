@@ -8,7 +8,7 @@ Play-build: eerst lokaal testen.
 
 | Onderdeel | iOS | Android | Waar |
 |---|:-:|:-:|---|
-| Unforced error: schakelaar DOWN · OUT · SERVICE · GROND, geen vak meer | ✅ | ✅ | `ErrorKind` (Core), `ErrorKindToggle` (UI), `ContentView.scoreTapStage`, `CoachScoring` |
+| Unforced error: daarna kiezen uit DOWN · OUT · SERVICE · GROND (of Weet niet), geen vak meer | ✅ | ✅ | `ErrorKind`, `Game.selectErrorKind` (Core), `ErrorKindPicker` (UI), `ContentView.scoreTapStage`, `CoachScoring` |
 | Soort fout in analyse, lokaal advies, AI-prompt, gametekst | ✅ | ✅ | `Game.errorKindCounts`, `AdviceRules`, dashboards |
 | START GAME per game; zonder Start telt de eerste rally niet mee | ✅ | ✅ | `Game.start()`, `Point.isTimed` |
 | Opslag van de soort fout | SwiftData V7 | Room 9 | `PersistenceSchema`, `AppDatabase.MIGRATION_8_9` |
@@ -55,13 +55,15 @@ Er was geen Mac (Xcode, Skip) en geen Docker beschikbaar. Dus:
 ## Testlijst
 
 **Unforced error**
-- [ ] Tik op een score → Unforced error: boven de knop staat
-      DOWN · OUT · SERVICE · GROND
-- [ ] Kies er een → tik Unforced error → het punt telt meteen, zonder baan
+- [ ] Tik op een score → Unforced error → "Wat voor fout was het?" met vier
+      tegels DOWN · OUT · SERVICE · GROND en "Weet niet" (sinds 3 oktober;
+      eerst stond er een schakelaar boven de knop)
+- [ ] Kies er een → het punt telt meteen, zonder baan
 - [ ] Onder de knoppen: "Naam: Unforced error · Down"
-- [ ] SERVICE is grijs als de speler die de fout maakte niet serveerde
-- [ ] Niets kiezen werkt ook (soort onbekend)
-- [ ] Annuleer zet de keuze terug
+- [ ] SERVICE ("Servicefout tegenstander") is grijs als de speler die de fout
+      maakte niet serveerde
+- [ ] "Weet niet" telt het punt zonder soort
+- [ ] Annuleer gaat terug zonder punt
 - [ ] Analyse: "Eigen fouten: Down 2 · Out 1"; na 2+ keer dezelfde fout
       een advies ("…× in de tin: mik iets hoger…")
 

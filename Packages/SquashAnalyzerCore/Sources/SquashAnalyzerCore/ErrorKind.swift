@@ -41,7 +41,7 @@ public enum ErrorKind: String, CaseIterable, Identifiable, Codable, Sendable {
         switch self {
         case .down: return "Bal in de tin"
         case .outOfCourt: return "Bal buiten de baan of boven de outlijn"
-        case .service: return "Servicefout"
+        case .service: return "Servicefout tegenstander"
         case .viaFloor: return "Bal raakt eerst de vloer voor de frontwand"
         }
     }

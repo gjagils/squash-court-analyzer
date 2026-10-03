@@ -22,7 +22,35 @@ final class ErrorKindAndStartTests: XCTestCase {
 
         game.selectPlayer(Player.player1)
         game.selectPointType(PointType.unforcedError)
+        game.selectErrorKind(nil)
         XCTAssertNil(game.points.last?.errorKind, "nothing picked: unknown")
+    }
+
+    func testUnforcedErrorAsksTheKindNext() {
+        let game = Game()
+        game.selectPlayer(Player.player2)
+        game.selectPointType(PointType.unforcedError)
+        XCTAssertEqual(game.scoringStep, Game.ScoringStep.selectErrorKind)
+        XCTAssertEqual(game.player2Score, 0, "not scored before the kind is picked")
+
+        game.selectErrorKind(ErrorKind.outOfCourt)
+        XCTAssertEqual(game.player2Score, 1)
+        XCTAssertEqual(game.points.last?.errorKind, ErrorKind.outOfCourt)
+        XCTAssertEqual(game.scoringStep, Game.ScoringStep.selectPlayer)
+
+        // "Weet niet": scored without a kind
+        game.selectPlayer(Player.player1)
+        game.selectPointType(PointType.unforcedError)
+        game.selectErrorKind(nil)
+        XCTAssertEqual(game.player1Score, 1)
+        XCTAssertNil(game.points.last?.errorKind)
+
+        // Back from the kind step to the point types
+        game.selectPlayer(Player.player1)
+        game.selectPointType(PointType.unforcedError)
+        game.goBackStep()
+        XCTAssertEqual(game.scoringStep, Game.ScoringStep.selectPointType)
+        XCTAssertEqual(game.player1Score, 1)
     }
 
     func testOnlyUnforcedErrorsKeepAKind() {

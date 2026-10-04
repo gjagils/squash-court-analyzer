@@ -566,3 +566,4 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-ra
 .feat-icon .ms { font-size: 32px; }
 .tile h2 .icon .ms { font-size: 24px; }
 .btn-primary .ms { color: inherit; font-size: 20px; }
+.footer-links .ms { font-size: 16px; vertical-align: -3px; }

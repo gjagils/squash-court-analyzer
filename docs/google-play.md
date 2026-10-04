@@ -245,6 +245,25 @@ scripts/play_upload.py --notes release-notes/android-X-N.md --name "X (N)"
 
 Gedaan: 0.1 (1) met de hand, 0.2 (2) met het script.
 
+Sinds 4 oktober zet het script elke release op **internal**, **alpha** en
+**Google Group testers** tegelijk (`--tracks` om af te wijken).
+
+## Twee gesloten tests (sinds 2026-10-04)
+
+Play Console kiest per gesloten test óf mailinglijsten óf Google Groups. Daarom:
+
+- **Gesloten test - Alpha**: mailinglijsten AllInnSquash, Bombardino en overig.
+  Bestaande testers; nieuwe mensen kun je hier met de hand bijzetten.
+- **Gesloten test - Google Group testers**: leden van
+  [squashanalyzer@googlegroups.com](https://groups.google.com/g/squashanalyzer)
+  (zichtbaar voor iedereen, lid worden op aanvraag; Gerd-Jan keurt goed, de ledenlijst
+  is alleen voor beheerders zichtbaar). Landen Nederland en België, feedback
+  info@squashanalyzer.com. Welkomsttekst van de groep = de testersmail.
+- Beide gebruiken dezelfde opt-in-link
+  (https://play.google.com/apps/testing/com.squashanalyzer.android).
+- Testers van een gesloten test kun je niet via de API beheren ("upgraded to use
+  open or closed testing"); releases en landen wel.
+
 ## Store-vermelding met het script (sinds 2026-10-01)
 
 `scripts/play_listing.py` zet de Nederlandse store-vermelding vanuit de repo: teksten en

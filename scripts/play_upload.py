@@ -9,7 +9,12 @@ sent to Google's token endpoint; uploads use the short-lived access token.
 
     scripts/play_upload.py --check                      # can we reach the app?
     scripts/play_upload.py --bump                       # versionCode + 1 in build.gradle.kts
-    scripts/play_upload.py --aab PATH --notes FILE      # upload, release to internal testing
+    scripts/play_upload.py --aab PATH --notes FILE      # upload, release to all test tracks
+
+The release goes to internal testing and both closed tests: "alpha" (the
+mailing lists AllInnSquash, Bombardino, overig) and "Google Group testers"
+(members of squashanalyzer@googlegroups.com). Play Console allows either
+mailing lists or Google Groups per closed test, hence two (--tracks overrides).
 
 See docs/google-play.md ("Uploaden met het script").
 """
@@ -114,7 +119,10 @@ def bump() -> int:
     return new
 
 
-def upload(token: str, aab: str, notes: str, name: str) -> None:
+TRACKS = ["internal", "alpha", "Google Group testers"]
+
+
+def upload(token: str, aab: str, notes: str, name: str, tracks: list) -> None:
     edit = call(token, "POST", f"{API}/edits", body={})
     edit_id = edit["id"]
     with open(aab, "rb") as handle:
@@ -122,17 +130,18 @@ def upload(token: str, aab: str, notes: str, name: str) -> None:
                       data=handle.read(), content_type="application/octet-stream")
     code = bundle["versionCode"]
     print("Geüpload, versionCode", code)
-    call(token, "PUT", f"{API}/edits/{edit_id}/tracks/internal", body={
-        "track": "internal",
-        "releases": [{
-            "name": name or str(code),
-            "versionCodes": [str(code)],
-            "status": "completed",
-            "releaseNotes": [{"language": "nl-NL", "text": notes[:500]}],
-        }],
-    })
+    for track in tracks:
+        call(token, "PUT", f"{API}/edits/{edit_id}/tracks/{urllib.parse.quote(track)}", body={
+            "track": track,
+            "releases": [{
+                "name": name or str(code),
+                "versionCodes": [str(code)],
+                "status": "completed",
+                "releaseNotes": [{"language": "nl-NL", "text": notes[:500]}],
+            }],
+        })
     call(token, "POST", f"{API}/edits/{edit_id}:commit")
-    print("Uitgerold naar Internal testing.")
+    print("Uitgerold naar:", ", ".join(tracks))
 
 
 def main() -> None:
@@ -143,6 +152,7 @@ def main() -> None:
                                                       "build", "outputs", "bundle", "release", "app-release.aab"))
     parser.add_argument("--notes", help="file with the Dutch release notes (max 500 characters)")
     parser.add_argument("--name", help="release name, e.g. 0.2 (2)")
+    parser.add_argument("--tracks", default=",".join(TRACKS), help="comma-separated tracks (default: all test tracks)")
     args = parser.parse_args()
     if args.bump:
         bump()
@@ -155,7 +165,7 @@ def main() -> None:
         sys.exit("--notes is nodig")
     with open(args.notes) as handle:
         notes = handle.read().strip()
-    upload(token, args.aab, notes, args.name)
+    upload(token, args.aab, notes, args.name, [t.strip() for t in args.tracks.split(",") if t.strip()])
 
 
 if __name__ == "__main__":

@@ -257,8 +257,10 @@ Play Console kiest per gesloten test óf mailinglijsten óf Google Groups. Daaro
 - **Gesloten test - Google Group testers**: leden van
   [squashanalyzer@googlegroups.com](https://groups.google.com/g/squashanalyzer)
   (zichtbaar voor iedereen, lid worden op aanvraag; Gerd-Jan keurt goed, de ledenlijst
-  is alleen voor beheerders zichtbaar). Landen Nederland en België, feedback
-  info@squashanalyzer.com. Welkomsttekst van de groep = de testersmail.
+  is alleen voor beheerders zichtbaar), plus **testers-community@googlegroups.com**
+  (Testers Community, betaalde dienst voor de 12 testers × 14 dagen). Alle landen
+  (wereldwijd, voor de testers van die dienst), feedback info@squashanalyzer.com.
+  Welkomsttekst van de groep = de testersmail.
 - Beide gebruiken dezelfde opt-in-link
   (https://play.google.com/apps/testing/com.squashanalyzer.android).
 - Testers van een gesloten test kun je niet via de API beheren ("upgraded to use

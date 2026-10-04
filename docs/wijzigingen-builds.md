@@ -101,18 +101,23 @@ De live-server met foto's draait al in productie; de privacytekst staat online.
   lichter, gedempte tekst op badges/dashboard een fractie donkerder.
 
 ### Nog doen vóór de upload
-- [ ] Testen op Gerd-Jans iPhone en de Android-telefoon (ook met vergrote tekst).
-- [ ] Screenshots App Store en Play, en de handleiding op de website.
-- [ ] Releasenotes schrijven uit dit overzicht (`release-notes/`); `concept-volgende-build.md` is verouderd.
+- [x] Testen op Gerd-Jans iPhone en de Android-telefoon (ook met vergrote tekst).
+- [x] Screenshots App Store en Play, en de handleiding op de website.
+- [x] Releasenotes schrijven uit dit overzicht (`release-notes/`); `concept-volgende-build.md` is verouderd.
 - [x] Privacytekst (live meekijken: 2 uur bewaren, foto's) gepubliceerd (3 okt).
-- [ ] Website bijwerken (homepage, nieuws).
+- [x] Website bijwerken (homepage, nieuws).
 - [x] Google Play Gegevensveiligheid: Naam en Foto's toegevoegd (3 okt, via de API).
 
 ## Backlog (gemeld door Gerd-Jan, 3 oktober)
 
-- [ ] Livepagina: bij een lange naam (Bombardino) is "rechts" niet meer te lezen.
+- [x] Livepagina: bij een lange naam (Bombardino) is "rechts" niet meer te lezen.
       Een lange naam mag over 2 regels; daaronder in klein lettertype een
-      bolletje voor wie serveert en aan welke kant.
+      bolletje voor wie serveert en aan welke kant. Klaar 3 okt (server, geen
+      nieuwe build nodig), samen met de huisstijl op de livepagina.
+
+Verder na build 17 (alleen website en server, geen app-build):
+- Website en livepagina in de huisstijl Clubhuis; Material-iconen zoals in de app.
+- Oude TestFlight-builds verlopen automatisch (`scripts/testflight_expire_old.py`).
 
 ## iOS 2.2 build 16 en Android 0.3 (3), 1 oktober 2026
 

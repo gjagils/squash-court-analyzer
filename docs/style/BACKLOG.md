@@ -11,7 +11,7 @@ De homepage wordt in deze wijziging doorgevoerd voor iOS en Android. De overige 
 - [x] Behoud layout, afstanden, knoppen, kaartvormen en bestaande tekstgroottes; uitzondering: paginatitels hieronder.
 - [x] Maak paginatitels consistent 20 pt op iOS / 20 sp op Android, met gewone schrijfwijze: Coach, Scheidsrechter, Coach dashboard, Wedstrijden, Spelers, Alle badges, Mijn team, Instellingen. Laat dynamische speler- en badgenamen intact.
 - [x] Behoud functionele kleuren: oranje/blauw voor de spelers, koel blauw/indigo voor rechter scheidsrechteracties, rood voor STROKE/fouten, baan- en badgekleuren. Gebruik namen/labels naast kleur.
-- [ ] Controleer beide platformen met standaard en vergrote tekst. Test navigatie en bestaande flows; beperk de verandering tot presentatie.
+- [x] Controleer beide platformen met standaard en vergrote tekst (4 okt, simulator en emulator 1,3× en 2×). Afbrekende titels en knoppen opgelost; scoreschermen op Android begrensd tot 1,3×. iOS gebruikt grotendeels vaste lettergroottes en groeit dus nauwelijks mee; meegroeien op lijst- en menuschermen is een mogelijke latere stap.
 
 Uitgevoerd:
 - Schermachtergronden echt zwart: `AppBackground` (iOS) en `GlowBackground` (gedeeld) zonder oranje gloed; de achtergrondtokens in alle lokale paletten op `Color.black`.

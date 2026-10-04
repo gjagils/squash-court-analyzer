@@ -68,7 +68,8 @@ public class RefereeMatch: Identifiable {
     public var player1PreferredSide: ServerSide?
     public var player2PreferredSide: ServerSide?
     public var lastCallText: String?
-    public let matchStartedAt: Date
+    /// Moved forward when a stopped match is resumed (`skipClosedTime`)
+    public var matchStartedAt: Date
     public var gameStartedAt: Date
     public var lastPointAt: Date?
 
@@ -227,6 +228,16 @@ public class RefereeMatch: Identifiable {
     public var currentGameDuration: TimeInterval {
         let end = isGameOver ? (lastPointAt ?? now()) : now()
         return max(0.0, end.timeIntervalSince(gameStartedAt))
+    }
+
+    /// Resuming a match that was saved at `stoppedAt`: the match and game
+    /// clocks skip the time the app was closed and continue where they were,
+    /// instead of showing 970 minutes the next day.
+    public func skipClosedTime(since stoppedAt: Date) {
+        let away = now().timeIntervalSince(stoppedAt)
+        guard away > 0.0, !isMatchOver else { return }
+        matchStartedAt = matchStartedAt.addingTimeInterval(away)
+        gameStartedAt = gameStartedAt.addingTimeInterval(away)
     }
 
     public var matchDuration: TimeInterval {

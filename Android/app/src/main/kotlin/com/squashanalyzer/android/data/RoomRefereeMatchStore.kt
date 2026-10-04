@@ -10,7 +10,10 @@ class RoomRefereeMatchStore(
     private val store: RefereeMatchStore,
     private val badgeAwardStore: BadgeAwardStore,
 ) : squash.analyzer.core.RefereeMatchStore {
-    override suspend fun loadInProgress(): RefereeMatch? = store.mostRecentInProgressMatch()?.let(::restore)
+    override suspend fun loadInProgress(): RefereeMatch? = store.mostRecentInProgressMatch()?.let { row ->
+        // The clocks continue from the last save, not from hours ago
+        restore(row).also { it.skipClosedTime(since = date(row.updatedAt)) }
+    }
 
     override suspend fun save(match: RefereeMatch) {
         // Capture the entire mutable model before the first suspension. The UI

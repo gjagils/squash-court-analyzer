@@ -201,7 +201,12 @@ enum RefereeInProgressStore {
             clear()
             return nil
         }
-        return RefereeMatch.restoring(snapshot)
+        let match = RefereeMatch.restoring(snapshot)
+        // The clocks continue from the last save, not from hours ago
+        if let saved = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date {
+            match?.skipClosedTime(since: saved)
+        }
+        return match
     }
 
     /// "Nieuwe wedstrijd" while one is unfinished: it goes into Afgeronde

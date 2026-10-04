@@ -32,6 +32,10 @@ public struct RefereeScoringView: View {
     }
 
     public var body: some View {
+        FontScaleCap { screen }
+    }
+
+    private var screen: some View {
         ZStack {
             GlowBackground()
 
@@ -137,7 +141,7 @@ public struct RefereeScoringView: View {
             Button(action: close) {
                 HStack(spacing: 6) {
                     AppSymbol("xmark", size: 13, color: SharedColors.textSecondary)
-                    Text("Sluiten")
+                    Text("Sluiten").lineLimit(1)
                 }
                 .font(.system(size: 14, weight: .medium, design: .rounded))
             }
@@ -256,6 +260,8 @@ public struct RefereeScoringView: View {
                         .foregroundColor(highlight.score)
                     Text("TIK = PUNT")
                         .font(.system(size: 9, weight: .medium, design: .rounded))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
                         .foregroundColor(highlight.caption)
                         .tracking(1.4)
                 }

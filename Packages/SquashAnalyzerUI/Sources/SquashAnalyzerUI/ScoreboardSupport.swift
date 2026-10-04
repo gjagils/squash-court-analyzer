@@ -60,6 +60,8 @@ public struct ServiceSideSelector: View {
                 }
                 Text(label)
                     .font(.system(size: compact ? 11.0 : 12.0, weight: .bold, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
             .foregroundColor(active ? SharedColors.background : color.opacity(0.4))
             .padding(.horizontal, compact ? 8.0 : 10.0)

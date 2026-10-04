@@ -274,6 +274,10 @@ public struct CoachScoringView: View {
     private var game: Game { match.currentGame }
 
     public var body: some View {
+        FontScaleCap { screen }
+    }
+
+    private var screen: some View {
         ZStack {
             GlowBackground()
 
@@ -348,7 +352,7 @@ public struct CoachScoringView: View {
                 Button { requestStop() } label: {
                     HStack(spacing: 4) {
                         AppSymbol("xmark", size: 14, color: SharedColors.textSecondary)
-                        Text("Stop")
+                        Text("Stop").lineLimit(1)
                     }
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textSecondary)

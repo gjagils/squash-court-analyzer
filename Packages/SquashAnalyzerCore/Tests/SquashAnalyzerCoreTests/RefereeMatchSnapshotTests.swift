@@ -51,4 +51,30 @@ final class RefereeMatchSnapshotTests: XCTestCase {
         }
         XCTAssertFalse(restored.canUndo)
     }
+
+    func testResumingSkipsTheTimeTheAppWasClosed() {
+        let start = Date(timeIntervalSince1970: 1_790_000_000.0)
+        var clock = start
+        let match = RefereeMatch(player1Name: "Gerard", player2Name: "Thé", bestOf: 5, startingServer: Player.player1,
+                                 matchStartedAt: start)
+        match.now = { clock }
+        match.gameStartedAt = start
+        clock = start.addingTimeInterval(300.0)  // five minutes played, then saved
+        match.awardPoint(to: Player.player1)
+        let saved = clock
+        clock = saved.addingTimeInterval(16.0 * 3600.0)  // resumed the next morning
+        match.skipClosedTime(since: saved)
+        XCTAssertEqual(match.matchDuration, 300.0, accuracy: 0.001)
+        XCTAssertEqual(match.currentGameDuration, 300.0, accuracy: 0.001)
+    }
+
+    func testAFinishedMatchKeepsItsClock() {
+        let start = Date(timeIntervalSince1970: 1_790_000_000.0)
+        let match = RefereeMatch(player1Name: "Gerard", player2Name: "Thé", bestOf: 1, startingServer: Player.player1,
+                                 matchStartedAt: start)
+        for _ in 0..<11 { match.awardPoint(to: Player.player1) }
+        let before = match.matchStartedAt
+        match.skipClosedTime(since: start)
+        XCTAssertEqual(match.matchStartedAt, before)
+    }
 }

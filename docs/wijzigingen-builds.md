@@ -4,7 +4,28 @@ Doorlopend overzicht van wat er sinds de laatste upload is veranderd. Bij elke
 nieuwe build schuift het blok "Volgende build" naar beneden onder het
 buildnummer, en de releasenotes (`release-notes/`) worden eruit geschreven.
 
-## Volgende build (nog niet geüpload; nummers bepalen bij de upload)
+## Volgende build (nog niet geüpload; iOS 18 / Android 5, pas na Gerd-Jans go)
+
+Vergeleken met iOS 2.2 (17) en Android 0.4 (4), 3 oktober 2026.
+
+### Opgelost
+- **Grote systeemtekst:** de tegel "SCHEIDSRECHTER" brak op Android al bij
+  Samsung "groot" (1,3×) midden in het woord; tegeltitels, de naam
+  SquashAnalyzer, "Sluiten", "Stop", Links/Rechts, "TIK = PUNT" en de filtertabs
+  blijven nu op één regel en worden zo nodig iets kleiner.
+- **Scoreschermen op Android:** Coach en Scheidsrechter scoren volgen de
+  systeemtekst tot 1,3× (`FontScaleCap`), zodat ze bij 2× niet meer uitlopen.
+- **Wedstrijdklok na hervatten:** een gestopte scheidsrechterwedstrijd telde de
+  uren met de app dicht mee (bijv. 970:54 de volgende dag). Bij hervatten
+  lopen match- en gameklok nu verder vanaf het laatste opslaan.
+
+### Probeer vooral
+- Zet de tekst groot (Samsung: Lettergrootte max; iPhone: Tekstgrootte) en loop
+  beginscherm, Coach, Scheidsrechter en Afgeronde wedstrijden door.
+- Stop een scheidsrechterwedstrijd, wacht even en hervat: loopt de klok verder
+  waar hij was?
+
+## iOS 2.2 build 17 en Android 0.4 (4), 3 oktober 2026 (geüpload)
 
 Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `main` (`b694cf5`), 3 oktober.
 De live-server met foto's draait al in productie; de privacytekst staat online.

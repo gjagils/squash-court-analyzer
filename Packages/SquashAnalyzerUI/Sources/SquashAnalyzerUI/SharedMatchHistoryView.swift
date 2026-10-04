@@ -177,7 +177,7 @@ public struct SharedMatchHistoryView: View {
             Text(title)
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .minimumScaleFactor(0.6)
                 .foregroundColor(selected ? SharedColors.background : SharedColors.gold)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)

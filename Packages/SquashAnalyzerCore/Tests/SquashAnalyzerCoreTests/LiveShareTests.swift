@@ -153,8 +153,43 @@ final class LiveShareTests: XCTestCase {
     /// On Android statics are set top to bottom: `shared` once got a null address
     @MainActor
     func testSharedUsesTheDefaultAddress() {
+        UserDefaults.standard.removeObject(forKey: LiveShare.serverKey)
         XCTAssertEqual(LiveShare.shared.baseURL, LiveShare.defaultBaseURL)
         XCTAssertTrue(LiveShare.shared.baseURL.hasPrefix("https://"))
+    }
+
+    /// Instellingen: Alfa (the NAS) or Beta (Cloudflare); unknown or empty is Alfa
+    @MainActor
+    func testTheServerSettingPicksTheAddress() {
+        UserDefaults.standard.set("beta", forKey: LiveShare.serverKey)
+        XCTAssertEqual(LiveServer.stored, LiveServer.beta)
+        XCTAssertEqual(LiveShare(transport: nil).baseURL, LiveShare.betaBaseURL)
+        XCTAssertEqual(LiveServer.beta.host, "beta.squashanalyzer.com")
+        UserDefaults.standard.set("raar", forKey: LiveShare.serverKey)
+        XCTAssertEqual(LiveServer.stored, LiveServer.alfa)
+        UserDefaults.standard.removeObject(forKey: LiveShare.serverKey)
+        XCTAssertEqual(LiveServer.stored, LiveServer.alfa)
+    }
+
+    /// A live match stays on the server it started on, whatever the setting does meanwhile
+    @MainActor
+    func testARunningMatchKeepsItsServer() async throws {
+        let transport = FakeLiveTransport()
+        let live = LiveShare(transport: transport)
+        live.baseURL = "https://alfa.test"
+        let match = Match()
+        _ = try await live.start(matchId: match.id, snapshot: match.liveSnapshot())
+        live.baseURL = "https://beta.test"
+        live.update(matchId: match.id, snapshot: match.liveSnapshot())
+        try await waitUntil { transport.requests.count >= 2 }
+        XCTAssertTrue(transport.requests[0].url.hasPrefix("https://alfa.test/"))
+        XCTAssertTrue(transport.requests[1].url.hasPrefix("https://alfa.test/"), "the PUT goes where the session is")
+        await live.stop()
+        XCTAssertTrue(transport.requests.last!.url.hasPrefix("https://alfa.test/"), "so does the DELETE")
+        // The next match goes to the new server
+        let next = Match()
+        _ = try await live.start(matchId: next.id, snapshot: next.liveSnapshot())
+        XCTAssertTrue(transport.requests.last!.url.hasPrefix("https://beta.test/"))
     }
 
     /// T25: an update before LIVE was tapped sends nothing; a second match

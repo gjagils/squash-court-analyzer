@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>{{TITLE}}</title>
+<meta property="og:title" content="{{TITLE}}">
+<meta property="og:description" content="{{DESCRIPTION}}">
+<meta property="og:url" content="{{URL}}">
+<meta property="og:image" content="{{IMAGE}}">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#000000">
+<style>
+  :root {
+    /* Huisstijl "Clubhuis" (docs/style/README.md): zwart, oranje accent, staalblauw voor speler 2 */
+    --bg: #000000; --card: #180E04; --line: rgba(242,140,38,0.35); --gold: #F28C26; --orange: #F28C26;
+    --blue: #59738C; --blue-light: #8094AD;
+    --text-1: #F2EDE6; --text-2: #B3ADA6; --text-3: #8C8680; --border: rgba(255,255,255,0.09); --live: #E5484D;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text-1); min-height: 100vh;
+    font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased; display: flex; justify-content: center; padding: 20px 16px 40px;
+  }
+  main { width: 100%; max-width: 440px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: var(--text-1);
+           text-decoration: none; }
+  .brand img { width: 32px; height: 32px; display: block; }
+  .badge { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; padding: 5px 10px; border-radius: 999px;
+           border: 1px solid var(--border); color: var(--text-2); text-transform: uppercase; }
+  .badge.live { color: #fff; background: var(--live); border-color: var(--live); }
+  .badge.live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #fff;
+                        margin-right: 6px; vertical-align: 1px; animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.3; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .status { text-align: center; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+            color: var(--gold); margin-bottom: 10px; min-height: 18px; }
+  .row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 10px 0; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block;
+            border: 2px solid var(--border); background: var(--card); }
+  .p1 .avatar { border-color: var(--orange); } .p2 .avatar { border-color: var(--blue); }
+  .initial { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+             font-size: 18px; font-weight: 700; border: 2px solid var(--border); }
+  .p1 .initial { color: var(--orange); border-color: var(--orange); } .p2 .initial { color: var(--blue-light); border-color: var(--blue); }
+  .row + .row { border-top: 1px solid var(--border); }
+  /* A long name may use two lines; who serves and from which side sits below it in small type */
+  .name { font-size: 20px; font-weight: 600; line-height: 1.2; overflow-wrap: break-word; hyphens: auto;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .p1 .name { color: var(--orange); } .p2 .name { color: var(--blue-light); }
+  .serveline { display: flex; align-items: center; gap: 6px; margin-top: 3px; font-size: 12px; color: var(--text-2);
+               white-space: nowrap; visibility: hidden; }
+  .serving .serveline { visibility: visible; }
+  .serve { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .p2 .serve { background: var(--blue-light); }
+  .games { font-size: 15px; font-weight: 700; color: var(--text-2); min-width: 22px; text-align: center;
+           border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; }
+  .points { font-size: 42px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 50px; text-align: right; }
+  .winner .name::after { content: " 🏆"; }
+  .history { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+  .chip { font-size: 13px; color: var(--text-2); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px;
+          font-variant-numeric: tabular-nums; }
+  .last { margin-top: 14px; text-align: center; font-size: 13px; color: var(--text-2); min-height: 18px; }
+  .updated { margin-top: 14px; text-align: center; font-size: 12px; color: var(--text-3); }
+  .notice { margin-top: 16px; text-align: center; font-size: 14px; color: var(--text-2); line-height: 1.5; }
+  .notice strong { color: var(--text-1); }
+  footer { margin-top: 26px; text-align: center; font-size: 12px; color: var(--text-3); line-height: 1.6; }
+  footer a { color: var(--gold); text-decoration: none; }
+  @media (max-width: 360px) {
+    .card { padding: 14px; } .row { gap: 8px; } .name { font-size: 18px; } .points { font-size: 38px; min-width: 44px; }
+  }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a class="brand" href="https://squashanalyzer.com"><img src="/logo.png" alt="">SquashAnalyzer</a>
+    <div class="badge" id="badge">Verbinden…</div>
+  </header>
+
+  <section class="card" id="board" hidden>
+    <div class="status" id="status"></div>
+    <div class="row p1" id="row1">
+      <div><img class="avatar" id="photo1" alt="" hidden><div class="initial" id="initial1" aria-hidden="true"></div></div>
+      <div><div class="name" id="name1"></div><div class="serveline"><span class="serve" aria-hidden="true"></span><span id="side1"></span></div></div>
+      <div class="games" id="games1" title="Games">0</div>
+      <div class="points" id="points1">0</div>
+    </div>
+    <div class="row p2" id="row2">
+      <div><img class="avatar" id="photo2" alt="" hidden><div class="initial" id="initial2" aria-hidden="true"></div></div>
+      <div><div class="name" id="name2"></div><div class="serveline"><span class="serve" aria-hidden="true"></span><span id="side2"></span></div></div>
+      <div class="games" id="games2" title="Games">0</div>
+      <div class="points" id="points2">0</div>
+    </div>
+    <div class="history" id="history"></div>
+    <div class="last" id="last"></div>
+    <div class="updated" id="updated"></div>
+  </section>
+
+  <p class="notice" id="notice" hidden></p>
+
+  <footer>
+    Live gedeeld vanuit <a href="https://squashanalyzer.com">SquashAnalyzer</a>.<br>
+    Alleen voornamen, de stand en eventueel een kleine spelersfoto;<br>2 uur na de wedstrijd wordt alles gewist.
+  </footer>
+</main>
+<script>
+(function () {
+  var id = {{ID_JSON}};
+  var $ = function (x) { return document.getElementById(x); };
+  var lastReceived = 0;
+  var hadState = false;
+  var ended = false;
+  var finished = false;
+
+  var statusText = {
+    warmup: 'Inspelen…',
+    playing: null,
+    between: 'Pauze tussen de games',
+    finished: 'Afgelopen'
+  };
+
+  /** The players' thumbnails when the coach shares them, otherwise the first letter */
+  var shownPhotos = ['', ''];
+  function renderPhotos(data, s) {
+    var photos = (data && data.photos) || [false, false];
+    for (var i = 0; i < 2; i++) {
+      var img = $('photo' + (i + 1));
+      var initial = $('initial' + (i + 1));
+      var src = photos[i] ? '/api/live/' + encodeURIComponent(id) + '/photo/' + (i + 1) + '?v=' + (data.photoVersion || 0) : '';
+      if (src !== shownPhotos[i]) {
+        shownPhotos[i] = src;
+        if (src) img.src = src; else img.removeAttribute('src');
+      }
+      img.hidden = !src;
+      initial.hidden = !!src;
+      initial.textContent = ((i === 0 ? s.p1 : s.p2) || '?').charAt(0).toUpperCase();
+    }
+  }
+
+  function render(s, data) {
+    hadState = true;
+    $('board').hidden = false;
+    $('name1').textContent = s.p1;
+    $('name2').textContent = s.p2;
+    renderPhotos(data, s);
+    $('points1').textContent = s.score[0];
+    $('points2').textContent = s.score[1];
+    $('games1').textContent = s.gamesWon[0];
+    $('games2').textContent = s.gamesWon[1];
+    var live = s.status !== 'finished';
+    finished = !live;
+    if (finished && !ended) {
+      $('notice').hidden = false;
+      $('notice').innerHTML = '<strong>Eindstand.</strong> Deze pagina blijft nog 2 uur na de wedstrijd te zien.';
+    }
+    $('row1').classList.toggle('serving', live && s.server === 1);
+    $('row2').classList.toggle('serving', live && s.server === 2);
+    $('side1').textContent = 'serveert ' + (s.side === 'L' ? 'links' : 'rechts');
+    $('side2').textContent = 'serveert ' + (s.side === 'L' ? 'links' : 'rechts');
+    $('row1').classList.toggle('winner', s.winner === 1);
+    $('row2').classList.toggle('winner', s.winner === 2);
+    var gameNumber = s.gamesWon[0] + s.gamesWon[1] + (s.status === 'playing' || s.status === 'warmup' ? 1 : 0);
+    var text = statusText[s.status];
+    if (s.status === 'playing') text = 'Game ' + gameNumber + ' · best of ' + s.bestOf;
+    if (s.status === 'finished' && s.winner) text = (s.winner === 1 ? s.p1 : s.p2) + ' wint ' +
+      Math.max(s.gamesWon[0], s.gamesWon[1]) + '-' + Math.min(s.gamesWon[0], s.gamesWon[1]);
+    $('status').textContent = text || '';
+    var history = $('history');
+    history.textContent = '';
+    s.games.forEach(function (g) {
+      var chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = g[0] + '-' + g[1];
+      history.appendChild(chip);
+    });
+    $('last').textContent = s.lastPoint || '';
+    lastReceived = Date.now();
+    setBadge(live && !ended ? 'live' : 'done');
+    tick();
+  }
+
+  function setBadge(kind) {
+    var badge = $('badge');
+    badge.className = 'badge' + (kind === 'live' ? ' live' : '');
+    badge.textContent = kind === 'live' ? 'Live' : kind === 'done' ? 'Afgelopen' : kind === 'lost' ? 'Geen verbinding' : 'Verbinden…';
+  }
+
+  function tick() {
+    if (!lastReceived || ended || finished) { $('updated').textContent = ''; return; }
+    var seconds = Math.round((Date.now() - lastReceived) / 1000);
+    var text = seconds < 5 ? 'Zojuist bijgewerkt' : seconds < 60 ? seconds + ' s geleden bijgewerkt'
+      : Math.round(seconds / 60) + ' min geleden bijgewerkt';
+    if (seconds > 300) text += ' · geen nieuws van de baan';
+    $('updated').textContent = text;
+  }
+  setInterval(tick, 1000);
+
+  function showEnded() {
+    ended = true;
+    setBadge('done');
+    $('updated').textContent = '';
+    var notice = $('notice');
+    notice.hidden = false;
+    notice.innerHTML = hadState
+      ? '<strong>De wedstrijd is afgelopen.</strong> Dit was de laatste stand; de livesessie is gewist.'
+      : '<strong>Deze livewedstrijd is afgelopen</strong> of de link klopt niet.';
+  }
+
+  if (!window.EventSource) {
+    $('notice').hidden = false;
+    $('notice').textContent = 'Deze browser kan de stand niet live volgen.';
+    return;
+  }
+  var source = new EventSource('/api/live/' + encodeURIComponent(id) + '/events');
+  source.addEventListener('state', function (e) {
+    try { var data = JSON.parse(e.data); render(data.snapshot, data); } catch (err) {}
+  });
+  source.addEventListener('ended', function (e) {
+    // The session is gone, and so are its photos: show the letters
+    try { var data = JSON.parse(e.data); if (data.snapshot) render(data.snapshot, null); } catch (err) {}
+    source.close();
+    showEnded();
+  });
+  source.onerror = function () {
+    if (ended) return;
+    if (source.readyState === EventSource.CLOSED) {
+      showEnded();
+    } else if (hadState) {
+      setBadge('lost');
+    }
+  };
+})();
+</script>
+</body>
+</html>

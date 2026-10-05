@@ -1,0 +1,37 @@
+# Squash Analyzer — live meekijken on Cloudflare Workers (beta.squashanalyzer.com).
+# Deploy: npx wrangler deploy (after `npx wrangler login`). See README.md.
+name = "squash-live-beta"
+main = "src/index.js"
+compatibility_date = "2025-10-01"
+workers_dev = false
+routes = [{ pattern = "beta.squashanalyzer.com", custom_domain = true }]
+
+[vars]
+PUBLIC_URL = "https://beta.squashanalyzer.com"
+IDLE_MINUTES = "120"
+MAX_SESSIONS = "200"
+CREATES_PER_MINUTE = "10"
+GLOBAL_CREATES_PER_MINUTE = "60"
+MAX_VIEWERS_PER_SESSION = "200"
+
+# The viewer page and the logo; the Worker runs first and fills the page in
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+[[durable_objects.bindings]]
+name = "SESSION"
+class_name = "LiveSession"
+
+[[durable_objects.bindings]]
+name = "LIMITER"
+class_name = "LiveLimiter"
+
+# SQLite-backed objects: the kind the free plan allows
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["LiveSession", "LiveLimiter"]
+
+[observability]
+enabled = true

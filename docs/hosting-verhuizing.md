@@ -17,9 +17,17 @@ Kaartlinks en teamlinks zijn gewone bestanden of URL-fragmenten op de website.
 
 ## Advies
 
-**Website naar Cloudflare Pages, live-server naar Fly.io.** Samen rond de
-€4 per maand, geen NAS en geen tunnel meer nodig, en de app hoeft niet
-opnieuw gebouwd te worden omdat de domeinnamen gelijk blijven.
+**Website naar Cloudflare Pages, live-server naar Cloudflare Workers.**
+Alles bij Cloudflare, gratis, geen NAS en geen tunnel meer nodig.
+
+**Stand 5 oktober (avond):** de Workers-versie van de live-server is gebouwd
+in `server/live-worker` (Durable Objects, zelfde API en kijkpagina, 12 tests
+groen in de Workers-testomgeving) en gaat naar `beta.squashanalyzer.com`. De
+app krijgt in Instellingen een schakelaar **Alfa** (NAS, `live.squashanalyzer.com`)
+of **Beta** (Cloudflare); een lopende wedstrijd blijft op de server waar hij
+begon. Zie `server/live-worker/README.md` voor het uitrollen. Fly.io is
+daarmee het reserveplan als de Workers-versie tegenvalt; de uitwerking
+hieronder blijft staan.
 
 ### Website: Cloudflare Pages (gratis)
 
@@ -113,7 +121,7 @@ Wat er nodig is:
 | Hetzner Cloud VPS (CX23) | €3,99 + €0,50 IPv4 per maand | Zelfde opzet als nu (Docker, Portainer, cloudflared), maar dan zelf een Linux-server bijhouden (updates, SSH, back-ups). Goede keus als je liever een eigen machine hebt. |
 | Railway | vanaf $5 per maand | Werkt, maar duurder dan Fly voor dit kleine proces en geen Nederlandse regio. |
 | Render | Starter $7 per maand | Het gratis plan slaapt na 15 minuten, dat kan niet voor live. Starter is het duurst van de lijst. |
-| Cloudflare Workers + Durable Objects | gratis plan (100.000 verzoeken per dag) | Alles bij Cloudflare en gratis, maar vraagt een herschrijving van `server.js` (één Durable Object per sessie, SSE via streams, hibernation) en van de tests. Mooie stap voor later, niet tijdens de testperiode. |
+| Cloudflare Workers + Durable Objects | gratis plan (100.000 verzoeken per dag) | Gebouwd op 5 oktober als `server/live-worker` (zie boven): één Durable Object per sessie, SSE via een stream, alarm voor het opruimen. |
 | Cloudflare Pages voor de live-server | — | Kan niet: Pages Functions zijn stateless en houden geen sessies in het geheugen. |
 
 ## Volgorde en moment

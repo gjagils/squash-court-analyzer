@@ -13,6 +13,14 @@ de builds in de testperiode (drie tot vier, elk hooguit één feature):
 build 19: voortgang naar de volgende badgetrede. Hosting:
 `docs/hosting-verhuizing.md`.
 
+### Live meekijken
+- **Live-server Alfa of Beta** in Instellingen (onder Live meekijken): Alfa is
+  de server op de NAS (`live.squashanalyzer.com`), Beta de nieuwe versie bij
+  Cloudflare (`beta.squashanalyzer.com`, `server/live-worker`). Standaard Alfa.
+  Een wedstrijd die live is blijft op de server waar hij begon; de keuze geldt
+  voor de volgende wedstrijd. Voor de test van de Cloudflare-versie; na de
+  verhuizing wijst Alfa ook naar Cloudflare en verdwijnt de schakelaar.
+
 ### Gemeld door testers
 (wat · wie · platform · nu / volgende / later)
 

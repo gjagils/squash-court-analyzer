@@ -48,6 +48,25 @@ uitrollen (stap 7, API-token en GitHub-secrets) nog niet ingesteld.
 omzetting van de domeinen staan in `docs/live-beta-afronden-instructie.md`,
 stap 9. Tot die omzetting serveert de NAS de site.
 
+**Proef gedaan 5 oktober (18:00):** `wrangler pages project create` maakt
+tegenwoordig geen `pages.dev`-project meer maar een Worker met statische
+assets ("Pages is nu onderdeel van Workers"); een klassiek Pages-project is
+niet meer aan te maken. Daarom staat de site als Worker `squashanalyzer-site`
+met config `server/website-worker/wrangler.jsonc`, uitgerold met
+`npx wrangler deploy -c server/website-worker/wrangler.jsonc`, op
+`https://squashanalyzer-site.gerdjanvangils.workers.dev`. Gecontroleerd:
+homepage, `/badges/`, `/handleiding/`, `/testen.html`, `/privacy.html`, een
+kaartlink en de teamzip; alle 172 interne links en assets geven 200; de
+homepage en de badgepagina zijn byte-gelijk aan de NAS (op de e-mail-
+obfuscatie van Cloudflare op het eigen domein na). Headers: beide
+deep-link-bestanden `application/json`, `/teams/*` `noindex`. Twee
+verschillen met nginx: `/privacy.html` en `/testen.html` krijgen een 307 naar
+`/privacy` en `/testen` (de pagina laadt daarna gewoon), en **`website/screenshots/`
+staat net als `website/teams/` buiten git**, dus beide ontbreken bij een
+upload vanuit GitHub Actions; vanaf de Mac gaan ze wel mee. Omzetten van het
+domein is Gerd-Jans besluit (custom domain op de Worker in plaats van op
+een Pages-project).
+
 Waarom: het domein staat al bij Cloudflare, de site is statisch, en Pages
 publiceert automatisch bij elke push naar `main`. Het gratis plan is ruim
 genoeg (500 builds per maand, 100 custom domains per project, `_headers` tot

@@ -33,8 +33,8 @@ android {
         targetSdk = 36
         // Bump versionCode for every upload to Google Play (it must go up);
         // versionName is what testers see.
-        versionCode = 4
-        versionName = "0.4"
+        versionCode = 5
+        versionName = "0.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

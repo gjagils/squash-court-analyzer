@@ -6,7 +6,7 @@
   <title>Badges – SquashAnalyzer</title>
   <meta name="description" content="Alle badges die spelers in SquashAnalyzer kunnen verdienen tijdens een squashwedstrijd." />
   <meta property="og:title" content="Badges – SquashAnalyzer" />
-  <meta property="og:description" content="31 badges om te verdienen tijdens je squashwedstrijden." />
+  <meta property="og:description" content="37 badges om te verdienen tijdens je squashwedstrijden, 17 in brons, zilver en goud." />
   <meta property="og:image" content="https://www.squashanalyzer.com/badges/five-in-a-row.png" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=android,assignment,auto_awesome,backup,fast_forward,groups,history,home,install_mobile,leaderboard,local_cafe,lock,menu_book,military_tech,new_releases,psychology,replay,sensors,settings,sports&display=block" />
   <link rel="stylesheet" href="../style.css?v=20261004b" />
@@ -25,105 +25,94 @@
     .badge-card p { font-size: 13px; color: var(--text-2); line-height: 1.4; }
     .tag { display: inline-block; margin-top: 10px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(242,140,38,0.5); border-radius: 999px; padding: 2px 8px; }
     .back { display: inline-block; margin-bottom: 24px; color: var(--text-2); }
+    .badge-card .tiers { display: flex; justify-content: center; gap: 4px; margin: 0 auto 12px; }
+    .badge-card .tiers img { width: 72px; height: 72px; margin: 0; }
+    .badge-card .tier-summary { margin-top: 6px; font-size: 12px; color: var(--text-3); }
   </style>
 </head>
 <body>
   <main class="badges-page">
     <a class="back" href="../">← SquashAnalyzer</a>
     <h1>Badges</h1>
-    <p class="intro">Spelers die je in de app kiest via "Kies speler" verdienen badges tijdens een wedstrijd, in coach- en scheidsrechtermodus. Badges met het label <em>Coach</em> vragen om de slagen die alleen coachmodus bijhoudt. Je vindt ze terug op het badgescherm van de speler en op de badgekaart die je via WhatsApp deelt.</p>
+    <p class="intro">Spelers die je in de app kiest via "Kies speler" verdienen badges tijdens een wedstrijd, in coach- en scheidsrechtermodus. Badges met het label <em>Coach</em> vragen om de slagen die alleen coachmodus bijhoudt. Zeventien badges hebben drie treden: brons, zilver en goud, met het getal van die trede in de badge. Je vindt ze terug op het badgescherm van de speler en op de badgekaart die je via WhatsApp deelt.</p>
 
     <h2>In één game</h2>
     <div class="badge-grid">
         <div class="badge-card">
-          <img src="five-in-a-row.png" alt="" width="96" height="96" loading="lazy">
+          <div class="tiers"><img src="five-in-a-row-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="five-in-a-row-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="five-in-a-row-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
           <h3>5 points in a row</h3>
           <p>5 punten achter elkaar</p>
-          
+          <p class="tier-summary">Brons 5 · Zilver 7 · Goud 10</p>
         </div>
         <div class="badge-card">
           <img src="eleven-nil.png" alt="" width="96" height="96" loading="lazy">
           <h3>Alles is voor Bassie</h3>
           <p>Win een game met 11-0</p>
-          
         </div>
         <div class="badge-card">
-          <img src="back-from-the-death.png" alt="" width="96" height="96" loading="lazy">
+          <div class="tiers"><img src="drop-it-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="drop-it-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="drop-it-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
+          <h3>Drop it like it&#x27;s hot</h3>
+          <p>4 drops in één game</p>
+          <p class="tier-summary">Brons 4 · Zilver 6 · Goud 8</p>
+          <span class="tag">Coach</span>
+        </div>
+        <div class="badge-card">
+          <div class="tiers"><img src="kriss-cross-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="kriss-cross-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="kriss-cross-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
+          <h3>Kriss Kross</h3>
+          <p>4 crosses in één game</p>
+          <p class="tier-summary">Brons 4 · Zilver 6 · Goud 8</p>
+          <span class="tag">Coach</span>
+        </div>
+        <div class="badge-card">
+          <div class="tiers"><img src="back-from-the-death-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="back-from-the-death-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="back-from-the-death-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
           <h3>Back from the dead</h3>
           <p>Win een game na 5 punten achterstand</p>
-          
+          <p class="tier-summary">Brons 5 · Zilver 7 · Goud 9</p>
+        </div>
+        <div class="badge-card">
+          <div class="tiers"><img src="ace-of-pace-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="ace-of-pace-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="ace-of-pace-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
+          <h3>Ace of pace</h3>
+          <p>4 servicewinners in één game</p>
+          <p class="tier-summary">Brons 4 · Zilver 6 · Goud 8</p>
+          <span class="tag">Coach</span>
+        </div>
+        <div class="badge-card">
+          <div class="tiers"><img src="lob-story-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="lob-story-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="lob-story-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
+          <h3>Lob story</h3>
+          <p>4 lobwinners in één game</p>
+          <p class="tier-summary">Brons 4 · Zilver 6 · Goud 8</p>
+          <span class="tag">Coach</span>
+        </div>
+        <div class="badge-card">
+          <div class="tiers"><img src="volleywood-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="volleywood-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="volleywood-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
+          <h3>Volleywood</h3>
+          <p>4 volleywinners in één game</p>
+          <p class="tier-summary">Brons 4 · Zilver 6 · Goud 8</p>
+          <span class="tag">Coach</span>
         </div>
         <div class="badge-card">
           <img src="cool-under-pressure.png" alt="" width="96" height="96" loading="lazy">
           <h3>Cool under pressure</h3>
           <p>Win een game na 10-10</p>
-          
+        </div>
+        <div class="badge-card">
+          <div class="tiers"><img src="drive-me-crazy-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="drive-me-crazy-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="drive-me-crazy-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
+          <h3>Drive me crazy</h3>
+          <p>4 drivewinners in één game</p>
+          <p class="tier-summary">Brons 4 · Zilver 6 · Goud 8</p>
+          <span class="tag">Coach</span>
+        </div>
+        <div class="badge-card">
+          <div class="tiers"><img src="boast-buster-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="boast-buster-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="boast-buster-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
+          <h3>Boast buster</h3>
+          <p>4 boastwinners in één game</p>
+          <p class="tier-summary">Brons 4 · Zilver 6 · Goud 8</p>
+          <span class="tag">Coach</span>
         </div>
         <div class="badge-card">
           <img src="marathon-man.png" alt="" width="96" height="96" loading="lazy">
           <h3>Marathon man</h3>
           <p>Win een game met minstens 20 punten</p>
-          
-        </div>
-        <div class="badge-card">
-          <img src="drop-it.png" alt="" width="96" height="96" loading="lazy">
-          <h3>Drop it like it&#x27;s hot</h3>
-          <p>4 drops in één game</p>
-          <span class="tag">Coach</span>
-        </div>
-        <div class="badge-card">
-          <img src="kriss-cross.png" alt="" width="96" height="96" loading="lazy">
-          <h3>Kriss Kross</h3>
-          <p>4 crosses in één game</p>
-          <span class="tag">Coach</span>
-        </div>
-        <div class="badge-card">
-          <img src="lob-story.png" alt="" width="96" height="96" loading="lazy">
-          <h3>Lob story</h3>
-          <p>4 lobwinners in één game</p>
-          <span class="tag">Coach</span>
-        </div>
-        <div class="badge-card">
-          <img src="volleywood.png" alt="" width="96" height="96" loading="lazy">
-          <h3>Volleywood</h3>
-          <p>4 volleywinners in één game</p>
-          <span class="tag">Coach</span>
-        </div>
-        <div class="badge-card">
-          <img src="drive-me-crazy.png" alt="" width="96" height="96" loading="lazy">
-          <h3>Drive me crazy</h3>
-          <p>4 drivewinners in één game</p>
-          <span class="tag">Coach</span>
-        </div>
-        <div class="badge-card">
-          <img src="boast-buster.png" alt="" width="96" height="96" loading="lazy">
-          <h3>Boast buster</h3>
-          <p>4 boastwinners in één game</p>
-          <span class="tag">Coach</span>
-        </div>
-        <div class="badge-card">
-          <img src="ace-of-pace.png" alt="" width="96" height="96" loading="lazy">
-          <h3>Ace of pace</h3>
-          <p>4 servicewinners in één game</p>
-          <span class="tag">Coach</span>
-        </div>
-        <div class="badge-card">
-          <img src="perfect-ten.png" alt="" width="96" height="96" loading="lazy">
-          <h3>Perfect ten</h3>
-          <p>10 punten achter elkaar</p>
-          
-        </div>
-        <div class="badge-card">
-          <img src="unbreakable.png" alt="" width="96" height="96" loading="lazy">
-          <h3>Unbreakable</h3>
-          <p>Win een game zonder ooit achter te staan</p>
-          
-        </div>
-        <div class="badge-card">
-          <img src="stroke-of-genius.png" alt="" width="96" height="96" loading="lazy">
-          <h3>Stroke of genius</h3>
-          <p>Krijg 3 strokes toegekend in één game</p>
-          
         </div>
         <div class="badge-card">
           <img src="brick-wall.png" alt="" width="96" height="96" loading="lazy">
@@ -132,16 +121,45 @@
           <span class="tag">Coach</span>
         </div>
         <div class="badge-card">
-          <img src="front-row-king.png" alt="" width="96" height="96" loading="lazy">
+          <div class="tiers"><img src="front-row-king-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="front-row-king-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="front-row-king-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
           <h3>Front row king</h3>
           <p>5 winners vanuit de voorste zones in één game</p>
+          <p class="tier-summary">Brons 5 · Zilver 7 · Goud 9</p>
           <span class="tag">Coach</span>
         </div>
         <div class="badge-card">
-          <img src="endurance.png" alt="" width="96" height="96" loading="lazy">
+          <div class="tiers"><img src="endurance-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="endurance-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="endurance-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
           <h3>Endurance</h3>
           <p>Win een rally van minstens 60 seconden</p>
+          <p class="tier-summary">Brons 60 s · Zilver 90 s · Goud 120 s</p>
           <span class="tag">Coach</span>
+        </div>
+        <div class="badge-card">
+          <img src="unbreakable.png" alt="" width="96" height="96" loading="lazy">
+          <h3>Unbreakable</h3>
+          <p>Win een game zonder ooit achter te staan</p>
+        </div>
+        <div class="badge-card">
+          <img src="stroke-of-genius.png" alt="" width="96" height="96" loading="lazy">
+          <h3>Stroke of genius</h3>
+          <p>Krijg 3 strokes toegekend in één game</p>
+        </div>
+        <div class="badge-card">
+          <img src="back-wall-boss.png" alt="" width="96" height="96" loading="lazy">
+          <h3>Back wall boss</h3>
+          <p>5 winners vanuit de achterste zones in één game</p>
+          <span class="tag">Coach</span>
+        </div>
+        <div class="badge-card">
+          <img src="sneltrein.png" alt="" width="96" height="96" loading="lazy">
+          <h3>Sneltrein</h3>
+          <p>Win een game in minder dan 6 minuten</p>
+          <span class="tag">Coach</span>
+        </div>
+        <div class="badge-card">
+          <img src="hand-out-held.png" alt="" width="96" height="96" loading="lazy">
+          <h3>Hand-out held</h3>
+          <p>Win 5 rally&#x27;s achter elkaar op de service van de ander</p>
         </div>
     </div>
 
@@ -151,25 +169,11 @@
           <img src="going-the-distance.png" alt="" width="96" height="96" loading="lazy">
           <h3>Going the distance</h3>
           <p>Win de wedstrijd na 0-2 in games</p>
-          
         </div>
         <div class="badge-card">
           <img src="clean-sweep.png" alt="" width="96" height="96" loading="lazy">
           <h3>Clean sweep</h3>
           <p>Win de wedstrijd met 3-0</p>
-          
-        </div>
-        <div class="badge-card">
-          <img src="houdini.png" alt="" width="96" height="96" loading="lazy">
-          <h3>Houdini</h3>
-          <p>Werk 3 matchpoints weg en win de wedstrijd</p>
-          
-        </div>
-        <div class="badge-card">
-          <img src="double-trouble.png" alt="" width="96" height="96" loading="lazy">
-          <h3>Double trouble</h3>
-          <p>Win 2 games na 10-10 in één wedstrijd</p>
-          
         </div>
         <div class="badge-card">
           <img src="full-house.png" alt="" width="96" height="96" loading="lazy">
@@ -178,26 +182,46 @@
           <span class="tag">Coach</span>
         </div>
         <div class="badge-card">
+          <img src="houdini.png" alt="" width="96" height="96" loading="lazy">
+          <h3>Houdini</h3>
+          <p>Werk 3 matchpoints weg en win de wedstrijd</p>
+        </div>
+        <div class="badge-card">
+          <img src="double-trouble.png" alt="" width="96" height="96" loading="lazy">
+          <h3>Double trouble</h3>
+          <p>Win 2 games na 10-10 in één wedstrijd</p>
+        </div>
+        <div class="badge-card">
           <img src="photo-finish.png" alt="" width="96" height="96" loading="lazy">
           <h3>Photo finish</h3>
           <p>Win een wedstrijd met 3-2</p>
-          
         </div>
         <div class="badge-card">
-          <img src="iron-man.png" alt="" width="96" height="96" loading="lazy">
+          <div class="tiers"><img src="iron-man-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="iron-man-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="iron-man-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
           <h3>Iron man</h3>
           <p>Speel een wedstrijd van minstens 60 minuten uit</p>
-          
+          <p class="tier-summary">Brons 60 min · Zilver 75 min · Goud 90 min</p>
+        </div>
+        <div class="badge-card">
+          <img src="rock-solid.png" alt="" width="96" height="96" loading="lazy">
+          <h3>Rock solid</h3>
+          <p>Win de wedstrijd zonder één unforced error</p>
+          <span class="tag">Coach</span>
+        </div>
+        <div class="badge-card">
+          <img src="vette-winst.png" alt="" width="96" height="96" loading="lazy">
+          <h3>Vette winst</h3>
+          <p>Win de wedstrijd zonder dat de tegenstander in een game boven de 5 komt</p>
         </div>
     </div>
 
     <h2>Over al je wedstrijden</h2>
     <div class="badge-grid">
         <div class="badge-card">
-          <img src="hat-trick.png" alt="" width="96" height="96" loading="lazy">
+          <div class="tiers"><img src="hat-trick-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="hat-trick-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="hat-trick-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
           <h3>Hat trick</h3>
           <p>Win 3 wedstrijden op rij</p>
-          
+          <p class="tier-summary">Brons 3 · Zilver 5 · Goud 7</p>
         </div>
         <div class="badge-card">
           <img src="off-the-mark.png" alt="" width="96" height="96" loading="lazy">
@@ -206,28 +230,42 @@
           <span class="tag">Eén keer</span>
         </div>
         <div class="badge-card">
-          <img src="centurion.png" alt="" width="96" height="96" loading="lazy">
+          <div class="tiers"><img src="centurion-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="centurion-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="centurion-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
           <h3>Centurion</h3>
           <p>Scoor in totaal 100 punten</p>
+          <p class="tier-summary">Brons 100 · Zilver 500 · Goud 1000</p>
           <span class="tag">Eén keer</span>
         </div>
         <div class="badge-card">
-          <img src="ten-out-of-ten.png" alt="" width="96" height="96" loading="lazy">
+          <div class="tiers"><img src="ten-out-of-ten-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="ten-out-of-ten-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="ten-out-of-ten-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
           <h3>Ten out of ten</h3>
           <p>Win in totaal 10 wedstrijden</p>
+          <p class="tier-summary">Brons 10 · Zilver 25 · Goud 50</p>
           <span class="tag">Eén keer</span>
         </div>
         <div class="badge-card">
-          <img src="nemesis.png" alt="" width="96" height="96" loading="lazy">
+          <div class="tiers"><img src="nemesis-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="nemesis-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="nemesis-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
           <h3>Nemesis</h3>
           <p>Win 5 keer van dezelfde tegenstander</p>
-          
+          <p class="tier-summary">Brons 5 · Zilver 10 · Goud 20</p>
         </div>
         <div class="badge-card">
-          <img src="veteran.png" alt="" width="96" height="96" loading="lazy">
+          <div class="tiers"><img src="veteran-bronze.png" alt="Brons" width="72" height="72" loading="lazy"><img src="veteran-silver.png" alt="Zilver" width="72" height="72" loading="lazy"><img src="veteran-gold.png" alt="Goud" width="72" height="72" loading="lazy"></div>
           <h3>Veteran</h3>
           <p>Speel 25 wedstrijden, gewonnen of niet</p>
+          <p class="tier-summary">Brons 25 · Zilver 50 · Goud 100</p>
           <span class="tag">Eén keer</span>
+        </div>
+        <div class="badge-card">
+          <img src="clubicoon.png" alt="" width="96" height="96" loading="lazy">
+          <h3>Clubicoon</h3>
+          <p>Speel tegen 10 verschillende tegenstanders</p>
+          <span class="tag">Eén keer</span>
+        </div>
+        <div class="badge-card">
+          <img src="rivalen.png" alt="" width="96" height="96" loading="lazy">
+          <h3>Rivalen</h3>
+          <p>Speel 10 wedstrijden tegen dezelfde tegenstander</p>
         </div>
     </div>
 

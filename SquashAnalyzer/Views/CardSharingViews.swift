@@ -10,12 +10,21 @@ import SquashAnalyzerCore
 struct PlayerCardImage: View {
     let snapshot: CardSnapshot
 
-    /// Earned badges with how often, in catalogue order
+    /// Earned badges with how often, in catalogue order: per badge the highest
+    /// tier earned, counted by the tier with the most moments (bronze comes
+    /// with every silver or gold), like the shared badge screen
     private var earned: [(kind: BadgeKind, count: Int)] {
         let active = snapshot.awards.filter { $0.deletedAt == nil }
-        return BadgeKind.allCases.compactMap { kind in
-            let count = active.filter { $0.badge == kind }.count
-            return count > 0 ? (kind, count) : nil
+        return BadgeKind.families.compactMap { family in
+            var best: BadgeKind? = nil
+            var count = 0
+            for kind in family.series {
+                let moments = active.filter { award in award.badge == kind }.count
+                if moments > 0 { best = kind }
+                count = max(count, moments)
+            }
+            guard let best else { return nil }
+            return (best, count)
         }
     }
 
@@ -39,7 +48,7 @@ struct PlayerCardImage: View {
                 Text(snapshot.name)
                     .font(AppFonts.title(24))
                     .foregroundColor(AppColors.textPrimary)
-                Text("\(earned.count) van \(BadgeKind.allCases.count) badges")
+                Text("\(earned.count) van \(BadgeKind.families.count) badges")
                     .font(AppFonts.caption(12))
                     .foregroundColor(AppColors.textSecondary)
             }

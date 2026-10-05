@@ -110,3 +110,41 @@ Ook de oude imagesets zonder tredeachtervoegsel van de 17 omgezette badges en `p
 ## Uitgevoerde controle
 
 Alle 58 ontwerpen zijn in de drie gevraagde afmetingen aanwezig. PNG-alpha en imagesetmetadata zijn gecontroleerd. De getallen en het onderscheid tussen de treden zijn visueel op 56 pixels beoordeeld. Dit is een artworkcontrole; er is geen app-build of functionele badgetest uitgevoerd voor deze oplevering.
+
+## Integratie (Claude Code, 5 oktober 2026)
+
+Het artwork is gekoppeld; de logica staat in de code en wacht op een build en
+een test op de toestellen (in de cloudsessie zijn Swift en Skip niet beschikbaar).
+
+- **`BadgeKind`** (`Packages/SquashAnalyzerCore/.../BadgeEngine.swift`): de
+  zilveren en gouden treden zijn eigen cases met de ids `<id>-silver` en
+  `<id>-gold`; brons houdt het oude id, zodat al verdiende badges brons blijven.
+  `perfect-ten` blijft bestaan als de gouden trede van `five-in-a-row` (het id
+  staat op kaarten en mag niet veranderen). `family`, `tier`, `series`,
+  `threshold`, `tierSummary` en `BadgeKind.families` beschrijven de reeksen;
+  `imageName` wijst naar `badge-<id>-<trede>` of `badge-<id>`.
+- **Regels** (`BadgeEngine`): een reeks kent elke trede toe waarvan de drempel is
+  gehaald. Nieuw: Rock solid en Vette winst alleen als alle games rally voor
+  rally zijn bijgehouden (`BadgeMatchInput.isFullyTracked`), Sneltrein op de
+  gameduur (`BadgeGame.duration`), Hand-out held op de server per rally
+  (`BadgeRally.server`; in scheidsrechtermodus afgeleid van de vorige rally),
+  Clubicoon/Rivalen in `careerBadges`.
+- **Schermen:** `SharedBadgeCatalogView` toont per badge de drie treden
+  (`BadgeSeriesArtwork`); `SharedPlayerBadgesView`, de kaartafbeelding (iOS
+  `PlayerCardImage`, Android `CardImage.kt`) en de strip na de wedstrijd tonen
+  per badge de hoogste trede. Android laadt de plaatjes zoals voorheen uit het
+  gedeelde asset-catalogus van SquashAnalyzerUI; er zijn geen drawables nodig.
+- **Website:** `website/kaart/index.html` kent alle 71 ids en toont per badge
+  de hoogste trede; `website/badges/` toont de treden naast elkaar.
+- **Gedaan op de Mac (5 oktober 2026):** de oude imagesets `badge-<id>.imageset`
+  van de zeventien omgezette badges en `badge-perfect-ten.imageset` zijn
+  verwijderd (71 imagesets over); `website/badges/<id>.png` van die achttien
+  blijft staan voor oude kaartlinks. Getest op de iPhone 17 Pro Max-simulator
+  (iOS 26.5) en de Android-emulator Medium Phone API 36.1: catalogus met drie
+  medaillons per reeks, coachwedstrijd met acht drops (gouden Drop it like
+  it's hot op de strip, "Goud · 1×" bij de speler, drie momenten), badgekaart
+  in app en browser, scheidsrechter 11-3/11-4/11-5 (Vette winst en Clean
+  sweep), en een back-up van build 17 met een oude `perfect-ten` (verschijnt
+  als gouden 5 points in a row, niets dubbel). Screenshots in
+  `docs/screenshots-oktober/ios-badges-*.png` en `android-badges-*.png`.
+

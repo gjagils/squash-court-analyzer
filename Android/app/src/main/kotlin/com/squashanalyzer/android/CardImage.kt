@@ -17,9 +17,10 @@ import java.io.File
 
 /**
  * "Deel kaart" with a picture, like iOS' `PlayerCardImage`: the player's name,
- * how many of the 31 badges, and every earned badge with its artwork and
- * count, drawn on a Canvas (Skip has no ImageRenderer). The artwork comes from
- * SquashAnalyzerUI's asset catalog, which Skip ships in the APK's assets.
+ * how many of the badges, and every earned badge with its artwork (the highest
+ * tier earned) and count, drawn on a Canvas (Skip has no ImageRenderer). The
+ * artwork comes from SquashAnalyzerUI's asset catalog, which Skip ships in the
+ * APK's assets.
  */
 object CardImage {
     private const val WIDTH = 1080
@@ -41,12 +42,18 @@ object CardImage {
         return Intent.createChooser(send, null)
     }
 
-    /** Earned badges with how often, in catalogue order */
+    /**
+     * Earned badges with how often, in catalogue order: per badge the highest
+     * tier earned, counted by the tier with the most moments (bronze comes with
+     * every silver or gold), like the shared badge screen
+     */
     private fun earned(snapshot: CardSnapshot): List<Pair<BadgeKind, Int>> {
         val active = snapshot.awards.toList().filter { it.deletedAt == null }
-        return BadgeKind.allCases.toList().mapNotNull { kind ->
-            val count = active.count { it.badge == kind }
-            if (count > 0) kind to count else null
+        return BadgeKind.families.toList().mapNotNull { family ->
+            val tiers = family.series.toList()
+            val counts = tiers.map { tier -> active.count { it.badge == tier } }
+            val best = tiers.indices.lastOrNull { counts[it] > 0 } ?: return@mapNotNull null
+            tiers[best] to counts.max()
         }
     }
 
@@ -79,7 +86,7 @@ object CardImage {
         text.typeface = Typeface.DEFAULT
         text.textSize = 34f
         text.color = Color.rgb(179, 175, 168)
-        canvas.drawText("${items.size} van ${BadgeKind.allCases.count} badges", PADDING.toFloat(), PADDING + 185f, text)
+        canvas.drawText("${items.size} van ${BadgeKind.families.count} badges", PADDING.toFloat(), PADDING + 185f, text)
 
         val top = PADDING + 240
         if (items.isEmpty()) {

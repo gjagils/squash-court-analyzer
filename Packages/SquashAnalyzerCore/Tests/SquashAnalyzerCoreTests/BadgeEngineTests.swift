@@ -205,11 +205,101 @@ final class BadgeEngineTests: XCTestCase {
         let many = (0..<25).map { i in
             BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval(i)), won: false, pointsWon: 0, opponentKey: "x\(i)")
         }
-        XCTAssertEqual(engine.careerBadges(in: many[24].matchId, history: many, earnedElsewhere: []), [.veteran])
+        XCTAssertEqual(engine.careerBadges(in: many[24].matchId, history: many, earnedElsewhere: []), [.veteran, .clubicoon], "25 matches against 25 opponents")
         let more = (0..<30).map { i in
             BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval(i)), won: false, pointsWon: 0, opponentKey: "y\(i)")
         }
-        XCTAssertEqual(engine.careerBadges(in: more[29].matchId, history: more, earnedElsewhere: []), [.veteran], "past 25 still")
-        XCTAssertTrue(engine.careerBadges(in: more[29].matchId, history: more, earnedElsewhere: [.veteran]).isEmpty)
+        XCTAssertEqual(engine.careerBadges(in: more[29].matchId, history: more, earnedElsewhere: []), [.veteran, .clubicoon], "past 25 still")
+        XCTAssertTrue(engine.careerBadges(in: more[29].matchId, history: more, earnedElsewhere: [.veteran, .clubicoon]).isEmpty)
+    }
+
+    // MARK: - Tiers and the newer badges
+
+    func testTiersAwardEveryThresholdReached() {
+        let eight = engine.badges(for: input([BadgeGame(rallies: rallies([(.player1, 8)], shot: .drop), winner: nil)]))[.player1]!
+        XCTAssertTrue(eight.isSuperset(of: [BadgeKind.dropIt, BadgeKind.dropItSilver, BadgeKind.dropItGold]))
+        let six = engine.badges(for: input([BadgeGame(rallies: rallies([(.player1, 6)], shot: .drop), winner: nil)]))[.player1]!
+        XCTAssertTrue(six.contains(.dropItSilver))
+        XCTAssertFalse(six.contains(.dropItGold))
+
+        let seven = engine.badges(forRallyWinners: Array(repeating: Player.player1, count: 7))[.player1]!
+        XCTAssertEqual(seven, [.fiveInARow, .fiveInARowSilver])
+        XCTAssertEqual(BadgeKind.highestTiers(among: seven), [.fiveInARowSilver])
+        XCTAssertEqual(BadgeKind.perfectTen.family, .fiveInARow)
+        XCTAssertEqual(BadgeKind.perfectTen.tier, .gold)
+        XCTAssertEqual(BadgeKind.perfectTen.imageName, "badge-five-in-a-row-gold")
+        XCTAssertEqual(BadgeKind.dropIt.imageName, "badge-drop-it-bronze")
+        XCTAssertEqual(BadgeKind.dropItSilver.detail, "6 drops in één game")
+        XCTAssertEqual(BadgeKind.rockSolid.imageName, "badge-rock-solid")
+        XCTAssertNil(BadgeKind.rockSolid.tier)
+        XCTAssertEqual(BadgeKind.families.count, 37)
+        XCTAssertEqual(BadgeKind.allCases.count, 71)
+    }
+
+    func testBackWallBossHandOutsAndSneltrein() {
+        let backWinners = Array(repeating: BadgeRally(winner: .player1, pointType: .winner, zone: .backLeft), count: 5)
+        XCTAssertTrue(engine.badges(for: input([BadgeGame(rallies: backWinners, winner: nil)]))[.player1]!.contains(.backWallBoss))
+
+        // Five hand-outs in a row for A: every rally B serves, A wins it back;
+        // A loses its own serves in between, which B wins only four times running
+        var handOuts: [BadgeRally] = [BadgeRally(winner: .player1, server: .player2), BadgeRally(winner: .player1, server: .player1)]
+        for _ in 0..<4 {
+            handOuts.append(BadgeRally(winner: .player2, server: .player1))
+            handOuts.append(BadgeRally(winner: .player1, server: .player2))
+        }
+        let earned = engine.badges(for: input([BadgeGame(rallies: handOuts, winner: nil)]))
+        XCTAssertTrue(earned[.player1]!.contains(.handOutHeld))
+        XCTAssertNil(earned[Player.player2])
+        var broken = handOuts
+        broken[3] = BadgeRally(winner: .player2, server: .player2)
+        XCTAssertNil(engine.badges(for: input([BadgeGame(rallies: broken, winner: nil)]))[Player.player1])
+
+        let quick = BadgeGame(rallies: rallies([(.player1, 11)]), winner: .player1, duration: 5.0 * 60.0)
+        XCTAssertTrue(engine.badges(for: input([quick]))[.player1]!.contains(.sneltrein))
+        let slow = BadgeGame(rallies: rallies([(.player1, 11)]), winner: .player1, duration: 6.0 * 60.0)
+        XCTAssertFalse(engine.badges(for: input([slow]))[.player1]!.contains(.sneltrein))
+    }
+
+    func testWholeMatchBadgesNeedEveryGameTracked() {
+        func blowout(_ player: Player) -> BadgeGame {
+            BadgeGame(rallies: rallies([(player, 11), (player.opponent, 3)], type: .winner), winner: player)
+        }
+        var match = input([blowout(.player1), blowout(.player1), blowout(.player1)], winner: .player1)
+        match.recordsPointTypes = true
+        let earned = engine.badges(for: match)[.player1]!
+        XCTAssertTrue(earned.contains(.vetteWinst))
+        XCTAssertTrue(earned.contains(.rockSolid))
+
+        var lateStart = input([blowout(.player1), blowout(.player1)], winner: .player1, before: (1, 0))
+        lateStart.recordsPointTypes = true
+        XCTAssertFalse(engine.badges(for: lateStart)[.player1]!.contains(.vetteWinst), "the first game was not tracked")
+        XCTAssertFalse(engine.badges(for: lateStart)[.player1]!.contains(.rockSolid))
+
+        var sloppy = match
+        sloppy.games[1] = BadgeGame(rallies: rallies([(.player1, 11), (.player2, 1)], type: .winner) + rallies([(.player2, 1)], type: .unforcedError), winner: .player1)
+        XCTAssertFalse(engine.badges(for: sloppy)[.player1]!.contains(.rockSolid), "one unforced error")
+        XCTAssertTrue(engine.badges(for: sloppy)[.player1]!.contains(.vetteWinst))
+    }
+
+    func testCareerTiersAndTheNewerCareerBadges() {
+        func history(_ count: Int, won: Bool = true, opponent: (Int) -> String) -> [BadgeEngine.CareerMatch] {
+            (0..<count).map { i in
+                BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval(i)), won: won, pointsWon: 0, opponentKey: opponent(i))
+            }
+        }
+        let wins = history(25) { _ in "" }
+        let silver = engine.careerBadges(in: wins[24].matchId, history: wins, earnedElsewhere: [])
+        XCTAssertTrue(silver.isSuperset(of: [BadgeKind.tenOutOfTenSilver, BadgeKind.veteran, BadgeKind.hatTrickGold]))
+        XCTAssertFalse(silver.contains(.tenOutOfTenGold))
+        XCTAssertFalse(silver.contains(.clubicoon), "no opponent known")
+
+        let rivalry = history(10) { _ in "kristian" }
+        XCTAssertTrue(engine.careerBadges(in: rivalry[9].matchId, history: rivalry, earnedElsewhere: []).isSuperset(of: [BadgeKind.rivalen, BadgeKind.nemesisSilver]))
+        XCTAssertFalse(engine.careerBadges(in: rivalry[8].matchId, history: rivalry, earnedElsewhere: []).contains(.rivalen))
+        XCTAssertFalse(engine.careerBadges(in: rivalry[8].matchId, history: rivalry, earnedElsewhere: []).contains(.nemesisSilver))
+
+        let club = history(10, won: false) { i in "speler \(i)" }
+        XCTAssertEqual(engine.careerBadges(in: club[9].matchId, history: club, earnedElsewhere: []), [.clubicoon])
+        XCTAssertTrue(engine.careerBadges(in: club[8].matchId, history: club, earnedElsewhere: []).isEmpty)
     }
 }

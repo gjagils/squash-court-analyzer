@@ -158,3 +158,6 @@ website/teams/
 
 # Messages with private team links (not in git)
 docs/berichten/
+
+# Skip test results
+Android/.build/

@@ -46,6 +46,11 @@ Vergeleken met iOS 2.2 (17) en Android 0.4 (4), 3 oktober 2026.
       vragen of hij erbij hoort en welke partij (E1–E4). Dan: de teamwedstrijd als
       geheel (4 partijen, stand in games), één verslag van de avond, live
       meekijken per teamwedstrijd, en vergelijken met de SBN-uitslag.
+      Ook partijen die je niet hebt bijgehouden met de hand invullen (de
+      game-standen, zoals bij Later instappen / Uitslag aanvullen) of later
+      importeren. Voorbeeld: speelvolgorde 4-2-1-3; je speelt zelf E4 (niet
+      bijgehouden, achteraf invullen), coacht daarna E2 en E1 en fluit E3: samen
+      één complete teamwedstrijd.
 
 ## iOS 2.2 build 17 en Android 0.4 (4), 3 oktober 2026 (geüpload)
 

@@ -17,6 +17,10 @@ public struct RefereeSessionView: View {
     /// The platform share sheet, for "Deel score"
     let shareText: ((String) -> Void)?
     @Environment(\.dismiss) private var dismiss
+    /// Competitie: after a finished match on a match day, ask which partij it is
+    let teamMatchStore: (any TeamMatchStore)?
+    @State private var linkCandidate: TeamMatch? = nil
+    @State private var linkAsked = false
     @State private var match: RefereeMatch? = nil
     @State private var pending: RefereeMatch? = nil
     @State private var showingSetup = false
@@ -25,7 +29,9 @@ public struct RefereeSessionView: View {
     @State private var saver = SessionSaver(busy: true)
 
     public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil, shareText: ((String) -> Void)? = nil,
+                teamMatchStore: (any TeamMatchStore)? = nil,
                 onExit: @escaping @MainActor () -> Void) {
+        self.teamMatchStore = teamMatchStore
         self.shareText = shareText
         self.store = store
         self.playerStore = playerStore
@@ -40,7 +46,7 @@ public struct RefereeSessionView: View {
             if let match {
                 RefereeScoringView(match: match, shareText: shareText, photos: photos, onMatchChanged: { changed in
                     persist(changed, exit: false)
-                }, onExit: { persist(match, exit: true) })
+                }, onExit: { requestExit(match) })
                 .disabled(saver.busy || saver.failed)
             } else if let pending {
                 ResumePromptCard(message: pending.resumeMessage,
@@ -82,6 +88,43 @@ public struct RefereeSessionView: View {
             saver.onExit = { close() }
             photos = await PlayerPhotos.load(photoStore: photoStore, playerStore: playerStore)
             if match == nil && pending == nil && !showingSetup { await load() }
+        }
+        .sheet(isPresented: Binding(get: { linkCandidate != nil }, set: { if !$0 { linkCandidate = nil } })) {
+            if let candidate = linkCandidate, let match {
+                TeamMatchLinkPrompt(team: candidate, player1Name: match.player1Name, player2Name: match.player2Name) { slot, ownIsPlayer1 in
+                    var team = candidate
+                    var partij = team.partij(slot)
+                    partij.link(referee: match, ownIsPlayer1: ownIsPlayer1)
+                    team.update(partij)
+                    linkCandidate = nil
+                    Task { @MainActor in
+                        try? await teamMatchStore?.save(team)
+                        persist(match, exit: true)
+                    }
+                } onSkip: {
+                    linkCandidate = nil
+                    persist(match, exit: true)
+                }
+            }
+        }
+    }
+
+    /// "Sluiten" after the match: on a match day of Mijn team first ask whether
+    /// it belongs to the team match (once); then save and go home
+    private func requestExit(_ value: RefereeMatch) {
+        guard value.isMatchOver, !linkAsked, let teamMatchStore else {
+            persist(value, exit: true)
+            return
+        }
+        linkAsked = true
+        Task { @MainActor in
+            if let candidate = await TeamMatchSupport.candidate(store: teamMatchStore),
+               candidate.partijLinked(to: value.id.uuidString) == nil {
+                persist(value, exit: false)
+                linkCandidate = candidate
+            } else {
+                persist(value, exit: true)
+            }
         }
     }
 

@@ -216,6 +216,45 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertEqual(team.partij(2).ownPlayer, "Gerd-Jan")
     }
 
+    func testLinkingALiveMatchTakesItsGames() {
+        // Coach: one game head start for player 2, two tracked games, one filled in for player 1
+        let coach = Match()
+        coach.setupMatch(player1: "Gerd-Jan", player2: "Piet", startingServer: .player1,
+                         player1CoachingFocus: [], player2CoachingFocus: [], player1GamesBefore: 0, player2GamesBefore: 1)
+        for _ in 0..<11 { coach.currentGame.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.backLeft, with: ShotType.drive) }
+        coach.startNewGame()
+        for _ in 0..<11 { coach.currentGame.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.backLeft, with: ShotType.drive) }
+        coach.startNewGame()
+        XCTAssertTrue(coach.completeResult(with: [.player1]))
+        var partij = TeamPartij(slot: 1)
+        partij.link(coach: coach, ownIsPlayer1: true)
+        XCTAssertEqual(partij.ownPlayer, "Gerd-Jan")
+        XCTAssertEqual(partij.games.count, 4)
+        XCTAssertEqual(partij.ownGames, 3)
+        XCTAssertEqual(partij.theirGames, 1)
+        XCTAssertEqual(partij.gamesText, "–, 11-0, 11-0, –")
+        XCTAssertEqual(partij.linkedMatchId, coach.id.uuidString)
+        XCTAssertEqual(partij.linkedKind, "coach")
+
+        // Referee, seen from player 2
+        let referee = RefereeMatch(player1Name: "Gerard", player2Name: "Thé", bestOf: 5, startingServer: .player1,
+                                   player1GamesBefore: 0, player2GamesBefore: 0)
+        for _ in 0..<11 { referee.awardPoint(to: Player.player2) }
+        referee.confirmNextGame()
+        for _ in 0..<11 { referee.awardPoint(to: Player.player1) }
+        referee.confirmNextGame()
+        // The third game stays on the board (no "Volgende game" after the last point)
+        for _ in 0..<11 { referee.awardPoint(to: Player.player2) }
+        XCTAssertTrue(referee.isGameOver)
+        var theirs = TeamPartij(slot: 4)
+        theirs.link(referee: referee, ownIsPlayer1: false)
+        XCTAssertEqual(theirs.ownPlayer, "Thé")
+        XCTAssertEqual(theirs.opponentPlayer, "Gerard")
+        XCTAssertEqual(theirs.gamesText, "11-0, 0-11, 11-0")
+        XCTAssertEqual(theirs.ownGames, 2)
+        XCTAssertEqual(theirs.linkedKind, "referee")
+    }
+
     func testTheReportReadsLikeAWhatsAppMessage() {
         var team = match([
             partij(1, [(11, 5), (11, 7), (11, 9)]),

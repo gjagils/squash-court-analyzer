@@ -3,8 +3,10 @@
 De externe test is op 5 oktober gestart met iOS 2.2 (18) en Android 0.5 (5).
 Tijdens de testperiode komen er drie tot vier externe builds, elk met
 bugfixes en kleine verbeteringen uit de testfeedback en **hooguit één
-feature**. Grote onderwerpen (competitiekoppeling, trainingsmodus,
-clubranglijst) wachten tot na de testperiode.
+feature**. Grote onderwerpen (trainingsmodus, clubranglijst) wachten tot
+na de testperiode. **Uitzondering (5 oktober):** Gerd-Jan koos de
+competitiekoppeling als feature van build 19; de badgevoortgang schuift
+een build door.
 
 **Bijgesteld 5 oktober:** de testperiode duurt twaalf dagen (tot en met
 17 oktober); daarna wordt voor Android productie aangevraagd. In twaalf dagen

@@ -180,6 +180,46 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         bestOf = summary.bestOf
     }
 
+    /// The games of a coach match just played, seen from our player: the
+    /// head start ("Later instappen") and the filled-in result have no score
+    public mutating func link(coach match: Match, ownIsPlayer1: Bool) {
+        var result: [TeamGame] = []
+        for _ in 0..<match.player1GamesBefore { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsPlayer1)) }
+        for _ in 0..<match.player2GamesBefore { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsPlayer1)) }
+        for game in match.completedGames {
+            let own = ownIsPlayer1 ? game.player1Score : game.player2Score
+            let their = ownIsPlayer1 ? game.player2Score : game.player1Score
+            result.append(TeamGame(ownPoints: own, theirPoints: their, ownWon: own > their))
+        }
+        for _ in 0..<match.player1GamesAfter { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsPlayer1)) }
+        for _ in 0..<match.player2GamesAfter { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsPlayer1)) }
+        ownPlayer = ownIsPlayer1 ? match.player1Name : match.player2Name
+        opponentPlayer = ownIsPlayer1 ? match.player2Name : match.player1Name
+        games = result
+        linkedMatchId = match.id.uuidString
+        linkedKind = "coach"
+        bestOf = match.bestOf
+    }
+
+    /// The games of a referee match just played, seen from our player (the
+    /// last game is still on the board when the match ends: `allGameResults`)
+    public mutating func link(referee match: RefereeMatch, ownIsPlayer1: Bool) {
+        var result: [TeamGame] = []
+        for _ in 0..<match.player1GamesBefore { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsPlayer1)) }
+        for _ in 0..<match.player2GamesBefore { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsPlayer1)) }
+        for game in match.allGameResults {
+            let own = ownIsPlayer1 ? game.player1Score : game.player2Score
+            let their = ownIsPlayer1 ? game.player2Score : game.player1Score
+            result.append(TeamGame(ownPoints: own, theirPoints: their, ownWon: (game.winner == Player.player1) == ownIsPlayer1))
+        }
+        ownPlayer = ownIsPlayer1 ? match.player1Name : match.player2Name
+        opponentPlayer = ownIsPlayer1 ? match.player2Name : match.player1Name
+        games = result
+        linkedMatchId = match.id.uuidString
+        linkedKind = "referee"
+        bestOf = match.bestOf
+    }
+
     /// Keeps the games as they are, but as a partij filled in by hand
     public mutating func unlink() {
         linkedMatchId = nil

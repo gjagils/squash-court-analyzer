@@ -45,12 +45,14 @@ struct ContentView: View {
                              aiCoach: IOSAICoach.context, shareText: { IOSShare.text($0) },
                              historyStore: SwiftDataMatchHistoryStore(context: modelContext),
                              settings: SettingsContext(aiCoach: IOSAICoach.context, backup: nil),
+                             teamMatchStore: HomeView.teamMatchStore,
                              onExit: { showingCoach = false })
         }
         .fullScreenCover(isPresented: $showingReferee) {
             let players = SwiftDataPlayerStore(context: modelContext)
             RefereeSessionView(store: SwiftDataRefereeMatchStore(context: modelContext), playerStore: players,
                                photoStore: players, shareText: { IOSShare.text($0) },
+                               teamMatchStore: HomeView.teamMatchStore,
                                onExit: { showingReferee = false })
         }
         .fullScreenCover(isPresented: $showingHistory) {

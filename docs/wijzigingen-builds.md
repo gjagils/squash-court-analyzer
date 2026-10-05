@@ -9,9 +9,36 @@ buildnummer, en de releasenotes (`release-notes/`) worden eruit geschreven.
 Vergeleken met iOS 2.2 (18) en Android 0.5 (5), 5 oktober 2026. Planning van
 de builds in de testperiode (drie tot vier, elk hooguit één feature):
 `docs/buildplanning-testperiode.md`: testperiode twaalf dagen, twee builds
-(rond 10 en 15 oktober), daarna productie aanvragen voor Android. Gepland als
-build 19: voortgang naar de volgende badgetrede. Hosting:
+(rond 10 en 15 oktober), daarna productie aanvragen voor Android. Build 19
+krijgt de competitiekoppeling (besluit Gerd-Jan, 5 oktober); de
+badgevoortgang schuift door. Hosting:
 `docs/hosting-verhuizing.md`.
+
+### Competitie: teamwedstrijden (de feature van build 19)
+
+Tekst voor de releasenotes (gebruikerstaal):
+
+> **Nieuw: Competitie.** Op het beginscherm staat een rij Competitie. Daar
+> maak je een teamwedstrijd van de SBN-competitie aan (uit het programma van
+> Mijn team, of zelf ingevuld) met de vier partijen E1 tot en met E4. Hield
+> je een partij bij als coach of scheidsrechter? Koppel die, dan komen de
+> games vanzelf mee. De rest vul je in met de game-standen, of alleen wie
+> won. De app telt de games, de bonuspunten en de winnaar volgens de
+> SBN-regels (meeste games; gelijk: meeste partijen; nog gelijk: meeste
+> rallypunten; winnaar krijgt 3 bonuspunten) en maakt één verslag van de
+> avond om in de groepsapp te delen. Speel je op een dag dat je team een
+> wedstrijd heeft, dan vraagt de app na een coach- of
+> scheidsrechterwedstrijd of hij erbij hoort en bij welke partij.
+
+Techniek (niet voor de releasenotes): `TeamMatch` in Core met tests (12),
+opslag in één JSON-bestand per telefoon (`JSONFileTeamMatchStore`, geen
+SwiftData- of Room-migratie), gedeelde schermen `SharedTeamMatchesView`,
+`SharedTeamMatchView`, `TeamPartijEditor` en `TeamMatchLinkPrompt` in
+SquashAnalyzerUI. Nog niet: teamwedstrijden in de back-up, live meekijken
+per teamwedstrijd, vergelijken met de SBN-uitslag, badgecategorie
+Teamspeler. Getest op simulator en emulator (aanmaken uit het programma,
+partij invullen, koppelen vanuit Afgeronde wedstrijden, vraag na een
+scheidsrechterwedstrijd, verslag delen, opslag na herinstallatie).
 
 ### Live meekijken en website: nieuwe hosting
 
@@ -116,7 +143,7 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
 
 ## Backlog
 
-- [ ] **Wedstrijd koppelen aan een competitiewedstrijd** (verkennen in de testperiode).
+- [x] **Wedstrijd koppelen aan een competitiewedstrijd** (gebouwd 5 oktober voor build 19, zie hierboven; live per teamwedstrijd en SBN-vergelijking nog niet).
       Een SBN-teamwedstrijd = 4 partijen (E1–E4, singles, best of 5 tot 11).
       Uitslag = gewonnen games over de 4 partijen; competitiepunten = games + 3
       bonuspunten voor de winnaar. Winnaar: eerst meeste games; gelijk → meeste

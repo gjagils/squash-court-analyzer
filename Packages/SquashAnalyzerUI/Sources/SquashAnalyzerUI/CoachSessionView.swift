@@ -23,6 +23,10 @@ public struct CoachSessionView: View {
     let settings: SettingsContext?
     @State private var showingHistory = false
     @State private var showingSettings = false
+    /// Competitie: after a finished match on a match day, ask which partij it is
+    let teamMatchStore: (any TeamMatchStore)?
+    @State private var linkCandidate: TeamMatch? = nil
+    @State private var linkAsked = false
     @Environment(\.dismiss) private var dismiss
     @State private var match: Match? = nil
     @State private var pending: Match? = nil
@@ -33,8 +37,10 @@ public struct CoachSessionView: View {
 
     public init(store: any CoachMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil, aiCoach: AICoachContext? = nil,
                 shareText: ((String) -> Void)? = nil, historyStore: (any MatchHistoryStore)? = nil, settings: SettingsContext? = nil,
+                teamMatchStore: (any TeamMatchStore)? = nil,
                 onExit: @escaping @MainActor () -> Void) {
         self.store = store
+        self.teamMatchStore = teamMatchStore
         self.historyStore = historyStore
         self.settings = settings
         self.shareText = shareText
@@ -55,7 +61,7 @@ public struct CoachSessionView: View {
                 onHistory: historyStore == nil ? nil : { showingHistory = true },
                 onSettings: settings == nil ? nil : { showingSettings = true },
                 onNewMatch: { startOver(match) },
-                onExit: { persist(match, exit: true) })
+                onExit: { requestExit(match) })
                 .disabled(saver.busy || saver.failed)
             } else if let pending {
                 ResumePromptCard(message: pending.resumeMessage,
@@ -120,6 +126,43 @@ public struct CoachSessionView: View {
                             }
                         }
                 }
+            }
+        }
+        .sheet(isPresented: Binding(get: { linkCandidate != nil }, set: { if !$0 { linkCandidate = nil } })) {
+            if let candidate = linkCandidate, let match {
+                TeamMatchLinkPrompt(team: candidate, player1Name: match.player1Name, player2Name: match.player2Name) { slot, ownIsPlayer1 in
+                    var team = candidate
+                    var partij = team.partij(slot)
+                    partij.link(coach: match, ownIsPlayer1: ownIsPlayer1)
+                    team.update(partij)
+                    linkCandidate = nil
+                    Task { @MainActor in
+                        try? await teamMatchStore?.save(team)
+                        persist(match, exit: true)
+                    }
+                } onSkip: {
+                    linkCandidate = nil
+                    persist(match, exit: true)
+                }
+            }
+        }
+    }
+
+    /// "Klaar" after the match: on a match day of Mijn team first ask whether
+    /// it belongs to the team match (once); then save and go home
+    private func requestExit(_ value: Match) {
+        guard value.isMatchOver, !linkAsked, let teamMatchStore else {
+            persist(value, exit: true)
+            return
+        }
+        linkAsked = true
+        Task { @MainActor in
+            if let candidate = await TeamMatchSupport.candidate(store: teamMatchStore),
+               candidate.partijLinked(to: value.id.uuidString) == nil {
+                persist(value, exit: false)
+                linkCandidate = candidate
+            } else {
+                persist(value, exit: true)
             }
         }
     }

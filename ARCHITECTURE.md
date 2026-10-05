@@ -57,6 +57,30 @@ Players earn badges during a match, in coach and referee mode, but only players 
 - **Where badges show.** Not during the match (no interruption while counting). The "Wedstrijd klaar" screen shows a "Badges verdiend" strip and a "Bekijk badges" button next to "Deel score", only when a picked player earned something. The badge screen per player shows the badges new in this match, the collection with a count per badge ("5 op rij · 3×" = earned in 3 matches, one award per match), locked badges still to earn, and "Deel kaart". The same screen opens from the player list; history cards get a small medal icon for matches with a badge.
 - **App Store / privacy.** No accounts (no in-app account deletion or Sign in with Apple needed), nothing public or searchable (no user-generated content moderation), and no data leaves the device except in links the user sends, so the privacy label can stay "Data Not Collected" (verify when filling it in). The privacy policy gets a paragraph on shared player cards, and the share flow asks to share only with the player's consent.
 
+## Competitie (teamwedstrijden)
+
+An SBN team match is four singles (E1–E4). `TeamMatch` (Core,
+`TeamMatch.swift`) holds the fixture (from `LeagueFixture` of Mijn team or
+typed in), our side (home/away) and four `TeamPartij`s with `TeamGame`s seen
+from our player (points optional, winner always known). `TeamMatchScore` is
+pure: games, partijen, rally points, winner (most games; tie → most partijen;
+tie → most rally points when every game has a score; else a draw) and
+competition points (games + 3 bonus for the winner, only once all four are
+decided). A partij can be linked to a tracked coach or referee match
+(`link(_: MatchHistorySummary, ownIsPlayer1:)` from the history,
+`link(coach:)` / `link(referee:)` from a match just played; `linkedMatchId`
+is the history id, so "Vernieuwen" re-reads it). `TeamMatchReport.text` is
+the WhatsApp message. Storage is one JSON file per phone
+(`JSONFileTeamMatchStore`, shared by iOS in Application Support and Android
+in `filesDir`; no SwiftData or Room change, not yet in the backup). UI in
+SquashAnalyzerUI: `SharedTeamMatchesView` (list, new from the fixtures or
+by hand), `SharedTeamMatchView`, `TeamPartijEditor` (roster chips from Mijn
+team, scores or winner only, link picker with the match day on top) and
+`TeamMatchLinkPrompt`, which both session views show once after a finished
+match when `TeamMatchSupport.candidate` finds a team match of today (saved or
+a fixture of Mijn team). Later: live per team match, SBN comparison, badge
+category Teamspeler.
+
 ## Android port
 
 A Skip-based (Swift → Kotlin/Compose) Android port is planned and in progress.

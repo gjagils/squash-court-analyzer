@@ -17,6 +17,103 @@ public enum TeamMatchSupport {
         guard !saved.isEmpty, let link = try? LeagueTeamLink(saved) else { return nil }
         return LeagueTeamStorage.cachedSnapshot(for: link)
     }
+
+    /// The team match of today, to ask about after a coach or referee match:
+    /// one already started on this phone, else a match of Mijn team played
+    /// today (not saved until a partij is linked). Nil on an ordinary day.
+    @MainActor public static func candidate(store: any TeamMatchStore, now: Date = Date()) async -> TeamMatch? {
+        let calendar = Calendar.current
+        if let all = try? await store.loadAll() {
+            for match in all where calendar.isDate(match.date, inSameDayAs: now) { return match }
+        }
+        guard let team = cachedTeam() else { return nil }
+        for fixture in team.fixtures where calendar.isDate(fixture.date, inSameDayAs: now) {
+            return TeamMatch.from(fixture: fixture, ownTeam: team.name)
+        }
+        return nil
+    }
+}
+
+/// After a match on a match day of Mijn team: does it belong to the team
+/// match, as which partij, and which player is ours?
+public struct TeamMatchLinkPrompt: View {
+    let team: TeamMatch
+    let player1Name: String
+    let player2Name: String
+    /// slot (1...4) and whether our player is player 1 of the match
+    let onLink: (Int, Bool) -> Void
+    let onSkip: () -> Void
+
+    @State private var slot: Int? = nil
+
+    public init(team: TeamMatch, player1Name: String, player2Name: String,
+                onLink: @escaping (Int, Bool) -> Void, onSkip: @escaping () -> Void) {
+        self.team = team
+        self.player1Name = player1Name
+        self.player2Name = player2Name
+        self.onLink = onLink
+        self.onSkip = onSkip
+    }
+
+    public var body: some View {
+        ZStack {
+            SharedColors.background.ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("COMPETITIE VANDAAG")
+                        .font(.system(size: 11, weight: .semibold))
+                        .tracking(1.4)
+                        .foregroundColor(SharedColors.accent)
+                    Text(team.title)
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                        .foregroundColor(SharedColors.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Hoort \(player1Name) – \(player2Name) bij deze teamwedstrijd? Kies de partij.")
+                        .font(.system(size: 14))
+                        .foregroundColor(SharedColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    VStack(spacing: 8) {
+                        ForEach(team.partijen, id: \.slot) { partij in
+                            Button { slot = partij.slot } label: {
+                                HStack(spacing: 12) {
+                                    Text(partij.label)
+                                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                                        .foregroundColor(SharedColors.background)
+                                        .frame(width: 30, height: 30)
+                                        .background(slot == partij.slot ? SharedColors.accent : SharedColors.textMuted)
+                                        .clipShape(Circle())
+                                    Text(partij.hasEntry
+                                         ? "\(partij.ownPlayer.isEmpty ? "?" : partij.ownPlayer) – \(partij.opponentPlayer.isEmpty ? "?" : partij.opponentPlayer) · \(partij.standText)"
+                                         : "nog leeg")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(partij.hasEntry ? SharedColors.textPrimary : SharedColors.textMuted)
+                                        .lineLimit(1)
+                                    Spacer()
+                                }
+                                .padding(12)
+                                .background(slot == partij.slot ? SharedColors.accent.opacity(0.14) : Color.white.opacity(0.04))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    if let slot {
+                        Text("Wie is onze speler (\(team.ownName))?")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(SharedColors.textPrimary)
+                        HStack(spacing: 10) {
+                            ActionButton(player1Name, style: .filled) { onLink(slot, true) }
+                            ActionButton(player2Name, style: .filled, color: SharedColors.steelBlueLight) { onLink(slot, false) }
+                        }
+                    }
+                    ActionButton("Nee, gewone wedstrijd", color: SharedColors.textSecondary, action: onSkip)
+                        .padding(.top, 8)
+                }
+                .padding(24)
+            }
+        }
+        .preferredColorScheme(.dark)
+    }
 }
 
 /// Afgeronde en lopende teamwedstrijden, nieuwste eerst

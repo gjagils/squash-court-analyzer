@@ -13,15 +13,30 @@ de builds in de testperiode (drie tot vier, elk hooguit één feature):
 build 19: voortgang naar de volgende badgetrede. Hosting:
 `docs/hosting-verhuizing.md`.
 
-### Live meekijken
-- **Live-server bij Cloudflare.** `live.squashanalyzer.com` wijst sinds 5
-  oktober naar de Cloudflare-versie (`server/live-worker`, Durable Objects);
-  de NAS-server is reserve. Voor de gebruiker verandert niets aan de link.
-  Getest op de iPhone met een scheidsrechter- en een coachwedstrijd, foto's,
-  WhatsApp-link en vliegtuigstand: "werkt super soepel". De schakelaar
-  Alfa/Beta die in deze branch zat is weer verwijderd (nooit in een build).
-- **Kijkpagina:** elke gewonnen game in de kleur van de winnaar, en de grote
-  scores staan recht onder elkaar (kolom vast op twee cijfers).
+### Live meekijken en website: nieuwe hosting
+
+Tekst voor de releasenotes (gebruikerstaal):
+
+> **Live meekijken en de website draaien nu bij Cloudflare.** Tot nu toe
+> stonden de livepagina en squashanalyzer.com op een eigen server thuis.
+> Vanaf nu draaien ze op het wereldwijde netwerk van Cloudflare: sneller,
+> altijd bereikbaar (ook als een thuisverbinding hapert) en elke
+> livewedstrijd krijgt zijn eigen stukje server, dus drukte bij de ene
+> wedstrijd raakt de andere niet. Voor jou verandert er niets: dezelfde
+> links, dezelfde app. Er wordt nog steeds niets bewaard: alleen voornamen,
+> de stand en een kleine spelersfoto, en twee uur na de wedstrijd wordt
+> alles gewist.
+>
+> **Op de livepagina** krijgt elke gewonnen game de kleur van de winnaar en
+> staan de scores netjes onder elkaar.
+
+Techniek (niet voor de releasenotes): `live.squashanalyzer.com` en
+`squashanalyzer.com` zijn sinds 5 oktober Cloudflare Workers
+(`server/live-worker`, `server/website-worker`); de NAS is reserve, zie
+`docs/hosting-verhuizing.md`. Getest op de iPhone met een scheidsrechter- en
+een coachwedstrijd, foto's, WhatsApp-link en vliegtuigstand: "werkt super
+soepel". De schakelaar Alfa/Beta uit de testbranch is weer verwijderd
+(nooit in een build geweest).
 
 ### Gemeld door testers
 (wat · wie · platform · nu / volgende / later)

@@ -29,11 +29,37 @@ Vergeleken met iOS 2.2 (17) en Android 0.4 (4), 3 oktober 2026.
   anders eens per week. Eerst haalde de app het team op bij elk beginscherm.
 - **Vernieuwen**-knop onderaan het teamscherm om meteen op te halen.
 
+### Badges
+- **Treden brons, zilver en goud** voor zeventien badges; de rand van de badge
+  laat de trede zien en het getal in de badge is de drempel. 5 points in a row
+  5/7/10 (goud is de oude Perfect ten), slagbadges 4/6/8 per game, Front row
+  king en Back from the dead 5/7/9, Endurance 60/90/120 s, Iron man 60/75/90
+  min, Hat trick 3/5/7, Nemesis 5/10/20, Ten out of ten 10/25/50, Centurion
+  100/500/1000, Veteran 25/50/100. Wie de drempel van goud haalt, krijgt in die
+  wedstrijd alle drie de treden; al verdiende badges blijven brons.
+- **Zeven nieuwe badges:** Rock solid (wedstrijd zonder unforced error, coach),
+  Back wall boss (5 winners achterin, coach), Sneltrein (game in minder dan 6
+  minuten, coach), Vette winst (tegenstander in geen game boven de 5),
+  Clubicoon (10 verschillende tegenstanders, één keer), Rivalen (10 wedstrijden
+  tegen dezelfde tegenstander) en Hand-out held (5 rally's op rij gewonnen op
+  de service van de ander). Daarmee zijn er 37 badges (71 met treden).
+- **Schermen:** de catalogus toont per badge de drie treden naast elkaar met de
+  drempels; het spelersscherm, de badgekaart (app en website) en de strip na de
+  wedstrijd tonen per badge de hoogste trede. Bij de momenten staat de trede
+  erbij ("Goud · Tegen …").
+- Artwork van Codex (`docs/style/badge-artwork-overdracht-claude-code.md`); de
+  oude imagesets van de zeventien omgezette badges en `perfect-ten` staan nog
+  in `Module.xcassets` en kunnen weg zodra de treden op beide toestellen zijn
+  gezien.
+
 ### Probeer vooral
 - Zet de tekst groot (Samsung: Lettergrootte max; iPhone: Tekstgrootte) en loop
   beginscherm, Coach, Scheidsrechter en Afgeronde wedstrijden door.
 - Stop een scheidsrechterwedstrijd, wacht even en hervat: loopt de klok verder
   waar hij was?
+- Speel in coachmodus een game met 6 of 8 drops en kijk of zilver/goud op de
+  strip, het spelersscherm en de gedeelde kaart verschijnen; open "Alle badges"
+  voor de treden en de zeven nieuwe badges.
 
 ## Backlog
 
@@ -52,17 +78,19 @@ Vergeleken met iOS 2.2 (17) en Android 0.4 (4), 3 oktober 2026.
       bijgehouden, achteraf invullen), coacht daarna E2 en E1 en fluit E3: samen
       één complete teamwedstrijd.
 
-- [ ] **Badges met treden (brons, zilver, goud)** (gekozen: idee B). De huidige
+- [x] **Badges met treden (brons, zilver, goud)** (gekozen: idee B). De huidige
       badge wordt brons; zwaardere treden erboven, bijv. 5 op een rij 5/7/10
       (goud = Perfect ten), slagbadges 4/6/8 per game, Ten out of ten 10/25/50,
       Centurion 100/500/1000, Veteran 25/50/100. Al verdiende badges blijven brons.
       Rand bepaalt de trede. Artwork: Codex, prompt in `docs/style/badge-prompt-codex.md`.
-- [ ] **Nieuwe badges:** Rock solid (wedstrijd zonder unforced errors), Back wall
+      Gebouwd voor de volgende build (zie hierboven).
+- [x] **Nieuwe badges:** Rock solid (wedstrijd zonder unforced errors), Back wall
       boss (5 winners achterin), Sneltrein (game < 6 min), Vette winst
       (tegenstander in geen game boven 5), Clubicoon (10 verschillende
       tegenstanders), Rivalen (10× dezelfde tegenstander), Hand-out held (5 rally's
-      op rij bij serve van de ander). Later, met de competitiekoppeling: een eigen
-      badgecategorie voor competitiewedstrijden (o.a. Teamspeler).
+      op rij bij serve van de ander). Gebouwd voor de volgende build.
+- [ ] Later, met de competitiekoppeling: een eigen badgecategorie voor
+      competitiewedstrijden (o.a. Teamspeler).
 
 ## iOS 2.2 build 17 en Android 0.4 (4), 3 oktober 2026 (geüpload)
 

@@ -56,41 +56,57 @@
   </main>
 
   <script>
-    // Badge ids and texts as in BadgeKind (the app); unknown ids are skipped.
-    // Artwork lives in ../badges/<id>.png; a badge without artwork gets a medal.
-    const BADGES = {
-      "five-in-a-row": ["5 points in a row", "5 punten achter elkaar"],
-      "eleven-nil": ["Alles is voor Bassie", "Win een game met 11-0"],
-      "drop-it": ["Drop it like it's hot", "4 drops in één game"],
-      "kriss-cross": ["Kriss Kross", "4 crosses in één game"],
-      "back-from-the-death": ["Back from the dead", "Win een game na 5 punten achterstand"],
-      "going-the-distance": ["Going the distance", "Win de wedstrijd na 0-2 in games"],
-      "ace-of-pace": ["Ace of pace", "4 servicewinners in één game"],
-      "lob-story": ["Lob story", "4 lobwinners in één game"],
-      "volleywood": ["Volleywood", "4 volleywinners in één game"],
-      "clean-sweep": ["Clean sweep", "Win de wedstrijd met 3-0"],
-      "cool-under-pressure": ["Cool under pressure", "Win een game na 10-10"],
-      "drive-me-crazy": ["Drive me crazy", "4 drivewinners in één game"],
-      "boast-buster": ["Boast buster", "4 boastwinners in één game"],
-      "full-house": ["Full house", "Scoor met alle 6 slagtypes in één wedstrijd"],
-      "hat-trick": ["Hat trick", "Win 3 wedstrijden op rij"],
-      "houdini": ["Houdini", "Werk 3 matchpoints weg en win de wedstrijd"],
-      "marathon-man": ["Marathon man", "Win een game met minstens 20 punten"],
-      "off-the-mark": ["Off the mark", "Win je eerste wedstrijd"],
-      "centurion": ["Centurion", "Scoor in totaal 100 punten"],
-      "double-trouble": ["Double trouble", "Win 2 games na 10-10 in één wedstrijd"],
-      "ten-out-of-ten": ["Ten out of ten", "Win in totaal 10 wedstrijden"],
-      "brick-wall": ["Brick wall", "Win een game zonder unforced errors"],
-      "front-row-king": ["Front row king", "5 winners vanuit de voorste zones in één game"],
-      "endurance": ["Endurance", "Win een rally van minstens 60 seconden"],
-      "perfect-ten": ["Perfect ten", "10 punten achter elkaar"],
-      "unbreakable": ["Unbreakable", "Win een game zonder ooit achter te staan"],
-      "photo-finish": ["Photo finish", "Win een wedstrijd met 3-2"],
-      "stroke-of-genius": ["Stroke of genius", "Krijg 3 strokes toegekend in één game"],
-      "iron-man": ["Iron man", "Speel een wedstrijd van minstens 60 minuten uit"],
-      "nemesis": ["Nemesis", "Win 5 keer van dezelfde tegenstander"],
-      "veteran": ["Veteran", "Speel 25 wedstrijden, gewonnen of niet"]
-    };
+    // Badges as in BadgeKind (the app); unknown ids are skipped. A badge with
+    // tiers lists the ids of its bronze, silver and gold tier (the old "perfect-ten"
+    // is the gold tier of "five-in-a-row"); its artwork is ../badges/<id>-<tier>.png,
+    // a plain badge's ../badges/<id>.png. A badge without artwork gets a medal.
+    const TIERS = ["bronze", "silver", "gold"];
+    const TIER_NAMES = ["Brons", "Zilver", "Goud"];
+    const BADGES = [
+      {"id": "five-in-a-row", "title": "5 points in a row", "detail": "5 punten achter elkaar", "tiers": ["five-in-a-row", "five-in-a-row-silver", "perfect-ten"], "summary": "Brons 5 · Zilver 7 · Goud 10"},
+      {"id": "eleven-nil", "title": "Alles is voor Bassie", "detail": "Win een game met 11-0"},
+      {"id": "drop-it", "title": "Drop it like it's hot", "detail": "4 drops in één game", "tiers": ["drop-it", "drop-it-silver", "drop-it-gold"], "summary": "Brons 4 · Zilver 6 · Goud 8"},
+      {"id": "kriss-cross", "title": "Kriss Kross", "detail": "4 crosses in één game", "tiers": ["kriss-cross", "kriss-cross-silver", "kriss-cross-gold"], "summary": "Brons 4 · Zilver 6 · Goud 8"},
+      {"id": "back-from-the-death", "title": "Back from the dead", "detail": "Win een game na 5 punten achterstand", "tiers": ["back-from-the-death", "back-from-the-death-silver", "back-from-the-death-gold"], "summary": "Brons 5 · Zilver 7 · Goud 9"},
+      {"id": "going-the-distance", "title": "Going the distance", "detail": "Win de wedstrijd na 0-2 in games"},
+      {"id": "ace-of-pace", "title": "Ace of pace", "detail": "4 servicewinners in één game", "tiers": ["ace-of-pace", "ace-of-pace-silver", "ace-of-pace-gold"], "summary": "Brons 4 · Zilver 6 · Goud 8"},
+      {"id": "lob-story", "title": "Lob story", "detail": "4 lobwinners in één game", "tiers": ["lob-story", "lob-story-silver", "lob-story-gold"], "summary": "Brons 4 · Zilver 6 · Goud 8"},
+      {"id": "volleywood", "title": "Volleywood", "detail": "4 volleywinners in één game", "tiers": ["volleywood", "volleywood-silver", "volleywood-gold"], "summary": "Brons 4 · Zilver 6 · Goud 8"},
+      {"id": "clean-sweep", "title": "Clean sweep", "detail": "Win de wedstrijd met 3-0"},
+      {"id": "cool-under-pressure", "title": "Cool under pressure", "detail": "Win een game na 10-10"},
+      {"id": "drive-me-crazy", "title": "Drive me crazy", "detail": "4 drivewinners in één game", "tiers": ["drive-me-crazy", "drive-me-crazy-silver", "drive-me-crazy-gold"], "summary": "Brons 4 · Zilver 6 · Goud 8"},
+      {"id": "boast-buster", "title": "Boast buster", "detail": "4 boastwinners in één game", "tiers": ["boast-buster", "boast-buster-silver", "boast-buster-gold"], "summary": "Brons 4 · Zilver 6 · Goud 8"},
+      {"id": "full-house", "title": "Full house", "detail": "Scoor met alle 6 slagtypes in één wedstrijd"},
+      {"id": "hat-trick", "title": "Hat trick", "detail": "Win 3 wedstrijden op rij", "tiers": ["hat-trick", "hat-trick-silver", "hat-trick-gold"], "summary": "Brons 3 · Zilver 5 · Goud 7"},
+      {"id": "houdini", "title": "Houdini", "detail": "Werk 3 matchpoints weg en win de wedstrijd"},
+      {"id": "marathon-man", "title": "Marathon man", "detail": "Win een game met minstens 20 punten"},
+      {"id": "off-the-mark", "title": "Off the mark", "detail": "Win je eerste wedstrijd"},
+      {"id": "centurion", "title": "Centurion", "detail": "Scoor in totaal 100 punten", "tiers": ["centurion", "centurion-silver", "centurion-gold"], "summary": "Brons 100 · Zilver 500 · Goud 1000"},
+      {"id": "double-trouble", "title": "Double trouble", "detail": "Win 2 games na 10-10 in één wedstrijd"},
+      {"id": "ten-out-of-ten", "title": "Ten out of ten", "detail": "Win in totaal 10 wedstrijden", "tiers": ["ten-out-of-ten", "ten-out-of-ten-silver", "ten-out-of-ten-gold"], "summary": "Brons 10 · Zilver 25 · Goud 50"},
+      {"id": "brick-wall", "title": "Brick wall", "detail": "Win een game zonder unforced errors"},
+      {"id": "front-row-king", "title": "Front row king", "detail": "5 winners vanuit de voorste zones in één game", "tiers": ["front-row-king", "front-row-king-silver", "front-row-king-gold"], "summary": "Brons 5 · Zilver 7 · Goud 9"},
+      {"id": "endurance", "title": "Endurance", "detail": "Win een rally van minstens 60 seconden", "tiers": ["endurance", "endurance-silver", "endurance-gold"], "summary": "Brons 60 s · Zilver 90 s · Goud 120 s"},
+      {"id": "unbreakable", "title": "Unbreakable", "detail": "Win een game zonder ooit achter te staan"},
+      {"id": "photo-finish", "title": "Photo finish", "detail": "Win een wedstrijd met 3-2"},
+      {"id": "stroke-of-genius", "title": "Stroke of genius", "detail": "Krijg 3 strokes toegekend in één game"},
+      {"id": "iron-man", "title": "Iron man", "detail": "Speel een wedstrijd van minstens 60 minuten uit", "tiers": ["iron-man", "iron-man-silver", "iron-man-gold"], "summary": "Brons 60 min · Zilver 75 min · Goud 90 min"},
+      {"id": "nemesis", "title": "Nemesis", "detail": "Win 5 keer van dezelfde tegenstander", "tiers": ["nemesis", "nemesis-silver", "nemesis-gold"], "summary": "Brons 5 · Zilver 10 · Goud 20"},
+      {"id": "veteran", "title": "Veteran", "detail": "Speel 25 wedstrijden, gewonnen of niet", "tiers": ["veteran", "veteran-silver", "veteran-gold"], "summary": "Brons 25 · Zilver 50 · Goud 100"},
+      {"id": "rock-solid", "title": "Rock solid", "detail": "Win de wedstrijd zonder één unforced error"},
+      {"id": "back-wall-boss", "title": "Back wall boss", "detail": "5 winners vanuit de achterste zones in één game"},
+      {"id": "sneltrein", "title": "Sneltrein", "detail": "Win een game in minder dan 6 minuten"},
+      {"id": "vette-winst", "title": "Vette winst", "detail": "Win de wedstrijd zonder dat de tegenstander in een game boven de 5 komt"},
+      {"id": "clubicoon", "title": "Clubicoon", "detail": "Speel tegen 10 verschillende tegenstanders"},
+      {"id": "rivalen", "title": "Rivalen", "detail": "Speel 10 wedstrijden tegen dezelfde tegenstander"},
+      {"id": "hand-out-held", "title": "Hand-out held", "detail": "Win 5 rally's achter elkaar op de service van de ander"},
+    ];
+    // Every badge id → its badge and tier (null for a badge without tiers)
+    const KIND = {};
+    for (const badge of BADGES) {
+      if (badge.tiers) badge.tiers.forEach((id, tier) => { KIND[id] = { badge, tier }; });
+      else KIND[badge.id] = { badge, tier: null };
+    }
 
     function decodeBase64Url(text) {
       const base64 = text.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((text.length + 3) % 4);
@@ -132,19 +148,26 @@
       box.replaceChildren();
       box.append(el("div", "card-label", "Badgekaart"), el("div", "card-name", card.n));
 
-      const active = (card.a || []).filter(a => a.d == null && BADGES[a.b]);
+      const active = (card.a || []).filter(a => a.d == null && KIND[a.b]);
       const badges = el("div", "badges");
-      for (const [id, [title, detail]] of Object.entries(BADGES)) {
-        const count = active.filter(a => a.b === id).length;
+      for (const badge of BADGES) {
+        // A badge with tiers: the highest tier earned, counted by the tier with
+        // the most moments (bronze comes with every silver or gold), as in the app
+        const ids = badge.tiers || [badge.id];
+        const counts = ids.map(id => active.filter(a => a.b === id).length);
+        let best = -1;
+        counts.forEach((n, index) => { if (n > 0) best = index; });
+        const count = Math.max(...counts);
         const item = el("div", count > 0 ? "badge" : "badge locked");
         const medal = el("div", "medal");
         const img = document.createElement("img");
-        img.src = "../badges/" + id + ".png";
+        img.src = "../badges/" + (badge.tiers ? badge.id + "-" + TIERS[Math.max(best, 0)] : badge.id) + ".png";
         img.alt = "";
         img.onerror = () => { img.remove(); medal.textContent = "🏅"; };
         medal.append(img);
-        item.append(medal, el("div", "badge-title", title));
-        item.append(count > 0 ? el("div", "badge-count", count + "×") : el("div", "badge-detail", detail));
+        item.append(medal, el("div", "badge-title", badge.title));
+        const earned = badge.tiers && best >= 0 ? TIER_NAMES[best] + " · " + count + "×" : count + "×";
+        item.append(count > 0 ? el("div", "badge-count", earned) : el("div", "badge-detail", badge.detail));
         badges.append(item);
       }
       box.append(badges);
@@ -155,7 +178,8 @@
         const formatter = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "short", year: "numeric" });
         for (const award of active.sort((x, y) => y.t - x.t)) {
           const row = el("div", "moment");
-          const what = BADGES[award.b][0] + (award.o ? " · tegen " + award.o : "");
+          const kind = KIND[award.b];
+          const what = kind.badge.title + (kind.tier == null ? "" : " · " + TIER_NAMES[kind.tier]) + (award.o ? " · tegen " + award.o : "");
           row.append(el("span", null, what), el("span", null, formatter.format(new Date(award.t * 1000))));
           moments.append(row);
         }

@@ -4,7 +4,8 @@ import SquashAnalyzerCore
 /// A player's badges on Android, like iOS' PlayerBadgesView: how many earned,
 /// every badge of the catalogue (earned in colour with a count, the rest grey
 /// with how to earn it), and per earned badge the moments it was earned, which
-/// can be deleted. Named `Shared...` because the iOS app target has its own
+/// can be deleted. A badge with tiers is one tile, showing the highest tier
+/// earned. Named `Shared...` because the iOS app target has its own
 /// `PlayerBadgesView`.
 ///
 /// "Deel kaart" sends the card as a snapshot link
@@ -37,6 +38,7 @@ public struct SharedPlayerBadgesView: View {
         self.cardInbox = cardInbox
     }
 
+    /// Moments of one tier
     private func count(_ badge: BadgeKind) -> Int {
         var result = 0
         for moment in moments where moment.badge == badge {
@@ -45,9 +47,28 @@ public struct SharedPlayerBadgesView: View {
         return result
     }
 
-    private var earnedKinds: Int {
+    /// How often the badge was earned: the tier with the most moments (bronze
+    /// comes with every silver or gold, unless a moment was deleted)
+    private func familyCount(_ family: BadgeKind) -> Int {
         var result = 0
-        for kind in BadgeKind.allCases where count(kind) > 0 {
+        for kind in family.series {
+            result = max(result, count(kind))
+        }
+        return result
+    }
+
+    /// The highest tier earned, or the bronze/plain badge while nothing is earned
+    private func shownKind(_ family: BadgeKind) -> BadgeKind {
+        var best = family
+        for kind in family.series where count(kind) > 0 {
+            best = kind
+        }
+        return best
+    }
+
+    private var earnedFamilies: Int {
+        var result = 0
+        for family in BadgeKind.families where familyCount(family) > 0 {
             result += 1
         }
         return result
@@ -62,7 +83,7 @@ public struct SharedPlayerBadgesView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         header
-                        section("BADGES · \(earnedKinds) VAN \(BadgeKind.allCases.count)") {
+                        section("BADGES · \(earnedFamilies) VAN \(BadgeKind.families.count)") {
                             // Rows of three, not a LazyVGrid: on Android that becomes a
                             // scroll area of its own inside the page
                             VStack(spacing: 18) {
@@ -92,7 +113,7 @@ public struct SharedPlayerBadgesView: View {
         .task(id: cardInbox.importCount) { await load() }
     }
 
-    private static var rowCount: Int { (BadgeKind.allCases.count + 2) / 3 }
+    private static var rowCount: Int { (BadgeKind.families.count + 2) / 3 }
 
     private func badgeRow(_ row: Int) -> some View {
         HStack(alignment: .top, spacing: 8) {
@@ -104,23 +125,24 @@ public struct SharedPlayerBadgesView: View {
 
     @ViewBuilder
     private func gridCell(_ index: Int) -> some View {
-        if index < BadgeKind.allCases.count {
-            let kind = BadgeKind.allCases[index]
+        if index < BadgeKind.families.count {
+            let family = BadgeKind.families[index]
             NavigationLink {
-                SharedBadgeMomentsView(kind: kind, moments: moments(of: kind)) { moment in remove(moment) }
+                SharedBadgeMomentsView(family: family, moments: moments(of: family)) { moment in remove(moment) }
             } label: {
-                badgeTile(kind)
+                badgeTile(family)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("\(kind.title), \(count(kind) > 0 ? "\(count(kind)) keer verdiend" : "nog niet verdiend")")
+            .accessibilityLabel("\(shownKind(family).tieredTitle), \(familyCount(family) > 0 ? "\(familyCount(family)) keer verdiend" : "nog niet verdiend")")
         } else {
             Color.clear.frame(maxWidth: .infinity, maxHeight: 1)
         }
     }
 
-    private func moments(of kind: BadgeKind) -> [BadgeMoment] {
+    /// The moments of every tier of the badge, newest first (as loaded)
+    private func moments(of family: BadgeKind) -> [BadgeMoment] {
         var list: [BadgeMoment] = []
-        for moment in moments where moment.badge == kind {
+        for moment in moments where moment.badge.family == family {
             list.append(moment)
         }
         return list
@@ -150,16 +172,17 @@ public struct SharedPlayerBadgesView: View {
         }
     }
 
-    private func badgeTile(_ kind: BadgeKind) -> some View {
-        let earned = count(kind)
+    private func badgeTile(_ family: BadgeKind) -> some View {
+        let earned = familyCount(family)
+        let shown = shownKind(family)
         return VStack(spacing: 4) {
-            BadgeMedallion(kind: kind, size: 76, showsTitle: true, isLocked: earned == 0)
+            BadgeMedallion(kind: shown, size: 76, showsTitle: true, isLocked: earned == 0)
             if earned > 0 {
-                Text("\(earned)×")
+                Text(Self.earnedText(shown, count: earned))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundColor(SharedColors.gold)
             } else {
-                Text(kind.detail)
+                Text(family.detail)
                     .font(.system(size: 10, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textMuted)
                     .multilineTextAlignment(.center)
@@ -167,6 +190,12 @@ public struct SharedPlayerBadgesView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .top)
+    }
+
+    /// "Goud · 3×" for a tier, "3×" for a badge without tiers
+    static func earnedText(_ kind: BadgeKind, count: Int) -> String {
+        guard let tier = kind.tier else { return "\(count)×" }
+        return tier.title + " · \(count)×"
     }
 
     private func remove(_ moment: BadgeMoment) {
@@ -198,12 +227,24 @@ public struct SharedPlayerBadgesView: View {
 }
 
 /// Every match in which the player earned this badge, as iOS' BadgeMomentsView:
-/// the badge with what it means, then "N× verdiend" with opponent and date.
-/// Deleting only marks the award, so recomputing the match does not bring it back.
+/// the badge with what it means, then "N× verdiend" with the tier, opponent and
+/// date. Deleting only marks the award, so recomputing the match does not bring it back.
 struct SharedBadgeMomentsView: View {
-    let kind: BadgeKind
+    /// The bronze or plain badge; the moments cover every tier of it
+    let family: BadgeKind
     @State var moments: [BadgeMoment]
     let onDelete: (BadgeMoment) -> Void
+
+    /// The highest tier among the moments, or the badge itself while none is earned
+    private var shownKind: BadgeKind {
+        var best = family
+        for kind in family.series {
+            for moment in moments where moment.badge == kind {
+                best = kind
+            }
+        }
+        return best
+    }
 
     var body: some View {
         ZStack {
@@ -211,19 +252,24 @@ struct SharedBadgeMomentsView: View {
             List {
                 Section {
                     HStack(spacing: 14) {
-                        BadgeMedallion(kind: kind, size: 72, showsTitle: false, isLocked: moments.isEmpty)
+                        BadgeMedallion(kind: shownKind, size: 72, showsTitle: false, isLocked: moments.isEmpty)
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(kind.title)
+                            Text(family.title)
                                 .font(.system(size: 17, weight: .bold, design: .rounded))
                                 .foregroundColor(SharedColors.textPrimary)
-                            Text(kind.detail)
+                            Text(family.detail)
                                 .font(.system(size: 12, weight: .medium, design: .rounded))
                                 .foregroundColor(SharedColors.textSecondary)
-                            if kind.coachOnly {
+                            if let summary = family.tierSummary {
+                                Text(summary)
+                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .foregroundColor(SharedColors.textMuted)
+                            }
+                            if family.coachOnly {
                                 Text("Alleen in coachmodus, waar de slagen worden bijgehouden")
                                     .font(.system(size: 11, weight: .medium, design: .rounded))
                                     .foregroundColor(SharedColors.textMuted)
-                            } else if kind.isCareer {
+                            } else if family.isCareer {
                                 Text("Telt de wedstrijden op dit toestel")
                                     .font(.system(size: 11, weight: .medium, design: .rounded))
                                     .foregroundColor(SharedColors.textMuted)
@@ -235,7 +281,7 @@ struct SharedBadgeMomentsView: View {
                 Section("\(moments.count)× verdiend") {
                     ForEach(moments) { moment in
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(moment.opponentName.isEmpty ? "Wedstrijd" : "Tegen \(moment.opponentName)")
+                            Text(Self.momentTitle(moment))
                                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                                 .foregroundColor(SharedColors.textPrimary)
                             Text(Self.dateText(moment.earnedAt))
@@ -255,7 +301,14 @@ struct SharedBadgeMomentsView: View {
             }
             .scrollContentBackground(.hidden)
         }
-        .pageTitle(kind.title)
+        .pageTitle(family.title)
+    }
+
+    /// "Goud · Tegen Kristian", "Tegen Kristian" or "Wedstrijd"
+    static func momentTitle(_ moment: BadgeMoment) -> String {
+        let against = moment.opponentName.isEmpty ? "Wedstrijd" : "Tegen \(moment.opponentName)"
+        guard let tier = moment.badge.tier else { return against }
+        return tier.title + " · " + against
     }
 
     /// "1 okt 2026 16:20", like iOS' medium date with short time

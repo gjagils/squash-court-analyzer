@@ -64,8 +64,9 @@ class BadgeAwardStore(
         // One query for all active awards, grouped by card
         val wanted = forPlayers.toSet()
         val cards = playerDao.all().filter { it.id in wanted }.associate { it.id to (it.cardId ?: it.id) }
+        // A badge with tiers counts once, whichever tiers are there
         val kindsPerCard = dao.allActive().groupBy { it.cardId }.mapValues { (_, rows) ->
-            rows.map { it.badge }.distinct().count { BadgeKind.init(rawValue = it) != null }
+            rows.mapNotNull { BadgeKind.init(rawValue = it.badge) }.map { it.family }.distinct().size
         }
         val result = Dictionary<String, Int>()
         for (id in forPlayers) result[id] = cards[id]?.let { kindsPerCard[it] } ?: 0

@@ -3,7 +3,8 @@ import SquashAnalyzerCore
 
 /// The artwork of a badge, shared by iOS and Android. The images live in this
 /// package (`Resources/Module.xcassets/badge-<id>`, 240px), so both apps use
-/// the same files; iOS' own `BadgeView` draws this too.
+/// the same files; iOS' own `BadgeView` draws this too. A tier has its own
+/// artwork (`badge-<id>-bronze` and so on), see `BadgeKind.imageName`.
 public struct BadgeArtwork: View {
     let kind: BadgeKind
 
@@ -49,12 +50,34 @@ public struct BadgeMedallion: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .accessibilityLabel("Badge \(kind.title)\(isLocked ? ", nog niet verdiend" : "")")
+        .accessibilityLabel("Badge \(kind.tieredTitle)\(isLocked ? ", nog niet verdiend" : "")")
+    }
+}
+
+/// The three tiers of a badge side by side (bronze, silver, gold), for the
+/// catalogue; a badge without tiers shows its one medallion in the same width
+public struct BadgeSeriesArtwork: View {
+    let family: BadgeKind
+    var size: CGFloat = 44.0
+
+    public init(family: BadgeKind, size: CGFloat = 44.0) {
+        self.family = family
+        self.size = size
+    }
+
+    public var body: some View {
+        HStack(spacing: 4) {
+            ForEach(family.series) { kind in
+                BadgeMedallion(kind: kind, size: family.hasTiers ? size : size + 12.0, showsTitle: false)
+            }
+        }
+        .frame(width: size * 3.0 + 8.0, alignment: .center)
     }
 }
 
 
-/// The full badge catalog: every badge there is, locked/unlocked state aside.
+/// The full badge catalog: every badge there is, locked/unlocked state aside,
+/// one row per badge with its three tiers where it has them.
 /// No player or award data needed, so this is reachable without any setup.
 /// Named `Shared...` (not `BadgeCatalogView`) because the iOS app target
 /// already has its own `BadgeCatalogView` with real artwork; the two must
@@ -65,26 +88,31 @@ public struct SharedBadgeCatalogView: View {
     public var body: some View {
         List {
             Section {
-                Text("Spelers die je kiest via \"Kies speler\" verdienen badges tijdens een wedstrijd, in coach- en scheidsrechtermodus. Badges met het label Coach vragen om de slagen die alleen coachmodus bijhoudt.")
+                Text("Spelers die je kiest via \"Kies speler\" verdienen badges tijdens een wedstrijd, in coach- en scheidsrechtermodus. Badges met het label Coach vragen om de slagen die alleen coachmodus bijhoudt. Een badge met drie treden verdien je in brons, zilver en goud: de rand laat zien hoe ver je bent.")
                     .font(.system(size: 12))
                     .foregroundColor(SharedColors.textSecondary)
                     .listRowBackground(Color.clear)
             }
             ForEach(BadgeKind.Category.allCases, id: \.self) { category in
                 Section {
-                    ForEach(BadgeKind.allCases.filter { $0.category == category }) { kind in
+                    ForEach(BadgeKind.families.filter { kind in kind.category == category }) { family in
                         HStack(spacing: 14) {
-                            BadgeMedallion(kind: kind, size: 56, showsTitle: false)
+                            BadgeSeriesArtwork(family: family)
                             VStack(alignment: .leading, spacing: 3) {
-                                Text(kind.title)
+                                Text(family.title)
                                     .font(.system(size: 15, weight: .semibold))
                                     .foregroundColor(SharedColors.textPrimary)
-                                Text(kind.detail)
+                                Text(family.detail)
                                     .font(.system(size: 12))
                                     .foregroundColor(SharedColors.textSecondary)
+                                if let summary = family.tierSummary {
+                                    Text(summary)
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundColor(SharedColors.textMuted)
+                                }
                                 HStack(spacing: 6) {
-                                    if kind.coachOnly { tag("Coach") }
-                                    if kind.isOnce { tag("Eén keer") }
+                                    if family.coachOnly { tag("Coach") }
+                                    if family.isOnce { tag("Eén keer") }
                                 }
                             }
                         }

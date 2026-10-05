@@ -283,7 +283,7 @@ public struct MatchBadgesRow: View {
                     BadgeMedallion(kind: kind, size: 26, showsTitle: false)
                 }
             }
-            Text("\(earning.name) · " + (earning.badges.count == 1 ? earning.badges[0].title : "\(earning.badges.count) badges"))
+            Text("\(earning.name) · " + (earning.badges.count == 1 ? earning.badges[0].tieredTitle : "\(earning.badges.count) badges"))
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
                 .lineLimit(1)
@@ -362,7 +362,7 @@ public struct SharedMatchBadgesSheet: View {
                 HStack(spacing: 14) {
                     BadgeMedallion(kind: kind, size: 52, showsTitle: false)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(kind.title)
+                        Text(kind.tieredTitle)
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(SharedColors.textPrimary)
                         Text(kind.detail)

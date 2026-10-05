@@ -400,46 +400,66 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
 
 // MARK: - Verslag
 
-/// The team match as a WhatsApp message
+/// The team match as a WhatsApp message, in the layouts of "Deel score":
+/// Scorekaart (a monospace table), Verslag (per partij) and the short
+/// three-liner. The picture is `ResultCard.from(_:)` below.
 public enum TeamMatchReport {
+    /// The full report ("Verslag")
     public static func text(_ match: TeamMatch) -> String {
+        text(match, style: MatchShareStyle.report)
+    }
+
+    public static func text(_ match: TeamMatch, style: MatchShareStyle) -> String {
+        switch style {
+        case .compact: return compact(match)
+        case .scorecard: return scorecard(match)
+        case .report: return report(match)
+        }
+    }
+
+    // Building blocks
+
+    /// "9–8" in games, the winner's games first
+    private static func winnerScore(_ match: TeamMatch) -> String {
+        let own = match.score.ownGames
+        let their = match.score.theirGames
+        return own >= their ? "\(own)–\(their)" : "\(their)–\(own)"
+    }
+
+    /// The result, or the stand while the team match is not over
+    static func resultLine(_ match: TeamMatch) -> String {
         let current = match.score
-        var lines: [String] = []
-        lines.append("🏆 TEAMWEDSTRIJD · \(dayText(match.date))")
-        lines.append(match.title)
         if current.isComplete {
-            var result = "Uitslag \(match.gamesText) in games · \(match.homePartijen)-\(match.awayPartijen) in partijen"
-            if let winner = match.winnerName {
-                result += " → \(winner) wint"
-            } else {
-                result += " → gelijkspel"
-            }
-            lines.append(result)
-            lines.append("Competitiepunten: \(match.home) \(match.homeCompetitionPoints) · \(match.away) \(match.awayCompetitionPoints)")
-        } else if current.partijenPlayed > 0 {
-            lines.append("Stand \(match.gamesText) in games · \(current.partijenPlayed) van 4 partijen gespeeld")
+            if let winner = match.winnerName { return "🏆 *\(winner) wint met \(winnerScore(match))*" }
+            return "🤝 *Gelijkspel \(match.homeGames)–\(match.awayGames)*"
         }
-        lines.append("")
-        for partij in match.partijen.sorted(by: { a, b in a.slot < b.slot }) {
-            let who = names(partij, match: match)
-            if !partij.hasEntry {
-                lines.append("\(partij.label) \(who): nog niet gespeeld")
-            } else {
-                let stand = match.ownSide == .home ? "\(partij.ownGames)-\(partij.theirGames)" : "\(partij.theirGames)-\(partij.ownGames)"
-                let games = match.ownSide == .home ? partij.gamesText : flipped(partij)
-                lines.append("\(partij.label) \(who): \(stand) (\(games))")
-            }
-        }
-        lines.append("")
-        lines.append("Gedeeld vanuit SquashAnalyzer · squashanalyzer.com")
-        return lines.joined(separator: "\n")
+        if current.partijenPlayed == 0 { return "Nog niet begonnen" }
+        if current.ownGames == current.theirGames { return "Stand: gelijk \(match.homeGames)–\(match.awayGames)" }
+        let leader = current.ownGames > current.theirGames ? match.ownName : match.opponentName
+        return "Stand: \(leader) leidt met \(winnerScore(match)) · \(current.partijenPlayed) van 4 partijen"
+    }
+
+    /// "Competitiepunten: All Inn 12 · Delft 8" once the match is decided
+    static func pointsLine(_ match: TeamMatch) -> String? {
+        guard match.score.isComplete else { return nil }
+        return "Competitiepunten: \(match.home) \(match.homeCompetitionPoints) · \(match.away) \(match.awayCompetitionPoints)"
     }
 
     /// Home player first, as SBN prints it
     static func names(_ partij: TeamPartij, match: TeamMatch) -> String {
         let own = partij.ownPlayer.isEmpty ? "?" : partij.ownPlayer
         let their = partij.opponentPlayer.isEmpty ? "?" : partij.opponentPlayer
-        return match.ownSide == .home ? "\(own) – \(their)" : "\(their) – \(own)"
+        return match.ownSide == TeamSide.home ? "\(own) – \(their)" : "\(their) – \(own)"
+    }
+
+    /// "3-1" of a partij, home first
+    static func standText(_ partij: TeamPartij, match: TeamMatch) -> String {
+        match.ownSide == TeamSide.home ? "\(partij.ownGames)-\(partij.theirGames)" : "\(partij.theirGames)-\(partij.ownGames)"
+    }
+
+    /// "11-8, 9-11", home first
+    static func gamesText(_ partij: TeamPartij, match: TeamMatch) -> String {
+        match.ownSide == TeamSide.home ? partij.gamesText : flipped(partij)
     }
 
     static func flipped(_ partij: TeamPartij) -> String {
@@ -454,13 +474,162 @@ public enum TeamMatchReport {
         return parts.joined(separator: ", ")
     }
 
-    /// "vr 30 okt" (DateFormatter: Date.FormatStyle does not exist in Skip)
-    public static func dayText(_ date: Date) -> String {
+    private static func sorted(_ match: TeamMatch) -> [TeamPartij] {
+        match.partijen.sorted(by: { a, b in a.slot < b.slot })
+    }
+
+    // 1. Kort
+
+    private static func compact(_ match: TeamMatch) -> String {
+        var lines: [String] = []
+        lines.append("🏆 *Teamwedstrijd · \(shortDay(match.date))*")
+        let homeLeads = match.homeGames > match.awayGames
+        let awayLeads = match.awayGames > match.homeGames
+        let home = homeLeads ? "*\(match.home)*" : match.home
+        let away = awayLeads ? "*\(match.away)*" : match.away
+        lines.append("\(home) \(match.homeGames) – \(match.awayGames) \(away)")
+        var detail = "\(match.homePartijen)-\(match.awayPartijen) in partijen"
+        if let points = pointsLine(match) { detail += " · " + points.replacingOccurrences(of: "Competitiepunten: ", with: "punten ") }
+        lines.append(detail)
+        return lines.joined(separator: "\n")
+    }
+
+    // 2. Scorekaart
+
+    /// Monospace table: per partij the home and the away player, one column per game
+    private static func scorecard(_ match: TeamMatch) -> String {
+        let nameWidth = 10
+        // Every row has as many game columns as the longest partij, so the
+        // column with the games won lines up
+        var columns = 1
+        for partij in match.partijen where partij.games.count > columns { columns = partij.games.count }
+        func pad(_ s: String, _ w: Int, right: Bool = false) -> String {
+            let t = String(s.prefix(w))
+            let fill = String(repeating: " ", count: max(0, w - t.count))
+            return right ? fill + t : t + fill
+        }
+        var lines: [String] = []
+        lines.append("🏆 *TEAM SCOREKAART*")
+        lines.append("\(shortDay(match.date)) · \(match.home) – \(match.away)")
+        lines.append("")
+        lines.append("```")
+        for partij in sorted(match) {
+            let own = partij.ownPlayer.isEmpty ? "?" : partij.ownPlayer
+            let their = partij.opponentPlayer.isEmpty ? "?" : partij.opponentPlayer
+            let homeName = match.ownSide == TeamSide.home ? own : their
+            let awayName = match.ownSide == TeamSide.home ? their : own
+            var row1 = pad(partij.label + " " + homeName, nameWidth)
+            var row2 = pad("   " + awayName, nameWidth)
+            for game in partij.games {
+                let homePoints = match.ownSide == TeamSide.home ? game.ownPoints : game.theirPoints
+                let awayPoints = match.ownSide == TeamSide.home ? game.theirPoints : game.ownPoints
+                row1 += pad(homePoints.map { value in String(value) } ?? "–", 4, right: true)
+                row2 += pad(awayPoints.map { value in String(value) } ?? "–", 4, right: true)
+            }
+            for _ in partij.games.count..<columns {
+                row1 += "    "
+                row2 += "    "
+            }
+            if partij.hasEntry {
+                row1 += "  " + String(standText(partij, match: match).prefix(1))
+                row2 += "  " + String(standText(partij, match: match).suffix(1))
+            }
+            lines.append(row1)
+            lines.append(row2)
+        }
+        lines.append("```")
+        lines.append(resultLine(match))
+        if let points = pointsLine(match) { lines.append(points) }
+        return lines.joined(separator: "\n")
+    }
+
+    // 3. Verslag
+
+    private static func report(_ match: TeamMatch) -> String {
+        var lines: [String] = []
+        lines.append("🏆 *TEAMWEDSTRIJD*")
+        lines.append("📅 \(longDay(match.date))")
+        lines.append("👥 \(match.home) – \(match.away)")
+        lines.append("")
+        for partij in sorted(match) {
+            let who = names(partij, match: match)
+            if !partij.hasEntry {
+                lines.append("*\(partij.label)* \(who): nog niet gespeeld")
+            } else {
+                var line = "*\(partij.label)* \(who) · \(standText(partij, match: match)) (\(gamesText(partij, match: match)))"
+                if let won = partij.ownWon {
+                    let winner = won ? partij.ownPlayer : partij.opponentPlayer
+                    if !winner.isEmpty { line += " ✅ \(winner)" }
+                }
+                lines.append(line)
+            }
+        }
+        lines.append("")
+        lines.append(resultLine(match))
+        let current = match.score
+        var stats = ["🎯 \(match.homePartijen)-\(match.awayPartijen) in partijen"]
+        if current.pointsKnown && current.partijenPlayed > 0 {
+            stats.append("🎾 rallypunten \(match.ownSide == TeamSide.home ? current.ownPoints : current.theirPoints)-\(match.ownSide == TeamSide.home ? current.theirPoints : current.ownPoints)")
+        }
+        lines.append(stats.joined(separator: " · "))
+        if let points = pointsLine(match) { lines.append(points) }
+        lines.append("")
+        lines.append("_Gescoord met Squash Analyzer_")
+        return lines.joined(separator: "\n")
+    }
+
+    // Dates (DateFormatter: Date.FormatStyle does not exist in Skip)
+
+    private static func format(_ date: Date, _ pattern: String) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "nl_NL")
         formatter.timeZone = TimeZone(identifier: "Europe/Amsterdam")
-        formatter.dateFormat = "EEE d MMM"
+        formatter.dateFormat = pattern
         return formatter.string(from: date)
+    }
+
+    /// "vr 30 okt"
+    public static func dayText(_ date: Date) -> String { format(date, "EEE d MMM") }
+    static func shortDay(_ date: Date) -> String { dayText(date) }
+    /// "vrijdag 30 oktober 2026"
+    static func longDay(_ date: Date) -> String { format(date, "EEEE d MMMM yyyy") }
+}
+
+extension ResultCard {
+    /// The picture of a team match: both team names, the games as the big
+    /// score (home is the orange side), who won, and a chip per partij.
+    public static func from(_ match: TeamMatch) -> ResultCard {
+        var chips: [Chip] = []
+        for partij in match.partijen.sorted(by: { a, b in a.slot < b.slot }) where partij.hasEntry {
+            var winner: Player? = nil
+            if let ownWon = partij.ownWon {
+                let homeWon = ownWon == (match.ownSide == TeamSide.home)
+                winner = homeWon ? Player.player1 : Player.player2
+            }
+            chips.append(Chip(label: partij.label, score: TeamMatchReport.standText(partij, match: match), winner: winner))
+        }
+        let current = match.score
+        var winner: Player? = nil
+        var text: String? = nil
+        var title = "TUSSENSTAND"
+        if current.isComplete {
+            title = "TEAMWEDSTRIJD KLAAR"
+            if let ownWon = current.ownWon {
+                let homeWon = ownWon == (match.ownSide == TeamSide.home)
+                winner = homeWon ? Player.player1 : Player.player2
+                text = "\(match.winnerName ?? "") wint de teamwedstrijd"
+            } else {
+                text = "Gelijkspel"
+            }
+        } else if current.partijenPlayed == 0 {
+            title = "TEAMWEDSTRIJD"
+        } else if match.homeGames != match.awayGames {
+            winner = match.homeGames > match.awayGames ? Player.player1 : Player.player2
+            text = "\(match.homeGames > match.awayGames ? match.home : match.away) leidt \(max(match.homeGames, match.awayGames))-\(min(match.homeGames, match.awayGames))"
+        }
+        return ResultCard(title: title, player1Name: match.home, player2Name: match.away,
+                          player1Score: match.homeGames, player2Score: match.awayGames,
+                          winner: winner, winnerText: text, chips: chips)
     }
 }
 
@@ -474,50 +643,59 @@ public protocol TeamMatchStore {
     func delete(id: UUID) async throws
 }
 
-/// One JSON file with all team matches, used on iOS (Application Support)
-/// and Android (the app's files directory). Small and whole: every save
-/// rewrites the file.
-@MainActor
-public final class JSONFileTeamMatchStore: TeamMatchStore {
+/// The JSON file with all team matches, readable and writable without the
+/// main actor (the backup code on iOS and Android needs it synchronously)
+public enum TeamMatchFile {
     public static let fileName = "team-matches.json"
-    private let url: URL
 
-    public init(directory: URL) {
-        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        url = directory.appendingPathComponent(JSONFileTeamMatchStore.fileName)
-    }
-
-    public func loadAll() async throws -> [TeamMatch] {
-        return read().sorted(by: { a, b in a.date > b.date })
-    }
-
-    public func save(_ match: TeamMatch) async throws {
-        var all = read()
-        var replaced = false
-        for index in 0..<all.count where all[index].id == match.id {
-            all[index] = match
-            replaced = true
-        }
-        if !replaced { all.append(match) }
-        try write(all)
-    }
-
-    public func delete(id: UUID) async throws {
-        let kept = read().filter { match in match.id != id }
-        try write(kept)
-    }
-
-    private func read() -> [TeamMatch] {
+    public static func read(in directory: URL) -> [TeamMatch] {
+        let url = directory.appendingPathComponent(TeamMatchFile.fileName)
         guard let data = try? Data(contentsOf: url) else { return [] }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return (try? decoder.decode([TeamMatch].self, from: data)) ?? []
     }
 
-    private func write(_ matches: [TeamMatch]) throws {
+    public static func write(_ matches: [TeamMatch], in directory: URL) throws {
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let url = directory.appendingPathComponent(TeamMatchFile.fileName)
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         let data = try encoder.encode(matches)
         try data.write(to: url)
+    }
+}
+
+/// One JSON file with all team matches, used on iOS (Application Support)
+/// and Android (the app's files directory). Small and whole: every save
+/// rewrites the file.
+@MainActor
+public final class JSONFileTeamMatchStore: TeamMatchStore {
+    public static let fileName = TeamMatchFile.fileName
+    private let directory: URL
+
+    public init(directory: URL) {
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        self.directory = directory
+    }
+
+    public func loadAll() async throws -> [TeamMatch] {
+        return TeamMatchFile.read(in: directory).sorted(by: { a, b in a.date > b.date })
+    }
+
+    public func save(_ match: TeamMatch) async throws {
+        var all = TeamMatchFile.read(in: directory)
+        var replaced = false
+        for index in 0..<all.count where all[index].id == match.id {
+            all[index] = match
+            replaced = true
+        }
+        if !replaced { all.append(match) }
+        try TeamMatchFile.write(all, in: directory)
+    }
+
+    public func delete(id: UUID) async throws {
+        let kept = TeamMatchFile.read(in: directory).filter { match in match.id != id }
+        try TeamMatchFile.write(kept, in: directory)
     }
 }

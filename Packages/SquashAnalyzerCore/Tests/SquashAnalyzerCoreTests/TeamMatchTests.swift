@@ -14,7 +14,7 @@ final class TeamMatchTests: XCTestCase {
 
     private func match(_ partijen: [TeamPartij], ownSide: TeamSide = .home) -> TeamMatch {
         TeamMatch(date: Date(timeIntervalSince1970: 1_793_181_600.0), home: "All Inn Squash 8", away: "Squash Delft 8",
-                  ownSide: ownSide, partijen: partijen)
+                  ownSide: ownSide, partijen: partijen, updatedAt: Date(timeIntervalSince1970: 1_793_181_600.0))
     }
 
     func testAGameScoreMustBeASquashScore() {
@@ -255,28 +255,161 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertEqual(theirs.linkedKind, "referee")
     }
 
-    func testTheReportReadsLikeAWhatsAppMessage() {
-        var team = match([
+    private func decided() -> TeamMatch {
+        match([
             partij(1, [(11, 5), (11, 7), (11, 9)]),
             partij(2, [(11, 9), (8, 11), (11, 13), (11, 4), (11, 8)]),
             partij(3, [(11, 6), (5, 11), (7, 11), (9, 11)]),
             partij(4, [(11, 9), (11, 8), (6, 11), (9, 11), (8, 11)]),
         ])
+    }
+
+    func testTheReportReadsLikeAWhatsAppMessage() {
+        var team = decided()
         var text = TeamMatchReport.text(team)
-        XCTAssertTrue(text.hasPrefix("🏆 TEAMWEDSTRIJD · "), text)
-        XCTAssertTrue(text.contains("All Inn Squash 8 – Squash Delft 8"))
-        XCTAssertTrue(text.contains("Uitslag 9-8 in games · 2-2 in partijen → All Inn Squash 8 wint"))
+        XCTAssertEqual(text, TeamMatchReport.text(team, style: MatchShareStyle.report))
+        XCTAssertTrue(text.hasPrefix("🏆 *TEAMWEDSTRIJD*"), text)
+        XCTAssertTrue(text.contains("👥 All Inn Squash 8 – Squash Delft 8"))
+        XCTAssertTrue(text.contains("🏆 *All Inn Squash 8 wint met 9–8*"), text)
+        XCTAssertTrue(text.contains("🎯 2-2 in partijen"))
         XCTAssertTrue(text.contains("Competitiepunten: All Inn Squash 8 12 · Squash Delft 8 8"))
-        XCTAssertTrue(text.contains("E1 Wij1 – Zij1: 3-0 (11-5, 11-7, 11-9)"))
-        XCTAssertTrue(text.contains("E3 Wij3 – Zij3: 1-3 (11-6, 5-11, 7-11, 9-11)"))
-        XCTAssertTrue(text.hasSuffix("Gedeeld vanuit SquashAnalyzer · squashanalyzer.com"))
+        XCTAssertTrue(text.contains("*E1* Wij1 – Zij1 · 3-0 (11-5, 11-7, 11-9) ✅ Wij1"), text)
+        XCTAssertTrue(text.contains("*E3* Wij3 – Zij3 · 1-3 (11-6, 5-11, 7-11, 9-11) ✅ Zij3"), text)
+        XCTAssertTrue(text.hasSuffix("_Gescoord met Squash Analyzer_"))
 
         // Away: home names and scores first, so it reads like SBN
         team = match([partij(1, [(11, 5), (11, 7), (11, 9)])], ownSide: .away)
         text = TeamMatchReport.text(team)
-        XCTAssertTrue(text.contains("Stand 0-3 in games · 1 van 4 partijen gespeeld"), text)
-        XCTAssertTrue(text.contains("E1 Zij1 – Wij1: 0-3 (5-11, 7-11, 9-11)"), text)
-        XCTAssertTrue(text.contains("E2 ? – ?: nog niet gespeeld"), text)
+        XCTAssertTrue(text.contains("Stand: Squash Delft 8 leidt met 3–0 · 1 van 4 partijen"), text)
+        XCTAssertTrue(text.contains("*E1* Zij1 – Wij1 · 0-3 (5-11, 7-11, 9-11)"), text)
+        XCTAssertTrue(text.contains("*E2* ? – ?: nog niet gespeeld"), text)
+    }
+
+    func testTheScorecardIsAMonospaceTable() {
+        let text = TeamMatchReport.text(decided(), style: MatchShareStyle.scorecard)
+        XCTAssertTrue(text.hasPrefix("🏆 *TEAM SCOREKAART*"), text)
+        let blocks = text.components(separatedBy: "```")
+        XCTAssertEqual(blocks.count, 3, "one code block")
+        var rows: [String] = []
+        for line in blocks[1].components(separatedBy: "\n") where !line.isEmpty { rows.append(line) }
+        XCTAssertEqual(rows.count, 8, "two rows per partij")
+        // The columns line up: every row is as long as the longest partij needs
+        for row in rows { XCTAssertEqual(row.count, rows[0].count, row) }
+        // E1: home player on top, games won in the last column, away player below
+        XCTAssertTrue(rows[0].hasPrefix("E1 Wij1    "), rows[0])
+        XCTAssertTrue(rows[0].contains("11  11  11"), rows[0])
+        XCTAssertTrue(rows[0].hasSuffix("  3"), rows[0])
+        XCTAssertTrue(rows[1].hasPrefix("   Zij1"), rows[1])
+        XCTAssertTrue(rows[1].hasSuffix("  0"), rows[1])
+        XCTAssertTrue(text.contains("🏆 *All Inn Squash 8 wint met 9–8*"))
+        XCTAssertTrue(text.contains("Competitiepunten: All Inn Squash 8 12 · Squash Delft 8 8"))
+        // A partij without a score still shows who won each game
+        var blind = TeamPartij(slot: 1, ownPlayer: "Jan", opponentPlayer: "Piet")
+        XCTAssertTrue(blind.addGame(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: true)))
+        let open = TeamMatchReport.text(match([blind]), style: MatchShareStyle.scorecard)
+        XCTAssertTrue(open.contains("E1 Jan "), open)
+        XCTAssertTrue(open.contains("–  1"), open)
+        XCTAssertTrue(open.contains("Stand: All Inn Squash 8 leidt met 1–0 · 1 van 4 partijen"), open)
+    }
+
+    func testTheShortLayoutIsThreeLines() {
+        let text = TeamMatchReport.text(decided(), style: MatchShareStyle.compact)
+        let lines = text.components(separatedBy: "\n")
+        XCTAssertEqual(lines.count, 3, text)
+        XCTAssertTrue(lines[0].hasPrefix("🏆 *Teamwedstrijd · "))
+        XCTAssertEqual(lines[1], "*All Inn Squash 8* 9 – 8 Squash Delft 8")
+        XCTAssertEqual(lines[2], "2-2 in partijen · punten All Inn Squash 8 12 · Squash Delft 8 8")
+    }
+
+    func testThePictureShowsTheGamesAndAChipPerPartij() {
+        let card = ResultCard.from(decided())
+        XCTAssertEqual(card.title, "TEAMWEDSTRIJD KLAAR")
+        XCTAssertEqual(card.player1Name, "All Inn Squash 8")
+        XCTAssertEqual(card.player1Score, 9)
+        XCTAssertEqual(card.player2Score, 8)
+        XCTAssertEqual(card.winner, Player.player1)
+        XCTAssertEqual(card.winnerText, "All Inn Squash 8 wint de teamwedstrijd")
+        XCTAssertEqual(card.chips.count, 4)
+        XCTAssertEqual(card.chips[0].label, "E1")
+        XCTAssertEqual(card.chips[0].score, "3-0")
+        XCTAssertEqual(card.chips[0].winner, Player.player1)
+        XCTAssertEqual(card.chips[2].winner, Player.player2)
+
+        // Away: the orange side is still home
+        let away = ResultCard.from(match([partij(1, [(11, 5), (11, 7), (11, 9)])], ownSide: .away))
+        XCTAssertEqual(away.title, "TUSSENSTAND")
+        XCTAssertEqual(away.player1Score, 0)
+        XCTAssertEqual(away.player2Score, 3)
+        XCTAssertEqual(away.winner, Player.player2)
+        XCTAssertEqual(away.chips[0].score, "0-3")
+        XCTAssertEqual(away.chips[0].winner, Player.player2)
+        XCTAssertEqual(ResultCard.from(match([])).title, "TEAMWEDSTRIJD")
+    }
+
+    func testTheTeamRosterIsAListOfIdsInTheSettings() {
+        XCTAssertTrue(TeamRoster.parse("").isEmpty)
+        XCTAssertEqual(TeamRoster.parse("a, b,,a"), ["a", "b"])
+        var raw = ""
+        raw = TeamRoster.setting("p1", inTeam: true, in: raw)
+        raw = TeamRoster.setting("p2", inTeam: true, in: raw)
+        raw = TeamRoster.setting("p1", inTeam: true, in: raw)
+        XCTAssertEqual(raw, "p1,p2")
+        XCTAssertTrue(TeamRoster.contains("p2", in: raw))
+        raw = TeamRoster.setting("p1", inTeam: false, in: raw)
+        XCTAssertEqual(TeamRoster.parse(raw), ["p2"])
+        XCTAssertFalse(TeamRoster.contains("p1", in: raw))
+    }
+
+    @MainActor
+    func testTeamMatchesAndTeamPlayersTravelInTheBackup() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("teambackup-\(UUID().uuidString)")
+        let store = JSONFileTeamMatchStore(directory: folder)
+        let team = decided()
+        try await store.save(team)
+        let defaults = UserDefaults.standard
+        let before = defaults.string(forKey: TeamRoster.storageKey)
+        TeamRoster.replace(["p1", "p2"])
+
+        let plain = FullBackup(version: 2, backupDate: Date(timeIntervalSince1970: 1_793_181_600.0), players: [], matches: [], standaloneGames: [])
+        XCTAssertEqual(BackupCodec.formatVersion(for: plain), 2, "without team data an older app can still read it")
+        let attached = TeamBackup.attach(plain, directory: folder)
+        XCTAssertEqual(attached.teamMatches?.count, 1)
+        XCTAssertEqual(attached.teamPlayerIds, ["p1", "p2"])
+        XCTAssertEqual(BackupCodec.formatVersion(for: attached), 4)
+
+        // Through the file and back: the checksum holds and the match is intact
+        let data = try BackupCodec.encode(attached, appVersion: "test")
+        let decoded = try BackupCodec.decode(data)
+        XCTAssertEqual(decoded.teamMatches, [team])
+        XCTAssertEqual(decoded.teamPlayerIds, ["p1", "p2"])
+
+        // Restore onto a clean phone
+        let other = FileManager.default.temporaryDirectory.appendingPathComponent("teambackup-\(UUID().uuidString)")
+        TeamRoster.replace(["x"])
+        TeamBackup.restore(decoded, directory: other, replacing: false)
+        XCTAssertEqual(TeamMatchFile.read(in: other), [team])
+        XCTAssertEqual(TeamRoster.ids(), ["x", "p1", "p2"], "merging keeps what was there")
+
+        // Merging the same file again adds nothing; a newer edit on the phone wins
+        var edited = team
+        edited.updatedAt = Date(timeIntervalSince1970: 1_893_181_600.0)
+        edited.home = "Bewerkt"
+        try TeamMatchFile.write([edited], in: other)
+        TeamBackup.restore(decoded, directory: other, replacing: false)
+        XCTAssertEqual(TeamMatchFile.read(in: other).count, 1)
+        XCTAssertEqual(TeamMatchFile.read(in: other)[0].home, "Bewerkt")
+
+        // Replacing swaps both for the file's; a file without team data wipes nothing
+        TeamBackup.restore(decoded, directory: other, replacing: true)
+        XCTAssertEqual(TeamMatchFile.read(in: other), [team])
+        XCTAssertEqual(TeamRoster.ids(), ["p1", "p2"])
+        TeamBackup.restore(plain, directory: other, replacing: true)
+        XCTAssertEqual(TeamMatchFile.read(in: other).count, 1)
+        XCTAssertEqual(TeamRoster.ids(), ["p1", "p2"])
+
+        if let before { defaults.set(before, forKey: TeamRoster.storageKey) } else { defaults.removeObject(forKey: TeamRoster.storageKey) }
+        try? FileManager.default.removeItem(at: folder)
+        try? FileManager.default.removeItem(at: other)
     }
 
     @MainActor

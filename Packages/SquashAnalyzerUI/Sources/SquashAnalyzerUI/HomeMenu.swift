@@ -377,7 +377,7 @@ public struct AndroidHomeView: View {
                 }
                 .navigationDestination(isPresented: $showingTeam) {
                     if let team {
-                        SharedLeagueTeamDetailView(snapshot: team)
+                        SharedLeagueTeamDetailView(snapshot: team, fetcher: leagueTeamFetcher)
                     }
                 }
         }

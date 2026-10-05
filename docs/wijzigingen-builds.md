@@ -19,11 +19,33 @@ Vergeleken met iOS 2.2 (17) en Android 0.4 (4), 3 oktober 2026.
   uren met de app dicht mee (bijv. 970:54 de volgende dag). Bij hervatten
   lopen match- en gameklok nu verder vanaf het laatste opslaan.
 
+### Mijn team
+- **Je eigen team valt op** in de stand: een oranje band met naam, positie en
+  punten in oranje. Op de iPhone nu hetzelfde teamscherm als op Android.
+- **Minder verkeer naar sbn.toernooi.nl:** de app toont de bewaarde stand en haalt
+  alleen opnieuw op als er iets kan zijn veranderd (`LeagueTeamRefresh`): elk uur
+  zolang een gespeelde wedstrijd van je team (laatste 2 weken) nog geen uitslag
+  heeft, elke 6 uur als niet elk team in de poule even vaak heeft gespeeld, en
+  anders eens per week. Eerst haalde de app het team op bij elk beginscherm.
+- **Vernieuwen**-knop onderaan het teamscherm om meteen op te halen.
+
 ### Probeer vooral
 - Zet de tekst groot (Samsung: Lettergrootte max; iPhone: Tekstgrootte) en loop
   beginscherm, Coach, Scheidsrechter en Afgeronde wedstrijden door.
 - Stop een scheidsrechterwedstrijd, wacht even en hervat: loopt de klok verder
   waar hij was?
+
+## Backlog
+
+- [ ] **Wedstrijd koppelen aan een competitiewedstrijd** (verkennen in de testperiode).
+      Een SBN-teamwedstrijd = 4 partijen (E1–E4, singles, best of 5 tot 11).
+      Uitslag = gewonnen games over de 4 partijen; competitiepunten = games + 3
+      bonuspunten voor de winnaar. Winnaar: eerst meeste games; gelijk → meeste
+      gewonnen partijen; nog gelijk → meeste rallypunten. Idee: als een coach- of
+      scheidsrechterwedstrijd op de dag van een wedstrijd van Mijn team valt,
+      vragen of hij erbij hoort en welke partij (E1–E4). Dan: de teamwedstrijd als
+      geheel (4 partijen, stand in games), één verslag van de avond, live
+      meekijken per teamwedstrijd, en vergelijken met de SBN-uitslag.
 
 ## iOS 2.2 build 17 en Android 0.4 (4), 3 oktober 2026 (geüpload)
 

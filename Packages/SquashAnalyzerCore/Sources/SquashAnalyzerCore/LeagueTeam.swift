@@ -425,4 +425,51 @@ public enum LeagueTeamStorage {
             defaults.set(data, forKey: snapshotKey)
         }
     }
+
+    static let lastAttemptKey = "sbnTeamLastAttempt"
+
+    /// When the team was last asked for, successful or not (seconds since 1970)
+    public static func lastAttempt(in defaults: UserDefaults = UserDefaults.standard) -> Date? {
+        let seconds = defaults.double(forKey: lastAttemptKey)
+        return seconds > 0.0 ? Date(timeIntervalSince1970: seconds) : nil
+    }
+
+    public static func noteAttempt(_ date: Date = Date(), in defaults: UserDefaults = UserDefaults.standard) {
+        defaults.set(date.timeIntervalSince1970, forKey: lastAttemptKey)
+    }
+}
+
+/// How often Mijn team is fetched from sbn.toernooi.nl. The standings change at
+/// most once per round, so the saved team is shown and only fetched again when
+/// something can have changed:
+/// - a match of the team has been played (its time has passed, in the last two weeks) without a score: hourly;
+/// - not every team in the poule has played as often: every 6 hours;
+/// - everything in: once a week, for moved matches or a changed programme.
+/// Failed attempts count too, so a site that is down is not asked every minute.
+public enum LeagueTeamRefresh {
+    public static let missingScoreInterval: TimeInterval = 3600.0
+    public static let unevenPouleInterval: TimeInterval = 6.0 * 3600.0
+    public static let settledInterval: TimeInterval = 7.0 * 24.0 * 3600.0
+    /// Without any saved team: at most once a minute
+    public static let noTeamInterval: TimeInterval = 60.0
+
+    public static func interval(for cached: LeagueTeamSnapshot?, now: Date = Date()) -> TimeInterval {
+        guard let cached else { return noTeamInterval }
+        // A match from the last two weeks without a score (an older one was probably cancelled)
+        let recent = now.addingTimeInterval(-14.0 * 24.0 * 3600.0)
+        if cached.fixtures.contains(where: { fixture in fixture.date <= now && fixture.date > recent && fixture.score == nil }) {
+            return missingScoreInterval
+        }
+        if Set(cached.standings.map { row in row.played }).count > 1 {
+            return unevenPouleInterval
+        }
+        return settledInterval
+    }
+
+    /// Whether the saved team is worth fetching again
+    public static func isDue(_ cached: LeagueTeamSnapshot?, lastAttempt: Date?, now: Date = Date()) -> Bool {
+        var since = cached?.updatedAt ?? Date.distantPast
+        if let lastAttempt, lastAttempt > since { since = lastAttempt }
+        return now.timeIntervalSince(since) >= interval(for: cached, now: now)
+    }
 }

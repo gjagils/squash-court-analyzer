@@ -79,9 +79,15 @@ public struct SharedLeagueTeamCard: View {
             snapshot = nil
             return
         }
-        if snapshot?.source != link.url {
-            snapshot = LeagueTeamStorage.cachedSnapshot(for: link)
+        // The saved team (also after "Vernieuwen" in the team screen); another link starts empty
+        if let cached = LeagueTeamStorage.cachedSnapshot(for: link) {
+            snapshot = cached
+        } else if snapshot?.source != link.url {
+            snapshot = nil
         }
+        // The saved team as long as nothing can have changed (LeagueTeamRefresh)
+        guard LeagueTeamRefresh.isDue(snapshot, lastAttempt: LeagueTeamStorage.lastAttempt()) else { return }
+        LeagueTeamStorage.noteAttempt()
         loading = true
         errorMessage = nil
         do {
@@ -97,10 +103,15 @@ public struct SharedLeagueTeamCard: View {
 
 /// The whole team: standings, matches and players
 public struct SharedLeagueTeamDetailView: View {
-    let snapshot: LeagueTeamSnapshot
+    @State private var snapshot: LeagueTeamSnapshot
+    /// "Vernieuwen" fetches the team now, whatever LeagueTeamRefresh says
+    private let fetcher: LeagueTeamFetcher?
+    @State private var refreshing = false
+    @State private var refreshError: String?
 
-    public init(snapshot: LeagueTeamSnapshot) {
-        self.snapshot = snapshot
+    public init(snapshot: LeagueTeamSnapshot, fetcher: LeagueTeamFetcher? = nil) {
+        _snapshot = State(initialValue: snapshot)
+        self.fetcher = fetcher
     }
 
     public var body: some View {
@@ -118,18 +129,25 @@ public struct SharedLeagueTeamDetailView: View {
                     }
                     section("STAND") {
                         ForEach(snapshot.standings) { row in
+                            let own = isOwnTeam(row)
                             HStack {
                                 Text("\(row.rank)")
-                                    .foregroundColor(row.name == snapshot.name ? SharedColors.accent : SharedColors.textMuted)
+                                    .foregroundColor(own ? SharedColors.accent : SharedColors.textMuted)
                                     .frame(width: 26, alignment: .leading)
                                 Text(row.name)
-                                    .foregroundColor(SharedColors.textPrimary)
-                                    .fontWeight(row.name == snapshot.name ? .bold : .regular)
+                                    .foregroundColor(own ? SharedColors.accent : SharedColors.textPrimary)
+                                    .fontWeight(own ? .bold : .regular)
                                 Spacer()
                                 Text("\(row.points) pt")
-                                    .foregroundColor(SharedColors.gold)
+                                    .foregroundColor(own ? SharedColors.accent : SharedColors.gold)
+                                    .fontWeight(own ? .bold : .regular)
                             }
                             .padding(.vertical, 5)
+                            // The team you follow stands out: an orange band, as on the home tiles
+                            // (every row indented alike; Compose has no negative padding)
+                            .padding(.horizontal, 8)
+                            .background(RoundedRectangle(cornerRadius: 8).fill(own ? SharedColors.accent.opacity(0.14) : Color.clear))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(own ? SharedColors.accent.opacity(0.5) : Color.clear, lineWidth: 1))
                         }
                     }
                     section("WEDSTRIJDEN") {
@@ -162,14 +180,46 @@ public struct SharedLeagueTeamDetailView: View {
                             .padding(.vertical, 4)
                         }
                     }
-                    Text("Bijgewerkt: \(LeagueDates.day(snapshot.updatedAt)) \(LeagueDates.time(snapshot.updatedAt))")
-                        .font(.system(size: 11))
-                        .foregroundColor(SharedColors.textMuted)
+                    HStack(spacing: 12) {
+                        Text(refreshError ?? "Bijgewerkt: \(LeagueDates.day(snapshot.updatedAt)) \(LeagueDates.time(snapshot.updatedAt))")
+                            .font(.system(size: 11))
+                            .foregroundColor(SharedColors.textMuted)
+                        Spacer()
+                        if fetcher != nil {
+                            if refreshing {
+                                ProgressView()
+                            } else {
+                                Button("Vernieuwen") { Task { await refresh() } }
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(SharedColors.accent)
+                            }
+                        }
+                    }
                 }
                 .padding(24)
             }
         }
         .pageTitle("Mijn team")
+    }
+
+    private func refresh() async {
+        guard let fetcher, let link = try? LeagueTeamLink(snapshot.source.absoluteString) else { return }
+        refreshing = true
+        refreshError = nil
+        LeagueTeamStorage.noteAttempt()
+        do {
+            let result = try await fetcher.fetch(link)
+            LeagueTeamStorage.store(result)
+            snapshot = result
+        } catch {
+            refreshError = (error as? LeagueTeamError)?.message ?? LeagueTeamError.unavailable.message
+        }
+        refreshing = false
+    }
+
+    /// The followed team's row: same team page, or else the same name
+    private func isOwnTeam(_ row: LeagueStanding) -> Bool {
+        row.id == snapshot.source.path || row.name == snapshot.name
     }
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {

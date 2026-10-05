@@ -213,6 +213,58 @@ final class LeagueTeamTests: XCTestCase {
             XCTAssertEqual(error as? LeagueTeamError, LeagueTeamError.changedPage)
         }
     }
+
+    // MARK: - How often Mijn team is fetched
+
+    private func team(fixtures: [LeagueFixture], played: [Int], updatedAt: Date) -> LeagueTeamSnapshot {
+        let url = URL(string: "https://sbn.toernooi.nl/league/E035D752-EA4C-446D-82CF-0016EFF20E6C/team/113")!
+        var standings: [LeagueStanding] = []
+        for i in 0..<played.count {
+            standings.append(LeagueStanding(id: "/team/\(i)", rank: i + 1, name: "Team \(i)", played: played[i], won: 0, lost: 0, points: 0))
+        }
+        return LeagueTeamSnapshot(source: url, name: "Team 0", competition: "SBN", division: "1e klasse", rank: 1, played: played.first,
+                                  points: 0, fixtures: fixtures, players: [], standings: standings, updatedAt: updatedAt)
+    }
+
+    private func fixture(_ date: Date, score: String?) -> LeagueFixture {
+        LeagueFixture(id: "\(date.timeIntervalSince1970)", date: date, home: "Team 0", away: "Team 1", score: score,
+                      url: URL(string: "https://sbn.toernooi.nl/match/1")!)
+    }
+
+    func testAllScoresInFetchesOnlyWeekly() {
+        let now = Date(timeIntervalSince1970: 1_790_000_000.0)
+        let saved = team(fixtures: [fixture(now.addingTimeInterval(-86_400.0), score: "9-7"), fixture(now.addingTimeInterval(6.0 * 86_400.0), score: nil)],
+                         played: [4, 4, 4, 4], updatedAt: now.addingTimeInterval(-2.0 * 86_400.0))
+        XCTAssertFalse(LeagueTeamRefresh.isDue(saved, lastAttempt: nil, now: now))
+        XCTAssertTrue(LeagueTeamRefresh.isDue(saved, lastAttempt: nil, now: now.addingTimeInterval(5.0 * 86_400.0)))
+    }
+
+    func testAPlayedMatchWithoutScoreFetchesHourly() {
+        let now = Date(timeIntervalSince1970: 1_790_000_000.0)
+        let saved = team(fixtures: [fixture(now.addingTimeInterval(-3.0 * 3600.0), score: nil)], played: [4, 4, 4, 4],
+                         updatedAt: now.addingTimeInterval(-2.0 * 3600.0))
+        XCTAssertTrue(LeagueTeamRefresh.isDue(saved, lastAttempt: nil, now: now))
+        // Just tried (and failed): not again within the hour
+        XCTAssertFalse(LeagueTeamRefresh.isDue(saved, lastAttempt: now.addingTimeInterval(-600.0), now: now))
+    }
+
+    func testAnUnevenPouleFetchesEverySixHours() {
+        let now = Date(timeIntervalSince1970: 1_790_000_000.0)
+        let saved = team(fixtures: [], played: [5, 4, 5, 5], updatedAt: now.addingTimeInterval(-7.0 * 3600.0))
+        XCTAssertTrue(LeagueTeamRefresh.isDue(saved, lastAttempt: nil, now: now))
+        XCTAssertFalse(LeagueTeamRefresh.isDue(saved, lastAttempt: now.addingTimeInterval(-3600.0), now: now))
+    }
+
+    func testAnOldMatchWithoutScoreDoesNotKeepFetching() {
+        let now = Date(timeIntervalSince1970: 1_790_000_000.0)
+        let saved = team(fixtures: [fixture(now.addingTimeInterval(-30.0 * 86_400.0), score: nil)], played: [4, 4],
+                         updatedAt: now.addingTimeInterval(-2.0 * 86_400.0))
+        XCTAssertFalse(LeagueTeamRefresh.isDue(saved, lastAttempt: nil, now: now))
+    }
+
+    func testWithoutASavedTeamItFetches() {
+        XCTAssertTrue(LeagueTeamRefresh.isDue(nil, lastAttempt: nil))
+    }
 }
 
 /// Answers requests with the given pages in order and records them;
@@ -239,4 +291,5 @@ final class FakeLoader: LeaguePageLoader, @unchecked Sendable {
         guard !pages.isEmpty else { throw URLError(.notConnectedToInternet) }
         return pages.removeFirst()
     }
+
 }

@@ -30,6 +30,8 @@ import skip.ui.PresentationRoot
 import skip.ui.UIApplication
 import squash.analyzer.core.CardInbox
 import squash.analyzer.core.LeagueTeamFetcher
+import squash.analyzer.core.JSONFileTeamMatchStore
+import skip.foundation.URL
 import squash.analyzer.core.AICoachClient
 import squash.analyzer.core.LiveShare
 import squash.analyzer.ui.AICoachContext
@@ -87,6 +89,8 @@ class MainActivity : AppCompatActivity() {
         val refereeMatchStore = RoomRefereeMatchStore(refereeMatchDataStore, badgeAwardStore)
         val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore, matchStore, refereeMatchStore, badgeAwardStore)
         val leagueTeamFetcher = LeagueTeamFetcher(loader = HttpLeaguePageLoader())
+        // Competitie: team matches in one JSON file in the app's files directory (shared Core store)
+        val teamMatchStore = JSONFileTeamMatchStore(directory = URL(fileURLWithPath = filesDir.absolutePath, isDirectory = true))
         // Registers activity-result launchers, so it must exist before the activity starts
         val appVersion = "Android " + (packageManager.getPackageInfo(packageName, 0).versionName ?: "?")
         val backupStore = RoomBackupStore(db)
@@ -119,7 +123,7 @@ class MainActivity : AppCompatActivity() {
             stateHolder.SaveableStateProvider(true) {
                 PresentationRoot(defaultColorScheme = ColorScheme.dark, context = ComposeContext()) { context ->
                     Box(modifier = context.modifier.fillMaxSize()) {
-                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach, backup = backup, teamImporter = teamImporter, photoStore = playerStore, filePicker = playerFiles, shareCard = { snapshot, text -> shareOffMainThread { CardImage.shareIntent(this@MainActivity, snapshot, text) } })
+                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach, backup = backup, teamImporter = teamImporter, photoStore = playerStore, filePicker = playerFiles, shareCard = { snapshot, text -> shareOffMainThread { CardImage.shareIntent(this@MainActivity, snapshot, text) } }, teamMatchStore = teamMatchStore)
                             // Page titles 20 sp semibold on every top bar, as PageTitleStyle on iOS (docs/style/README.md)
                             .material3TopAppBar { options ->
                                 val title = options.title

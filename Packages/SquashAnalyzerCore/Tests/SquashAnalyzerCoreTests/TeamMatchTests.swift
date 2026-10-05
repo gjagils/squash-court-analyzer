@@ -1,0 +1,274 @@
+import Foundation
+import XCTest
+@testable import SquashAnalyzerCore
+
+/// Competitie: a team match of four partijen with the SBN rules
+final class TeamMatchTests: XCTestCase {
+    private func partij(_ slot: Int, _ scores: [(Int, Int)]) -> TeamPartij {
+        var partij = TeamPartij(slot: slot, ownPlayer: "Wij\(slot)", opponentPlayer: "Zij\(slot)")
+        for score in scores {
+            XCTAssertTrue(partij.addGame(TeamGame(own: score.0, their: score.1)), "game \(score.0)-\(score.1) in E\(slot)")
+        }
+        return partij
+    }
+
+    private func match(_ partijen: [TeamPartij], ownSide: TeamSide = .home) -> TeamMatch {
+        TeamMatch(date: Date(timeIntervalSince1970: 1_793_181_600.0), home: "All Inn Squash 8", away: "Squash Delft 8",
+                  ownSide: ownSide, partijen: partijen)
+    }
+
+    func testAGameScoreMustBeASquashScore() {
+        XCTAssertTrue(TeamGame.isValidScore(11, 8))
+        XCTAssertTrue(TeamGame.isValidScore(8, 11))
+        XCTAssertTrue(TeamGame.isValidScore(12, 10))
+        XCTAssertTrue(TeamGame.isValidScore(15, 13))
+        XCTAssertTrue(TeamGame.isValidScore(11, 0))
+        XCTAssertFalse(TeamGame.isValidScore(11, 10))
+        XCTAssertFalse(TeamGame.isValidScore(10, 8))
+        XCTAssertFalse(TeamGame.isValidScore(13, 10))
+        XCTAssertFalse(TeamGame.isValidScore(11, -1))
+        XCTAssertEqual(TeamGame(own: 11, their: 8).text, "11-8")
+        XCTAssertTrue(TeamGame(own: 11, their: 8).ownWon)
+        XCTAssertFalse(TeamGame(own: 9, their: 11).ownWon)
+        XCTAssertEqual(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: true).text, "–")
+    }
+
+    func testAPartijEndsAtThreeGamesAndTakesNoMore() {
+        var first = partij(1, [(11, 8), (9, 11), (11, 6)])
+        XCTAssertFalse(first.isOver)
+        XCTAssertNil(first.ownWon)
+        XCTAssertTrue(first.canAddGame)
+        XCTAssertTrue(first.addGame(TeamGame(own: 11, their: 9)))
+        XCTAssertTrue(first.isOver)
+        XCTAssertEqual(first.ownWon, true)
+        XCTAssertEqual(first.standText, "3-1")
+        XCTAssertEqual(first.gamesText, "11-8, 9-11, 11-6, 11-9")
+        XCTAssertFalse(first.canAddGame)
+        XCTAssertFalse(first.addGame(TeamGame(own: 11, their: 3)), "a decided partij takes no fifth game")
+        XCTAssertFalse(first.addGame(TeamGame(own: 11, their: 10)), "11-10 is no squash score")
+        first.removeLastGame()
+        XCTAssertFalse(first.isOver)
+        XCTAssertEqual(first.games.count, 3)
+    }
+
+    func testTheTeamResultIsTheGamesWithThreeBonusPointsForTheWinner() {
+        let team = match([
+            partij(1, [(11, 5), (11, 7), (11, 9)]),            // 3-0
+            partij(2, [(11, 9), (8, 11), (11, 13), (11, 4), (11, 8)]), // 3-2
+            partij(3, [(11, 6), (5, 11), (7, 11), (9, 11)]),   // 1-3
+            partij(4, [(11, 9), (11, 8), (6, 11), (9, 11), (8, 11)]), // 2-3
+        ])
+        let score = team.score
+        XCTAssertTrue(score.isComplete)
+        XCTAssertEqual(score.ownGames, 9)
+        XCTAssertEqual(score.theirGames, 8)
+        XCTAssertEqual(score.ownPartijen, 2)
+        XCTAssertEqual(score.theirPartijen, 2)
+        XCTAssertEqual(score.ownWon, true)
+        XCTAssertEqual(score.ownCompetitionPoints, 12)
+        XCTAssertEqual(score.theirCompetitionPoints, 8)
+        XCTAssertEqual(team.winnerName, "All Inn Squash 8")
+        XCTAssertEqual(team.gamesText, "9-8")
+        XCTAssertEqual(team.statusText, "All Inn Squash 8 wint 9-8")
+    }
+
+    func testEqualGamesGoToTheTeamWithMorePartijen() {
+        // 8-8 in games, 3-1 in partijen
+        let team = match([
+            partij(1, [(11, 5), (11, 7), (11, 9)]),            // 3-0
+            partij(2, [(11, 9), (11, 8), (11, 4)]),            // 3-0
+            partij(3, [(11, 6), (5, 11), (11, 7), (9, 11), (11, 9)]), // 3-2 (own 2 lost)
+            partij(4, [(3, 11), (4, 11), (5, 11)]),            // 0-3
+        ])
+        // own games: 3+3+3+0 = 9, their: 0+0+2+3 = 5 → not equal yet; make E4 2-3 and E3 1-3
+        let tied = match([
+            partij(1, [(11, 5), (11, 7), (11, 9)]),            // 3-0
+            partij(2, [(11, 9), (11, 8), (11, 4)]),            // 3-0
+            partij(3, [(11, 6), (5, 11), (7, 11), (9, 11)]),   // 1-3
+            partij(4, [(11, 9), (6, 11), (9, 11), (8, 11)]),   // 1-3
+        ])
+        XCTAssertEqual(team.score.ownWon, true)
+        XCTAssertEqual(tied.score.ownGames, 8)
+        XCTAssertEqual(tied.score.theirGames, 6)
+        // Real tie on games: E1 3-1, E2 3-2, E3 1-3, E4 1-3 → 8-9? Build 8-8 explicitly
+        let eight = match([
+            partij(1, [(11, 5), (9, 11), (11, 7), (11, 9)]),           // 3-1
+            partij(2, [(11, 9), (8, 11), (11, 8), (11, 4)]),           // 3-1
+            partij(3, [(11, 6), (5, 11), (7, 11), (9, 11)]),           // 1-3
+            partij(4, [(11, 9), (6, 11), (9, 11), (8, 11)]),           // 1-3
+        ])
+        XCTAssertEqual(eight.score.ownGames, 8)
+        XCTAssertEqual(eight.score.theirGames, 8)
+        XCTAssertEqual(eight.score.ownPartijen, 2)
+        XCTAssertEqual(eight.score.theirPartijen, 2)
+        // 2-2 in partijen as well: the rally points decide
+        XCTAssertTrue(eight.score.pointsKnown)
+        XCTAssertNotEqual(eight.score.ownPoints, eight.score.theirPoints)
+        XCTAssertEqual(eight.score.ownWon, eight.score.ownPoints > eight.score.theirPoints)
+        // 8-8 with 3-1 in partijen: the partijen decide
+        let byPartijen = match([
+            partij(1, [(11, 5), (9, 11), (11, 7), (11, 9)]),           // 3-1
+            partij(2, [(11, 9), (8, 11), (11, 8), (11, 4)]),           // 3-1
+            partij(3, [(11, 6), (5, 11), (11, 7), (9, 11), (11, 9)]),  // 3-2
+            partij(4, [(3, 11), (4, 11), (5, 11)]),                    // 0-3
+        ])
+        XCTAssertEqual(byPartijen.score.ownGames, 9)
+        XCTAssertEqual(byPartijen.score.theirGames, 7)
+        XCTAssertEqual(byPartijen.score.ownWon, true)
+    }
+
+    func testAFullTieWithoutPointsIsADrawWithoutBonus() {
+        // 8-8 in games and 2-2 in partijen, every game without a score
+        func blind(_ slot: Int, _ wins: [Bool]) -> TeamPartij {
+            var partij = TeamPartij(slot: slot)
+            for won in wins { XCTAssertTrue(partij.addGame(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: won))) }
+            return partij
+        }
+        let team = match([
+            blind(1, [true, false, true, true]),
+            blind(2, [true, false, true, true]),
+            blind(3, [true, false, false, false]),
+            blind(4, [true, false, false, false]),
+        ])
+        let score = team.score
+        XCTAssertTrue(score.isComplete)
+        XCTAssertFalse(score.pointsKnown)
+        XCTAssertEqual(score.ownGames, 8)
+        XCTAssertEqual(score.theirGames, 8)
+        XCTAssertNil(score.ownWon)
+        XCTAssertEqual(score.ownCompetitionPoints, 8)
+        XCTAssertEqual(score.theirCompetitionPoints, 8)
+        XCTAssertEqual(team.statusText, "Gelijkspel 8-8")
+    }
+
+    func testAnUnfinishedTeamMatchHasAStandButNoWinner() {
+        let team = match([partij(1, [(11, 5), (11, 7), (11, 9)]), partij(2, [(11, 9), (8, 11)])])
+        let score = team.score
+        XCTAssertFalse(score.isComplete)
+        XCTAssertEqual(score.partijenPlayed, 2)
+        XCTAssertNil(score.ownWon)
+        XCTAssertEqual(score.ownCompetitionPoints, 4, "no bonus before the end")
+        XCTAssertEqual(team.statusText, "Stand 4-1 · 2 van 4 partijen")
+        XCTAssertEqual(match([]).statusText, "Nog niet begonnen")
+        XCTAssertEqual(match([]).partijen.count, 4, "always four slots")
+        XCTAssertEqual(match([]).partij(3).label, "E3")
+    }
+
+    func testAwayTeamShowsHomeFirst() {
+        let team = match([partij(1, [(11, 5), (11, 7), (11, 9)])], ownSide: .away)
+        XCTAssertEqual(team.ownName, "Squash Delft 8")
+        XCTAssertEqual(team.opponentName, "All Inn Squash 8")
+        XCTAssertEqual(team.homeGames, 0)
+        XCTAssertEqual(team.awayGames, 3)
+        XCTAssertEqual(team.gamesText, "0-3")
+    }
+
+    func testAFixtureOfMijnTeamKnowsOurSide() {
+        let fixture = LeagueFixture(id: "f1", date: Date(timeIntervalSince1970: 1_793_181_600.0), home: "All Inn Squash 8",
+                                    away: "Squash Delft 8", score: nil, url: URL(string: "https://sbn.toernooi.nl/x")!)
+        let home = TeamMatch.from(fixture: fixture, ownTeam: "All Inn Squash 8")
+        XCTAssertEqual(home.ownSide, TeamSide.home)
+        XCTAssertEqual(home.fixtureId, "f1")
+        XCTAssertEqual(home.title, "All Inn Squash 8 – Squash Delft 8")
+        let away = TeamMatch.from(fixture: fixture, ownTeam: " squash delft 8 ")
+        XCTAssertEqual(away.ownSide, TeamSide.away)
+    }
+
+    func testLinkingATrackedMatchTakesItsGamesFromOurSide() {
+        // Player 1 won 3-1: one game before scoring started, three tracked
+        let summary = MatchHistorySummary(id: "m1", kind: "coach", player1Name: "Gerd-Jan", player2Name: "Piet",
+                                          player1Games: 3, player2Games: 1, status: "completed",
+                                          updatedAt: Date(timeIntervalSince1970: 1_793_181_600.0),
+                                          games: [HistoryGameScore(player1Score: 11, player2Score: 8, winner: Player.player1.rawValue),
+                                                  HistoryGameScore(player1Score: 9, player2Score: 11, winner: Player.player2.rawValue),
+                                                  HistoryGameScore(player1Score: 11, player2Score: 6, winner: Player.player1.rawValue)],
+                                          untrackedBefore: 1)
+        var partij = TeamPartij(slot: 2)
+        partij.link(summary, ownIsPlayer1: true)
+        XCTAssertEqual(partij.ownPlayer, "Gerd-Jan")
+        XCTAssertEqual(partij.opponentPlayer, "Piet")
+        XCTAssertEqual(partij.games.count, 4)
+        XCTAssertEqual(partij.ownGames, 3)
+        XCTAssertEqual(partij.theirGames, 1)
+        XCTAssertEqual(partij.gamesText, "11-8, 9-11, 11-6, –")
+        XCTAssertFalse(partij.hasAllPoints)
+        XCTAssertEqual(partij.linkedMatchId, "m1")
+        XCTAssertEqual(partij.linkedKind, "coach")
+        XCTAssertTrue(partij.isLinked)
+
+        // Our player was player 2
+        var theirs = TeamPartij(slot: 3)
+        theirs.link(summary, ownIsPlayer1: false)
+        XCTAssertEqual(theirs.ownPlayer, "Piet")
+        XCTAssertEqual(theirs.ownGames, 1)
+        XCTAssertEqual(theirs.theirGames, 3)
+        XCTAssertEqual(theirs.games[0].text, "8-11")
+        XCTAssertEqual(theirs.ownWon, false)
+
+        theirs.unlink()
+        XCTAssertFalse(theirs.isLinked)
+        XCTAssertEqual(theirs.games.count, 4, "the games stay")
+
+        var team = match([])
+        team.update(partij)
+        XCTAssertEqual(team.partijLinked(to: "m1")?.slot, 2)
+        XCTAssertNil(team.partijLinked(to: "m2"))
+        XCTAssertEqual(team.partij(2).ownPlayer, "Gerd-Jan")
+    }
+
+    func testTheReportReadsLikeAWhatsAppMessage() {
+        var team = match([
+            partij(1, [(11, 5), (11, 7), (11, 9)]),
+            partij(2, [(11, 9), (8, 11), (11, 13), (11, 4), (11, 8)]),
+            partij(3, [(11, 6), (5, 11), (7, 11), (9, 11)]),
+            partij(4, [(11, 9), (11, 8), (6, 11), (9, 11), (8, 11)]),
+        ])
+        var text = TeamMatchReport.text(team)
+        XCTAssertTrue(text.hasPrefix("🏆 TEAMWEDSTRIJD · "), text)
+        XCTAssertTrue(text.contains("All Inn Squash 8 – Squash Delft 8"))
+        XCTAssertTrue(text.contains("Uitslag 9-8 in games · 2-2 in partijen → All Inn Squash 8 wint"))
+        XCTAssertTrue(text.contains("Competitiepunten: All Inn Squash 8 12 · Squash Delft 8 8"))
+        XCTAssertTrue(text.contains("E1 Wij1 – Zij1: 3-0 (11-5, 11-7, 11-9)"))
+        XCTAssertTrue(text.contains("E3 Wij3 – Zij3: 1-3 (11-6, 5-11, 7-11, 9-11)"))
+        XCTAssertTrue(text.hasSuffix("Gedeeld vanuit SquashAnalyzer · squashanalyzer.com"))
+
+        // Away: home names and scores first, so it reads like SBN
+        team = match([partij(1, [(11, 5), (11, 7), (11, 9)])], ownSide: .away)
+        text = TeamMatchReport.text(team)
+        XCTAssertTrue(text.contains("Stand 0-3 in games · 1 van 4 partijen gespeeld"), text)
+        XCTAssertTrue(text.contains("E1 Zij1 – Wij1: 0-3 (5-11, 7-11, 9-11)"), text)
+        XCTAssertTrue(text.contains("E2 ? – ?: nog niet gespeeld"), text)
+    }
+
+    @MainActor
+    func testTheFileStoreKeepsMatchesNewestFirst() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("teammatch-\(UUID().uuidString)")
+        let store = JSONFileTeamMatchStore(directory: folder)
+        let empty = try await store.loadAll()
+        XCTAssertTrue(empty.isEmpty)
+
+        let older = TeamMatch(date: Date(timeIntervalSince1970: 1_793_181_600.0), home: "A", away: "B", ownSide: .home)
+        var newer = TeamMatch(date: Date(timeIntervalSince1970: 1_793_786_400.0), home: "C", away: "D", ownSide: .away)
+        try await store.save(older)
+        try await store.save(newer)
+        var all = try await store.loadAll()
+        XCTAssertEqual(all.map { match in match.home }, ["C", "A"])
+
+        newer.update(partij(1, [(11, 3), (11, 4), (11, 5)]))
+        try await store.save(newer)
+        all = try await store.loadAll()
+        XCTAssertEqual(all.count, 2, "saving again replaces")
+        XCTAssertEqual(all[0].score.ownGames, 3)
+        XCTAssertEqual(all[0].ownSide, TeamSide.away)
+        XCTAssertEqual(all[0].partij(1).gamesText, "11-3, 11-4, 11-5")
+
+        try await store.delete(id: older.id)
+        all = try await store.loadAll()
+        XCTAssertEqual(all.map { match in match.home }, ["C"])
+
+        // A second store on the same folder reads the same file
+        let again = try await JSONFileTeamMatchStore(directory: folder).loadAll()
+        XCTAssertEqual(again, all)
+        try? FileManager.default.removeItem(at: folder)
+    }
+}

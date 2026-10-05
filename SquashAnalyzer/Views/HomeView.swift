@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import SquashAnalyzerCore
 import SquashAnalyzerUI
 
@@ -15,6 +16,12 @@ struct HomeView: View {
 
     @State private var showingPlayerManagement = false
     @State private var showingBadgeCatalog = false
+    @State private var showingCompetition = false
+    @Environment(\.modelContext) private var modelContext
+
+    /// Competitie: team matches in one JSON file in Application Support, as on Android
+    @MainActor static let teamMatchStore = JSONFileTeamMatchStore(
+        directory: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0])
 
     var body: some View {
         ZStack {
@@ -29,7 +36,8 @@ struct HomeView: View {
                         onReferee: onReferee,
                         onHistory: onViewHistory,
                         onPlayers: { showingPlayerManagement = true },
-                        onBadges: { showingBadgeCatalog = true }
+                        onBadges: { showingBadgeCatalog = true },
+                        onCompetition: { showingCompetition = true }
                     )
                 }
                 .padding(.top, 8)
@@ -44,6 +52,17 @@ struct HomeView: View {
                 SharedBadgeCatalogView()
                     .toolbar {
                         CloseToolbarItem { showingBadgeCatalog = false }
+                    }
+            }
+        }
+        .sheet(isPresented: $showingCompetition) {
+            NavigationStack {
+                SharedTeamMatchesView(store: HomeView.teamMatchStore,
+                                      historyStore: SwiftDataMatchHistoryStore(context: modelContext),
+                                      team: TeamMatchSupport.cachedTeam(),
+                                      shareText: { text in IOSShare.text(text) })
+                    .toolbar {
+                        CloseToolbarItem { showingCompetition = false }
                     }
             }
         }

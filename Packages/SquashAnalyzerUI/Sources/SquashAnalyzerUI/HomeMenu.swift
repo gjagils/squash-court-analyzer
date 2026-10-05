@@ -4,6 +4,7 @@ import SquashAnalyzerCore
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MilitaryTech
@@ -58,14 +59,18 @@ public struct HomeMenuTiles: View {
     private let onHistory: () -> Void
     private let onPlayers: () -> Void
     private let onBadges: () -> Void
+    /// Competitie (teamwedstrijden); the row only shows when the host wires it
+    private let onCompetition: (() -> Void)?
 
     public init(onCoach: @escaping () -> Void, onReferee: @escaping () -> Void,
-                onHistory: @escaping () -> Void, onPlayers: @escaping () -> Void, onBadges: @escaping () -> Void) {
+                onHistory: @escaping () -> Void, onPlayers: @escaping () -> Void, onBadges: @escaping () -> Void,
+                onCompetition: (() -> Void)? = nil) {
         self.onCoach = onCoach
         self.onReferee = onReferee
         self.onHistory = onHistory
         self.onPlayers = onPlayers
         self.onBadges = onBadges
+        self.onCompetition = onCompetition
     }
 
     public var body: some View {
@@ -80,6 +85,10 @@ public struct HomeMenuTiles: View {
             VStack(spacing: 0) {
                 menuRow("Afgeronde wedstrijden", icon: .history, action: onHistory)
                 Divider().overlay(Color.white.opacity(0.09))
+                if let onCompetition {
+                    menuRow("Competitie", icon: .competition, action: onCompetition)
+                    Divider().overlay(Color.white.opacity(0.09))
+                }
                 menuRow("Spelers", icon: .players, action: onPlayers)
                 Divider().overlay(Color.white.opacity(0.09))
                 menuRow("Badges", icon: .badges, action: onBadges)
@@ -195,7 +204,7 @@ private struct HomeMenuTile: View {
 /// The five home tiles' icons: a clipboard (coach), a whistle or raised hand
 /// (referee), history, a group (players) and a medal (badges).
 enum HomeTileIcon {
-    case coach, referee, history, players, badges
+    case coach, referee, history, players, badges, competition
 
     /// SF Symbol on Apple. The referee is drawn (`WhistleShape`): the
     /// `whistle` symbols render as an empty glyph on the iOS SF Symbols
@@ -207,6 +216,7 @@ enum HomeTileIcon {
         case .history: return "clock.arrow.circlepath"
         case .players: return "person.2.fill"
         case .badges: return "medal.fill"
+        case .competition: return "trophy.fill"
         }
     }
 }
@@ -277,6 +287,7 @@ struct HomeTileIconView: View {
         case .history: return Icons.Filled.History
         case .players: return Icons.Filled.Groups
         case .badges: return Icons.Filled.MilitaryTech
+        case .competition: return Icons.Filled.EmojiEvents
         }
     }
     #endif
@@ -319,6 +330,9 @@ public struct AndroidHomeView: View {
     private let filePicker: (any PlayerFilePicker)?
     /// "Deel kaart" with a picture (Android draws it)
     private let shareCard: ((CardSnapshot, String) -> Void)?
+    /// Competitie: team matches in a JSON file (Android supplies its files directory)
+    private let teamMatchStore: (any TeamMatchStore)?
+    @State private var showingCompetition = false
 
     public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 historyStore: any MatchHistoryStore,
@@ -327,7 +341,9 @@ public struct AndroidHomeView: View {
                 cardInbox: CardInbox, cardImportStore: any CardImportStore,
                 leagueTeamFetcher: LeagueTeamFetcher, aiCoach: AICoachContext? = nil, backup: BackupContext? = nil,
                 teamImporter: (any TeamLinkImporter)? = nil, photoStore: (any PlayerPhotoStore)? = nil,
-                filePicker: (any PlayerFilePicker)? = nil, shareCard: ((CardSnapshot, String) -> Void)? = nil) {
+                filePicker: (any PlayerFilePicker)? = nil, shareCard: ((CardSnapshot, String) -> Void)? = nil,
+                teamMatchStore: (any TeamMatchStore)? = nil) {
+        self.teamMatchStore = teamMatchStore
         self.teamImporter = teamImporter
         self.photoStore = photoStore
         self.filePicker = filePicker
@@ -380,6 +396,12 @@ public struct AndroidHomeView: View {
                         SharedLeagueTeamDetailView(snapshot: team, fetcher: leagueTeamFetcher)
                     }
                 }
+                .navigationDestination(isPresented: $showingCompetition) {
+                    if let teamMatchStore {
+                        SharedTeamMatchesView(store: teamMatchStore, historyStore: historyStore,
+                                              team: TeamMatchSupport.cachedTeam(), shareText: shareText)
+                    }
+                }
         }
         .sheet(isPresented: Binding(get: { cardInbox.pending != nil },
                                     set: { if !$0 { cardInbox.pending = nil } })) {
@@ -414,7 +436,8 @@ public struct AndroidHomeView: View {
                             onReferee: { showingReferee = true },
                             onHistory: { showingHistory = true },
                             onPlayers: { showingPlayers = true },
-                            onBadges: { showingBadges = true }
+                            onBadges: { showingBadges = true },
+                            onCompetition: teamMatchStore == nil ? nil : { showingCompetition = true }
                         )
                     }
                     .padding(.top, 8)

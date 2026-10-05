@@ -27,9 +27,8 @@ NAS blijft voorlopig als reserve draaien.** Stand na die avond:
   domain van de Worker `squash-live-beta` (naast `beta.squashanalyzer.com`,
   dat als alias blijft); `PUBLIC_URL` is `https://live.squashanalyzer.com`.
   Het tunnel-record `live` → `2b05ba07-fadb-4248-a867-6df79718ae59.cfargotunnel.com`
-  is uit DNS gehaald (de public hostname in de tunnel en Portainer-stack 109
-  staan er nog; terugzetten = custom domain van de Worker af, dat record
-  weer aanmaken). De schakelaar Alfa/Beta is uit de app gehaald voordat hij
+  is uit DNS gehaald en de tunnel-hostname is weg; alleen Portainer-stack 109
+  draait nog (terugzetten: zie bij de website hieronder). De schakelaar Alfa/Beta is uit de app gehaald voordat hij
   in een build zat; `LiveShare.serverKey` blijft bestaan maar wordt niet
   gelezen. `server/live` (Node) is de reserve.
 - **Website is omgezet (5 oktober, 18:35).** Gerd-Jan haalde de
@@ -42,10 +41,13 @@ NAS blijft voorlopig als reserve draaien.** Stand na die avond:
   (`application/zip`, `noindex`), beide deep-link-bestanden als
   `application/json`. Nog te doen op een telefoon:
   `adb shell pm get-app-links com.squashanalyzer.android` moet `verified`
-  blijven en een kaartlink vanaf de iPhone moet de app openen. Portainer-
-  stacks 85 en 109 en de tunnel-hostnames staan er nog als reserve; de
-  tunnel-records in DNS zijn weg (doel was
-  `2b05ba07-fadb-4248-a867-6df79718ae59.cfargotunnel.com`).
+  blijven en een kaartlink vanaf de iPhone moet de app openen. Gerd-Jan
+  haalde dezelfde avond ook de drie tunnel-hostnames (`live`, apex, `www`)
+  uit de tunnel; alleen Portainer-stacks 85 (website) en 109 (live) draaien
+  nog als reserve. Terugvallen = custom domain van de Worker af, in Zero
+  Trust de public hostname opnieuw toevoegen (tunnel
+  `2b05ba07-fadb-4248-a867-6df79718ae59`, website → `http://192.168.68.120:3001`,
+  live → `http://192.168.68.120:3002`), wat ook het DNS-record aanmaakt.
 
 **Stand 5 oktober (avond):** de Workers-versie van de live-server is gebouwd
 in `server/live-worker` (Durable Objects, zelfde API en kijkpagina, 12 tests

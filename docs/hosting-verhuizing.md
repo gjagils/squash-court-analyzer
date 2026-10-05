@@ -32,18 +32,20 @@ NAS blijft voorlopig als reserve draaien.** Stand na die avond:
   weer aanmaken). De schakelaar Alfa/Beta is uit de app gehaald voordat hij
   in een build zat; `LiveShare.serverKey` blijft bestaan maar wordt niet
   gelezen. `server/live` (Node) is de reserve.
-- **Website: wacht op twee DNS-records.** De Worker `squashanalyzer-site`
-  heeft `squashanalyzer.com` en `www` als custom domains in
-  `server/website-worker/wrangler.jsonc`, maar de deploy weigert zolang de
-  tunnel-records voor die twee namen bestaan (fout 100117). Die twee records
-  verwijderen (DNS → Records → Edit → Delete) kon niet vanuit Claude Code
-  (auto-modus blokkeert DNS-wijzigingen); daarna
+- **Website is omgezet (5 oktober, 18:35).** Gerd-Jan haalde de
+  tunnel-records voor `squashanalyzer.com` en `www` uit DNS; daarna
   `npx wrangler deploy -c server/website-worker/wrangler.jsonc` vanaf de Mac
   (de map `website/screenshots/` en `website/teams/` gaan dan mee; de repo is
   publiek, dus de teamzips blijven buiten git en de website-workflow in
-  GitHub blijft uit). Controle daarna: `curl -sI https://squashanalyzer.com/.well-known/apple-app-site-association`
-  geeft `application/json`, `adb shell pm get-app-links com.squashanalyzer.android`
-  blijft `verified`, een kaartlink vanaf de iPhone opent de app.
+  GitHub blijft uit). Gecontroleerd op het eigen domein: homepage, `www`,
+  `/badges/`, `/handleiding/`, `/kaart/`, de screenshots, de teamzip
+  (`application/zip`, `noindex`), beide deep-link-bestanden als
+  `application/json`. Nog te doen op een telefoon:
+  `adb shell pm get-app-links com.squashanalyzer.android` moet `verified`
+  blijven en een kaartlink vanaf de iPhone moet de app openen. Portainer-
+  stacks 85 en 109 en de tunnel-hostnames staan er nog als reserve; de
+  tunnel-records in DNS zijn weg (doel was
+  `2b05ba07-fadb-4248-a867-6df79718ae59.cfargotunnel.com`).
 
 **Stand 5 oktober (avond):** de Workers-versie van de live-server is gebouwd
 in `server/live-worker` (Durable Objects, zelfde API en kijkpagina, 12 tests
@@ -189,6 +191,9 @@ Wat er nodig is:
 | Cloudflare Pages voor de live-server | — | Kan niet: Pages Functions zijn stateless en houden geen sessies in het geheugen. |
 
 ## Volgorde en moment
+
+Afgerond op 5 oktober 2026 (zie het besluit hierboven); de NAS-stacks mogen
+weg zodra Gerd-Jan de reserve niet meer nodig vindt.
 
 1. Website naar Pages (een uur werk, geen risico, op elk moment).
 2. Live-server naar Fly op een dag zonder competitiewedstrijden; test eerst

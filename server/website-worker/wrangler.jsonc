@@ -1,0 +1,16 @@
+// Squash Analyzer — the static website (website/) on Cloudflare as a Worker
+// with static assets (the current form of Cloudflare Pages). Trial address:
+// https://squashanalyzer-site.gerdjanvangils.workers.dev; the domain stays on
+// the NAS until Gerd-Jan switches it. website/_headers sets the JSON types
+// for the deep-link files and keeps /teams/ out of search engines.
+// Deploy: npx wrangler deploy -c server/website-worker/wrangler.jsonc
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "squashanalyzer-site",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "../../website",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}

@@ -1,10 +1,13 @@
-# The website on Cloudflare Pages (project squashanalyzer-site): on a push to
-# main that touches website/, upload the folder with wrangler. Needs the
-# repository secrets CLOUDFLARE_API_TOKEN (with "Cloudflare Pages: Edit") and
-# CLOUDFLARE_ACCOUNT_ID. Only active once the Pages project exists (see
-# docs/live-beta-afronden-instructie.md, step 9); until then the NAS serves
-# the site and this workflow only runs when started by hand.
-name: Website (Cloudflare Pages)
+# The website on Cloudflare as a Worker with static assets (the current form
+# of Cloudflare Pages; config in server/website-worker/wrangler.jsonc, Worker
+# squashanalyzer-site): on a push to main that touches website/, upload the
+# folder with wrangler. Needs the repository secrets CLOUDFLARE_API_TOKEN
+# ("Edit Cloudflare Workers") and CLOUDFLARE_ACCOUNT_ID. Only active once
+# WEBSITE_ON_PAGES is set (see docs/live-beta-afronden-instructie.md, step 9);
+# until then the NAS serves the site and this workflow only runs when started
+# by hand. Note: website/screenshots/ and website/teams/ are outside git and
+# do not come along in this upload; deploy from the Mac for those.
+name: Website (Cloudflare)
 
 on:
   push:
@@ -26,7 +29,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npx --yes wrangler@4 pages deploy website --project-name squashanalyzer-site --branch main --commit-dirty=true
+      - run: npx --yes wrangler@4 deploy -c server/website-worker/wrangler.jsonc
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

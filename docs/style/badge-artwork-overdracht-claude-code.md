@@ -136,8 +136,15 @@ een test op de toestellen (in de cloudsessie zijn Swift en Skip niet beschikbaar
   gedeelde asset-catalogus van SquashAnalyzerUI; er zijn geen drawables nodig.
 - **Website:** `website/kaart/index.html` kent alle 71 ids en toont per badge
   de hoogste trede; `website/badges/` toont de treden naast elkaar.
-- **Nog te doen na de build:** de oude imagesets `badge-<id>.imageset` van de
-  zeventien omgezette badges en `badge-perfect-ten.imageset` (en de losse
-  `website/badges/<id>.png` daarvan) weghalen zodra de treden op iPhone en
-  Android zijn gezien; `badge-perfect-ten` wordt nergens meer geladen.
+- **Gedaan op de Mac (5 oktober 2026):** de oude imagesets `badge-<id>.imageset`
+  van de zeventien omgezette badges en `badge-perfect-ten.imageset` zijn
+  verwijderd (71 imagesets over); `website/badges/<id>.png` van die achttien
+  blijft staan voor oude kaartlinks. Getest op de iPhone 17 Pro Max-simulator
+  (iOS 26.5) en de Android-emulator Medium Phone API 36.1: catalogus met drie
+  medaillons per reeks, coachwedstrijd met acht drops (gouden Drop it like
+  it's hot op de strip, "Goud · 1×" bij de speler, drie momenten), badgekaart
+  in app en browser, scheidsrechter 11-3/11-4/11-5 (Vette winst en Clean
+  sweep), en een back-up van build 17 met een oude `perfect-ten` (verschijnt
+  als gouden 5 points in a row, niets dubbel). Screenshots in
+  `docs/screenshots-oktober/ios-badges-*.png` en `android-badges-*.png`.
 

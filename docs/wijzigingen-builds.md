@@ -4,9 +4,25 @@ Doorlopend overzicht van wat er sinds de laatste upload is veranderd. Bij elke
 nieuwe build schuift het blok "Volgende build" naar beneden onder het
 buildnummer, en de releasenotes (`release-notes/`) worden eruit geschreven.
 
-## Volgende build (nog niet geüpload; iOS 18 / Android 5, pas na Gerd-Jans go)
+## Volgende build (nog niet geüpload)
 
-Vergeleken met iOS 2.2 (17) en Android 0.4 (4), 3 oktober 2026.
+Vergeleken met iOS 2.2 (18) en Android 0.5 (5), 5 oktober 2026.
+
+## iOS 2.2 build 18 en Android 0.5 (5), 5 oktober 2026 (gebouwd en getest; upload door Gerd-Jan)
+
+Zie `release-notes/2.2-18.md` en `release-notes/android-0.5-5.md`. Getest op
+de iPhone 17 Pro Max-simulator en de Android-emulator (API 36.1); alle suites
+groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
+2.2 (17) en Android 0.4 (4), 3 oktober 2026.
+
+### Opgelost tijdens het testen (5 oktober)
+- **iOS Instellingen, TERUGZETTEN** opende geen bestandskiezer (twee
+  `.fileImporter`s op één view); nu elk op zijn eigen rij.
+- **iOS Spelers:** het getal bij de medaille telt een badge met treden één
+  keer, zoals Android en "x van 37".
+- **Strip "Badges verdiend":** de tekst krimpt bij vijf medaillons; op Android
+  stond er "Bombardino · 5" in plaats van "· 5 badges".
+- De oude imagesets zonder trede zijn verwijderd (71 imagesets over).
 
 ### Opgelost
 - **Grote systeemtekst:** de tegel "SCHEIDSRECHTER" brak op Android al bij
@@ -48,9 +64,8 @@ Vergeleken met iOS 2.2 (17) en Android 0.4 (4), 3 oktober 2026.
   wedstrijd tonen per badge de hoogste trede. Bij de momenten staat de trede
   erbij ("Goud · Tegen …").
 - Artwork van Codex (`docs/style/badge-artwork-overdracht-claude-code.md`); de
-  oude imagesets van de zeventien omgezette badges en `perfect-ten` staan nog
-  in `Module.xcassets` en kunnen weg zodra de treden op beide toestellen zijn
-  gezien.
+  oude imagesets van de zeventien omgezette badges en `perfect-ten` zijn op
+  5 oktober verwijderd.
 
 ### Probeer vooral
 - Zet de tekst groot (Samsung: Lettergrootte max; iPhone: Tekstgrootte) en loop

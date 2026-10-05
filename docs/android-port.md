@@ -2292,3 +2292,33 @@ moeten worden (ssh naar github.com).
     `data.prefix(3) == Data(…)` transpileren niet (of naar een verouderde
     constructor). Werk via base64: een JPEG begint in base64 altijd met `/9j/`
     (`LivePhotos.encoded`), en tests maken bytes met `Data(base64Encoded:)`.
+
+### Badges met treden (2026-10-05)
+
+Lokaal gedraaid op de branch `claude/great-pasteur-eyskxy` na de cloudsessie
+die de treden en de zeven nieuwe badges bouwde: `scripts/lint.sh` groen,
+Core 172 XCTest + 171 Skip/JUnit (`swift test` draait beide; `skip test
+--project` 171/171), UI-package bouwt en transpileert (geen testtarget),
+iOS-app 94/94 op de iPhone 17 Pro Max-simulator, Android 65 unit tests
+(Robolectric) en 28 connected tests op de API 36.1-emulator. De voorspelde
+Skip-risico's (`BadgeKind.families`, `family.series`, `for … where`,
+`BadgeSeriesArtwork`, de ternary met `size + 12.0`) gaven geen enkele
+Kotlin-fout. Nieuwe eigenaardigheden:
+
+14. **Een stale incrementele Kotlin-cache in de included build geeft valse
+    fouten.** Na `swift build` van SquashAnalyzerUI in een verse worktree
+    faalde `:skipstone:SquashAnalyzerCore:compileDebugKotlin` in 2 s met
+    "Cannot access 'internal fun entry' / 'Enum types cannot be instantiated'"
+    in `RefereeMatch.kt` en `Match.kt`, terwijl de gegenereerde Kotlin
+    identiek was aan die van de groene `skip test`. Verwijder dan
+    `Packages/SquashAnalyzerUI/.build/plugins/outputs/squashanalyzerui/SquashAnalyzerUI/destination/skipstone/*/build`,
+    `…/.gradle` en `Android/app/build`; daarna bouwt alles schoon (45 s).
+15. **`skip test` kent geen `--package-path`;** gebruik
+    `skip test --project Packages/SquashAnalyzerCore`. Het zet zijn
+    JUnit-xml in `Android/.build/` (nu genegeerd in `.gitignore`).
+16. **Twee `.fileImporter`-modifiers op één view laten alleen de laatste
+    werken** (iOS, niet Skip): TERUGZETTEN in Instellingen opende niets.
+    Hang elke importer aan zijn eigen rij.
+17. **Compose kapt een `Text` in een `HStack` af in plaats van te krimpen**
+    (zelfde als 9): de strip "Badges verdiend" toonde "Bombardino · 5" bij
+    vijf medaillons. `.minimumScaleFactor(0.7)` op de tekst lost het op.

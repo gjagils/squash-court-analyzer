@@ -39,7 +39,10 @@ app: coachwedstrijd op de iPhone met Beta gekozen, link en spelersfoto's op de
 kijkpagina, tientallen stand-updates zonder één fout in de Worker-logs
 (alleen methode, pad en status te zien). Gerd-Jans oordeel: "werkt super
 soepel". Android-telefoon nog niet getest op Beta (later). Automatisch
-uitrollen (stap 7, API-token en GitHub-secrets) nog niet ingesteld.
+uitrollen staat aan sinds de merge van 5 oktober 18:13: de secrets
+`CLOUDFLARE_API_TOKEN` en `CLOUDFLARE_ACCOUNT_ID` staan in de repo en de
+eerste run van `deploy-live-beta.yml` op `main` was groen (tests 26 s,
+deploy 25 s).
 
 ### Website: Cloudflare Pages (gratis)
 

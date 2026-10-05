@@ -195,8 +195,9 @@ enum ExportService {
             badgeAwards: awardData.isEmpty ? nil : awardData,
             refereeMatches: refereeData.isEmpty ? nil : refereeData
         )
+        // Competitie: team matches and the "In mijn team" flags travel along (format 4)
         return try BackupCodec.encode(
-            backup,
+            TeamBackup.attach(backup, directory: TeamMatchStorage.directory),
             appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
         )
     }
@@ -207,7 +208,7 @@ enum ExportService {
     /// Merges like Android's `RoomBackupStore`: a player, match or loose game
     /// whose id is already there is skipped, so importing the same file twice
     /// adds nothing the second time.
-    static func importFullBackup(_ data: Data, context: ModelContext) throws -> (players: Int, matches: Int, games: Int) {
+    static func importFullBackup(_ data: Data, context: ModelContext, replacingTeam: Bool = false) throws -> (players: Int, matches: Int, games: Int) {
         let backup = try decodeAndValidateBackup(data)
 
         var playerCount = 0
@@ -248,6 +249,7 @@ enum ExportService {
         }
 
         try context.save()
+        TeamBackup.restore(backup, directory: TeamMatchStorage.directory, replacing: replacingTeam)
         return (playerCount, matchCount, gameCount)
     }
 
@@ -269,7 +271,7 @@ enum ExportService {
         }
         try context.save()
 
-        return try importFullBackup(data, context: context)
+        return try importFullBackup(data, context: context, replacingTeam: true)
     }
 
     // MARK: - Import

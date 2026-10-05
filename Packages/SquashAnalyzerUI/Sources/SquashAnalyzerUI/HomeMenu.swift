@@ -400,8 +400,12 @@ public struct AndroidHomeView: View {
                 }
                 .navigationDestination(isPresented: $showingCompetition) {
                     if let teamMatchStore {
-                        SharedTeamMatchesView(store: teamMatchStore, historyStore: historyStore,
-                                              team: TeamMatchSupport.cachedTeam(), shareText: shareText)
+                        SharedTeamMatchesView(
+                            store: teamMatchStore,
+                            tools: TeamMatchTools(historyStore: historyStore, playerStore: playerStore, coachStore: matchStore,
+                                                  refereeStore: refereeMatchStore, photoStore: photoStore, filePicker: filePicker,
+                                                  aiCoach: aiCoach, shareText: shareText),
+                            team: TeamMatchSupport.cachedTeam())
                     }
                 }
         }

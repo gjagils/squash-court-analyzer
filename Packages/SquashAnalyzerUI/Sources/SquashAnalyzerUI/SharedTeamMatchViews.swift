@@ -9,7 +9,102 @@ import SquashAnalyzerCore
 // the competition points come from Core (`TeamMatch`), the message from
 // `TeamMatchReport`.
 
+/// What a team match screen needs to start a tracked match for a partij and
+/// to share the report: the stores of the coach and referee sessions, the
+/// players and the platform share sheet. Built by the host app.
+public struct TeamMatchTools {
+    public let historyStore: any MatchHistoryStore
+    public let playerStore: any PlayerProfileStore
+    public let coachStore: any CoachMatchStore
+    public let refereeStore: any RefereeMatchStore
+    public let photoStore: (any PlayerPhotoStore)?
+    public let filePicker: (any PlayerFilePicker)?
+    public let aiCoach: AICoachContext?
+    public let shareText: ((String) -> Void)?
+
+    public init(historyStore: any MatchHistoryStore, playerStore: any PlayerProfileStore,
+                coachStore: any CoachMatchStore, refereeStore: any RefereeMatchStore,
+                photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil,
+                aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil) {
+        self.historyStore = historyStore
+        self.playerStore = playerStore
+        self.coachStore = coachStore
+        self.refereeStore = refereeStore
+        self.photoStore = photoStore
+        self.filePicker = filePicker
+        self.aiCoach = aiCoach
+        self.shareText = shareText
+    }
+}
+
+/// A coach or referee match started from a partij: the names to start with
+/// (the home player is Speler 1, as SBN prints it) and where the result goes
+/// when the match is over.
+public struct TeamTarget: Equatable {
+    public let teamMatchId: UUID
+    public let slot: Int
+    public let ownPlayer: String
+    public let opponentPlayer: String
+    /// Our team plays at home: our player is Speler 1
+    public let ownIsPlayer1: Bool
+
+    public init(teamMatchId: UUID, slot: Int, ownPlayer: String, opponentPlayer: String, ownIsPlayer1: Bool) {
+        self.teamMatchId = teamMatchId
+        self.slot = slot
+        self.ownPlayer = ownPlayer
+        self.opponentPlayer = opponentPlayer
+        self.ownIsPlayer1 = ownIsPlayer1
+    }
+
+    public var player1Name: String { ownIsPlayer1 ? ownPlayer : opponentPlayer }
+    public var player2Name: String { ownIsPlayer1 ? opponentPlayer : ownPlayer }
+
+    /// Which player of the finished match is ours: by name, else as started
+    func ownIsPlayer1(in match1: String, _ match2: String) -> Bool {
+        let own = ownPlayer.trimmingCharacters(in: .whitespaces).lowercased()
+        if !own.isEmpty && match1.trimmingCharacters(in: .whitespaces).lowercased() == own { return true }
+        if !own.isEmpty && match2.trimmingCharacters(in: .whitespaces).lowercased() == own { return false }
+        return ownIsPlayer1
+    }
+}
+
 public enum TeamMatchSupport {
+    /// The finished coach match goes into the partij it was started for
+    @MainActor public static func link(coach match: Match, target: TeamTarget, store: any TeamMatchStore) async {
+        guard let all = try? await store.loadAll() else { return }
+        for var team in all where team.id == target.teamMatchId {
+            var partij = team.partij(target.slot)
+            partij.link(coach: match, ownIsPlayer1: target.ownIsPlayer1(in: match.player1Name, match.player2Name))
+            team.update(partij)
+            try? await store.save(team)
+        }
+    }
+
+    /// The finished referee match goes into the partij it was started for
+    @MainActor public static func link(referee match: RefereeMatch, target: TeamTarget, store: any TeamMatchStore) async {
+        guard let all = try? await store.loadAll() else { return }
+        for var team in all where team.id == target.teamMatchId {
+            var partij = team.partij(target.slot)
+            partij.link(referee: match, ownIsPlayer1: target.ownIsPlayer1(in: match.player1Name, match.player2Name))
+            team.update(partij)
+            try? await store.save(team)
+        }
+    }
+
+    /// The names to offer as our player: the players marked "In mijn team"
+    /// first, then the players of Mijn team, without doubles
+    public static func rosterNames(players: [PlayerProfile], team: LeagueTeamSnapshot?, rosterRaw: String) -> [String] {
+        let ids = TeamRoster.parse(rosterRaw)
+        var names: [String] = []
+        for player in players where ids.contains(player.id) {
+            if !names.contains(player.name) { names.append(player.name) }
+        }
+        if let team {
+            for player in team.players where !names.contains(player.name) { names.append(player.name) }
+        }
+        return names
+    }
+
     /// Mijn team as last fetched (Instellingen holds the link), for the
     /// fixtures and the roster; nil without a link
     public static func cachedTeam() -> LeagueTeamSnapshot? {
@@ -119,10 +214,9 @@ public struct TeamMatchLinkPrompt: View {
 /// Afgeronde en lopende teamwedstrijden, nieuwste eerst
 public struct SharedTeamMatchesView: View {
     private let store: any TeamMatchStore
-    private let historyStore: any MatchHistoryStore
+    private let tools: TeamMatchTools
     /// Mijn team, when a link is saved: its matches and players
     private let team: LeagueTeamSnapshot?
-    private let shareText: ((String) -> Void)?
 
     @State private var matches: [TeamMatch] = []
     @State private var isLoading = true
@@ -130,12 +224,10 @@ public struct SharedTeamMatchesView: View {
     @State private var opened: TeamMatch? = nil
     @State private var message: String? = nil
 
-    public init(store: any TeamMatchStore, historyStore: any MatchHistoryStore,
-                team: LeagueTeamSnapshot? = nil, shareText: ((String) -> Void)? = nil) {
+    public init(store: any TeamMatchStore, tools: TeamMatchTools, team: LeagueTeamSnapshot? = nil) {
         self.store = store
-        self.historyStore = historyStore
+        self.tools = tools
         self.team = team
-        self.shareText = shareText
     }
 
     public var body: some View {
@@ -178,7 +270,7 @@ public struct SharedTeamMatchesView: View {
         }
         .navigationDestination(isPresented: Binding(get: { opened != nil }, set: { if !$0 { opened = nil } })) {
             if let opened {
-                SharedTeamMatchView(match: opened, store: store, historyStore: historyStore, team: team, shareText: shareText) { _ in
+                SharedTeamMatchView(match: opened, store: store, tools: tools, team: team) { _ in
                     Task { await load() }
                 }
             }
@@ -271,25 +363,27 @@ struct TeamMatchCard: View {
 public struct SharedTeamMatchView: View {
     @State private var match: TeamMatch
     private let store: any TeamMatchStore
-    private let historyStore: any MatchHistoryStore
+    private let tools: TeamMatchTools
     private let team: LeagueTeamSnapshot?
-    private let shareText: ((String) -> Void)?
     /// After a save (the match) or a delete (nil)
     private let onChange: (TeamMatch?) -> Void
 
     @State private var editing: TeamPartij? = nil
     @State private var confirmDelete = false
     @State private var message: String? = nil
+    @State private var sharing = false
+    /// A tracked match being played for a partij (full screen)
+    @State private var tracking: TeamTrackRequest? = nil
+    @State private var players: [PlayerProfile] = []
+    @AppStorage(TeamRoster.storageKey) private var rosterRaw = ""
     @Environment(\.dismiss) private var dismiss
 
-    public init(match: TeamMatch, store: any TeamMatchStore, historyStore: any MatchHistoryStore,
-                team: LeagueTeamSnapshot? = nil, shareText: ((String) -> Void)? = nil,
-                onChange: @escaping (TeamMatch?) -> Void) {
+    public init(match: TeamMatch, store: any TeamMatchStore, tools: TeamMatchTools,
+                team: LeagueTeamSnapshot? = nil, onChange: @escaping (TeamMatch?) -> Void) {
         _match = State(initialValue: match)
         self.store = store
-        self.historyStore = historyStore
+        self.tools = tools
         self.team = team
-        self.shareText = shareText
         self.onChange = onChange
     }
 
@@ -303,10 +397,8 @@ public struct SharedTeamMatchView: View {
                     if let message {
                         Text(message).font(.system(size: 12)).foregroundColor(SharedColors.error)
                     }
-                    if let shareText {
-                        ActionButton("Deel verslag", icon: "square.and.arrow.up", style: .filled) {
-                            shareText(TeamMatchReport.text(match))
-                        }
+                    if tools.shareText != nil {
+                        ActionButton("Deel verslag", icon: "square.and.arrow.up", style: .filled) { sharing = true }
                     }
                     ActionButton("Verwijder teamwedstrijd", color: SharedColors.textSecondary) { confirmDelete = true }
                 }
@@ -314,14 +406,27 @@ public struct SharedTeamMatchView: View {
             }
         }
         .pageTitle("Teamwedstrijd")
+        .task { players = (try? await tools.playerStore.loadPlayers()) ?? [] }
         .sheet(isPresented: Binding(get: { editing != nil }, set: { if !$0 { editing = nil } })) {
             if let editing {
-                TeamPartijEditor(partij: editing, match: match, roster: rosterNames, historyStore: historyStore) { updated in
+                TeamPartijEditor(partij: editing, match: match, roster: rosterNames, historyStore: tools.historyStore) { updated in
                     var changed = match
                     changed.update(updated)
                     self.editing = nil
                     Task { await save(changed) }
+                } onTrack: { updated, kind in
+                    startTracking(updated, kind: kind)
                 } onCancel: { self.editing = nil }
+            }
+        }
+        .sheet(isPresented: $sharing) {
+            if let shareText = tools.shareText {
+                TeamMatchShareView(match: match, shareText: shareText) { sharing = false }
+            }
+        }
+        .trackedCover(isPresented: Binding(get: { tracking != nil }, set: { if !$0 { tracking = nil } })) {
+            if let request = tracking {
+                trackedSession(request)
             }
         }
         .alert("Teamwedstrijd verwijderen?", isPresented: $confirmDelete) {
@@ -332,12 +437,53 @@ public struct SharedTeamMatchView: View {
         }
     }
 
-    /// Players of Mijn team, to pick our player from
+    /// Our players to pick from: "In mijn team" first, then Mijn team
     private var rosterNames: [String] {
-        guard let team else { return [] }
-        var names: [String] = []
-        for player in team.players { names.append(player.name) }
-        return names
+        TeamMatchSupport.rosterNames(players: players, team: team, rosterRaw: rosterRaw)
+    }
+
+    /// The editor asks for a new tracked match: keep the partij as edited,
+    /// close the editor, then open the coach or referee screen for it
+    private func startTracking(_ updated: TeamPartij, kind: String) {
+        var changed = match
+        changed.update(updated)
+        editing = nil
+        Task { @MainActor in
+            await save(changed)
+            // The editor sheet is closing: wait for it before the full screen opens
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            tracking = TeamTrackRequest(slot: updated.slot, kind: kind)
+        }
+    }
+
+    @ViewBuilder
+    private func trackedSession(_ request: TeamTrackRequest) -> some View {
+        let partij = match.partij(request.slot)
+        let target = TeamTarget(teamMatchId: match.id, slot: request.slot, ownPlayer: partij.ownPlayer,
+                                opponentPlayer: partij.opponentPlayer, ownIsPlayer1: match.ownSide == TeamSide.home)
+        if request.kind == "referee" {
+            RefereeSessionView(store: tools.refereeStore, playerStore: tools.playerStore, photoStore: tools.photoStore,
+                               filePicker: tools.filePicker, shareText: tools.shareText,
+                               teamMatchStore: store, teamTarget: target,
+                               onExit: { trackingDone() })
+        } else {
+            CoachSessionView(store: tools.coachStore, playerStore: tools.playerStore, photoStore: tools.photoStore,
+                             filePicker: tools.filePicker, aiCoach: tools.aiCoach, shareText: tools.shareText,
+                             historyStore: tools.historyStore, settings: nil,
+                             teamMatchStore: store, teamTarget: target,
+                             onExit: { trackingDone() })
+        }
+    }
+
+    /// Back from the tracked match: it was linked to the partij while closing
+    @MainActor private func trackingDone() {
+        tracking = nil
+        Task { @MainActor in
+            if let all = try? await store.loadAll() {
+                for stored in all where stored.id == match.id { match = stored }
+            }
+            onChange(match)
+        }
     }
 
     private var header: some View {
@@ -513,6 +659,8 @@ struct TeamPartijEditor: View {
     let roster: [String]
     let historyStore: any MatchHistoryStore
     let onSave: (TeamPartij) -> Void
+    /// A new tracked match for this partij: the partij as edited and "coach" or "referee"
+    let onTrack: (TeamPartij, String) -> Void
     let onCancel: () -> Void
 
     @State private var ownText = ""
@@ -525,12 +673,14 @@ struct TeamPartijEditor: View {
     @State private var chosen: MatchHistorySummary? = nil
 
     init(partij: TeamPartij, match: TeamMatch, roster: [String], historyStore: any MatchHistoryStore,
-         onSave: @escaping (TeamPartij) -> Void, onCancel: @escaping () -> Void) {
+         onSave: @escaping (TeamPartij) -> Void, onTrack: @escaping (TeamPartij, String) -> Void,
+         onCancel: @escaping () -> Void) {
         _partij = State(initialValue: partij)
         self.match = match
         self.roster = roster
         self.historyStore = historyStore
         self.onSave = onSave
+        self.onTrack = onTrack
         self.onCancel = onCancel
     }
 
@@ -558,9 +708,13 @@ struct TeamPartijEditor: View {
                 }
             }
             .sheet(isPresented: $choosingMatch) {
-                TrackedMatchPicker(entries: history, loaded: historyLoaded, matchDate: match.date) { summary in
+                TrackedMatchPicker(entries: history, loaded: historyLoaded, matchDate: match.date,
+                                   homeIsOurs: match.ownSide == TeamSide.home) { summary in
                     choosingMatch = false
                     chosen = summary
+                } onNew: { kind in
+                    choosingMatch = false
+                    onTrack(partij, kind)
                 } onCancel: { choosingMatch = false }
             }
             .alert("Wie is onze speler?", isPresented: Binding(get: { chosen != nil }, set: { if !$0 { chosen = nil } })) {
@@ -817,7 +971,11 @@ struct TrackedMatchPicker: View {
     let entries: [MatchHistorySummary]
     let loaded: Bool
     let matchDate: Date
+    /// Our team plays at home: our player starts as Speler 1
+    let homeIsOurs: Bool
     let onPick: (MatchHistorySummary) -> Void
+    /// "coach" or "referee": a new match to track for this partij
+    let onNew: (String) -> Void
     let onCancel: () -> Void
 
     private var sorted: [MatchHistorySummary] {
@@ -833,6 +991,22 @@ struct TrackedMatchPicker: View {
                 SharedColors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 8) {
+                        Text("NIEUWE WEDSTRIJD BIJHOUDEN")
+                            .font(.system(size: 11, weight: .semibold))
+                            .tracking(1.4)
+                            .foregroundColor(SharedColors.accent)
+                        HStack(spacing: 10) {
+                            ActionButton("Coach") { onNew("coach") }
+                            ActionButton("Scheidsrechter") { onNew("referee") }
+                        }
+                        Text(homeIsOurs ? "Wij spelen thuis: onze speler start als Speler 1." : "Wij spelen uit: onze speler start als Speler 2.")
+                            .font(.system(size: 11))
+                            .foregroundColor(SharedColors.textMuted)
+                        Text("OF EEN BIJGEHOUDEN WEDSTRIJD")
+                            .font(.system(size: 11, weight: .semibold))
+                            .tracking(1.4)
+                            .foregroundColor(SharedColors.accent)
+                            .padding(.top, 10)
                         if !loaded {
                             ProgressView().frame(maxWidth: .infinity)
                         } else if entries.isEmpty {
@@ -982,5 +1156,126 @@ struct NewTeamMatchSheet: View {
             .onAppear { if ownTeam.isEmpty, let team { ownTeam = team.name } }
         }
         .preferredColorScheme(.dark)
+    }
+}
+
+
+/// A new tracked match for one partij of the team match on screen
+struct TeamTrackRequest: Equatable {
+    let slot: Int
+    /// "coach" or "referee"
+    let kind: String
+}
+
+// MARK: - Verslag delen
+
+/// "Deel verslag": the same three choices as "Deel score" of a match
+/// (Scorekaart, Verslag, Plaatje), with a preview and one Delen button. The
+/// choice is the same setting as for a match.
+struct TeamMatchShareView: View {
+    let match: TeamMatch
+    let shareText: (String) -> Void
+    let onClose: () -> Void
+
+    @AppStorage(MatchShareChoice.storageKey) private var storedChoice = MatchShareChoice.scorecard.rawValue
+
+    private var choices: [MatchShareChoice] {
+        ResultImageSharing.share == nil ? MatchShareChoice.allCases.filter { $0 != MatchShareChoice.picture } : MatchShareChoice.allCases
+    }
+
+    private var choice: MatchShareChoice {
+        let stored = MatchShareChoice.from(stored: storedChoice)
+        return choices.contains(stored) ? stored : MatchShareChoice.scorecard
+    }
+
+    var body: some View {
+        ZStack {
+            SharedColors.background.ignoresSafeArea()
+            VStack(spacing: 18) {
+                header
+                tabs
+                Text(choice.subtitle)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(SharedColors.textMuted)
+                ScrollView {
+                    if let style = choice.textStyle {
+                        WhatsAppPreview(text: TeamMatchReport.text(match, style: style))
+                            .padding(16)
+                            .background(Color.white.opacity(0.055))
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.10), lineWidth: 1))
+                    } else {
+                        ResultCardPreview(card: ResultCard.from(match))
+                    }
+                }
+                ActionButton("DELEN", style: .filled) { share() }
+                Spacer().frame(height: 24)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 22)
+        }
+        .preferredColorScheme(.dark)
+    }
+
+    private func share() {
+        if let style = choice.textStyle {
+            shareText(TeamMatchReport.text(match, style: style))
+        } else if let shareImage = ResultImageSharing.share {
+            shareImage(ResultCard.from(match))
+        }
+    }
+
+    private var header: some View {
+        ZStack {
+            Text("DEEL VERSLAG")
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .tracking(2)
+                .foregroundColor(SharedColors.textPrimary)
+            HStack {
+                Button(action: onClose) {
+                    HStack(spacing: 4) {
+                        AppSymbol("xmark", size: 14, color: SharedColors.textSecondary)
+                        Text("Sluiten")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(SharedColors.textSecondary)
+                    }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Sluiten")
+                Spacer()
+            }
+        }
+    }
+
+    private var tabs: some View {
+        HStack(spacing: 8) {
+            ForEach(choices) { option in
+                let active = option == choice
+                Button { storedChoice = option.rawValue } label: {
+                    Text(option.title)
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundColor(active ? SharedColors.background : SharedColors.gold)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(active ? SharedColors.gold : SharedColors.gold.opacity(0.10))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(SharedColors.gold.opacity(active ? 0.0 : 0.3), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+
+
+extension View {
+    /// A full-screen cover for a tracked match; the macOS build of the UI
+    /// package (run before the Android build) has no full-screen covers
+    func trackedCover<Content: View>(isPresented: Binding<Bool>, @ViewBuilder content: @escaping () -> Content) -> some View {
+        #if os(macOS) && !SKIP
+        return self.sheet(isPresented: isPresented, content: content)
+        #else
+        return self.fullScreenCover(isPresented: isPresented, content: content)
+        #endif
     }
 }

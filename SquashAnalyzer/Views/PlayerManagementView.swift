@@ -246,6 +246,7 @@ struct PlayerRowView: View {
     let onDelete: () -> Void
 
     @State private var showingDeleteConfirm = false
+    @AppStorage(TeamRoster.storageKey) private var rosterRaw = ""
 
     var body: some View {
         HStack(spacing: 14) {
@@ -268,6 +269,15 @@ struct PlayerRowView: View {
                     Text(player.name)
                         .font(AppFonts.label(15))
                         .foregroundColor(AppColors.textPrimary)
+                    if TeamRoster.contains(player.id.uuidString, in: rosterRaw) {
+                        Text("TEAM")
+                            .font(AppFonts.caption(9))
+                            .tracking(1)
+                            .foregroundColor(AppColors.warmOrange)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Capsule().fill(AppColors.warmOrange.opacity(0.14)))
+                    }
                     if badgeCount > 0 {
                         HStack(spacing: 3) {
                             Image(systemName: "medal.fill")
@@ -447,7 +457,8 @@ struct PlayerEditSheet: View {
                             get: { Array(selectedFocusAreas).sorted() },
                             set: { selectedFocusAreas = Set($0) }
                         ),
-                        notes: $notes
+                        notes: $notes,
+                        playerId: player?.id.uuidString
                     )
                     .padding(.horizontal, 24)
 

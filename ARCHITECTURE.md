@@ -78,8 +78,16 @@ by hand), `SharedTeamMatchView`, `TeamPartijEditor` (roster chips from Mijn
 team, scores or winner only, link picker with the match day on top) and
 `TeamMatchLinkPrompt`, which both session views show once after a finished
 match when `TeamMatchSupport.candidate` finds a team match of today (saved or
-a fixture of Mijn team). Later: live per team match, SBN comparison, badge
-category Teamspeler.
+a fixture of Mijn team). A partij can also start a new tracked match
+(`TeamTarget`: names to start with, the home player is Speler 1; the finished
+match is linked without asking, `TeamMatchSupport.link`). "Deel verslag" has
+the three choices of "Deel score" (`TeamMatchReport.text(_:style:)`,
+`ResultCard.from(_ teamMatch:)`, `TeamMatchShareView`). Players marked "In mijn
+team" are a list of ids in the settings (`TeamRoster`; no schema change), and
+team matches plus that list travel in the backup (`TeamBackup`, format 4,
+`TeamMatchFile` for the synchronous file access of the platform backup code).
+Later: live per team match (`docs/plan-live-teamwedstrijd.md`), SBN comparison,
+badge category Teamspeler.
 
 ## Android port
 

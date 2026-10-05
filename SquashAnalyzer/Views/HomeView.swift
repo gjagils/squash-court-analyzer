@@ -19,9 +19,6 @@ struct HomeView: View {
     @State private var showingCompetition = false
     @Environment(\.modelContext) private var modelContext
 
-    /// Competitie: team matches in one JSON file in Application Support, as on Android
-    @MainActor static let teamMatchStore = JSONFileTeamMatchStore(
-        directory: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0])
 
     var body: some View {
         ZStack {
@@ -57,10 +54,15 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showingCompetition) {
             NavigationStack {
-                SharedTeamMatchesView(store: HomeView.teamMatchStore,
-                                      historyStore: SwiftDataMatchHistoryStore(context: modelContext),
-                                      team: TeamMatchSupport.cachedTeam(),
-                                      shareText: { text in IOSShare.text(text) })
+                let players = SwiftDataPlayerStore(context: modelContext)
+                SharedTeamMatchesView(
+                    store: TeamMatchStorage.store,
+                    tools: TeamMatchTools(historyStore: SwiftDataMatchHistoryStore(context: modelContext), playerStore: players,
+                                          coachStore: SwiftDataCoachMatchStore(context: modelContext),
+                                          refereeStore: SwiftDataRefereeMatchStore(context: modelContext),
+                                          photoStore: players, filePicker: nil, aiCoach: IOSAICoach.context,
+                                          shareText: { text in IOSShare.text(text) }),
+                    team: TeamMatchSupport.cachedTeam())
                     .toolbar {
                         CloseToolbarItem { showingCompetition = false }
                     }

@@ -19,6 +19,8 @@ public struct RefereeSessionView: View {
     @Environment(\.dismiss) private var dismiss
     /// Competitie: after a finished match on a match day, ask which partij it is
     let teamMatchStore: (any TeamMatchStore)?
+    /// A match started for a partij of a team match (see `CoachSessionView`)
+    let teamTarget: TeamTarget?
     @State private var linkCandidate: TeamMatch? = nil
     @State private var linkAsked = false
     @State private var match: RefereeMatch? = nil
@@ -29,9 +31,10 @@ public struct RefereeSessionView: View {
     @State private var saver = SessionSaver(busy: true)
 
     public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil, shareText: ((String) -> Void)? = nil,
-                teamMatchStore: (any TeamMatchStore)? = nil,
+                teamMatchStore: (any TeamMatchStore)? = nil, teamTarget: TeamTarget? = nil,
                 onExit: @escaping @MainActor () -> Void) {
         self.teamMatchStore = teamMatchStore
+        self.teamTarget = teamTarget
         self.shareText = shareText
         self.store = store
         self.playerStore = playerStore
@@ -55,7 +58,9 @@ public struct RefereeSessionView: View {
                                  onCancel: { close() })
                 .disabled(saver.busy || saver.failed)
             } else if showingSetup {
-                MatchSetupView(playerStore: playerStore, mode: .referee, photoStore: photoStore, filePicker: filePicker, onCancel: { close() }) { choice in
+                MatchSetupView(playerStore: playerStore, mode: .referee, photoStore: photoStore, filePicker: filePicker,
+                               initialPlayer1Name: teamTarget?.player1Name ?? "", initialPlayer2Name: teamTarget?.player2Name ?? "",
+                               onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }
                 .disabled(saver.busy || saver.failed)
@@ -112,7 +117,15 @@ public struct RefereeSessionView: View {
     /// "Sluiten" after the match: on a match day of Mijn team first ask whether
     /// it belongs to the team match (once); then save and go home
     private func requestExit(_ value: RefereeMatch) {
-        guard value.isMatchOver, !linkAsked, let teamMatchStore else {
+        // Started for a partij: a finished match goes straight into it
+        if let teamTarget, let teamMatchStore, value.isMatchOver {
+            Task { @MainActor in
+                await TeamMatchSupport.link(referee: value, target: teamTarget, store: teamMatchStore)
+                persist(value, exit: true)
+            }
+            return
+        }
+        guard value.isMatchOver, !linkAsked, teamTarget == nil, let teamMatchStore else {
             persist(value, exit: true)
             return
         }

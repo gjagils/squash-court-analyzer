@@ -1,5 +1,6 @@
 package com.squashanalyzer.android.data
 
+import skip.foundation.URL
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -21,6 +22,9 @@ import squash.analyzer.core.*
  */
 @RunWith(RobolectricTestRunner::class)
 class RoomBackupStoreTest {
+    /** A folder of its own per store: the team matches of Competitie live outside Room */
+    private fun teamDir() = URL(fileURLWithPath = java.nio.file.Files.createTempDirectory("team-matches").toString(), isDirectory = true)
+
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val names = listOf("backup-a.db", "backup-b.db")
     private lateinit var a: AppDatabase
@@ -50,7 +54,7 @@ class RoomBackupStoreTest {
 
     @Test fun anIOSBackupRestoresOnAndroid() = runTest {
         val backup = BackupCodec.decode(iosFile())
-        val counts = RoomBackupStore(a).restore(backup, replacing = false)
+        val counts = RoomBackupStore(a, teamDir()).restore(backup, replacing = false)
         assertEquals(BackupCounts(players = 1, matches = 2, games = 2, badges = 1), counts)
 
         val player = a.playerDao().byId("0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2")!!
@@ -77,6 +81,31 @@ class RoomBackupStoreTest {
             BadgeAwardStore(a.badgeAwardDao(), a.playerDao(), MatchStore(a.matchDao()), RefereeMatchStore(a.refereeMatchDao()), "test")).loadHistory().count)
     }
 
+    /** Competitie: the team matches and the "In mijn team" flags travel in the file (format 4) */
+    @Test fun teamMatchesTravelInTheBackup() = runTest {
+        val dirA = teamDir()
+        val dirB = teamDir()
+        val match = TeamMatch(date = Date(), home = "Bombardinos", away = "Squash Delft 8", ownSide = TeamSide.home)
+        var partij = match.partij(1)
+        partij.addGame(TeamGame(own = 11, their = 8))
+        match.update(partij)
+        TeamMatchFile.write(skip.lib.Array(listOf(match)), in_ = dirA)
+        TeamRoster.replace(skip.lib.Array(listOf("p1", "p2")))
+
+        val backup = RoomBackupStore(a, dirA).makeBackup()
+        assertEquals(1, backup.teamMatches?.count)
+        assertEquals(4, BackupCodec.formatVersion(backup))
+        val decoded = BackupCodec.decode(BackupCodec.encode(backup, appVersion = "test"))
+
+        TeamRoster.replace(skip.lib.Array<String>())
+        RoomBackupStore(b, dirB).restore(decoded, replacing = true)
+        val restored = TeamMatchFile.read(in_ = dirB)
+        assertEquals(1, restored.count)
+        assertEquals("Bombardinos", restored.first().home)
+        assertEquals("11-8", restored.first().partij(1).gamesText)
+        assertEquals(listOf("p1", "p2"), TeamRoster.ids().toList())
+    }
+
     /** Referee matches are in the file (format 3) and come back with their result (T2) */
     @Test fun refereeMatchesRoundTripAndOlderFilesKeepThem() = runTest {
         val record = RefereeMatchRecord(
@@ -89,7 +118,7 @@ class RoomBackupStoreTest {
         )
         RefereeMatchStore(a.refereeMatchDao()).upsert(record)
 
-        val file = BackupCodec.encode(RoomBackupStore(a).makeBackup(), appVersion = "test")
+        val file = BackupCodec.encode(RoomBackupStore(a, teamDir()).makeBackup(), appVersion = "test")
         val backup = BackupCodec.decode(file)
         assertEquals(1, backup.refereeMatches?.count)
         assertEquals(2, backup.refereeMatches?.toList()?.first()?.games?.count) // the deciding game is included
@@ -98,17 +127,17 @@ class RoomBackupStoreTest {
         RefereeMatchStore(b.refereeMatchDao()).upsert(record.copy(id = "11111111-2222-4333-8444-555555555555"))
         val older = FullBackup(version = 2, backupDate = Date(), players = skip.lib.Array(), matches = skip.lib.Array(),
             standaloneGames = skip.lib.Array())
-        RoomBackupStore(b).restore(older, replacing = true)
+        RoomBackupStore(b, teamDir()).restore(older, replacing = true)
         assertEquals(1, RefereeMatchStore(b.refereeMatchDao()).history().size)
 
-        RoomBackupStore(b).restore(backup, replacing = true)
+        RoomBackupStore(b, teamDir()).restore(backup, replacing = true)
         val restored = RefereeMatchStore(b.refereeMatchDao()).history()
         assertEquals(listOf("9F8E7D6C-5B4A-4392-8180-706F5E4D3C2B"), restored.map { it.id })
         assertEquals(listOf("11-4", "11-9"), restored.single().completedGames.map { "${it.player1Score}-${it.player2Score}" })
         assertEquals("completed", restored.single().status)
 
         // Merging the same file again adds nothing
-        assertEquals(0, RoomBackupStore(b).restore(backup, replacing = false).matches)
+        assertEquals(0, RoomBackupStore(b, teamDir()).restore(backup, replacing = false).matches)
     }
 
     @Test fun anAndroidBackupRoundTripsIntoAnEmptyInstall() = runTest {
@@ -124,8 +153,8 @@ class RoomBackupStoreTest {
         coachStore(a).save(match)
         assertTrue(a.badgeAwardDao().all().isNotEmpty())
 
-        val file = BackupCodec.encode(RoomBackupStore(a).makeBackup(), appVersion = "android-test")
-        val counts = RoomBackupStore(b).restore(BackupCodec.decode(file), replacing = true)
+        val file = BackupCodec.encode(RoomBackupStore(a, teamDir()).makeBackup(), appVersion = "android-test")
+        val counts = RoomBackupStore(b, teamDir()).restore(BackupCodec.decode(file), replacing = true)
         assertEquals(1, counts.players)
         assertEquals(1, counts.matches)
         assertEquals(a.badgeAwardDao().all().size, counts.badges)
@@ -150,12 +179,12 @@ class RoomBackupStoreTest {
 
     @Test fun mergingKeepsWhatIsThereAndADeletionWins() = runTest {
         val backup = BackupCodec.decode(iosFile())
-        RoomBackupStore(a).restore(backup, replacing = false)
+        RoomBackupStore(a, teamDir()).restore(backup, replacing = false)
         val award = a.badgeAwardDao().all().single()
         a.badgeAwardDao().markDeleted(award.id, 5_000L)
         a.playerDao().updateFields("0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2", "Paul (eigen)", "[]", "")
 
-        val again = RoomBackupStore(a).restore(backup, replacing = false)
+        val again = RoomBackupStore(a, teamDir()).restore(backup, replacing = false)
         assertEquals(BackupCounts(players = 0, matches = 0, games = 0, badges = 0), again)
         assertEquals("Paul (eigen)", a.playerDao().byId("0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2")!!.name)
         assertEquals(5_000L, a.badgeAwardDao().byId(award.id)!!.deletedAt)
@@ -163,7 +192,7 @@ class RoomBackupStoreTest {
 
     @Test fun replacingStartsFromTheBackupOnly() = runTest {
         a.playerDao().insert(PlayerEntity("9F8E7D6C-5B4A-4392-8180-706F5E4D3C2B", "Weg", "[]", "", 0.0))
-        RoomBackupStore(a).restore(BackupCodec.decode(iosFile()), replacing = true)
+        RoomBackupStore(a, teamDir()).restore(BackupCodec.decode(iosFile()), replacing = true)
         assertNull(a.playerDao().byId("9F8E7D6C-5B4A-4392-8180-706F5E4D3C2B"))
         assertEquals(1, a.playerDao().all().size)
         assertEquals(2, MatchStore(a.matchDao()).all().size)

@@ -90,10 +90,11 @@ class MainActivity : AppCompatActivity() {
         val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore, matchStore, refereeMatchStore, badgeAwardStore)
         val leagueTeamFetcher = LeagueTeamFetcher(loader = HttpLeaguePageLoader())
         // Competitie: team matches in one JSON file in the app's files directory (shared Core store)
-        val teamMatchStore = JSONFileTeamMatchStore(directory = URL(fileURLWithPath = filesDir.absolutePath, isDirectory = true))
+        val teamDirectory = URL(fileURLWithPath = filesDir.absolutePath, isDirectory = true)
+        val teamMatchStore = JSONFileTeamMatchStore(directory = teamDirectory)
         // Registers activity-result launchers, so it must exist before the activity starts
         val appVersion = "Android " + (packageManager.getPackageInfo(packageName, 0).versionName ?: "?")
-        val backupStore = RoomBackupStore(db)
+        val backupStore = RoomBackupStore(db, teamDirectory)
         autoBackup = AutoBackup(this, backupStore, appVersion)
         val backup = BackupContext(store = backupStore, files = ActivityBackupFiles(this), appVersion = appVersion, auto = autoBackup)
         val teamImporter = RoomTeamImporter(db)

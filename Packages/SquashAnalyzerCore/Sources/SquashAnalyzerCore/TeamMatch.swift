@@ -498,7 +498,7 @@ public enum TeamMatchReport {
 
     /// Monospace table: per partij the home and the away player, one column per game
     private static func scorecard(_ match: TeamMatch) -> String {
-        let nameWidth = 10
+        let nameWidth = 12
         // Every row has as many game columns as the longest partij, so the
         // column with the games won lines up
         var columns = 1

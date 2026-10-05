@@ -3,6 +3,7 @@ package com.squashanalyzer.android.data
 import androidx.room.withTransaction
 import org.json.JSONArray
 import skip.foundation.Date
+import skip.foundation.URL
 import skip.foundation.UUID
 import skip.lib.Array as SwiftArray
 import squash.analyzer.core.AwardValue
@@ -19,6 +20,7 @@ import squash.analyzer.core.PlayerBackupData
 import squash.analyzer.core.PointExportData
 import squash.analyzer.core.RefereeMatchBackupData
 import squash.analyzer.core.ServerSide
+import squash.analyzer.core.TeamBackup
 
 /**
  * The Android side of the shared backup file (Core's `FullBackup` /
@@ -32,7 +34,7 @@ import squash.analyzer.core.ServerSide
  * yet, and merges awards like everywhere else: a deletion always wins. Loose
  * games from old iOS backups (no match) each become a finished match.
  */
-class RoomBackupStore(private val db: AppDatabase) : BackupStore {
+class RoomBackupStore(private val db: AppDatabase, private val teamDirectory: URL) : BackupStore {
     private val matches = MatchStore(db.matchDao())
     private val refereeMatches = RefereeMatchStore(db.refereeMatchDao())
 
@@ -51,12 +53,14 @@ class RoomBackupStore(private val db: AppDatabase) : BackupStore {
             )
         }
         val referee = refereeMatches.history().map(::exportReferee)
-        return FullBackup(
+        val backup = FullBackup(
             version = 2, backupDate = Date(), players = SwiftArray(players),
             matches = SwiftArray(matches.all().map(::export)), standaloneGames = SwiftArray(),
             badgeAwards = if (awards.isEmpty()) null else SwiftArray(awards),
             refereeMatches = if (referee.isEmpty()) null else SwiftArray(referee),
         )
+        // Competitie: team matches and the "In mijn team" flags travel along (format 4)
+        return TeamBackup.attach(backup, directory = teamDirectory)
     }
 
     override suspend fun restore(backup: FullBackup, replacing: Boolean): BackupCounts {
@@ -114,6 +118,7 @@ class RoomBackupStore(private val db: AppDatabase) : BackupStore {
                 games += referee.games.count
             }
         }
+        TeamBackup.restore(backup, directory = teamDirectory, replacing = replacing)
         return BackupCounts(players = players, matches = restoredMatches, games = games, badges = badges)
     }
 

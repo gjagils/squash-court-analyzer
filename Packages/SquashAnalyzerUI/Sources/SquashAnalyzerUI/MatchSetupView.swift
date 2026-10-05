@@ -39,8 +39,11 @@ public struct MatchSetupView: View {
     let onStart: (MatchSetupChoice) -> Void
 
     @State private var players: [PlayerProfile] = []
-    @State private var player1Name = ""
-    @State private var player2Name = ""
+    @State private var player1Name: String
+    @State private var player2Name: String
+    /// Names to start with (a match for a partij of a team match); a player of
+    /// the list with exactly that name is picked, so badges and focus work
+    private let prefilled: Bool
     @State private var player1Pick: PlayerProfile? = nil
     @State private var player2Pick: PlayerProfile? = nil
     @State private var pickingSlot: Int? = nil
@@ -50,8 +53,12 @@ public struct MatchSetupView: View {
     @State private var gamesBefore2 = 0
 
     public init(playerStore: any PlayerProfileStore, mode: MatchSetupMode, photoStore: (any PlayerPhotoStore)? = nil,
-                filePicker: (any PlayerFilePicker)? = nil, onCancel: (() -> Void)? = nil,
+                filePicker: (any PlayerFilePicker)? = nil, initialPlayer1Name: String = "", initialPlayer2Name: String = "",
+                onCancel: (() -> Void)? = nil,
                 onStart: @escaping (MatchSetupChoice) -> Void) {
+        _player1Name = State(initialValue: initialPlayer1Name)
+        _player2Name = State(initialValue: initialPlayer2Name)
+        self.prefilled = !initialPlayer1Name.isEmpty || !initialPlayer2Name.isEmpty
         self.playerStore = playerStore
         self.photoStore = photoStore
         self.filePicker = filePicker
@@ -290,6 +297,26 @@ public struct MatchSetupView: View {
     private func reloadPlayers() async {
         players = (try? await playerStore.loadPlayers()) ?? []
         if let photoStore { photos = (try? await photoStore.photos()) ?? [:] }
+        if prefilled { pickPrefilledPlayers() }
+    }
+
+    /// A prefilled name that is a player of the list is picked, once
+    private func pickPrefilledPlayers() {
+        if player1Pick == nil, let found = player(named: player1Name) {
+            player1Pick = found
+            player1Name = found.name
+        }
+        if player2Pick == nil, let found = player(named: player2Name) {
+            player2Pick = found
+            player2Name = found.name
+        }
+    }
+
+    private func player(named name: String) -> PlayerProfile? {
+        let wanted = name.trimmingCharacters(in: .whitespaces).lowercased()
+        if wanted.isEmpty { return nil }
+        for candidate in players where candidate.name.trimmingCharacters(in: .whitespaces).lowercased() == wanted { return candidate }
+        return nil
     }
 
     /// From "Kies speler" the tapped player goes into the slot; from the players

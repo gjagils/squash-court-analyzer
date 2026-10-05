@@ -10,6 +10,13 @@ import SquashAnalyzerUI
 
 // MARK: - Share sheet
 
+/// Competitie: the team matches live in one JSON file in Application Support
+/// (shared Core store, as on Android); the backup reads the same file
+enum TeamMatchStorage {
+    static let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+    @MainActor static let store = JSONFileTeamMatchStore(directory: TeamMatchStorage.directory)
+}
+
 /// The system share sheet from anywhere (the shared screens give a text or a
 /// picture, not a view to attach a sheet to): shown over the top-most screen.
 @MainActor

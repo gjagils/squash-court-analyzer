@@ -7,11 +7,15 @@ public struct PlayerProfileFields: View {
     @Binding private var name: String
     @Binding private var focus: [String]
     @Binding private var notes: String
+    /// The player's id once it exists: shows the switch "In mijn team"
+    private let playerId: String?
+    @AppStorage(TeamRoster.storageKey) private var rosterRaw = ""
 
-    public init(name: Binding<String>, focus: Binding<[String]>, notes: Binding<String>) {
+    public init(name: Binding<String>, focus: Binding<[String]>, notes: Binding<String>, playerId: String? = nil) {
         _name = name
         _focus = focus
         _notes = notes
+        self.playerId = playerId
     }
 
     public var body: some View {
@@ -24,6 +28,19 @@ public struct PlayerProfileFields: View {
                     .padding()
                     .background(Color.white.opacity(0.08))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+            if let playerId {
+                VStack(alignment: .leading, spacing: 8) {
+                    caption("TEAM")
+                    Toggle(isOn: Binding(get: { TeamRoster.contains(playerId, in: rosterRaw) },
+                                         set: { rosterRaw = TeamRoster.setting(playerId, inTeam: $0, in: rosterRaw) })) {
+                        Text("In mijn team")
+                    }
+                    .tint(SharedColors.accent)
+                    Text("Spelers in je team staan bovenaan als je een partij van een teamwedstrijd invult.")
+                        .font(.system(size: 12))
+                        .foregroundColor(SharedColors.textMuted)
+                }
             }
             VStack(alignment: .leading, spacing: 12) {
                 caption("COACHING FOCUS")
@@ -87,6 +104,7 @@ public struct PlayerDirectoryView: View {
     @State private var showingCatalog = false
     @State private var showingTeamImport = false
     @State private var photos: [String: Data] = [:]
+    @AppStorage(TeamRoster.storageKey) private var rosterRaw = ""
 
     private let shareText: (String) -> Void
     /// Reloads after a card link was imported while this screen was open
@@ -184,6 +202,16 @@ public struct PlayerDirectoryView: View {
                                             VStack(alignment: .leading, spacing: 5) {
                                                 HStack(spacing: 8) {
                                                     Text(player.name).font(.headline)
+                                                    if TeamRoster.contains(player.id, in: rosterRaw) {
+                                                        Text("TEAM")
+                                                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                                                            .tracking(1)
+                                                            .foregroundColor(SharedColors.accent)
+                                                            .padding(.horizontal, 6)
+                                                            .padding(.vertical, 2)
+                                                            .background(SharedColors.accent.opacity(0.14))
+                                                            .clipShape(Capsule())
+                                                    }
                                                     // Badge count right after the name, as on iOS
                                                     if let count = badgeCounts[player.id], count > 0 {
                                                         HStack(spacing: 3) {
@@ -387,7 +415,7 @@ struct PlayerProfileEditor: View {
                     if photoStore != nil && filePicker != nil {
                         photoSection
                     }
-                    PlayerProfileFields(name: $player.name, focus: $player.coachingFocusAreas, notes: $player.coachingNotes)
+                    PlayerProfileFields(name: $player.name, focus: $player.coachingFocusAreas, notes: $player.coachingNotes, playerId: player.id)
                     HStack(spacing: 16) {
                         Button("Annuleren") { dismiss() }.disabled(isSaving)
                         Spacer()

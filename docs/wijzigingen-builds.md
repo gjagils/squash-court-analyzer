@@ -26,17 +26,27 @@ Tekst voor de releasenotes (gebruikerstaal):
 > won. De app telt de games, de bonuspunten en de winnaar volgens de
 > SBN-regels (meeste games; gelijk: meeste partijen; nog gelijk: meeste
 > rallypunten; winnaar krijgt 3 bonuspunten) en maakt één verslag van de
-> avond om in de groepsapp te delen. Speel je op een dag dat je team een
-> wedstrijd heeft, dan vraagt de app na een coach- of
-> scheidsrechterwedstrijd of hij erbij hoort en bij welke partij.
+> avond om in de groepsapp te delen, als Scorekaart, Verslag of Plaatje,
+> net als bij een wedstrijd. Speel je op een dag dat je team een wedstrijd
+> heeft, dan vraagt de app na een coach- of scheidsrechterwedstrijd of hij
+> erbij hoort en bij welke partij. Een partij kun je ook meteen bijhouden:
+> kies bij de partij een nieuwe coach- of scheidsrechterwedstrijd; de
+> thuisspeler is Speler 1, en de uitslag komt vanzelf in de partij.
+> Bij Spelers zet je met **In mijn team** aan wie bij je team hoort; die
+> spelers staan bovenaan als je een partij invult. Teamwedstrijden en die
+> teamvlag zitten ook in de back-up.
+
+Back-up: formaat 4 alleen als er teamdata is (testers met build 17 of 18 kunnen
+zo'n bestand niet terugzetten, zoals bij formaat 3). De teamvlag is een lijst
+ids in de instellingen (`TeamRoster`), geen SwiftData- of Room-kolom.
 
 Techniek (niet voor de releasenotes): `TeamMatch` in Core met tests (12),
 opslag in één JSON-bestand per telefoon (`JSONFileTeamMatchStore`, geen
 SwiftData- of Room-migratie), gedeelde schermen `SharedTeamMatchesView`,
 `SharedTeamMatchView`, `TeamPartijEditor` en `TeamMatchLinkPrompt` in
-SquashAnalyzerUI. Nog niet: teamwedstrijden in de back-up, live meekijken
-per teamwedstrijd, vergelijken met de SBN-uitslag, badgecategorie
-Teamspeler. Getest op simulator en emulator (aanmaken uit het programma,
+SquashAnalyzerUI. Nog niet: live meekijken per teamwedstrijd (plan:
+`docs/plan-live-teamwedstrijd.md`), vergelijken met de SBN-uitslag,
+badgecategorie Teamspeler. Getest op simulator en emulator (aanmaken uit het programma,
 partij invullen, koppelen vanuit Afgeronde wedstrijden, vraag na een
 scheidsrechterwedstrijd, verslag delen, opslag na herinstallatie).
 

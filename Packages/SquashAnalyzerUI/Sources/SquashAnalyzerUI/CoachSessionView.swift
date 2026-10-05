@@ -25,6 +25,9 @@ public struct CoachSessionView: View {
     @State private var showingSettings = false
     /// Competitie: after a finished match on a match day, ask which partij it is
     let teamMatchStore: (any TeamMatchStore)?
+    /// A match started for a partij of a team match: names to start with, and
+    /// the finished match goes into that partij without asking
+    let teamTarget: TeamTarget?
     @State private var linkCandidate: TeamMatch? = nil
     @State private var linkAsked = false
     @Environment(\.dismiss) private var dismiss
@@ -37,10 +40,11 @@ public struct CoachSessionView: View {
 
     public init(store: any CoachMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil, aiCoach: AICoachContext? = nil,
                 shareText: ((String) -> Void)? = nil, historyStore: (any MatchHistoryStore)? = nil, settings: SettingsContext? = nil,
-                teamMatchStore: (any TeamMatchStore)? = nil,
+                teamMatchStore: (any TeamMatchStore)? = nil, teamTarget: TeamTarget? = nil,
                 onExit: @escaping @MainActor () -> Void) {
         self.store = store
         self.teamMatchStore = teamMatchStore
+        self.teamTarget = teamTarget
         self.historyStore = historyStore
         self.settings = settings
         self.shareText = shareText
@@ -70,7 +74,9 @@ public struct CoachSessionView: View {
                                  onCancel: { close() })
                 .disabled(saver.busy || saver.failed)
             } else if showingSetup {
-                MatchSetupView(playerStore: playerStore, mode: .coach, photoStore: photoStore, filePicker: filePicker, onCancel: { close() }) { choice in
+                MatchSetupView(playerStore: playerStore, mode: .coach, photoStore: photoStore, filePicker: filePicker,
+                               initialPlayer1Name: teamTarget?.player1Name ?? "", initialPlayer2Name: teamTarget?.player2Name ?? "",
+                               onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }
                 .disabled(saver.busy || saver.failed)
@@ -151,7 +157,15 @@ public struct CoachSessionView: View {
     /// "Klaar" after the match: on a match day of Mijn team first ask whether
     /// it belongs to the team match (once); then save and go home
     private func requestExit(_ value: Match) {
-        guard value.isMatchOver, !linkAsked, let teamMatchStore else {
+        // Started for a partij: a finished match goes straight into it
+        if let teamTarget, let teamMatchStore, value.isMatchOver {
+            Task { @MainActor in
+                await TeamMatchSupport.link(coach: value, target: teamTarget, store: teamMatchStore)
+                persist(value, exit: true)
+            }
+            return
+        }
+        guard value.isMatchOver, !linkAsked, teamTarget == nil, let teamMatchStore else {
             persist(value, exit: true)
             return
         }

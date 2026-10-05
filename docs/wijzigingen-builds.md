@@ -20,6 +20,10 @@ build 19: voortgang naar de volgende badgetrede. Hosting:
   Een wedstrijd die live is blijft op de server waar hij begon; de keuze geldt
   voor de volgende wedstrijd. Voor de test van de Cloudflare-versie; na de
   verhuizing wijst Alfa ook naar Cloudflare en verdwijnt de schakelaar.
+- **Beta getest (5 oktober):** `beta.squashanalyzer.com` draait op Cloudflare
+  Workers; coachwedstrijd op de iPhone met foto's en WhatsApp-link liep zonder
+  haperen, Worker-logs zonder fouten. De schakelaar gaat mee in build 19.
+  Android op Beta nog te testen; Alfa blijft de server voor de testers.
 
 ### Gemeld door testers
 (wat · wie · platform · nu / volgende / later)

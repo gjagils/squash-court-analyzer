@@ -41,9 +41,10 @@ met kleine (vitest.config.js), omdat de limiter over tests heen telt.
 
 Eén keer:
 
-1. In het Cloudflare-dashboard: **Workers & Pages** openen en de eerste keer
-   een `workers.dev`-subdomein kiezen (gratis plan volstaat; Durable Objects
-   met SQLite zitten erin).
+1. In het Cloudflare-dashboard: **Workers & Pages** één keer openen; dat
+   maakt het `workers.dev`-subdomein aan (gratis plan volstaat; Durable
+   Objects met SQLite zitten erin). Zonder dat subdomein faalt de deploy met
+   fout 10063, ook al gebruikt de Worker alleen het eigen domein.
 2. `npx wrangler login` (opent de browser) of een API-token met
    "Edit Cloudflare Workers" als `CLOUDFLARE_API_TOKEN` en het account-id als
    `CLOUDFLARE_ACCOUNT_ID` in de omgeving.
@@ -58,7 +59,9 @@ npx wrangler deploy
 `wrangler.toml` koppelt de Worker aan `beta.squashanalyzer.com` als custom
 domain: Cloudflare maakt het DNS-record en het certificaat zelf aan (de zone
 staat in hetzelfde account). Controleer met
-`curl https://beta.squashanalyzer.com/health`.
+`curl https://beta.squashanalyzer.com/health`; de eerste ~20 s na een deploy
+kan dat nog een 500 geven, daarna `{"ok":true,"sessions":0}`. Uitgerold op
+5 oktober 2026.
 
 De GitHub-workflow `deploy-live-beta.yml` rolt uit bij elke push naar `main`
 die `server/live-worker/` raakt, met de twee secrets hierboven in de repo.

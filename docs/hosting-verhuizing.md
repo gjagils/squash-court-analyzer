@@ -29,6 +29,18 @@ begon. Zie `server/live-worker/README.md` voor het uitrollen. Fly.io is
 daarmee het reserveplan als de Workers-versie tegenvalt; de uitwerking
 hieronder blijft staan.
 
+**Uitgerold 5 oktober (17:40):** `npx wrangler deploy` vanaf de Mac na
+`wrangler login`; Cloudflare maakte DNS en certificaat voor
+`beta.squashanalyzer.com` zelf aan. Eerste poging gaf fout 10063 ("You need a
+workers.dev subdomain"): één keer Workers & Pages openen in het dashboard, dan
+opnieuw deployen. `/health` gaf de eerste ~20 s een 500 (eerste aanroep van
+het limiter-object), daarna `{"ok":true,"sessions":0}`. Praktijktest met de
+app: coachwedstrijd op de iPhone met Beta gekozen, link en spelersfoto's op de
+kijkpagina, tientallen stand-updates zonder één fout in de Worker-logs
+(alleen methode, pad en status te zien). Gerd-Jans oordeel: "werkt super
+soepel". Android-telefoon nog niet getest op Beta (later). Automatisch
+uitrollen (stap 7, API-token en GitHub-secrets) nog niet ingesteld.
+
 ### Website: Cloudflare Pages (gratis)
 
 Waarom: het domein staat al bij Cloudflare, de site is statisch, en Pages

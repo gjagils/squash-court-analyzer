@@ -52,6 +52,18 @@ Vergeleken met iOS 2.2 (17) en Android 0.4 (4), 3 oktober 2026.
       bijgehouden, achteraf invullen), coacht daarna E2 en E1 en fluit E3: samen
       één complete teamwedstrijd.
 
+- [ ] **Badges met treden (brons, zilver, goud)** (gekozen: idee B). De huidige
+      badge wordt brons; zwaardere treden erboven, bijv. 5 op een rij 5/7/10
+      (goud = Perfect ten), slagbadges 4/6/8 per game, Ten out of ten 10/25/50,
+      Centurion 100/500/1000, Veteran 25/50/100. Al verdiende badges blijven brons.
+      Rand bepaalt de trede. Artwork: Codex, prompt in `docs/style/badge-prompt-codex.md`.
+- [ ] **Nieuwe badges:** Rock solid (wedstrijd zonder unforced errors), Back wall
+      boss (5 winners achterin), Sneltrein (game < 6 min), Vette winst
+      (tegenstander in geen game boven 5), Clubicoon (10 verschillende
+      tegenstanders), Rivalen (10× dezelfde tegenstander), Hand-out held (5 rally's
+      op rij bij serve van de ander). Later, met de competitiekoppeling: een eigen
+      badgecategorie voor competitiewedstrijden (o.a. Teamspeler).
+
 ## iOS 2.2 build 17 en Android 0.4 (4), 3 oktober 2026 (geüpload)
 
 Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `main` (`b694cf5`), 3 oktober.

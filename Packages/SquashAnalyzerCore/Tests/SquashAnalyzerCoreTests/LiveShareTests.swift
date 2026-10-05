@@ -158,17 +158,14 @@ final class LiveShareTests: XCTestCase {
         XCTAssertTrue(LiveShare.shared.baseURL.hasPrefix("https://"))
     }
 
-    /// Instellingen: Alfa (the NAS) or Beta (Cloudflare); unknown or empty is Alfa
+    /// The Alfa/Beta switch of October 2026 is gone: a value left under its
+    /// key changes nothing, every match goes to live.squashanalyzer.com
     @MainActor
-    func testTheServerSettingPicksTheAddress() {
+    func testAnOldServerSettingIsIgnored() {
         UserDefaults.standard.set("beta", forKey: LiveShare.serverKey)
-        XCTAssertEqual(LiveServer.stored, LiveServer.beta)
-        XCTAssertEqual(LiveShare(transport: nil).baseURL, LiveShare.betaBaseURL)
-        XCTAssertEqual(LiveServer.beta.host, "beta.squashanalyzer.com")
-        UserDefaults.standard.set("raar", forKey: LiveShare.serverKey)
-        XCTAssertEqual(LiveServer.stored, LiveServer.alfa)
+        XCTAssertEqual(LiveShare(transport: nil).baseURL, "https://live.squashanalyzer.com")
         UserDefaults.standard.removeObject(forKey: LiveShare.serverKey)
-        XCTAssertEqual(LiveServer.stored, LiveServer.alfa)
+        XCTAssertEqual(LiveShare(transport: nil).baseURL, LiveShare.defaultBaseURL)
     }
 
     /// A live match stays on the server it started on, whatever the setting does meanwhile

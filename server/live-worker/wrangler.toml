@@ -1,13 +1,16 @@
-# Squash Analyzer — live meekijken on Cloudflare Workers (beta.squashanalyzer.com).
+# Squash Analyzer — live meekijken on Cloudflare Workers (live.squashanalyzer.com, beta as alias).
 # Deploy: npx wrangler deploy (after `npx wrangler login`). See README.md.
 name = "squash-live-beta"
 main = "src/index.js"
 compatibility_date = "2025-10-01"
 workers_dev = false
-routes = [{ pattern = "beta.squashanalyzer.com", custom_domain = true }]
+routes = [
+  { pattern = "live.squashanalyzer.com", custom_domain = true },
+  { pattern = "beta.squashanalyzer.com", custom_domain = true },
+]
 
 [vars]
-PUBLIC_URL = "https://beta.squashanalyzer.com"
+PUBLIC_URL = "https://live.squashanalyzer.com"
 IDLE_MINUTES = "120"
 MAX_SESSIONS = "200"
 CREATES_PER_MINUTE = "10"

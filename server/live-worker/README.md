@@ -1,9 +1,11 @@
 # squash-live-beta: live meekijken op Cloudflare Workers
 
 De Cloudflare-versie van [`server/live`](../live/README.md): dezelfde API,
-dezelfde kijkpagina, maar zonder eigen server. Draait op
-`beta.squashanalyzer.com`; de app kiest in Instellingen tussen **Alfa**
-(`live.squashanalyzer.com`, de Node-server op de NAS) en **Beta** (deze).
+dezelfde kijkpagina, maar zonder eigen server. Sinds 5 oktober 2026 **de**
+live-server: `live.squashanalyzer.com` (de app) en `beta.squashanalyzer.com`
+(alias uit de testfase) zijn allebei custom domains van deze Worker;
+`PUBLIC_URL` is `https://live.squashanalyzer.com`. De Node-versie op de NAS
+is reserve.
 
 ## Hoe het werkt
 
@@ -56,9 +58,11 @@ cd server/live-worker
 npx wrangler deploy
 ```
 
-`wrangler.toml` koppelt de Worker aan `beta.squashanalyzer.com` als custom
-domain: Cloudflare maakt het DNS-record en het certificaat zelf aan (de zone
-staat in hetzelfde account). Controleer met
+`wrangler.toml` koppelt de Worker aan `live.squashanalyzer.com` en
+`beta.squashanalyzer.com` als custom domains: Cloudflare maakt de DNS-records
+en certificaten zelf aan (de zone staat in hetzelfde account). Bestaat er al
+een ander record voor die naam (zoals het tunnel-record van de NAS), dan
+weigert de deploy met fout 100117: eerst dat record verwijderen. Controleer met
 `curl https://beta.squashanalyzer.com/health`; de eerste ~20 s na een deploy
 kan dat nog een 500 geven, daarna `{"ok":true,"sessions":0}`. Uitgerold op
 5 oktober 2026.

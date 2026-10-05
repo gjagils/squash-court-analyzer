@@ -20,6 +20,31 @@ Kaartlinks en teamlinks zijn gewone bestanden of URL-fragmenten op de website.
 **Website naar Cloudflare Pages, live-server naar Cloudflare Workers.**
 Alles bij Cloudflare, gratis, geen NAS en geen tunnel meer nodig.
 
+**Besluit Gerd-Jan, 5 oktober (avond): alles standaard naar Cloudflare; de
+NAS blijft voorlopig als reserve draaien.** Stand na die avond:
+
+- **Live meekijken is omgezet.** `live.squashanalyzer.com` is een custom
+  domain van de Worker `squash-live-beta` (naast `beta.squashanalyzer.com`,
+  dat als alias blijft); `PUBLIC_URL` is `https://live.squashanalyzer.com`.
+  Het tunnel-record `live` → `2b05ba07-fadb-4248-a867-6df79718ae59.cfargotunnel.com`
+  is uit DNS gehaald (de public hostname in de tunnel en Portainer-stack 109
+  staan er nog; terugzetten = custom domain van de Worker af, dat record
+  weer aanmaken). De schakelaar Alfa/Beta is uit de app gehaald voordat hij
+  in een build zat; `LiveShare.serverKey` blijft bestaan maar wordt niet
+  gelezen. `server/live` (Node) is de reserve.
+- **Website: wacht op twee DNS-records.** De Worker `squashanalyzer-site`
+  heeft `squashanalyzer.com` en `www` als custom domains in
+  `server/website-worker/wrangler.jsonc`, maar de deploy weigert zolang de
+  tunnel-records voor die twee namen bestaan (fout 100117). Die twee records
+  verwijderen (DNS → Records → Edit → Delete) kon niet vanuit Claude Code
+  (auto-modus blokkeert DNS-wijzigingen); daarna
+  `npx wrangler deploy -c server/website-worker/wrangler.jsonc` vanaf de Mac
+  (de map `website/screenshots/` en `website/teams/` gaan dan mee; de repo is
+  publiek, dus de teamzips blijven buiten git en de website-workflow in
+  GitHub blijft uit). Controle daarna: `curl -sI https://squashanalyzer.com/.well-known/apple-app-site-association`
+  geeft `application/json`, `adb shell pm get-app-links com.squashanalyzer.android`
+  blijft `verified`, een kaartlink vanaf de iPhone opent de app.
+
 **Stand 5 oktober (avond):** de Workers-versie van de live-server is gebouwd
 in `server/live-worker` (Durable Objects, zelfde API en kijkpagina, 12 tests
 groen in de Workers-testomgeving) en gaat naar `beta.squashanalyzer.com`. De

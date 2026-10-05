@@ -277,7 +277,6 @@ public struct SharedSettingsView: View {
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     @AppStorage(LiveShare.enabledKey) private var liveSharing = true
     @AppStorage(LiveShare.photosKey) private var livePhotos = true
-    @AppStorage(LiveShare.serverKey) private var liveServer = LiveServer.alfa.rawValue
     @State private var draft = ""
     @State private var message: String?
     @State private var messageIsError = false
@@ -404,15 +403,6 @@ public struct SharedSettingsView: View {
             .tint(SharedColors.accent)
             .disabled(!liveSharing)
             Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.")
-                .font(.system(size: 12))
-                .foregroundColor(SharedColors.textMuted)
-            Picker("Live-server", selection: $liveServer) {
-                Text(LiveServer.alfa.title).tag(LiveServer.alfa.rawValue)
-                Text(LiveServer.beta.title).tag(LiveServer.beta.rawValue)
-            }
-            .pickerStyle(.segmented)
-            .disabled(!liveSharing)
-            Text("Live-server: \((LiveServer(rawValue: liveServer) ?? LiveServer.alfa).host). Alfa is de server op de NAS, Beta de versie bij Cloudflare. Geldt voor de volgende wedstrijd die je live zet.")
                 .font(.system(size: 12))
                 .foregroundColor(SharedColors.textMuted)
         }

@@ -194,41 +194,6 @@ struct LiveCreated: Codable {
     let url: String
 }
 
-/// Which live server the app sends a match to: Alfa is the Node server on
-/// the NAS (`live.squashanalyzer.com`), Beta the Cloudflare Worker
-/// (`beta.squashanalyzer.com`). Chosen in Instellingen, stored under
-/// `LiveShare.serverKey`; a running live match keeps the server it started on.
-public enum LiveServer: String, CaseIterable, Sendable {
-    case alfa, beta
-
-    /// UserDefaults key of the choice (also `LiveShare.serverKey`)
-    public static let storageKey = "liveSharingServer"
-
-    public var title: String {
-        switch self {
-        case .alfa: return "Alfa"
-        case .beta: return "Beta"
-        }
-    }
-
-    /// Addresses as literals here, not via `LiveShare`: the enum is not bound
-    /// to the main actor, so it cannot read the class's statics
-    public var baseURL: String {
-        switch self {
-        case .alfa: return "https://live.squashanalyzer.com"
-        case .beta: return "https://beta.squashanalyzer.com"
-        }
-    }
-
-    /// The host as shown under the switch
-    public var host: String { baseURL.replacingOccurrences(of: "https://", with: "") }
-
-    /// The stored choice; anything unknown or empty is Alfa
-    public static var stored: LiveServer {
-        LiveServer(rawValue: UserDefaults.standard.string(forKey: LiveServer.storageKey) ?? "") ?? LiveServer.alfa
-    }
-}
-
 public enum LiveShareError: Error, Equatable {
     case noTransport
     case noConnection
@@ -240,14 +205,14 @@ public enum LiveShareError: Error, Equatable {
 @MainActor
 @Observable
 public final class LiveShare {
-    /// Address of the live server (server/live, behind the reverse proxy).
-    /// Above `shared`: Kotlin initialises statics top to bottom, and `shared`
-    /// reads this in its `baseURL`; the other way round it was null on Android.
-    public static let defaultBaseURL = LiveServer.alfa.baseURL
-    /// The Cloudflare version (server/live-worker)
-    public static let betaBaseURL = LiveServer.beta.baseURL
-    /// Instellingen: which live server the next match goes to (`LiveServer`)
-    public static let serverKey = LiveServer.storageKey
+    /// Address of the live server (server/live-worker on Cloudflare; the Node
+    /// version in server/live is the reserve). Above `shared`: Kotlin
+    /// initialises statics top to bottom, and `shared` reads this in its
+    /// `baseURL`; the other way round it was null on Android.
+    public static let defaultBaseURL = "https://live.squashanalyzer.com"
+    /// Old Instellingen key of the Alfa/Beta switch (October 2026, never in a
+    /// shipped build): no longer read, kept so a stored value cannot interfere
+    public static let serverKey = "liveSharingServer"
 
     /// Settings switch "Live meekijken" (on by default): only then the
     /// scoring screens show the LIVE button
@@ -258,10 +223,10 @@ public final class LiveShare {
     public static let shared = LiveShare()
 
     public var transport: (any LiveTransport)? = nil
-    /// Set by tests; otherwise the server picked in Instellingen (`LiveServer.stored`)
+    /// Set by tests (and for a local server); otherwise `defaultBaseURL`
     private var customBaseURL: String? = nil
     public var baseURL: String {
-        get { customBaseURL ?? LiveServer.stored.baseURL }
+        get { customBaseURL ?? LiveShare.defaultBaseURL }
         set { customBaseURL = newValue }
     }
     /// The server the live session was made on: a change of the setting

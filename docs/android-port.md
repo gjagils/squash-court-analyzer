@@ -2339,3 +2339,6 @@ property, de segmented `Picker`) transpileerden zonder aanpassing: geen
 nieuwe Skip-eigenaardigheden. In een worktree: `JAVA_HOME` op de JBR van
 Android Studio en `ANDROID_HOME=~/Library/Android/sdk` zetten (zie 11
 hierboven), anders start Gradle niet.
+Diezelfde avond weer verwijderd: Gerd-Jan zette alles op Cloudflare, dus
+`LiveShare.baseURL` is weer één adres en `LiveServer` en de `Picker` zijn
+weg (Core 174, Skip 173/173, iOS 94, Android 65 groen).

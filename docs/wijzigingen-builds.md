@@ -14,16 +14,14 @@ build 19: voortgang naar de volgende badgetrede. Hosting:
 `docs/hosting-verhuizing.md`.
 
 ### Live meekijken
-- **Live-server Alfa of Beta** in Instellingen (onder Live meekijken): Alfa is
-  de server op de NAS (`live.squashanalyzer.com`), Beta de nieuwe versie bij
-  Cloudflare (`beta.squashanalyzer.com`, `server/live-worker`). Standaard Alfa.
-  Een wedstrijd die live is blijft op de server waar hij begon; de keuze geldt
-  voor de volgende wedstrijd. Voor de test van de Cloudflare-versie; na de
-  verhuizing wijst Alfa ook naar Cloudflare en verdwijnt de schakelaar.
-- **Beta getest (5 oktober):** `beta.squashanalyzer.com` draait op Cloudflare
-  Workers; coachwedstrijd op de iPhone met foto's en WhatsApp-link liep zonder
-  haperen, Worker-logs zonder fouten. De schakelaar gaat mee in build 19.
-  Android op Beta nog te testen; Alfa blijft de server voor de testers.
+- **Live-server bij Cloudflare.** `live.squashanalyzer.com` wijst sinds 5
+  oktober naar de Cloudflare-versie (`server/live-worker`, Durable Objects);
+  de NAS-server is reserve. Voor de gebruiker verandert niets aan de link.
+  Getest op de iPhone met een scheidsrechter- en een coachwedstrijd, foto's,
+  WhatsApp-link en vliegtuigstand: "werkt super soepel". De schakelaar
+  Alfa/Beta die in deze branch zat is weer verwijderd (nooit in een build).
+- **Kijkpagina:** elke gewonnen game in de kleur van de winnaar, en de grote
+  scores staan recht onder elkaar (kolom vast op twee cijfers).
 
 ### Gemeld door testers
 (wat · wie · platform · nu / volgende / later)

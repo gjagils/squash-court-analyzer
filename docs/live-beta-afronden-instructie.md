@@ -168,10 +168,50 @@ git checkout main && git merge --no-ff claude/great-pasteur-eyskxy && git push o
 Meld aan het eind: testaantallen per suite, het resultaat van de echte
 wedstrijd op Beta, en wat open blijft.
 
+## 9. Website op Cloudflare Pages testen (los van de live-server)
+
+De website staat nog op de NAS. Zet hem als proef op Pages, op een
+`pages.dev`-adres; het domein blijft bij de NAS tot Gerd-Jan omzet.
+
+1. Eenmalig een Pages-project maken en de map uploaden (de ingelogde
+   wrangler van stap 4 volstaat; `website/_headers` zet de JSON-types voor
+   de deep-link-bestanden en houdt `/teams/` uit zoekmachines):
+   ```bash
+   npx --yes wrangler@4 pages project create squashanalyzer-site --production-branch main
+   npx --yes wrangler@4 pages deploy website --project-name squashanalyzer-site --branch main
+   ```
+   De uitvoer noemt het adres, zoals `https://squashanalyzer-site.pages.dev`.
+   De lokale map `website/teams/` (buiten git) gaat zo gewoon mee.
+2. Controleer op dat adres: de homepage, `/badges/` (37 kaarten, 17 met drie
+   plaatjes), `/handleiding/` voor iPhone en Android, `/testen.html`,
+   `/privacy.html`, een echte kaartlink (`/kaart/#…` uit de app, met het
+   `pages.dev`-adres in plaats van squashanalyzer.com) en een teamzip
+   (`/teams/<code>/team.zip`, moet downloaden en niet in Google staan).
+3. Headers:
+   ```bash
+   curl -sI https://squashanalyzer-site.pages.dev/.well-known/apple-app-site-association | grep -i content-type
+   curl -sI https://squashanalyzer-site.pages.dev/.well-known/assetlinks.json | grep -i content-type
+   curl -sI https://squashanalyzer-site.pages.dev/teams/ | grep -i x-robots
+   ```
+   Alle drie `application/json` respectievelijk `noindex`.
+4. Vergelijk met de NAS: dezelfde pagina's op `https://squashanalyzer.com`
+   moeten er hetzelfde uitzien (zelfde commit).
+
+**[Gerd-Jan] beslist** of de website over gaat. Zo ja, dan in een
+vervolgstap: in het dashboard bij het Pages-project onder **Custom domains**
+`squashanalyzer.com` en `www.squashanalyzer.com` toevoegen (Pages zet de
+DNS-records; de tunnel-hostnames voor de website daarna weghalen), de
+repository-variabele `WEBSITE_ON_PAGES` op `true` zetten zodat
+`.github/workflows/deploy-website.yml` bij elke push naar `main` uploadt (de
+token uit stap 7 heeft dan ook "Cloudflare Pages: Edit" nodig), en
+`website/teams/` uit `.gitignore` halen en de zips committen, anders missen
+ze in de automatische upload. Daarna `adb shell pm get-app-links
+com.squashanalyzer.android` en een kaartlink vanaf een iPhone controleren.
+
 ## Later, als Beta bevalt (niet in deze sessie)
 
 - `LiveServer.alfa.baseURL` naar Cloudflare laten wijzen (of `live` als
   tweede custom domain op de Worker zetten), de schakelaar uit Instellingen
   halen en `serverKey` laten staan zodat oude instellingen niet storen.
-- Portainer-stack 109 en de tunnel-hostname `live` op de NAS weg; daarna de
-  website naar Cloudflare Pages volgens `docs/hosting-verhuizing.md`.
+- Portainer-stack 109 en de tunnel-hostname `live` op de NAS weg; stack 85
+  (website) zodra de domeinen op Pages staan.

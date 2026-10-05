@@ -6,7 +6,13 @@ buildnummer, en de releasenotes (`release-notes/`) worden eruit geschreven.
 
 ## Volgende build (nog niet geüpload)
 
-Vergeleken met iOS 2.2 (18) en Android 0.5 (5), 5 oktober 2026.
+Vergeleken met iOS 2.2 (18) en Android 0.5 (5), 5 oktober 2026. Planning van
+de builds in de testperiode (drie tot vier, elk hooguit één feature):
+`docs/buildplanning-testperiode.md`. Gepland als build 19: voortgang naar de
+volgende badgetrede.
+
+### Gemeld door testers
+(wat · wie · platform · nu / volgende / later)
 
 ## iOS 2.2 build 18 en Android 0.5 (5), 5 oktober 2026 (geüpload)
 

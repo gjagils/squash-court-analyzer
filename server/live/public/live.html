@@ -57,11 +57,13 @@
   .p2 .serve { background: var(--blue-light); }
   .games { font-size: 15px; font-weight: 700; color: var(--text-2); min-width: 22px; text-align: center;
            border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; }
-  .points { font-size: 42px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 50px; text-align: right; }
+  .points { font-size: 42px; font-weight: 700; font-variant-numeric: tabular-nums; width: 2ch; text-align: right; }
   .winner .name::after { content: " 🏆"; }
   .history { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
   .chip { font-size: 13px; color: var(--text-2); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px;
           font-variant-numeric: tabular-nums; }
+  .chip.won1 { color: var(--orange); border-color: var(--line); }
+  .chip.won2 { color: var(--blue-light); border-color: rgba(128,148,173,0.45); }
   .last { margin-top: 14px; text-align: center; font-size: 13px; color: var(--text-2); min-height: 18px; }
   .updated { margin-top: 14px; text-align: center; font-size: 12px; color: var(--text-3); }
   .notice { margin-top: 16px; text-align: center; font-size: 14px; color: var(--text-2); line-height: 1.5; }
@@ -69,7 +71,7 @@
   footer { margin-top: 26px; text-align: center; font-size: 12px; color: var(--text-3); line-height: 1.6; }
   footer a { color: var(--gold); text-decoration: none; }
   @media (max-width: 360px) {
-    .card { padding: 14px; } .row { gap: 8px; } .name { font-size: 18px; } .points { font-size: 38px; min-width: 44px; }
+    .card { padding: 14px; } .row { gap: 8px; } .name { font-size: 18px; } .points { font-size: 38px; }
   }
   [hidden] { display: none !important; }
 </style>
@@ -173,7 +175,8 @@
     history.textContent = '';
     s.games.forEach(function (g) {
       var chip = document.createElement('span');
-      chip.className = 'chip';
+      // The game in the colour of whoever won it
+      chip.className = 'chip' + (g[0] > g[1] ? ' won1' : g[1] > g[0] ? ' won2' : '');
       chip.textContent = g[0] + '-' + g[1];
       history.appendChild(chip);
     });

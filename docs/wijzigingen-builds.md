@@ -8,13 +8,13 @@ buildnummer, en de releasenotes (`release-notes/`) worden eruit geschreven.
 
 Vergeleken met iOS 2.2 (18) en Android 0.5 (5), 5 oktober 2026.
 
-## iOS 2.2 build 18 en Android 0.5 (5), 5 oktober 2026 (Android geüpload; iOS-archief klaar)
+## iOS 2.2 build 18 en Android 0.5 (5), 5 oktober 2026 (geüpload)
 
-Android 0.5 (5) staat sinds 5 oktober op internal, alpha en Google Group testers
-(`scripts/play_upload.py`). Het iOS-archief 2.2 (18) staat in
-`output/build-18/SquashAnalyzer.xcarchive`; de export naar App Store Connect,
-`scripts/testflight_distribute.py`, `scripts/play_listing.py` en het publiceren
-van de website moeten nog (buiten de auto-modus van Claude Code).
+Android 0.5 (5) staat op internal, alpha en Google Group testers
+(`scripts/play_upload.py`), de Play-listing is bijgewerkt. iOS 2.2 (18) is
+vanaf de Mac geüpload (`xcodebuild -exportArchive`, archief in
+`output/build-18/`) en via `scripts/testflight_distribute.py` van notes
+voorzien en ingediend voor beta review. Website gepubliceerd (stack 85).
 Zie `release-notes/2.2-18.md` en `release-notes/android-0.5-5.md`. Getest op
 de iPhone 17 Pro Max-simulator en de Android-emulator (API 36.1); alle suites
 groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS

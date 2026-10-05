@@ -43,6 +43,11 @@ uitrollen (stap 7, API-token en GitHub-secrets) nog niet ingesteld.
 
 ### Website: Cloudflare Pages (gratis)
 
+**Stand 5 oktober (avond):** `website/_headers` en de workflow
+`deploy-website.yml` staan klaar; de proef op een `pages.dev`-adres en de
+omzetting van de domeinen staan in `docs/live-beta-afronden-instructie.md`,
+stap 9. Tot die omzetting serveert de NAS de site.
+
 Waarom: het domein staat al bij Cloudflare, de site is statisch, en Pages
 publiceert automatisch bij elke push naar `main`. Het gratis plan is ruim
 genoeg (500 builds per maand, 100 custom domains per project, `_headers` tot

@@ -111,6 +111,52 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       op rij bij serve van de ander). Gebouwd voor de volgende build.
 - [ ] Later, met de competitiekoppeling: een eigen badgecategorie voor
       competitiewedstrijden (o.a. Teamspeler).
+- [ ] **Spelersprofiel met trend over wedstrijden** (voorgesteld 5 oktober,
+      kandidaat voor de build na de badges).
+      *Waarom:* de analyse kijkt nu per wedstrijd (dashboard, heatmap, slagen,
+      soorten fouten); een coach ziet niet of een speler vooruitgaat. Het
+      profiel laat dat zien over de laatste wedstrijden, zonder nieuwe invoer.
+      *Wat de gebruiker ziet:* vanuit Spelers (naast Badges) een scherm
+      "Profiel" met bovenaan foto, naam, aantal wedstrijden en winstpercentage,
+      en daaronder kaarten in de huisstijl:
+      - **Vorm:** de laatste 10 beslissingen als rij bolletjes (W/V, oranje en
+        gedempt) met de uitslag in games eronder; coach- én
+        scheidsrechterwedstrijden tellen mee.
+      - **Winners tegenover unforced errors** per game, als twee lijnen over
+        de laatste 10 coachwedstrijden, met het gemiddelde van de eerste en
+        de laatste 5 ("van 3,1 naar 2,4 fouten per game"). Alleen coachmodus
+        heeft punttypes; staat er niets, dan toont de kaart dat.
+      - **Slagen:** winnende slag met het hoogste aandeel over de periode
+        (`Game.pointsWon(by:with:)`), top 3 met percentage, en de slag die het
+        vaakst een unforced error opleverde.
+      - **Baan:** winners en eigen fouten per rij en kant (`AreaTally`,
+        `dominantRow`/`dominantSide`), als dezelfde baanweergave als in de
+        analyse; sterkste en zwakste vak in één zin.
+      - **Tempo:** gemiddelde rallyduur gewonnen tegenover verloren
+        (`averageDurationWon/Lost`), met de trend over de wedstrijden.
+      - **Tegenstanders:** top 3 met stand onderling, uit dezelfde
+        geschiedenis als de carrièrebadges (`BadgeAwarder.history`,
+        `BadgeAwardStore.careerHistory`).
+      Elke kaart heeft een periode-keuze: laatste 10, laatste 25, alles.
+      *Hoe te bouwen:* een pure `PlayerTrend` in SquashAnalyzerCore die uit een
+      lijst opgeslagen coachwedstrijden (`Match`) en scheidsrechterwedstrijden
+      (`RefereeMatch`) per speler-id een `PlayerTrendSummary` maakt (per
+      wedstrijd: datum, gewonnen, games, winners, unforced errors, slagen per
+      type, `AreaTally` winners en fouten, rallyduur), met tests zoals
+      `BadgeEngineTests`. Daarbovenop één gedeeld scherm `SharedPlayerTrendView`
+      in SquashAnalyzerUI (rijen van kaarten, geen LazyVGrid, getallen met
+      `.0` voor Skip) dat beide platformen gebruiken; de stores leveren de
+      wedstrijden al (`CoachMatchStore.history`, `RefereeMatchStore.history`,
+      iOS `SavedMatch`/`SavedRefereeMatch`). Lijnen tekenen met `Path` zoals de
+      heatmap, geen Charts-framework (Skip kent het niet). Een speler zonder
+      coachwedstrijden krijgt alleen Vorm en Tegenstanders.
+      *Buiten scope (later):* vergelijken van twee spelers, export als plaatje,
+      AI Coach-advies over de trend (die kan de `PlayerTrendSummary` dan als
+      invoer krijgen).
+      *Klaar wanneer:* Core-tests voor de berekeningen (ook met wedstrijden
+      zonder punttypes en met "later instappen"), het scherm op iPhone en
+      Android gelijk, standaard en 1,3× tekst gecontroleerd, en een regel in de
+      handleiding op de website.
 
 ## iOS 2.2 build 17 en Android 0.4 (4), 3 oktober 2026 (geüpload)
 

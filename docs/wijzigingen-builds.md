@@ -8,8 +8,10 @@ buildnummer, en de releasenotes (`release-notes/`) worden eruit geschreven.
 
 Vergeleken met iOS 2.2 (18) en Android 0.5 (5), 5 oktober 2026. Planning van
 de builds in de testperiode (drie tot vier, elk hooguit één feature):
-`docs/buildplanning-testperiode.md`. Gepland als build 19: voortgang naar de
-volgende badgetrede.
+`docs/buildplanning-testperiode.md`: testperiode twaalf dagen, twee builds
+(rond 10 en 15 oktober), daarna productie aanvragen voor Android. Gepland als
+build 19: voortgang naar de volgende badgetrede. Hosting:
+`docs/hosting-verhuizing.md`.
 
 ### Gemeld door testers
 (wat · wie · platform · nu / volgende / later)

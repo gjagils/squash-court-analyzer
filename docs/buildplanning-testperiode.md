@@ -6,9 +6,15 @@ bugfixes en kleine verbeteringen uit de testfeedback en **hooguit één
 feature**. Grote onderwerpen (competitiekoppeling, trainingsmodus,
 clubranglijst) wachten tot na de testperiode.
 
-Aanname: de testperiode duurt ongeveer vier weken, met een build per week of
-per tien dagen. Schuift de periode, dan schuiven de builds mee; de volgorde
-van de features blijft.
+**Bijgesteld 5 oktober:** de testperiode duurt twaalf dagen (tot en met
+17 oktober); daarna wordt voor Android productie aangevraagd. In twaalf dagen
+passen twee builds verantwoord, niet vier. De features houden hun volgorde;
+build 21 en 22 komen na de productieaanvraag, als gewone updates. Let op de
+Play-regel voor een nieuw persoonlijk ontwikkelaarsaccount: minstens 12
+testers die 14 dagen aaneengesloten aangemeld blijven; controleer in de Play
+Console wat daar precies staat voordat je de aanvraag doet. Nieuwe builds
+tijdens de gesloten test zijn toegestaan en onderbreken die termijn niet,
+zolang de testers aangemeld blijven.
 
 ## Spelregels per build
 
@@ -44,7 +50,7 @@ is "later" en gaat naar de backlog.
 
 ## De builds
 
-### Build 19 · iOS 2.2 (19), Android 0.6 (6) · rond 12 oktober
+### Build 19 · iOS 2.2 (19), Android 0.6 (6) · rond 10 oktober (dag 5)
 
 - **Feature: voortgang naar de volgende trede.** Op de badgetegel en bij de
   momenten staat hoe ver de speler is: "Goud · 1×, zilver was 6, goud bij 8"
@@ -61,7 +67,11 @@ is "later" en gaat naar de backlog.
 - **Website:** testen.html; badgepagina alleen als er iets aan de teksten
   verandert.
 
-### Build 20 · iOS 2.2 (20), Android 0.7 (7) · rond 19 oktober
+### Build 20 · iOS 2.2 (20), Android 0.7 (7) · rond 15 oktober (dag 10, laatste testbuild)
+
+Dit is de build waarmee Android productie wordt aangevraagd: na de upload
+twee dagen alleen nog kijken, niets meer uploaden. Alles wat na 13 oktober
+binnenkomt en niet gegevens raakt, gaat naar build 21.
 
 - **Feature: onderlinge stand bij "Kies speler".** Zodra beide spelers
   gekozen zijn, een kaartje in de huisstijl: hoe vaak tegen elkaar gespeeld,
@@ -75,7 +85,7 @@ is "later" en gaat naar de backlog.
   hervatten, opslaan en live meekijken, omdat testers dan echte
   competitiewedstrijden spelen.
 
-### Build 21 · iOS 2.2 (21), Android 0.8 (8) · rond 26 oktober
+### Build 21 · iOS 2.2 (21), Android 0.8 (8) · na de productieaanvraag, rond 24 oktober
 
 - **Feature: spelersprofiel met trend, eerste helft.** Het scherm "Profiel"
   uit de backlog met drie kaarten: Vorm (laatste 10 uitslagen), Winners
@@ -85,11 +95,10 @@ is "later" en gaat naar de backlog.
 - **Bugfixes en klein:** feedback van week 3; tekstcorrecties in de
   handleiding en releasenotes van eerdere builds meenemen.
 
-### Build 22 (optioneel) · iOS 2.2 (22), Android 0.9 (9) · rond 2 november
+### Build 22 (optioneel) · iOS 2.2 (22), Android 0.9 (9) · rond 31 oktober
 
-Alleen als de testperiode nog loopt en er genoeg feedback is om te
-verwerken. De feature is één van deze twee, te kiezen op basis van wat
-testers vragen:
+Alleen als er genoeg feedback is om te verwerken. De feature is één van deze
+twee, te kiezen op basis van wat testers vragen:
 
 - **Spelersprofiel, tweede helft:** Slagen, Baan en Tempo, plus de
   periode-keuze (10, 25, alles).
@@ -99,8 +108,9 @@ testers vragen:
   testperiode al is verkend en het datamodel vaststaat; anders schuift dit
   naar de periode erna.
 
-Daarna volgt de release in de App Store en de Play Store op basis van de
-laatste testbuild, met de verzamelde fixes en zonder nieuwe feature.
+De Play-productierelease gaat uit van build 20; de App Store-indiening kan
+op dezelfde build of op build 21, zonder nieuwe feature ten opzichte van de
+laatste testbuild.
 
 ## Wat niet in deze builds komt
 

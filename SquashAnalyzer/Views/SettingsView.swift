@@ -427,29 +427,31 @@ struct BackupActionsView: View {
     @State private var messageTitle = ""
 
     var body: some View {
+        // Each file picker hangs on its own row: two `.fileImporter`s on one
+        // view let only the last one present, so TERUGZETTEN never opened.
         VStack(spacing: 10) {
             HStack(spacing: 10) {
                 ActionButton("NU NAAR ICLOUD", color: AppColors.warmOrange) { saveToiCloud() }
                 ActionButton("TERUGZETTEN", color: AppColors.warmOrange) { showingBackupImporter = true }
             }
+            .fileImporter(isPresented: $showingBackupImporter, allowedContentTypes: [.json]) { result in
+                if let data = read(result) {
+                    pendingBackupData = data
+                    showingReplaceConfirm = true
+                }
+            }
             HStack(spacing: 10) {
                 ActionButton("DELEN", color: AppColors.textSecondary) { shareBackup() }
                 ActionButton("WEDSTRIJD IMPORTEREN", color: AppColors.textSecondary) { showingMatchImporter = true }
             }
-        }
-        .fileImporter(isPresented: $showingBackupImporter, allowedContentTypes: [.json]) { result in
-            if let data = read(result) {
-                pendingBackupData = data
-                showingReplaceConfirm = true
-            }
-        }
-        .fileImporter(isPresented: $showingMatchImporter, allowedContentTypes: [.json]) { result in
-            guard let data = read(result) else { return }
-            do {
-                try ExportService.importFromJSON(data, context: modelContext)
-                show("Import gelukt!", "De wedstrijd is geïmporteerd.")
-            } catch {
-                show("Import mislukt", error.localizedDescription)
+            .fileImporter(isPresented: $showingMatchImporter, allowedContentTypes: [.json]) { result in
+                guard let data = read(result) else { return }
+                do {
+                    try ExportService.importFromJSON(data, context: modelContext)
+                    show("Import gelukt!", "De wedstrijd is geïmporteerd.")
+                } catch {
+                    show("Import mislukt", error.localizedDescription)
+                }
             }
         }
         .alert("Alles vervangen?", isPresented: $showingReplaceConfirm) {

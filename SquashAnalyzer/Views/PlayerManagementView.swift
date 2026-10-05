@@ -14,6 +14,13 @@ struct PlayerManagementView: View {
     @Query(sort: \SavedPlayer.name) private var players: [SavedPlayer]
     @Query(filter: #Predicate<SavedBadgeAward> { $0.deletedAt == nil }) private var activeAwards: [SavedBadgeAward]
 
+    /// Badges with tiers count once, like Android's `badgeCounts` and the
+    /// "x van 37" on the player screen
+    private func badgeFamilyCount(for player: SavedPlayer) -> Int {
+        Set(activeAwards.filter { $0.cardId == player.badgeCardId }
+            .compactMap { BadgeKind(rawValue: $0.badge)?.family }).count
+    }
+
     /// When set, the view acts as a picker and calls this on selection
     var onSelectPlayer: ((SavedPlayer) -> Void)? = nil
 
@@ -121,7 +128,7 @@ struct PlayerManagementView: View {
                                     PlayerRowView(
                                         player: player,
                                         isPickerMode: isPickerMode,
-                                        badgeCount: activeAwards.filter { $0.cardId == player.badgeCardId }.count,
+                                        badgeCount: badgeFamilyCount(for: player),
                                         onSelect: {
                                             onSelectPlayer?(player)
                                             dismiss()

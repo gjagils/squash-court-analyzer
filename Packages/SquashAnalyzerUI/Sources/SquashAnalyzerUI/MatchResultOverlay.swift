@@ -287,6 +287,9 @@ public struct MatchBadgesRow: View {
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
                 .lineLimit(1)
+                // Five medallions plus "Bombardino · 5 badges" is wider than
+                // the row; Android clips instead of shortening, so shrink
+                .minimumScaleFactor(0.7)
         }
     }
 }

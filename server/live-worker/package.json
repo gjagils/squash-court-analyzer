@@ -1,0 +1,18 @@
+{
+  "name": "squash-live-beta",
+  "version": "1.0.0",
+  "description": "Squash Analyzer: live meekijken op Cloudflare Workers (Durable Objects, geen opslag buiten de sessie)",
+  "scripts": {
+    "test": "vitest run",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "vitest": "^4.1.0",
+    "wrangler": "^4.147.0"
+  },
+  "private": true,
+  "type": "module"
+}

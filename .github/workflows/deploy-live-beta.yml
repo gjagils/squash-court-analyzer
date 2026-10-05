@@ -1,0 +1,53 @@
+# Live meekijken op Cloudflare (server/live-worker, beta.squashanalyzer.com):
+# tests, and on main a deploy with wrangler. Needs the repository secrets
+# CLOUDFLARE_API_TOKEN (Edit Cloudflare Workers) and CLOUDFLARE_ACCOUNT_ID.
+name: Live beta (Cloudflare)
+
+on:
+  push:
+    branches: [main]
+    paths: ['server/live-worker/**', '.github/workflows/deploy-live-beta.yml']
+  pull_request:
+    paths: ['server/live-worker/**', '.github/workflows/deploy-live-beta.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: live-beta-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests (workerd)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server/live-worker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/live-worker/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  deploy:
+    name: Deploy beta.squashanalyzer.com
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/live-worker/package-lock.json
+      - run: npm ci
+        working-directory: server/live-worker
+      - run: npx wrangler deploy
+        working-directory: server/live-worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

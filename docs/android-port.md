@@ -2322,3 +2322,20 @@ Kotlin-fout. Nieuwe eigenaardigheden:
 17. **Compose kapt een `Text` in een `HStack` af in plaats van te krimpen**
     (zelfde als 9): de strip "Badges verdiend" toonde "Bombardino · 5" bij
     vijf medaillons. `.minimumScaleFactor(0.7)` op de tekst lost het op.
+
+### Live-server Alfa/Beta (2026-10-05)
+
+Nieuw in Core: `LiveServer` (enum, `storageKey`, `baseURL`, `host`, `stored`)
+in `LiveShare.swift`; `LiveShare.baseURL` is een berekende property en
+`sessionBaseURL` houdt de server van een lopende sessie vast. In de UI een
+`Picker` met `.segmented` onder de twee schakelaars in `SharedSettingsView`.
+Lokaal getest op 5 oktober: Core 174 XCTest, `skip test --project` 173/173
+(de twee nieuwe `LiveShareTests` lopen ook in Kotlin), iOS-app 94/94 op de
+simulator, Android 65 unit tests, `lint.sh` groen. Op simulator en emulator:
+segment Alfa | Beta met "Live-server: live.squashanalyzer.com", bij Beta
+`beta.squashanalyzer.com`, grijs zodra "Knop LIVE" uit staat. De gevreesde
+plekken (`UserDefaults.standard.string(forKey:)` in een statische berekende
+property, de segmented `Picker`) transpileerden zonder aanpassing: geen
+nieuwe Skip-eigenaardigheden. In een worktree: `JAVA_HOME` op de JBR van
+Android Studio en `ANDROID_HOME=~/Library/Android/sdk` zetten (zie 11
+hierboven), anders start Gradle niet.

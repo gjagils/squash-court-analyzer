@@ -194,6 +194,41 @@ struct LiveCreated: Codable {
     let url: String
 }
 
+/// Which live server the app sends a match to: Alfa is the Node server on
+/// the NAS (`live.squashanalyzer.com`), Beta the Cloudflare Worker
+/// (`beta.squashanalyzer.com`). Chosen in Instellingen, stored under
+/// `LiveShare.serverKey`; a running live match keeps the server it started on.
+public enum LiveServer: String, CaseIterable, Sendable {
+    case alfa, beta
+
+    /// UserDefaults key of the choice (also `LiveShare.serverKey`)
+    public static let storageKey = "liveSharingServer"
+
+    public var title: String {
+        switch self {
+        case .alfa: return "Alfa"
+        case .beta: return "Beta"
+        }
+    }
+
+    /// Addresses as literals here, not via `LiveShare`: the enum is not bound
+    /// to the main actor, so it cannot read the class's statics
+    public var baseURL: String {
+        switch self {
+        case .alfa: return "https://live.squashanalyzer.com"
+        case .beta: return "https://beta.squashanalyzer.com"
+        }
+    }
+
+    /// The host as shown under the switch
+    public var host: String { baseURL.replacingOccurrences(of: "https://", with: "") }
+
+    /// The stored choice; anything unknown or empty is Alfa
+    public static var stored: LiveServer {
+        LiveServer(rawValue: UserDefaults.standard.string(forKey: LiveServer.storageKey) ?? "") ?? LiveServer.alfa
+    }
+}
+
 public enum LiveShareError: Error, Equatable {
     case noTransport
     case noConnection
@@ -208,7 +243,11 @@ public final class LiveShare {
     /// Address of the live server (server/live, behind the reverse proxy).
     /// Above `shared`: Kotlin initialises statics top to bottom, and `shared`
     /// reads this in its `baseURL`; the other way round it was null on Android.
-    public static let defaultBaseURL = "https://live.squashanalyzer.com"
+    public static let defaultBaseURL = LiveServer.alfa.baseURL
+    /// The Cloudflare version (server/live-worker)
+    public static let betaBaseURL = LiveServer.beta.baseURL
+    /// Instellingen: which live server the next match goes to (`LiveServer`)
+    public static let serverKey = LiveServer.storageKey
 
     /// Settings switch "Live meekijken" (on by default): only then the
     /// scoring screens show the LIVE button
@@ -219,7 +258,15 @@ public final class LiveShare {
     public static let shared = LiveShare()
 
     public var transport: (any LiveTransport)? = nil
-    public var baseURL: String = LiveShare.defaultBaseURL
+    /// Set by tests; otherwise the server picked in Instellingen (`LiveServer.stored`)
+    private var customBaseURL: String? = nil
+    public var baseURL: String {
+        get { customBaseURL ?? LiveServer.stored.baseURL }
+        set { customBaseURL = newValue }
+    }
+    /// The server the live session was made on: a change of the setting
+    /// during a match does not move the session
+    private var sessionBaseURL: String = LiveShare.defaultBaseURL
 
     /// The match that is live, nil when nothing is shared
     public private(set) var matchId: UUID? = nil
@@ -288,7 +335,7 @@ public final class LiveShare {
         let id = sessionId
         let key = writeKey
         reset()
-        guard let id, let key, let transport, let url = URL(string: "\(baseURL)/api/live/\(id)") else { return }
+        guard let id, let key, let transport, let url = URL(string: "\(sessionBaseURL)/api/live/\(id)") else { return }
         _ = try? await transport.send(method: "DELETE", url: url, headers: ["Authorization": "Bearer \(key)"], body: nil)
     }
 
@@ -343,7 +390,8 @@ public final class LiveShare {
 
     private func create(_ snapshot: LiveSnapshot) async throws {
         guard let transport else { throw LiveShareError.noTransport }
-        guard let url = URL(string: "\(baseURL)/api/live") else { throw LiveShareError.noConnection }
+        sessionBaseURL = baseURL
+        guard let url = URL(string: "\(sessionBaseURL)/api/live") else { throw LiveShareError.noConnection }
         let body = try JSONEncoder().encode(snapshot)
         let response: AITransportResponse
         do {
@@ -364,7 +412,7 @@ public final class LiveShare {
     /// The photos, if any; a failure only means viewers see the first letters
     private func sendPhotos() async {
         guard let photos, !photos.isEmpty, let transport, let id = sessionId, let key = writeKey,
-              let url = URL(string: "\(baseURL)/api/live/\(id)/photos"),
+              let url = URL(string: "\(sessionBaseURL)/api/live/\(id)/photos"),
               let body = try? JSONEncoder().encode(photos) else { return }
         _ = try? await transport.send(method: "PUT", url: url,
                                       headers: ["Content-Type": "application/json", "Authorization": "Bearer \(key)"],
@@ -399,7 +447,7 @@ public final class LiveShare {
     /// Sends one state; a session the server no longer knows is made again
     private func put(_ snapshot: LiveSnapshot) async -> Bool {
         guard let transport, let id = sessionId, let key = writeKey,
-              let url = URL(string: "\(baseURL)/api/live/\(id)"),
+              let url = URL(string: "\(sessionBaseURL)/api/live/\(id)"),
               let body = try? JSONEncoder().encode(snapshot) else { return false }
         do {
             let response = try await transport.send(method: "PUT", url: url,

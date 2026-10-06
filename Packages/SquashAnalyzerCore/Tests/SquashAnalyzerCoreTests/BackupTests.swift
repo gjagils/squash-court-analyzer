@@ -102,9 +102,18 @@ final class BackupTests: XCTestCase {
         XCTAssertTrue((String(data: data, encoding: .utf8) ?? "").contains("\"formatVersion\" : 3"))
         XCTAssertEqual(try BackupCodec.decode(data), backup)
 
-        // An empty list is not written as format 3
+        // An empty list still says "none" (Vervang alles clears them), so it is format 3
         backup.refereeMatches = []
+        XCTAssertEqual(BackupCodec.formatVersion(for: backup), 3)
+        // Only a file without the list (an older app) stays format 2
+        backup.refereeMatches = nil
         XCTAssertEqual(BackupCodec.formatVersion(for: backup), 2)
+        // Empty team lists make format 4
+        backup.teamMatches = []
+        XCTAssertEqual(BackupCodec.formatVersion(for: backup), 4)
+        backup.teamMatches = nil
+        backup.teamPlayerIds = []
+        XCTAssertEqual(BackupCodec.formatVersion(for: backup), 4)
     }
 
     /// B16: format 4 (team matches and the "In mijn team" list): a `TeamMatch` has

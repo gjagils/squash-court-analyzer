@@ -12,7 +12,7 @@ nieuwe testronde 3.1; intern `build 4.1`), zie
 **Competitie en live teamwedstrijden** zijn de gekozen feature en zijn op main
 gebouwd: vier partijen, handmatig invullen of koppelen aan bijgehouden
 wedstrijden, teamstand en verslag, plus live volgen en samenwerken via een
-teamlink. Teamdata reist mee in back-upformaat 4 wanneer die aanwezig is.
+teamlink. Teamdata reist mee in back-upformaat 4; de apps schrijven sinds 6 oktober altijd formaat 4.
 Dit is een bewuste aanvulling op het eerdere streven formaten ongemoeid te laten.
 
 Simulator- en emulatortests staan als geslaagd gedocumenteerd. Praktijktesten

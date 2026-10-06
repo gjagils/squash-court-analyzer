@@ -332,13 +332,17 @@ public enum BackupCodec {
         return hex
     }
 
-    /// The envelope version a backup is written with: 4 with team matches or
-    /// team players, else 3 when it has referee matches, else 2, so a file without them stays readable by older apps
-    /// (they recompute the checksum without fields they do not know)
+    /// The envelope version a backup is written with: 4 when the file says
+    /// something about team matches or team players, else 3 when it says something
+    /// about referee matches, else 2 (a file made by an older app).
+    ///
+    /// "Says something" includes an empty list: the apps always write the lists
+    /// (decision Gerd-Jan, 6 October 2026), so "Vervang alles" knows that a source
+    /// without referee or team matches means exactly that, and clears them; only
+    /// a file from an older app, without the list, leaves what the phone has.
     public static func formatVersion(for backup: FullBackup) -> Int {
-        if let team = backup.teamMatches, !team.isEmpty { return 4 }
-        if let ids = backup.teamPlayerIds, !ids.isEmpty { return 4 }
-        if let referee = backup.refereeMatches, !referee.isEmpty { return 3 }
+        if backup.teamMatches != nil || backup.teamPlayerIds != nil { return 4 }
+        if backup.refereeMatches != nil { return 3 }
         return 2
     }
 

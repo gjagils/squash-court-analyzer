@@ -197,7 +197,7 @@ enum ExportService {
             matches: matchData,
             standaloneGames: gameData,
             badgeAwards: awardData.isEmpty ? nil : awardData,
-            refereeMatches: refereeData.isEmpty ? nil : refereeData
+            refereeMatches: refereeData
         )
         // Competitie: team matches and the "In mijn team" flags travel along (format 4)
         return try BackupCodec.encode(

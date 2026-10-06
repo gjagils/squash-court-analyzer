@@ -57,7 +57,7 @@ class RoomBackupStore(private val db: AppDatabase, private val teamDirectory: UR
             version = 2, backupDate = Date(), players = SwiftArray(players),
             matches = SwiftArray(matches.all().map(::export)), standaloneGames = SwiftArray(),
             badgeAwards = if (awards.isEmpty()) null else SwiftArray(awards),
-            refereeMatches = if (referee.isEmpty()) null else SwiftArray(referee),
+            refereeMatches = SwiftArray(referee),
         )
         // Competitie: team matches and the "In mijn team" flags travel along (format 4)
         return TeamBackup.attach(backup, directory = teamDirectory)

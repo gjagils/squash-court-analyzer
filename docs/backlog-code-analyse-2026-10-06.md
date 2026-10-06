@@ -52,20 +52,20 @@ badgeregels, kosten) is niet zonder Gerd-Jan doorgevoerd.
 - [x] **B9** De speeldag-vraag koppelt via dezelfde route als een gestart wedstrijd
       (pusht en gebruikt de actuele opslag); "Nieuwe wedstrijd bijhouden" opent via
       `onDismiss` (geen 500 ms) en `TeamTrackRequest` heeft een eigen id.
-- [~] **B10** Back-up: scheidsrechterwedstrijden van vóór de badges krijgen bij de export een
-      blijvend id, `importFromJSON` dedupet. **Niet gedaan** (back-upformaat): "leeg versus
-      nil" bij Vervang alles (`refereeMatches`/`teamMatches` weglaten als de bron er geen
-      heeft maakt formaat 2); zie de besluiten.
+- [x] **B10** Back-up: scheidsrechterwedstrijden van vóór de badges krijgen bij de export een
+      blijvend id, `importFromJSON` dedupet. Besluit 6 oktober: `refereeMatches`,
+      `teamMatches` en `teamPlayerIds` worden altijd geschreven (ook leeg) en de export is
+      dus altijd formaat 4; Vervang alles wist ze als de bron de lijst heeft (leeg) en laat
+      ze staan bij een oud bestand zonder lijst. Build 17/18 kan zo'n bestand niet
+      terugzetten. Tests in Core, iOS en Android.
 - [x] **B11** Rollback bij een mislukte referee-save, `keepAsAbandoned` slikt geen fouten meer
       (wist het bestand pas na succes), `loadHistory` committeert geen half werk.
 - [?] **B12** Losse spellen zijn op iOS onzichtbaar (tonen of `.game`-import weigeren).
 - [x] **B13** Kaart-import en team-uitnodiging blijven niet meer hangen achter een
       `fullScreenCover` (getest op de simulator: de uitnodiging wacht en opent na het sluiten).
 - [?] **B14** Opgave/walkover in het teammodel en de reglementsbron voor de gelijkspelregel.
-- [?] **B15** Hat trick wordt bij een lange reeks elke wedstrijd opnieuw uitgereikt. Een
-      bestaande test legt het huidige `>=`-gedrag vast (25 wins op rij = goud): een
-      ontwerpkeuze, geen duidelijke fout. Opties: exact 3/5/7 (zoals Nemesis) of per reeks
-      één keer. Niet aangepast.
+- [x] **B15** Hat trick: besluit 6 oktober, exact bij 3, 5 en 7 op rij (zoals Nemesis), niet
+      bij elke wedstrijd daarna. Test aangepast (de 25e winst is geen goud meer).
 - [x] **B16** Back-upformaat 4: golden bytes (de Darwin-uitvoer van een `TeamMatch` staat vast
       en draait ook in Kotlin) en een iPhone-v4-bestand dat op Android wordt teruggezet.
 - [~] **B17** Room: `schemas/` zijn assets van de debug-build en `androidTest`,
@@ -101,10 +101,9 @@ badgeregels, kosten) is niet zonder Gerd-Jan doorgevoerd.
 
 ## Cloudflare en CI
 
-- [?] **Kostenbesluit**: Workers Paid ($5 per maand) of WebSocket-hibernation. SSE houdt het
-      object wakker; het gratis plan heeft ~13.000 GB-s per dag (≈ 29 objecturen). Een
-      teamavond is 15–20 objecturen: bij twee teams of een toernooi gaat dat erover. Tot dan
-      het dashboard "Durable Objects duration" bekijken rond teamavonden.
+- [x] **Kostenbesluit**: Workers Paid ($5 per maand), besluit 6 oktober; Gerd-Jan heeft het
+      abonnement aangezet. Geen hibernation-werk nodig (SSE houdt het object wakker; de
+      limiet van het gratis plan, ~13.000 GB-s per dag, geldt niet meer).
 - [x] Worker-vitest in `ci.yml` (job `worker`); `deploy-live-beta.yml` annuleert een lopende
       deploy niet meer.
 - [x] `workers_dev: false` (de site staat nu alleen op squashanalyzer.com en www), `website/404.html`,

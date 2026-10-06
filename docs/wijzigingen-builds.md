@@ -86,8 +86,12 @@ een partij raakte de koppeling kwijt als je hem verliet en later hervatte;
 die staat nu in de teamwedstrijd (`trackingMatchId`) en komt terug bij
 Hervatten. Geen aparte releasenote nodig (de feature is nieuw).
 
-Back-up: formaat 4 alleen als er teamdata is (testers met build 17 of 18 kunnen
-zo'n bestand niet terugzetten, zoals bij formaat 3). De teamvlag is een lijst
+Back-up: sinds 6 oktober (besluit Gerd-Jan) schrijven de apps de lijsten
+scheidsrechterwedstrijden, teamwedstrijden en teamvlag altijd, ook leeg, en dus
+altijd formaat 4. Zo weet "Vervang alles" dat een bron zonder die wedstrijden
+ze ook echt niet heeft; alleen een bestand van een oudere app laat ze staan.
+Gevolg: testers met build 17 of 18 kunnen geen nieuwe back-up meer terugzetten
+(zoals bij formaat 3, nu voor elk bestand). De teamvlag is een lijst
 ids in de instellingen (`TeamRoster`), geen SwiftData- of Room-kolom.
 
 Techniek (niet voor de releasenotes): `TeamMatch` in Core met tests (12),

@@ -463,6 +463,17 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertEqual(try counts(), before)
     }
 
+    /// B10: the lists are always written, also empty, so the file is format 4 and
+    /// "Vervang alles" knows the source had no referee or team matches
+    func testAnEmptyBackupStillSaysItHasNoRefereeOrTeamMatches() throws {
+        let data = try ExportService.exportFullBackup(players: [], matches: [], standaloneGames: [], refereeMatches: [])
+        let backup = try BackupCodec.decode(data)
+        XCTAssertEqual(backup.refereeMatches?.count, 0)
+        XCTAssertNotNil(backup.teamMatches)
+        XCTAssertNotNil(backup.teamPlayerIds)
+        XCTAssertEqual(BackupCodec.formatVersion(for: backup), 4)
+    }
+
     /// B10: a referee match from before badges (no id) gets one at the first export
     /// and keeps it, so merging the same file twice adds it once; and a shared
     /// match or game imported twice is there once.
@@ -518,7 +529,12 @@ final class ScoringAndPersistenceTests: XCTestCase {
 
         let withReferee = try ExportService.exportFullBackup(players: [], matches: [], standaloneGames: [],
                                                              refereeMatches: [referee])
-        let withoutReferee = try ExportService.exportFullBackup(players: [], matches: [], standaloneGames: [])
+        // An older app wrote no referee list at all (the apps now always write it, also empty)
+        var olderFile = try BackupCodec.decode(try ExportService.exportFullBackup(players: [], matches: [], standaloneGames: []))
+        olderFile.refereeMatches = nil
+        olderFile.teamMatches = nil
+        olderFile.teamPlayerIds = nil
+        let withoutReferee = try BackupCodec.encode(olderFile, appVersion: "test")
 
         // An older file (no referee matches) keeps the history
         _ = try ExportService.replaceWithBackup(withoutReferee, context: context)

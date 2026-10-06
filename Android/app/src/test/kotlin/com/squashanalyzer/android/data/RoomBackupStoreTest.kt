@@ -101,6 +101,22 @@ class RoomBackupStoreTest {
         TeamRoster.replace(skip.lib.Array<String>())
     }
 
+    /** B10: an empty phone still writes the lists (format 4), and replacing with it clears what the target had */
+    @Test fun anEmptyBackupIsFormat4AndReplacingWithItClearsTeamAndRefereeMatches() = runTest {
+        val dirA = teamDir()
+        val dirB = teamDir()
+        TeamRoster.replace(skip.lib.Array<String>())
+        val empty = RoomBackupStore(a, dirA).makeBackup()
+        assertEquals(0, empty.refereeMatches?.count)
+        assertEquals(0, empty.teamMatches?.count)
+        assertEquals(4, BackupCodec.formatVersion(empty))
+
+        val match = TeamMatch(date = Date(), home = "Bombardinos", away = "Squash Delft 8", ownSide = TeamSide.home)
+        TeamMatchFile.write(skip.lib.Array(listOf(match)), in_ = dirB)
+        RoomBackupStore(b, dirB).restore(BackupCodec.decode(BackupCodec.encode(empty, appVersion = "test")), replacing = true)
+        assertEquals(0, TeamMatchFile.read(in_ = dirB).count)
+    }
+
     /** Competitie: the team matches and the "In mijn team" flags travel in the file (format 4) */
     @Test fun teamMatchesTravelInTheBackup() = runTest {
         val dirA = teamDir()

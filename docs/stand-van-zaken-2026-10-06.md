@@ -37,7 +37,7 @@ app-build is volgens de actuele opleverdocumentatie nog niet geüpload.**
 - Teamstand, competitiepunten en gezamenlijk verslag als Scorekaart,
   Verslag of Plaatje.
 - Spelers markeren als **In mijn team**; teamwedstrijden en teamvlag in
-  back-upformaat 4 wanneer er teamdata is.
+  back-upformaat 4 (nu altijd, ook zonder teamdata).
 - Eén live kijkerslink voor de hele teamavond, deelnemen via link of code,
   meerdere telefoons die hun eigen partij bijwerken, ook punt voor punt.
 - De koppeling van een lopende partij blijft bestaan na verlaten en

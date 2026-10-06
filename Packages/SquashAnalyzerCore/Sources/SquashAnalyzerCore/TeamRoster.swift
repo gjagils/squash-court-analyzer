@@ -55,9 +55,10 @@ public enum TeamBackup {
             matches[index].liveKey = nil
             matches[index].liveOwnerKey = nil
         }
-        result.teamMatches = matches.isEmpty ? nil : matches
-        let ids = TeamRoster.ids()
-        result.teamPlayerIds = ids.isEmpty ? nil : ids
+        // Always written, also empty: a restore that replaces everything must be
+        // able to tell "this phone has none" from "an older file that does not say"
+        result.teamMatches = matches
+        result.teamPlayerIds = TeamRoster.ids()
         return result
     }
 

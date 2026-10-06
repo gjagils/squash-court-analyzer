@@ -277,7 +277,9 @@ final class BadgeEngineTests: XCTestCase {
         }
         let wins = history(25) { _ in "" }
         let silver = engine.careerBadges(in: wins[24].matchId, history: wins, earnedElsewhere: [])
-        XCTAssertTrue(silver.isSuperset(of: [BadgeKind.tenOutOfTenSilver, BadgeKind.veteran, BadgeKind.hatTrickGold]))
+        XCTAssertTrue(silver.isSuperset(of: [BadgeKind.tenOutOfTenSilver, BadgeKind.veteran]))
+        XCTAssertFalse(silver.contains(.hatTrickGold), "gold is exactly the 7th win in a row, not every later one")
+        XCTAssertTrue(engine.careerBadges(in: wins[6].matchId, history: wins, earnedElsewhere: []).contains(.hatTrickGold))
         XCTAssertFalse(silver.contains(.tenOutOfTenGold))
         XCTAssertFalse(silver.contains(.clubicoon), "no opponent known")
 

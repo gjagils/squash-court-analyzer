@@ -71,7 +71,8 @@ bij Cloudflare:
   idle-alarm), kijkpagina `/l/<id>`.
 - Per teamwedstrijd (nieuw): `TeamSession`, API `/api/team…`, kijkpagina
   `/t/<id>`. Eén gedeelde schrijfsleutel per teamwedstrijd; de uitnodiging is
-  `id.key` als link (`https://squashanalyzer.com/team/#<id>.<key>`), als code of
+  `id.key` (de **uitnodigingssleutel**; de startende telefoon houdt daarnaast een
+  **eigenaarssleutel** voor stoppen en de teamnamen) als link (`https://squashanalyzer.com/team/#<id>.<key>`), als code of
   als `squashanalyzer://team#…`. De app werkt de gekozen partij bij; de
   gedeelde sleutel geeft technisch schrijfrecht op alle partijen. Lege namen blijven leeg op de server; pagina en app tonen dan de
   teamnaam met de partij erachter ("Delft 7 E1"). Alles wordt twee uur na de

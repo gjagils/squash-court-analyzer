@@ -33,9 +33,10 @@ Tekst voor de releasenotes (gebruikerstaal):
 > Mijn team, of zelf ingevuld) met de vier partijen E1 tot en met E4. Hield
 > je een partij bij als coach of scheidsrechter? Koppel die, dan komen de
 > games vanzelf mee. De rest vul je in met de game-standen, of alleen wie
-> won. De app telt de games, de bonuspunten en de winnaar volgens de
-> SBN-regels (meeste games; gelijk: meeste partijen; nog gelijk: meeste
-> rallypunten; winnaar krijgt 3 bonuspunten) en maakt één verslag van de
+> won. De app telt de games, de bonuspunten en de winnaar volgens het
+> SBN-reglement (meeste partijen; gelijk: volledig team; dan games, dan
+> rallypunten, dan wie E1 won; winnaar krijgt 3 bonuspunten, behalve een
+> team zonder volledige opstelling) en maakt één verslag van de
 > avond om in de groepsapp te delen, als Scorekaart, Verslag of Plaatje,
 > net als bij een wedstrijd. Speel je op een dag dat je team een wedstrijd
 > heeft, dan vraagt de app na een coach- of scheidsrechterwedstrijd of hij
@@ -85,6 +86,18 @@ Bugfix binnen dezelfde feature (6 oktober): een bijgehouden wedstrijd voor
 een partij raakte de koppeling kwijt als je hem verliet en later hervatte;
 die staat nu in de teamwedstrijd (`trackingMatchId`) en komt terug bij
 Hervatten. Geen aparte releasenote nodig (de feature is nieuw).
+
+Opgave en niet verschenen (6 oktober, B14): in een partij kies je "Opgave"
+(optioneel met de stand van de lopende game: alle resterende punten gaan naar
+de tegenstander, de game is voor hem en de games die nog nodig zijn zijn 11-0)
+of "Niet verschenen" (3 keer 11-0, alleen bij een partij zonder games). Dat
+staat zo in het verslag en op het plaatje ("opgave", "niet verschenen") en reist
+mee over de live-pagina. Bron: reglement regulier, bijlage 1 (incompleet team =
+3 keer 11-0) en art. 23 van het Algemeen competitiereglement; voor de opgave
+zelf zwijgt het reglement, dat is het besluit van Gerd-Jan. Oude bestanden en
+build 17/18 blijven werken (de games staan gewoon in de partij; alleen het
+etiket "opgave" gaat verloren). Het teamverschil "beide teams onvolledig" heeft
+geen regel in het reglement: dan geen winnaar (gelijkspel, elk de games).
 
 Back-up: sinds 6 oktober (besluit Gerd-Jan) schrijven de apps de lijsten
 scheidsrechterwedstrijden, teamwedstrijden en teamvlag altijd, ook leeg, en dus
@@ -255,8 +268,11 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
 - [x] **Wedstrijd koppelen aan een competitiewedstrijd** (gebouwd 5 oktober voor build 19, zie hierboven; live teamwedstrijden ook gebouwd op 6 oktober, SBN-vergelijking nog niet).
       Een SBN-teamwedstrijd = 4 partijen (E1–E4, singles, best of 5 tot 11).
       Uitslag = gewonnen games over de 4 partijen; competitiepunten = games + 3
-      bonuspunten voor de winnaar. Winnaar: eerst meeste games; gelijk → meeste
-      gewonnen partijen; nog gelijk → meeste rallypunten. Idee: als een coach- of
+      bonuspunten voor de winnaar. Winnaar (6 oktober aangepast aan het
+      Algemeen competitiereglement SBN, art. 23): meeste gewonnen partijen;
+      gelijk → het team met een volledige opstelling; beide volledig → meeste
+      games; gelijk → meeste rallypunten; gelijk → wie E1 won. Wint een team
+      zonder volledige opstelling, dan geen bonuspunten (23.8). Idee: als een coach- of
       scheidsrechterwedstrijd op de dag van een wedstrijd van Mijn team valt,
       vragen of hij erbij hoort en welke partij (E1–E4). Dan: de teamwedstrijd als
       geheel (4 partijen, stand in games), één verslag van de avond, live

@@ -44,7 +44,9 @@ public enum TeamMatchReport {
     /// "Competitiepunten: All Inn 12 · Delft 8" once the match is decided
     static func pointsLine(_ match: TeamMatch) -> String? {
         guard match.score.isComplete else { return nil }
-        return "Competitiepunten: \(match.home) \(match.homeCompetitionPoints) · \(match.away) \(match.awayCompetitionPoints)"
+        var line = "Competitiepunten: \(match.home) \(match.homeCompetitionPoints) · \(match.away) \(match.awayCompetitionPoints)"
+        if match.score.winnerNotFull { line += " (geen bonuspunten: onvolledig team)" }
+        return line
     }
 
     /// Home player first, as SBN prints it; a missing name is "Squash Delft 8 E1"
@@ -69,6 +71,13 @@ public enum TeamMatchReport {
     /// "11-8, 9-11", home first
     public static func gamesText(_ partij: TeamPartij, match: TeamMatch) -> String {
         match.ownSide == TeamSide.home ? partij.gamesText : flipped(partij)
+    }
+
+    /// The games with how the partij ended: "11-0, 11-0, 11-0 (niet verschenen)"
+    public static func gamesWithEnd(_ partij: TeamPartij, match: TeamMatch) -> String {
+        let games = gamesText(partij, match: match)
+        guard let end = partij.endText else { return games }
+        return "\(games) (\(end))"
     }
 
     static func flipped(_ partij: TeamPartij) -> String {
@@ -168,7 +177,7 @@ public enum TeamMatchReport {
             if !partij.hasEntry {
                 lines.append(bare ? "*\(partij.label)* nog niet gespeeld" : "\(prefix)\(who): nog niet gespeeld")
             } else {
-                var line = "\(prefix)\(who) · \(standText(partij, match: match)) (\(gamesText(partij, match: match)))"
+                var line = "\(prefix)\(who) · \(standText(partij, match: match)) (\(gamesWithEnd(partij, match: match)))"
                 if let won = partij.ownWon {
                     let winner = won ? match.ownDisplayName(partij) : match.opponentDisplayName(partij)
                     line += " ✅ \(winner)"
@@ -246,7 +255,7 @@ extension ResultCard {
             let their = match.opponentDisplayName(partij)
             rows.append(Row(label: partij.label, home: ownIsHome ? own : their, away: ownIsHome ? their : own,
                             score: TeamMatchReport.standText(partij, match: match),
-                            games: TeamMatchReport.gamesText(partij, match: match).replacingOccurrences(of: ", ", with: " · "),
+                            games: TeamMatchReport.gamesWithEnd(partij, match: match).replacingOccurrences(of: ", ", with: " · "),
                             winner: rowWinner))
         }
         card.rows = rows

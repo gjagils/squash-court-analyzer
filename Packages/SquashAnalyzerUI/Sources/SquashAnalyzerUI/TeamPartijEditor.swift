@@ -18,6 +18,10 @@ struct TeamPartijEditor: View {
     @State private var ownText = ""
     @State private var theirText = ""
     @State private var scoreError: String? = nil
+    /// The game in progress when a player gave up (optional)
+    @State private var stoppedOwnText = ""
+    @State private var stoppedTheirText = ""
+    @State private var endError: String? = nil
     @State private var choosingMatch = false
     @State private var history: [MatchHistorySummary] = []
     @State private var historyLoaded = false
@@ -45,6 +49,7 @@ struct TeamPartijEditor: View {
                         playersSection
                         linkSection
                         gamesSection
+                        endingSection
                         orderSection
                     }
                     .padding(24)
@@ -192,6 +197,94 @@ struct TeamPartijEditor: View {
                 Text("Partij beslist.").font(.system(size: 12)).foregroundColor(SharedColors.textMuted).padding(.top, 4)
             }
         }
+    }
+
+    /// Opgave or niet verschenen: the rest of the partij goes to the opponent
+    @ViewBuilder
+    private var endingSection: some View {
+        if partij.endedBy != nil || (!partij.isOver && partij.games.count < partij.bestOf) {
+            section("OPGAVE OF NIET VERSCHENEN") {
+                if let text = partij.endText {
+                    let winner = partij.ownWon == true ? "Wij winnen" : "Zij winnen"
+                    Text("\(winner) deze partij door \(text == "opgave" ? "de opgave van de tegenstander" : "het wegblijven van de tegenstander"): alle resterende punten gaan naar de winnaar.")
+                        .font(.system(size: 12))
+                        .foregroundColor(SharedColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    ActionButton("Maak ongedaan", color: SharedColors.textSecondary) {
+                        partij.clearEnd()
+                        endError = nil
+                    }
+                    .padding(.top, 6)
+                } else {
+                    Text("Geeft een speler op, dan gaan alle resterende punten naar de tegenstander. Kwam een speler niet opdagen, dan wint de ander met 3 keer 11-0.")
+                        .font(.system(size: 12))
+                        .foregroundColor(SharedColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Opgave: stand van de game waarin het gebeurde (optioneel)")
+                        .font(.system(size: 11))
+                        .foregroundColor(SharedColors.textMuted)
+                        .padding(.top, 4)
+                    HStack(spacing: 10) {
+                        scoreField("wij", text: $stoppedOwnText)
+                        Text("–").foregroundColor(SharedColors.textMuted)
+                        scoreField("zij", text: $stoppedTheirText)
+                    }
+                    HStack(spacing: 10) {
+                        endButton("Onze speler geeft op", color: SharedColors.accent) { giveUp(ownGivesUp: true) }
+                        endButton("Hun speler geeft op", color: SharedColors.steelBlueLight) { giveUp(ownGivesUp: false) }
+                    }
+                    if partij.games.isEmpty {
+                        HStack(spacing: 10) {
+                            endButton("Onze speler kwam niet", color: SharedColors.accent) { endWalkover(ownWins: false) }
+                            endButton("Hun speler kwam niet", color: SharedColors.steelBlueLight) { endWalkover(ownWins: true) }
+                        }
+                    }
+                }
+                if let endError {
+                    Text(endError).font(.system(size: 11)).foregroundColor(SharedColors.error)
+                }
+            }
+        }
+    }
+
+    private func endButton(_ title: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .foregroundColor(color)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(color.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func giveUp(ownGivesUp: Bool) {
+        let ownTrimmed = stoppedOwnText.trimmingCharacters(in: .whitespaces)
+        let theirTrimmed = stoppedTheirText.trimmingCharacters(in: .whitespaces)
+        var own: Int? = nil
+        var their: Int? = nil
+        if !ownTrimmed.isEmpty || !theirTrimmed.isEmpty {
+            guard let a = Int(ownTrimmed), let b = Int(theirTrimmed), a >= 0, b >= 0 else {
+                endError = "Vul beide punten in, bijvoorbeeld 7 en 9, of laat ze allebei leeg."
+                return
+            }
+            own = a
+            their = b
+        }
+        if partij.giveUp(ownGivesUp: ownGivesUp, currentOwn: own, currentTheir: their) {
+            endError = nil
+            stoppedOwnText = ""
+            stoppedTheirText = ""
+        } else {
+            endError = "Dat kan niet bij deze partij."
+        }
+    }
+
+    private func endWalkover(ownWins: Bool) {
+        endError = partij.walkover(ownWins: ownWins) ? nil : "Dat kan alleen bij een partij zonder games."
     }
 
     private var orderSection: some View {

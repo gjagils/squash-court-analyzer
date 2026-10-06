@@ -4,9 +4,15 @@ import Foundation
 //
 // An SBN team match is four singles (E1–E4, best of five to 11). The result
 // is the games won over the four partijen; competition points are those
-// games plus 3 bonus points for the winner. Winner: most games; tie → most
-// partijen won; still tied → most rally points (rules confirmed by Gerd-Jan,
-// October 2026). Everything here is pure and shared with Android; the
+// games plus 3 bonus points for the winner. The winner follows the SBN
+// Algemeen competitiereglement, art. 23 (decision Gerd-Jan, 6 October 2026):
+// most partijen won; equal → the team with a full line-up; both full → most
+// games; equal → most rally points; equal → the team that won E1. A win by a
+// team that is not full gets no bonus points (23.8). A player who does not
+// show up loses the partij as three times 11-0 (reglement regulier, bijlage 1,
+// "incompleet team"); a player who gives up loses the rest of the partij:
+// all remaining points go to the opponent (Gerd-Jan, 6 October 2026; the
+// reglement is silent on it). Everything here is pure and shared with Android; the
 // screens live in SquashAnalyzerUI, the file store (TeamMatchStore.swift) is used by both
 // platforms.
 
@@ -56,6 +62,12 @@ public struct TeamGame: Codable, Equatable, Sendable {
     }
 }
 
+/// How a partij ended when it was not played out: a player gave up in the
+/// middle of it, or did not show up at all
+public enum TeamPartijEnd: String, Codable, Sendable {
+    case retired, walkover
+}
+
 /// One of the four partijen (E1–E4) of a team match
 public struct TeamPartij: Codable, Equatable, Sendable {
     /// 1...4: E1 is the strongest player of each team
@@ -81,6 +93,12 @@ public struct TeamPartij: Codable, Equatable, Sendable {
     /// was linked: "Vernieuwen" must not guess it again from a name that can
     /// be edited in the meantime
     public var linkedOwnIsPlayer1: Bool?
+    /// Set by `giveUp` and `walkover`, which write the remaining games into
+    /// `games` (so every count, report and live page works on them as on
+    /// played games); only the report and the team rules look at the mark
+    public var endedBy: TeamPartijEnd?
+    /// How many games were there before the ending added its own, so it can be undone
+    public var endedAfter: Int?
 
     public init(slot: Int, ownPlayer: String = "", opponentPlayer: String = "", games: [TeamGame] = [],
                 playOrder: Int? = nil, linkedMatchId: String? = nil, linkedKind: String? = nil, bestOf: Int = 5) {
@@ -158,6 +176,73 @@ public struct TeamPartij: Codable, Equatable, Sendable {
 
     public mutating func removeLastGame() {
         if !games.isEmpty { games.removeLast() }
+        // The ending wrote games itself; once one is taken away it no longer holds
+        endedBy = nil
+        endedAfter = nil
+    }
+
+    /// One 11-0 game for the winner of an ending
+    private func shutout(ownWins: Bool) -> TeamGame {
+        TeamGame(ownPoints: ownWins ? 11 : 0, theirPoints: ownWins ? 0 : 11, ownWon: ownWins)
+    }
+
+    /// A player gives up (injury): every remaining point goes to the opponent.
+    /// The game in progress (its score when they stopped, if known) is won by
+    /// the opponent, who gets at least 11 and two clear; the games still
+    /// needed are 11-0. Only while the partij is open.
+    public mutating func giveUp(ownGivesUp: Bool, currentOwn: Int? = nil, currentTheir: Int? = nil) -> Bool {
+        guard !isOver, endedBy == nil else { return false }
+        if (currentOwn == nil) != (currentTheir == nil) { return false }
+        if let own = currentOwn, let their = currentTheir, own < 0 || their < 0 || own > 99 || their > 99 { return false }
+        let winnerIsOwn = !ownGivesUp
+        let before = games.count
+        var won = winnerIsOwn ? ownGames : theirGames
+        if let own = currentOwn, let their = currentTheir {
+            let loserPoints = winnerIsOwn ? their : own
+            let winnerPoints = max(11, loserPoints + 2)
+            games.append(TeamGame(own: winnerIsOwn ? winnerPoints : loserPoints,
+                                  their: winnerIsOwn ? loserPoints : winnerPoints))
+            won += 1
+        }
+        while won < gamesToWin {
+            games.append(shutout(ownWins: winnerIsOwn))
+            won += 1
+        }
+        endedBy = TeamPartijEnd.retired
+        endedAfter = before
+        return true
+    }
+
+    /// A player did not show up: the other wins three times 11-0. Only for a
+    /// partij without games.
+    public mutating func walkover(ownWins: Bool) -> Bool {
+        guard games.isEmpty, endedBy == nil else { return false }
+        for _ in 0..<gamesToWin { games.append(shutout(ownWins: ownWins)) }
+        endedBy = TeamPartijEnd.walkover
+        endedAfter = 0
+        return true
+    }
+
+    /// Takes the ending back: the games it wrote go, the played ones stay
+    /// (all of them, for a mark that came in without a count)
+    public mutating func clearEnd() {
+        guard endedBy != nil else { return }
+        if let after = endedAfter {
+            while games.count > after { games.removeLast() }
+        }
+        endedBy = nil
+        endedAfter = nil
+    }
+
+    /// Our player did not show up (so our team is not full)
+    public var ownMissing: Bool { endedBy == TeamPartijEnd.walkover && ownWon == false }
+    /// Their player did not show up
+    public var theirMissing: Bool { endedBy == TeamPartijEnd.walkover && ownWon == true }
+
+    /// "opgave" or "niet verschenen" for a partij that was not played out
+    public var endText: String? {
+        guard let end = endedBy else { return nil }
+        return end == TeamPartijEnd.retired ? "opgave" : "niet verschenen"
     }
 
     /// The games of a tracked coach or referee match, seen from our player.
@@ -191,6 +276,8 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         linkedOwnIsPlayer1 = ownIsPlayer1
         trackingMatchId = nil
         trackingOwnIsPlayer1 = nil
+        endedBy = nil
+        endedAfter = nil
         bestOf = summary.bestOf
     }
 
@@ -227,6 +314,8 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         linkedOwnIsPlayer1 = ownIsPlayer1
         trackingMatchId = nil
         trackingOwnIsPlayer1 = nil
+        endedBy = nil
+        endedAfter = nil
         bestOf = match.bestOf
     }
 
@@ -249,6 +338,8 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         linkedOwnIsPlayer1 = ownIsPlayer1
         trackingMatchId = nil
         trackingOwnIsPlayer1 = nil
+        endedBy = nil
+        endedAfter = nil
         bestOf = match.bestOf
     }
 
@@ -278,8 +369,13 @@ public struct TeamMatchScore: Equatable, Sendable {
     public let isComplete: Bool
     /// Every played game has its score, so rally points can break a tie
     public let pointsKnown: Bool
+    /// Our team has no partij that was lost by not showing up
+    public let ownTeamFull: Bool
+    public let theirTeamFull: Bool
     /// Only when complete: true = we won, false = they did, nil = not decided (or a full tie)
     public let ownWon: Bool?
+    /// The winner is a team that is not full: it gets no bonus points (art. 23.8)
+    public let winnerNotFull: Bool
     public let ownCompetitionPoints: Int
     public let theirCompetitionPoints: Int
 
@@ -293,7 +389,11 @@ public struct TeamMatchScore: Equatable, Sendable {
         var played = 0
         var decided = 0
         var pointsKnown = true
+        var ownFull = true
+        var theirFull = true
         for partij in partijen {
+            if partij.ownMissing { ownFull = false }
+            if partij.theirMissing { theirFull = false }
             ownGames += partij.ownGames
             theirGames += partij.theirGames
             ownPoints += partij.ownPoints
@@ -306,16 +406,29 @@ public struct TeamMatchScore: Equatable, Sendable {
             }
         }
         let complete = partijen.count == 4 && decided == 4
+        // SBN Algemeen competitiereglement art. 23: most partijen; equal → the
+        // full team; both full → most games; equal → most points (when every
+        // score is known); equal → who won E1. Both teams short: the reglement
+        // says nothing, so no winner.
         var ownWon: Bool? = nil
         if complete {
-            if ownGames != theirGames {
-                ownWon = ownGames > theirGames
-            } else if ownPartijen != theirPartijen {
+            if ownPartijen != theirPartijen {
                 ownWon = ownPartijen > theirPartijen
-            } else if pointsKnown && ownPoints != theirPoints {
-                ownWon = ownPoints > theirPoints
+            } else if ownFull != theirFull {
+                ownWon = ownFull
+            } else if ownFull {
+                if ownGames != theirGames {
+                    ownWon = ownGames > theirGames
+                } else if pointsKnown {
+                    if ownPoints != theirPoints {
+                        ownWon = ownPoints > theirPoints
+                    } else {
+                        for partij in partijen where partij.slot == 1 { ownWon = partij.ownWon }
+                    }
+                }
             }
         }
+        let winnerShort = (ownWon == true && !ownFull) || (ownWon == false && !theirFull)
         self.ownGames = ownGames
         self.theirGames = theirGames
         self.ownPartijen = ownPartijen
@@ -326,8 +439,12 @@ public struct TeamMatchScore: Equatable, Sendable {
         self.isComplete = complete
         self.pointsKnown = pointsKnown
         self.ownWon = ownWon
-        self.ownCompetitionPoints = ownGames + (ownWon == true ? TeamMatchScore.bonus : 0)
-        self.theirCompetitionPoints = theirGames + (ownWon == false ? TeamMatchScore.bonus : 0)
+        self.ownTeamFull = ownFull
+        self.theirTeamFull = theirFull
+        self.winnerNotFull = winnerShort
+        let bonus = winnerShort ? 0 : TeamMatchScore.bonus
+        self.ownCompetitionPoints = ownGames + (ownWon == true ? bonus : 0)
+        self.theirCompetitionPoints = theirGames + (ownWon == false ? bonus : 0)
     }
 }
 

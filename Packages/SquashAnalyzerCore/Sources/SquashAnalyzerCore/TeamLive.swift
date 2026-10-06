@@ -25,9 +25,16 @@ public struct TeamLivePartij: Codable, Equatable, Sendable {
     public var status: LiveStatus
     public var lastPoint: String?
     public var winner: Int?
+    /// "retired" or "walkover" for a partij that was not played out (the games
+    /// above already hold what the ending wrote), and how many games came before it
+    public var end: String?
+    public var endAfter: Int?
 
     public init(p1: String, p2: String, bestOf: Int, games: [[Int]], score: [Int], gamesWon: [Int],
-                server: Int, side: String, status: LiveStatus, lastPoint: String? = nil, winner: Int? = nil) {
+                server: Int, side: String, status: LiveStatus, lastPoint: String? = nil, winner: Int? = nil,
+                end: String? = nil, endAfter: Int? = nil) {
+        self.end = end
+        self.endAfter = endAfter
         self.p1 = p1
         self.p2 = p2
         self.bestOf = bestOf
@@ -216,7 +223,7 @@ public extension TeamPartij {
         return TeamLivePartij(p1: homeIsOwn ? ownName : theirName, p2: homeIsOwn ? theirName : ownName,
                               bestOf: bestOf, games: scored, score: [0, 0], gamesWon: [homeGames, awayGames],
                               server: 1, side: "R", status: isOver ? LiveStatus.finished : LiveStatus.between,
-                              winner: winner)
+                              winner: winner, end: endedBy?.rawValue, endAfter: endedAfter)
     }
 
     /// A partij from the live page, seen from our team; nil when it holds nothing yet
@@ -251,6 +258,10 @@ public extension TeamPartij {
         var partij = TeamPartij(slot: slot, ownPlayer: ownIsHome ? live.p1 : live.p2,
                                 opponentPlayer: ownIsHome ? live.p2 : live.p1, games: games, bestOf: bestOf)
         partij.fromLive = true
+        if let end = live.end, let kind = TeamPartijEnd(rawValue: end) {
+            partij.endedBy = kind
+            partij.endedAfter = live.endAfter.map { value in max(0, min(value, games.count)) }
+        }
         return partij
     }
 }

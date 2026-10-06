@@ -205,5 +205,11 @@ export function validatePartij(input) {
   }
   const winner = cleanInt(input.winner, 1, 2);
   if (winner !== null) partij.winner = winner;
+  // A partij not played out (a player gave up or did not show up)
+  if (input.end === 'retired' || input.end === 'walkover') {
+    partij.end = input.end;
+    const after = cleanInt(input.endAfter, 0, 7);
+    if (after !== null) partij.endAfter = after;
+  }
   return partij;
 }

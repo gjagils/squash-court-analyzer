@@ -86,6 +86,18 @@ describe('input', () => {
     expect(validatePartij({ ...partij, games: [[11]] })).toBeNull();
     expect(validatePartij('nope')).toBeNull();
   });
+
+  it('a partij that was not played out keeps how it ended, and nothing else', () => {
+    const ended = validatePartij({ status: 'finished', games: [[0, 11], [0, 11], [0, 11]], gamesWon: [0, 3], winner: 2, end: 'walkover', endAfter: 0 });
+    expect(ended).toMatchObject({ end: 'walkover', endAfter: 0, gamesWon: [0, 3] });
+    expect(validatePartij({ status: 'finished', gamesWon: [3, 1], winner: 1, end: 'retired', endAfter: 2 })).toMatchObject({ end: 'retired', endAfter: 2 });
+    expect(validatePartij({ status: 'finished', gamesWon: [3, 1], winner: 1, end: 'retired' }).endAfter).toBeUndefined();
+    const odd = validatePartij({ status: 'finished', gamesWon: [3, 1], winner: 1, end: 'banana', endAfter: 2 });
+    expect(odd.end).toBeUndefined();
+    expect(odd.endAfter).toBeUndefined();
+    expect(validatePartij({ ...partij }).end).toBeUndefined();
+    expect(validatePartij({ status: 'finished', gamesWon: [3, 1], winner: 1, end: 'retired', endAfter: 99 }).endAfter).toBeUndefined();
+  });
 });
 
 describe('team sessions', () => {

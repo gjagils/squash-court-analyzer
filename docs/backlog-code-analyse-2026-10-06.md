@@ -65,7 +65,15 @@ badgeregels, kosten) is niet zonder Gerd-Jan doorgevoerd.
       zoals vroeger. `SwiftDataMatchHistoryStore`, test in `ScoringAndPersistenceTests`.
 - [x] **B13** Kaart-import en team-uitnodiging blijven niet meer hangen achter een
       `fullScreenCover` (getest op de simulator: de uitnodiging wacht en opent na het sluiten).
-- [?] **B14** Opgave/walkover in het teammodel en de reglementsbron voor de gelijkspelregel.
+- [x] **B14** Opgave/walkover in het teammodel (`TeamPartij.giveUp/walkover/clearEnd`, `endedBy`,
+      `endedAfter`; de games worden meteen ingevuld, dus tellingen, verslag en live werken
+      mee) en de reglementsbron: Algemeen competitiereglement SBN art. 23 (meeste
+      partijen; gelijk: volledig team; dan games, rallypunten, E1; winst van een
+      onvolledig team zonder bonus) en reglement regulier bijlage 1 (incompleet team =
+      3×11-0). Besluit Gerd-Jan 6 oktober: de app volgt het reglement (dus niet meer
+      "games eerst") en bij een opgave gaan alle resterende punten naar de tegenstander.
+      Beide teams onvolledig: geen winnaar (reglement zwijgt). Tests: `TeamPartijEndTests`,
+      Worker `team.test.js`; editor-UI in `TeamPartijEditor`.
 - [x] **B15** Hat trick: besluit 6 oktober, exact bij 3, 5 en 7 op rij (zoals Nemesis), niet
       bij elke wedstrijd daarna. Test aangepast (de 25e winst is geen goud meer).
 - [x] **B16** Back-upformaat 4: golden bytes (de Darwin-uitvoer van een `TeamMatch` staat vast
@@ -134,12 +142,15 @@ badgeregels, kosten) is niet zonder Gerd-Jan doorgevoerd.
       fixture); 6 deels (Room); 7 deels (Worker: team-sleutel, verify, 413, games-clamp);
       5, 8 (opgave, `careerBadges` 4+) en 9 (Compose-screentest, UI-testtarget) niet.
 
-## Besluiten die bij Gerd-Jan liggen
+## Besluiten (6 oktober 2026) en wat er nog openstaat
 
-1. **B14**: opgave/walkover en de bron van de gelijkspelregel (SBN-reglement).
-2. **B15**: hat trick exact bij 3/5/7, of één keer per reeks.
-3. **B12**: losse spellen op iOS tonen of de `.game`-import weigeren.
-4. **B10**: back-upformaat: `refereeMatches`/`teamMatches` altijd schrijven (ook leeg), met
-   formaat 3/4 als gevolg, zodat Vervang alles weet dat de bron "niets" bedoelt.
-5. **Kosten live-server**: Workers Paid of WebSocket-hibernation.
-6. **EU-opslag** inschakelen (nu uit) en het App Store-privacylabel bijwerken.
+Alle zes besluiten zijn gegeven en verwerkt: B14 (volg het reglement; opgave = resterende
+punten naar de tegenstander), B15 (exact 3/5/7), B12 (losse spellen tonen), B10 (altijd
+formaat 4), kosten (Workers Paid, door Gerd-Jan aangezet) en EU-opslag.
+
+Nog open:
+
+1. **EU-opslag inschakelen**: `LIVE_JURISDICTION = "eu"` zodra `/health` `"sessions": 0` zegt
+   (eigen kleine commit), daarna `website/privacy.html` aanvullen en de website publiceren.
+2. **App Store-privacylabel** bijwerken door Gerd-Jan vóór build 19.
+3. **Teamzip-links** nameten op de iPhone en de A13 (AASA-cache).

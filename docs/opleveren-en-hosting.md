@@ -216,7 +216,7 @@ GitHub-secrets.
 
 ## 5. Open punten (voor wie verder wil)
 
-- Build 19 uploaden: alleen als Gerd-Jan het zegt.
+- 3.0 build 1 is op 6 oktober 2026 geüpload (TestFlight in bèta-review, Play internal, alpha en Google Group testers). Na goedkeuring `scripts/testflight_expire_old.py` draaien (houdt nu 3.0 (1) en 2.2 (18)). Schermafbeeldingen en Play-listing zijn bij deze build niet vernieuwd (de App Store-versie 3.0 bestaat nog niet in App Store Connect).
 - Live teamwedstrijd is getest tussen iOS-simulator, Android-emulator, de
   iPhone en de A13 zijn nog niet door Gerd-Jan geprobeerd.
 - Vergelijken met de SBN-uitslag en een badgecategorie Teamspeler (zie
@@ -226,4 +226,4 @@ GitHub-secrets.
   naam "squashanalyzer") afhandelen: toevoegen aan de Google Group van de
   track "Google Group testers" en een antwoordmail sturen. Planning van de
   testperiode: `docs/buildplanning-testperiode.md`.
-- Google's pre-launch report voor Squash Analyzer is nog niet gegenereerd.
+- Google's pre-launch report voor Squash Analyzer is nog niet gegenereerd (Pre-lanceringsrapport leeg; Gerd-Jan laat het gaan, 6 oktober).

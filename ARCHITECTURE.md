@@ -106,7 +106,7 @@ has a `TeamSession` Durable Object (`server/live-worker/src/team.js`, routes
 `/api/team…`, viewer page `/t/<id>`) with the header, four partij slots
 and the same two-hour idle alarm. The phone side is `TeamLive` in Core: one
 shared write key per team match, invitation `id.key` as a link
-(`squashanalyzer.com/team#…`), code or `squashanalyzer://team#…`
+(`squashanalyzer.com/team/#…`), code or `squashanalyzer://team#…`
 (`TeamInvite`). The app writes its selected partij, home player first
 (`TeamLivePartij`); empty names stay empty and the page and app render the
 team name plus position. A tracked coach/referee match bound with
@@ -119,6 +119,16 @@ All participants share the same write key; the server does not enforce ownership
 Later: SBN comparison, badge category Teamspeler.
 
 ## Android port
+
+**Room database version (Android): 9.** Every step 1→9 has a `Migration`
+(`AppDatabase.kt`), there is no destructive fallback, and the schema is exported
+to `Android/app/schemas/<version>.json` (committed; the CI job fails when the build
+writes a different schema, so a changed entity cannot ship without a version bump
+and a migration). `AppDatabaseSchemaTest` keeps `MigrationTestHelper` usable: for
+the next version commit its JSON and test the step with `createDatabase(old)` +
+`runMigrationsAndValidate(new, true, MIGRATION_x_y)`. Steps up to 9 have SQL-based
+rewind tests because no JSON was exported for them. Competitie (team matches) lives
+outside Room, in a JSON file (`JSONFileTeamMatchStore`).
 
 De Android-port is beschikbaar voor testers als 0.5 (5). De app gebruikt
 Swift/SwiftUI via Skip, met gedeelde schermen in SquashAnalyzerUI en regels in

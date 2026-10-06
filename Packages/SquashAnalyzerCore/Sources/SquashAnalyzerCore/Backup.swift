@@ -438,7 +438,8 @@ public struct BackupCounts: Equatable, Sendable {
 public protocol BackupStore: AnyObject, Sendable {
     func makeBackup() async throws -> FullBackup
     /// `replacing` first removes players, coach matches and badges (referee
-    /// matches are not in the backup format and stay, as on iOS); otherwise
+    /// matches are only replaced when the file has some, format 3, so an older file
+    /// wipes nothing it never contained, as on iOS); otherwise
     /// only what is not there yet is added, and a deleted badge stays deleted.
     func restore(_ backup: FullBackup, replacing: Bool) async throws -> BackupCounts
 }

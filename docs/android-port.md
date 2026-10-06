@@ -1,5 +1,8 @@
 # Android port (one Swift codebase, via Skip)
 
+> De Skip-valkuilen uit dit logboek staan sinds 6 oktober als korte lijst in
+> [`docs/skip-valkuilen.md`](skip-valkuilen.md); zoek hier op het trefwoord voor de achtergrond.
+
 ## Actuele status — 6 oktober 2026
 
 De port is in gebruik bij testers: **Android 0.5 (5)**, naast iOS 2.2 (18).

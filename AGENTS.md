@@ -13,7 +13,7 @@ commit-uitleg zijn Nederlands, code en commentaar Engels zoals het er al staat.
   Competitie incl. live teamwedstrijd, Android-port).
 - `docs/wijzigingen-builds.md`: wat er sinds de laatste upload veranderd is,
   met de releasenote-teksten. Werk dit bij met elke wijziging.
-- `docs/android-port.md`: Skip-valkuilen en Android-status.
+- `docs/skip-valkuilen.md`: de Skip-valkuilen (Swift → Kotlin) in een lijst; `docs/android-port.md` is het uitgebreide logboek.
 - `docs/competitie-vervolg.md`, `docs/plan-live-teamwedstrijd.md`: de laatste
   feature en de gemaakte keuzes.
 

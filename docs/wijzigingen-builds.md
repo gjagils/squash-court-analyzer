@@ -36,6 +36,27 @@ Tekst voor de releasenotes (gebruikerstaal):
 > spelers staan bovenaan als je een partij invult. Teamwedstrijden en die
 > teamvlag zitten ook in de back-up.
 
+**Live teamwedstrijd** (ook build 19), tekst voor de releasenotes:
+
+> **Teamwedstrijd live meekijken.** In een teamwedstrijd staat nu een kaart
+> Live. Tik op Live delen en deel de kijkerslink in de groepsapp: iedereen
+> ziet de stand van de hele avond en per partij de games, ook punt voor
+> punt. Teamgenoten kunnen meedoen: stuur ze de uitnodiging (link of code),
+> ze kiezen hun team en zetten hun eigen partij erop. Start je een coach- of
+> scheidsrechterwedstrijd, kies dan in het beginscherm Onderdeel van een
+> teamwedstrijd, dan gaat de stand van die partij vanzelf mee. Alleen
+> teamnamen, voornamen en de stand gaan mee; zonder namen staat er de
+> teamnaam met de partij erachter, bijvoorbeeld Delft 7 E1. Twee uur na de
+> laatste update wordt alles gewist.
+
+Techniek: Worker `TeamSession` (Durable Object), pagina `/t/<id>`, `TeamLive`
+en `TeamInvite` in Core, schermen `TeamLiveCard` en `SharedTeamJoinView`.
+Getest tussen iOS-simulator en Android-emulator (aanmaken, deelnemen met
+de uitnodiging, partij invullen en terugzien op de andere telefoon en op de
+pagina, punt voor punt vanuit een gekoppelde coachwedstrijd). Worker 21,
+Core 201 (Skip), Android 66 en iOS-tests groen. De NAS-server heeft geen
+teamendpoints (alleen reserve).
+
 Back-up: formaat 4 alleen als er teamdata is (testers met build 17 of 18 kunnen
 zo'n bestand niet terugzetten, zoals bij formaat 3). De teamvlag is een lijst
 ids in de instellingen (`TeamRoster`), geen SwiftData- of Room-kolom.
@@ -44,8 +65,7 @@ Techniek (niet voor de releasenotes): `TeamMatch` in Core met tests (12),
 opslag in één JSON-bestand per telefoon (`JSONFileTeamMatchStore`, geen
 SwiftData- of Room-migratie), gedeelde schermen `SharedTeamMatchesView`,
 `SharedTeamMatchView`, `TeamPartijEditor` en `TeamMatchLinkPrompt` in
-SquashAnalyzerUI. Nog niet: live meekijken per teamwedstrijd (plan:
-`docs/plan-live-teamwedstrijd.md`), vergelijken met de SBN-uitslag,
+SquashAnalyzerUI. Live per teamwedstrijd staat hierboven. Nog niet: vergelijken met de SBN-uitslag,
 badgecategorie Teamspeler. Getest op simulator en emulator (aanmaken uit het programma,
 partij invullen, koppelen vanuit Afgeronde wedstrijden, vraag na een
 scheidsrechterwedstrijd, verslag delen, opslag na herinstallatie).

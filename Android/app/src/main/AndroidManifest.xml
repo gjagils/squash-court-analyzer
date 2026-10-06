@@ -33,12 +33,14 @@
                 <data android:host="squashanalyzer.com" />
                 <data android:host="www.squashanalyzer.com" />
                 <data android:pathPrefix="/kaart" />
+                <data android:pathPrefix="/team" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="squashanalyzer" android:host="kaart" />
+                <data android:scheme="squashanalyzer" android:host="team" />
             </intent-filter>
         </activity>
         <!-- Shares the badge card picture ("Deel kaart") with other apps -->

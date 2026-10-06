@@ -125,6 +125,8 @@ public struct LiveShareButton: View {
 public enum LiveShareSync {
     @MainActor
     public static func send(matchId: UUID, snapshot: LiveSnapshot) {
+        // A match played for a partij of a live team match also goes to the team page
+        TeamLive.shared.forward(matchId: matchId, snapshot: snapshot)
         let live = LiveShare.shared
         guard live.isLive(matchId) else { return }
         if snapshot.status == LiveStatus.finished {

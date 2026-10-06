@@ -27,7 +27,7 @@ public struct CoachSessionView: View {
     let teamMatchStore: (any TeamMatchStore)?
     /// A match started for a partij of a team match: names to start with, and
     /// the finished match goes into that partij without asking
-    let teamTarget: TeamTarget?
+    @State private var activeTarget: TeamTarget?
     @State private var linkCandidate: TeamMatch? = nil
     @State private var linkAsked = false
     @Environment(\.dismiss) private var dismiss
@@ -44,7 +44,7 @@ public struct CoachSessionView: View {
                 onExit: @escaping @MainActor () -> Void) {
         self.store = store
         self.teamMatchStore = teamMatchStore
-        self.teamTarget = teamTarget
+        _activeTarget = State(initialValue: teamTarget)
         self.historyStore = historyStore
         self.settings = settings
         self.shareText = shareText
@@ -75,7 +75,8 @@ public struct CoachSessionView: View {
                 .disabled(saver.busy || saver.failed)
             } else if showingSetup {
                 MatchSetupView(playerStore: playerStore, mode: .coach, photoStore: photoStore, filePicker: filePicker,
-                               initialPlayer1Name: teamTarget?.player1Name ?? "", initialPlayer2Name: teamTarget?.player2Name ?? "",
+                               initialPlayer1Name: activeTarget?.player1Name ?? "", initialPlayer2Name: activeTarget?.player2Name ?? "",
+                               teamMatchStore: activeTarget == nil ? teamMatchStore : nil,
                                onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }
@@ -158,14 +159,14 @@ public struct CoachSessionView: View {
     /// it belongs to the team match (once); then save and go home
     private func requestExit(_ value: Match) {
         // Started for a partij: a finished match goes straight into it
-        if let teamTarget, let teamMatchStore, value.isMatchOver {
+        if let teamTarget = activeTarget, let teamMatchStore, value.isMatchOver {
             Task { @MainActor in
                 await TeamMatchSupport.link(coach: value, target: teamTarget, store: teamMatchStore)
                 persist(value, exit: true)
             }
             return
         }
-        guard value.isMatchOver, !linkAsked, teamTarget == nil, let teamMatchStore else {
+        guard value.isMatchOver, !linkAsked, activeTarget == nil, let teamMatchStore else {
             persist(value, exit: true)
             return
         }
@@ -209,6 +210,13 @@ public struct CoachSessionView: View {
             player2Id: choice.player2Id.flatMap { UUID(uuidString: $0) }
         )
         match = fresh
+        // "Onderdeel van een teamwedstrijd" chosen in the setup: the team match
+        // must exist for the result to be linked, and a live one gets the state
+        if let target = choice.teamTarget, let teamMatch = choice.teamMatch, let teamMatchStore {
+            activeTarget = target
+            Task { try? await teamMatchStore.save(teamMatch) }
+        }
+        activeTarget?.bind(matchId: fresh.id)
         saver.start { try await store.save(fresh) }
     }
 

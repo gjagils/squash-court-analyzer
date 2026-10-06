@@ -342,7 +342,7 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
         return TeamMatch(date: fixture.date, home: fixture.home, away: fixture.away, ownSide: side, fixtureId: fixture.id)
     }
 
-    static func sameTeam(_ a: String, _ b: String) -> Bool {
+    public static func sameTeam(_ a: String, _ b: String) -> Bool {
         a.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == b.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 
@@ -361,7 +361,7 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
 
     /// Replaces the partij with the same slot
     public mutating func update(_ partij: TeamPartij) {
-        var ours = partij
+        var ours = cleaned(partij)
         ours.fromLive = nil
         var replaced = false
         for index in 0..<partijen.count where partijen[index].slot == ours.slot {

@@ -86,8 +86,21 @@ the three choices of "Deel score" (`TeamMatchReport.text(_:style:)`,
 team" are a list of ids in the settings (`TeamRoster`; no schema change), and
 team matches plus that list travel in the backup (`TeamBackup`, format 4,
 `TeamMatchFile` for the synchronous file access of the platform backup code).
-Later: live per team match (`docs/plan-live-teamwedstrijd.md`), SBN comparison,
-badge category Teamspeler.
+Live per team match (built, `docs/plan-live-teamwedstrijd.md`): the Worker
+has a `TeamSession` Durable Object (`server/live-worker/src/team.js`, routes
+`/api/team…`, viewer page `/t/<id>`) with the header, four partij slots
+and the same two-hour idle alarm. The phone side is `TeamLive` in Core: one
+shared write key per team match, invitation `id.key` as a link
+(`squashanalyzer.com/team#…`), code or `squashanalyzer://team#…`
+(`TeamInvite`). Every phone writes only its own partij, home player first
+(`TeamLivePartij`); empty names stay empty and the page and app render the
+team name plus position. A tracked coach/referee match bound with
+`TeamTarget.bind` is forwarded point by point through `LiveShareSync.send`;
+the team match screen pushes changed partijen on save and pulls/merges
+(`mergeLive`) on open and "Vernieuwen". The setup screen can attach a new
+match to a team match ("Onderdeel van een teamwedstrijd"). The Node server
+`server/live` (NAS reserve) has no team endpoints.
+Later: SBN comparison, badge category Teamspeler.
 
 ## Android port
 

@@ -304,7 +304,8 @@ final class TeamLiveTests: XCTestCase {
         let sent = transport.requests.count
         live.forward(matchId: matchId, snapshot: snapshot("Jan", "Piet", score: [5, 0]))
         try await waitUntil { transport.requests.count > sent && transport.requests[transport.requests.count - 1].body.contains("\"score\":[5,0]") }
-        XCTAssertFalse(live.offline)
+        // The flag is set once the answer is in
+        try await waitUntil { !live.offline }
 
         live.unbind(matchId: matchId)
         XCTAssertFalse(live.isBound(matchId))

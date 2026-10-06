@@ -4,7 +4,8 @@
       {
         "appIDs": ["65FAHRU88M.com.squashanalyzer.app"],
         "components": [
-          { "/": "/kaart*", "comment": "Player badge cards" }
+          { "/": "/kaart*", "comment": "Player badge cards" },
+          { "/": "/team*", "comment": "Invitations to a live team match" }
         ]
       }
     ]

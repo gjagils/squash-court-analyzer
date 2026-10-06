@@ -118,6 +118,14 @@ struct ContentView: View {
         .onChange(of: cardInbox.pending) { _, _ in
             presentPendingCard()
         }
+        // A link to a live team match (Competitie): join it
+        .sheet(isPresented: Binding(get: { cardInbox.pendingTeam != nil }, set: { if !$0 { cardInbox.pendingTeam = nil } })) {
+            if let invite = cardInbox.pendingTeam {
+                SharedTeamJoinView(store: TeamMatchStorage.store, team: TeamMatchSupport.cachedTeam(), initialCode: invite.code) { _ in
+                    cardInbox.pendingTeam = nil
+                } onCancel: { cardInbox.pendingTeam = nil }
+            }
+        }
         .alert("Veilige tijdelijke opslag actief", isPresented: $showingStartupPersistenceWarning) {
             Button("OK", role: .cancel) { }
         } message: {

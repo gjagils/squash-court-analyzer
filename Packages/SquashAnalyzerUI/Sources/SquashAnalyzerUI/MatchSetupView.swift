@@ -14,6 +14,25 @@ public struct MatchSetupChoice: Equatable {
     /// Coaching focus of a picked player (empty otherwise)
     public let player1Focus: [String]
     public let player2Focus: [String]
+    /// "Onderdeel van een teamwedstrijd": which team match, which partij and
+    /// whether our player is Speler 1 (nil team match = an ordinary match)
+    public let teamMatch: TeamMatch?
+    public let teamSlot: Int
+    public let teamOwnIsPlayer1: Bool
+}
+
+public extension MatchSetupChoice {
+    /// Where the finished match goes, when it belongs to a team match. A name
+    /// left empty is the default ("Squash Delft 8 E1") instead of "Speler 1".
+    var teamTarget: TeamTarget? {
+        guard let teamMatch else { return nil }
+        let own = teamOwnIsPlayer1 ? player1Name : player2Name
+        let opponent = teamOwnIsPlayer1 ? player2Name : player1Name
+        let ownPlaceholder = own == "Speler 1" || own == "Speler 2"
+        let opponentPlaceholder = opponent == "Speler 1" || opponent == "Speler 2"
+        return TeamTarget.make(team: teamMatch, slot: teamSlot, ownIsPlayer1: teamOwnIsPlayer1,
+                               ownName: ownPlaceholder ? nil : own, opponentName: opponentPlaceholder ? nil : opponent)
+    }
 }
 
 /// Which match the setup screen starts
@@ -37,6 +56,15 @@ public struct MatchSetupView: View {
     @State private var editing: PlayerProfile? = nil
     let onCancel: (() -> Void)?
     let onStart: (MatchSetupChoice) -> Void
+    /// Competitie: when given and there is a team match to play for, the setup offers
+    /// "Onderdeel van een teamwedstrijd"
+    let teamMatchStore: (any TeamMatchStore)?
+    @State private var teamCandidates: [TeamMatch] = []
+    @State private var inTeam = false
+    @State private var pickedTeam: UUID? = nil
+    @State private var teamSlot = 1
+    @State private var teamOwnIsPlayer1 = true
+    @AppStorage(TeamRoster.storageKey) private var rosterRaw = ""
 
     @State private var players: [PlayerProfile] = []
     @State private var player1Name: String
@@ -54,8 +82,10 @@ public struct MatchSetupView: View {
 
     public init(playerStore: any PlayerProfileStore, mode: MatchSetupMode, photoStore: (any PlayerPhotoStore)? = nil,
                 filePicker: (any PlayerFilePicker)? = nil, initialPlayer1Name: String = "", initialPlayer2Name: String = "",
+                teamMatchStore: (any TeamMatchStore)? = nil,
                 onCancel: (() -> Void)? = nil,
                 onStart: @escaping (MatchSetupChoice) -> Void) {
+        self.teamMatchStore = teamMatchStore
         _player1Name = State(initialValue: initialPlayer1Name)
         _player2Name = State(initialValue: initialPlayer2Name)
         self.prefilled = !initialPlayer1Name.isEmpty || !initialPlayer2Name.isEmpty
@@ -83,6 +113,7 @@ public struct MatchSetupView: View {
                 playerRow(label: "Speler 2", name: $player2Name, slot: 2, color: SharedColors.steelBlue, focus: focus(player2Pick, currentName: player2Name))
 
                 serverPicker
+                teamSection
                 lateStartSection
 
                 ActionButton(isCoach ? "START WEDSTRIJD" : "START SCHEIDSRECHTER", style: .filled,
@@ -90,7 +121,10 @@ public struct MatchSetupView: View {
             }
             .padding(24)
         }
-        .task { await reloadPlayers() }
+        .task {
+            await reloadPlayers()
+            if let teamMatchStore { teamCandidates = await TeamMatchSupport.candidates(store: teamMatchStore) }
+        }
         .sheet(isPresented: pickerIsPresented) {
             NavigationStack {
                 List {
@@ -283,14 +317,130 @@ public struct MatchSetupView: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
+    /// The team match picked in the setup, when "Onderdeel van een teamwedstrijd" is on
+    private var chosenTeam: TeamMatch? {
+        guard inTeam else { return nil }
+        for candidate in teamCandidates where candidate.id == pickedTeam { return candidate }
+        return teamCandidates.first
+    }
+
+    /// "Onderdeel van een teamwedstrijd": pick the team match, the partij and which player is ours
+    @ViewBuilder
+    private var teamSection: some View {
+        if !teamCandidates.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                Toggle(isOn: Binding(get: { inTeam }, set: { turnTeamOn($0) })) {
+                    Text("Onderdeel van een teamwedstrijd")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(SharedColors.textPrimary)
+                }
+                .tint(SharedColors.accent)
+                if inTeam, let team = chosenTeam {
+                    if teamCandidates.count > 1 {
+                        ForEach(teamCandidates) { candidate in
+                            Button { pickedTeam = candidate.id; teamSlot = freeSlot(candidate) } label: {
+                                HStack(spacing: 8) {
+                                    Text("\(TeamMatchReport.dayText(candidate.date)) · \(candidate.title)")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(candidate.id == team.id ? SharedColors.accent : SharedColors.textSecondary)
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.leading)
+                                    Spacer()
+                                }
+                                .padding(10)
+                                .background(candidate.id == team.id ? SharedColors.accent.opacity(0.12) : Color.white.opacity(0.04))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    } else {
+                        Text("\(TeamMatchReport.dayText(team.date)) · \(team.title)")
+                            .font(.system(size: 12))
+                            .foregroundColor(SharedColors.textSecondary)
+                    }
+                    Text("PARTIJ")
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .tracking(1)
+                        .foregroundColor(SharedColors.textMuted)
+                    HStack(spacing: 8) {
+                        ForEach(1..<5, id: \.self) { slot in
+                            Button { teamSlot = slot } label: {
+                                Text("E\(slot)")
+                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                    .foregroundColor(teamSlot == slot ? SharedColors.background : (team.partij(slot).hasEntry ? SharedColors.textMuted : SharedColors.accent))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 9)
+                                    .background(teamSlot == slot ? SharedColors.accent : Color.white.opacity(0.06))
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    Text("WIE IS ONZE SPELER?")
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .tracking(1)
+                        .foregroundColor(SharedColors.textMuted)
+                    HStack(spacing: 8) {
+                        ownChoice(name1, isPlayer1: true, color: SharedColors.accent)
+                        ownChoice(name2, isPlayer1: false, color: SharedColors.steelBlue)
+                    }
+                    Text("Het resultaat komt na afloop vanzelf in de partij en, als de teamwedstrijd live is, gaat de stand mee naar de teampagina.")
+                        .font(.system(size: 11))
+                        .foregroundColor(SharedColors.textMuted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(14)
+            .background(Color.white.opacity(0.04))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+    }
+
+    private func ownChoice(_ name: String, isPlayer1: Bool, color: Color) -> some View {
+        let selected = teamOwnIsPlayer1 == isPlayer1
+        return Button { teamOwnIsPlayer1 = isPlayer1 } label: {
+            Text(name)
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundColor(selected ? SharedColors.background : color)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(selected ? color : color.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// The first partij without games (E1 when all are filled)
+    private func freeSlot(_ team: TeamMatch) -> Int {
+        for slot in 1..<5 where !team.partij(slot).hasEntry { return slot }
+        return 1
+    }
+
+    /// Turning it on picks the nearest team match and a free partij; our player is the one in "In mijn team"
+    private func turnTeamOn(_ on: Bool) {
+        inTeam = on
+        guard on, let first = teamCandidates.first else { return }
+        let team = chosenTeam ?? first
+        pickedTeam = team.id
+        teamSlot = freeSlot(team)
+        var ours1 = false
+        var ours2 = false
+        if let pick = player1Pick { ours1 = TeamRoster.contains(pick.id, in: rosterRaw) }
+        if let pick = player2Pick { ours2 = TeamRoster.contains(pick.id, in: rosterRaw) }
+        teamOwnIsPlayer1 = !(ours2 && !ours1)
+    }
+
     private func start() {
         let late = headStartIsValid
+        let team = chosenTeam
         onStart(MatchSetupChoice(
             player1Name: name1, player2Name: name2,
             player1Id: pickedId(player1Pick, currentName: player1Name), player2Id: pickedId(player2Pick, currentName: player2Name),
             startingServer: server,
             player1GamesBefore: late ? gamesBefore1 : 0, player2GamesBefore: late ? gamesBefore2 : 0,
-            player1Focus: focus(player1Pick, currentName: player1Name), player2Focus: focus(player2Pick, currentName: player2Name)
+            player1Focus: focus(player1Pick, currentName: player1Name), player2Focus: focus(player2Pick, currentName: player2Name),
+            teamMatch: team, teamSlot: teamSlot, teamOwnIsPlayer1: teamOwnIsPlayer1
         ))
     }
 

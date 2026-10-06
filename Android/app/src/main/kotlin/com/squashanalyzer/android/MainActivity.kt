@@ -178,6 +178,12 @@ class MainActivity : AppCompatActivity() {
         if (intent?.action != Intent.ACTION_VIEW) return
         val link = intent.dataString ?: return
         lifecycleScope.launch {
+            // An invitation to a live team match is checked first: it is small and no card
+            val invite = withContext(Dispatchers.Default) { CardInbox.invite(from = link) }
+            if (invite != null) {
+                cardInbox.acceptTeam(invite)
+                return@launch
+            }
             val snapshot = withContext(Dispatchers.Default) { CardInbox.snapshot(from = link) }
             if (snapshot != null) cardInbox.accept(snapshot)
         }

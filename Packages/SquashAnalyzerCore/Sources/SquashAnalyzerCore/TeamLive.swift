@@ -73,10 +73,10 @@ public struct TeamLivePartij: Codable, Equatable, Sendable {
 public struct TeamLiveHeader: Codable, Equatable, Sendable {
     public var home: String
     public var away: String
-    /// Milliseconds since 1970
-    public var date: Double
+    /// Milliseconds since 1970 (an Int64: a Double is written as 1.79E12 on Android)
+    public var date: Int64
 
-    public init(home: String, away: String, date: Double) {
+    public init(home: String, away: String, date: Int64) {
         self.home = home
         self.away = away
         self.date = date
@@ -137,13 +137,30 @@ public struct TeamInvite: Equatable, Sendable {
         return TeamInvite(id: id, key: key)
     }
 
-    /// A pasted link, a link inside a message, `squashanalyzer://team#code`, or the bare code
+    /// A pasted link, a link inside a message, `squashanalyzer://team#code`, or the bare code.
+    /// Words and the part after the last "#" are cut by hand: Skip has no CharacterSet splitting.
     public static func parse(_ text: String) -> TeamInvite? {
-        let words = text.components(separatedBy: CharacterSet.whitespacesAndNewlines)
-        for word in words where !word.isEmpty {
-            var candidate = word
-            if let hash = word.lastIndex(of: "#") {
-                candidate = String(word[word.index(after: hash)...])
+        var words: [String] = []
+        var word = ""
+        for character in text {
+            if character == " " || character == "\n" || character == "\t" || character == "\r" {
+                if !word.isEmpty {
+                    words.append(word)
+                    word = ""
+                }
+            } else {
+                word += String(character)
+            }
+        }
+        if !word.isEmpty { words.append(word) }
+        for item in words {
+            var candidate = ""
+            for character in item {
+                if character == "#" {
+                    candidate = ""
+                } else {
+                    candidate += String(character)
+                }
             }
             if let invite = fromCode(candidate) { return invite }
         }
@@ -230,7 +247,7 @@ public extension TeamMatch {
 
     /// A local copy of a live team match someone invited us to
     static func joining(_ state: TeamLiveState, invite: TeamInvite, ownSide: TeamSide) -> TeamMatch {
-        var match = TeamMatch(date: Date(timeIntervalSince1970: state.team.date / 1000.0), home: state.team.home,
+        var match = TeamMatch(date: Date(timeIntervalSince1970: Double(state.team.date) / 1000.0), home: state.team.home,
                               away: state.team.away, ownSide: ownSide, liveId: invite.id, liveKey: invite.key)
         _ = match.mergeLive(state)
         return match
@@ -332,7 +349,7 @@ public final class TeamLive {
     public func create(_ match: TeamMatch) async throws -> TeamLiveCreated {
         guard let transport = activeTransport else { throw TeamLiveError.noTransport }
         guard let url = URL(string: "\(baseURL)/api/team") else { throw TeamLiveError.noConnection }
-        let header = TeamLiveHeader(home: match.home, away: match.away, date: match.date.timeIntervalSince1970 * 1000.0)
+        let header = TeamLiveHeader(home: match.home, away: match.away, date: Int64(match.date.timeIntervalSince1970 * 1000.0))
         let body = try JSONEncoder().encode(header)
         let response: AITransportResponse
         do {

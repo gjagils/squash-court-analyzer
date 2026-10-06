@@ -417,6 +417,15 @@ public struct AndroidHomeView: View {
                 }
             }
         }
+        .sheet(isPresented: Binding(get: { cardInbox.pendingTeam != nil }, set: { if !$0 { cardInbox.pendingTeam = nil } })) {
+            // A link to a live team match was opened: join it
+            if let invite = cardInbox.pendingTeam, let teamMatchStore {
+                SharedTeamJoinView(store: teamMatchStore, team: TeamMatchSupport.cachedTeam(), initialCode: invite.code) { _ in
+                    cardInbox.pendingTeam = nil
+                    showingCompetition = true
+                } onCancel: { cardInbox.pendingTeam = nil }
+            }
+        }
         .sheet(isPresented: Binding(get: { analysedMatch != nil }, set: { if !$0 { analysedMatch = nil } })) {
             if let match = analysedMatch {
                 SharedCoachDashboardView(match: match, game: match.games.last ?? match.currentGame, aiCoach: aiCoach,

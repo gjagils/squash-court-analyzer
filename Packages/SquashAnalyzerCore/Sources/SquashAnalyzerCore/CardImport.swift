@@ -67,6 +67,8 @@ public protocol CardImportStore: Sendable {
 @Observable
 public final class CardInbox {
     public var pending: CardSnapshot?
+    /// An invitation to a live team match (`squashanalyzer.com/team/#code`)
+    public var pendingTeam: TeamInvite?
     /// Goes up after every finished import, so open screens can reload
     public private(set) var importCount = 0
 
@@ -83,9 +85,23 @@ public final class CardInbox {
     /// for anything that is not a readable card link.
     @discardableResult
     public func receive(_ link: String) -> Bool {
+        if let invite = CardInbox.invite(from: link) {
+            pendingTeam = invite
+            return true
+        }
         guard let snapshot = CardInbox.snapshot(from: link) else { return false }
         pending = snapshot
         return true
+    }
+
+    /// A team invitation in a link (not a card link), without touching the inbox
+    public static func invite(from link: String) -> TeamInvite? {
+        if !link.contains("/team") && !link.hasPrefix("squashanalyzer://team") { return nil }
+        return TeamInvite.parse(link)
+    }
+
+    public func acceptTeam(_ invite: TeamInvite) {
+        pendingTeam = invite
     }
 
     /// Decodes a link without touching the inbox, so Android can do it off the

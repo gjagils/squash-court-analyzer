@@ -1,7 +1,12 @@
 # Plan: live meekijken per teamwedstrijd
 
 Stand 5 oktober 2026, op Gerd-Jans vraag "wat heb je nodig voor live
-teamwedstrijden?". Alleen een plan, niets gebouwd. Het sluit aan op
+teamwedstrijden?". **Gebouwd op 6 oktober 2026** (beslissingen: per partij ook
+punt voor punt, voornamen van de tegenstander naar de server, standaardnaam
+teamnaam plus positie, wissen 2 uur na de laatste update, meteen elke
+telefoon via een gedeelde teamsleutel). Getest met iOS-simulator en
+Android-emulator tegen live.squashanalyzer.com. De tekst hieronder is het
+oorspronkelijke plan. Het sluit aan op
 Competitie (`TeamMatch`, vier partijen E1 tot en met E4) en op live meekijken
 (`LiveShare`, de Cloudflare-Worker `server/live-worker`).
 

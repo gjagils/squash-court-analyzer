@@ -29,10 +29,8 @@ badgeregels, kosten) is niet zonder Gerd-Jan doorgevoerd.
       Google Fonts is van de hele website af (lettertype zelf gehost); de Worker kan sessies
       in de EU bewaren (`LIVE_JURISDICTION`, zie hieronder). **Nog te doen door Gerd-Jan:**
       het App Store-privacylabel in App Store Connect gelijktrekken vóór build 19.
-- [~] **B5 EU-opslag**: de code staat klaar maar de instelling staat uit
-      (`LIVE_JURISDICTION = ""` in `server/live-worker/wrangler.toml`): inschakelen
-      (`"eu"`) maakt lopende sessies onvindbaar; doe het als `/health` `"sessions": 0`
-      zegt. Daarna de privacytekst aanvullen met "alleen in de EU opgeslagen".
+- [x] **B5 EU-opslag**: `LIVE_JURISDICTION = "eu"` staat aan sinds 6 oktober (eigen commit, de
+      ene lopende sessie was van Gerd-Jan zelf). Privacytekst aangevuld.
 - [x] **B19** Website: Android-keuze op `team/` en `kaart/`, aanmeldanker op de testpagina;
       "wekelijks", de treden en Mijn team waren al gecorrigeerd (Codex); handleiding
       beschrijft build 19 als vooruitblik. Gepubliceerd.

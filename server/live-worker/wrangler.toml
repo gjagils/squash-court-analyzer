@@ -19,9 +19,9 @@ MAX_VIEWERS_PER_SESSION = "200"
 # Where the wedstrijd data is stored: "eu" keeps the objects in the European
 # Union (Cloudflare jurisdiction). Empty = no restriction (also in the local
 # tests: workerd has no jurisdictions). Changing it makes running sessions
-# unfindable (they last two hours at most): switch it when /health shows
-# "sessions": 0.
-LIVE_JURISDICTION = ""
+# unfindable (they last two hours at most). Switched on 6 October 2026, with
+# the one running session (Gerd-Jan's own) given up.
+LIVE_JURISDICTION = "eu"
 
 # The viewer page and the logo; the Worker runs first and fills the page in
 [assets]

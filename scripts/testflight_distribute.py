@@ -13,6 +13,7 @@ import os
 import re
 import sys
 import time
+import urllib.error
 
 sys.path.insert(0, os.path.dirname(__file__))
 import asc_api as asc  # noqa: E402
@@ -73,7 +74,14 @@ def main():
 
     deadline = time.time() + args.timeout_minutes * 60
     while True:
-        build = find_build(args.version, args.build)
+        try:
+            build = find_build(args.version, args.build)
+        except Exception as error:  # a network hiccup must not end the wait
+            print(time.strftime("%H:%M:%S"), f"kon de build niet opvragen ({error}); ik blijf proberen", flush=True)
+            if time.time() > deadline:
+                sys.exit("Timed out waiting for processing")
+            time.sleep(60)
+            continue
         state = build["attributes"]["processingState"] if build else "NOT_VISIBLE_YET"
         print(time.strftime("%H:%M:%S"), f"{args.version} ({args.build})", state, flush=True)
         if state == "VALID":
@@ -84,30 +92,42 @@ def main():
             sys.exit("Timed out waiting for processing")
         time.sleep(120)
 
-    build_id = build["id"]
+    # The build is in App Store Connect now. What follows (notes, group, review,
+    # expiring old builds) can be repeated: when it breaks halfway, run the same
+    # command again and what is done is not done twice.
+    restart = "scripts/testflight_distribute.py" + (f" --notes {args.notes}" if args.notes else "")
+    try:
+        build_id = build["id"]
 
-    if args.notes:
-        set_test_notes(build_id, open(args.notes, encoding="utf-8").read().strip())
+        if args.notes:
+            set_test_notes(build_id, open(args.notes, encoding="utf-8").read().strip())
 
-    # Internal groups receive every build automatically and refuse explicit assignment.
-    groups = asc.get(f"/v1/apps/{APP_ID}/betaGroups", {"fields[betaGroups]": "name,isInternalGroup"})["data"]
-    wanted = [g for g in groups if g["attributes"]["name"] in args.groups and not g["attributes"]["isInternalGroup"]]
-    if not wanted:
-        sys.exit(f"No external beta groups named {args.groups}")
-    asc.post(f"/v1/builds/{build_id}/relationships/betaGroups",
-             {"data": [{"type": "betaGroups", "id": g["id"]} for g in wanted]})
-    for g in wanted:
-        print("  added to external group", g["attributes"]["name"])
+        # Internal groups receive every build automatically and refuse explicit assignment.
+        groups = asc.get(f"/v1/apps/{APP_ID}/betaGroups", {"fields[betaGroups]": "name,isInternalGroup"})["data"]
+        wanted = [g for g in groups if g["attributes"]["name"] in args.groups and not g["attributes"]["isInternalGroup"]]
+        if not wanted:
+            sys.exit(f"No external beta groups named {args.groups}")
+        asc.post(f"/v1/builds/{build_id}/relationships/betaGroups",
+                 {"data": [{"type": "betaGroups", "id": g["id"]} for g in wanted]})
+        for g in wanted:
+            print("  added to external group", g["attributes"]["name"])
 
-    if not args.no_review:
-        sub = asc.post("/v1/betaAppReviewSubmissions", {"data": {
-            "type": "betaAppReviewSubmissions",
-            "relationships": {"build": {"data": {"type": "builds", "id": build_id}}},
-        }})
-        print("  beta review:", sub["data"]["attributes"]["betaReviewState"])
-    # Older builds go; the previous approved one stays until this one passes review
-    if not args.keep_old:
-        expire_old()
+        if not args.no_review:
+            sub = asc.post("/v1/betaAppReviewSubmissions", {"data": {
+                "type": "betaAppReviewSubmissions",
+                "relationships": {"build": {"data": {"type": "builds", "id": build_id}}},
+            }})
+            print("  beta review:", sub["data"]["attributes"]["betaReviewState"])
+        # Older builds go; the previous approved one stays until this one passes review
+        if not args.keep_old:
+            expire_old()
+    except urllib.error.HTTPError as error:
+        if error.code == 409 and "betaAppReviewSubmissions" in str(error.url):
+            print("  beta review was already submitted")
+        else:
+            sys.exit(f"Gestopt na het uploaden ({error}). De build staat in TestFlight; draai opnieuw: {restart}")
+    except (urllib.error.URLError, TimeoutError, ConnectionError) as error:
+        sys.exit(f"Gestopt na het uploaden ({error}). De build staat in TestFlight; draai opnieuw: {restart}")
     print("Done.")
 
 

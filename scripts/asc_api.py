@@ -19,6 +19,7 @@ KEY_PATH = os.path.expanduser(
     os.environ.get("ASC_KEY_PATH", f"~/.appstoreconnect/private_keys/AuthKey_{KEY_ID}.p8")
 )
 BASE_URL = "https://api.appstoreconnect.apple.com"
+TIMEOUT_SECONDS = 60
 
 
 def _b64url(data: bytes) -> str:
@@ -81,14 +82,28 @@ def request(method: str, path: str, body=None, params=None, headers=None, raw=Fa
     if headers:
         hdrs.update(headers)
     req = urllib.request.Request(url, data=data, method=method, headers=hdrs)
-    try:
-        with urllib.request.urlopen(req) as resp:
-            content = resp.read()
-            return json.loads(content) if content and not raw else None
-    except urllib.error.HTTPError as e:
-        detail = e.read().decode(errors="replace")
-        print(f"HTTP {e.code} {method} {url}\n{detail[:1500]}", file=sys.stderr)
-        raise
+    # A connection that hangs must not block a release for ever (timeout), and a
+    # read that fails on the network is tried again; only GET is repeated
+    # automatically, a write is not (it may have gone through)
+    attempts = 4 if method == "GET" else 1
+    for attempt in range(1, attempts + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
+                content = resp.read()
+                return json.loads(content) if content and not raw else None
+        except urllib.error.HTTPError as e:
+            if e.code >= 500 and attempt < attempts:
+                time.sleep(2 * attempt)
+                continue
+            detail = e.read().decode(errors="replace")
+            print(f"HTTP {e.code} {method} {url}\n{detail[:1500]}", file=sys.stderr)
+            raise
+        except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+            if attempt < attempts:
+                print(f"Netwerkfout ({e}); opnieuw proberen ({attempt}/{attempts - 1})", file=sys.stderr)
+                time.sleep(2 * attempt)
+                continue
+            raise
 
 
 def get(path, params=None):

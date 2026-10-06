@@ -127,7 +127,7 @@ def upload(token: str, aab: str, notes: str, name: str, tracks: list) -> None:
                 "name": name or str(code),
                 "versionCodes": [str(code)],
                 "status": "completed",
-                "releaseNotes": [{"language": "nl-NL", "text": notes[:500]}],
+                "releaseNotes": [{"language": "nl-NL", "text": notes}],
             }],
         })
     call(token, "POST", f"{API}/edits/{edit_id}:commit")
@@ -151,6 +151,9 @@ def main() -> None:
         sys.exit("--notes is nodig")
     with open(args.notes) as handle:
         notes = handle.read().strip()
+    # Google Play allows 500 characters: shorten the file, never cut it silently
+    if len(notes) > 500:
+        sys.exit(f"De releasenotes zijn {len(notes)} tekens; Google Play staat er 500 toe. Kort {args.notes} in.")
     version, build = versions.read_ios()
     name = args.name or versions.android_name(version, build)
     print("Release:", name, "(versionCode", versions.android_code(version, build), "in de app)")

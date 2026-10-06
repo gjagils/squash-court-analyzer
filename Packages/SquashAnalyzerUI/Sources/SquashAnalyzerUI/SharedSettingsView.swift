@@ -358,7 +358,12 @@ public struct SharedSettingsView: View {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "nl_NL")
         formatter.dateFormat = "d MMMM yyyy HH:mm"
-        return "Back-up van \(formatter.string(from: backup.backupDate)): \(backup.players.count) spelers en \(backup.matches.count + backup.standaloneGames.count) wedstrijden. Samenvoegen voegt toe wat er nog niet is; Alles vervangen wist eerst je spelers, coachwedstrijden en badges op dit toestel."
+        var contents = "\(backup.players.count) spelers en \(backup.matches.count + backup.standaloneGames.count) wedstrijden"
+        let referee = backup.refereeMatches?.count ?? 0
+        let team = backup.teamMatches?.count ?? 0
+        if referee > 0 { contents += ", \(referee) scheidsrechterwedstrijden" }
+        if team > 0 { contents += ", \(team) teamwedstrijden" }
+        return "Back-up van \(formatter.string(from: backup.backupDate)): \(contents). Samenvoegen voegt toe wat er nog niet is; Alles vervangen wist eerst je spelers, wedstrijden en badges op dit toestel, ook de scheidsrechter- en teamwedstrijden als de back-up die bevat."
     }
 
     private func showBackup(_ text: String, error: Bool) {

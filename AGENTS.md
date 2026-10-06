@@ -37,6 +37,13 @@ commit-uitleg zijn Nederlands, code en commentaar Engels zoals het er al staat.
   upload naar testers, `build 4.1` per interne uitlevering; alleen aanpassen
   met `scripts/version.py` (uitleg in `docs/opleveren-en-hosting.md`). In
   productie staat iOS 2.0; de testperiode loopt tot 3.0.
+- **Branches opruimen**: push gemergd werk direct naar `main` (`git push origin
+  HEAD:main`) en laat geen remote werkbranch staan; is een branch na een
+  commit leeg (alles in `main`), verwijder hem dan (`git push origin --delete
+  <branch>`, lokaal `git branch -d`; een branch die in een worktree is
+  uitgecheckt kan pas weg als die sessie klaar is). Verwijder nooit een branch
+  met commits die niet in `main` staan, en raak worktrees van andere sessies
+  en de uncommitted wijzigingen in de hoofdcheckout niet aan.
 - Houd de live-server-API achterwaarts compatibel met de builds van testers.
 - Geheimen (App Store Connect-, Play- en Cloudflare-sleutels) staan buiten de
   repo; zie `docs/opleveren-en-hosting.md`.

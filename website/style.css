@@ -553,6 +553,17 @@ footer {
 a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
 
+/* Icon font: the 21 Material Symbols (Outlined, filled) the pages use, served from
+   this site (Apache 2.0, from Google Fonts) so that no page calls a third party.
+   Add a name to the pages, then rebuild this subset (see fonts/README.md). */
+@font-face {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url(fonts/material-symbols.woff2) format("woff2");
+}
+
 /* ── Iconen: dezelfde Material-iconen als de app, in het accent ── */
 .ms {
   font-family: "Material Symbols Outlined";

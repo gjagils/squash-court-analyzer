@@ -1,4 +1,4 @@
-# Cloudflare Pages headers (ignored by nginx on the NAS). The deep-link files
+# Cloudflare Pages headers (the old nginx on the NAS ignored them; it is reserve only). The deep-link files
 # have no extension or must be JSON on both hosts; the badge and handleiding
 # images may be cached; the team zips stay out of search engines.
 /.well-known/apple-app-site-association

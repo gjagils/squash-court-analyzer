@@ -3,9 +3,9 @@
 # squashanalyzer-site): on a push to main that touches website/, upload the
 # folder with wrangler. Needs the repository secrets CLOUDFLARE_API_TOKEN
 # ("Edit Cloudflare Workers") and CLOUDFLARE_ACCOUNT_ID. Only active once
-# WEBSITE_ON_PAGES is set (see docs/live-beta-afronden-instructie.md, step 9);
-# until then the NAS serves the site and this workflow only runs when started
-# by hand. Note: website/screenshots/ and website/teams/ are outside git and
+# WEBSITE_ON_PAGES is set; it is left off on purpose (the site is published by
+# hand from the Mac, see docs/opleveren-en-hosting.md) and only runs when
+# started by hand. Note: website/screenshots/ and website/teams/ are outside git and
 # do not come along in this upload; deploy from the Mac for those.
 name: Website (Cloudflare)
 

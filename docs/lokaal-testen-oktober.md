@@ -190,7 +190,7 @@ iOS-simulator en de Android-emulator).
 
 - **Migratie op echte data** (build 16 op de iPhone, 0.3 op de A13): niet
   gedaan, want niets op echte toestellen. In de tests werken V6→V7 en Room 8→9.
-- ~~Domein live-server~~ **staat live sinds 3 oktober**: Portainer-stack
+- ~~Domein live-server~~ *(sinds 5 oktober draait dit op Cloudflare, zie `docs/opleveren-en-hosting.md`)* **staat live sinds 3 oktober**: Portainer-stack
   `squash-live` (id 109, NAS, poort 3002, branch `main`)
   achter de Cloudflare Tunnel (`live.squashanalyzer.com` →
   `http://192.168.68.120:3002`). Getest: `/health`, aanmaken, live-updates via

@@ -1,3 +1,9 @@
+> **Afgerond en achterhaald (6 oktober 2026).** Alles hieronder is uitgevoerd.
+> Het besluit is anders uitgepakt dan deze instructie: de schakelaar Alfa/Beta
+> is uit de app gehaald, `live.squashanalyzer.com` en de website draaien op
+> Cloudflare en de NAS is alleen reserve. Lees `docs/opleveren-en-hosting.md`
+> voor de huidige stand; dit bestand blijft als geschiedenis.
+
 # Instructie voor Claude Code op de Mac: live meekijken op Cloudflare afronden
 
 Kopieer alles onder de lijn in Claude Code in de lokale checkout

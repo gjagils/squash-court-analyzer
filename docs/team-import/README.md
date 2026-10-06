@@ -42,7 +42,7 @@ Er is geen uploadformulier. Gerd-Jan zet teams online, op verzoek van een captai
 1. **Toestemming**: de captain bevestigt dat alle spelers in het team akkoord zijn met naam en foto op de site.
 2. **Inhoud nakijken**: alleen `name`, `photo` en eventueel `focus`. **Haal `notes` weg** (coachingnotities horen niet online). Controleer dat de zip in de app importeert.
 3. **Code maken**: een lange willekeurige mapnaam, bijvoorbeeld `openssl rand -hex 12`. Zet de zip in `website/teams/<code>/team.zip`. Die map staat in `.gitignore`: teambestanden met namen en foto's gaan **nooit** in git (de repo is openbaar).
-4. **Online zetten**: upload `teams/<code>/team.zip` via Portainer, zoals de rest van de website. `robots.txt` houdt `/teams/` uit zoekmachines; nginx toont geen maplijst.
+4. **Online zetten**: zet `teams/<code>/team.zip` in `website/teams/` (staat buiten git) en publiceer de website met `npx wrangler deploy -c server/website-worker/wrangler.jsonc` vanaf de Mac (sinds 5 oktober 2026 draait de site op Cloudflare, niet meer op de NAS; zie `docs/opleveren-en-hosting.md`). `robots.txt` en de header `X-Robots-Tag: noindex` houden `/teams/` uit zoekmachines; er is geen maplijst.
 5. **Link delen** met de captain: `https://squashanalyzer.com/teams/<code>/team.zip`.
 6. **Verwijderen of bijwerken** op verzoek: vervang of verwijder het bestand op de server, binnen een maand. Een speler weghalen = nieuwe zip zonder die speler.
 

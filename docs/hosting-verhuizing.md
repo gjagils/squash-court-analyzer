@@ -1,5 +1,11 @@
 # Website en live-server naar een externe host
 
+> **Samenvatting (6 oktober 2026):** klaar. Website en live-server draaien op
+> Cloudflare (Workers); de NAS-stacks 85 en 109 staan alleen nog als reserve.
+> Wat dat betekent voor uitrollen en opleveren staat in
+> `docs/opleveren-en-hosting.md`. De rest van dit bestand is de
+> geschiedenis van de verkenning en de omzetting.
+
 Verkenning van 5 oktober 2026. Vraag: kunnen de website en de live-server van
 de NAS (Portainer, Cloudflare Tunnel) naar een externe host, en welke?
 

@@ -2323,7 +2323,10 @@ Kotlin-fout. Nieuwe eigenaardigheden:
     (zelfde als 9): de strip "Badges verdiend" toonde "Bombardino · 5" bij
     vijf medaillons. `.minimumScaleFactor(0.7)` op de tekst lost het op.
 
-### Live-server Alfa/Beta (2026-10-05)
+### Live-server Alfa/Beta (2026-10-05; sinds dezelfde avond weer weggehaald)
+
+*Achterhaald: de schakelaar is uit de app gehaald, de app gebruikt alleen
+`live.squashanalyzer.com` (Cloudflare). Zie `docs/opleveren-en-hosting.md`.*
 
 Nieuw in Core: `LiveServer` (enum, `storageKey`, `baseURL`, `host`, `stored`)
 in `LiveShare.swift`; `LiveShare.baseURL` is een berekende property en

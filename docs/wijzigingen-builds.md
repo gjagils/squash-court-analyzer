@@ -57,6 +57,11 @@ pagina, punt voor punt vanuit een gekoppelde coachwedstrijd). Worker 21,
 Core 201 (Skip), Android 66 en iOS-tests groen. De NAS-server heeft geen
 teamendpoints (alleen reserve).
 
+Bugfix binnen dezelfde feature (6 oktober): een bijgehouden wedstrijd voor
+een partij raakte de koppeling kwijt als je hem verliet en later hervatte;
+die staat nu in de teamwedstrijd (`trackingMatchId`) en komt terug bij
+Hervatten. Geen aparte releasenote nodig (de feature is nieuw).
+
 Back-up: formaat 4 alleen als er teamdata is (testers met build 17 of 18 kunnen
 zo'n bestand niet terugzetten, zoals bij formaat 3). De teamvlag is een lijst
 ids in de instellingen (`TeamRoster`), geen SwiftData- of Room-kolom.

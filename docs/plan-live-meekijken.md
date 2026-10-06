@@ -1,3 +1,7 @@
+> **Oorspronkelijk plan (Docker op de NAS).** Sinds 5 oktober 2026 draait
+> live meekijken als Cloudflare Worker (`server/live-worker`); de Node-server
+> `server/live` is alleen reserve. Zie `docs/opleveren-en-hosting.md`.
+
 # Bouwplan: Live meekijken
 
 Status: **gebouwd** (3 oktober 2026, branch `claude/tender-rubin-yw2rzz`), nog lokaal te testen: zie `docs/lokaal-testen-oktober.md`.

@@ -4,7 +4,9 @@
 ([`server/live-worker`](../live-worker/README.md), zelfde API en kijkpagina);
 `live.squashanalyzer.com` wijst daarheen. Deze Node-versie draait nog op de
 NAS (Portainer-stack 109) als reserve, maar is van buiten niet meer
-bereikbaar zolang het tunnel-record `live` ontbreekt.
+bereikbaar zolang het tunnel-record `live` ontbreekt. **Deze versie kent de
+teamendpoints (`/api/team…`, `/t/<id>`) niet**: live teamwedstrijden werken
+alleen op de Worker. Zie `docs/opleveren-en-hosting.md`.
 
 Kleine server voor **live meekijken** (zie `docs/plan-live-meekijken.md`). De
 coach of scheidsrechter tikt in de app op **Live delen** en deelt de link in de

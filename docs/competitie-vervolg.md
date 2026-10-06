@@ -40,10 +40,25 @@ begint hier, vinkt af wat klaar is en commit per punt.
   back-up accepteren, live per telefoon, en bij een nieuwe wedstrijd vanuit
   een partij is de thuisspeler Speler 1.
 
+## Gebouwd op 6 oktober
+
+- [x] **Live teamwedstrijd** (kijkerslink, uitnodiging met link of code,
+      iedere telefoon zet zijn eigen partij erop, punt voor punt vanuit een
+      gekoppelde coach- of scheidsrechterwedstrijd, standaardnamen
+      "Teamnaam E1", wissen na 2 uur). Keuzes en uitwerking:
+      `docs/plan-live-teamwedstrijd.md`.
+- [x] **Setup-optie "Onderdeel van een teamwedstrijd"** bij Coach en
+      Scheidsrechter (partij kiezen en wie onze speler is).
+- [x] **Een lopende gekoppelde wedstrijd blijft gekoppeld na verlaten en
+      hervatten** (Gerd-Jan vond dit): `TeamPartij.trackingMatchId` en
+      `trackingOwnIsPlayer1` bewaren de koppeling en de gebruikte namen in de
+      teamwedstrijd; `TeamMatchSupport.track` zet ze bij het starten,
+      `TeamMatchSupport.target(forMatchId:)` haalt ze terug bij Hervatten.
+      Getest op de simulator (starten, Stop met bewaren, app herstarten,
+      hervatten, punt: de livepagina liep door).
+
 ## Nog open
 
-- Live per teamwedstrijd: wacht op Gerd-Jans keuzes in
-  `docs/plan-live-teamwedstrijd.md`.
-- Op een echte telefoon proberen (iPhone staat er na de volgende
-  installatie op; Android-telefoon nog niet aangesloten).
+- Op een echte telefoon proberen (iPhone en A13 hebben de debug-build van
+  6 oktober; Gerd-Jan heeft het nog niet geprobeerd).
 - Upload van build 19 naar TestFlight en Play: alleen als Gerd-Jan het zegt.

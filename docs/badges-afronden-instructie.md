@@ -147,7 +147,7 @@ als die verouderd is.
   zonder `--dry-run`.
 - `website/appstore-metadata.md`: dezelfde zin in de App Store-beschrijving,
   als die badges noemt.
-- Publiceer de website zoals gebruikelijk (Portainer, stack 85) en open
+- Publiceer de website (sinds 5 oktober 2026 met `npx wrangler deploy -c server/website-worker/wrangler.jsonc` vanaf de Mac, niet meer via Portainer; zie `docs/opleveren-en-hosting.md`) en open
   squashanalyzer.com/badges en /testen.
 
 ## 8. Bouwen en uploaden

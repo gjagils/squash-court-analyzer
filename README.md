@@ -21,6 +21,9 @@ Baanindeling). Per vak kies je alleen de slagen die daar passen, met een
 schakelaar "Uit de lucht" voor volleys; nieuw is de slag Kill.
 
 - [Visuele stijl en stijlkaart](docs/style/README.md)
+- [Werkafspraken voor agents](AGENTS.md)
+- [Opleveren en hosting (Cloudflare, testen, uploaden)](docs/opleveren-en-hosting.md)
+- [Wijzigingen per build](docs/wijzigingen-builds.md)
 - [Architectuur](ARCHITECTURE.md)
 - [Android-status, bouwinstructies en resterende stappen](docs/android-port.md)
 - [Google Play: Android-app ondertekenen, uploaden en testen](docs/google-play.md)

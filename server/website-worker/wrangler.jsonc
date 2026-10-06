@@ -9,7 +9,9 @@
   "$schema": "https://unpkg.com/wrangler/config-schema.json",
   "name": "squashanalyzer-site",
   "compatibility_date": "2026-10-01",
-  "workers_dev": true,
+  // Only squashanalyzer.com and www: no second hostname for the same pages
+  // (and the team zips) on workers.dev
+  "workers_dev": false,
   "routes": [
     { "pattern": "squashanalyzer.com", "custom_domain": true },
     { "pattern": "www.squashanalyzer.com", "custom_domain": true }
@@ -17,6 +19,7 @@
   "assets": {
     "directory": "../../website",
     "html_handling": "auto-trailing-slash",
+    // website/404.html
     "not_found_handling": "404-page"
   }
 }

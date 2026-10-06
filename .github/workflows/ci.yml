@@ -22,8 +22,23 @@ jobs:
       - uses: actions/checkout@v4
       - run: scripts/lint.sh
 
+  worker:
+    name: Live-Worker (workerd)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/live-worker/package-lock.json
+      - run: npm ci
+        working-directory: server/live-worker
+      - run: npm test
+        working-directory: server/live-worker
+
   server:
-    name: Live-server
+    name: Live-server (Node, reserve)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

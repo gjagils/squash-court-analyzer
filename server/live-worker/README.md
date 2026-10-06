@@ -28,7 +28,12 @@ is reserve.
 - `TeamSession` (`src/team.js`) bewaart de teamnamen, vier partijen en de gedeelde
   schrijfsleutel in persistente Durable Object-opslag, zonder foto's. Een team-
   of partijupdate vernieuwt het alarm. De team-API ontbreekt in de NAS-reserve.
-  De gedeelde sleutel geeft schrijfrecht op alle partijen, niet alleen de eigen.
+  Twee sleutels: de **uitnodigingssleutel** (in de link of code) schrijft partijen, en
+  geeft schrijfrecht op alle partijen, niet alleen de eigen; de **eigenaarssleutel** blijft
+  op de telefoon die de pagina startte en is nodig om de pagina te stoppen (`DELETE`) of de
+  teamnamen te wijzigen (`PUT`). `GET /api/team/:id/verify` (Bearer) zegt of een sleutel werkt
+  en wat hij mag (`owner` of `writer`), zodat een verkeerd getypte code bij Deelnemen opvalt.
+  De Worker weigert een partij met meer games dan nodig om te winnen.
 - De limiter bewaart apart IP-adressen en tijdstippen. De sessietermijn van
   twee uur geldt niet voor die administratie; oude verzoeken worden bij
   volgende aanmaakverzoeken gefilterd, zonder afzonderlijk verwijderalarm.
@@ -71,7 +76,7 @@ npx wrangler deploy
 en certificaten zelf aan (de zone staat in hetzelfde account). Bestaat er al
 een ander record voor die naam (zoals het tunnel-record van de NAS), dan
 weigert de deploy met fout 100117: eerst dat record verwijderen. Controleer met
-`curl https://beta.squashanalyzer.com/health`; de eerste ~20 s na een deploy
+`curl https://live.squashanalyzer.com/health`; de eerste ~20 s na een deploy
 kan dat nog een 500 geven, daarna `{"ok":true,"sessions":0}`. Uitgerold op
 5 oktober 2026.
 
@@ -87,4 +92,8 @@ Gelijk aan de Node-versie (zie `server/live/README.md`): `POST /api/live`,
 
 Instellingen in `wrangler.toml` onder `[vars]`: `PUBLIC_URL`, `IDLE_MINUTES`
 (120), `MAX_SESSIONS` (200), `CREATES_PER_MINUTE` (10),
-`GLOBAL_CREATES_PER_MINUTE` (60), `MAX_VIEWERS_PER_SESSION` (200).
+`GLOBAL_CREATES_PER_MINUTE` (60), `MAX_VIEWERS_PER_SESSION` (200),
+`LIVE_JURISDICTION` (`eu` = de objecten staan alleen in de EU; leeg = geen
+beperking, ook in de lokale tests omdat workerd geen jurisdicties kent). Een
+wijziging maakt lopende sessies onvindbaar (ze duren hooguit twee uur): zet
+hem om als `/health` `"sessions": 0` zegt.

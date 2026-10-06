@@ -26,6 +26,16 @@ jobs:
     if: vars.WEBSITE_ON_PAGES == 'true' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
+      # An assets deploy replaces the whole site: without the folders that are
+      # outside git (screenshots, team zips) the live pages would lose them.
+      - name: Refuse without the folders that are outside git
+        run: |
+          for folder in website/screenshots website/teams; do
+            if [ ! -d "$folder" ]; then
+              echo "::error::$folder staat buiten git en ontbreekt: publiceer de website vanaf de Mac (docs/opleveren-en-hosting.md)"
+              exit 1
+            fi
+          done
       - uses: actions/setup-node@v4
         with:
           node-version: 22

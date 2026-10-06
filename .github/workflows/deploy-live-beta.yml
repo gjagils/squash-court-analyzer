@@ -1,4 +1,4 @@
-# Live meekijken op Cloudflare (server/live-worker, beta.squashanalyzer.com):
+# Live meekijken op Cloudflare (server/live-worker, live.squashanalyzer.com):
 # tests, and on main a deploy with wrangler. Needs the repository secrets
 # CLOUDFLARE_API_TOKEN (Edit Cloudflare Workers) and CLOUDFLARE_ACCOUNT_ID.
 name: Live beta (Cloudflare)
@@ -11,9 +11,11 @@ on:
     paths: ['server/live-worker/**', '.github/workflows/deploy-live-beta.yml']
   workflow_dispatch:
 
+# A deploy that is running is never cancelled by a newer push (it would be cut
+# off halfway); the next one waits its turn
 concurrency:
   group: live-beta-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   test:
@@ -33,7 +35,7 @@ jobs:
       - run: npm test
 
   deploy:
-    name: Deploy beta.squashanalyzer.com
+    name: Deploy live.squashanalyzer.com
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest

@@ -3,7 +3,7 @@
 Overzicht van de wijzigingen van 1 tot en met 6 oktober, op basis van de
 projectdocumentatie, releasenotes en Git-geschiedenis. Referentie:
 `main` en `origin/main` op `19fabb8`, na ophalen van de remote refs op
-6 oktober. De lokale checkout liep vier commits achter en is met een
+6 oktober (momentopname; zie de updates in de kop "Branches"). De lokale checkout liep vier commits achter en is met een
 fast-forward bijgewerkt. Dit is een documentatiereview, geen nieuwe
 functionele testronde of controle van de stores en productieomgeving.
 
@@ -77,32 +77,25 @@ teamwedstrijden. Deze review heeft de actuele deployment niet opnieuw getest.
 De datums en buildtoewijzingen uit de oude planning zijn niet allemaal
 actueel; zie de documentatiebevindingen hieronder.
 
-## Branches: er bestaat meer dan alleen main
+## Branches (bijgewerkt later op 6 oktober)
 
-De remote heeft drie branches, rechtstreeks gecontroleerd met
-`git ls-remote --heads origin`:
+Bij de review stonden er drie remote branches. Daarna is opgeruimd:
+`claude/live-beta-afronden-faf03f` was leeg (alles in main) en is
+verwijderd. `claude/great-pasteur-eyskxy` bevatte twee commits buiten main
+(`46a8607`: documentatie en conceptworkflow voor testbuilds vanuit de cloud
+via GitHub Actions; `9b55182`: Python-cache negeren). Gerd-Jan besloot de
+branch weg te gooien; de keuzes rond cloud-builds staan als open punt op de
+backlog in `wijzigingen-builds.md` en de `.gitignore`-regel staat op main.
+Op GitHub bestaat nu alleen `main`. Lokaal staan nog een paar lege branches
+die aan een worktree van een eerdere sessie hangen. De afspraken om dit
+schoon te houden staan in `AGENTS.md` ("Werken zonder elkaar in de weg te
+zitten").
 
-| Branch op origin | Commit | Verhouding tot main |
-| --- | --- | --- |
-| `main` | `19fabb8` | Centrale, actuele app-ontwikkeling |
-| `claude/live-beta-afronden-faf03f` | `19fabb8` | Exact dezelfde commit als main |
-| `claude/great-pasteur-eyskxy` | `9b55182` | Twee eigen commits buiten main; mist tegelijk tien commits van main |
-
-De twee nog niet samengevoegde commits zijn:
-
-- `46a8607`: documentatie en conceptworkflow voor testbuilds vanuit de
-  cloud via GitHub Actions, plus aanpassing van het TestFlight-script.
-- `9b55182`: Python-cache van scripts negeren in Git.
-
-De workflow staat dus **niet op main**; een werkende releasebouwstraat in
-de cloud is daarmee ook niet aangetoond. De branch bevat
-`docs/cloud-builds.md` naast de workflow en scriptwijzigingen.
-
-Lokaal bestaan zes branches: main en vijf Claude-branches. Alle lokale
-Claude-branchtips zitten al in main; de lokale `claude/great-pasteur-eyskxy`
-loopt achter op zijn remote tegenhanger. Enkele lokale branches zijn aan
-worktrees gekoppeld. Niets verwijderd of samengevoegd tijdens deze review,
-behalve de fast-forward van main naar de bestaande origin/main.
+Ook de versienummering is inmiddels vastgelegd: de volgende uploads zijn
+**3.0 build 1, 2, …**, intern `build N.M`
+(`opleveren-en-hosting.md#versienummers-besluit-gerd-jan-6-oktober-2026`).
+Waar dit document 2.2 (19) of Android 0.6 (6) noemt, is dat de situatie
+van vóór dat besluit.
 
 ## Documentatiebevindingen en afhandeling
 

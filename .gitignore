@@ -164,3 +164,13 @@ Android/.build/
 
 # wrangler cache (wrangler run from the repo root for the website)
 .wrangler/
+
+# Local counter for internal deliveries (scripts/version.py internal)
+.internal-build
+
+# Python cache (scripts/)
+__pycache__/
+
+# Build output and loose screenshots in the repo root (never commit)
+output/
+Squashanalyzerscreens/

@@ -8,7 +8,7 @@ by default play-api.json there, else the only *.json in that folder). It is only
 sent to Google's token endpoint; uploads use the short-lived access token.
 
     scripts/play_upload.py --check                      # can we reach the app?
-    scripts/play_upload.py --bump                       # versionCode + 1 in build.gradle.kts
+    scripts/version.py upload                           # version and build for the next upload (see there)
     scripts/play_upload.py --aab PATH --notes FILE      # upload, release to all test tracks
 
 The release goes to internal testing and both closed tests: "alpha" (the
@@ -36,7 +36,8 @@ API = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/
 UPLOAD_API = "https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications/" + PACKAGE
 TOKEN_URL = "https://oauth2.googleapis.com/token"
 SCOPE = "https://www.googleapis.com/auth/androidpublisher"
-GRADLE = os.path.join(os.path.dirname(__file__), "..", "Android", "app", "build.gradle.kts")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import version as versions  # noqa: E402  (scripts/version.py: the numbers of both apps)
 
 
 def key_path() -> str:
@@ -108,17 +109,6 @@ def check(token: str) -> None:
     print("Toegang tot", PACKAGE, "werkt.")
 
 
-def bump() -> int:
-    with open(GRADLE) as handle:
-        text = handle.read()
-    match = re.search(r"versionCode = (\d+)", text)
-    new = int(match.group(1)) + 1
-    with open(GRADLE, "w") as handle:
-        handle.write(text.replace(match.group(0), f"versionCode = {new}", 1))
-    print("versionCode", new)
-    return new
-
-
 TRACKS = ["internal", "alpha", "Google Group testers"]
 
 
@@ -147,16 +137,12 @@ def upload(token: str, aab: str, notes: str, name: str, tracks: list) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
-    parser.add_argument("--bump", action="store_true")
     parser.add_argument("--aab", default=os.path.join(os.path.dirname(__file__), "..", "Android", "app",
                                                       "build", "outputs", "bundle", "release", "app-release.aab"))
     parser.add_argument("--notes", help="file with the Dutch release notes (max 500 characters)")
-    parser.add_argument("--name", help="release name, e.g. 0.2 (2)")
+    parser.add_argument("--name", help="release name (default: versionName from build.gradle.kts, e.g. 3.1 (4))")
     parser.add_argument("--tracks", default=",".join(TRACKS), help="comma-separated tracks (default: all test tracks)")
     args = parser.parse_args()
-    if args.bump:
-        bump()
-        return
     token = access_token()
     if args.check:
         check(token)
@@ -165,7 +151,10 @@ def main() -> None:
         sys.exit("--notes is nodig")
     with open(args.notes) as handle:
         notes = handle.read().strip()
-    upload(token, args.aab, notes, args.name, [t.strip() for t in args.tracks.split(",") if t.strip()])
+    version, build = versions.read_ios()
+    name = args.name or versions.android_name(version, build)
+    print("Release:", name, "(versionCode", versions.android_code(version, build), "in de app)")
+    upload(token, args.aab, notes, name, [t.strip() for t in args.tracks.split(",") if t.strip()])
 
 
 if __name__ == "__main__":

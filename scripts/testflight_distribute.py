@@ -16,6 +16,7 @@ import time
 
 sys.path.insert(0, os.path.dirname(__file__))
 import asc_api as asc  # noqa: E402
+import version as versions  # noqa: E402
 from testflight_expire_old import expire_old  # noqa: E402
 
 APP_ID = "6758676921"
@@ -55,14 +56,20 @@ def set_test_notes(build_id, text, locale="nl-NL"):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--version", required=True, help="marketing version, e.g. 2.2")
-    ap.add_argument("--build", required=True, help="build number, e.g. 6")
+    ap.add_argument("--version", help="marketing version, e.g. 3.1 (default: from the project, scripts/version.py)")
+    ap.add_argument("--build", help="build number, e.g. 4 (default: from the project)")
     ap.add_argument("--notes", help="text file with the What to Test notes for testers")
     ap.add_argument("--groups", nargs="*", default=["Squashteam"])
     ap.add_argument("--no-review", action="store_true")
     ap.add_argument("--keep-old", action="store_true", help="do not expire older builds")
     ap.add_argument("--timeout-minutes", type=int, default=45)
     args = ap.parse_args()
+    if not (args.version and args.build):
+        project_version, project_build = versions.read_ios()
+        args.version = args.version or project_version
+        args.build = args.build or str(project_build)
+    if args.build in ("0",) or "." in args.build:
+        sys.exit(f"Build {args.build} is geen upload: gebruik scripts/version.py upload (build + 1), internal bouwen telt niet mee")
 
     deadline = time.time() + args.timeout_minutes * 60
     while True:

@@ -8,7 +8,12 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (nog niet geüpload)
+## Volgende build: 3.0 build 1 (nog niet geüpload)
+
+Nieuwe nummering sinds 6 oktober 2026 (`docs/opleveren-en-hosting.md`,
+"Versienummers"): 3.0 build 1 is de eerstvolgende upload op iOS en Android; in
+de projectbestanden staat nu 3.0 build 0. De release-notes heten
+`release-notes/3.0-1.md` en `release-notes/android-3.0-1.md`.
 
 Vergeleken met iOS 2.2 (18) en Android 0.5 (5), 5 oktober 2026. Planning van
 de builds in de testperiode (twee beoogde uploads, elk hooguit één feature):
@@ -193,6 +198,41 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       `squashLevelsProfileURL` per speler in `team.json` wordt meegenomen
       bij teamimport uit zip of via link. Uitwerking en acceptatiecriteria:
       [plan-squashlevels-profiel.md](plan-squashlevels-profiel.md).
+
+- [ ] **Testbuilds vanuit de cloud (GitHub Actions): keuzes die nog gemaakt
+      moeten worden.** Een cloudsessie kan geen Xcode draaien, GitHub wel (de
+      repo is publiek, dus de macOS-runners zijn gratis). Het idee uit een
+      cloudsessie van 5 oktober (verwijderde branch `claude/great-pasteur-eyskxy`,
+      commits `46a8607` en `9b55182`, besluit Gerd-Jan 6 oktober: niet
+      overnemen maar opnieuw kiezen, meteen op de nieuwe nummering): een
+      workflow met de hand starten die iOS archiveert en uploadt (App Store
+      Connect API-sleutel, `-allowProvisioningUpdates`) en Android bundelt en
+      uploadt (`play_upload.py`). Te kiezen:
+      1. **Wel of niet doen?** Winst: een testbuild zonder de Mac, vanuit de
+         cloud. Kosten: eenmalig ongeveer een uur secrets zetten in GitHub
+         (Apple Distribution-certificaat als .p12 met wachtwoord, API-sleutel
+         `AuthKey_…p8`, Android-keystore met twee wachtwoorden, Play-serviceaccount-
+         JSON) en het certificaat jaarlijks vernieuwen.
+      2. **Goedkeuring.** Een GitHub-omgeving `release` met jou als verplichte
+         reviewer maakt dat er niets wordt geüpload zonder jouw klik: dat
+         vervangt de afspraak "niets uploaden zonder dat Gerd-Jan het zegt"
+         (en dan zijn de secrets alleen na die klik beschikbaar).
+      3. **Volgorde.** Eerst alleen Android naar internal testing (minste
+         signing-risico), daarna iOS. Mogelijk alleen uploaden zonder groep en
+         zonder beta-review, zodat jij na een blik op een toestel zelf doorzet.
+      4. **Aansluiting op de nummering** (3.1 build 4, intern 4.1): de workflow
+         moet versie en build uit het project lezen via `scripts/version.py`
+         (niet met `grep`/`sed` op `versionCode`), nooit zelf een `upload`
+         doen (jij of de cloudsessie commit het nummer), nooit een interne
+         build uploaden, en de notities lezen uit
+         `release-notes/<versie>-<build>.md` en `android-<versie>-<build>.md`.
+         `testflight_distribute.py` kan al zonder `--version/--build`; nog te
+         doen is `--groups` zonder namen = alleen uploaden.
+      5. **Alternatieven:** Xcode Cloud (alleen iOS, 25 gratis uur per maand,
+         dan toch Actions voor Android), fastlane match (meer gereedschap dan
+         nodig voor één ontwikkelaar), of zo laten en vanaf de Mac uploaden.
+      6. **Beveiliging van `main`:** pull request verplicht en groene CI
+         voordat een build vertrekt (optioneel).
 
 - [x] **Wedstrijd koppelen aan een competitiewedstrijd** (gebouwd 5 oktober voor build 19, zie hierboven; live teamwedstrijden ook gebouwd op 6 oktober, SBN-vergelijking nog niet).
       Een SBN-teamwedstrijd = 4 partijen (E1–E4, singles, best of 5 tot 11).

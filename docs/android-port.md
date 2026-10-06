@@ -6,8 +6,8 @@ De port is in gebruik bij testers: **Android 0.5 (5)**, naast iOS 2.2 (18).
 Coach- en scheidsrechtermodus, opslag/hervatten, spelersfoto's, badges en
 kaartlinks, geschiedenis, analyse, delen, Mijn team, teamimport en wekelijkse
 back-ups zijn gebouwd. De schermen en domeinregels worden gedeeld via Skip.
-Competitie en live teamwedstrijden zijn op main gebouwd voor Android 0.6 (6)
-/ iOS build 19; die upload is nog niet uitgevoerd. Praktijktesten van live
+Competitie en live teamwedstrijden zijn op main gebouwd voor de eerstvolgende
+upload, **3.0 build 1** (iOS en Android); die upload is nog niet uitgevoerd. Praktijktesten van live
 teamwedstrijden op de twee telefoons staan nog open.
 
 Actuele werkinstructies: [opleveren en hosting](opleveren-en-hosting.md).

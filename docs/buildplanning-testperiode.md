@@ -1,10 +1,13 @@
 # Buildplanning testperiode — bijgewerkt 6 oktober 2026
 
 De externe test is op 5 oktober gestart met **iOS 2.2 (18)** en
-**Android 0.5 (5)**. De voorgenomen planning bevat twee testupdates, rond
+**Android 0.5 (5)**. Sinds 6 oktober geldt een nieuwe nummering: de volgende
+uploads zijn **3.0 build 1, 2, …** op iOS en Android (productie wordt 3.0, een
+nieuwe testronde 3.1; intern `build 4.1`), zie
+[opleveren en hosting](opleveren-en-hosting.md#versienummers-besluit-gerd-jan-6-oktober-2026). De voorgenomen planning bevat twee testupdates, rond
 10 en 15 oktober. Dit zijn richtdata, geen uploadopdrachten.
 
-## Build 19 — iOS 2.2 (19), Android 0.6 (6)
+## Eerstvolgende upload: 3.0 build 1 (voorheen "build 19")
 
 **Competitie en live teamwedstrijden** zijn de gekozen feature en zijn op main
 gebouwd: vier partijen, handmatig invullen of koppelen aan bijgehouden
@@ -18,7 +21,7 @@ niet geüpload. Zie [Competitie](competitie-vervolg.md),
 [live teamwedstrijden](plan-live-teamwedstrijd.md) en
 [opleveren en hosting](opleveren-en-hosting.md).
 
-## Volgende testupdate — beoogd build 20 / Android 0.7 (7)
+## Volgende testupdate — beoogd 3.0 build 2
 
 Badgevoortgang schuift volgens de keuze van 5 oktober één build door en is
 de volgende geplande feature. Bugfixes uit testfeedback gaan voor; definitieve
@@ -48,7 +51,7 @@ Er is geen gegarandeerde productiedatum of automatische App Store-indiening.
   Dat document bevat de actuele commando's; het UI-package heeft geen los Swift-testtarget.
 - Werk releasenotes, handleidingen en de testpagina bij voor de daadwerkelijk
   aangeboden versie. Vooruitblikken moeten herkenbaar blijven.
-- TestFlight/Play-upload en versieverhoging gebeuren alleen op expliciete opdracht.
+- TestFlight/Play-upload en versieverhoging (`scripts/version.py upload`) gebeuren alleen op expliciete opdracht.
 
 ## Later
 

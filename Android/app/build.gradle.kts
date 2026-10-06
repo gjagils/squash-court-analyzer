@@ -77,6 +77,13 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }
+    // The exported Room schemas (schemas/<version>.json) are assets of the debug
+    // build and of the instrumented tests (never of release): MigrationTestHelper,
+    // also under Robolectric, reads them there to build a database at an old version
+    sourceSets {
+        getByName("debug").assets.srcDir("$projectDir/schemas")
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
     buildFeatures {
         compose = true
     }

@@ -99,3 +99,8 @@ jobs:
       - name: Unit tests and a debug build
         working-directory: Android
         run: ./gradlew testDebugUnitTest assembleDebug --no-daemon
+      # The build writes the Room schema (schemas/<version>.json). When it differs
+      # from what is committed, the entities changed: raise the database version,
+      # write the migration and commit the new JSON (docs/android-port.md).
+      - name: The exported Room schema is committed
+        run: git diff --exit-code -- Android/app/schemas

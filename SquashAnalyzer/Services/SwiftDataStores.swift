@@ -134,6 +134,17 @@ final class SwiftDataRefereeMatchStore: RefereeMatchStore {
     }
 
     func save(_ match: RefereeMatch) async throws {
+        do {
+            try saveInContext(match)
+        } catch {
+            // A failure halfway must not leave half a row on the shared context
+            // for the next save somewhere else to commit
+            context.rollback()
+            throw error
+        }
+    }
+
+    private func saveInContext(_ match: RefereeMatch) throws {
         let existing = try savedMatch(for: match.id)
         if match.isMatchOver {
             // Finished: in Afgeronde wedstrijden, with its badges
@@ -162,7 +173,7 @@ final class SwiftDataRefereeMatchStore: RefereeMatchStore {
             RefereeInProgressStore.clear()
             return
         }
-        RefereeInProgressStore.keepAsAbandoned(match, in: context)
+        try RefereeInProgressStore.keepAsAbandoned(match, in: context)
     }
 
     private func savedMatch(for id: UUID) throws -> SavedRefereeMatch? {
@@ -219,7 +230,7 @@ enum RefereeInProgressStore {
     /// "Nieuwe wedstrijd" while one is unfinished: it goes into Afgeronde
     /// wedstrijden as incomplete (only its finished games), with its badges,
     /// as Android keeps it as abandoned. Then the file is removed.
-    @MainActor static func keepAsAbandoned(_ match: RefereeMatch, in context: ModelContext) {
+    @MainActor static func keepAsAbandoned(_ match: RefereeMatch, in context: ModelContext) throws {
         // Not a single rally played: nothing worth keeping
         guard !match.pointHistory.isEmpty || !match.completedGames.isEmpty else {
             clear()
@@ -237,13 +248,19 @@ enum RefereeInProgressStore {
         saved.player1Id = match.player1Id
         saved.player2Id = match.player2Id
         context.insert(saved)
-        try? BadgeAwarder(context: context).syncAwards(
-            matchId: match.id,
-            playerIds: match.playerIds,
-            playerNames: [.player1: match.player1Name, .player2: match.player2Name],
-            input: match.badgeInput
-        )
-        try? context.save()
+        do {
+            try BadgeAwarder(context: context).syncAwards(
+                matchId: match.id,
+                playerIds: match.playerIds,
+                playerNames: [.player1: match.player1Name, .player2: match.player2Name],
+                input: match.badgeInput
+            )
+            try context.save()
+        } catch {
+            // Not kept: the unfinished match stays where it is, and the failure shows
+            context.rollback()
+            throw error
+        }
         clear()
     }
 
@@ -334,7 +351,14 @@ final class SwiftDataMatchHistoryStore: MatchHistoryStore {
                 untrackedBefore: saved.player1GamesBefore + saved.player2GamesBefore,
                 bestOf: saved.bestOf, hasBadges: withBadges.contains(id)))
         }
-        if context.hasChanges { try context.save() }
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                context.rollback()
+                throw error
+            }
+        }
         return (coach + referee).sorted { $0.updatedAt > $1.updatedAt }
     }
 

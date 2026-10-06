@@ -161,6 +161,10 @@ enum ExportService {
         badgeAwards: [SavedBadgeAward] = [],
         refereeMatches: [SavedRefereeMatch] = []
     ) throws -> Data {
+        // Referee matches from before badges have no id: given one now and kept,
+        // so the same row has the same id in every export and "Voeg toe" does
+        // not add it again each time
+        for match in refereeMatches where match.matchId == nil { match.matchId = UUID() }
         let playerData = players.map {
             PlayerBackupData(
                 id: $0.id.uuidString,
@@ -285,9 +289,12 @@ enum ExportService {
         switch export.type {
         case .match:
             guard let matchData = export.match else { return }
+            // Importing the same shared match twice adds it once
+            if let id = matchData.id.flatMap(UUID.init(uuidString:)), try exists(SavedMatch.self, id: id, context: context) { return }
             importMatch(matchData, context: context)
         case .game:
             guard let gameData = export.game else { return }
+            if let id = gameData.id.flatMap(UUID.init(uuidString:)), try exists(SavedGame.self, id: id, context: context) { return }
             importGame(gameData, context: context, matchRef: nil)
         }
 

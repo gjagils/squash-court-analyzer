@@ -463,6 +463,44 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertEqual(try counts(), before)
     }
 
+    /// B10: a referee match from before badges (no id) gets one at the first export
+    /// and keeps it, so merging the same file twice adds it once; and a shared
+    /// match or game imported twice is there once.
+    @MainActor
+    func testAnOldRefereeMatchKeepsItsIdInEveryExportAndImportsAreIdempotent() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let container = try ModelContainer(for: Schema(versionedSchema: SquashAnalyzerCurrentSchema.self),
+                                           migrationPlan: SquashAnalyzerMigrationPlan.self, configurations: [config])
+        let context = container.mainContext
+        let referee = SavedRefereeMatch(player1Name: "Jan", player2Name: "Piet", bestOf: 3,
+                                        gameResults: [RefereeGameResult(number: 1, player1Score: 11, player2Score: 7, winner: .player1)])
+        XCTAssertNil(referee.matchId)
+        context.insert(referee)
+        try context.save()
+
+        let first = try ExportService.exportFullBackup(players: [], matches: [], standaloneGames: [], refereeMatches: [referee])
+        let second = try ExportService.exportFullBackup(players: [], matches: [], standaloneGames: [], refereeMatches: [referee])
+        XCTAssertNotNil(referee.matchId, "given an id at the export")
+        let idOf = { (data: Data) throws -> String? in try BackupCodec.decode(data).refereeMatches?.first?.id }
+        XCTAssertEqual(try idOf(first), try idOf(second), "the same id in every export")
+
+        _ = try ExportService.importFullBackup(first, context: context)
+        _ = try ExportService.importFullBackup(second, context: context)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<SavedRefereeMatch>()), 1, "no copy per export")
+
+        // A shared match imported twice
+        let repository = SwiftDataMatchRepository(context: context)
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1)
+        match.currentGame.addPoint(to: .player1, pointType: .winner, at: .frontLeft, with: .drive)
+        try repository.upsert(match)
+        let saved = try XCTUnwrap(context.fetch(FetchDescriptor<SavedMatch>()).first)
+        let json = try ExportService.exportJSON(from: saved)
+        try ExportService.importFromJSON(json, context: context)
+        try ExportService.importFromJSON(json, context: context)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<SavedMatch>()), 1)
+    }
+
     /// Referee matches are in the backup (T2): export → replace → back, and an
     /// older file without them leaves the referee history alone
     @MainActor

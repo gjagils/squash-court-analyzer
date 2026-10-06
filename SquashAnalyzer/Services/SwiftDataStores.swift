@@ -340,6 +340,19 @@ final class SwiftDataMatchHistoryStore: MatchHistoryStore {
                     untrackedAfter: saved.player1GamesAfter + saved.player2GamesAfter,
                     bestOf: saved.bestOf, hasBadges: withBadges.contains(saved.id))
             }
+        // Loose games (a game saved on its own) show as a one-game coach row: they
+        // open in the analysis and can be deleted, as in the old iPhone history (B12)
+        let loose = try context.fetch(FetchDescriptor<SavedGame>(predicate: #Predicate { $0.match == nil }))
+            .map { saved -> MatchHistorySummary in
+                let winner = saved.winner
+                return MatchHistorySummary(
+                    id: saved.id.uuidString, kind: "coach", player1Name: saved.player1Name, player2Name: saved.player2Name,
+                    player1Games: winner == Player.player1.rawValue ? 1 : 0,
+                    player2Games: winner == Player.player2.rawValue ? 1 : 0,
+                    status: MatchStatus.completed.rawValue, updatedAt: saved.savedAt,
+                    games: winner.map { [HistoryGameScore(player1Score: saved.player1Score, player2Score: saved.player2Score, winner: $0)] } ?? [],
+                    bestOf: 1)
+            }
         var referee: [MatchHistorySummary] = []
         for saved in try context.fetch(FetchDescriptor<SavedRefereeMatch>()) {
             let id = refereeId(saved)
@@ -362,11 +375,21 @@ final class SwiftDataMatchHistoryStore: MatchHistoryStore {
                 throw error
             }
         }
-        return (coach + referee).sorted { $0.updatedAt > $1.updatedAt }
+        return (coach + loose + referee).sorted { $0.updatedAt > $1.updatedAt }
     }
 
     func coachMatch(id: String) async throws -> Match? {
-        try savedMatch(id)?.toMatch()
+        if let saved = try savedMatch(id) { return saved.toMatch() }
+        // A loose game opens as a match of that one game
+        guard let game = try looseGame(id) else { return nil }
+        let match = Match(id: game.id)
+        match.player1Name = game.player1Name
+        match.player2Name = game.player2Name
+        match.status = .completed
+        match.updatedAt = game.savedAt
+        match.games = [game.toGame()]
+        match.currentGameIndex = 0
+        return match
     }
 
     /// Only the game scores are kept for a referee match (for sharing the result)
@@ -392,6 +415,8 @@ final class SwiftDataMatchHistoryStore: MatchHistoryStore {
             if let saved = try savedMatch(entry.id) {
                 try BadgeAwarder(context: context).markAwardsDeleted(forMatch: saved.id)
                 context.delete(saved)
+            } else if let game = try looseGame(entry.id) {
+                context.delete(game)
             }
         } else if let saved = try savedRefereeMatch(entry.id) {
             try BadgeAwarder(context: context).markAwardsDeleted(forMatch: refereeId(saved))
@@ -411,6 +436,11 @@ final class SwiftDataMatchHistoryStore: MatchHistoryStore {
     private func savedMatch(_ id: String) throws -> SavedMatch? {
         guard let uuid = UUID(uuidString: id) else { return nil }
         return try context.fetch(FetchDescriptor<SavedMatch>(predicate: #Predicate { $0.id == uuid })).first
+    }
+
+    private func looseGame(_ id: String) throws -> SavedGame? {
+        guard let uuid = UUID(uuidString: id) else { return nil }
+        return try context.fetch(FetchDescriptor<SavedGame>(predicate: #Predicate { $0.id == uuid && $0.match == nil })).first
     }
 
     private func savedRefereeMatch(_ id: String) throws -> SavedRefereeMatch? {

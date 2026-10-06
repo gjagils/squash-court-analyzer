@@ -463,6 +463,37 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertEqual(try counts(), before)
     }
 
+    /// B12: a game saved on its own shows in "Afgeronde wedstrijden", opens as a one-game
+    /// match and can be deleted (it was invisible on iOS before)
+    @MainActor
+    func testALooseGameShowsOpensAndDeletesInTheHistory() async throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let container = try ModelContainer(for: Schema(versionedSchema: SquashAnalyzerCurrentSchema.self),
+                                           migrationPlan: SquashAnalyzerMigrationPlan.self, configurations: [config])
+        let context = container.mainContext
+        let game = SavedGame(gameNumber: 1, player1Name: "Jan", player2Name: "Piet", player1Score: 11, player2Score: 7,
+                             startingServer: .player1, winner: .player1)
+        context.insert(game)
+        try context.save()
+
+        let store = SwiftDataMatchHistoryStore(context: context)
+        let history = try await store.loadHistory()
+        let row = try XCTUnwrap(history.first)
+        XCTAssertEqual(history.count, 1)
+        XCTAssertEqual(row.id, game.id.uuidString)
+        XCTAssertEqual(row.gameScoresText, "11-7")
+        XCTAssertEqual(row.winnerName, "Jan")
+
+        let opened = try await store.coachMatch(id: row.id)
+        XCTAssertEqual(opened?.games.count, 1)
+        XCTAssertEqual(opened?.games.first?.player1Score, 11)
+
+        try await store.delete(row)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<SavedGame>()), 0)
+        let after = try await store.loadHistory()
+        XCTAssertTrue(after.isEmpty)
+    }
+
     /// B10: the lists are always written, also empty, so the file is format 4 and
     /// "Vervang alles" knows the source had no referee or team matches
     func testAnEmptyBackupStillSaysItHasNoRefereeOrTeamMatches() throws {

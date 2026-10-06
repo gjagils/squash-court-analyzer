@@ -60,7 +60,9 @@ badgeregels, kosten) is niet zonder Gerd-Jan doorgevoerd.
       terugzetten. Tests in Core, iOS en Android.
 - [x] **B11** Rollback bij een mislukte referee-save, `keepAsAbandoned` slikt geen fouten meer
       (wist het bestand pas na succes), `loadHistory` committeert geen half werk.
-- [?] **B12** Losse spellen zijn op iOS onzichtbaar (tonen of `.game`-import weigeren).
+- [x] **B12** Losse spellen (`SavedGame` zonder wedstrijd) staan op iOS in Afgeronde wedstrijden,
+      besluit 6 oktober: als rij van één game (bestOf 1), openen in de analyse en verwijderen
+      zoals vroeger. `SwiftDataMatchHistoryStore`, test in `ScoringAndPersistenceTests`.
 - [x] **B13** Kaart-import en team-uitnodiging blijven niet meer hangen achter een
       `fullScreenCover` (getest op de simulator: de uitnodiging wacht en opent na het sluiten).
 - [?] **B14** Opgave/walkover in het teammodel en de reglementsbron voor de gelijkspelregel.

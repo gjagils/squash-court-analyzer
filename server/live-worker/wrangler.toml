@@ -2,7 +2,7 @@
 # Deploy: npx wrangler deploy (after `npx wrangler login`). See README.md.
 name = "squash-live-beta"
 main = "src/index.js"
-compatibility_date = "2026-10-01"
+compatibility_date = "2025-10-01"
 workers_dev = false
 routes = [
   { pattern = "live.squashanalyzer.com", custom_domain = true },

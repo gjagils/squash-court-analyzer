@@ -38,8 +38,10 @@ zolang de testers aangemeld blijven.
   met `scripts/testflight_distribute.py` en `scripts/play_upload.py`. De
   stappen staan uitgewerkt in `docs/badges-afronden-instructie.md`
   (stap 5 tot en met 9).
-- **Versienummers:** iOS blijft 2.2 met oplopend buildnummer; Android
-  `versionCode` en `versionName` lopen samen op (0.6 (6), 0.7 (7), …).
+- **Versienummers:** sinds 6 oktober gelden de nieuwe afspraken: de volgende
+  uploads zijn **3.0 build 1, 2, …** op iOS en Android (in productie gaat 3.0;
+  een nieuwe testronde is 3.1). Zie `docs/opleveren-en-hosting.md`. De tekst
+  hieronder over 2.2 en 0.x is de situatie van voor die afspraak.
 
 ## Feedback verzamelen en verdelen
 

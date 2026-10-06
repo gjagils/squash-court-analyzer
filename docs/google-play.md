@@ -186,7 +186,7 @@ Menu **Grow users → Store presence → Main store listing**.
    die op hun Android-toestel, tikken op "Word tester" en installeren de app
    via de Play Store. Nieuwe versies komen daarna automatisch binnen.
 
-Elke volgende upload: `versionCode` omhoog (Claude doet dat), nieuwe `.aab`,
+Elke volgende upload: `scripts/version.py upload` (verhoogt build en `versionCode`), nieuwe `.aab`,
 nieuwe release in dezelfde track. Later maakt Claude een uploadscript via de
 Google Play Developer API (net als het TestFlight-script); daarvoor is een
 service-account in Google Cloud nodig met toegang in de Play Console.
@@ -227,17 +227,17 @@ vingerafdrukken uit B6 en akkoord om de website bij te werken.
 Net als TestFlight gaat een Android-testbuild nu vanaf de Mac, zonder de Play Console:
 
 ```bash
-scripts/play_upload.py --bump
+scripts/version.py upload
 ```
 ```bash
 cd Android && ./gradlew :app:bundleRelease
 ```
 ```bash
-scripts/play_upload.py --notes release-notes/android-X-N.md --name "X (N)"
+scripts/play_upload.py --notes release-notes/android-X-N.md
 ```
 
-- `--bump` verhoogt `versionCode` in `app/build.gradle.kts`; `versionName` pas je zelf aan.
-- De release-notes (Nederlands, max. 500 tekens) staan in `release-notes/android-<versie>-<code>.md`.
+- `scripts/version.py upload` verhoogt de build voor iOS en Android tegelijk; `versionCode` volgt uit versie en build (zie `docs/opleveren-en-hosting.md`, "Versienummers"), `versionName` wordt `3.1 (4)`.
+- De release-notes (Nederlands, max. 500 tekens) staan in `release-notes/android-<versie>-<build>.md`.
 - `--check` laat de tracks en de laatste release zien: zo zie je of de toegang werkt.
 - De sleutel van het serviceaccount staat in `~/.android-keys` (nooit in de repo, ook in 1Password).
   Het script ondertekent het verzoek met openssl en stuurt alleen een tijdelijk toegangsbewijs mee.

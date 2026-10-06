@@ -4,7 +4,12 @@ Doorlopend overzicht van wat er sinds de laatste upload is veranderd. Bij elke
 nieuwe build schuift het blok "Volgende build" naar beneden onder het
 buildnummer, en de releasenotes (`release-notes/`) worden eruit geschreven.
 
-## Volgende build (nog niet geüpload)
+## Volgende build: 3.0 build 1 (nog niet geüpload)
+
+Nieuwe nummering sinds 6 oktober 2026 (`docs/opleveren-en-hosting.md`,
+"Versienummers"): 3.0 build 1 is de eerstvolgende upload op iOS en Android; in
+de projectbestanden staat nu 3.0 build 0. De release-notes heten
+`release-notes/3.0-1.md` en `release-notes/android-3.0-1.md`.
 
 Vergeleken met iOS 2.2 (18) en Android 0.5 (5), 5 oktober 2026. Planning van
 de builds in de testperiode (drie tot vier, elk hooguit één feature):

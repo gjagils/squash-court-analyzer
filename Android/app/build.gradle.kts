@@ -5,6 +5,15 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+// Version and build: edited by scripts/version.py (docs/opleveren-en-hosting.md),
+// not by hand. squashCode = 1.000.000 * major + 10.000 * minor + 100 * build;
+// an internal delivery to a phone adds -PsquashInternal=N (3.1 build 4.1) and
+// so counts up from the last upload, which the versionCode needs.
+val squashVersion = "3.0"
+val squashBuild = 0
+val squashCode = 3000000
+val squashInternal = (findProperty("squashInternal") as String?)?.toInt() ?: 0
+
 // Google Play upload key: never in the repo. The keystore lives in
 // ~/.android-keys (backed up in 1Password), the passwords in
 // ~/.gradle/gradle.properties. Google Play App Signing re-signs with the real
@@ -31,10 +40,10 @@ android {
         applicationId = "com.squashanalyzer.android"
         minSdk = 28
         targetSdk = 36
-        // Bump versionCode for every upload to Google Play (it must go up);
-        // versionName is what testers see.
-        versionCode = 5
-        versionName = "0.5"
+        // versionCode must go up with every upload to Google Play; versionName
+        // is what testers see ("3.1 (4)", internal "3.1 (4.1)")
+        versionCode = squashCode + squashInternal
+        versionName = if (squashInternal == 0) "$squashVersion ($squashBuild)" else "$squashVersion ($squashBuild.$squashInternal)"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

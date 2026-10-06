@@ -37,4 +37,10 @@ report "No keypath literals in SquashAnalyzerCore" "$hits"
 hits=$(grep -rnE '^\s*case out\b' Packages/SquashAnalyzerCore/Sources --include='*.swift')
 report "No enum case 'out' in SquashAnalyzerCore" "$hits"
 
+# 5. iOS and Android carry the same version and build (scripts/version.py)
+hits=$(python3 scripts/version.py check 2>&1)
+report "iOS and Android versions agree" "$hits"
+hits=$(python3 scripts/test_version.py 2>&1 | grep -E 'FAIL|ERROR')
+report "Version scheme tests" "$hits"
+
 exit $failed

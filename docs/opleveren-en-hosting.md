@@ -31,7 +31,7 @@ Gevolgen van de verhuizing:
 - **De live-server is losgekoppeld van app-builds.** Hij gaat live zodra een
   wijziging op `main` staat, ook als er nog geen nieuwe build is. Houd de API
   daarom **achterwaarts compatibel** met de builds die testers hebben
-  (iOS 2.2 (18), Android 0.5 (5)): nieuwe endpoints erbij is veilig,
+  (iOS 2.2 (18), Android 0.5 (5), later 3.0 build N): nieuwe endpoints erbij is veilig,
   bestaande aanpassen niet. De teamendpoints (`/api/team…`, pagina `/t/<id>`)
   zijn nieuw en worden door oudere builds simpelweg niet gebruikt.
 - **De app wijst alleen nog naar `https://live.squashanalyzer.com`.** De
@@ -93,7 +93,7 @@ Alles draait lokaal op de Mac. Eisen: Xcode, Skip, Android Studio.
 | Android unit-tests en debug-APK | `cd Android && export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ANDROID_HOME=$HOME/Library/Android/sdk && ./gradlew testDebugUnitTest assembleDebug` |
 | Worker | `cd server/live-worker && npm test` (21 tests) |
 | Node-reserve | `cd server/live && node --test` |
-| Lint | `scripts/lint.sh` |
+| Lint (incl. versiecontrole iOS/Android en `scripts/test_version.py`) | `scripts/lint.sh` |
 
 Regels voor tests op toestellen:
 
@@ -122,35 +122,74 @@ Regels voor tests op toestellen:
 ## 4. Opleveren naar testers
 
 **Er wordt niets geüpload naar TestFlight of Google Play zonder dat
-Gerd-Jan dat zegt.** Stand: iOS 2.2 (18) en Android 0.5 (5) zijn het laatst
-geüpload; build 19 (Competitie, live teamwedstrijd, nieuwe hosting) is
-klaar maar nog niet geüpload (in de projectbestanden staan nog iOS
-`CURRENT_PROJECT_VERSION = 18` en Android `versionCode = 5`; ophogen hoort bij
-de upload).
+Gerd-Jan dat zegt.** Stand: in productie staat iOS 2.0 (App Store); Android
+heeft nog niets in productie. In de tests zitten iOS 2.2 (18) (TestFlight) en
+Android 0.5 (5) (Play-testtracks). Wat daarna komt (Competitie, live
+teamwedstrijd, nieuwe hosting) is **3.0 build 1**, de eerste upload van de
+versie die na de testperiode in productie gaat. In de projectbestanden staat
+nu `3.0 build 0`: er is nog niets van 3.0 geüpload.
+
+### Versienummers (besluit Gerd-Jan, 6 oktober 2026)
+
+```
+3.1 build 4      de 4e upload naar testers (TestFlight / Google Play) van versie 3.1
+3.1 build 4.1    de 1e interne uitlevering daarna (eigen iPhone of Android-telefoon)
+```
+
+- **Versie** (3.1) is op iOS en Android gelijk. Een nieuwe testronde is een
+  nieuwe versie; een productierelease is een hele versie: na de testperiode
+  gaat 3.0 naar de App Store en Google Play (de laatst geteste build, dus de
+  testbuilds van nu zijn 3.0 build 1, 2, …), daarna begint 3.1 met build 1.
+  Een 2.2 komt niet meer: die staat alleen als concept in App Store Connect.
+- **Build** begint bij elke versie opnieuw bij 1 en gaat bij elke upload naar
+  testers met 1 omhoog. **Intern** is de teller achter de build (4.1, 4.2, …);
+  die telt alleen lokaal en komt nooit in een store.
+- Wat in git staat is de **laatste upload** (`3.0 build 0` = nog niets
+  geüpload). Het script `scripts/version.py` beheert de nummers en houdt iOS
+  en Android gelijk; verander ze niet met de hand:
+
+| Commando | Doet |
+| --- | --- |
+| `scripts/version.py show` | toont de nummers voor beide platforms |
+| `scripts/version.py set 3.1` | nieuwe versie, build 0 |
+| `scripts/version.py upload` | build + 1, vlak voor een upload (daarna committen) |
+| `scripts/version.py internal --new` | telt een interne uitlevering (4.1, 4.2, …); niets om te committen (`.internal-build` is lokaal) |
+| `xcodebuild … $(scripts/version.py internal --xcode)` | iOS-build voor je eigen telefoon met dat nummer |
+| `./gradlew assembleDebug $(../scripts/version.py internal --gradle)` | Android-build met dat nummer (vanuit `Android/`) |
+
+- **iOS** laat `CURRENT_PROJECT_VERSION` met punten toe (`4.1`, tot drie
+  getallen) en eist alleen dat het binnen één versie oploopt. **Android**
+  eist een geheel getal dat altijd oploopt en nooit opnieuw begint; daarom is
+  `versionCode = 1.000.000 × hoofdversie + 10.000 × tweede getal + 100 ×
+  build + intern` (3.1 build 4 = 3010400, 3.1 build 4.1 = 3010401). De
+  `versionName` is `3.1 (4)` of `3.1 (4.1)`. Alle drie de waarden zijn groter
+  dan de laatste Play-upload (versionCode 5).
+- De upload-scripts lezen de nummers uit het project: `testflight_distribute.py`
+  neemt versie en build zelf en weigert een build 0 of een interne build;
+  `play_upload.py` gebruikt `3.1 (4)` als releasenaam.
 
 Volgorde bij een externe build:
 
 1. Alles op `main` en groen (CI, plus lokaal de suites uit 3). De live-Worker
    wordt bij de push automatisch uitgerold; controleer `/health` op
    `https://live.squashanalyzer.com`.
-2. Buildnummer ophogen: iOS `CURRENT_PROJECT_VERSION` in `project.pbxproj`
-   (beide app-configuraties); Android `scripts/play_upload.py --bump` en de
-   `versionName` in `Android/app/build.gradle.kts`.
+2. `scripts/version.py upload` (build + 1 voor beide platforms) en committen.
+   Een nieuwe testronde begint met `scripts/version.py set 3.1`, daarna
+   `upload` voor build 1.
 3. Releasenotes in het Nederlands: `release-notes/<versie>-<build>.md` (iOS,
-   geen emoji, App Store Connect weigert ze) en
-   `release-notes/android-<versionName>-<versionCode>.md` (maximaal 500
-   tekens). De tekst staat voorbereid in `docs/wijzigingen-builds.md`,
+   bijvoorbeeld `3.0-1.md`, geen emoji, App Store Connect weigert ze) en
+   `release-notes/android-<versie>-<build>.md` (maximaal 500 tekens). De tekst staat voorbereid in `docs/wijzigingen-builds.md`,
    inclusief het stuk over de nieuwe hosting.
 4. iOS: `xcodebuild archive` (Release, `-allowProvisioningUpdates` met de
    App Store Connect API-sleutel), `xcodebuild -exportArchive` met een
    ExportOptions.plist (`method app-store-connect`, `destination upload`,
    `signingStyle automatic`, `manageAppVersionAndBuildNumber false`), daarna
-   `scripts/testflight_distribute.py --version X --build N --notes release-notes/X-N.md`
+   `scripts/testflight_distribute.py --notes release-notes/X-N.md`
    (zet de notities, voegt toe aan groep Squashteam, dient in voor
    bèta-review en laat oude builds vervallen; draai
    `scripts/testflight_expire_old.py` nogmaals na goedkeuring).
 5. Android: `cd Android && ./gradlew :app:bundleRelease`, dan
-   `scripts/play_upload.py --notes <bestand> --name "<versionName> (<code>)"`
+   `scripts/play_upload.py --notes <bestand>`
    (internal, alpha en de Google Group-track tegelijk; `--check` toont de
    tracks). Testers van gesloten tracks zijn alleen in de console te wijzigen.
 6. Schermafbeeldingen vernieuwen: `scripts/screenshots.sh`, bekijk de PNG's,
@@ -161,7 +200,7 @@ Volgorde bij een externe build:
    `android.html`, per tegel één sectie) en de website publiceren met de
    `wrangler deploy` uit 1. Daarna in het rapport vermelden wat er veranderd is.
 8. `docs/wijzigingen-builds.md`: het blok "Volgende build" krijgt de kop met
-   buildnummers en "(geüpload)".
+   het nummer (bijvoorbeeld "3.0 build 1") en "(geüpload)".
 
 Sleutels en geheimen staan **nooit** in de repo: App Store Connect-sleutel in
 `~/.appstoreconnect/private_keys/` (sleutel- en issuer-id staan als

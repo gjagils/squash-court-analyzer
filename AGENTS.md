@@ -33,6 +33,10 @@ commit-uitleg zijn Nederlands, code en commentaar Engels zoals het er al staat.
   wist de app-data); gebruik `ANDROID_SERIAL=emulator-5554` en `adb -s`.
 - SwiftData-schema V7 is bevroren; een modelwijziging is V8 met migratie.
   Competitie gebruikt bewust een JSON-bestand.
+- **Versienummers**: versie (3.1) gelijk op iOS en Android, `build 4` per
+  upload naar testers, `build 4.1` per interne uitlevering; alleen aanpassen
+  met `scripts/version.py` (uitleg in `docs/opleveren-en-hosting.md`). In
+  productie staat iOS 2.0; de testperiode loopt tot 3.0.
 - Houd de live-server-API achterwaarts compatibel met de builds van testers.
 - Geheimen (App Store Connect-, Play- en Cloudflare-sleutels) staan buiten de
   repo; zie `docs/opleveren-en-hosting.md`.

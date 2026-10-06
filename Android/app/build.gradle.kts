@@ -10,8 +10,8 @@ plugins {
 // an internal delivery to a phone adds -PsquashInternal=N (3.1 build 4.1) and
 // so counts up from the last upload, which the versionCode needs.
 val squashVersion = "3.0"
-val squashBuild = 0
-val squashCode = 3000000
+val squashBuild = 1
+val squashCode = 3000100
 val squashInternal = (findProperty("squashInternal") as String?)?.toInt() ?: 0
 
 // Google Play upload key: never in the repo. The keystore lives in

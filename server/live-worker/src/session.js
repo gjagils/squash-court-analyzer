@@ -2,24 +2,11 @@
 // two photos and the open viewers; the state lives in the object's storage,
 // so an evicted object (nobody watching for a while) comes back as it was.
 // An alarm removes the session once nobody updated it for `IDLE_MINUTES`.
+// Keys, viewers (SSE), alarm and the end are in ViewerSession.
 
-import { DurableObject } from 'cloudflare:workers';
-import { readConfig } from './config.js';
+import { ViewerSession } from './viewer-session.js';
 
-const encoder = new TextEncoder();
-
-export class LiveSession extends DurableObject {
-  constructor(ctx, env) {
-    super(ctx, env);
-    this.config = readConfig(env);
-    /** Open SSE streams: stream controller -> ping timer */
-    this.viewers = new Map();
-  }
-
-  get id() {
-    return this.ctx.id.name || '';
-  }
-
+export class LiveSession extends ViewerSession {
   /** Creates the session; false when this id is already in use */
   async create(key, snapshot, id) {
     if (await this.ctx.storage.get('key')) return false;
@@ -27,7 +14,7 @@ export class LiveSession extends DurableObject {
     // The id is kept in storage too: the limiter is released by it, and the
     // name of a jurisdiction object id must not be what that depends on
     await this.ctx.storage.put({ key, snapshot, id, updatedAt: now, photoVersion: 0 });
-    await this.ctx.storage.setAlarm(now + this.config.idleMs);
+    await this.scheduleIdleAlarm(now);
     return true;
   }
 
@@ -55,21 +42,13 @@ export class LiveSession extends DurableObject {
     return computed;
   }
 
-  async keyEquals(given) {
-    const expected = await this.ctx.storage.get('key');
-    const a = encoder.encode(given || '');
-    const b = encoder.encode(expected || '');
-    if (!expected || a.length !== b.length) return false;
-    return crypto.subtle.timingSafeEqual(a, b);
-  }
-
   /** 404 unknown, 401 wrong key, 204 done */
   async update(given, snapshot) {
     if (!(await this.ctx.storage.get('key'))) return 404;
     if (!(await this.keyEquals(given))) return 401;
     const now = Date.now();
     await this.ctx.storage.put({ snapshot, updatedAt: now });
-    await this.ctx.storage.setAlarm(now + this.config.idleMs);
+    await this.scheduleIdleAlarm(now);
     this.broadcast('state', await this.state());
     return 204;
   }
@@ -102,100 +81,8 @@ export class LiveSession extends DurableObject {
     return 204;
   }
 
-  /** Viewers learn the session ended (with the last state), then everything goes */
-  async end(reason) {
-    const snapshot = await this.ctx.storage.get('snapshot');
-    const id = this.id || (await this.ctx.storage.get('id')) || '';
-    this.broadcast('ended', { reason, snapshot });
-    for (const [controller, ping] of this.viewers) {
-      clearInterval(ping);
-      try { controller.close(); } catch { /* already gone */ }
-    }
-    this.viewers.clear();
-    await this.ctx.storage.deleteAlarm();
-    await this.ctx.storage.deleteAll();
-    await this.env.LIMITER.get(this.env.LIMITER.idFromName('global')).release(id);
+  /** The last stand goes to the viewers with the end */
+  async endedPayload(reason) {
+    return { reason, snapshot: await this.ctx.storage.get('snapshot') };
   }
-
-  /** Nobody updated the session for IDLE_MINUTES: a lost phone, or the match is long over */
-  async alarm() {
-    if (!(await this.ctx.storage.get('key'))) return;
-    await this.end('idle');
-  }
-
-  /** Queues a message for every viewer; a stream that is gone is dropped */
-  broadcast(event, data) {
-    const message = encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
-    for (const [controller, ping] of Array.from(this.viewers)) {
-      try {
-        controller.enqueue(message);
-      } catch {
-        clearInterval(ping);
-        this.viewers.delete(controller);
-      }
-    }
-  }
-
-  /** GET /events: a Server-Sent Events stream with the state now and after every rally */
-  async fetch(request) {
-    const url = new URL(request.url);
-    if (url.pathname !== '/events') return new Response('Not found', { status: 404 });
-    const state = await this.state();
-    if (!state) return json(404, { error: 'Afgelopen' });
-    if (this.viewers.size >= this.config.maxViewersPerSession) {
-      return json(503, { error: 'Te veel kijkers, probeer het zo opnieuw' });
-    }
-    const viewers = this.viewers;
-    let entry = null;
-    // A ReadableStream with a controller: enqueue never waits for the reader,
-    // and cancel() tells us the browser left
-    const readable = new ReadableStream({
-      start(controller) {
-        controller.enqueue(encoder.encode('retry: 3000\n\n'));
-        controller.enqueue(encoder.encode(`event: state\ndata: ${JSON.stringify(state)}\n\n`));
-        const ping = setInterval(() => {
-          try {
-            controller.enqueue(encoder.encode(': ping\n\n'));
-          } catch {
-            clearInterval(ping);
-            viewers.delete(controller);
-          }
-        }, 25000);
-        entry = [controller, ping];
-        viewers.set(controller, ping);
-      },
-      cancel() {
-        if (!entry) return;
-        clearInterval(entry[1]);
-        viewers.delete(entry[0]);
-      },
-    });
-    // The browser left (closed the tab, lost the network): the place is free now,
-    // not only when the next ping fails
-    request.signal?.addEventListener('abort', () => {
-      if (!entry) return;
-      clearInterval(entry[1]);
-      viewers.delete(entry[0]);
-    });
-    return new Response(readable, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/event-stream; charset=utf-8',
-        'Cache-Control': 'no-store',
-        'X-Content-Type-Options': 'nosniff',
-      },
-    });
-  }
-
-  /** For tests: how many viewers are connected */
-  viewerCount() {
-    return this.viewers.size;
-  }
-}
-
-function json(status, body) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
-  });
 }

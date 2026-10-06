@@ -135,6 +135,27 @@ final class BadgeEngineTests: XCTestCase {
                        "third win in a row; 4 × 30 points crosses 100")
         XCTAssertEqual(engine.careerBadges(in: first[3].matchId, history: first, earnedElsewhere: [.centurion]), [.hatTrick])
 
+        // A streak is awarded at 3, 5 and 7 wins in a row, not in every match after
+        let streak = history(Array(repeating: true, count: 10), points: 0)
+        func hatTrick(_ index: Int) -> [BadgeKind] {
+            let got = engine.careerBadges(in: streak[index].matchId, history: streak, earnedElsewhere: [])
+            var found: [BadgeKind] = []
+            let tiers: [BadgeKind] = [BadgeKind.hatTrick, BadgeKind.hatTrickSilver, BadgeKind.hatTrickGold]
+            for kind in tiers where got.contains(kind) { found.append(kind) }
+            return found
+        }
+        let none: [BadgeKind] = []
+        XCTAssertEqual(hatTrick(1), none)
+        XCTAssertEqual(hatTrick(2), [.hatTrick], "3rd win in a row")
+        XCTAssertEqual(hatTrick(3), none, "the 4th does not repeat it")
+        XCTAssertEqual(hatTrick(4), [.hatTrickSilver], "5th")
+        XCTAssertEqual(hatTrick(6), [.hatTrickGold], "7th")
+        XCTAssertEqual(hatTrick(7), none, "8th")
+        XCTAssertEqual(hatTrick(9), none, "10th")
+        // A new streak after a defeat can earn the bronze again
+        let again = history([true, true, true, false, true, true, true])
+        XCTAssertTrue(engine.careerBadges(in: again[6].matchId, history: again, earnedElsewhere: []).contains(.hatTrick))
+
         let ten = history(Array(repeating: true, count: 10), points: 0)
         XCTAssertTrue(engine.careerBadges(in: ten[9].matchId, history: ten, earnedElsewhere: []).contains(.tenOutOfTen))
         XCTAssertFalse(engine.careerBadges(in: ten[8].matchId, history: ten, earnedElsewhere: []).contains(.tenOutOfTen))
@@ -289,7 +310,8 @@ final class BadgeEngineTests: XCTestCase {
         }
         let wins = history(25) { _ in "" }
         let silver = engine.careerBadges(in: wins[24].matchId, history: wins, earnedElsewhere: [])
-        XCTAssertTrue(silver.isSuperset(of: [BadgeKind.tenOutOfTenSilver, BadgeKind.veteran, BadgeKind.hatTrickGold]))
+        XCTAssertTrue(silver.isSuperset(of: [BadgeKind.tenOutOfTenSilver, BadgeKind.veteran]))
+        XCTAssertFalse(silver.contains(.hatTrickGold), "the 25th win in a row is not the 7th: a long streak is not awarded again")
         XCTAssertFalse(silver.contains(.tenOutOfTenGold))
         XCTAssertFalse(silver.contains(.clubicoon), "no opponent known")
 

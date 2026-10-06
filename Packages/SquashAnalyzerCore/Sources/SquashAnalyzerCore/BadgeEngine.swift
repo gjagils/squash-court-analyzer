@@ -684,7 +684,10 @@ public struct BadgeEngine {
             for entry in before.reversed() {
                 if entry.won { streak += 1 } else { break }
             }
-            insertReaching(.hatTrick, streak)
+            // Exactly 3, 5 and 7 in a row (decision Gerd-Jan, 6 October 2026): a long
+            // streak is not awarded again with every further win, a new streak can
+            // earn the badge again
+            insertExactly(.hatTrick, streak)
         }
         let sameOpponent = before.filter { entry in !match.opponentKey.isEmpty && entry.opponentKey == match.opponentKey }
         // The 5th, 10th and 20th win against this opponent: Nemesis can be earned

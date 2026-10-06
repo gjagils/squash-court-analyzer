@@ -34,6 +34,7 @@ import squash.analyzer.core.JSONFileTeamMatchStore
 import skip.foundation.URL
 import squash.analyzer.core.AICoachClient
 import squash.analyzer.core.LiveShare
+import squash.analyzer.core.TeamLive
 import squash.analyzer.ui.AICoachContext
 import squash.analyzer.ui.ResultImageSharing
 import squash.analyzer.ui.BackupContext
@@ -145,6 +146,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         lifecycleScope.launch { LiveShare.shared.retryPending() }
+        lifecycleScope.launch { TeamLive.shared.retryPending() }
     }
 
     private val resultImageShare: (ResultCard) -> Unit = { card -> shareOffMainThread { ResultImage.shareIntent(this, card) } }

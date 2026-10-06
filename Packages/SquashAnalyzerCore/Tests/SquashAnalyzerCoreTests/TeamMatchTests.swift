@@ -216,6 +216,33 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertEqual(team.partij(2).ownPlayer, "Gerd-Jan")
     }
 
+    func testRefreshingALinkKeepsOurSideAlsoWhenTheNameWasEdited() {
+        let summary = MatchHistorySummary(id: "m1", kind: "coach", player1Name: "Jan de Vries", player2Name: "Piet",
+                                          player1Games: 3, player2Games: 1, status: "completed",
+                                          updatedAt: Date(timeIntervalSince1970: 1_793_181_600.0),
+                                          games: [HistoryGameScore(player1Score: 11, player2Score: 8, winner: Player.player1.rawValue)],
+                                          untrackedBefore: 0)
+        var partij = TeamPartij(slot: 2)
+        partij.link(summary, ownIsPlayer1: true)
+        XCTAssertEqual(partij.linkedOwnIsPlayer1, true)
+        // The coach corrects the name in the form; Vernieuwen must not turn the partij around
+        partij.ownPlayer = "Jan"
+        partij.refreshLink(from: summary)
+        XCTAssertEqual(partij.ownPlayer, "Jan de Vries")
+        XCTAssertEqual(partij.opponentPlayer, "Piet")
+        XCTAssertEqual(partij.ownGames, 3)
+        XCTAssertEqual(partij.theirGames, 1)
+
+        // A link from before the side was stored: the name decides, ignoring case and spaces
+        var old = TeamPartij(slot: 3, ownPlayer: "  piet ", opponentPlayer: "Jan de Vries", linkedMatchId: "m1", linkedKind: "coach")
+        old.refreshLink(from: summary)
+        XCTAssertEqual(old.ownPlayer, "Piet")
+        XCTAssertEqual(old.ownGames, 1)
+
+        old.unlink()
+        XCTAssertNil(old.linkedOwnIsPlayer1)
+    }
+
     func testAMatchInProgressIsRememberedForItsPartijUntilItIsLinked() throws {
         var team = match([])
         let id = UUID()

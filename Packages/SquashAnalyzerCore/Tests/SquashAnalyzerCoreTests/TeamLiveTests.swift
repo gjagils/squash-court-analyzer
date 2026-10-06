@@ -17,14 +17,20 @@ final class FakeTeamTransport: LiveTransport, @unchecked Sendable {
     var getStatus = 200
     var getBody = ""
     var offline = false
+    /// What `/verify` answers: a role, or a status for a wrong key / gone page
+    var verifyStatus = 200
+    var verifyRole = "writer"
 
     func send(method: String, url: URL, headers: [String: String], body: Data?) async throws -> AITransportResponse {
         if offline { throw URLError(.notConnectedToInternet) }
         let text = body.flatMap { String(data: $0, encoding: String.Encoding.utf8) } ?? ""
         let auth = headers["Authorization"] ?? ""
         requests.append(TeamRequest(method: method, url: url.absoluteString, key: auth, body: text))
+        if method == "GET" && url.absoluteString.hasSuffix("/verify") {
+            return AITransportResponse(status: verifyStatus, body: "{\"role\":\"\(verifyRole)\"}".data(using: String.Encoding.utf8) ?? Data())
+        }
         if method == "POST" {
-            let json = "{\"id\":\"abcdefghjkmn\",\"writeKey\":\"K3yK3yK3yK3yK3yK3yK3yK3y\",\"url\":\"https://live.test/t/abcdefghjkmn\"}"
+            let json = "{\"id\":\"abcdefghjkmn\",\"writeKey\":\"K3yK3yK3yK3yK3yK3yK3yK3y\",\"ownerKey\":\"0wn3r0wn3r0wn3r0wn3r0wn3r\",\"url\":\"https://live.test/t/abcdefghjkmn\"}"
             return AITransportResponse(status: 201, body: json.data(using: String.Encoding.utf8) ?? Data())
         }
         if method == "GET" { return AITransportResponse(status: getStatus, body: getBody.data(using: String.Encoding.utf8) ?? Data()) }
@@ -331,6 +337,121 @@ final class TeamLiveTests: XCTestCase {
 
         live.unbind(matchId: matchId)
         XCTAssertFalse(live.isBound(matchId))
+    }
+
+    @MainActor
+    func testAKeyTheServerRefusesIsShownAndForgottenWhenItWorksAgain() async throws {
+        let transport = FakeTeamTransport()
+        let live = TeamLive(transport: transport)
+        live.baseURL = "https://live.test"
+        var match = team()
+        match.liveId = "abcdefghjkmn"
+        match.liveKey = "Wr0ngWr0ngWr0ngWr0ngWr0ng"
+        var partij = TeamPartij(slot: 1)
+        _ = partij.addGame(TeamGame(own: 11, their: 3))
+
+        transport.putStatus = 401
+        let refused = await live.push(partij, in: match)
+        XCTAssertFalse(refused)
+        XCTAssertTrue(live.isRejected("abcdefghjkmn"), "a refused key must show, not vanish")
+        XCTAssertFalse(live.offline, "a refused key is not a network problem")
+
+        transport.putStatus = 204
+        let sent = await live.push(partij, in: match)
+        XCTAssertTrue(sent)
+        XCTAssertFalse(live.isRejected("abcdefghjkmn"))
+    }
+
+    @MainActor
+    func testVerifyTellsWhatAKeyMayDoAndWhatIsWrong() async throws {
+        let transport = FakeTeamTransport()
+        let live = TeamLive(transport: transport)
+        live.baseURL = "https://live.test"
+        var role = try await live.verify(id: "abcdefghjkmn", key: "K3yK3yK3yK3yK3yK3yK3yK3y")
+        XCTAssertEqual(role, TeamLiveRole.writer)
+        XCTAssertEqual(transport.requests[0].url, "https://live.test/api/team/abcdefghjkmn/verify")
+        XCTAssertEqual(transport.requests[0].key, "Bearer K3yK3yK3yK3yK3yK3yK3yK3y")
+        transport.verifyRole = "owner"
+        role = try await live.verify(id: "abcdefghjkmn", key: "0wn3r")
+        XCTAssertEqual(role, TeamLiveRole.owner)
+
+        transport.verifyStatus = 401
+        do {
+            _ = try await live.verify(id: "abcdefghjkmn", key: "fout")
+            XCTFail("a wrong key must throw")
+        } catch let error as TeamLiveError {
+            XCTAssertEqual(error, TeamLiveError.keyRejected)
+        }
+        transport.verifyStatus = 404
+        do {
+            _ = try await live.verify(id: "abcdefghjkmn", key: "x")
+            XCTFail("a page that is gone must throw")
+        } catch let error as TeamLiveError {
+            XCTAssertEqual(error, TeamLiveError.gone)
+        }
+    }
+
+    @MainActor
+    func testOnlyTheOwnerKeyStopsTheLivePageAndEmptiedPartijenLeaveIt() async throws {
+        let transport = FakeTeamTransport()
+        let live = TeamLive(transport: transport)
+        live.baseURL = "https://live.test"
+        let created = try await live.create(team())
+        XCTAssertEqual(created.ownerKey, "0wn3r0wn3r0wn3r0wn3r0wn3r")
+        var match = team()
+        match.liveId = created.id
+        match.liveKey = created.writeKey
+        match.liveOwnerKey = created.ownerKey
+        XCTAssertTrue(match.isLiveOwner)
+        await live.stop(match)
+        XCTAssertEqual(transport.requests.last?.method, "DELETE")
+        XCTAssertEqual(transport.requests.last?.key, "Bearer 0wn3r0wn3r0wn3r0wn3r0wn3r")
+
+        // A phone that joined has no owner key
+        var joined = match
+        joined.liveOwnerKey = nil
+        XCTAssertFalse(joined.isLiveOwner)
+        XCTAssertTrue(joined.isLive)
+
+        let cleared = await live.clear(slot: 3, in: match)
+        XCTAssertTrue(cleared)
+        XCTAssertEqual(transport.requests.last?.url, "https://live.test/api/team/abcdefghjkmn/partij/3")
+        XCTAssertEqual(transport.requests.last?.body, "{\"empty\":true}")
+    }
+
+    @MainActor
+    func testWhatCouldNotBeSentGoesWhenTheAppComesBack() async throws {
+        let transport = FakeTeamTransport()
+        let live = TeamLive(transport: transport)
+        live.baseURL = "https://live.test"
+        let matchId = UUID()
+        live.bind(matchId: matchId, teamId: "abcdefghjkmn", writeKey: "K3yK3yK3yK3yK3yK3yK3yK3y", slot: 2,
+                  homeIsPlayer1: true, homeLabel: "Jan", awayLabel: "")
+        transport.offline = true
+        live.forward(matchId: matchId, snapshot: snapshot("Jan", "Piet", score: [4, 0]))
+        try await waitUntil { live.offline }
+        XCTAssertTrue(transport.requests.isEmpty)
+
+        transport.offline = false
+        live.retryPending()
+        try await waitUntil { transport.requests.count == 1 && transport.requests[0].body.contains("\"score\":[4,0]") }
+        try await waitUntil { !live.offline }
+    }
+
+    func testAnotherPhoneCannotMakeAPartijShowMoreGamesThanItTakesToWin() {
+        let bogus = TeamLivePartij(p1: "Jan", p2: "Piet", bestOf: 5, games: [[11, 1], [11, 2], [11, 3], [11, 4], [11, 5], [11, 6]],
+                                   score: [0, 0], gamesWon: [7, 7], server: 1, side: "R", status: LiveStatus.finished)
+        let partij = TeamPartij.fromLive(bogus, slot: 1, ownIsHome: true)
+        XCTAssertNotNil(partij)
+        XCTAssertLessThanOrEqual(partij?.games.count ?? 0, 5)
+        XCTAssertLessThanOrEqual(partij?.ownGames ?? 9, 3)
+        XCTAssertLessThanOrEqual(partij?.theirGames ?? 9, 3)
+        let tooMany = TeamLivePartij(p1: "Jan", p2: "Piet", bestOf: 5, games: [], score: [0, 0], gamesWon: [7, 0],
+                                     server: 1, side: "R", status: LiveStatus.finished)
+        XCTAssertEqual(TeamPartij.fromLive(tooMany, slot: 1, ownIsHome: true)?.ownGames, 3)
+        let oddBestOf = TeamLivePartij(p1: "", p2: "", bestOf: 99, games: [], score: [0, 0], gamesWon: [1, 0],
+                                       server: 1, side: "R", status: LiveStatus.between)
+        XCTAssertEqual(TeamPartij.fromLive(oddBestOf, slot: 1, ownIsHome: true)?.bestOf, 5)
     }
 
     @MainActor

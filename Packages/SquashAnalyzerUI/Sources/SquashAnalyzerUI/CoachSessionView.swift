@@ -138,13 +138,12 @@ public struct CoachSessionView: View {
         .sheet(isPresented: Binding(get: { linkCandidate != nil }, set: { if !$0 { linkCandidate = nil } })) {
             if let candidate = linkCandidate, let match {
                 TeamMatchLinkPrompt(team: candidate, player1Name: match.player1Name, player2Name: match.player2Name) { slot, ownIsPlayer1 in
-                    var team = candidate
-                    var partij = team.partij(slot)
-                    partij.link(coach: match, ownIsPlayer1: ownIsPlayer1)
-                    team.update(partij)
                     linkCandidate = nil
                     Task { @MainActor in
-                        try? await teamMatchStore?.save(team)
+                        if let teamMatchStore {
+                            await TeamMatchSupport.linkOnMatchDay(coach: match, team: candidate, slot: slot,
+                                                                  ownIsPlayer1: ownIsPlayer1, store: teamMatchStore)
+                        }
                         persist(match, exit: true)
                     }
                 } onSkip: {

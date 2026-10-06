@@ -14,6 +14,8 @@ struct TeamLiveCard: View {
     let match: TeamMatch
     let busy: Bool
     let canShare: Bool
+    /// What is wrong with sending (a refused key, no connection), or nil
+    var problem: String? = nil
     let onGoLive: () -> Void
     let onShareViewers: () -> Void
     let onShareInvite: () -> Void
@@ -51,9 +53,17 @@ struct TeamLiveCard: View {
                     ActionButton("Deel kijkerslink", icon: "square.and.arrow.up", style: .filled, disabled: busy, action: onShareViewers)
                     ActionButton("Nodig teamgenoten uit", icon: "square.and.arrow.up", disabled: busy, action: onShareInvite)
                 }
+                if let problem {
+                    Text(problem)
+                        .font(.system(size: 12))
+                        .foregroundColor(SharedColors.error)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 HStack(spacing: 10) {
                     ActionButton("Vernieuwen", icon: "arrow.counterclockwise", disabled: busy, action: onRefresh)
-                    ActionButton("Live stoppen", color: SharedColors.textSecondary, disabled: busy, action: onStop)
+                    // Only the phone that started the live page can end it for everyone
+                    ActionButton(match.isLiveOwner ? "Live stoppen" : "Live verlaten", color: SharedColors.textSecondary,
+                                 disabled: busy, action: onStop)
                 }
             } else {
                 Text("Laat je team en de groepsapp de stand van de hele avond live volgen, per partij ook punt voor punt. Alleen teamnamen, voornamen en de stand gaan mee.")
@@ -236,6 +246,27 @@ public struct SharedTeamJoinView: View {
     private func join(_ fetched: TeamLiveState) async {
         guard let invite else { return }
         busy = true
+        message = nil
+        // The code must work before we keep it: a mistyped key would otherwise
+        // never show anywhere
+        do {
+            _ = try await TeamLive.shared.verify(id: invite.id, key: invite.key)
+        } catch let error as TeamLiveError {
+            busy = false
+            switch error {
+            case TeamLiveError.keyRejected:
+                message = "De code klopt niet: de teamwedstrijd is gevonden, maar de sleutel wordt niet geaccepteerd. Vraag je teamgenoot de uitnodiging opnieuw te sturen."
+            case TeamLiveError.gone:
+                message = "Deze teamwedstrijd is afgelopen of de link klopt niet."
+            default:
+                message = "Geen verbinding. Controleer het internet en probeer het opnieuw."
+            }
+            return
+        } catch {
+            busy = false
+            message = "Controleren van de code lukte niet."
+            return
+        }
         do {
             let all = try await store.loadAll()
             // Joined before: that copy, with what the page has now

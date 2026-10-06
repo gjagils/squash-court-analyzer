@@ -109,6 +109,7 @@ struct ContentView: View {
                 presentPendingCard()
                 // A live final score that could not be sent (no network) goes now
                 Task { await LiveShare.shared.retryPending() }
+                Task { @MainActor in TeamLive.shared.retryPending() }
             }
         }
         // A player card link (website or squashanalyzer://kaart#…)

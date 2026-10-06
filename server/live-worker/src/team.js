@@ -1,6 +1,8 @@
 // One Durable Object per live team match (Competitie): the two team names,
 // the day and up to four partijen (E1-E4), each in the shape of a live match.
-// Any phone with the team key writes its own slot; viewers get everything over
+// Any phone with the team key (the one in the invitation) writes a slot; only
+// the owner key, which stays on the phone that started the live page, may
+// change the team names or end it. Viewers get everything over
 // Server-Sent Events. Like LiveSession: state in storage, an alarm removes it
 // `IDLE_MINUTES` after the last update of any partij (so two hours after the
 // last partij), nothing else is kept.
@@ -9,6 +11,14 @@ import { DurableObject } from 'cloudflare:workers';
 import { readConfig } from './config.js';
 
 const encoder = new TextEncoder();
+
+/** Constant-time comparison of a given key with the stored one */
+function sameKey(given, expected) {
+  const a = encoder.encode(given || '');
+  const b = encoder.encode(expected || '');
+  if (!expected || a.length !== b.length) return false;
+  return crypto.subtle.timingSafeEqual(a, b);
+}
 
 export class TeamSession extends DurableObject {
   constructor(ctx, env) {
@@ -23,10 +33,10 @@ export class TeamSession extends DurableObject {
   }
 
   /** Creates the session; false when this id is already in use */
-  async create(key, team) {
+  async create(key, ownerKey, team) {
     if (await this.ctx.storage.get('key')) return false;
     const now = Date.now();
-    await this.ctx.storage.put({ key, team, partijen: {}, updatedAt: now });
+    await this.ctx.storage.put({ key, ownerKey, team, partijen: {}, updatedAt: now });
     await this.ctx.storage.setAlarm(now + this.config.idleMs);
     return true;
   }
@@ -42,11 +52,21 @@ export class TeamSession extends DurableObject {
   }
 
   async keyEquals(given) {
-    const expected = await this.ctx.storage.get('key');
-    const a = encoder.encode(given || '');
-    const b = encoder.encode(expected || '');
-    if (!expected || a.length !== b.length) return false;
-    return crypto.subtle.timingSafeEqual(a, b);
+    return sameKey(given, await this.ctx.storage.get('key'));
+  }
+
+  /** The owner key; a session from before owner keys has none and takes the team key */
+  async ownerEquals(given) {
+    const owner = await this.ctx.storage.get('ownerKey');
+    return sameKey(given, owner || (await this.ctx.storage.get('key')));
+  }
+
+  /** 404 unknown, 401 wrong key, else what this key may do: "owner" or "writer" */
+  async role(given) {
+    if (!(await this.ctx.storage.get('key'))) return 404;
+    if (await this.ownerEquals(given)) return 'owner';
+    if (await this.keyEquals(given)) return 'writer';
+    return 401;
   }
 
   async touch(extra) {
@@ -56,10 +76,10 @@ export class TeamSession extends DurableObject {
     this.broadcast('state', await this.state());
   }
 
-  /** 404 unknown, 401 wrong key, 204 done */
+  /** 404 unknown, 401 wrong key (the owner key is needed), 204 done */
   async setTeam(given, team) {
     if (!(await this.ctx.storage.get('key'))) return 404;
-    if (!(await this.keyEquals(given))) return 401;
+    if (!(await this.ownerEquals(given))) return 401;
     await this.touch({ team });
     return 204;
   }
@@ -74,10 +94,10 @@ export class TeamSession extends DurableObject {
     return 204;
   }
 
-  /** The team match is over for good (Live stoppen): everything goes at once */
+  /** The team match is over for good (Live stoppen, owner key): everything goes at once */
   async remove(given) {
     if (!(await this.ctx.storage.get('key'))) return 404;
-    if (!(await this.keyEquals(given))) return 401;
+    if (!(await this.ownerEquals(given))) return 401;
     await this.end('finished');
     return 204;
   }

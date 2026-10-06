@@ -85,8 +85,21 @@ public struct TeamLiveHeader: Codable, Equatable, Sendable {
 
 public struct TeamLiveCreated: Codable, Equatable, Sendable {
     public let id: String
+    /// For the invitation: writes a partij
     public let writeKey: String
+    /// Stays on this phone: ends the live page
+    public let ownerKey: String?
     public let url: String
+}
+
+/// What a key may do on the live page
+public enum TeamLiveRole: String, Codable, Sendable {
+    case owner
+    case writer
+}
+
+struct TeamLiveRoleAnswer: Codable {
+    var role: TeamLiveRole
 }
 
 /// What the server holds: the team match and the partijen by slot ("1"..."4")
@@ -211,23 +224,32 @@ public extension TeamPartij {
         if live.gamesWon.count < 2 { return nil }
         let total = live.gamesWon[0] + live.gamesWon[1]
         if total == 0 && live.games.isEmpty { return nil }
+        // Another phone (or a bad copy of the app) must not make a partij
+        // "7-0" or put more games on it than it takes to decide it
+        let bestOf = live.bestOf >= 1 && live.bestOf <= 7 ? live.bestOf : 5
+        let toWin = MatchStand.gamesToWin(bestOf: bestOf)
+        let homeWon = max(0, min(live.gamesWon[0], toWin))
+        var awayWon = max(0, min(live.gamesWon[1], toWin))
+        if homeWon == toWin && awayWon == toWin { awayWon = toWin - 1 }
         var games: [TeamGame] = []
         var homeWonScored = 0
         var awayWonScored = 0
         for game in live.games {
             if game.count < 2 { continue }
+            // The partij was decided at the games to win: nothing after that counts
+            if homeWonScored >= toWin || awayWonScored >= toWin { break }
             let home = game[0]
             let away = game[1]
             if home > away { homeWonScored += 1 } else { awayWonScored += 1 }
             games.append(TeamGame(own: ownIsHome ? home : away, their: ownIsHome ? away : home))
         }
         // Games without a known score: only who won them is known
-        let homeUnscored = max(0, live.gamesWon[0] - homeWonScored)
-        let awayUnscored = max(0, live.gamesWon[1] - awayWonScored)
+        let homeUnscored = max(0, homeWon - homeWonScored)
+        let awayUnscored = max(0, awayWon - awayWonScored)
         for _ in 0..<homeUnscored { games.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsHome)) }
         for _ in 0..<awayUnscored { games.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsHome)) }
         var partij = TeamPartij(slot: slot, ownPlayer: ownIsHome ? live.p1 : live.p2,
-                                opponentPlayer: ownIsHome ? live.p2 : live.p1, games: games, bestOf: live.bestOf)
+                                opponentPlayer: ownIsHome ? live.p2 : live.p1, games: games, bestOf: bestOf)
         partij.fromLive = true
         return partij
     }
@@ -271,6 +293,8 @@ public enum TeamLiveError: Error, Equatable {
     case refused(status: Int)
     /// The live team match is gone (two hours after the last update, or stopped)
     case gone
+    /// The server does not know this key: a mistyped invitation, or one for another evening
+    case keyRejected
 }
 
 /// The live side of Competitie on this phone. It uses the transport and the
@@ -299,6 +323,11 @@ public final class TeamLive {
 
     /// A send failed (no network); the next point tries again
     public private(set) var offline = false
+    /// Live team matches whose key the server refused (401) at the last send:
+    /// the partij does not reach the page, the invitation is wrong or old
+    public private(set) var rejectedTeamIds: [String] = []
+
+    public func isRejected(_ teamId: String) -> Bool { rejectedTeamIds.contains(teamId) }
 
     private var bindings: [UUID: Binding] = [:]
     private var pending: [String: TeamLivePartij] = [:]
@@ -406,9 +435,57 @@ public final class TeamLive {
         return state
     }
 
-    /// Stops the live page: gone at once
-    public func stop(_ match: TeamMatch) async {
+    /// Whether this key works for the live page, and what it may do. Throws
+    /// `.gone` (unknown or ended), `.keyRejected` (wrong key) or a connection error.
+    public func verify(id: String, key: String) async throws -> TeamLiveRole {
+        guard let transport = activeTransport else { throw TeamLiveError.noTransport }
+        guard let url = URL(string: "\(baseURL)/api/team/\(id)/verify") else { throw TeamLiveError.noConnection }
+        let response: AITransportResponse
+        do {
+            response = try await transport.send(method: "GET", url: url, headers: ["Authorization": "Bearer \(key)"], body: nil)
+        } catch {
+            throw TeamLiveError.noConnection
+        }
+        if response.status == 404 { throw TeamLiveError.gone }
+        if response.status == 401 { throw TeamLiveError.keyRejected }
+        guard response.status == 200, let answer = try? JSONDecoder().decode(TeamLiveRoleAnswer.self, from: response.body) else {
+            throw TeamLiveError.refused(status: response.status)
+        }
+        return answer.role
+    }
+
+    /// Takes a partij off the live page (it was emptied or unlinked here)
+    public func clear(slot: Int, in match: TeamMatch) async -> Bool {
         guard let id = match.liveId, let key = match.liveKey, let transport = activeTransport,
+              let url = URL(string: "\(baseURL)/api/team/\(id)/partij/\(slot)"),
+              let body = try? JSONEncoder().encode(TeamLiveEmpty(empty: true)) else { return false }
+        do {
+            let response = try await transport.send(method: "PUT", url: url,
+                                                    headers: ["Content-Type": "application/json", "Authorization": "Bearer \(key)"],
+                                                    body: body)
+            noteResult(response.status, teamId: id)
+            return response.status >= 200 && response.status < 300
+        } catch {
+            offline = true
+            return false
+        }
+    }
+
+    /// Back in the app (or the network is back): what could not be sent is sent now
+    public func retryPending() {
+        for (key, _) in pending where sending[key] != true {
+            // key is "<teamId>/<slot>"; the binding that wrote it holds the rest
+            for (_, binding) in bindings where binding.teamId + "/" + String(binding.slot) == key {
+                Task { await self.flush(binding, key: key) }
+                break
+            }
+        }
+    }
+
+    /// Stops the live page: gone at once. Only the phone that started it (the
+    /// owner key) can; a phone that joined just leaves it locally.
+    public func stop(_ match: TeamMatch) async {
+        guard let id = match.liveId, let key = match.liveOwnerKey ?? match.liveKey, let transport = activeTransport,
               let url = URL(string: "\(baseURL)/api/team/\(id)") else { return }
         _ = try? await transport.send(method: "DELETE", url: url, headers: ["Authorization": "Bearer \(key)"], body: nil)
     }
@@ -420,12 +497,23 @@ public final class TeamLive {
             let response = try await transport.send(method: "PUT", url: url,
                                                     headers: ["Content-Type": "application/json", "Authorization": "Bearer \(writeKey)"],
                                                     body: body)
-            let ok = response.status >= 200 && response.status < 300
-            offline = !ok && response.status != 404 && response.status != 401
-            return ok
+            noteResult(response.status, teamId: teamId)
+            return response.status >= 200 && response.status < 300
         } catch {
             offline = true
             return false
+        }
+    }
+
+    /// What the server answered to a send: offline for a failure that may pass,
+    /// a refused key (401) shown separately, a page that is gone not a connection problem
+    private func noteResult(_ status: Int, teamId: String) {
+        let ok = status >= 200 && status < 300
+        offline = !ok && status != 404 && status != 401
+        if status == 401 {
+            if !rejectedTeamIds.contains(teamId) { rejectedTeamIds.append(teamId) }
+        } else if ok {
+            rejectedTeamIds = rejectedTeamIds.filter { id in id != teamId }
         }
     }
 }

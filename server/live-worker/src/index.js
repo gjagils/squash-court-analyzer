@@ -203,9 +203,11 @@ async function handle(request, env) {
 }
 
 /**
- * /api/team: a live team match (Competitie). POST makes one (id, team key,
- * viewer link); every phone with the key PUTs its own partij to
- * /api/team/:id/partij/:slot; viewers read it or follow /events.
+ * /api/team: a live team match (Competitie). POST makes one (id, team key for
+ * the invitation, owner key for the starter, viewer link); every phone with the
+ * team key PUTs its partij to /api/team/:id/partij/:slot; only the owner key
+ * changes the team names (PUT) or ends it (DELETE); GET /verify tells what a key
+ * may do; viewers read it or follow /events.
  */
 async function handleTeam(request, env, config, parts, limiter, teamFor) {
   const id = parts[2];
@@ -218,17 +220,26 @@ async function handleTeam(request, env, config, parts, limiter, teamFor) {
     if (!team) return send(400, { error: 'Ongeldige teamwedstrijd' });
     let newId = newSessionId();
     const key = newWriteKey();
+    const ownerKey = newWriteKey();
     if (!(await limiter.register(`t:${newId}`))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
-    while (!(await teamFor(newId).create(key, team))) {
+    while (!(await teamFor(newId).create(key, ownerKey, team))) {
       await limiter.release(`t:${newId}`);
       newId = newSessionId();
       if (!(await limiter.register(`t:${newId}`))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
     }
-    return send(201, { id: newId, writeKey: key, url: `${baseUrl(request, config)}/t/${newId}` });
+    return send(201, { id: newId, writeKey: key, ownerKey, url: `${baseUrl(request, config)}/t/${newId}` });
   }
 
   if (!id || !ID_PATTERN.test(id) || parts.length > 5) return send(404, 'Not found');
   const session = teamFor(id);
+
+  // GET /api/team/:id/verify: does this key work, and what may it do ("owner" or "writer")
+  if (request.method === 'GET' && parts[3] === 'verify' && parts.length === 4) {
+    const role = await session.role(bearer(request));
+    if (role === 404) return send(404, { error: 'Onbekende teamwedstrijd' });
+    if (role === 401) return send(401, { error: 'Geen toegang' });
+    return send(200, { role });
+  }
 
   // GET /api/team/:id/events: Server-Sent Events for viewers
   if (request.method === 'GET' && parts[3] === 'events' && parts.length === 4) {

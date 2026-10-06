@@ -92,7 +92,7 @@ describe('team sessions', () => {
   it('create, fill the partijen, read and delete', async () => {
     const created = await call('POST', '/api/team', header);
     expect(created.status).toBe(201);
-    const { id, writeKey, url } = created.json;
+    const { id, writeKey, ownerKey, url } = created.json;
     expect(id).toMatch(/^[a-z0-9]{12}$/);
     expect(url).toBe(`${BASE}/t/${id}`);
 
@@ -116,16 +116,16 @@ describe('team sessions', () => {
     expect(Object.keys((await call('GET', `/api/team/${id}`)).json.partijen)).toEqual(['1']);
 
     // New team names
-    expect((await call('PUT', `/api/team/${id}`, { ...header, away: 'Delft 7' }, writeKey)).status).toBe(204);
+    expect((await call('PUT', `/api/team/${id}`, { ...header, away: 'Delft 7' }, ownerKey)).status).toBe(204);
     expect((await call('GET', `/api/team/${id}`)).json.team.away).toBe('Delft 7');
 
-    expect((await call('DELETE', `/api/team/${id}`, undefined, writeKey)).status).toBe(204);
+    expect((await call('DELETE', `/api/team/${id}`, undefined, ownerKey)).status).toBe(204);
     expect((await call('GET', `/api/team/${id}`)).status).toBe(404);
     expect((await call('PUT', `/api/team/${id}/partij/1`, partij, writeKey)).status).toBe(404);
   });
 
   it('wrong key, wrong slot and odd bodies are refused', async () => {
-    const { id, writeKey } = (await call('POST', '/api/team', header)).json;
+    const { id, writeKey, ownerKey } = (await call('POST', '/api/team', header)).json;
     expect((await call('PUT', `/api/team/${id}/partij/1`, partij, 'nope')).status).toBe(401);
     expect((await call('PUT', `/api/team/${id}/partij/1`, partij)).status).toBe(401);
     expect((await call('PUT', `/api/team/${id}/partij/5`, partij, writeKey)).status).toBe(404);
@@ -138,8 +138,41 @@ describe('team sessions', () => {
     expect((await call('PATCH', `/api/team/${id}`, {}, writeKey)).status).toBe(405);
   });
 
-  it('viewers get every change and the end over SSE', async () => {
+  it('the invitation key writes partijen; only the owner key changes the team or ends it', async () => {
+    const { id, writeKey, ownerKey } = (await call('POST', '/api/team', header)).json;
+    expect(ownerKey).toBeTruthy();
+    expect(ownerKey).not.toBe(writeKey);
+    // A teammate with the invitation: writes a partij, cannot rename or wipe the evening
+    expect((await call('PUT', `/api/team/${id}/partij/2`, partij, writeKey)).status).toBe(204);
+    expect((await call('PUT', `/api/team/${id}`, { ...header, away: 'Anders' }, writeKey)).status).toBe(401);
+    expect((await call('DELETE', `/api/team/${id}`, undefined, writeKey)).status).toBe(401);
+    expect((await call('GET', `/api/team/${id}`)).json.partijen['2']).toBeTruthy();
+    // The owner may
+    expect((await call('PUT', `/api/team/${id}`, { ...header, away: 'Delft 7' }, ownerKey)).status).toBe(204);
+    expect((await call('DELETE', `/api/team/${id}`, undefined, ownerKey)).status).toBe(204);
+  });
+
+  it('verify tells a wrong key from a right one and what the key may do', async () => {
+    const { id, writeKey, ownerKey } = (await call('POST', '/api/team', header)).json;
+    expect((await call('GET', `/api/team/${id}/verify`, undefined, writeKey)).json).toEqual({ role: 'writer' });
+    expect((await call('GET', `/api/team/${id}/verify`, undefined, ownerKey)).json).toEqual({ role: 'owner' });
+    expect((await call('GET', `/api/team/${id}/verify`, undefined, 'nope')).status).toBe(401);
+    expect((await call('GET', `/api/team/${id}/verify`)).status).toBe(401);
+    expect((await call('GET', '/api/team/aaaaaaaaaaaa/verify', undefined, writeKey)).status).toBe(404);
+  });
+
+  it('a partij cannot show more games than it takes to win', async () => {
     const { id, writeKey } = (await call('POST', '/api/team', header)).json;
+    const put = (body) => call('PUT', `/api/team/${id}/partij/1`, body, writeKey);
+    expect((await put({ status: 'between', gamesWon: [7, 0] })).status).toBe(400);
+    expect((await put({ status: 'between', bestOf: 5, gamesWon: [4, 0] })).status).toBe(400);
+    expect((await put({ status: 'finished', bestOf: 5, gamesWon: [3, 3] })).status).toBe(400);
+    expect((await put({ status: 'finished', bestOf: 3, gamesWon: [2, 1] })).status).toBe(204);
+    expect((await put({ status: 'finished', bestOf: 5, gamesWon: [3, 2] })).status).toBe(204);
+  });
+
+  it('viewers get every change and the end over SSE', async () => {
+    const { id, writeKey, ownerKey } = (await call('POST', '/api/team', header)).json;
     const events = await openEvents(id);
     expect(events.status).toBe(200);
     await call('PUT', `/api/team/${id}/partij/2`, partij, writeKey);
@@ -148,7 +181,7 @@ describe('team sessions', () => {
     expect(got.map((e) => e.event)).toEqual(['state', 'state', 'state']);
     expect(got[0].data.partijen).toEqual({});
     expect(got[2].data.partijen['2'].score).toEqual([5, 2]);
-    await call('DELETE', `/api/team/${id}`, undefined, writeKey);
+    await call('DELETE', `/api/team/${id}`, undefined, ownerKey);
     const all = await events.read(4);
     expect(all[3].event).toBe('ended');
     expect(all[3].data.partijen['2']).toBeTruthy();
@@ -173,7 +206,7 @@ describe('team sessions', () => {
   });
 
   it('an idle team match is removed by its alarm, two hours after the last update', async () => {
-    const { id, writeKey } = (await call('POST', '/api/team', header)).json;
+    const { id, writeKey, ownerKey } = (await call('POST', '/api/team', header)).json;
     await call('PUT', `/api/team/${id}/partij/4`, partij, writeKey);
     expect(await runDurableObjectAlarm(teamStub(id))).toBe(true);
     expect((await call('GET', `/api/team/${id}`)).status).toBe(404);
@@ -181,9 +214,9 @@ describe('team sessions', () => {
 
   it('team matches count in the health check and are released', async () => {
     const before = (await call('GET', '/health')).json.sessions;
-    const { id, writeKey } = (await call('POST', '/api/team', header)).json;
+    const { id, writeKey, ownerKey } = (await call('POST', '/api/team', header)).json;
     expect((await call('GET', '/health')).json.sessions).toBe(before + 1);
-    await call('DELETE', `/api/team/${id}`, undefined, writeKey);
+    await call('DELETE', `/api/team/${id}`, undefined, ownerKey);
     expect((await call('GET', '/health')).json.sessions).toBe(before);
   });
 });

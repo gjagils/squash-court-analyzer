@@ -77,6 +77,10 @@ public struct TeamPartij: Codable, Equatable, Sendable {
     /// match picks the coupling up again. Cleared when the result is linked.
     public var trackingMatchId: String?
     public var trackingOwnIsPlayer1: Bool?
+    /// Whether our player was Speler 1 of the linked match, as chosen when it
+    /// was linked: "Vernieuwen" must not guess it again from a name that can
+    /// be edited in the meantime
+    public var linkedOwnIsPlayer1: Bool?
 
     public init(slot: Int, ownPlayer: String = "", opponentPlayer: String = "", games: [TeamGame] = [],
                 playOrder: Int? = nil, linkedMatchId: String? = nil, linkedKind: String? = nil, bestOf: Int = 5) {
@@ -184,9 +188,22 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         games = TeamPartij.linkedGames(from: summary, ownIsPlayer1: ownIsPlayer1)
         linkedMatchId = summary.id
         linkedKind = summary.kind
+        linkedOwnIsPlayer1 = ownIsPlayer1
         trackingMatchId = nil
         trackingOwnIsPlayer1 = nil
         bestOf = summary.bestOf
+    }
+
+    /// Reads the linked match again (e.g. after its result was completed),
+    /// from the same player's side as when it was linked. Without a stored
+    /// side (a link from before) the name is compared, ignoring case and spaces.
+    public mutating func refreshLink(from summary: MatchHistorySummary) {
+        var ownFirst = linkedOwnIsPlayer1
+        if ownFirst == nil {
+            let own = ownPlayer.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            ownFirst = summary.player1Name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == own
+        }
+        link(summary, ownIsPlayer1: ownFirst == true)
     }
 
     /// The games of a coach match just played, seen from our player: the
@@ -207,6 +224,7 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         games = result
         linkedMatchId = match.id.uuidString
         linkedKind = "coach"
+        linkedOwnIsPlayer1 = ownIsPlayer1
         trackingMatchId = nil
         trackingOwnIsPlayer1 = nil
         bestOf = match.bestOf
@@ -228,6 +246,7 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         games = result
         linkedMatchId = match.id.uuidString
         linkedKind = "referee"
+        linkedOwnIsPlayer1 = ownIsPlayer1
         trackingMatchId = nil
         trackingOwnIsPlayer1 = nil
         bestOf = match.bestOf
@@ -237,6 +256,7 @@ public struct TeamPartij: Codable, Equatable, Sendable {
     public mutating func unlink() {
         linkedMatchId = nil
         linkedKind = nil
+        linkedOwnIsPlayer1 = nil
         trackingMatchId = nil
         trackingOwnIsPlayer1 = nil
     }
@@ -325,13 +345,17 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     public var updatedAt: Date
     /// The live team match on the server (Live delen, or joined with a code)
     public var liveId: String?
+    /// The key in the invitation: writes a partij, nothing more
     public var liveKey: String?
+    /// Only on the phone that started the live page: ends it, changes its team names
+    public var liveOwnerKey: String?
 
     public init(id: UUID = UUID(), date: Date, home: String, away: String, ownSide: TeamSide,
                 fixtureId: String? = nil, partijen: [TeamPartij] = [], updatedAt: Date = Date(),
-                liveId: String? = nil, liveKey: String? = nil) {
+                liveId: String? = nil, liveKey: String? = nil, liveOwnerKey: String? = nil) {
         self.liveId = liveId
         self.liveKey = liveKey
+        self.liveOwnerKey = liveOwnerKey
         self.id = id
         self.date = date
         self.home = home
@@ -354,7 +378,8 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     /// through `init`)
     public func normalized() -> TeamMatch {
         TeamMatch(id: id, date: date, home: home, away: away, ownSide: ownSide, fixtureId: fixtureId,
-                  partijen: partijen, updatedAt: updatedAt, liveId: liveId, liveKey: liveKey)
+                  partijen: partijen, updatedAt: updatedAt, liveId: liveId, liveKey: liveKey,
+                  liveOwnerKey: liveOwnerKey)
     }
 
     /// A match of Mijn team: our side follows from the team's name
@@ -416,6 +441,8 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     }
 
     public var isLive: Bool { liveId != nil && liveKey != nil }
+    /// This phone started the live page (and may end it)
+    public var isLiveOwner: Bool { isLive && liveOwnerKey != nil }
 
     /// The partij a coach or referee match in progress was started for, if any
     public func partijTracking(matchId: String) -> TeamPartij? {

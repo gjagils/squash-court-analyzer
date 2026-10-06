@@ -88,8 +88,31 @@ export function escapeHtml(text) {
  * larger, { status: 400 } when not JSON; resolves null for an empty body.
  */
 export async function readJson(request, limit = MAX_BODY_BYTES) {
-  const bytes = new Uint8Array(await request.arrayBuffer());
-  if (bytes.length > limit) throw Object.assign(new Error('Te groot'), { status: 413 });
+  const tooLarge = () => Object.assign(new Error('Te groot'), { status: 413 });
+  // Refuse on the announced size before anything is read, and read a body
+  // without (or with a wrong) length in pieces, stopping at the limit
+  const declared = Number(request.headers.get('content-length'));
+  if (Number.isFinite(declared) && declared > limit) throw tooLarge();
+  if (!request.body) return null;
+  const reader = request.body.getReader();
+  const chunks = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.length;
+    if (total > limit) {
+      await reader.cancel();
+      throw tooLarge();
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.length;
+  }
   if (bytes.length === 0) return null;
   try {
     return JSON.parse(new TextDecoder().decode(bytes));
@@ -170,6 +193,9 @@ export function validatePartij(input) {
   const server = input.server === undefined ? 1 : cleanInt(input.server, 1, 2);
   const side = input.side === undefined ? 'R' : input.side;
   if (bestOf === null || gamesWon === null || score === null || server === null) return null;
+  // A partij is decided at the games to win: nobody has more, and not both have them
+  const toWin = Math.floor(bestOf / 2) + 1;
+  if (gamesWon[0] > toWin || gamesWon[1] > toWin || (gamesWon[0] === toWin && gamesWon[1] === toWin)) return null;
   if (!STATUSES.has(input.status)) return null;
   if (side !== 'L' && side !== 'R') return null;
   const gamesInput = input.games === undefined ? [] : input.games;

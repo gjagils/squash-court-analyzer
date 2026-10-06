@@ -53,6 +53,7 @@ public enum TeamBackup {
         for index in 0..<matches.count {
             matches[index].liveId = nil
             matches[index].liveKey = nil
+            matches[index].liveOwnerKey = nil
         }
         result.teamMatches = matches.isEmpty ? nil : matches
         let ids = TeamRoster.ids()

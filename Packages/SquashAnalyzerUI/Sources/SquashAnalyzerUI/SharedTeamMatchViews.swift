@@ -148,6 +148,36 @@ public enum TeamMatchSupport {
         TeamLive.shared.unbind(matchId: match.id)
     }
 
+    /// The match-day question was answered: the finished match goes into that
+    /// partij, through the same route as a match started for it (stored again
+    /// from what is stored now, so what teammates put on the live page in the
+    /// meantime is not overwritten, and the live page gets the result)
+    @MainActor public static func linkOnMatchDay(coach match: Match, team: TeamMatch, slot: Int, ownIsPlayer1: Bool,
+                                                 store: any TeamMatchStore) async {
+        await ensureStored(team, store: store)
+        let target = TeamTarget.make(team: team, slot: slot, ownIsPlayer1: ownIsPlayer1,
+                                     ownName: ownIsPlayer1 ? match.player1Name : match.player2Name,
+                                     opponentName: ownIsPlayer1 ? match.player2Name : match.player1Name)
+        await link(coach: match, target: target, store: store)
+    }
+
+    @MainActor public static func linkOnMatchDay(referee match: RefereeMatch, team: TeamMatch, slot: Int, ownIsPlayer1: Bool,
+                                                 store: any TeamMatchStore) async {
+        await ensureStored(team, store: store)
+        let target = TeamTarget.make(team: team, slot: slot, ownIsPlayer1: ownIsPlayer1,
+                                     ownName: ownIsPlayer1 ? match.player1Name : match.player2Name,
+                                     opponentName: ownIsPlayer1 ? match.player2Name : match.player1Name)
+        await link(referee: match, target: target, store: store)
+    }
+
+    /// A team match from the fixtures of Mijn team is not saved until a partij is linked
+    @MainActor private static func ensureStored(_ team: TeamMatch, store: any TeamMatchStore) async {
+        if let all = try? await store.loadAll() {
+            for stored in all where stored.id == team.id { return }
+        }
+        try? await store.save(team)
+    }
+
     /// The finished referee match goes into the partij it was started for
     @MainActor public static func link(referee match: RefereeMatch, target: TeamTarget, store: any TeamMatchStore) async {
         guard let all = try? await store.loadAll() else { return }
@@ -481,6 +511,8 @@ public struct SharedTeamMatchView: View {
     @State private var confirmStopLive = false
     /// A tracked match being played for a partij (full screen)
     @State private var tracking: TeamTrackRequest? = nil
+    /// Asked for in the editor; opens as soon as the editor sheet is gone
+    @State private var pendingTrack: TeamTrackRequest? = nil
     @State private var players: [PlayerProfile] = []
     @AppStorage(TeamRoster.storageKey) private var rosterRaw = ""
     @Environment(\.dismiss) private var dismiss
@@ -502,10 +534,11 @@ public struct SharedTeamMatchView: View {
                     header
                     partijenList
                     TeamLiveCard(match: match, busy: liveBusy, canShare: tools.shareText != nil,
+                                 problem: liveProblem,
                                  onGoLive: { Task { await goLive() } },
                                  onShareViewers: { tools.shareText?(TeamLiveTexts.viewers(match, baseURL: TeamLive.shared.baseURL)) },
                                  onShareInvite: { tools.shareText?(TeamLiveTexts.invite(match)) },
-                                 onRefresh: { Task { await syncFromLive(showGone: true) } },
+                                 onRefresh: { Task { await refreshLive() } },
                                  onStop: { confirmStopLive = true })
                     if let message {
                         Text(message).font(.system(size: 12)).foregroundColor(SharedColors.error)
@@ -523,13 +556,21 @@ public struct SharedTeamMatchView: View {
             players = (try? await tools.playerStore.loadPlayers()) ?? []
             await syncFromLive(showGone: false)
         }
-        .alert("Live stoppen?", isPresented: $confirmStopLive) {
-            Button("Stop live", role: .destructive) { Task { await stopLive() } }
+        .alert(match.isLiveOwner ? "Live stoppen?" : "Live verlaten?", isPresented: $confirmStopLive) {
+            Button(match.isLiveOwner ? "Stop live" : "Verlaat live", role: .destructive) { Task { await stopLive() } }
             Button("Annuleer", role: .cancel) { }
         } message: {
-            Text("De livepagina is meteen weg voor iedereen. Je teamwedstrijd blijft in de app staan.")
+            Text(match.isLiveOwner
+                 ? "De livepagina is meteen weg voor iedereen. Je teamwedstrijd blijft in de app staan."
+                 : "Je partijen komen niet meer op de livepagina van je teamgenoot. De pagina blijft bestaan voor de rest; je teamwedstrijd blijft in de app staan.")
         }
-        .sheet(isPresented: Binding(get: { editing != nil }, set: { if !$0 { editing = nil } })) {
+        .sheet(isPresented: Binding(get: { editing != nil }, set: { if !$0 { editing = nil } }), onDismiss: {
+            // The full screen may only open once the sheet is really gone
+            if let request = pendingTrack {
+                pendingTrack = nil
+                tracking = request
+            }
+        }) {
             if let editing {
                 TeamPartijEditor(partij: editing, match: match, roster: rosterNames, historyStore: tools.historyStore) { updated in
                     var changed = match
@@ -559,6 +600,26 @@ public struct SharedTeamMatchView: View {
         }
     }
 
+    /// Why this phone's partijen may not reach the live page, for the card
+    private var liveProblem: String? {
+        guard let id = match.liveId else { return nil }
+        if TeamLive.shared.isRejected(id) {
+            return "De livepagina wil je partij niet hebben: de uitnodigingscode klopt niet (meer). Vraag je teamgenoot de uitnodiging opnieuw te sturen en doe weer mee."
+        }
+        if TeamLive.shared.offline {
+            return "Geen verbinding: je partij staat nog niet op de livepagina. Tik op Vernieuwen zodra je weer internet hebt."
+        }
+        return nil
+    }
+
+    /// "Vernieuwen": send our partijen again (what failed earlier), then read what teammates put there
+    private func refreshLive() async {
+        liveBusy = true
+        await TeamLive.shared.pushAll(match)
+        liveBusy = false
+        await syncFromLive(showGone: true)
+    }
+
     /// Our players to pick from: "In mijn team" first, then Mijn team
     private var rosterNames: [String] {
         TeamMatchSupport.rosterNames(players: players, team: team, rosterRaw: rosterRaw)
@@ -569,12 +630,12 @@ public struct SharedTeamMatchView: View {
     private func startTracking(_ updated: TeamPartij, kind: String) {
         var changed = match
         changed.update(updated)
+        match = changed
+        // Asked for before the sheet closes: its onDismiss opens the full screen
+        pendingTrack = TeamTrackRequest(slot: updated.slot, kind: kind)
         editing = nil
         Task { @MainActor in
             await save(changed)
-            // The editor sheet is closing: wait for it before the full screen opens
-            try? await Task.sleep(nanoseconds: 500_000_000)
-            tracking = TeamTrackRequest(slot: updated.slot, kind: kind)
         }
     }
 
@@ -759,8 +820,13 @@ public struct SharedTeamMatchView: View {
             // Live: only the partijen this save changed go up, so another
             // phone's partij is never overwritten with an old copy
             if changed.isLive {
-                for slot in 1...4 where before.partij(slot) != changed.partij(slot) && changed.partij(slot).hasEntry {
-                    _ = await TeamLive.shared.push(changed.partij(slot), in: changed)
+                for slot in 1...4 where before.partij(slot) != changed.partij(slot) {
+                    if changed.partij(slot).hasEntry {
+                        _ = await TeamLive.shared.push(changed.partij(slot), in: changed)
+                    } else if before.partij(slot).hasEntry {
+                        // Emptied here: it leaves the live page too
+                        _ = await TeamLive.shared.clear(slot: slot, in: changed)
+                    }
                 }
             }
         } catch {
@@ -777,6 +843,7 @@ public struct SharedTeamMatchView: View {
             var changed = match
             changed.liveId = created.id
             changed.liveKey = created.writeKey
+            changed.liveOwnerKey = created.ownerKey
             try await store.save(changed)
             match = changed
             onChange(changed)
@@ -790,7 +857,9 @@ public struct SharedTeamMatchView: View {
 
     private func stopLive() async {
         liveBusy = true
-        await TeamLive.shared.stop(match)
+        // Only the phone that started it ends the page for everyone; a phone
+        // that joined just leaves it
+        if match.isLiveOwner { await TeamLive.shared.stop(match) }
         liveBusy = false
         await clearLive()
     }
@@ -800,6 +869,7 @@ public struct SharedTeamMatchView: View {
         var changed = match
         changed.liveId = nil
         changed.liveKey = nil
+        changed.liveOwnerKey = nil
         try? await store.save(changed)
         match = changed
         onChange(changed)
@@ -819,8 +889,14 @@ public struct SharedTeamMatchView: View {
             if showGone { message = nil }
         } catch let error as TeamLiveError {
             if error == TeamLiveError.gone {
-                await clearLive()
-                message = "De livepagina is afgelopen (2 uur na de laatste update) en wordt niet meer bijgewerkt."
+                if showGone {
+                    // Asked for by the user: the page is really gone, the live state ends here
+                    await clearLive()
+                    message = "De livepagina is afgelopen (2 uur na de laatste update) en wordt niet meer bijgewerkt."
+                } else {
+                    // On opening the screen: not yet sure enough to throw the key away
+                    message = "De livepagina lijkt afgelopen. Tik op Vernieuwen om dat te bevestigen."
+                }
             } else if showGone {
                 message = "Geen verbinding om de livepagina te lezen."
             }
@@ -1148,8 +1224,7 @@ struct TeamPartijEditor: View {
         historyLoaded = false
         await loadHistory()
         for entry in history where entry.id == id {
-            let ownIsPlayer1 = entry.player1Name == partij.ownPlayer
-            partij.link(entry, ownIsPlayer1: ownIsPlayer1)
+            partij.refreshLink(from: entry)
         }
     }
 }
@@ -1350,9 +1425,13 @@ struct NewTeamMatchSheet: View {
 
 /// A new tracked match for one partij of the team match on screen
 struct TeamTrackRequest: Equatable {
+    /// Every request is its own: asking for the same partij again opens it again
+    let id = UUID()
     let slot: Int
     /// "coach" or "referee"
     let kind: String
+
+    static func == (a: TeamTrackRequest, b: TeamTrackRequest) -> Bool { a.id == b.id }
 }
 
 // MARK: - Verslag delen

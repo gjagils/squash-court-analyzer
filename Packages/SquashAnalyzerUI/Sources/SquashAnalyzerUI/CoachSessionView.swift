@@ -69,7 +69,7 @@ public struct CoachSessionView: View {
                 .disabled(saver.busy || saver.failed)
             } else if let pending {
                 ResumePromptCard(message: pending.resumeMessage,
-                                 onResume: { match = pending; self.pending = nil },
+                                 onResume: { resume(pending) },
                                  onNew: { startFresh(abandoning: pending) },
                                  onCancel: { close() })
                 .disabled(saver.busy || saver.failed)
@@ -192,6 +192,20 @@ public struct CoachSessionView: View {
         }
     }
 
+    /// "Hervat": the match goes on, and when it was started for a partij of a
+    /// team match that coupling comes back (result, live page)
+    private func resume(_ saved: Match) {
+        match = saved
+        pending = nil
+        guard activeTarget == nil, let teamMatchStore else { return }
+        Task { @MainActor in
+            if let target = await TeamMatchSupport.target(forMatchId: saved.id, store: teamMatchStore) {
+                activeTarget = target
+                target.bind(matchId: saved.id)
+            }
+        }
+    }
+
     private func load() async {
         await saver.perform {
             if let saved = try await store.loadInProgress() { pending = saved }
@@ -212,11 +226,18 @@ public struct CoachSessionView: View {
         match = fresh
         // "Onderdeel van een teamwedstrijd" chosen in the setup: the team match
         // must exist for the result to be linked, and a live one gets the state
-        if let target = choice.teamTarget, let teamMatch = choice.teamMatch, let teamMatchStore {
+        if let target = choice.teamTarget {
             activeTarget = target
-            Task { try? await teamMatchStore.save(teamMatch) }
         }
         activeTarget?.bind(matchId: fresh.id)
+        if let target = activeTarget, let teamMatchStore {
+            let teamMatch = choice.teamMatch
+            let matchId = fresh.id
+            Task { @MainActor in
+                if let teamMatch { try? await teamMatchStore.save(teamMatch) }
+                await TeamMatchSupport.track(target, matchId: matchId, store: teamMatchStore)
+            }
+        }
         saver.start { try await store.save(fresh) }
     }
 

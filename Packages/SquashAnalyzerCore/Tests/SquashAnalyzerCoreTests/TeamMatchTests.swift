@@ -216,6 +216,36 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertEqual(team.partij(2).ownPlayer, "Gerd-Jan")
     }
 
+    func testAMatchInProgressIsRememberedForItsPartijUntilItIsLinked() throws {
+        var team = match([])
+        let id = UUID()
+        team.startTracking(slot: 3, matchId: id.uuidString, ownIsPlayer1: false)
+        XCTAssertEqual(team.partijTracking(matchId: id.uuidString)?.slot, 3)
+        XCTAssertEqual(team.partijTracking(matchId: id.uuidString)?.trackingOwnIsPlayer1, false)
+        XCTAssertNil(team.partijTracking(matchId: UUID().uuidString))
+
+        // The names it was started with stay with the partij; the defaults stay empty
+        var named = match([])
+        named.startTracking(slot: 1, matchId: id.uuidString, ownIsPlayer1: true, ownPlayer: "Gerd-Jan", opponentPlayer: "Squash Delft 8 E1")
+        XCTAssertEqual(named.partij(1).ownPlayer, "Gerd-Jan")
+        XCTAssertEqual(named.partij(1).opponentPlayer, "")
+
+        // It survives the file: leaving and resuming later finds the coupling again
+        let data = try JSONEncoder().encode(team)
+        let back = try JSONDecoder().decode(TeamMatch.self, from: data)
+        XCTAssertEqual(back.partijTracking(matchId: id.uuidString)?.slot, 3)
+
+        // The finished match is linked and no longer "in progress"
+        let coach = Match()
+        coach.setupMatch(player1: "Gerd-Jan", player2: "Piet", startingServer: .player1,
+                         player1CoachingFocus: [], player2CoachingFocus: [], player1GamesBefore: 0, player2GamesBefore: 0)
+        var partij = team.partij(3)
+        partij.link(coach: coach, ownIsPlayer1: true)
+        team.update(partij)
+        XCTAssertNil(team.partijTracking(matchId: id.uuidString))
+        XCTAssertNil(team.partij(3).trackingOwnIsPlayer1)
+    }
+
     func testLinkingALiveMatchTakesItsGames() {
         // Coach: one game head start for player 2, two tracked games, one filled in for player 1
         let coach = Match()

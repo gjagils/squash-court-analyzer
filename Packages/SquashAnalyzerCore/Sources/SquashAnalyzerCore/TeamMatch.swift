@@ -72,6 +72,11 @@ public struct TeamPartij: Codable, Equatable, Sendable {
     public var bestOf: Int
     /// Taken over from the live page (another phone's partij); a local edit makes it ours
     public var fromLive: Bool?
+    /// A coach or referee match started for this partij that is not finished
+    /// yet (its id), and whether our player is its Speler 1: resuming that
+    /// match picks the coupling up again. Cleared when the result is linked.
+    public var trackingMatchId: String?
+    public var trackingOwnIsPlayer1: Bool?
 
     public init(slot: Int, ownPlayer: String = "", opponentPlayer: String = "", games: [TeamGame] = [],
                 playOrder: Int? = nil, linkedMatchId: String? = nil, linkedKind: String? = nil, bestOf: Int = 5) {
@@ -179,6 +184,8 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         games = TeamPartij.linkedGames(from: summary, ownIsPlayer1: ownIsPlayer1)
         linkedMatchId = summary.id
         linkedKind = summary.kind
+        trackingMatchId = nil
+        trackingOwnIsPlayer1 = nil
         bestOf = summary.bestOf
     }
 
@@ -200,6 +207,8 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         games = result
         linkedMatchId = match.id.uuidString
         linkedKind = "coach"
+        trackingMatchId = nil
+        trackingOwnIsPlayer1 = nil
         bestOf = match.bestOf
     }
 
@@ -219,6 +228,8 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         games = result
         linkedMatchId = match.id.uuidString
         linkedKind = "referee"
+        trackingMatchId = nil
+        trackingOwnIsPlayer1 = nil
         bestOf = match.bestOf
     }
 
@@ -226,6 +237,8 @@ public struct TeamPartij: Codable, Equatable, Sendable {
     public mutating func unlink() {
         linkedMatchId = nil
         linkedKind = nil
+        trackingMatchId = nil
+        trackingOwnIsPlayer1 = nil
     }
 }
 
@@ -395,6 +408,26 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     }
 
     public var isLive: Bool { liveId != nil && liveKey != nil }
+
+    /// The partij a coach or referee match in progress was started for, if any
+    public func partijTracking(matchId: String) -> TeamPartij? {
+        for partij in partijen where partij.trackingMatchId == matchId { return partij }
+        return nil
+    }
+
+    /// Remembers that the tracked match `matchId` was started for this partij;
+    /// a partij has one tracked match at a time
+    /// The names the match was started with go into the partij too (the
+    /// defaults stay empty), so a resumed match keeps them
+    public mutating func startTracking(slot: Int, matchId: String, ownIsPlayer1: Bool,
+                                       ownPlayer: String? = nil, opponentPlayer: String? = nil) {
+        var partij = partij(slot)
+        partij.trackingMatchId = matchId
+        partij.trackingOwnIsPlayer1 = ownIsPlayer1
+        if let ownPlayer, !partij.hasEntry { partij.ownPlayer = ownPlayer }
+        if let opponentPlayer, !partij.hasEntry { partij.opponentPlayer = opponentPlayer }
+        update(partij)
+    }
 
     /// The partij a tracked match is linked to, if any
     public func partijLinked(to matchId: String) -> TeamPartij? {

@@ -112,6 +112,29 @@ public struct TeamTarget: Equatable {
 }
 
 public enum TeamMatchSupport {
+    /// A match started for a partij is remembered in the team match, so that
+    /// leaving and resuming it later picks the coupling up again
+    @MainActor public static func track(_ target: TeamTarget, matchId: UUID, store: any TeamMatchStore) async {
+        guard let all = try? await store.loadAll() else { return }
+        for var team in all where team.id == target.teamMatchId {
+            team.startTracking(slot: target.slot, matchId: matchId.uuidString, ownIsPlayer1: target.ownIsPlayer1,
+                               ownPlayer: target.ownPlayer, opponentPlayer: target.opponentPlayer)
+            try? await store.save(team)
+        }
+    }
+
+    /// The coupling of a resumed match, from the team match it was started for
+    @MainActor public static func target(forMatchId id: UUID, store: any TeamMatchStore) async -> TeamTarget? {
+        guard let all = try? await store.loadAll() else { return nil }
+        for team in all {
+            if let partij = team.partijTracking(matchId: id.uuidString) {
+                return TeamTarget.make(team: team, slot: partij.slot, ownIsPlayer1: partij.trackingOwnIsPlayer1,
+                                       ownName: team.ownDisplayName(partij), opponentName: team.opponentDisplayName(partij))
+            }
+        }
+        return nil
+    }
+
     /// The finished coach match goes into the partij it was started for
     @MainActor public static func link(coach match: Match, target: TeamTarget, store: any TeamMatchStore) async {
         guard let all = try? await store.loadAll() else { return }

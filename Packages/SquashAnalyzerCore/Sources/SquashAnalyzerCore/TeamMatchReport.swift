@@ -62,12 +62,12 @@ public enum TeamMatchReport {
     }
 
     /// "3-1" of a partij, home first
-    static func standText(_ partij: TeamPartij, match: TeamMatch) -> String {
+    public static func standText(_ partij: TeamPartij, match: TeamMatch) -> String {
         match.ownSide == TeamSide.home ? "\(partij.ownGames)-\(partij.theirGames)" : "\(partij.theirGames)-\(partij.ownGames)"
     }
 
     /// "11-8, 9-11", home first
-    static func gamesText(_ partij: TeamPartij, match: TeamMatch) -> String {
+    public static func gamesText(_ partij: TeamPartij, match: TeamMatch) -> String {
         match.ownSide == TeamSide.home ? partij.gamesText : flipped(partij)
     }
 
@@ -211,15 +211,6 @@ extension ResultCard {
     /// The picture of a team match: both team names, the games as the big
     /// score (home is the orange side), who won, and a chip per partij.
     public static func from(_ match: TeamMatch) -> ResultCard {
-        var chips: [Chip] = []
-        for partij in match.partijen.sorted(by: { a, b in a.slot < b.slot }) where partij.hasEntry {
-            var winner: Player? = nil
-            if let ownWon = partij.ownWon {
-                let homeWon = ownWon == (match.ownSide == TeamSide.home)
-                winner = homeWon ? Player.player1 : Player.player2
-            }
-            chips.append(Chip(label: partij.label, score: TeamMatchReport.standText(partij, match: match), winner: winner))
-        }
         let current = match.score
         var winner: Player? = nil
         var text: String? = nil
@@ -239,8 +230,26 @@ extension ResultCard {
             winner = match.homeGames > match.awayGames ? Player.player1 : Player.player2
             text = "\(match.homeGames > match.awayGames ? match.home : match.away) leidt \(max(match.homeGames, match.awayGames))-\(min(match.homeGames, match.awayGames))"
         }
-        return ResultCard(title: title, player1Name: match.home, player2Name: match.away,
-                          player1Score: match.homeGames, player2Score: match.awayGames,
-                          winner: winner, winnerText: text, chips: chips)
+        var card = ResultCard(title: title, player1Name: match.home, player2Name: match.away,
+                              player1Score: match.homeGames, player2Score: match.awayGames,
+                              winner: winner, winnerText: text, chips: [])
+        // Under the score: who played whom, the games and the stand per partij (the
+        // quiet replacement of the chips, which only had the stand)
+        var rows: [Row] = []
+        for partij in match.partijen.sorted(by: { a, b in a.slot < b.slot }) where partij.hasEntry {
+            let ownIsHome = match.ownSide == TeamSide.home
+            var rowWinner: Player? = nil
+            if let ownWon = partij.ownWon {
+                rowWinner = ownWon == ownIsHome ? Player.player1 : Player.player2
+            }
+            let own = match.ownDisplayName(partij)
+            let their = match.opponentDisplayName(partij)
+            rows.append(Row(label: partij.label, home: ownIsHome ? own : their, away: ownIsHome ? their : own,
+                            score: TeamMatchReport.standText(partij, match: match),
+                            games: TeamMatchReport.gamesText(partij, match: match).replacingOccurrences(of: ", ", with: " · "),
+                            winner: rowWinner))
+        }
+        card.rows = rows
+        return card
     }
 }

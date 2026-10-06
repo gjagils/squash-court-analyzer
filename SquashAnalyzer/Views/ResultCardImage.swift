@@ -58,6 +58,10 @@ struct ResultCardImage: View {
                     .multilineTextAlignment(.center)
             }
 
+            if !card.rows.isEmpty {
+                rowsView
+            }
+
             if !card.chips.isEmpty {
                 HStack(spacing: 8) {
                     ForEach(Array(card.chips.enumerated()), id: \.offset) { _, chip in
@@ -81,6 +85,59 @@ struct ResultCardImage: View {
         .frame(width: width)
         .frame(maxWidth: width == nil ? .infinity : nil)
         .background(background)
+    }
+
+    /// Team match: a quiet list under the score, one partij per line (who played
+    /// whom, the stand and the games), only a hairline between the lines
+    private var rowsView: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("PARTIJEN")
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .tracking(3)
+                .foregroundColor(muted)
+                .padding(.bottom, 6)
+            ForEach(Array(card.rows.enumerated()), id: \.offset) { index, row in
+                if index > 0 {
+                    Rectangle().fill(Color.white.opacity(0.08)).frame(height: 1)
+                }
+                rowView(row).padding(.vertical, 11)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 4)
+    }
+
+    private func rowView(_ row: ResultCard.Row) -> some View {
+        // The winner of the partij in their colour, the other side muted; open: both calm
+        func tone(_ player: Player) -> Color {
+            guard let winner = row.winner else { return AppColors.textSecondary }
+            return winner == player ? color(player) : muted
+        }
+        let home = Text(row.home).fontWeight(row.winner == .player1 ? .semibold : .regular).foregroundColor(tone(.player1))
+        let dash = Text("  –  ").foregroundColor(muted)
+        let away = Text(row.away).fontWeight(row.winner == .player2 ? .semibold : .regular).foregroundColor(tone(.player2))
+        return HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Text(row.label)
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .tracking(1)
+                .foregroundColor(muted)
+                .frame(width: 24, alignment: .leading)
+            VStack(alignment: .leading, spacing: 4) {
+                (home + dash + away)
+                    .font(.system(size: 16, design: .rounded))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                Text(row.games)
+                    .font(.system(size: 12, design: .rounded))
+                    .foregroundColor(muted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            Spacer(minLength: 8)
+            Text(row.score)
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .foregroundColor(row.winner.map { color($0) } ?? AppColors.textPrimary)
+        }
     }
 
     private func side(_ player: Player) -> some View {
@@ -163,4 +220,18 @@ struct ResultCardImage: View {
                                   player1Games: 2, player2Games: 3, matchWinner: .player2, games: games,
                                   startedAt: Date(), duration: 0)
     return ResultCardImage(card: ResultCard.from(report))
+}
+
+#Preview("Teamwedstrijd") {
+    let card = ResultCard(title: "TEAMWEDSTRIJD KLAAR", player1Name: "All Inn Squash 8", player2Name: "Squash Delft 8",
+                          player1Score: 9, player2Score: 8, winner: .player1, winnerText: "All Inn Squash 8 wint de teamwedstrijd",
+                          chips: [])
+    var rowsCard = card
+    rowsCard.rows = [
+        ResultCard.Row(label: "E1", home: "Paul Steenks", away: "Vish Delft", score: "2-3", games: "14-12 · 5-11 · 3-11 · 11-9 · 6-11", winner: .player2),
+        ResultCard.Row(label: "E2", home: "Kristian Koster", away: "Sjors Delft", score: "1-3", games: "8-11 · 11-9 · 8-11 · 10-12", winner: .player2),
+        ResultCard.Row(label: "E3", home: "Niels van Sevenhoven", away: "Luis delft", score: "3-2", games: "17-15 · 8-11 · 9-11 · 11-7 · 11-6", winner: .player1),
+        ResultCard.Row(label: "E4", home: "Gerd-Jan van Gils", away: "Han", score: "3-0", games: "12-10 · 12-10 · 11-3", winner: .player1),
+    ]
+    return ResultCardImage(card: rowsCard)
 }

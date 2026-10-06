@@ -14,6 +14,30 @@ public struct ResultCard: Equatable {
         public let winner: Player?
     }
 
+    /// One line under the score of a team match: who played whom and how it went
+    public struct Row: Equatable {
+        /// "E1"
+        public let label: String
+        /// The home player (the orange side), then the away player
+        public let home: String
+        public let away: String
+        /// Games of this partij, home first: "2-3"
+        public let score: String
+        /// The games, home first: "14-12 · 5-11 · 3-11"; "–" for a game without a score
+        public let games: String
+        /// Who won the partij (player1 = home); nil while it is open
+        public let winner: Player?
+
+        public init(label: String, home: String, away: String, score: String, games: String, winner: Player?) {
+            self.label = label
+            self.home = home
+            self.away = away
+            self.score = score
+            self.games = games
+            self.winner = winner
+        }
+    }
+
     /// "WEDSTRIJD KLAAR", "GAME 2 KLAAR" or "TUSSENSTAND"
     public let title: String
     public let player1Name: String
@@ -31,6 +55,8 @@ public struct ResultCard: Equatable {
     /// person icon; nil when the player has none
     public var player1Photo: Data? = nil
     public var player2Photo: Data? = nil
+    /// A line per partij at the bottom of a team match picture (empty for a single match)
+    public var rows: [Row] = []
 
     public init(title: String, player1Name: String, player2Name: String, player1Score: Int, player2Score: Int,
                 winner: Player?, winnerText: String?, chips: [Chip], footer: String = "Squash Analyzer") {

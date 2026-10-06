@@ -385,7 +385,7 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertEqual(lines[2], "2-2 in partijen · punten All Inn Squash 8 12 · Squash Delft 8 8")
     }
 
-    func testThePictureShowsTheGamesAndAChipPerPartij() {
+    func testThePictureShowsWhoPlayedWhomWithTheGamesPerPartij() {
         let card = ResultCard.from(decided())
         XCTAssertEqual(card.title, "TEAMWEDSTRIJD KLAAR")
         XCTAssertEqual(card.player1Name, "All Inn Squash 8")
@@ -393,11 +393,14 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertEqual(card.player2Score, 8)
         XCTAssertEqual(card.winner, Player.player1)
         XCTAssertEqual(card.winnerText, "All Inn Squash 8 wint de teamwedstrijd")
-        XCTAssertEqual(card.chips.count, 4)
-        XCTAssertEqual(card.chips[0].label, "E1")
-        XCTAssertEqual(card.chips[0].score, "3-0")
-        XCTAssertEqual(card.chips[0].winner, Player.player1)
-        XCTAssertEqual(card.chips[2].winner, Player.player2)
+        XCTAssertTrue(card.chips.isEmpty, "the rows replace the chips of a team match")
+        XCTAssertEqual(card.rows.count, 4)
+        XCTAssertEqual(card.rows[0].label, "E1")
+        XCTAssertEqual(card.rows[0].score, "3-0")
+        XCTAssertEqual(card.rows[0].winner, Player.player1)
+        XCTAssertEqual(card.rows[2].winner, Player.player2)
+        // Home first, the games with a middle dot, a game without a score is a dash
+        XCTAssertFalse(card.rows[0].games.contains(","), card.rows[0].games)
 
         // Away: the orange side is still home
         let away = ResultCard.from(match([partij(1, [(11, 5), (11, 7), (11, 9)])], ownSide: .away))
@@ -405,8 +408,12 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertEqual(away.player1Score, 0)
         XCTAssertEqual(away.player2Score, 3)
         XCTAssertEqual(away.winner, Player.player2)
-        XCTAssertEqual(away.chips[0].score, "0-3")
-        XCTAssertEqual(away.chips[0].winner, Player.player2)
+        XCTAssertEqual(away.rows[0].score, "0-3")
+        XCTAssertEqual(away.rows[0].winner, Player.player2)
+        XCTAssertEqual(away.rows[0].games, "5-11 · 7-11 · 9-11", "seen from home: the games turned around")
+        // Names: the home player first (we play away, so the opponent is on the left)
+        XCTAssertEqual(away.rows[0].home, "Zij1")
+        XCTAssertEqual(away.rows[0].away, "Wij1")
         XCTAssertEqual(ResultCard.from(match([])).title, "TEAMWEDSTRIJD")
     }
 

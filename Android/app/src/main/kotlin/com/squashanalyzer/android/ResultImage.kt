@@ -59,7 +59,10 @@ object ResultImage {
 
     fun render(card: ResultCard): Bitmap {
         val chips = card.chips.toList()
-        val height = 1180
+        val rows = card.rows.toList()
+        // A team match picture has a line per partij under the score and is taller for it
+        val rowHeight = 150f
+        val height = if (rows.isEmpty()) 1180 else (1000f + rows.size * rowHeight + 150f).toInt()
         val bitmap = Bitmap.createBitmap(WIDTH, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawColor(background)
@@ -135,11 +138,53 @@ object ResultImage {
             }
         }
 
+        // Team match: a quiet line per partij (who played whom, the games, the stand),
+        // only a hairline between them
+        if (rows.isNotEmpty()) {
+            val header = paint(26f, muted, bold = true, align = Paint.Align.LEFT).apply { letterSpacing = 0.25f }
+            canvas.drawText("PARTIJEN", PADDING, 985f, header)
+            val hairline = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(20, 255, 255, 255); strokeWidth = 2f }
+            val nameX = PADDING + 78f
+            val scoreWidth = 150f
+            val room = WIDTH - PADDING - scoreWidth - nameX
+            var y = 1000f
+            for (row in rows) {
+                canvas.drawLine(PADDING, y, WIDTH - PADDING, y, hairline)
+                val baseline = y + 66f
+                canvas.drawText(row.label, PADDING, baseline, paint(26f, muted, align = Paint.Align.LEFT))
+                // The winner of the partij in their colour, the other side muted; open: both calm
+                fun tone(player: Player): Int {
+                    val winner = row.winner ?: return textSecondary
+                    return if (winner == player) color(player) else muted
+                }
+                val home = paint(42f, tone(Player.player1), bold = row.winner == Player.player1, align = Paint.Align.LEFT)
+                val dash = paint(42f, muted, align = Paint.Align.LEFT)
+                val away = paint(42f, tone(Player.player2), bold = row.winner == Player.player2, align = Paint.Align.LEFT)
+                val between = "  –  "
+                val total = home.measureText(row.home) + dash.measureText(between) + away.measureText(row.away)
+                if (total > room) {
+                    val factor = room / total
+                    home.textSize *= factor; dash.textSize *= factor; away.textSize *= factor
+                }
+                canvas.drawText(row.home, nameX, baseline, home)
+                var x = nameX + home.measureText(row.home)
+                canvas.drawText(between, x, baseline, dash)
+                x += dash.measureText(between)
+                canvas.drawText(row.away, x, baseline, away)
+                val scorePaint = paint(46f, row.winner?.let(::color) ?: textPrimary, bold = true, align = Paint.Align.RIGHT)
+                canvas.drawText(row.score, WIDTH - PADDING, baseline, scorePaint)
+                val games = paint(32f, muted, align = Paint.Align.LEFT)
+                shrinkToFit(games, row.games, WIDTH - PADDING - nameX)
+                canvas.drawText(row.games, nameX, baseline + 48f, games)
+                y += rowHeight
+            }
+        }
+
         // Footer
         val footer = paint(30f, muted, bold = true).apply { letterSpacing = 0.15f }
         val footerWidth = footer.measureText(card.footer)
-        canvas.drawCircle(centre - footerWidth / 2f - 24f, 1129f, 9f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = gold })
-        canvas.drawText(card.footer, centre + 8f, 1140f, footer)
+        canvas.drawCircle(centre - footerWidth / 2f - 24f, height - 51f, 9f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = gold })
+        canvas.drawText(card.footer, centre + 8f, height - 40f, footer)
         return bitmap
     }
 

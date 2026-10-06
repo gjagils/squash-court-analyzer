@@ -48,6 +48,9 @@ struct ResultCardPreview: View {
                     .foregroundColor(card.winner == nil ? SharedColors.textSecondary : color(card.winner ?? Player.player1))
                     .multilineTextAlignment(.center)
             }
+            if !card.rows.isEmpty {
+                rowsView
+            }
             HStack(spacing: 6) {
                 ForEach(card.chips, id: \.label) { chip in
                     VStack(spacing: 2) {
@@ -75,6 +78,59 @@ struct ResultCardPreview: View {
         .background(background)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.10), lineWidth: 1))
+    }
+
+    /// Team match: one quiet line per partij (who played whom, the stand, the games)
+    private var rowsView: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("PARTIJEN")
+                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                .tracking(2.5)
+                .foregroundColor(muted)
+                .padding(.bottom, 4)
+            ForEach(card.rows, id: \.label) { row in
+                Rectangle().fill(Color.white.opacity(0.08)).frame(height: 1)
+                rowView(row).padding(.vertical, 9)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func rowView(_ row: ResultCard.Row) -> some View {
+        // The winner of the partij in their colour, the other side muted; open: both calm
+        func tone(_ player: Player) -> Color {
+            guard let winner = row.winner else { return SharedColors.textSecondary }
+            return winner == player ? color(player) : muted
+        }
+        return HStack(alignment: .top, spacing: 8) {
+            Text(row.label)
+                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .foregroundColor(muted)
+                .frame(width: 22, alignment: .leading)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 4) {
+                    Text(row.home)
+                        .font(.system(size: 13, weight: row.winner == Player.player1 ? .semibold : .regular, design: .rounded))
+                        .foregroundColor(tone(Player.player1))
+                        .lineLimit(1)
+                    Text("–")
+                        .font(.system(size: 13))
+                        .foregroundColor(muted)
+                    Text(row.away)
+                        .font(.system(size: 13, weight: row.winner == Player.player2 ? .semibold : .regular, design: .rounded))
+                        .foregroundColor(tone(Player.player2))
+                        .lineLimit(1)
+                }
+                Text(row.games)
+                    .font(.system(size: 11, design: .rounded))
+                    .foregroundColor(muted)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 6)
+            Text(row.score)
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundColor(row.winner == nil ? SharedColors.textPrimary : color(row.winner ?? Player.player1))
+        }
     }
 
     private func side(_ player: Player) -> some View {

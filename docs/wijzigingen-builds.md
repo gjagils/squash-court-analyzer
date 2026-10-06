@@ -75,6 +75,12 @@ ontbrekende verbinding staat op de livekaart, de uitnodigingscode is zichtbaar, 
 verbindingsfout wist de sleutel niet meer, en een geleegde partij gaat ook van de pagina. De
 website roept geen Google Fonts meer aan en de deep links raken de teamzip-links niet meer.
 
+Deel verslag als **Plaatje** toont onder de stand een rustig lijstje per partij: wie tegen wie
+(thuisspeler eerst), de stand in games en de games zelf; de winnaar van de partij in zijn kleur.
+In Core is dat `ResultCard.Row` (`ResultCard.rows`, gevuld door `ResultCard.from(_ teamMatch:)`
+en getekend door `ResultCardImage` (iOS), `ResultCardPreview` (gedeeld) en `ResultImage.kt`
+(Android-canvas)); de chips per partij zijn daarvoor vervallen.
+
 Bugfix binnen dezelfde feature (6 oktober): een bijgehouden wedstrijd voor
 een partij raakte de koppeling kwijt als je hem verliet en later hervatte;
 die staat nu in de teamwedstrijd (`trackingMatchId`) en komt terug bij

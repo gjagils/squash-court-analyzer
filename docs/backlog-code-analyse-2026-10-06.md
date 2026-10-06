@@ -138,9 +138,11 @@ badgeregels, kosten) is niet zonder Gerd-Jan doorgevoerd.
       Het alert-patroon in `TeamPartijEditor` is niet aangepast.
 - [x] Docs-drift uit §7, `docs/archief/` (afgeronde plannen en instructies) en
       `docs/skip-valkuilen.md`.
-- [~] Tests uit §6: 1–4 gedaan (bestand, deep link, perspectief, sleutel, golden bytes,
-      fixture); 6 deels (Room); 7 deels (Worker: team-sleutel, verify, 413, games-clamp);
-      5, 8 (opgave, `careerBadges` 4+) en 9 (Compose-screentest, UI-testtarget) niet.
+- [~] Tests uit §6: 1–5 gedaan (bestand, deep link, perspectief, sleutel, golden bytes,
+      fixture, Vervang alles met een bron zonder wedstrijden, history-store met
+      referee- en losse spellen, `APIKeyManager`); 6 deels (Room); 7 deels (Worker:
+      team-sleutel, verify, 413, games-clamp); 8 gedaan (opgave/walkover met
+      competitiepunten, hat trick exact 3/5/7); 9 niet (Compose-screentest, UI-testtarget).
 
 ## Besluiten (6 oktober 2026) en wat er nog openstaat
 

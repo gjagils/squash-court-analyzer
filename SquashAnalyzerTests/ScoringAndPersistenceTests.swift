@@ -494,6 +494,58 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertTrue(after.isEmpty)
     }
 
+    /// §6 punt 5: the history lists coach and referee matches, gives an old referee match
+    /// (no id yet) one, opens it and deletes it with its badges
+    @MainActor
+    func testTheHistoryListsOpensAndDeletesCoachAndRefereeMatches() async throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let container = try ModelContainer(for: Schema(versionedSchema: SquashAnalyzerCurrentSchema.self),
+                                           migrationPlan: SquashAnalyzerMigrationPlan.self, configurations: [config])
+        let context = container.mainContext
+        let referee = SavedRefereeMatch(player1Name: "Jan", player2Name: "Piet", bestOf: 3,
+                                        gameResults: [RefereeGameResult(number: 1, player1Score: 11, player2Score: 7, winner: .player1),
+                                                      RefereeGameResult(number: 2, player1Score: 11, player2Score: 9, winner: .player1)])
+        XCTAssertNil(referee.matchId)
+        context.insert(referee)
+        let match = Match()
+        match.setupMatch(player1: "Een", player2: "Twee", startingServer: .player1)
+        match.currentGame.addPoint(to: .player1, pointType: .winner, at: .frontLeft, with: .drive)
+        try SwiftDataMatchRepository(context: context).upsert(match)
+        try context.save()
+
+        let store = SwiftDataMatchHistoryStore(context: context)
+        let rows = try await store.loadHistory()
+        XCTAssertEqual(rows.count, 1, "the coach match is still in progress, so it is not history yet")
+        let row = try XCTUnwrap(rows.first)
+        XCTAssertEqual(row.kind, "referee")
+        XCTAssertNotNil(referee.matchId, "an old referee match gets its id when the history opens")
+        XCTAssertEqual(row.id, referee.matchId?.uuidString)
+        XCTAssertEqual(row.winnerName, "Jan")
+        XCTAssertEqual(row.gameScoresText, "11-7, 11-9")
+        let opened = try await store.refereeMatch(id: row.id)
+        XCTAssertEqual(opened?.completedGames.count, 2)
+
+        try await store.delete(row)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<SavedRefereeMatch>()), 0)
+        let after = try await store.loadHistory()
+        XCTAssertTrue(after.isEmpty)
+    }
+
+    /// §6 punt 5: the OpenAI key lives in the Keychain, is replaced in place and can be removed
+    @MainActor
+    func testTheAPIKeyIsSavedReplacedAndRemoved() {
+        let manager = APIKeyManager.shared
+        let before = manager.openAIAPIKey
+        defer { _ = manager.setOpenAIKey(before) }
+        XCTAssertTrue(manager.setOpenAIKey("sk-test-eerste"))
+        XCTAssertEqual(manager.openAIAPIKey, "sk-test-eerste")
+        XCTAssertTrue(manager.setOpenAIKey("sk-test-tweede"))
+        XCTAssertEqual(manager.openAIAPIKey, "sk-test-tweede", "replaced, not added")
+        XCTAssertTrue(manager.setOpenAIKey(nil))
+        XCTAssertNil(manager.openAIAPIKey)
+        XCTAssertTrue(manager.setOpenAIKey(""), "removing what is not there is not an error")
+    }
+
     /// B10: the lists are always written, also empty, so the file is format 4 and
     /// "Vervang alles" knows the source had no referee or team matches
     func testAnEmptyBackupStillSaysItHasNoRefereeOrTeamMatches() throws {

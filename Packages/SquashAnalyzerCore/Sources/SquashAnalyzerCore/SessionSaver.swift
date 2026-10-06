@@ -39,8 +39,10 @@ public final class SessionSaver {
     /// (and anything queued) is saved. Ignored while a blocking operation runs:
     /// the screen is disabled then, and the operation has the final word.
     public func save(exit: Bool = false, _ write: @escaping () async throws -> Void) {
-        if exit { exitAfterSave = true }
+        // Ignored means ignored: also the wish to exit, or the next plain save
+        // would close the screen in the middle of the match
         if busy { return }
+        if exit { exitAfterSave = true }
         if saving {
             queued = write
             return
@@ -61,9 +63,11 @@ public final class SessionSaver {
     /// blocked. Returns whether it worked; on failure `failed` is set.
     @discardableResult
     public func perform(_ operation: @escaping () async throws -> Void) async -> Bool {
-        await waitUntilSaved()
+        // Blocked from the start, also while waiting for a running save: a
+        // change that arrives in between would otherwise slip in after it
         busy = true
         failed = false
+        await waitUntilSaved()
         do {
             try await operation()
             busy = false

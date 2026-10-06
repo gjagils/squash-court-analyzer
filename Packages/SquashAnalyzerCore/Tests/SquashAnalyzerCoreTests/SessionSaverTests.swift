@@ -55,6 +55,44 @@ final class SessionSaverTests: XCTestCase {
     }
 
     @MainActor
+    func testAnExitDuringABlockingOperationIsIgnoredAndLeavesNoFlagBehind() async throws {
+        let store = RecordingWrites()
+        let saver = SessionSaver(busy: true)
+        var closed = false
+        saver.onExit = { closed = true }
+        saver.save(exit: true) { try await store.write("ignored") }
+        XCTAssertFalse(saver.exitAfterSave, "an ignored exit must not stay armed")
+        XCTAssertFalse(saver.saving)
+        XCTAssertTrue(store.written.isEmpty)
+
+        // The operation ends; the next ordinary point does not close the screen
+        let worked = await saver.perform { try await store.write("operation") }
+        XCTAssertTrue(worked)
+        saver.save { try await store.write("point") }
+        await saver.waitUntilSaved()
+        XCTAssertEqual(store.written, ["operation", "point"])
+        XCTAssertFalse(closed)
+    }
+
+    @MainActor
+    func testTheScreenIsBlockedWhileAnOperationWaitsForARunningSave() async throws {
+        let store = RecordingWrites()
+        let saver = SessionSaver()
+        saver.save { try await store.write("point") }
+        let waiting = Task { await saver.perform { try await store.write("finish") } }
+        // Wait (briefly, polling) until the operation has started; the running save takes 20 ms
+        var tries = 0
+        while !saver.busy && tries < 200 {
+            tries += 1
+            try await Task.sleep(nanoseconds: 1_000_000)
+        }
+        XCTAssertTrue(saver.busy, "blocked while it waits, not only after")
+        saver.save { try await store.write("slipped in") }
+        _ = await waiting.value
+        XCTAssertEqual(store.written, ["point", "finish"], "nothing slips in between")
+    }
+
+    @MainActor
     func testExitWaitsForTheSaveAndThenCloses() async throws {
         let store = RecordingWrites()
         let saver = SessionSaver()

@@ -63,23 +63,32 @@ public enum TeamBackup {
     /// Merging adds the matches that are not there yet (the newest edit of a
     /// match wins) and the team players; replacing swaps them for the file's,
     /// but only for what the file has, so an older file wipes nothing.
-    public static func restore(_ backup: FullBackup, directory: URL, replacing: Bool) {
+    /// Throws when the file cannot be written, so the restore does not report
+    /// "done" for team matches that were not saved. Returns how many team
+    /// matches were added (not the ones that were updated).
+    @discardableResult
+    public static func restore(_ backup: FullBackup, directory: URL, replacing: Bool) throws -> Int {
+        var added = 0
         if let incoming = backup.teamMatches {
-            var current: [TeamMatch] = replacing ? [] : TeamMatchFile.read(in: directory)
+            var current: [TeamMatch] = replacing ? [] : try TeamMatchFile.load(in: directory)
             for match in incoming {
                 var found = false
                 for index in 0..<current.count where current[index].id == match.id {
                     found = true
-                    if match.updatedAt > current[index].updatedAt { current[index] = match }
+                    if match.updatedAt > current[index].updatedAt { current[index] = match.normalized() }
                 }
-                if !found { current.append(match) }
+                if !found {
+                    current.append(match.normalized())
+                    added += 1
+                }
             }
-            try? TeamMatchFile.write(current, in: directory)
+            try TeamMatchFile.write(current, in: directory)
         }
         if let ids = backup.teamPlayerIds {
             var merged: [String] = replacing ? [] : TeamRoster.ids()
             for id in ids where !merged.contains(id) { merged.append(id) }
             TeamRoster.replace(merged)
         }
+        return added
     }
 }

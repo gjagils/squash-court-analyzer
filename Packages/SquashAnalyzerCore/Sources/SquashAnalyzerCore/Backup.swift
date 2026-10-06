@@ -417,16 +417,20 @@ public struct BackupCounts: Equatable, Sendable {
     public let matches: Int
     public let games: Int
     public let badges: Int
+    /// Team matches (Competitie) added; not part of the sentence while there are none
+    public let teamMatches: Int
 
-    public init(players: Int, matches: Int, games: Int, badges: Int) {
+    public init(players: Int, matches: Int, games: Int, badges: Int, teamMatches: Int = 0) {
         self.players = players
         self.matches = matches
         self.games = games
         self.badges = badges
+        self.teamMatches = teamMatches
     }
 
     public var summary: String {
-        "\(players) spelers, \(matches) wedstrijden, \(games) games, \(badges) badges"
+        let base = "\(players) spelers, \(matches) wedstrijden, \(games) games, \(badges) badges"
+        return teamMatches > 0 ? base + ", \(teamMatches) teamwedstrijden" : base
     }
 }
 

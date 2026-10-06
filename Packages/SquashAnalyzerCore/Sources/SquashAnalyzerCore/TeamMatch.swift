@@ -349,6 +349,14 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
         self.updatedAt = updatedAt
     }
 
+    /// The same match with exactly the four slots E1–E4 in order, also when a
+    /// file has too few, too many or doubled ones (decoding does not go
+    /// through `init`)
+    public func normalized() -> TeamMatch {
+        TeamMatch(id: id, date: date, home: home, away: away, ownSide: ownSide, fixtureId: fixtureId,
+                  partijen: partijen, updatedAt: updatedAt, liveId: liveId, liveKey: liveKey)
+    }
+
     /// A match of Mijn team: our side follows from the team's name
     public static func from(fixture: LeagueFixture, ownTeam: String) -> TeamMatch {
         let side: TeamSide = TeamMatch.sameTeam(fixture.home, ownTeam) ? .home : .away
@@ -720,26 +728,62 @@ public protocol TeamMatchStore {
     func delete(id: UUID) async throws
 }
 
+/// What is wrong with the file of team matches
+public enum TeamMatchFileError: Error, Equatable {
+    /// The file could not be read; it was set aside under `savedAs` (in the
+    /// same folder) so that nothing is lost and a new save starts clean
+    case unreadable(savedAs: String)
+}
+
+/// The file holds `{"version": 1, "matches": [...]}`; the first builds wrote a
+/// bare array, which is still read
+struct TeamMatchEnvelope: Codable {
+    var version: Int
+    var matches: [TeamMatch]
+}
+
 /// The JSON file with all team matches, readable and writable without the
 /// main actor (the backup code on iOS and Android needs it synchronously)
 public enum TeamMatchFile {
     public static let fileName = "team-matches.json"
+    public static let formatVersion = 1
 
-    public static func read(in directory: URL) -> [TeamMatch] {
+    /// All matches; an absent file is an empty list. A file that cannot be
+    /// decoded is moved aside and reported, never silently treated as empty:
+    /// the next save would overwrite what is in it.
+    public static func load(in directory: URL) throws -> [TeamMatch] {
         let url = directory.appendingPathComponent(TeamMatchFile.fileName)
         guard let data = try? Data(contentsOf: url) else { return [] }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return (try? decoder.decode([TeamMatch].self, from: data)) ?? []
+        var decoded: [TeamMatch]? = nil
+        if let envelope = try? decoder.decode(TeamMatchEnvelope.self, from: data) {
+            decoded = envelope.matches
+        } else if let legacy = try? decoder.decode([TeamMatch].self, from: data) {
+            decoded = legacy
+        }
+        guard let matches = decoded else {
+            let aside = "team-matches.unreadable-\(Int(Date().timeIntervalSince1970)).json"
+            try? FileManager.default.moveItem(at: url, to: directory.appendingPathComponent(aside))
+            throw TeamMatchFileError.unreadable(savedAs: aside)
+        }
+        return matches.map { match in match.normalized() }
     }
 
+    /// Like `load`, for code that cannot handle an error: an unreadable file
+    /// is set aside and the list is empty
+    public static func read(in directory: URL) -> [TeamMatch] {
+        return (try? load(in: directory)) ?? []
+    }
+
+    /// Written in one go (`.atomic`): a kill halfway leaves the old file
     public static func write(_ matches: [TeamMatch], in directory: URL) throws {
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let url = directory.appendingPathComponent(TeamMatchFile.fileName)
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        let data = try encoder.encode(matches)
-        try data.write(to: url)
+        let data = try encoder.encode(TeamMatchEnvelope(version: TeamMatchFile.formatVersion, matches: matches))
+        try data.write(to: url, options: Data.WritingOptions.atomic)
     }
 }
 
@@ -757,11 +801,11 @@ public final class JSONFileTeamMatchStore: TeamMatchStore {
     }
 
     public func loadAll() async throws -> [TeamMatch] {
-        return TeamMatchFile.read(in: directory).sorted(by: { a, b in a.date > b.date })
+        return try TeamMatchFile.load(in: directory).sorted(by: { a, b in a.date > b.date })
     }
 
     public func save(_ match: TeamMatch) async throws {
-        var all = TeamMatchFile.read(in: directory)
+        var all = try TeamMatchFile.load(in: directory)
         var replaced = false
         for index in 0..<all.count where all[index].id == match.id {
             all[index] = match
@@ -772,7 +816,7 @@ public final class JSONFileTeamMatchStore: TeamMatchStore {
     }
 
     public func delete(id: UUID) async throws {
-        let kept = TeamMatchFile.read(in: directory).filter { match in match.id != id }
+        let kept = try TeamMatchFile.load(in: directory).filter { match in match.id != id }
         try TeamMatchFile.write(kept, in: directory)
     }
 }

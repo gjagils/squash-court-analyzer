@@ -248,8 +248,9 @@ enum ExportService {
             matchCount += 1
         }
 
+        // A team file that cannot be written fails the restore before it is saved
+        try TeamBackup.restore(backup, directory: TeamMatchStorage.directory, replacing: replacingTeam)
         try context.save()
-        TeamBackup.restore(backup, directory: TeamMatchStorage.directory, replacing: replacingTeam)
         return (playerCount, matchCount, gameCount)
     }
 

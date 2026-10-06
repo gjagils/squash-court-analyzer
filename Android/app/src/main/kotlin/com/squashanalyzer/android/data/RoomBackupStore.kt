@@ -68,6 +68,7 @@ class RoomBackupStore(private val db: AppDatabase, private val teamDirectory: UR
         var restoredMatches = 0
         var games = 0
         var badges = 0
+        var teamMatches = 0
         db.withTransaction {
             if (replacing) {
                 db.playerDao().deleteAll()
@@ -117,9 +118,11 @@ class RoomBackupStore(private val db: AppDatabase, private val teamDirectory: UR
                 restoredMatches++
                 games += referee.games.count
             }
+            // Inside the transaction: when the team file cannot be written, the
+            // rest is rolled back and the error reaches the screen
+            teamMatches = TeamBackup.restore(backup, directory = teamDirectory, replacing = replacing)
         }
-        TeamBackup.restore(backup, directory = teamDirectory, replacing = replacing)
-        return BackupCounts(players = players, matches = restoredMatches, games = games, badges = badges)
+        return BackupCounts(players = players, matches = restoredMatches, games = games, badges = badges, teamMatches = teamMatches)
     }
 
     // MARK: Referee matches

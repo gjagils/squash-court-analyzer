@@ -416,7 +416,7 @@ final class TeamMatchTests: XCTestCase {
         // Restore onto a clean phone
         let other = FileManager.default.temporaryDirectory.appendingPathComponent("teambackup-\(UUID().uuidString)")
         TeamRoster.replace(["x"])
-        TeamBackup.restore(decoded, directory: other, replacing: false)
+        try TeamBackup.restore(decoded, directory: other, replacing: false)
         XCTAssertEqual(TeamMatchFile.read(in: other), [team])
         XCTAssertEqual(TeamRoster.ids(), ["x", "p1", "p2"], "merging keeps what was there")
 
@@ -425,21 +425,99 @@ final class TeamMatchTests: XCTestCase {
         edited.updatedAt = Date(timeIntervalSince1970: 1_893_181_600.0)
         edited.home = "Bewerkt"
         try TeamMatchFile.write([edited], in: other)
-        TeamBackup.restore(decoded, directory: other, replacing: false)
+        try TeamBackup.restore(decoded, directory: other, replacing: false)
         XCTAssertEqual(TeamMatchFile.read(in: other).count, 1)
         XCTAssertEqual(TeamMatchFile.read(in: other)[0].home, "Bewerkt")
 
         // Replacing swaps both for the file's; a file without team data wipes nothing
-        TeamBackup.restore(decoded, directory: other, replacing: true)
+        try TeamBackup.restore(decoded, directory: other, replacing: true)
         XCTAssertEqual(TeamMatchFile.read(in: other), [team])
         XCTAssertEqual(TeamRoster.ids(), ["p1", "p2"])
-        TeamBackup.restore(plain, directory: other, replacing: true)
+        try TeamBackup.restore(plain, directory: other, replacing: true)
         XCTAssertEqual(TeamMatchFile.read(in: other).count, 1)
         XCTAssertEqual(TeamRoster.ids(), ["p1", "p2"])
 
         if let before { defaults.set(before, forKey: TeamRoster.storageKey) } else { defaults.removeObject(forKey: TeamRoster.storageKey) }
         try? FileManager.default.removeItem(at: folder)
         try? FileManager.default.removeItem(at: other)
+    }
+
+    @MainActor
+    func testATruncatedTeamFileIsSetAsideAndNeverOverwritten() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("teamfile-\(UUID().uuidString)")
+        let store = JSONFileTeamMatchStore(directory: folder)
+        try await store.save(decided())
+        let url = folder.appendingPathComponent(TeamMatchFile.fileName)
+        let whole = try Data(contentsOf: url)
+        // A kill halfway: half a file
+        try whole.subdata(in: 0..<(whole.count / 2)).write(to: url)
+
+        do {
+            _ = try await store.loadAll()
+            XCTFail("an unreadable file must be reported, not read as empty")
+        } catch let error as TeamMatchFileError {
+            guard case .unreadable(let savedAs) = error else { return XCTFail("wrong error") }
+            XCTAssertTrue(FileManager.default.fileExists(atPath: folder.appendingPathComponent(savedAs).path),
+                          "what was in the file is kept under another name")
+        }
+        // The next save starts a clean file and does not wipe the set-aside one
+        try await store.save(match([]))
+        let again = try await store.loadAll()
+        XCTAssertEqual(again.count, 1)
+        try? FileManager.default.removeItem(at: folder)
+    }
+
+    func testTheFileHoldsAVersionAndStillReadsTheFirstFormat() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("teamfile-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let team = decided()
+        try TeamMatchFile.write([team], in: folder)
+        let text = String(data: try Data(contentsOf: folder.appendingPathComponent(TeamMatchFile.fileName)), encoding: String.Encoding.utf8) ?? ""
+        XCTAssertTrue(text.contains("\"version\""), "an envelope with a version")
+        XCTAssertEqual(try TeamMatchFile.load(in: folder), [team])
+
+        // The first builds wrote a bare array: still read
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        try encoder.encode([team]).write(to: folder.appendingPathComponent(TeamMatchFile.fileName))
+        XCTAssertEqual(try TeamMatchFile.load(in: folder), [team])
+        try? FileManager.default.removeItem(at: folder)
+    }
+
+    func testAFileWithTooFewOrDoubledSlotsIsMadeFourAgain() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("teamfile-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        var odd = decided()
+        odd.partijen = [odd.partijen[0], odd.partijen[0], odd.partijen[2]]
+        try TeamMatchFile.write([odd], in: folder)
+        let read = try TeamMatchFile.load(in: folder)
+        XCTAssertEqual(read[0].partijen.map { partij in partij.slot }, [1, 2, 3, 4])
+        var team = read[0]
+        team.update(partij(4, [(11, 1), (11, 2), (11, 3)]))
+        XCTAssertEqual(team.partijen.count, 4, "an update does not append a fifth slot")
+        try? FileManager.default.removeItem(at: folder)
+    }
+
+    func testARestoreThatCannotWriteTheTeamFileFails() throws {
+        // A "folder" that is a file: nothing can be written there
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("notafolder-\(UUID().uuidString)")
+        try Data("x".utf8).write(to: file)
+        var backup = FullBackup(version: 2, backupDate: Date(), players: [], matches: [], standaloneGames: [])
+        backup.teamMatches = [decided()]
+        do {
+            try TeamBackup.restore(backup, directory: file, replacing: false)
+            XCTFail("a team file that cannot be written must fail the restore")
+        } catch {
+            // expected
+        }
+        try? FileManager.default.removeItem(at: file)
+
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("teamfile-\(UUID().uuidString)")
+        XCTAssertEqual(try TeamBackup.restore(backup, directory: folder, replacing: false), 1, "the count of added team matches")
+        XCTAssertEqual(try TeamBackup.restore(backup, directory: folder, replacing: false), 0, "the same file adds nothing")
+        XCTAssertEqual(BackupCounts(players: 0, matches: 0, games: 0, badges: 0, teamMatches: 2).summary,
+                       "0 spelers, 0 wedstrijden, 0 games, 0 badges, 2 teamwedstrijden")
+        try? FileManager.default.removeItem(at: folder)
     }
 
     @MainActor

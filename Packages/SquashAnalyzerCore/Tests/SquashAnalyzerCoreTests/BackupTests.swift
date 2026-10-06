@@ -107,6 +107,47 @@ final class BackupTests: XCTestCase {
         XCTAssertEqual(BackupCodec.formatVersion(for: backup), 2)
     }
 
+    /// B16: format 4 (team matches and the "In mijn team" list): a `TeamMatch` has
+    /// dates, optional Bool/Int fields and nested arrays, exactly where T12 went
+    /// wrong. The expected text was made on Darwin; this test also runs on
+    /// Android (Skip), so both platforms write the same bytes and the same checksum.
+    static func teamSample() -> TeamMatch {
+        let date = Date(timeIntervalSince1970: 1_790_000_000)
+        var first = TeamPartij(slot: 1, ownPlayer: "Paul", opponentPlayer: "Jaïr", games: [
+            TeamGame(ownPoints: 11, theirPoints: 8, ownWon: true),
+            TeamGame(ownPoints: nil, theirPoints: nil, ownWon: false),
+            TeamGame(ownPoints: 12, theirPoints: 10, ownWon: true),
+            TeamGame(ownPoints: 11, theirPoints: 6, ownWon: true),
+        ], playOrder: 2, linkedMatchId: "6F1C2B3A-4D5E-4F60-8A7B-9C0D1E2F3A4B", linkedKind: "coach", bestOf: 5)
+        first.linkedOwnIsPlayer1 = true
+        var second = TeamPartij(slot: 3, ownPlayer: "", opponentPlayer: "Piet")
+        second.trackingMatchId = "9F8E7D6C-5B4A-4392-8180-706F5E4D3C2B"
+        second.trackingOwnIsPlayer1 = false
+        return TeamMatch(id: UUID(uuidString: "C1D2E3F4-0A1B-4C2D-8E3F-A4B5C6D7E8F9")!, date: date, home: "All Inn Squash 8",
+                         away: "Squash Delft 8", ownSide: TeamSide.away, fixtureId: "fixture-7", partijen: [first, second],
+                         updatedAt: date)
+    }
+
+    func testTeamMatchesMakeFormat4WithTheSameBytesOnBothPlatforms() throws {
+        var backup = BackupTests.sample()
+        XCTAssertEqual(BackupCodec.formatVersion(for: backup), 2)
+        backup.teamMatches = [BackupTests.teamSample()]
+        backup.teamPlayerIds = ["0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2"]
+        XCTAssertEqual(BackupCodec.formatVersion(for: backup), 4)
+
+        let data = try BackupCodec.canonicalData(for: backup)
+        let canonical = String(data: data, encoding: .utf8) ?? ""
+        XCTAssertEqual(canonical, BackupTests.darwinCanonical4)
+        XCTAssertEqual(BackupCodec.checksum(of: data), BackupTests.darwinChecksum4)
+
+        // Through the file and back
+        let file = try BackupCodec.encode(backup, appVersion: "test")
+        XCTAssertEqual(try BackupCodec.decode(file), backup)
+    }
+
+    static let darwinCanonical4 = "{\"backupDate\":\"2026-09-21T14:13:20Z\",\"badgeAwards\":[{\"awardedBy\":\"install-A\",\"badge\":\"five-in-a-row\",\"cardId\":\"0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2\",\"earnedAt\":\"2026-09-21T14:13:20Z\",\"matchId\":\"6F1C2B3A-4D5E-4F60-8A7B-9C0D1E2F3A4B\",\"opponentName\":\"Jaïr 🎾\"}],\"matches\":[{\"bestOf\":5,\"games\":[{\"gameNumber\":1,\"id\":\"AAAAAAAA-BBBB-4CCC-8DDD-EEEEEEEEEEEE\",\"lets\":[{\"letNumber\":1,\"player1Score\":1,\"player2Score\":1,\"requestedBy\":\"Speler 2\",\"server\":\"Speler 1\",\"timestamp\":\"2026-09-21T14:13:20Z\"}],\"player1Name\":\"Paul Stéenks\",\"player1Score\":11,\"player2Name\":\"Jaïr 🎾\",\"player2Score\":9,\"points\":[{\"duration\":3.25,\"id\":\"11111111-2222-4333-8444-555555555555\",\"player1Score\":1,\"player2Score\":0,\"pointNumber\":1,\"pointType\":\"Winner\",\"scorer\":\"Speler 1\",\"server\":\"Speler 1\",\"shotType\":\"Drive\",\"timestamp\":\"2026-09-21T14:13:20Z\",\"zone\":\"Voor Links\"},{\"duration\":12,\"player1Score\":1,\"player2Score\":1,\"pointNumber\":2,\"pointType\":\"Unforced Error\",\"scorer\":\"Speler 2\",\"server\":\"Speler 1\",\"shotType\":\"\",\"zone\":\"\"}],\"savedAt\":\"2026-09-21T14:13:20Z\",\"startingServer\":\"Speler 1\",\"winner\":\"Speler 1\"}],\"id\":\"6F1C2B3A-4D5E-4F60-8A7B-9C0D1E2F3A4B\",\"matchStartingServer\":\"Speler 1\",\"player1CoachingFocus\":[\"Backhand\",\"Drop\"],\"player1CoachingNotes\":\"Let op \\\"lengte\\\" \\/ tempo\",\"player1GamesBefore\":1,\"player1Id\":\"0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2\",\"player1Name\":\"Paul Stéenks\",\"player2CoachingFocus\":[],\"player2GamesBefore\":0,\"player2Name\":\"Jaïr 🎾\",\"savedAt\":\"2026-09-21T14:13:20Z\",\"status\":\"completed\",\"updatedAt\":\"2026-09-21T14:13:20Z\"}],\"players\":[{\"coachingFocusAreas\":[\"Drop\"],\"coachingNotes\":\"\",\"createdAt\":\"2026-09-21T14:13:20Z\",\"id\":\"0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2\",\"name\":\"Paul Stéenks\"}],\"standaloneGames\":[],\"teamMatches\":[{\"away\":\"Squash Delft 8\",\"date\":\"2026-09-21T14:13:20Z\",\"fixtureId\":\"fixture-7\",\"home\":\"All Inn Squash 8\",\"id\":\"C1D2E3F4-0A1B-4C2D-8E3F-A4B5C6D7E8F9\",\"ownSide\":\"away\",\"partijen\":[{\"bestOf\":5,\"games\":[{\"ownPoints\":11,\"ownWon\":true,\"theirPoints\":8},{\"ownWon\":false},{\"ownPoints\":12,\"ownWon\":true,\"theirPoints\":10},{\"ownPoints\":11,\"ownWon\":true,\"theirPoints\":6}],\"linkedKind\":\"coach\",\"linkedMatchId\":\"6F1C2B3A-4D5E-4F60-8A7B-9C0D1E2F3A4B\",\"linkedOwnIsPlayer1\":true,\"opponentPlayer\":\"Jaïr\",\"ownPlayer\":\"Paul\",\"playOrder\":2,\"slot\":1},{\"bestOf\":5,\"games\":[],\"opponentPlayer\":\"\",\"ownPlayer\":\"\",\"slot\":2},{\"bestOf\":5,\"games\":[],\"opponentPlayer\":\"Piet\",\"ownPlayer\":\"\",\"slot\":3,\"trackingMatchId\":\"9F8E7D6C-5B4A-4392-8180-706F5E4D3C2B\",\"trackingOwnIsPlayer1\":false},{\"bestOf\":5,\"games\":[],\"opponentPlayer\":\"\",\"ownPlayer\":\"\",\"slot\":4}],\"updatedAt\":\"2026-09-21T14:13:20Z\"}],\"teamPlayerIds\":[\"0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2\"],\"version\":2}"
+    static let darwinChecksum4 = "5d8cac0403e0ff2563fb8bfef6749ad11421b94c2d55e3c4f8a37162938a5ca0"
+
     /// T12: rally durations print the same in Swift and Kotlin JSON
     func testDurationsPrintTheSameOnBothPlatforms() throws {
         var texts: [String] = []

@@ -81,6 +81,26 @@ class RoomBackupStoreTest {
             BadgeAwardStore(a.badgeAwardDao(), a.playerDao(), MatchStore(a.matchDao()), RefereeMatchStore(a.refereeMatchDao()), "test")).loadHistory().count)
     }
 
+    /** B16: a format 4 file made by the iPhone (team matches inside) restores here, checksum and all */
+    @Test fun anIOSFormat4BackupWithTeamMatchesRestoresOnAndroid() = runTest {
+        val bytes = requireNotNull(javaClass.classLoader!!.getResourceAsStream("ios-backup-v4.json")).readBytes()
+        val backup = BackupCodec.decode(Data(platformValue = bytes))
+        assertEquals(4, BackupCodec.formatVersion(backup))
+        val dir = teamDir()
+        TeamRoster.replace(skip.lib.Array<String>())
+        val counts = RoomBackupStore(a, dir).restore(backup, replacing = false)
+        assertEquals(1, counts.teamMatches)
+        val team = TeamMatchFile.read(in_ = dir).single()
+        assertEquals("All Inn Squash 8", team.home)
+        assertEquals(TeamSide.away, team.ownSide)
+        assertEquals("11-8, –, 12-10, 11-6", team.partij(1).gamesText)
+        assertEquals(true, team.partij(1).linkedOwnIsPlayer1)
+        assertEquals("9F8E7D6C-5B4A-4392-8180-706F5E4D3C2B", team.partij(3).trackingMatchId)
+        assertEquals(false, team.partij(3).trackingOwnIsPlayer1)
+        assertEquals(listOf("0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2"), TeamRoster.ids().toList())
+        TeamRoster.replace(skip.lib.Array<String>())
+    }
+
     /** Competitie: the team matches and the "In mijn team" flags travel in the file (format 4) */
     @Test fun teamMatchesTravelInTheBackup() = runTest {
         val dirA = teamDir()

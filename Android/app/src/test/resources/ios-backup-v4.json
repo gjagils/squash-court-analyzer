@@ -1,0 +1,182 @@
+{
+  "appVersion" : "ios-v4-fixture",
+  "checksum" : "5d8cac0403e0ff2563fb8bfef6749ad11421b94c2d55e3c4f8a37162938a5ca0",
+  "createdAt" : "2026-09-21T14:15:00Z",
+  "formatVersion" : 4,
+  "payload" : {
+    "backupDate" : "2026-09-21T14:13:20Z",
+    "badgeAwards" : [
+      {
+        "awardedBy" : "install-A",
+        "badge" : "five-in-a-row",
+        "cardId" : "0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2",
+        "earnedAt" : "2026-09-21T14:13:20Z",
+        "matchId" : "6F1C2B3A-4D5E-4F60-8A7B-9C0D1E2F3A4B",
+        "opponentName" : "Jaïr 🎾"
+      }
+    ],
+    "matches" : [
+      {
+        "bestOf" : 5,
+        "games" : [
+          {
+            "gameNumber" : 1,
+            "id" : "AAAAAAAA-BBBB-4CCC-8DDD-EEEEEEEEEEEE",
+            "lets" : [
+              {
+                "letNumber" : 1,
+                "player1Score" : 1,
+                "player2Score" : 1,
+                "requestedBy" : "Speler 2",
+                "server" : "Speler 1",
+                "timestamp" : "2026-09-21T14:13:20Z"
+              }
+            ],
+            "player1Name" : "Paul Stéenks",
+            "player1Score" : 11,
+            "player2Name" : "Jaïr 🎾",
+            "player2Score" : 9,
+            "points" : [
+              {
+                "duration" : 3.25,
+                "id" : "11111111-2222-4333-8444-555555555555",
+                "player1Score" : 1,
+                "player2Score" : 0,
+                "pointNumber" : 1,
+                "pointType" : "Winner",
+                "scorer" : "Speler 1",
+                "server" : "Speler 1",
+                "shotType" : "Drive",
+                "timestamp" : "2026-09-21T14:13:20Z",
+                "zone" : "Voor Links"
+              },
+              {
+                "duration" : 12,
+                "player1Score" : 1,
+                "player2Score" : 1,
+                "pointNumber" : 2,
+                "pointType" : "Unforced Error",
+                "scorer" : "Speler 2",
+                "server" : "Speler 1",
+                "shotType" : "",
+                "zone" : ""
+              }
+            ],
+            "savedAt" : "2026-09-21T14:13:20Z",
+            "startingServer" : "Speler 1",
+            "winner" : "Speler 1"
+          }
+        ],
+        "id" : "6F1C2B3A-4D5E-4F60-8A7B-9C0D1E2F3A4B",
+        "matchStartingServer" : "Speler 1",
+        "player1CoachingFocus" : [
+          "Backhand",
+          "Drop"
+        ],
+        "player1CoachingNotes" : "Let op \"lengte\" \/ tempo",
+        "player1GamesBefore" : 1,
+        "player1Id" : "0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2",
+        "player1Name" : "Paul Stéenks",
+        "player2CoachingFocus" : [
+
+        ],
+        "player2GamesBefore" : 0,
+        "player2Name" : "Jaïr 🎾",
+        "savedAt" : "2026-09-21T14:13:20Z",
+        "status" : "completed",
+        "updatedAt" : "2026-09-21T14:13:20Z"
+      }
+    ],
+    "players" : [
+      {
+        "coachingFocusAreas" : [
+          "Drop"
+        ],
+        "coachingNotes" : "",
+        "createdAt" : "2026-09-21T14:13:20Z",
+        "id" : "0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2",
+        "name" : "Paul Stéenks"
+      }
+    ],
+    "standaloneGames" : [
+
+    ],
+    "teamMatches" : [
+      {
+        "away" : "Squash Delft 8",
+        "date" : "2026-09-21T14:13:20Z",
+        "fixtureId" : "fixture-7",
+        "home" : "All Inn Squash 8",
+        "id" : "C1D2E3F4-0A1B-4C2D-8E3F-A4B5C6D7E8F9",
+        "ownSide" : "away",
+        "partijen" : [
+          {
+            "bestOf" : 5,
+            "games" : [
+              {
+                "ownPoints" : 11,
+                "ownWon" : true,
+                "theirPoints" : 8
+              },
+              {
+                "ownWon" : false
+              },
+              {
+                "ownPoints" : 12,
+                "ownWon" : true,
+                "theirPoints" : 10
+              },
+              {
+                "ownPoints" : 11,
+                "ownWon" : true,
+                "theirPoints" : 6
+              }
+            ],
+            "linkedKind" : "coach",
+            "linkedMatchId" : "6F1C2B3A-4D5E-4F60-8A7B-9C0D1E2F3A4B",
+            "linkedOwnIsPlayer1" : true,
+            "opponentPlayer" : "Jaïr",
+            "ownPlayer" : "Paul",
+            "playOrder" : 2,
+            "slot" : 1
+          },
+          {
+            "bestOf" : 5,
+            "games" : [
+
+            ],
+            "opponentPlayer" : "",
+            "ownPlayer" : "",
+            "slot" : 2
+          },
+          {
+            "bestOf" : 5,
+            "games" : [
+
+            ],
+            "opponentPlayer" : "Piet",
+            "ownPlayer" : "",
+            "slot" : 3,
+            "trackingMatchId" : "9F8E7D6C-5B4A-4392-8180-706F5E4D3C2B",
+            "trackingOwnIsPlayer1" : false
+          },
+          {
+            "bestOf" : 5,
+            "games" : [
+
+            ],
+            "opponentPlayer" : "",
+            "ownPlayer" : "",
+            "slot" : 4
+          }
+        ],
+        "updatedAt" : "2026-09-21T14:13:20Z"
+      }
+    ],
+    "teamPlayerIds" : [
+      "0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2"
+    ],
+    "version" : 2
+  },
+  "schemaVersion" : "1.0.0"
+}

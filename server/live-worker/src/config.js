@@ -8,6 +8,8 @@ export function readConfig(env) {
   };
   return {
     publicUrl: String(env.PUBLIC_URL || '').replace(/\/+$/, ''),
+    // Cloudflare jurisdiction of the session objects ("eu"), or '' for none
+    jurisdiction: String(env.LIVE_JURISDICTION || '').trim().toLowerCase(),
     maxSessions: number('MAX_SESSIONS', 200),
     // A session nobody updates for this long is removed (lost phone, no network)
     idleMs: number('IDLE_MINUTES', 120) * 60 * 1000,

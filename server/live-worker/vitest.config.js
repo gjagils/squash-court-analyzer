@@ -10,12 +10,12 @@ export default defineConfig({
   test: {
     projects: [
       {
-        plugins: [worker({ PUBLIC_URL: '' })],
+        plugins: [worker({ PUBLIC_URL: '', LIVE_JURISDICTION: '' })],
         test: { name: 'api', include: ['test/api.test.js', 'test/team.test.js'] },
       },
       {
         plugins: [worker({
-          PUBLIC_URL: '', IDLE_MINUTES: '60', MAX_SESSIONS: '3', CREATES_PER_MINUTE: '2',
+          PUBLIC_URL: '', LIVE_JURISDICTION: '', IDLE_MINUTES: '60', MAX_SESSIONS: '3', CREATES_PER_MINUTE: '2',
           GLOBAL_CREATES_PER_MINUTE: '6', MAX_VIEWERS_PER_SESSION: '1',
         })],
         test: { name: 'limits', include: ['test/limits.test.js'] },

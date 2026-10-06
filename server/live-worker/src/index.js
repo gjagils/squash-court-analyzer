@@ -94,8 +94,11 @@ async function handle(request, env) {
   const url = new URL(request.url);
   const parts = url.pathname.split('/').filter(Boolean);
   const limiter = env.LIMITER.get(env.LIMITER.idFromName('global'));
-  const sessionFor = (id) => env.SESSION.get(env.SESSION.idFromName(id));
-  const teamFor = (id) => env.TEAM.get(env.TEAM.idFromName(id));
+  // The wedstrijd data (names, photos, the stand) stays in the jurisdiction of
+  // LIVE_JURISDICTION ("eu"); sessions made before this setting are not found
+  const where = (namespace) => (config.jurisdiction ? namespace.jurisdiction(config.jurisdiction) : namespace);
+  const sessionFor = (id) => where(env.SESSION).get(where(env.SESSION).idFromName(id));
+  const teamFor = (id) => where(env.TEAM).get(where(env.TEAM).idFromName(id));
 
   if (request.method === 'GET' && url.pathname === '/health') {
     return send(200, { ok: true, sessions: await limiter.count() });
@@ -131,7 +134,7 @@ async function handle(request, env) {
     const key = newWriteKey();
     if (!(await limiter.register(newId))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
     // An id already in use (practically never): pick another
-    while (!(await sessionFor(newId).create(key, snapshot))) {
+    while (!(await sessionFor(newId).create(key, snapshot, newId))) {
       await limiter.release(newId);
       newId = newSessionId();
       if (!(await limiter.register(newId))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
@@ -222,7 +225,7 @@ async function handleTeam(request, env, config, parts, limiter, teamFor) {
     const key = newWriteKey();
     const ownerKey = newWriteKey();
     if (!(await limiter.register(`t:${newId}`))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
-    while (!(await teamFor(newId).create(key, ownerKey, team))) {
+    while (!(await teamFor(newId).create(key, ownerKey, team, newId))) {
       await limiter.release(`t:${newId}`);
       newId = newSessionId();
       if (!(await limiter.register(`t:${newId}`))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
@@ -286,6 +289,8 @@ export default {
     try {
       return await handle(request, env);
     } catch (error) {
+      // A failure the client did not cause is logged (Observability shows it, without request data)
+      if (!error.status) console.error('worker error', error && error.message);
       return send(error.status || 500, { error: error.status ? error.message : 'Serverfout' });
     }
   },

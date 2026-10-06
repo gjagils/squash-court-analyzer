@@ -21,10 +21,12 @@ export class LiveSession extends DurableObject {
   }
 
   /** Creates the session; false when this id is already in use */
-  async create(key, snapshot) {
+  async create(key, snapshot, id) {
     if (await this.ctx.storage.get('key')) return false;
     const now = Date.now();
-    await this.ctx.storage.put({ key, snapshot, updatedAt: now, photoVersion: 0 });
+    // The id is kept in storage too: the limiter is released by it, and the
+    // name of a jurisdiction object id must not be what that depends on
+    await this.ctx.storage.put({ key, snapshot, id, updatedAt: now, photoVersion: 0 });
     await this.ctx.storage.setAlarm(now + this.config.idleMs);
     return true;
   }
@@ -88,6 +90,7 @@ export class LiveSession extends DurableObject {
   /** Viewers learn the session ended (with the last state), then everything goes */
   async end(reason) {
     const snapshot = await this.ctx.storage.get('snapshot');
+    const id = this.id || (await this.ctx.storage.get('id')) || '';
     this.broadcast('ended', { reason, snapshot });
     for (const [controller, ping] of this.viewers) {
       clearInterval(ping);
@@ -96,7 +99,7 @@ export class LiveSession extends DurableObject {
     this.viewers.clear();
     await this.ctx.storage.deleteAlarm();
     await this.ctx.storage.deleteAll();
-    await this.env.LIMITER.get(this.env.LIMITER.idFromName('global')).release(this.id);
+    await this.env.LIMITER.get(this.env.LIMITER.idFromName('global')).release(id);
   }
 
   /** Nobody updated the session for IDLE_MINUTES: a lost phone, or the match is long over */

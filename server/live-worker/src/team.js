@@ -33,10 +33,12 @@ export class TeamSession extends DurableObject {
   }
 
   /** Creates the session; false when this id is already in use */
-  async create(key, ownerKey, team) {
+  async create(key, ownerKey, team, id) {
     if (await this.ctx.storage.get('key')) return false;
     const now = Date.now();
-    await this.ctx.storage.put({ key, ownerKey, team, partijen: {}, updatedAt: now });
+    // The id is kept in storage too: the limiter is released by it, and the
+    // name of a jurisdiction object id must not be what that depends on
+    await this.ctx.storage.put({ key, ownerKey, team, id, partijen: {}, updatedAt: now });
     await this.ctx.storage.setAlarm(now + this.config.idleMs);
     return true;
   }
@@ -105,6 +107,7 @@ export class TeamSession extends DurableObject {
   /** Viewers learn the session ended (with the last state), then everything goes */
   async end(reason) {
     const state = await this.state();
+    const id = this.id || (await this.ctx.storage.get('id')) || '';
     this.broadcast('ended', { reason, ...(state || {}) });
     for (const [controller, ping] of this.viewers) {
       clearInterval(ping);
@@ -113,7 +116,7 @@ export class TeamSession extends DurableObject {
     this.viewers.clear();
     await this.ctx.storage.deleteAlarm();
     await this.ctx.storage.deleteAll();
-    await this.env.LIMITER.get(this.env.LIMITER.idFromName('global')).release(`t:${this.id}`);
+    await this.env.LIMITER.get(this.env.LIMITER.idFromName('global')).release(`t:${id}`);
   }
 
   /** Nobody updated any partij for IDLE_MINUTES: the evening is long over */

@@ -282,7 +282,7 @@ final class TeamMatchTests: XCTestCase {
         text = TeamMatchReport.text(team)
         XCTAssertTrue(text.contains("Stand: Squash Delft 8 leidt met 3–0 · 1 van 4 partijen"), text)
         XCTAssertTrue(text.contains("*E1* Zij1 – Wij1 · 0-3 (5-11, 7-11, 9-11)"), text)
-        XCTAssertTrue(text.contains("*E2* ? – ?: nog niet gespeeld"), text)
+        XCTAssertTrue(text.contains("*E2* nog niet gespeeld"), text)
     }
 
     func testTheScorecardIsAMonospaceTable() {

@@ -70,6 +70,8 @@ public struct TeamPartij: Codable, Equatable, Sendable {
     public var linkedMatchId: String?
     public var linkedKind: String?
     public var bestOf: Int
+    /// Taken over from the live page (another phone's partij); a local edit makes it ours
+    public var fromLive: Bool?
 
     public init(slot: Int, ownPlayer: String = "", opponentPlayer: String = "", games: [TeamGame] = [],
                 playOrder: Int? = nil, linkedMatchId: String? = nil, linkedKind: String? = nil, bestOf: Int = 5) {
@@ -308,9 +310,15 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     public var fixtureId: String?
     public var partijen: [TeamPartij]
     public var updatedAt: Date
+    /// The live team match on the server (Live delen, or joined with a code)
+    public var liveId: String?
+    public var liveKey: String?
 
     public init(id: UUID = UUID(), date: Date, home: String, away: String, ownSide: TeamSide,
-                fixtureId: String? = nil, partijen: [TeamPartij] = [], updatedAt: Date = Date()) {
+                fixtureId: String? = nil, partijen: [TeamPartij] = [], updatedAt: Date = Date(),
+                liveId: String? = nil, liveKey: String? = nil) {
+        self.liveId = liveId
+        self.liveKey = liveKey
         self.id = id
         self.date = date
         self.home = home
@@ -353,14 +361,40 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
 
     /// Replaces the partij with the same slot
     public mutating func update(_ partij: TeamPartij) {
+        var ours = partij
+        ours.fromLive = nil
         var replaced = false
-        for index in 0..<partijen.count where partijen[index].slot == partij.slot {
-            partijen[index] = partij
+        for index in 0..<partijen.count where partijen[index].slot == ours.slot {
+            partijen[index] = ours
             replaced = true
         }
-        if !replaced { partijen.append(partij) }
+        if !replaced { partijen.append(ours) }
         updatedAt = Date()
     }
+
+    // Default names: nothing filled in = "Squash Delft 8 E1"
+
+    /// The name of our player in this slot when none is filled in
+    public func defaultOwnName(_ slot: Int) -> String { "\(ownName) E\(slot)" }
+    public func defaultOpponentName(_ slot: Int) -> String { "\(opponentName) E\(slot)" }
+    /// The name to show: the real one, or the default ("Squash Delft 8 E1")
+    public func ownDisplayName(_ partij: TeamPartij) -> String {
+        partij.ownPlayer.isEmpty ? defaultOwnName(partij.slot) : partij.ownPlayer
+    }
+    public func opponentDisplayName(_ partij: TeamPartij) -> String {
+        partij.opponentPlayer.isEmpty ? defaultOpponentName(partij.slot) : partij.opponentPlayer
+    }
+
+    /// A partij whose "names" are just the defaults gets empty names again, so
+    /// filling them in later works and the defaults follow a renamed team
+    public func cleaned(_ partij: TeamPartij) -> TeamPartij {
+        var result = partij
+        if TeamMatch.sameTeam(result.ownPlayer, defaultOwnName(partij.slot)) { result.ownPlayer = "" }
+        if TeamMatch.sameTeam(result.opponentPlayer, defaultOpponentName(partij.slot)) { result.opponentPlayer = "" }
+        return result
+    }
+
+    public var isLive: Bool { liveId != nil && liveKey != nil }
 
     /// The partij a tracked match is linked to, if any
     public func partijLinked(to matchId: String) -> TeamPartij? {
@@ -445,11 +479,18 @@ public enum TeamMatchReport {
         return "Competitiepunten: \(match.home) \(match.homeCompetitionPoints) · \(match.away) \(match.awayCompetitionPoints)"
     }
 
-    /// Home player first, as SBN prints it
+    /// Home player first, as SBN prints it; a missing name is "Squash Delft 8 E1"
     static func names(_ partij: TeamPartij, match: TeamMatch) -> String {
-        let own = partij.ownPlayer.isEmpty ? "?" : partij.ownPlayer
-        let their = partij.opponentPlayer.isEmpty ? "?" : partij.opponentPlayer
+        let own = match.ownDisplayName(partij)
+        let their = match.opponentDisplayName(partij)
         return match.ownSide == TeamSide.home ? "\(own) – \(their)" : "\(their) – \(own)"
+    }
+
+    /// The last two words of a team name, for the narrow scorecard: "Squash Delft 8" → "Delft 8"
+    static func shortTeam(_ name: String) -> String {
+        let words = name.components(separatedBy: " ")
+        if words.count <= 2 { return name }
+        return words[words.count - 2] + " " + words[words.count - 1]
     }
 
     /// "3-1" of a partij, home first
@@ -514,8 +555,8 @@ public enum TeamMatchReport {
         lines.append("")
         lines.append("```")
         for partij in sorted(match) {
-            let own = partij.ownPlayer.isEmpty ? "?" : partij.ownPlayer
-            let their = partij.opponentPlayer.isEmpty ? "?" : partij.opponentPlayer
+            let own = partij.ownPlayer.isEmpty ? shortTeam(match.ownName) : partij.ownPlayer
+            let their = partij.opponentPlayer.isEmpty ? shortTeam(match.opponentName) : partij.opponentPlayer
             let homeName = match.ownSide == TeamSide.home ? own : their
             let awayName = match.ownSide == TeamSide.home ? their : own
             var row1 = pad(partij.label + " " + homeName, nameWidth)
@@ -553,13 +594,16 @@ public enum TeamMatchReport {
         lines.append("")
         for partij in sorted(match) {
             let who = names(partij, match: match)
+            // No names filled in: the default names already carry the E1
+            let bare = partij.ownPlayer.isEmpty && partij.opponentPlayer.isEmpty
+            let prefix = bare ? "" : "*\(partij.label)* "
             if !partij.hasEntry {
-                lines.append("*\(partij.label)* \(who): nog niet gespeeld")
+                lines.append(bare ? "*\(partij.label)* nog niet gespeeld" : "\(prefix)\(who): nog niet gespeeld")
             } else {
-                var line = "*\(partij.label)* \(who) · \(standText(partij, match: match)) (\(gamesText(partij, match: match)))"
+                var line = "\(prefix)\(who) · \(standText(partij, match: match)) (\(gamesText(partij, match: match)))"
                 if let won = partij.ownWon {
-                    let winner = won ? partij.ownPlayer : partij.opponentPlayer
-                    if !winner.isEmpty { line += " ✅ \(winner)" }
+                    let winner = won ? match.ownDisplayName(partij) : match.opponentDisplayName(partij)
+                    line += " ✅ \(winner)"
                 }
                 lines.append(line)
             }

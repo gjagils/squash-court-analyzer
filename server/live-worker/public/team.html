@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>{{TITLE}}</title>
+<meta property="og:title" content="{{TITLE}}">
+<meta property="og:description" content="{{DESCRIPTION}}">
+<meta property="og:url" content="{{URL}}">
+<meta property="og:image" content="{{IMAGE}}">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#000000">
+<style>
+  :root {
+    /* Huisstijl "Clubhuis" (docs/style/README.md), as the page of a single match */
+    --bg: #000000; --card: #180E04; --line: rgba(242,140,38,0.35); --gold: #F28C26; --orange: #F28C26;
+    --blue: #59738C; --blue-light: #8094AD;
+    --text-1: #F2EDE6; --text-2: #B3ADA6; --text-3: #8C8680; --border: rgba(255,255,255,0.09); --live: #E5484D;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text-1); min-height: 100vh;
+    font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased; display: flex; justify-content: center; padding: 20px 16px 40px;
+  }
+  main { width: 100%; max-width: 480px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: var(--text-1); text-decoration: none; }
+  .brand img { width: 32px; height: 32px; display: block; }
+  .badge { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; padding: 5px 10px; border-radius: 999px;
+           border: 1px solid var(--border); color: var(--text-2); text-transform: uppercase; }
+  .badge.live { color: #fff; background: var(--live); border-color: var(--live); }
+  .badge.live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #fff;
+                        margin-right: 6px; vertical-align: 1px; animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.3; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .day { text-align: center; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-2); margin-bottom: 12px; }
+  .teams { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; }
+  .team { text-align: center; }
+  .team .tname { font-size: 15px; font-weight: 600; line-height: 1.25; overflow-wrap: break-word; }
+  .team.home .tname { color: var(--orange); } .team.away .tname { color: var(--blue-light); }
+  .team .tgames { font-size: 52px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 4px; }
+  .dash { font-size: 30px; color: var(--text-3); font-weight: 700; }
+  .caption { text-align: center; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-3); margin-top: 2px; }
+  .summary { text-align: center; margin-top: 12px; font-size: 14px; font-weight: 600; color: var(--gold); min-height: 20px; }
+  .partijen { margin-top: 14px; display: grid; gap: 10px; }
+  .partij { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; }
+  .partij.playing { border-color: var(--line); }
+  .phead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .slot { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; color: var(--gold); }
+  .pstatus { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-3); }
+  .playing .pstatus { color: var(--live); }
+  .prow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 4px 0; }
+  .prow + .prow { border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px; }
+  .pname { font-size: 16px; font-weight: 600; overflow-wrap: break-word; }
+  .prow.h .pname { color: var(--orange); } .prow.a .pname { color: var(--blue-light); }
+  .pgames { font-size: 13px; font-weight: 700; color: var(--text-2); border: 1px solid var(--line); border-radius: 8px;
+            padding: 2px 8px; min-width: 24px; text-align: center; }
+  .ppoints { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 2ch; text-align: right; }
+  .prow.finished .ppoints { visibility: hidden; }
+  .pwin .pname::after { content: " 🏆"; }
+  .serve { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); margin-right: 6px; vertical-align: 2px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { font-size: 12px; color: var(--text-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 9px; font-variant-numeric: tabular-nums; }
+  .chip.won1 { color: var(--orange); border-color: var(--line); }
+  .chip.won2 { color: var(--blue-light); border-color: rgba(128,148,173,0.45); }
+  .chip.unknown { color: var(--text-3); }
+  .plast { margin-top: 6px; font-size: 12px; color: var(--text-2); }
+  .empty { color: var(--text-3); font-size: 13px; }
+  .updated { margin-top: 14px; text-align: center; font-size: 12px; color: var(--text-3); }
+  .notice { margin-top: 16px; text-align: center; font-size: 14px; color: var(--text-2); line-height: 1.5; }
+  .notice strong { color: var(--text-1); }
+  footer { margin-top: 26px; text-align: center; font-size: 12px; color: var(--text-3); line-height: 1.6; }
+  footer a { color: var(--gold); text-decoration: none; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a class="brand" href="https://squashanalyzer.com"><img src="/logo.png" alt="">SquashAnalyzer</a>
+    <div class="badge" id="badge">Verbinden…</div>
+  </header>
+
+  <section class="card" id="board" hidden>
+    <div class="day" id="day"></div>
+    <div class="teams">
+      <div class="team home"><div class="tname" id="home"></div><div class="tgames" id="homeGames">0</div></div>
+      <div class="dash">–</div>
+      <div class="team away"><div class="tname" id="away"></div><div class="tgames" id="awayGames">0</div></div>
+    </div>
+    <div class="caption">games</div>
+    <div class="summary" id="summary"></div>
+  </section>
+
+  <section class="partijen" id="partijen" hidden></section>
+  <div class="updated" id="updated"></div>
+  <p class="notice" id="notice" hidden></p>
+
+  <footer>
+    Live gedeeld vanuit <a href="https://squashanalyzer.com">SquashAnalyzer</a>.<br>
+    Alleen teamnamen, voornamen en de stand;<br>2 uur na de laatste partij wordt alles gewist.
+  </footer>
+</main>
+<script>
+(function () {
+  var id = {{ID_JSON}};
+  var $ = function (x) { return document.getElementById(x); };
+  var lastReceived = 0;
+  var hadState = false;
+  var ended = false;
+  var statusText = { warmup: 'Inspelen', playing: 'Bezig', between: 'Pauze', finished: 'Klaar' };
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  /** The name of a player, or the default "Delft 8 E1" when the app has none */
+  function nameOf(partij, side, team, slot) {
+    var given = side === 1 ? partij.p1 : partij.p2;
+    return given || ((side === 1 ? team.home : team.away) + ' E' + slot);
+  }
+
+  function dayText(ms) {
+    try {
+      return new Date(ms).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Amsterdam' });
+    } catch (e) { return ''; }
+  }
+
+  function renderPartij(slot, partij, team) {
+    var card = el('div', 'partij' + (partij && partij.status === 'playing' ? ' playing' : ''));
+    var head = el('div', 'phead');
+    head.appendChild(el('div', 'slot', 'E' + slot));
+    head.appendChild(el('div', 'pstatus', partij ? statusText[partij.status] || '' : 'Nog niet gespeeld'));
+    card.appendChild(head);
+    if (!partij) {
+      card.appendChild(el('div', 'empty', nameOf({}, 1, team, slot) + ' – ' + nameOf({}, 2, team, slot)));
+      return card;
+    }
+    var live = partij.status !== 'finished';
+    [1, 2].forEach(function (side) {
+      var row = el('div', 'prow ' + (side === 1 ? 'h' : 'a') + (live ? '' : ' finished') + (partij.winner === side ? ' pwin' : ''));
+      var name = el('div', 'pname');
+      if (partij.status === 'playing' && partij.server === side) name.appendChild(el('span', 'serve'));
+      name.appendChild(document.createTextNode(nameOf(partij, side, team, slot)));
+      row.appendChild(name);
+      row.appendChild(el('div', 'pgames', String(partij.gamesWon[side - 1])));
+      row.appendChild(el('div', 'ppoints', String(partij.score[side - 1])));
+      card.appendChild(row);
+    });
+    var chips = el('div', 'chips');
+    partij.games.forEach(function (g) {
+      chips.appendChild(el('span', 'chip' + (g[0] > g[1] ? ' won1' : g[1] > g[0] ? ' won2' : ''), g[0] + '-' + g[1]));
+    });
+    // Games whose score the app does not know (a partij filled in by hand)
+    var unknown = partij.gamesWon[0] + partij.gamesWon[1] - partij.games.length;
+    for (var i = 0; i < unknown; i++) chips.appendChild(el('span', 'chip unknown', '–'));
+    if (chips.childNodes.length) card.appendChild(chips);
+    if (partij.lastPoint) card.appendChild(el('div', 'plast', partij.lastPoint));
+    return card;
+  }
+
+  function render(data) {
+    hadState = true;
+    var team = data.team;
+    var partijen = data.partijen || {};
+    $('board').hidden = false;
+    $('partijen').hidden = false;
+    $('day').textContent = dayText(team.date);
+    $('home').textContent = team.home;
+    $('away').textContent = team.away;
+    var home = 0, away = 0, played = 0, decided = 0;
+    for (var slot = 1; slot <= 4; slot++) {
+      var p = partijen[slot];
+      if (!p) continue;
+      played++;
+      home += p.gamesWon[0];
+      away += p.gamesWon[1];
+      if (p.status === 'finished') decided++;
+    }
+    $('homeGames').textContent = home;
+    $('awayGames').textContent = away;
+    var summary = '';
+    if (decided === 4) {
+      summary = home === away ? 'Gelijkspel' : (home > away ? team.home : team.away) + ' wint ' + Math.max(home, away) + '-' + Math.min(home, away);
+    } else if (played) {
+      summary = decided + ' van 4 partijen klaar';
+    } else {
+      summary = 'Nog niet begonnen';
+    }
+    $('summary').textContent = summary;
+    var list = $('partijen');
+    list.textContent = '';
+    for (var s = 1; s <= 4; s++) list.appendChild(renderPartij(s, partijen[s], team));
+    lastReceived = Date.now();
+    setBadge(decided === 4 || ended ? 'done' : 'live');
+    tick();
+  }
+
+  function setBadge(kind) {
+    var badge = $('badge');
+    badge.className = 'badge' + (kind === 'live' ? ' live' : '');
+    badge.textContent = kind === 'live' ? 'Live' : kind === 'done' ? 'Afgelopen' : kind === 'lost' ? 'Geen verbinding' : 'Verbinden…';
+  }
+
+  function tick() {
+    if (!lastReceived || ended) { $('updated').textContent = ''; return; }
+    var seconds = Math.round((Date.now() - lastReceived) / 1000);
+    $('updated').textContent = seconds < 5 ? 'Zojuist bijgewerkt' : seconds < 60 ? seconds + ' s geleden bijgewerkt'
+      : Math.round(seconds / 60) + ' min geleden bijgewerkt';
+  }
+  setInterval(tick, 1000);
+
+  function showEnded() {
+    ended = true;
+    setBadge('done');
+    $('updated').textContent = '';
+    var notice = $('notice');
+    notice.hidden = false;
+    notice.innerHTML = hadState
+      ? '<strong>De teamwedstrijd is afgelopen.</strong> Dit was de laatste stand; de livesessie is gewist.'
+      : '<strong>Deze teamwedstrijd is afgelopen</strong> of de link klopt niet.';
+  }
+
+  if (!window.EventSource) {
+    $('notice').hidden = false;
+    $('notice').textContent = 'Deze browser kan de stand niet live volgen.';
+    return;
+  }
+  var source = new EventSource('/api/team/' + encodeURIComponent(id) + '/events');
+  source.addEventListener('state', function (e) {
+    try { render(JSON.parse(e.data)); } catch (err) {}
+  });
+  source.addEventListener('ended', function (e) {
+    try { var data = JSON.parse(e.data); if (data.team) render(data); } catch (err) {}
+    source.close();
+    showEnded();
+  });
+  source.onerror = function () {
+    if (ended) return;
+    if (source.readyState === EventSource.CLOSED) {
+      showEnded();
+    } else if (hadState) {
+      setBadge('lost');
+    }
+  };
+})();
+</script>
+</body>
+</html>

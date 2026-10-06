@@ -48,7 +48,12 @@ public enum TeamBackup {
     /// The backup with this phone's team matches and team players added
     public static func attach(_ backup: FullBackup, directory: URL) -> FullBackup {
         var result = backup
-        let matches = TeamMatchFile.read(in: directory)
+        var matches = TeamMatchFile.read(in: directory)
+        // The live key of an evening is no use after the evening: not in the file
+        for index in 0..<matches.count {
+            matches[index].liveId = nil
+            matches[index].liveKey = nil
+        }
         result.teamMatches = matches.isEmpty ? nil : matches
         let ids = TeamRoster.ids()
         result.teamPlayerIds = ids.isEmpty ? nil : ids

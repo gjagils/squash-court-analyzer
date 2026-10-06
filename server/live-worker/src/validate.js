@@ -125,3 +125,69 @@ export function newWriteKey() {
 }
 
 export const ID_PATTERN = /^[a-z0-9]{12}$/;
+
+// ---- Teamwedstrijden (Competitie) --------------------------------------------
+
+export const TEAM_NAME_MAX = 40;
+export const SLOTS = [1, 2, 3, 4];
+
+/** A team name: letters, digits, spaces and a few marks; "Squash Delft 8". Not a person, so no first-name rule. */
+export function cleanTeamName(value, fallback) {
+  if (typeof value !== 'string') return fallback;
+  const kept = Array.from(value).filter((c) => /[\p{L}\p{N}]|[ \-'.&()+]/u.test(c)).join('').replace(/\s+/g, ' ').trim();
+  return kept.slice(0, TEAM_NAME_MAX) || fallback;
+}
+
+/** A first name for a partij, or '' when the app has none (the page then shows "Delft 8 E1") */
+export function cleanPartijName(value) {
+  if (typeof value !== 'string' || !value.trim()) return '';
+  return cleanName(value, '');
+}
+
+/** The team match itself: both team names and the day (milliseconds or ISO text), or null */
+export function validateTeamHeader(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
+  const home = cleanTeamName(input.home, '');
+  const away = cleanTeamName(input.away, '');
+  if (!home || !away) return null;
+  let date = typeof input.date === 'number' ? input.date : Date.parse(String(input.date || ''));
+  const now = Date.now();
+  if (!Number.isFinite(date) || Math.abs(date - now) > 2 * 365 * 24 * 3600 * 1000) date = now;
+  return { home, away, date: Math.round(date) };
+}
+
+/**
+ * One partij of a team match, home player first (p1 = home). Like a snapshot
+ * but the names may be empty, and a hand-filled partij has fewer games than
+ * games won (their scores are unknown). `{ empty: true }` clears the slot.
+ */
+export function validatePartij(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
+  if (input.empty === true) return { empty: true };
+  const bestOf = input.bestOf === undefined ? 5 : cleanInt(input.bestOf, 1, 7);
+  const gamesWon = cleanPair(input.gamesWon, 7);
+  const score = input.score === undefined ? [0, 0] : cleanPair(input.score, 99);
+  const server = input.server === undefined ? 1 : cleanInt(input.server, 1, 2);
+  const side = input.side === undefined ? 'R' : input.side;
+  if (bestOf === null || gamesWon === null || score === null || server === null) return null;
+  if (!STATUSES.has(input.status)) return null;
+  if (side !== 'L' && side !== 'R') return null;
+  const gamesInput = input.games === undefined ? [] : input.games;
+  if (!Array.isArray(gamesInput) || gamesInput.length > 7) return null;
+  const games = [];
+  for (const game of gamesInput) {
+    const pair = cleanPair(game, 99);
+    if (!pair) return null;
+    games.push(pair);
+  }
+  const partij = {
+    p1: cleanPartijName(input.p1), p2: cleanPartijName(input.p2),
+    bestOf, games, score, gamesWon, server, side, status: input.status,
+  };
+  if (typeof input.lastPoint === 'string' && input.lastPoint.trim()) {
+    partij.lastPoint = input.lastPoint.trim().slice(0, LAST_POINT_MAX);
+  }
+  const winner = cleanInt(input.winner, 1, 2);
+  if (winner !== null) partij.winner = winner;
+  return partij;
+}

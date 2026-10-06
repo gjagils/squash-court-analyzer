@@ -96,6 +96,28 @@ final class TeamLiveTests: XCTestCase {
 
     // MARK: Uitnodiging
 
+    func testATeamZipLinkIsNoInvitation() {
+        let code = "abcdefghij12.abcdefghijklmnopqrstu"
+        // The captain's download link must stay a download
+        XCTAssertNil(CardInbox.invite(from: "https://squashanalyzer.com/teams/1eba617d117e5759a04ac8b8/team.zip"))
+        XCTAssertNil(CardInbox.invite(from: "https://www.squashanalyzer.com/teams/x/team.zip#" + code))
+        XCTAssertNil(CardInbox.invite(from: "https://example.com/team/#" + code))
+        XCTAssertNil(CardInbox.invite(from: "https://squashanalyzer.com/kaart/#" + code))
+        XCTAssertEqual(CardInbox.invite(from: "https://squashanalyzer.com/team/#" + code)?.id, "abcdefghij12")
+        XCTAssertEqual(CardInbox.invite(from: "https://www.squashanalyzer.com/team#" + code)?.id, "abcdefghij12")
+        XCTAssertEqual(CardInbox.invite(from: "squashanalyzer://team#" + code)?.id, "abcdefghij12")
+        let inbox = CardInbox()
+        XCTAssertFalse(inbox.receive("https://squashanalyzer.com/teams/1eba617d117e5759a04ac8b8/team.zip"))
+        XCTAssertNil(inbox.pendingTeam)
+    }
+
+    func testALinkInASentenceMayEndInPunctuation() {
+        let code = "abcdefghij12.abcdefghijklmnopqrstu"
+        XCTAssertEqual(TeamInvite.parse("Doe mee: https://squashanalyzer.com/team/#" + code + ".")?.code, code)
+        XCTAssertEqual(TeamInvite.parse("(https://squashanalyzer.com/team/#" + code + "),")?.code, code)
+        XCTAssertEqual(TeamInvite.parse(code + "!")?.code, code)
+    }
+
     func testAnInviteIsALinkOrACodeAndNothingElse() {
         let invite = TeamInvite(id: "abcdefghjkmn", key: "K3yK3yK3yK3yK3yK3yK3y_-9")
         XCTAssertEqual(invite.code, "abcdefghjkmn.K3yK3yK3yK3yK3yK3yK3y_-9")
@@ -110,7 +132,7 @@ final class TeamLiveTests: XCTestCase {
         XCTAssertNil(TeamInvite.parse("abc.def"))
         XCTAssertNil(TeamInvite.parse("ABCDEFGHJKMN.K3yK3yK3yK3yK3yK3yK3y_-9"), "an id is lower case")
         XCTAssertNil(TeamInvite.parse("abcdefghjkmn.kort"))
-        XCTAssertNil(TeamInvite.parse("abcdefghjkmn.K3yK3yK3yK3yK3yK3yK3y!!"))
+        XCTAssertNil(TeamInvite.parse("abcdefghjkmn.K3yK3yK3yK3yK3yK3yK3y@@"))
         XCTAssertEqual(invite.viewerLink(baseURL: "https://live.test"), "https://live.test/t/abcdefghjkmn")
     }
 

@@ -94,10 +94,18 @@ public final class CardInbox {
         return true
     }
 
-    /// A team invitation in a link (not a card link), without touching the inbox
+    /// A team invitation in a link (not a card link), without touching the inbox.
+    /// Only `squashanalyzer.com/team` or `/team/` (with the code in the fragment)
+    /// and `squashanalyzer://team`: a team zip link under `/teams/` is not an
+    /// invitation, and must stay a plain download.
     public static func invite(from link: String) -> TeamInvite? {
-        if !link.contains("/team") && !link.hasPrefix("squashanalyzer://team") { return nil }
-        return TeamInvite.parse(link)
+        let trimmed = link.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.hasPrefix("squashanalyzer://team") { return TeamInvite.parse(trimmed) }
+        guard let url = URL(string: trimmed), url.scheme?.lowercased() == "https",
+              let host = url.host?.lowercased(), host == "squashanalyzer.com" || host == "www.squashanalyzer.com" else { return nil }
+        let path = url.path
+        if path != "/team" && path != "/team/" { return nil }
+        return TeamInvite.parse(trimmed)
     }
 
     public func acceptTeam(_ invite: TeamInvite) {

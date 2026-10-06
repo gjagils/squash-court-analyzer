@@ -162,9 +162,18 @@ public struct TeamInvite: Equatable, Sendable {
                     candidate += String(character)
                 }
             }
-            if let invite = fromCode(candidate) { return invite }
+            if let invite = fromCode(trimmedEnd(candidate)) { return invite }
         }
         return nil
+    }
+
+    /// A link in a sentence often ends in a full stop, comma or bracket
+    private static func trimmedEnd(_ text: String) -> String {
+        var result = text
+        while let last = result.last, ".,;:!?)>\"'".contains(last) {
+            result = String(result.dropLast())
+        }
+        return result
     }
 
     /// The page of viewers

@@ -32,8 +32,12 @@
                 <data android:scheme="https" />
                 <data android:host="squashanalyzer.com" />
                 <data android:host="www.squashanalyzer.com" />
-                <data android:pathPrefix="/kaart" />
-                <data android:pathPrefix="/team" />
+                <!-- Exact paths: /kaartjes or /teams/<code>/team.zip must stay
+                     in the browser (the team zip is a download) -->
+                <data android:path="/kaart" />
+                <data android:pathPrefix="/kaart/" />
+                <data android:path="/team" />
+                <data android:pathPrefix="/team/" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

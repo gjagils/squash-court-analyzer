@@ -123,6 +123,16 @@ public enum TeamMatchSupport {
         }
     }
 
+    /// A tracked match was discarded or saved as incomplete: the partij is free again
+    @MainActor public static func untrack(matchId: UUID, store: any TeamMatchStore) async {
+        guard let all = try? await store.loadAll() else { return }
+        for var team in all where team.partijTracking(matchId: matchId.uuidString) != nil {
+            team.stopTracking(matchId: matchId.uuidString)
+            try? await store.save(team)
+        }
+        TeamLive.shared.unbind(matchId: matchId)
+    }
+
     /// The coupling of a resumed match, from the team match it was started for
     @MainActor public static func target(forMatchId id: UUID, store: any TeamMatchStore) async -> TeamTarget? {
         guard let all = try? await store.loadAll() else { return nil }
@@ -243,7 +253,8 @@ public enum TeamMatchSupport {
     @MainActor public static func candidate(store: any TeamMatchStore, now: Date = Date()) async -> TeamMatch? {
         let calendar = Calendar.current
         if let all = try? await store.loadAll() {
-            for match in all where calendar.isDate(match.date, inSameDayAs: now) { return match }
+            // A team match that is decided is not asked about again (a practice game after the team match)
+            for match in all where calendar.isDate(match.date, inSameDayAs: now) && !match.isComplete { return match }
         }
         guard let team = cachedTeam() else { return nil }
         for fixture in team.fixtures where calendar.isDate(fixture.date, inSameDayAs: now) {

@@ -257,6 +257,13 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertEqual(named.partij(1).ownPlayer, "Gerd-Jan")
         XCTAssertEqual(named.partij(1).opponentPlayer, "")
 
+        // Thrown away or saved as incomplete: the partij is free again
+        var dropped = team
+        dropped.stopTracking(matchId: id.uuidString)
+        XCTAssertNil(dropped.partijTracking(matchId: id.uuidString))
+        XCTAssertNil(dropped.partij(3).trackingOwnIsPlayer1)
+        XCTAssertNotNil(team.partijTracking(matchId: id.uuidString), "the copy is untouched")
+
         // It survives the file: leaving and resuming later finds the coupling again
         let data = try JSONEncoder().encode(team)
         let back = try JSONDecoder().decode(TeamMatch.self, from: data)

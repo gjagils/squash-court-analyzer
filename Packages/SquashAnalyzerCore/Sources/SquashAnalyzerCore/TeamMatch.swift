@@ -464,6 +464,16 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
         update(partij)
     }
 
+    /// The tracked match was thrown away or stopped without a result: it is no
+    /// longer "in progress" for its partij
+    public mutating func stopTracking(matchId: String) {
+        for index in 0..<partijen.count where partijen[index].trackingMatchId == matchId {
+            partijen[index].trackingMatchId = nil
+            partijen[index].trackingOwnIsPlayer1 = nil
+            updatedAt = Date()
+        }
+    }
+
     /// The partij a tracked match is linked to, if any
     public func partijLinked(to matchId: String) -> TeamPartij? {
         for partij in partijen where partij.linkedMatchId == matchId { return partij }

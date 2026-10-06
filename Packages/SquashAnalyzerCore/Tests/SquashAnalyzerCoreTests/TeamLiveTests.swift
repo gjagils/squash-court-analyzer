@@ -363,6 +363,26 @@ final class TeamLiveTests: XCTestCase {
     }
 
     @MainActor
+    func testAPageThatIsGoneStopsTheBoundMatchFromSending() async throws {
+        let transport = FakeTeamTransport()
+        let live = TeamLive(transport: transport)
+        live.baseURL = "https://live.test"
+        let matchId = UUID()
+        live.bind(matchId: matchId, teamId: "abcdefghjkmn", writeKey: "K3yK3yK3yK3yK3yK3yK3yK3y", slot: 2,
+                  homeIsPlayer1: true, homeLabel: "Jan", awayLabel: "")
+        transport.putStatus = 404
+        live.forward(matchId: matchId, snapshot: snapshot("Jan", "Piet", score: [1, 0]))
+        try await waitUntil { live.isGone("abcdefghjkmn") }
+        XCTAssertFalse(live.offline, "a gone page is not a network problem")
+        let sent = transport.requests.count
+
+        // Further points are not sent to a page that is gone
+        live.forward(matchId: matchId, snapshot: snapshot("Jan", "Piet", score: [2, 0]))
+        try await Task.sleep(nanoseconds: 50_000_000)
+        XCTAssertEqual(transport.requests.count, sent)
+    }
+
+    @MainActor
     func testVerifyTellsWhatAKeyMayDoAndWhatIsWrong() async throws {
         let transport = FakeTeamTransport()
         let live = TeamLive(transport: transport)

@@ -276,10 +276,12 @@ public extension TeamMatch {
         return changed
     }
 
-    /// A local copy of a live team match someone invited us to
-    static func joining(_ state: TeamLiveState, invite: TeamInvite, ownSide: TeamSide) -> TeamMatch {
-        var match = TeamMatch(date: Date(timeIntervalSince1970: Double(state.team.date) / 1000.0), home: state.team.home,
-                              away: state.team.away, ownSide: ownSide, liveId: invite.id, liveKey: invite.key)
+    /// A local copy of a live team match someone invited us to (`id` keeps an
+    /// existing copy's identity when joining again)
+    static func joining(_ state: TeamLiveState, invite: TeamInvite, ownSide: TeamSide,
+                        id: UUID = UUID(), ownerKey: String? = nil) -> TeamMatch {
+        var match = TeamMatch(id: id, date: Date(timeIntervalSince1970: Double(state.team.date) / 1000.0), home: state.team.home,
+                              away: state.team.away, ownSide: ownSide, liveId: invite.id, liveKey: invite.key, liveOwnerKey: ownerKey)
         _ = match.mergeLive(state)
         return match
     }
@@ -326,8 +328,12 @@ public final class TeamLive {
     /// Live team matches whose key the server refused (401) at the last send:
     /// the partij does not reach the page, the invitation is wrong or old
     public private(set) var rejectedTeamIds: [String] = []
+    /// Live team matches the server no longer knows (stopped, or two hours idle):
+    /// a bound match stops sending to them
+    public private(set) var goneTeamIds: [String] = []
 
     public func isRejected(_ teamId: String) -> Bool { rejectedTeamIds.contains(teamId) }
+    public func isGone(_ teamId: String) -> Bool { goneTeamIds.contains(teamId) }
 
     private var bindings: [UUID: Binding] = [:]
     private var pending: [String: TeamLivePartij] = [:]
@@ -357,7 +363,7 @@ public final class TeamLive {
 
     /// Called with every new state of a tracked match (nothing when it is not bound)
     public func forward(matchId: UUID, snapshot: LiveSnapshot) {
-        guard let binding = bindings[matchId] else { return }
+        guard let binding = bindings[matchId], !goneTeamIds.contains(binding.teamId) else { return }
         let partij = TeamLivePartij(snapshot: snapshot, homeIsPlayer1: binding.homeIsPlayer1,
                                     homeLabel: binding.homeLabel, awayLabel: binding.awayLabel)
         let key = binding.teamId + "/" + String(binding.slot)
@@ -510,6 +516,13 @@ public final class TeamLive {
     private func noteResult(_ status: Int, teamId: String) {
         let ok = status >= 200 && status < 300
         offline = !ok && status != 404 && status != 401
+        if status == 404 {
+            // The page is gone: nothing more is sent to it (until a new live page is bound)
+            if !goneTeamIds.contains(teamId) { goneTeamIds.append(teamId) }
+            for (key, _) in pending where key.hasPrefix(teamId + "/") { pending[key] = nil }
+        } else if ok {
+            goneTeamIds = goneTeamIds.filter { id in id != teamId }
+        }
         if status == 401 {
             if !rejectedTeamIds.contains(teamId) { rejectedTeamIds.append(teamId) }
         } else if ok {

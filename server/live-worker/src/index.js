@@ -57,7 +57,7 @@ async function renderPage(request, template, title, description, pageUrl, imageU
       'Cache-Control': 'no-store',
       'X-Content-Type-Options': 'nosniff',
       'Referrer-Policy': 'no-referrer',
-      'Content-Security-Policy': "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:",
+      'Content-Security-Policy': "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self'; frame-ancestors 'none'",
     },
   });
 }
@@ -133,9 +133,9 @@ async function handle(request, env) {
     let newId = newSessionId();
     const key = newWriteKey();
     if (!(await limiter.register(newId))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
-    // An id already in use (practically never): pick another
+    // An id already in use (practically never): pick another. The colliding id
+    // belongs to the session that has it: it is not released here.
     while (!(await sessionFor(newId).create(key, snapshot, newId))) {
-      await limiter.release(newId);
       newId = newSessionId();
       if (!(await limiter.register(newId))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
     }
@@ -226,7 +226,6 @@ async function handleTeam(request, env, config, parts, limiter, teamFor) {
     const ownerKey = newWriteKey();
     if (!(await limiter.register(`t:${newId}`))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
     while (!(await teamFor(newId).create(key, ownerKey, team, newId))) {
-      await limiter.release(`t:${newId}`);
       newId = newSessionId();
       if (!(await limiter.register(`t:${newId}`))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
     }

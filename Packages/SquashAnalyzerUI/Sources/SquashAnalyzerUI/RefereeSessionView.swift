@@ -146,6 +146,7 @@ public struct RefereeSessionView: View {
     private func startFresh(abandoning old: RefereeMatch) {
         saver.start {
             try await store.abandon(old)
+            if let teamMatchStore { await TeamMatchSupport.untrack(matchId: old.id, store: teamMatchStore) }
             pending = nil
             showingSetup = true
         }

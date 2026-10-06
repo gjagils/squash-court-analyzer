@@ -42,8 +42,16 @@ final class APIKeyManager {
     private func save(key: String, value: String) -> Bool {
         guard let data = value.data(using: .utf8) else { return false }
 
-        // Replace an existing item
-        guard delete(key: key) else { return false }
+        // Replace an existing item in place: when that fails the old key is still there
+        // (deleting first and then adding lost the key when the add failed)
+        let identity: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: key
+        ]
+        let updated = SecItemUpdate(identity as CFDictionary, [kSecValueData as String: data] as CFDictionary)
+        if updated == errSecSuccess { return true }
+        if updated != errSecItemNotFound { return false }
 
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,

@@ -121,16 +121,6 @@ export async function readJson(request, limit = MAX_BODY_BYTES) {
   }
 }
 
-/** Constant-time comparison of the write key from the Authorization header */
-export function keyMatches(request, expected) {
-  const header = request.headers.get('authorization') || '';
-  const given = header.startsWith('Bearer ') ? header.slice(7) : '';
-  const a = new TextEncoder().encode(given);
-  const b = new TextEncoder().encode(expected || '');
-  if (a.length !== b.length || a.length === 0) return false;
-  return crypto.subtle.timingSafeEqual(a, b);
-}
-
 /** 12 characters from an unambiguous alphabet: not guessable, easy to read aloud */
 export function newSessionId() {
   const alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';

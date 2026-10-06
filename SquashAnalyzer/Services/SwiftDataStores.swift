@@ -211,12 +211,15 @@ enum RefereeInProgressStore {
     }
 
     /// The unfinished match, if any. A file that cannot be read back (damaged,
-    /// or from a format this version no longer knows) is removed, so the
-    /// question "Wedstrijd hervatten?" does not keep failing on it.
+    /// or from a format this version no longer knows) is set aside under another
+    /// name, so the question "Wedstrijd hervatten?" does not keep failing on it
+    /// and nothing is thrown away.
     static func load() -> RefereeMatch? {
         guard let data = try? Data(contentsOf: url) else { return nil }
         guard let snapshot = try? JSONDecoder().decode(RefereeMatchSnapshot.self, from: data) else {
-            clear()
+            let aside = url.deletingLastPathComponent()
+                .appendingPathComponent("referee-in-progress.unreadable-\(Int(Date().timeIntervalSince1970)).json")
+            if (try? FileManager.default.moveItem(at: url, to: aside)) == nil { clear() }
             return nil
         }
         let match = RefereeMatch.restoring(snapshot)

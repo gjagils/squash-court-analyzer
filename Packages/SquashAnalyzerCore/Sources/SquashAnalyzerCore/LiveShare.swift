@@ -419,6 +419,9 @@ public final class LiveShare {
                                                     headers: ["Content-Type": "application/json", "Authorization": "Bearer \(key)"],
                                                     body: body)
             if response.status == 404 || response.status == 401 {
+                // At the end of a match a gone page is not made again: the final
+                // score would go to a link nobody has
+                if finishing { return true }
                 try await create(snapshot)
                 linkChanged = true
                 return true

@@ -193,10 +193,15 @@ class MainActivity : AppCompatActivity() {
 
     /** Identifies this install as the awarding coach, like iOS' `BadgeAwarder.installId` */
     private fun badgeInstallId(): String {
-        val prefs = getSharedPreferences("squash-analyzer", MODE_PRIVATE)
+        // Its own preferences file, left out of the cloud backup and device transfer:
+        // a restore onto another phone must not give two phones the same id
+        val prefs = getSharedPreferences("squash-analyzer-install", MODE_PRIVATE)
         prefs.getString("badgeInstallId", null)?.let { return it }
-        val id = java.util.UUID.randomUUID().toString().uppercase()
+        // An id that was kept with the other settings before moves here (and leaves the backed-up file)
+        val old = getSharedPreferences("squash-analyzer", MODE_PRIVATE)
+        val id = old.getString("badgeInstallId", null) ?: java.util.UUID.randomUUID().toString().uppercase()
         prefs.edit().putString("badgeInstallId", id).apply()
+        old.edit().remove("badgeInstallId").apply()
         return id
     }
 

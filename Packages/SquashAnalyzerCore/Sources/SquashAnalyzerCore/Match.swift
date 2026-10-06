@@ -64,7 +64,7 @@ public class Match: Identifiable {
 
     /// Neither player may already have won the match, and the games before must fit in best-of
     public static func isValidHeadStart(player1: Int, player2: Int, bestOf: Int = 5) -> Bool {
-        let toWin = (bestOf / 2) + 1
+        let toWin = MatchStand.gamesToWin(bestOf: bestOf)
         return player1 >= 0 && player2 >= 0 && player1 < toWin && player2 < toWin
     }
 

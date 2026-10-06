@@ -136,6 +136,19 @@ final class LiveShareTests: XCTestCase {
     }
 
     @MainActor
+    func testAGonePageIsNotMadeAgainForTheFinalScore() async throws {
+        let transport = FakeLiveTransport()
+        let live = LiveShare(transport: transport)
+        let match = Match()
+        _ = try await live.start(matchId: match.id, snapshot: match.liveSnapshot())
+        transport.putStatus = 404
+        await live.finish(matchId: match.id, snapshot: match.liveSnapshot())
+        try await waitUntil { !live.isLive(match.id) }
+        // POST (start) and the one PUT of the final score: no second POST
+        XCTAssertEqual(transport.requests.map { $0.method }, ["POST", "PUT"])
+    }
+
+    @MainActor
     func testNoNetworkKeepsTheStateForTheNextRally() async throws {
         let transport = FakeLiveTransport()
         let live = LiveShare(transport: transport)

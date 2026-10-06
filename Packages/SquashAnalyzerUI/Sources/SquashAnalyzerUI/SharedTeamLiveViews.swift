@@ -53,6 +53,13 @@ struct TeamLiveCard: View {
                     ActionButton("Deel kijkerslink", icon: "square.and.arrow.up", style: .filled, disabled: busy, action: onShareViewers)
                     ActionButton("Nodig teamgenoten uit", icon: "square.and.arrow.up", disabled: busy, action: onShareInvite)
                 }
+                if let id = match.liveId, let key = match.liveKey {
+                    // Also readable when nothing can be shared (no share sheet): the code teammates paste at Deelnemen
+                    Text("Code om mee te doen: \(TeamInvite(id: id, key: key).code)")
+                        .font(.system(size: 11))
+                        .foregroundColor(SharedColors.textMuted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 if let problem {
                     Text(problem)
                         .font(.system(size: 12))
@@ -271,6 +278,11 @@ public struct SharedTeamJoinView: View {
             let all = try await store.loadAll()
             // Joined before: that copy, with what the page has now
             for var existing in all where existing.liveId == invite.id {
+                // Joined before: the side may have been chosen wrong; joining again sets it right
+                if existing.ownSide != ownSide {
+                    existing = TeamMatch.joining(fetched, invite: invite, ownSide: ownSide, id: existing.id,
+                                                 ownerKey: existing.liveOwnerKey)
+                }
                 _ = existing.mergeLive(fetched)
                 try await store.save(existing)
                 busy = false

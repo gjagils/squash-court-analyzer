@@ -33,12 +33,26 @@ export class LiveSession extends DurableObject {
 
   /** What viewers get with every state: whether there is a photo per player, and its version (for the image URL) */
   async state() {
-    const [key, snapshot, updatedAt, photoVersion, photo1, photo2] = await Promise.all([
+    const [key, snapshot, updatedAt, photoVersion] = await Promise.all([
       this.ctx.storage.get('key'), this.ctx.storage.get('snapshot'), this.ctx.storage.get('updatedAt'),
-      this.ctx.storage.get('photoVersion'), this.ctx.storage.get('photo1'), this.ctx.storage.get('photo2'),
+      this.ctx.storage.get('photoVersion'),
     ]);
     if (!key) return null;
-    return { snapshot, updatedAt, photos: [Boolean(photo1), Boolean(photo2)], photoVersion: photoVersion || 0 };
+    return { snapshot, updatedAt, photos: await this.photoFlags(), photoVersion: photoVersion || 0 };
+  }
+
+  /**
+   * Whether each player has a photo. Kept as two flags next to the photos, so a
+   * state (sent with every rally) does not read two 24 KB photos from storage.
+   * A session from before the flags reads the photos once and stores the flags.
+   */
+  async photoFlags() {
+    const flags = await this.ctx.storage.get('photoFlags');
+    if (Array.isArray(flags)) return flags;
+    const [photo1, photo2] = await Promise.all([this.ctx.storage.get('photo1'), this.ctx.storage.get('photo2')]);
+    const computed = [Boolean(photo1), Boolean(photo2)];
+    await this.ctx.storage.put('photoFlags', computed);
+    return computed;
   }
 
   async keyEquals(given) {
@@ -68,6 +82,7 @@ export class LiveSession extends DurableObject {
     await this.ctx.storage.put({ photoVersion: version });
     if (photo1) await this.ctx.storage.put('photo1', photo1); else await this.ctx.storage.delete('photo1');
     if (photo2) await this.ctx.storage.put('photo2', photo2); else await this.ctx.storage.delete('photo2');
+    await this.ctx.storage.put('photoFlags', [Boolean(photo1), Boolean(photo2)]);
     this.broadcast('state', await this.state());
     return 204;
   }

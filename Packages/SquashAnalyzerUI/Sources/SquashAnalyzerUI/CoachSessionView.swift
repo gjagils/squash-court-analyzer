@@ -186,6 +186,7 @@ public struct CoachSessionView: View {
     private func startFresh(abandoning old: Match) {
         saver.start {
             if old.stopAction == .discard { try await store.discard(old) } else { try await store.abandon(old) }
+            if let teamMatchStore { await TeamMatchSupport.untrack(matchId: old.id, store: teamMatchStore) }
             pending = nil
             showingSetup = true
         }
@@ -258,7 +259,10 @@ public struct CoachSessionView: View {
             let done = await saver.perform {
                 if discard { try await store.discard(value) } else { try await store.abandon(value) }
             }
-            if done { close() }
+            if done {
+                if let teamMatchStore { await TeamMatchSupport.untrack(matchId: value.id, store: teamMatchStore) }
+                close()
+            }
         }
     }
 

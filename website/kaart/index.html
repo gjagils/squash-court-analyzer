@@ -179,7 +179,7 @@
         for (const award of active.sort((x, y) => y.t - x.t)) {
           const row = el("div", "moment");
           const kind = KIND[award.b];
-          const what = kind.badge.title + (kind.tier == null ? "" : " · " + TIER_NAMES[kind.tier]) + (award.o ? " · tegen " + award.o : "");
+          const what = kind.badge.title + (kind.tier == null ? "" : " · " + TIER_NAMES[kind.tier]) + (typeof award.o === "string" && award.o ? " · tegen " + award.o : "");
           row.append(el("span", null, what), el("span", null, formatter.format(new Date(award.t * 1000))));
           moments.append(row);
         }

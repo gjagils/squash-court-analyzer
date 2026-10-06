@@ -167,3 +167,6 @@ Android/.build/
 
 # Local counter for internal deliveries (scripts/version.py internal)
 .internal-build
+
+# Python cache (scripts/)
+__pycache__/

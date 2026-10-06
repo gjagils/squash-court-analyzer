@@ -48,4 +48,6 @@ it('body size, creations per IP and in total, live sessions and viewers are limi
   const another = await SELF.fetch(`${BASE}/api/live/${first.json.id}/events`);
   expect(another.status).toBe(503);
   await reader.cancel();
+  // (A viewer's place is also freed when the request is aborted; workerd's test
+  // environment does not pass that on, so it cannot be tested here.)
 });

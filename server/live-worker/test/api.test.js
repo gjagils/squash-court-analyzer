@@ -211,6 +211,19 @@ describe('photos', () => {
   });
 });
 
+describe('request size', () => {
+  it('a body over the limit is refused before it is read, and a photo upload has its own bigger limit', async () => {
+    const { id, writeKey } = (await call('POST', '/api/live', snapshot)).json;
+    // 200 KB of junk to a snapshot endpoint: 413, not stored
+    const big = { ...snapshot, lastPoint: 'x'.repeat(200 * 1024) };
+    expect((await call('PUT', `/api/live/${id}`, big, writeKey)).status).toBe(413);
+    // The state is untouched
+    expect((await call('GET', `/api/live/${id}`)).json.snapshot.score).toEqual(snapshot.score);
+    // Far over even the photo limit
+    expect((await call('PUT', `/api/live/${id}/photos`, { p1: 'A'.repeat(300 * 1024) }, writeKey)).status).toBe(413);
+  });
+});
+
 describe('service', () => {
   it('health check and logo', async () => {
     const health = await call('GET', '/health');

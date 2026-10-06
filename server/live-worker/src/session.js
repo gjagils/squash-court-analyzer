@@ -170,6 +170,13 @@ export class LiveSession extends DurableObject {
         viewers.delete(entry[0]);
       },
     });
+    // The browser left (closed the tab, lost the network): the place is free now,
+    // not only when the next ping fails
+    request.signal?.addEventListener('abort', () => {
+      if (!entry) return;
+      clearInterval(entry[1]);
+      viewers.delete(entry[0]);
+    });
     return new Response(readable, {
       status: 200,
       headers: {

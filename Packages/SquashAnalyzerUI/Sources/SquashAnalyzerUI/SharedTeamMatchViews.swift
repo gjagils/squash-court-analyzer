@@ -1164,7 +1164,7 @@ struct TeamPartijEditor: View {
             .font(.system(size: 16, weight: .semibold, design: .rounded))
             .foregroundColor(SharedColors.textPrimary)
             .multilineTextAlignment(.center)
-        #if os(iOS)
+        #if os(iOS) || SKIP
         return field
             .keyboardType(.numberPad)
             .lineLimit(1)

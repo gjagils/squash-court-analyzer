@@ -2,6 +2,7 @@ import SwiftUI
 #if SKIP
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -123,6 +124,7 @@ struct AppSymbol: View {
         case "square.and.arrow.down": return Icons.Filled.Download
         case "trash": return Icons.Filled.Delete
         case "pencil": return Icons.Filled.Edit
+        case "plus": return Icons.Filled.Add
         case "person.crop.circle": return Icons.Filled.AccountCircle
         case "chart.bar.fill", "chart.bar.xaxis": return Icons.Filled.BarChart
         case "crown.fill": return Icons.Filled.EmojiEvents

@@ -96,4 +96,4 @@ Instellingen in `wrangler.toml` onder `[vars]`: `PUBLIC_URL`, `IDLE_MINUTES`
 `LIVE_JURISDICTION` (`eu` = de objecten staan alleen in de EU; leeg = geen
 beperking, ook in de lokale tests omdat workerd geen jurisdicties kent). Een
 wijziging maakt lopende sessies onvindbaar (ze duren hooguit twee uur): zet
-hem om als `/health` `"sessions": 0` zegt.
+hem om als `/health` `"sessions": 0` zegt. Staat sinds 6 oktober 2026 op `eu`.

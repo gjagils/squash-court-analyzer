@@ -209,6 +209,17 @@ struct CardImportSheet: View {
 /// match, the history), so an opened card link never has to wait.
 @MainActor
 enum CardImportPresenter {
+    /// The sheet that is (or was) on screen. When the screen under it closes
+    /// (a full-screen cover), UIKit takes the sheet along without telling
+    /// anyone: this is how that is noticed.
+    private static weak var shown: UIViewController?
+
+    /// Whether the import sheet is really on screen now
+    static var isShowing: Bool {
+        guard let shown else { return false }
+        return shown.presentingViewController != nil && shown.view.window != nil
+    }
+
     /// Presents the import sheet on top of whatever is showing. False when
     /// there is no window yet (a cold start from a link): try again later.
     @discardableResult
@@ -225,6 +236,7 @@ enum CardImportPresenter {
         let controller = UIHostingController(rootView: AnyView(sheet.modelContainer(container)))
         controller.isModalInPresentation = true
         host = controller
+        shown = controller
         top.present(controller, animated: true)
         return true
     }

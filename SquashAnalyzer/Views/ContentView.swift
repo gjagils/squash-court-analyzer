@@ -26,8 +26,8 @@ struct ContentView: View {
     @State private var showingStartupPersistenceWarning = false
     /// A player card link that was opened and waits for the import sheet (shared with Android)
     @State private var cardInbox = CardInbox()
-    /// The import sheet for `cardInbox.pending` is on screen
-    @State private var showingCardImport = false
+    /// The join sheet for `cardInbox.pendingTeam` is on screen (not while a full-screen cover is up)
+    @State private var showingTeamJoin = false
     #if DEBUG
     /// App Store screenshots (scripts/screenshots.sh): a scoring screen in a prepared state
     @State private var screenshotCoach: Match? = nil
@@ -107,6 +107,7 @@ struct ContentView: View {
             // A link that arrived during a cold start, before there was a window
             if phase == .active {
                 presentPendingCard()
+                presentPendingTeam()
                 // A live final score that could not be sent (no network) goes now
                 Task { await LiveShare.shared.retryPending() }
                 Task { @MainActor in TeamLive.shared.retryPending() }
@@ -119,12 +120,22 @@ struct ContentView: View {
         .onChange(of: cardInbox.pending) { _, _ in
             presentPendingCard()
         }
+        .onChange(of: cardInbox.pendingTeam) { _, _ in
+            presentPendingTeam()
+        }
+        // A card or an invitation that came in during a match waits for the screen to be free
+        .onChange(of: anyCoverOpen) { _, open in
+            if !open {
+                presentPendingCard()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { presentPendingTeam() }
+            }
+        }
         // A link to a live team match (Competitie): join it
-        .sheet(isPresented: Binding(get: { cardInbox.pendingTeam != nil }, set: { if !$0 { cardInbox.pendingTeam = nil } })) {
+        .sheet(isPresented: $showingTeamJoin, onDismiss: { cardInbox.pendingTeam = nil }) {
             if let invite = cardInbox.pendingTeam {
                 SharedTeamJoinView(store: TeamMatchStorage.store, team: TeamMatchSupport.cachedTeam(), initialCode: invite.code) { _ in
-                    cardInbox.pendingTeam = nil
-                } onCancel: { cardInbox.pendingTeam = nil }
+                    showingTeamJoin = false
+                } onCancel: { showingTeamJoin = false }
             }
         }
         .alert("Veilige tijdelijke opslag actief", isPresented: $showingStartupPersistenceWarning) {
@@ -134,17 +145,26 @@ struct ContentView: View {
         }
     }
 
+    /// A full-screen cover is up: a sheet cannot open over it from here
+    private var anyCoverOpen: Bool {
+        showingCoach || showingReferee || showingHistory || showingSettings || analysedMatch != nil
+    }
+
+    /// The join sheet for a pending invitation, as soon as no cover is up
+    private func presentPendingTeam() {
+        showingTeamJoin = cardInbox.pendingTeam != nil && !anyCoverOpen
+    }
+
     /// Shows the import sheet for a pending card link. At a cold start there is
     /// no window yet: tried again a few times, and whenever the app becomes active.
     private func presentPendingCard(attempt: Int = 0) {
-        guard let snapshot = cardInbox.pending, !showingCardImport else { return }
+        // Asked what is really on screen, not a flag that goes stale when UIKit
+        // takes the sheet away with a closing cover
+        guard let snapshot = cardInbox.pending, !CardImportPresenter.isShowing else { return }
         let shown = CardImportPresenter.present(snapshot, container: modelContext.container) {
             cardInbox.pending = nil
-            showingCardImport = false
         }
-        if shown {
-            showingCardImport = true
-        } else if attempt < 20 {
+        if !shown, attempt < 20 {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { presentPendingCard(attempt: attempt + 1) }
         }
     }

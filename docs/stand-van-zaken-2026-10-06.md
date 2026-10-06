@@ -23,7 +23,7 @@ De projectbestanden bevatten nog deze versienummers.
 
 Bronnen: [buildoverzicht](wijzigingen-builds.md),
 [releasenotes](../release-notes/), [Android-port](android-port.md),
-[afgeronde code-analysebacklog](backlog-code-analyse-2026-10-03.md).
+[afgeronde code-analysebacklog](archief/backlog-code-analyse-2026-10-03.md).
 
 ## Gebouwd op main, voor de volgende app-upload
 

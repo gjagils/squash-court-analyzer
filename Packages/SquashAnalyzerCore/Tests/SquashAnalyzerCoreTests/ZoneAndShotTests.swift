@@ -3,7 +3,7 @@ import Foundation
 @testable import SquashAnalyzerCore
 
 /// 6 or 9 zones, shots per zone row, the volley switch and Kill (the trainer's
-/// plan, docs/plan-6-vakken-slagen.md), on Darwin and Android
+/// plan, docs/archief/plan-6-vakken-slagen.md), on Darwin and Android
 final class ZoneAndShotTests: XCTestCase {
     func testLayouts() {
         XCTAssertEqual(CourtLayout.six.zones, [CourtZone.frontLeft, CourtZone.frontRight, CourtZone.middleLeft,

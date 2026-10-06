@@ -1,6 +1,6 @@
 # Backlog uit code-analyse — Squash Analyzer (3 oktober 2026)
 
-Bron: `docs/code-analyse-2026-10-03.md`, gebaseerd op `main` = `bfd68ec`. Regelnummers kunnen verschuiven; zoek op symboolnaam.
+Bron: `docs/archief/code-analyse-2026-10-03.md`, gebaseerd op `main` = `bfd68ec`. Regelnummers kunnen verschuiven; zoek op symboolnaam.
 
 > **Stand 3 oktober (avond):** alle tickets T1–T25 gedaan en op `main`. T20: de
 > iPhone gebruikt de gedeelde coach, scheidsrechter, analyse, wedstrijdlijst en

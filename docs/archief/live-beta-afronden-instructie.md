@@ -28,7 +28,7 @@ de testers tot Gerd-Jan anders beslist.
 
 - `server/live-worker/README.md`: hoe de Worker werkt en hoe je uitrolt.
 - `server/live/README.md`: de Node-versie, dezelfde API.
-- `docs/hosting-verhuizing.md`: het advies en de stand van zaken.
+- `docs/archief/hosting-verhuizing.md`: het advies en de stand van zaken.
 - `docs/android-port.md`, "Nieuwe Skip-eigenaardigheden": valkuilen voor
   het nieuwe type `LiveServer` in Core.
 
@@ -157,7 +157,7 @@ lege push of een handmatige run (workflow_dispatch) dat de deploy slaagt.
 
 ## 8. Afsluiten
 
-- `docs/hosting-verhuizing.md`: onder "Stand 5 oktober" een regel met de
+- `docs/archief/hosting-verhuizing.md`: onder "Stand 5 oktober" een regel met de
   datum van de deploy en wat de praktijktest liet zien.
 - `docs/wijzigingen-builds.md`, blok "Volgende build", kopje Live meekijken:
   aanvullen met het testresultaat; de schakelaar gaat mee in build 19.

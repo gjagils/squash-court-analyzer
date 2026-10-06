@@ -2,7 +2,7 @@ import XCTest
 import Foundation
 @testable import SquashAnalyzerCore
 
-/// The row/side rules of the local advice and their thresholds (docs/plan-lokaal-advies.md)
+/// The row/side rules of the local advice and their thresholds (docs/archief/plan-lokaal-advies.md)
 final class AdviceRulesTests: XCTestCase {
     private func point(_ scorer: Player, _ type: PointType, _ zone: CourtZone?, _ shot: ShotType? = nil, volley: Bool = false) -> Point {
         Point(scorer: scorer, pointType: type, zone: zone, shotType: shot, server: Player.player1,

@@ -4,7 +4,7 @@ import SquashAnalyzerCore
 /// "LIVE" in the header of the coach and referee screens (iOS and Android).
 /// Not live: tap to start live sharing and share the link (WhatsApp). Live: a
 /// red ● LIVE; tap to share the link again or stop. The state itself is sent
-/// by `LiveShareSync` after every rally; see docs/plan-live-meekijken.md.
+/// by `LiveShareSync` after every rally; see docs/archief/plan-live-meekijken.md.
 /// Grey until a link is made, red once the match is live. Only shown when
 /// "Live meekijken" is on in Instellingen (on by default), or
 /// while this match is live so it can always be stopped. Brings its own

@@ -2,9 +2,9 @@
 
 De gekozen stijl is de aangepaste Clubhuis-startpagina: echt zwart, warme oranje accenten en rustige, gelijkwaardige kaarten. Deze gids is de ontwerpbron voor nieuwe en vernieuwde schermen op iOS en Android. Vastgelegd op 3 oktober 2026.
 
-- [Visuele stijlkaart](../homepage-options/style-guide.html)
-- [Previews van vervolgschermen](../homepage-options/pages.html)
-- [Gekozen startpagina](../homepage-options/index.html#clubhuis)
+- [Visuele stijlkaart](../archief/homepage-options/style-guide.html)
+- [Previews van vervolgschermen](../archief/homepage-options/pages.html)
+- [Gekozen startpagina](../archief/homepage-options/index.html#clubhuis)
 - [Platformonafhankelijke ontwerptokens](tokens.json)
 
 De homepage is nu in native implementatie. Vervolgschermen volgen afzonderlijk via [de backlog](BACKLOG.md).

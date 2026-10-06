@@ -2,7 +2,7 @@ import Foundation
 
 // The building blocks of the local advice (CoachAdvice.local): where on the
 // court a player wins, loses and errs, per row (voor/midden/achter) and side
-// (links/rechts). Shared by iOS and Android. Plan: docs/plan-lokaal-advies.md.
+// (links/rechts). Shared by iOS and Android. Plan: docs/archief/plan-lokaal-advies.md.
 
 public enum CourtSide: String, CaseIterable, Sendable {
     case left, right

@@ -2058,7 +2058,7 @@ Valkuil: een knop met donkere tekst (`foregroundColor`) op
 op Android donker op donker. Gebruik `.background(kleur)` plus
 `.clipShape(RoundedRectangle(cornerRadius: 12))` (VOLGENDE GAME, KLAAR,
 scheidsrechter-knoppen, DELEN).
-Plan en voortgang: `docs/plan-6-vakken-slagen.md`.
+Plan en voortgang: `docs/archief/plan-6-vakken-slagen.md`.
 
 ## Branching
 
@@ -2191,7 +2191,7 @@ vorm van de teamimport (iOS menu, Android eigen scherm).
 ## Soort fout, Start en live meekijken (2026-10-03, op 3 oktober lokaal gebouwd en getest)
 
 Gebouwd in de cloud zonder Mac, dus **nog niet door Skip gehaald**. Core is op
-Linux getest (zie `docs/lokaal-testen-oktober.md`). Nieuw gedeeld:
+Linux getest (zie `docs/archief/lokaal-testen-oktober.md`). Nieuw gedeeld:
 `ErrorKind` en `LiveShare` (Core, `@MainActor @Observable` met
 `static let shared`), `ErrorKindToggle` en `LiveShareButton` (UI, met
 `.alert`). Room gaat naar versie 9 (`points.errorKind`, `MIGRATION_8_9`).

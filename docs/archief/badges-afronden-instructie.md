@@ -1,4 +1,4 @@
-> **Historisch: uitgevoerd en uitgeleverd op 5 oktober 2026.** Build 18 / Android 0.5 (5) is afgerond. Onderstaande opdrachten en uploadtoestemming hoorden bij die oplevering. Voor nieuw werk geldt [Opleveren en hosting](opleveren-en-hosting.md).
+> **Historisch: uitgevoerd en uitgeleverd op 5 oktober 2026.** Build 18 / Android 0.5 (5) is afgerond. Onderstaande opdrachten en uploadtoestemming hoorden bij die oplevering. Voor nieuw werk geldt [Opleveren en hosting](../opleveren-en-hosting.md).
 
 # Instructie voor Claude Code op de Mac: badges afronden en testbuilds maken
 

@@ -22,7 +22,7 @@ de builds in de testperiode (twee beoogde uploads, elk hooguit één feature):
 vereiste testduur en bevestiging in de Play Console. Build 19
 krijgt de competitiekoppeling (besluit Gerd-Jan, 5 oktober); de
 badgevoortgang schuift door. Hosting:
-`docs/hosting-verhuizing.md`.
+`docs/archief/hosting-verhuizing.md`.
 
 ### Competitie: teamwedstrijden (de feature van build 19)
 
@@ -105,7 +105,7 @@ Tekst voor de releasenotes (gebruikerstaal):
 Techniek (niet voor de releasenotes): `live.squashanalyzer.com` en
 `squashanalyzer.com` zijn sinds 5 oktober Cloudflare Workers
 (`server/live-worker`, `server/website-worker`); de NAS is reserve, zie
-`docs/hosting-verhuizing.md`. Getest op de iPhone met een scheidsrechter- en
+`docs/archief/hosting-verhuizing.md`. Getest op de iPhone met een scheidsrechter- en
 een coachwedstrijd, foto's, WhatsApp-link en vliegtuigstand: "werkt super
 soepel". De schakelaar Alfa/Beta uit de testbranch is weer verwijderd
 (nooit in een build geweest).

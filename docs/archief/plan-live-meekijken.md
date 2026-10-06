@@ -4,7 +4,7 @@
 
 # Bouwplan: Live meekijken
 
-Status: **gebouwd** (3 oktober 2026, branch `claude/tender-rubin-yw2rzz`), nog lokaal te testen: zie `docs/lokaal-testen-oktober.md`.
+Status: **gebouwd** (3 oktober 2026, branch `claude/tender-rubin-yw2rzz`), nog lokaal te testen: zie `docs/archief/lokaal-testen-oktober.md`.
 
 Afwijkingen van het plan bij het bouwen: het model en de verzendlogica staan in Core (`LiveShare.swift`, gedeeld met Android), het versturen per platform (`URLSessionLiveTransport` / `HttpLiveTransport`), net als bij AI Coach. "Laatste punt tonen" staat vast uit (nog geen instelling). Het adres is `LiveShare.defaultBaseURL`.
 

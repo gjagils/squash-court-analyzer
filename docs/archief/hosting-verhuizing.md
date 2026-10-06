@@ -83,7 +83,7 @@ deploy 25 s).
 
 **Stand 5 oktober (avond):** `website/_headers` en de workflow
 `deploy-website.yml` staan klaar; de proef op een `pages.dev`-adres en de
-omzetting van de domeinen staan in `docs/live-beta-afronden-instructie.md`,
+omzetting van de domeinen staan in `docs/archief/live-beta-afronden-instructie.md`,
 stap 9. Tot die omzetting serveert de NAS de site.
 
 **Proef gedaan 5 oktober (18:00):** `wrangler pages project create` maakt

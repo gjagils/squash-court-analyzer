@@ -43,7 +43,7 @@ Gevolgen van de verhuizing:
   Zero Trust de public hostname opnieuw toevoegen (tunnel
   `2b05ba07-fadb-4248-a867-6df79718ae59`; website → `http://192.168.68.120:3001`,
   live → `http://192.168.68.120:3002`). Details en geschiedenis:
-  `docs/hosting-verhuizing.md`. Of de NAS ooit helemaal weg mag, beslist
+  `docs/archief/hosting-verhuizing.md`. Of de NAS ooit helemaal weg mag, beslist
   Gerd-Jan.
 - **Een Worker terugdraaien**: `npx wrangler rollback` (of de commit
   terugdraaien en laten deployen).

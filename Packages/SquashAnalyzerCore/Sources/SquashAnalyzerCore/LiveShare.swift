@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-// Live meekijken (docs/plan-live-meekijken.md): the coach or referee taps
+// Live meekijken (docs/archief/plan-live-meekijken.md): the coach or referee taps
 // "Live delen", shares the link in the WhatsApp group, and the app sends the
 // whole match state to the live server (server/live) after every rally. When
 // the match is over the session is deleted straight away. Only first names

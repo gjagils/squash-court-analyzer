@@ -8,7 +8,7 @@ bereikbaar zolang het tunnel-record `live` ontbreekt. **Deze versie kent de
 teamendpoints (`/api/team…`, `/t/<id>`) niet**: live teamwedstrijden werken
 alleen op de Worker. Zie `docs/opleveren-en-hosting.md`.
 
-Kleine server voor **live meekijken** (zie `docs/plan-live-meekijken.md`). De
+Kleine server voor **live meekijken** (zie `docs/archief/plan-live-meekijken.md`). De
 coach of scheidsrechter tikt in de app op **Live delen** en deelt de link in de
 WhatsApp-groep. Wie op de link tikt, ziet de stand live in de browser, zonder
 app.

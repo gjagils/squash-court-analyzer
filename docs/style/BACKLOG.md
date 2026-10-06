@@ -2,7 +2,7 @@
 
 ## Scope en afspraken
 
-De homepage wordt in deze wijziging doorgevoerd voor iOS en Android. De overige schermen krijgen **geen redesign**. De HTML-previews in `docs/homepage-options/pages.html` zijn door de gebruiker afgewezen en mogen niet als implementatiereferentie dienen.
+De homepage wordt in deze wijziging doorgevoerd voor iOS en Android. De overige schermen krijgen **geen redesign**. De HTML-previews in `docs/archief/homepage-options/pages.html` zijn door de gebruiker afgewezen en mogen niet als implementatiereferentie dienen.
 
 ## Stand (3 oktober, Claude Code)
 

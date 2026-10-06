@@ -1,3 +1,5 @@
+> **Historisch testverslag van 2–3 oktober 2026.** De hier gebouwde functies zijn met build 17 uitgeleverd. Open punten uit het oorspronkelijke plan kunnen inmiddels zijn opgelost. Voor de actuele stand: [wijzigingen per build](wijzigingen-builds.md) en [opleveren en hosting](opleveren-en-hosting.md).
+
 # Lokaal testen: testfeedback oktober 2026
 
 Branch: `claude/tender-rubin-yw2rzz`, gebouwd bovenop `codex/android-phase4`

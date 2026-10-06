@@ -1,5 +1,7 @@
 # Plan: live meekijken per teamwedstrijd
 
+**Actuele status 6 oktober:** gebouwd op main, nog niet als app-update geüpload. `TeamSession` bewaart team/partijen in persistente Durable Object-opslag; stoppen of het alarm na twee uur inactiviteit wist de sessiedata. Alle deelnemers gebruiken dezelfde schrijfsleutel: de app kiest de partij, de server beperkt de sleutel niet tot één partij. IP/tijdstippen voor de limiter hebben een afzonderlijke opslag. Zie [opleveren en hosting](opleveren-en-hosting.md).
+
 Stand 5 oktober 2026, op Gerd-Jans vraag "wat heb je nodig voor live
 teamwedstrijden?". **Gebouwd op 6 oktober 2026** (beslissingen: per partij ook
 punt voor punt, voornamen van de tegenstander naar de server, standaardnaam
@@ -10,7 +12,7 @@ oorspronkelijke plan. Het sluit aan op
 Competitie (`TeamMatch`, vier partijen E1 tot en met E4) en op live meekijken
 (`LiveShare`, de Cloudflare-Worker `server/live-worker`).
 
-## Wat er nu is
+## Uitgangssituatie vóór de bouw (5 oktober)
 
 - Live meekijken is **per partij**: één Durable Object per livewedstrijd
   (`LiveSession`) met een stand (`LiveSnapshot`), een schrijfsleutel, twee
@@ -19,7 +21,7 @@ Competitie (`TeamMatch`, vier partijen E1 tot en met E4) en op live meekijken
 - Een teamwedstrijd bestaat in de app alleen lokaal (`TeamMatch`, een JSON-
   bestand). De server kent hem niet.
 
-## Wat we willen
+## Oorspronkelijk doel
 
 Eén link in de groepsapp voor de hele teamavond: de stand in games, wie er
 tegen wie speelt, per partij de games en bij een lopende partij de stand
@@ -33,7 +35,7 @@ punt voor punt, en aan het eind de uitslag met competitiepunten.
   de teamnamen, de datum, de vier slots (voornamen, de laatste stand van de
   partij in de vorm van `LiveSnapshot`, status open, bezig of klaar) en een
   teamsleutel. Zelfde regels als nu: alleen voornamen, alleen in het
-  geheugen van het object, alarm twee uur na de laatste update, limieten in
+  persistente opslag van het object, alarm twee uur na de laatste team- of partijupdate, limieten in
   `LiveLimiter`.
 - Endpoints naast de bestaande: `POST /api/team` (geeft id, teamsleutel en
   url), `PUT /api/team/:id/partij/:slot` (stand van één partij, met de
@@ -67,7 +69,7 @@ punt voor punt, en aan het eind de uitslag met competitiepunten.
 - Niets nieuws bewaard: voornamen, standen en teamnamen, twee uur na de
   laatste update gewist.
 
-## Keuzes die ik van je nodig heb
+## Oorspronkelijke beslisvragen — beantwoord bij de bouw
 
 1. **Wie voert in?** Alleen de captain op één telefoon (eenvoudig), of elke
    coach en scheidsrechter vanaf de eigen telefoon in dezelfde teampagina

@@ -1,3 +1,5 @@
+> **Historisch ontwerp met uitvoeringsnotities.** Deze functie is gebouwd en staat op `main`. Oorspronkelijke voorstellen, branches en open vragen hieronder zijn geen actuele werklijst. De besluiten en uitvoeringsnotities gaan voor het oorspronkelijke plan; zie ook [wijzigingen per build](wijzigingen-builds.md).
+
 # Bouwplan: 6 vakken + slagkeuze per vak
 
 Status: **gebouwd op `codex/android-phase4`** (1 oktober 2026); nog uit te proberen in de praktijk

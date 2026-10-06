@@ -1,6 +1,10 @@
 # Overdracht badge-artwork aan Claude Code
 
-## Status
+## Actuele status (6 oktober 2026)
+
+Artwork én integratie zijn afgerond en uitgeleverd in iOS 2.2 (18) en Android 0.5 (5). De oude achttien imagesets zijn opgeruimd; de app heeft 37 badgefamilies en 71 varianten. De secties hieronder beschrijven de oorspronkelijke artworkoverdracht; de laatste sectie beschrijft de afgeronde integratie.
+
+## Oorspronkelijke artworkoverdracht
 
 Het artwork uit `docs/style/badge-prompt-codex.md` is gemaakt: 17 badges met elk drie treden (51 ontwerpen) en 7 nieuwe badges zonder treden. In totaal 58 ontwerpen, 174 transparante PNG-bestanden en 58 `Contents.json`-bestanden.
 
@@ -113,8 +117,7 @@ Alle 58 ontwerpen zijn in de drie gevraagde afmetingen aanwezig. PNG-alpha en im
 
 ## Integratie (Claude Code, 5 oktober 2026)
 
-Het artwork is gekoppeld; de logica staat in de code en wacht op een build en
-een test op de toestellen (in de cloudsessie zijn Swift en Skip niet beschikbaar).
+Het artwork is gekoppeld; logica, schermen en back-upcompatibiliteit zijn op de Mac getest (zie de resultaten onderaan). Uitgeleverd in build 18 / Android 0.5 (5).
 
 - **`BadgeKind`** (`Packages/SquashAnalyzerCore/.../BadgeEngine.swift`): de
   zilveren en gouden treden zijn eigen cases met de ids `<id>-silver` en

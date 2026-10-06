@@ -27,26 +27,27 @@
   <!-- ── Privacy content ──────────────────────────────────── -->
   <article class="prose">
     <h1>Privacybeleid</h1>
-    <p class="meta">Laatst bijgewerkt: oktober 2026</p>
+    <p class="meta">Laatst bijgewerkt: 6 oktober 2026</p>
 
     <h2>1. Wie zijn wij?</h2>
     <p>
-      SquashAnalyzer is een app voor iPhone en Android, ontwikkeld door Gerd-Jan van Gils. De app is beschikbaar via de Apple App Store en Google Play en bereikbaar via <a href="https://www.squashanalyzer.com">www.squashanalyzer.com</a>.
+      SquashAnalyzer is een app voor iPhone en Android, ontwikkeld door Gerd-Jan van Gils. De app is beschikbaar via de Apple App Store en als testversie via TestFlight en Google Play en bereikbaar via <a href="https://www.squashanalyzer.com">www.squashanalyzer.com</a>.
     </p>
     <p>
       Voor vragen over dit privacybeleid: <a href="mailto:info@squashanalyzer.com">info@squashanalyzer.com</a>
     </p>
 
     <h2>2. Welke gegevens verwerken wij?</h2>
-    <p>SquashAnalyzer verwerkt <strong>geen persoonlijke gegevens</strong> zonder expliciete invoer van de gebruiker. De app verzamelt of verstuurt de volgende informatie:</p>
+    <p>SquashAnalyzer bewaart de spelers en wedstrijden die je invoert lokaal. Wanneer je online functies gebruikt, worden daarvoor gegevens verwerkt zoals hieronder beschreven:</p>
     <ul>
-      <li><strong>Spelersnamen</strong>: Ingevoerd door de gebruiker voor de wedstrijd. Deze worden uitsluitend lokaal op het apparaat en optioneel in iCloud Drive opgeslagen.</li>
+      <li><strong>Spelersnamen</strong>: Ingevoerd door de gebruiker voor de wedstrijd. Deze worden lokaal en in je gekozen back-ups opgeslagen. Bij live meekijken of het delen van een kaart of uitslag worden ook namen gedeeld, zoals hieronder beschreven.</li>
       <li><strong>Wedstrijddata</strong>: Scores, punt-types, zones en slagkeuzes die de gebruiker registreert. Opgeslagen lokaal op het apparaat en, op iPhone, optioneel via iCloud Drive backup.</li>
-      <li><strong>AI coaching verzoeken</strong>: Geanonimiseerde wedstrijdstatistieken en gekozen algemene coaching-aandachtspunten worden naar de OpenAI API gestuurd om coachingadvies te genereren. Spelersnamen en vrije coachingnotities worden niet meegestuurd.</li>
+      <li><strong>AI coaching verzoeken</strong>: Wedstrijdstatistieken zonder spelersnamen en gekozen algemene coaching-aandachtspunten worden naar de OpenAI API gestuurd om coachingadvies te genereren. Spelersnamen en vrije coachingnotities worden niet meegestuurd.</li>
       <li><strong>Mijn team</strong>: Als je in de instellingen een teamlink van sbn.toernooi.nl invult, haalt de app de openbare teampagina en stand op bij sbn.toernooi.nl. Daarbij gaat alleen het verzoek om die openbare pagina naar sbn.toernooi.nl; er worden geen spelers, wedstrijden of andere gegevens uit de app meegestuurd. De opgehaalde stand wordt alleen lokaal op het apparaat bewaard.</li>
       <li><strong>Meedoen met de iPhone-test (TestFlight)</strong>: De test loopt via de app TestFlight van Apple; daarop is het privacybeleid van Apple van toepassing. Feedback die je in TestFlight stuurt, zoals een opmerking of screenshot, komt bij ons binnen en gebruiken we alleen om de app te verbeteren.</li>
       <li><strong>Aanmelden voor de Android-test</strong>: Meld je je per e-mail aan, dan gebruiken we je e-mailadres alleen om je toe te voegen aan de testgroep in Google Play en je over de test te mailen. Na de test, of eerder als je dat vraagt, verwijderen we het.</li>
-      <li><strong>Live meekijken</strong>: Alleen als de coach of scheidsrechter in de app op LIVE tikt, stuurt de app tijdens die wedstrijd de voornamen van de twee spelers en de stand naar een eigen server van SquashAnalyzer, zodat mensen met de link mee kunnen kijken. Staat er in de app een foto bij een speler, dan gaat daar ook een kleine versie van mee (een vierkantje van 160 bij 160 pixels), die naast de naam op de livepagina staat; dat kun je in Instellingen uitzetten met "Foto's van de spelers meesturen". Er gaan geen achternamen, slagen of andere gegevens mee. De server bewaart dit alleen in het werkgeheugen (niet op schijf), laat browsers en tussenliggende servers de foto's niet bewaren, en wist alles 2 uur na de laatste update: zo kunnen kijkers na afloop nog even de eindstand zien. Kies je in de app voor Live stoppen, dan wordt het meteen gewist. Hetzelfde geldt voor een live teamwedstrijd (Competitie): de teamnamen, de datum, per partij de voornamen (of de teamnaam met de partij erachter als je niets invult) en de stand gaan naar dezelfde server, op één pagina voor de hele teamavond, en teamgenoten met de uitnodiging kunnen hun eigen partij erop zetten. Iedereen met de link kan meekijken; deel hem dus alleen met wie je wilt. Voeg alleen foto's toe van spelers die dat goed vinden. In Instellingen kun je de LIVE-knop helemaal uitzetten.</li>
+      <li><strong>Live meekijken</strong>: Alleen als de coach of scheidsrechter in de app op LIVE tikt, stuurt de app tijdens die wedstrijd de voornamen van de twee spelers en de stand naar de live-dienst van SquashAnalyzer bij Cloudflare, zodat mensen met de link mee kunnen kijken. Staat er in de app een foto bij een speler, dan gaat daar ook een kleine versie van mee (een vierkantje van 160 bij 160 pixels), die naast de naam op de livepagina staat; dat kun je in Instellingen uitzetten met "Foto's van de spelers meesturen". Er gaan geen achternamen, slagen of andere gegevens mee. De live-dienst gebruikt tijdelijke, persistente opslag bij Cloudflare (Durable Objects), zodat een sessie een herstart kan overleven. Een automatisch alarm verwijdert de sessie-inhoud, inclusief eventuele foto's, 2 uur na de laatste stand-update. Foto's krijgen een instructie om ze niet in een browsercache te bewaren. Een al geopende pagina kan de laatst ontvangen stand nog tonen; kijkers kunnen ook zelf een kopie maken. Kies je in de app voor Live stoppen, dan wordt het meteen gewist. Voor live teamwedstrijden (Competitie, voorbereid voor build 19) geldt dezelfde opslag- en verwijdertermijn: de teamnamen, de datum, per partij de voornamen (of de teamnaam met de partij erachter als je niets invult) en de stand gaan naar dezelfde server, op één pagina voor de hele teamavond, en teamgenoten met de uitnodiging kunnen hun eigen partij erop zetten. Iedereen met de link kan meekijken; deel hem dus alleen met wie je wilt. Voeg alleen foto's toe van spelers die dat goed vinden. In Instellingen kun je de LIVE-knop helemaal uitzetten.</li>
+      <li><strong>Technische verzoekgegevens</strong>: Cloudflare verwerkt netwerkgegevens zoals IP-adressen om de website en live-dienst te leveren. De live-dienst gebruikt IP-adressen en tijdstippen van aanmaakverzoeken ook om het aantal verzoeken te begrenzen. Deze technische administratie staat los van de wedstrijdinhoud; de verwijdertermijn van 2 uur hierboven betreft de livesessie.</li>
       <li><strong>Teams via een link</strong>: Een team (namen, foto's en eventueel aandachtspunten) kan op squashanalyzer.com/teams staan, zodat een coach het met één link in de app zet. Zie hieronder bij "Teams op squashanalyzer.com".</li>
     </ul>
 
@@ -83,15 +84,15 @@
     </p>
     <ul>
       <li><strong>Wat staat er</strong>: per speler de naam, een foto en eventueel algemene aandachtspunten (zoals "Backhand"). Geen coachingnotities, wedstrijden, scores of badges.</li>
-      <li><strong>Wie kan het zien</strong>: iedereen die de link heeft. De link bevat een lange willekeurige code, staat nergens op de website en wordt niet door zoekmachines opgenomen. Deel de link daarom alleen binnen je eigen team.</li>
-      <li><strong>Waar</strong>: op een eigen server van SquashAnalyzer. Het verkeer naar squashanalyzer.com loopt via Cloudflare.</li>
+      <li><strong>Wie kan het zien</strong>: iedereen die de link heeft. De link bevat een lange willekeurige code, staat niet in de navigatie en krijgt instructies aan zoekmachines om hem niet op te nemen. Dat is geen toegangsbeveiliging. Deel de link daarom alleen binnen je eigen team.</li>
+      <li><strong>Waar</strong>: als bestanden op de website van SquashAnalyzer, gehost bij Cloudflare.</li>
       <li><strong>In de app</strong>: de app haalt het teambestand op bij squashanalyzer.com en zet de spelers alleen op het eigen apparaat. Daarbij wordt niets uit de app meegestuurd. Zoals bij elke website zien onze server en Cloudflare het IP-adres van het verzoek; wij gebruiken dat niet.</li>
       <li><strong>Hoe lang</strong>: zolang het team de link gebruikt. Op verzoek van de captain of van een speler zelf halen we het team of die ene speler weg. Spelers die al in iemands app staan, blijven op dat apparaat tot die gebruiker ze verwijdert.</li>
     </ul>
 
     <h2>5. OpenAI (AI coaching)</h2>
     <p>
-      De AI-coachingfunctie stuurt geanonimiseerde wedstrijdstatistieken (percentages, aantallen per zone/slagtype) en eventueel gekozen algemene aandachtspunten naar de OpenAI API. Er worden <strong>geen spelersnamen, vrije coachingnotities of direct identificeerbare gegevens</strong> verstuurd. OpenAI verwerkt deze verzoeken conform hun eigen <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">privacybeleid</a>.
+      De AI-coachingfunctie stuurt wedstrijdstatistieken zonder spelersnamen (percentages, aantallen per zone/slagtype) en eventueel gekozen algemene aandachtspunten naar de OpenAI API. Er worden <strong>geen spelersnamen, vrije coachingnotities of direct identificeerbare gegevens</strong> verstuurd. OpenAI verwerkt deze verzoeken conform hun eigen <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">privacybeleid</a>.
     </p>
     <p>Voor de AI coaching functie is een eigen OpenAI API-sleutel vereist, die de gebruiker zelf invoert in de app-instellingen.</p>
 
@@ -102,14 +103,14 @@
 
     <h2>7. Gegevensopslag</h2>
     <p>
-      Alle wedstrijddata wordt lokaal op het apparaat opgeslagen (op iPhone met Apple's SwiftData, op Android in een lokale database). Er is geen server, database of cloud-dienst van SquashAnalyzer zelf betrokken bij de opslag van gebruikersdata. Uitzonderingen zijn live meekijken (tijdelijk, zie hoofdstuk 2) en teams die de beheerder op verzoek op squashanalyzer.com zet (zie "Teams op squashanalyzer.com").
+      Spelers en wedstrijden staan lokaal op je apparaat; teamwedstrijden worden in een lokaal bestand bewaard. Back-ups staan op de door jou gekozen locatie. Online verwerking vindt plaats bij AI Coach, live meekijken en teams die de beheerder op verzoek op squashanalyzer.com zet, zoals hierboven beschreven. Gedeelde kaarten en uitslagen komen daarnaast bij de ontvangers terecht.
     </p>
 
     <h2>8. Rechten van gebruikers</h2>
-    <p>Je wedstrijden en spelers staan alleen op je eigen apparaat. Je kunt die gegevens op elk moment verwijderen door:</p>
+    <p>Je kunt de lokale wedstrijden en spelers en je eigen back-ups verwijderen door:</p>
     <ul>
-      <li>De wedstrijden handmatig te verwijderen via "Wedstrijdgeschiedenis" in de app</li>
-      <li>De app te verwijderen van je iPhone, iPad of Android-toestel (verwijdert alle lokale data)</li>
+      <li>De wedstrijden handmatig te verwijderen via "Afgeronde wedstrijden" in de app</li>
+      <li>De app met de lokale appgegevens te verwijderen van je iPhone, iPad of Android-toestel (bestaande back-ups en gedeelde kopieën blijven apart bestaan)</li>
       <li>Handmatig de back-upbestanden te verwijderen uit iCloud Drive (Bestanden-app → iCloud Drive → SquashAnalyzer) of, op Android, uit de map die je voor back-ups hebt gekozen</li>
     </ul>
     <p>

@@ -1,52 +1,25 @@
 # Android port (one Swift codebase, via Skip)
 
-**Status: Fase 0 t/m 4 afgerond; fase 5 Spelers, `CourtView`, coach-modus
-scoren, scheidsrechtermodus (beide ínclusief opslag/hervatten), de
-badges-catalogus, "Kies speler" bij nieuwe wedstrijden, echte badge-awards
-inclusief career-badges (berekenen, opslaan, tonen in Spelers, én een
-"Badges verdiend"-strip op het match-einde-scherm), en een
-geschiedenisoverzicht van afgeronde wedstrijden zijn afgerond
-(2026-09-27).** Alle badges-substappen zijn hiermee compleet. Android heeft
-nu een echt startscherm, een
-werkend spelersbeheer-scherm, een volledig werkende coach-scoreflow (tik
-score → puntsoort → zone → slag, undo, game/match-einde) en een werkende
-scheidsrechtermodus (punten, LET, STROKE, undo, game-wissel) — beide met
-automatische opslag/hervatten via Room, een "Kies speler"-stap vóór een
-nieuwe wedstrijd start (`MatchSetupView`, gedeeld), automatische
-badge-berekening bij elke opslag (`BadgeAwardStore`, Room-schema 5) die
-zichtbaar is via een badge-aantal per speler in het Spelers-scherm (met een
-tik-door naar hun verdiende badges, `SharedPlayerBadgesView`) én direct op
-het match-einde-scherm (`SharedMatchBadgesStrip`) — plus een vijfde
-starttegel "Badges" met de volledige badge-catalogus, en een echte
-"Afgeronde wedstrijden"-tegel die coach- en scheidsrechterwedstrijden samen
-toont (`SharedMatchHistoryView`). Allemaal test-gedekt en (waar praktisch
-haalbaar) handmatig op de emulator geverifieerd. `Game`, `Match`, `Point`,
-`LetCall`, `ServerSide`, `MatchStatus`, `RefereeMatch` en `Match`/
-`RefereeMatch`'s `badgeInput`/`rallyWinners` zijn gedeeld via
-`SquashAnalyzerCore`, met een `CoachMatchStore`-, een `RefereeMatchStore`-,
-een `PlayerBadgeSummaryStore`- en een `MatchHistoryStore`-protocol ernaast.
-Regressie bij de laatste stap: `:app:testDebugUnitTest` groen,
-`:app:connectedDebugAndroidTest` (13/13), `swift test`/`skip test` groen,
-volledige iOS-testsuite (`xcodebuild test -skipPackagePluginValidation`)
-**TEST SUCCEEDED**. De Badges-tegel verscheen bij een eerdere stap ook op
-iOS' eigen homescherm, zie Fase 5 hieronder. Geen TestFlight-upload.
+## Actuele status — 6 oktober 2026
 
-Eén echte fout gevonden en gefixt tijdens deze regressierun:
-`PlayerScreenTest.createEditReopenAndDeletePlayer` riep `.performScrollTo()`
-aan op de naam-/notitievelden, maar Skip's `ScrollView`-implementatie op
-Android hangt (nog) geen Compose scroll-semantics-actie aan zijn kinderen
-("Semantic Node has no parent layout with a Scroll SemanticsAction"). Dat is
-een SkipUI-beperking, geen app-bug: het formulier past ruim op het
-testtoestel zonder te hoeven scrollen. Fix: de `.performScrollTo()`-aanroepen
-uit de test verwijderd; als het spelersformulier ooit te lang wordt voor een
-klein scherm, moet scrollen op Android apart geverifieerd worden zodra
-SkipUI die semantics wel blootgeeft.
+De port is in gebruik bij testers: **Android 0.5 (5)**, naast iOS 2.2 (18).
+Coach- en scheidsrechtermodus, opslag/hervatten, spelersfoto's, badges en
+kaartlinks, geschiedenis, analyse, delen, Mijn team, teamimport en wekelijkse
+back-ups zijn gebouwd. De schermen en domeinregels worden gedeeld via Skip.
+Competitie en live teamwedstrijden zijn op main gebouwd voor Android 0.6 (6)
+/ iOS build 19; die upload is nog niet uitgevoerd. Praktijktesten van live
+teamwedstrijden op de twee telefoons staan nog open.
 
-Dit document is het naslagwerk voor de Android-port. Werk je hieraan verder,
-houd dit bestand bij: fase-status, nieuwe transpile-eigenaardigheden en
-beslissingen. Volgende: **fase 5, opslag voor scheidsrechterwedstrijden
-(dezelfde `MatchStore`-koppeling als coach-modus), daarna badges-UI en
-wedstrijdgeschiedenis**.
+Actuele werkinstructies: [opleveren en hosting](opleveren-en-hosting.md).
+Release- en backlogstatus: [wijzigingen per build](wijzigingen-builds.md).
+
+## Historisch ontwikkellogboek
+
+De fasen, versies, testresultaten en afspraken hieronder beschrijven hun
+vermelde datum. Vroege beperkingen, placeholders en het tijdelijke verbod op
+TestFlight zijn inmiddels achterhaald; ze zijn geen huidige productstatus.
+Nieuwe uploads vereisen nog steeds een expliciete opdracht. De actuele
+veiligheidsafspraken in AGENTS.md en de opleverinstructie blijven leidend.
 
 ## Doel en harde eisen (van Gerd-Jan, 2026-09-26/27)
 

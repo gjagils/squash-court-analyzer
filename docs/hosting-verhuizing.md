@@ -1,4 +1,4 @@
-# Website en live-server naar een externe host
+# Website en live-server naar een externe host (historisch)
 
 > **Samenvatting (6 oktober 2026):** klaar. Website en live-server draaien op
 > Cloudflare (Workers); de NAS-stacks 85 en 109 staan alleen nog als reserve.

@@ -1,7 +1,6 @@
 # Competitie: vervolgpunten (5 en 6 oktober 2026)
 
-Alle punten hieronder zijn gebouwd en getest op 5 oktober (avond); wat nog
-open is, staat onderaan.
+De eerste punten zijn gebouwd op 5 oktober; live teamwedstrijden en herstel van de koppeling volgden op 6 oktober. Wat nog open is, staat onderaan.
 
 Gerd-Jan vroeg op 5 oktober (avond) na de eerste versie van Competitie om
 deze punten. Uploaden naar TestFlight of Play hoeft nog niet. Dit bestand is
@@ -24,7 +23,7 @@ begint hier, vinkt af wat klaar is en commit per punt.
       `FullBackup`, formatVersion 4, terugzetten bij Voeg toe en Vervang
       alles, op iOS en Android.
 - [x] **Antwoord: wat is er nodig voor live teamwedstrijden?** Uitgewerkt in
-      `docs/plan-live-teamwedstrijd.md` (alleen een plan, niet gebouwd).
+      `docs/plan-live-teamwedstrijd.md` (oorspronkelijk plan, inmiddels gebouwd op 6 oktober).
 - [x] Docs: `docs/wijzigingen-builds.md` (releasenotetekst), `ARCHITECTURE.md`,
       handleiding op de website (en publiceren met
       `npx wrangler deploy -c server/website-worker/wrangler.jsonc`).

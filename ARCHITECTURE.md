@@ -1,8 +1,10 @@
 # Squash Analyzer architecture
 
+**Status 6 oktober 2026.** Laatste gedocumenteerde testuploads: iOS 2.2 (18) en Android 0.5 (5). Competitie en live teamwedstrijden zijn op main gebouwd voor de volgende upload; zie [opleveren en hosting](docs/opleveren-en-hosting.md).
+
 ## Local-first data flow
 
-SwiftUI features call `MatchRepository`; the repository is the only write path for coach matches. `SwiftDataMatchRepository` upserts one `SavedMatch` with child games, points and lets under stable UUIDs.
+SwiftUI features call `MatchRepository`; the iOS repository persists coach matches behind the shared store interfaces. `SwiftDataMatchRepository` upserts one `SavedMatch` with child games, points and lets under stable UUIDs.
 
 The lifecycle is:
 
@@ -37,25 +39,38 @@ The end of a match can be filled in the same way ("Uitslag aanvullen"). Stopping
 
 **Local coaching advice.** `CoachAdvice.local(in:for:match:)` (Core, so iOS and Android give the same advice) collects candidate lines from `AdviceRules`: where the player wins, loses and errs per row (voor/midden/achter) and side (links/rechts) from `ZoneProfile` (winners and forced errors, the opponent's, own unforced errors; strokes and service points do not count), where the opponent errs (a chance), volleys, the best shot per row, tempo, and the older error/let/service rules. "Vaak" needs 5 points, 3 in the row or side and 50% (row) or 70% (side). Each line carries a potential (points at stake; things that already go well weigh less); the dashboard shows the 5 with the most potential, and a finding that also showed in an earlier game of the match says "Net als in game N.". `ZoneProfileTable` shows the counts on both dashboards, and the AI prompt gets the same counts. Plan and decisions: `docs/plan-lokaal-advies.md`.
 
-**AI Coach model.** `AICoachClient.send` first asks OpenAI which models the key may use (`GET /v1/models`) and picks the cheapest suitable chat model with `AIModelChoice`: a preference list (cheapest first: gpt-4.1-nano, gpt-4o-mini, gpt-5-nano, gpt-4.1-mini, gpt-5-mini), else the first "nano" and then "mini" chat model in the list (no audio/realtime/search/… variants). OpenAI's API gives no prices, so "cheapest" is that order. Reasoning models (gpt-5, o-series) get `reasoning_effort: low`, more `max_completion_tokens` and no temperature. When OpenAI answers that the model does not exist (retired, 404/model_not_found), the next one is tried once; without a model list the preference list is tried. The dashboards (iOS and Android) only show the AI card when a key is set.
+**AI Coach model.** `AICoachClient.send` first asks OpenAI which models the key may use (`GET /v1/models`) and picks an available chat model using a fixed preference list with `AIModelChoice`: a preference list (in this order: gpt-4.1-nano, gpt-4o-mini, gpt-5-nano, gpt-4.1-mini, gpt-5-mini), else the first "nano" and then "mini" chat model in the list (no audio/realtime/search/… variants). This is not a live price comparison and does not guarantee the cheapest model. Reasoning models (gpt-5, o-series) get `reasoning_effort: low`, more `max_completion_tokens` and no temperature. When OpenAI answers that the model does not exist (retired, 404/model_not_found), the next one is tried once; without a model list the preference list is tried. The dashboards (iOS and Android) only show the AI card when a key is set.
 
 `Game` applies the same service-box rules in coach mode (`serverSide`, per-player preferred box, undo); `Match.startNewGame()` carries the preferred boxes into the next game. The box is not persisted: a game restored from the store derives the server from its last point (`restoreServiceState()`) and starts from the hand-out box until Links/Rechts is tapped. Both screens share `ServiceSideSelector`, and all four player columns (coach and referee, iOS and Android) take their text colours from `ServerHighlight` in `ScoreboardSupport.swift`: the server's name and score in white, the receiver's in the player colour.
 
 ## Badges
 
-Players earn badges during a match, in coach and referee mode, but only players picked from "Kies speler" (a typed-in name has no id and earns nothing). A player's badges are shared across the devices of every coach who tracks that player.
+Stand 6 oktober 2026: **37 badgefamilies en 71 varianten**, waarvan 17 families
+met brons, zilver en goud. Uitgeleverd in iOS 2.2 (18) / Android 0.5 (5).
+`BadgeKind` behoudt stabiele ids; `perfect-ten` blijft compatibel als gouden
+variant van vijf op rij. De collectie toont de hoogste behaalde trede.
 
-**Built so far (local, schema V5):** `BadgeKind` (stable raw values, stored and shared, never renamed) and `BadgeEngine`, which, like `ScoringEngine`, is pure: it takes the rally winners of a match in play order (`Match.rallyWinners`, `RefereeMatch.rallyWinners`) and returns the badges per player; runs carry over from one game into the next. The setup screen remembers a player picked in "Kies speler" (`PickedPlayer`; editing the name drops it) and passes `player1Id`/`player2Id` into `Match` and `RefereeMatch`, which are persisted. `BadgeAwarder.syncAwards` runs on every `MatchRepository.upsert` and when a referee match is saved, so an undone rally takes back an award while a deleted one stays deleted; discarding a match removes its awards, deleting one from the history marks them deleted. Awards go into the full backup (including deleted ones; import merges by award id). UI: `MatchBadgesStrip` on both match-over screens, `MatchBadgesSheet` / `PlayerBadgesView` with counts and the earning moments (`BadgeMomentsView`, swipe to delete), a badge count in the player list and a medal on history cards. `BadgeKind` has 31 badges (set 01–06); `BadgeCatalogView` (player list → medal) and `website/badges/index.html` list them all; the engine takes a `BadgeMatchInput` (rallies with shot and point type per game, head start, final stand, match winner) that `Match.badgeInput` and `RefereeMatch.badgeInput` build. Shot and service badges (`coachOnly`) can only be earned in coach mode. Career badges (`isCareer`: hat trick, off the mark, centurion, ten out of ten) come from `BadgeEngine.careerBadges` over the player's finished matches on this device (`BadgeAwarder.history`); the once-only ones (`isOnce`) are not awarded again when the card already has them. Artwork is `badge-<id>` (240px) in SquashAnalyzerUI's `Resources/Module.xcassets`, drawn by the shared `BadgeArtwork` on iOS (`BadgeView`) and Android (`BadgeMedallion`), and `website/badges/<id>.png` on the site; unearned badges are shown greyed out. Debug scenario `-screenshot badges` shows a finished match with badges. Sharing is by link only (since 2026-09-30; the CloudKit live sync — `CardSync`, "Nodig coach uit" — was removed so iPhone and Android share cards the same way, see docs/android-port.md): `CardSnapshot` is the link format (it and `AwardValue`, including the deterministic award id, live in `SquashAnalyzerCore` so iOS and Android produce and read identical links; golden-vector tests in `CardSnapshotTests` pin the format on both platforms), `CardStore` merges awards and links players to cards (`link` moves the player's own awards onto the card), `CardShareActions` ("Deel kaart": image plus link) / `CardImportSheet` / `CardImportPresenter` are the UI, and an opened link goes through the shared Core `CardInbox`. The website has `kaart/index.html` (draws the card from the fragment, never sends it) and `.well-known/apple-app-site-association` (applinks for `/kaart*`); the app also opens `squashanalyzer://kaart#…`. `SavedPlayerCard` and `SavedBadgeAward.cloudSystemFields` are unused leftovers of the CloudKit sync, kept because schema V5 is frozen. The design below is what was built, minus the CloudKit parts marked as removed.
+`BadgeEngine` in Core berekent awards uit `BadgeMatchInput`; carrièrebadges
+gebruiken de opgeslagen wedstrijdgeschiedenis. Alleen geselecteerde, opgeslagen
+spelers hebben een speler-id en kunnen badges verdienen. Coach- en
+scheidsrechtermodus delen de berekening; slagbadges vereisen coachgegevens.
+Awards worden opnieuw berekend bij opslaan en undo. Verwijderde awards hebben
+een tombstone: bij samenvoegen wint `deletedAt`, zodat een verwijderde award
+niet terugkomt door een oudere kaart te importeren. Awards gaan mee in back-ups.
 
-**Planned design:**
+De gedeelde UI toont de catalogus, collectie en verdienmomenten op beide
+platforms. Artwork staat in de resources van SquashAnalyzerUI en in
+`website/badges/`. Zie [de artworkoverdracht](docs/style/badge-artwork-overdracht-claude-code.md).
 
-- **Identity.** `SavedPlayer` gets a `cardId`; `SavedMatch` and `SavedRefereeMatch` get `player1Id`/`player2Id` (new `VersionedSchema`). Cards are matched on `cardId`, never on name.
-- **Awards.** A `BadgeAward` is one earning moment with a deterministic id derived from (cardId, badgeKind, matchId), plus `earnedAt`, `awardedBy` and an optional `deletedAt`. A player has a badge while at least one award without `deletedAt` exists. Because badges derive from the point history, awards are recomputed for old matches once (backfill); recomputing never recreates an existing id, so a deleted badge does not come back, while a new match can earn it again.
-- **Deletion is soft.** Deleting sets `deletedAt` on the awards, which is never cleared; on merge `deletedAt` always wins. Deleting a match offers to delete the badges it produced. Any badge can be deleted on the device that has it; the deletion travels in the next card link.
-- **Storage.** SwiftData locally (Room on Android). Only the name and badges go into a card link; photo, coaching notes and focus stay local. *(Removed 2026-09-30: one CloudKit record zone per card, synced with `CKSyncEngine`.)*
-- **Exchange via links (WhatsApp).** *(Removed 2026-09-30: the `CKShare` invitation with live sync.)* A *snapshot* is `https://squashanalyzer.com/kaart#<compressed card>`: the app imports and merges it (showing what changes first); the Android app does the same; a browser renders the card, so anyone can see the badges. The data is in the fragment, which browsers never send to the server, so the website stores and sees nothing. After a match with new badges the app offers to share the card (image plus snapshot link); there is no automatic sync, so after new badges someone sends the card again.
-- **Where badges show.** Not during the match (no interruption while counting). The "Wedstrijd klaar" screen shows a "Badges verdiend" strip and a "Bekijk badges" button next to "Deel score", only when a picked player earned something. The badge screen per player shows the badges new in this match, the collection with a count per badge ("5 op rij · 3×" = earned in 3 matches, one award per match), locked badges still to earn, and "Deel kaart". The same screen opens from the player list; history cards get a small medal icon for matches with a badge.
-- **App Store / privacy.** No accounts (no in-app account deletion or Sign in with Apple needed), nothing public or searchable (no user-generated content moderation), and no data leaves the device except in links the user sends, so the privacy label can stay "Data Not Collected" (verify when filling it in). The privacy policy gets a paragraph on shared player cards, and the share flow asks to share only with the player's consent.
+Kaarten worden uitgewisseld als **snapshots via links**, zonder automatische
+CloudKit-synchronisatie. `CardSnapshot` en `AwardValue` in Core leggen het
+platformonafhankelijke formaat vast; `CardStore` koppelt spelers en voegt awards
+samen. De link `https://squashanalyzer.com/kaart#…` bevat de kaartgegevens in het
+fragment. De browser toont ze lokaal; de app kan de kaart importeren en koppelen
+via `CardImportSheet` / `CardImportPresenter` en `CardInbox`. Nieuwe awards vragen
+een nieuwe gedeelde link. Namen en badges worden zo gedeeld; de kaartlink bevat
+geen spelersfoto of vrije coachingnotities. Oude CloudKit-velden blijven voor
+schemacompatibiliteit bestaan, niet als actieve synchronisatie.
 
 ## Competitie (teamwedstrijden)
 
@@ -72,7 +87,7 @@ decided). A partij can be linked to a tracked coach or referee match
 is the history id, so "Vernieuwen" re-reads it). `TeamMatchReport.text` is
 the WhatsApp message. Storage is one JSON file per phone
 (`JSONFileTeamMatchStore`, shared by iOS in Application Support and Android
-in `filesDir`; no SwiftData or Room change, not yet in the backup). UI in
+in `filesDir`; no SwiftData or Room change; included through TeamBackup in backup format 4). UI in
 SquashAnalyzerUI: `SharedTeamMatchesView` (list, new from the fixtures or
 by hand), `SharedTeamMatchView`, `TeamPartijEditor` (roster chips from Mijn
 team, scores or winner only, link picker with the match day on top) and
@@ -92,7 +107,7 @@ has a `TeamSession` Durable Object (`server/live-worker/src/team.js`, routes
 and the same two-hour idle alarm. The phone side is `TeamLive` in Core: one
 shared write key per team match, invitation `id.key` as a link
 (`squashanalyzer.com/team#…`), code or `squashanalyzer://team#…`
-(`TeamInvite`). Every phone writes only its own partij, home player first
+(`TeamInvite`). The app writes its selected partij, home player first
 (`TeamLivePartij`); empty names stay empty and the page and app render the
 team name plus position. A tracked coach/referee match bound with
 `TeamTarget.bind` is forwarded point by point through `LiveShareSync.send`;
@@ -100,137 +115,32 @@ the team match screen pushes changed partijen on save and pulls/merges
 (`mergeLive`) on open and "Vernieuwen". The setup screen can attach a new
 match to a team match ("Onderdeel van een teamwedstrijd"). The Node server
 `server/live` (NAS reserve) has no team endpoints.
+All participants share the same write key; the server does not enforce ownership per phone or slot.
 Later: SBN comparison, badge category Teamspeler.
 
 ## Android port
 
-A Skip-based (Swift → Kotlin/Compose) Android port is planned and in progress.
-Android coach scoring now uses the shared `CoachMatchStore` boundary and
-`CoachSessionView` to serialize edits with durable writes. `RoomCoachMatchStore`
-maps live Swift models to the existing transactional `MatchStore`. Room schema
-3 adds optional per-game service state through migration 2→3 (1→2 remains
-available). Each point, undo, service-side change, game transition and explicit
-exit saves; completed matches are retained but excluded from resume. Starting
-over marks the previous match abandoned instead of deleting its history.
-Android referee mode (`RefereeScoringView`/`RefereeSessionView` in
-`SquashAnalyzerUI`, backed by the shared `RefereeMatch` in
-`SquashAnalyzerCore`) now scores points, LET, STROKE, undo and game
-transitions, and persists through the same pattern as coach mode: a
-`RefereeMatchStore` protocol (`loadInProgress`/`save`/`abandon`) implemented
-by `RoomRefereeMatchStore` over a dedicated, smaller Room schema
-(`RefereeMatchEntity`/`RefereeGameEntity`/`RefereePointEntity`/
-`RefereeCurrentPointEntity` — no point type/zone/shot columns, since referee
-mode never tags those). `RefereeMatch.undo()` pops a private, in-memory
-undo stack; a saved match keeps who served the game's first rally
-(`openingServer`/`openingSide`, Room v8 and `RefereeMatchSnapshot`), and
-`rebuildUndo()` rebuilds the stack from that and the timeline on resume, so
-undo reaches back to the game's first rally on both platforms. Android
-also now has a badges destination: `SharedBadgeCatalogView`/`BadgeMedallion`
-in `SquashAnalyzerUI` render the full `BadgeKind` catalog (already pure and
-shared via `BadgeEngine.swift` in `SquashAnalyzerCore`) with a placeholder
-medallion instead of real artwork, the same scope-cut `PlayerAvatarPlaceholder`
-made for photos. It needs no player or match data, so it shipped before real
-per-player badge awards. `Match`/`RefereeMatch`'s `badgeInput`/`rallyWinners`
-extensions live in `SquashAnalyzerCore` (`BadgeInput.swift`) for the same
-reason. The `HomeMenuTiles` grid is shared between platforms, so this added a
-fifth tile to iOS' own home screen too, wired there to iOS' existing,
-separate `BadgeCatalogView` (real artwork attempts) rather than the Android
-placeholder. Real per-player badge awards need a real player id on the
-match, so Android's coach/referee match setup now has a "Kies speler" step
-too: a new, shared `MatchSetupView` (a much smaller version of iOS' full
-`MatchStartView` — two names, each optionally picked from the existing
-player list, no head-start/coaching-focus setup) shown by `CoachSessionView`/
-`RefereeSessionView` before a brand-new match is created, mirroring iOS'
-`PickedPlayer` rule that editing the name after picking drops the id.
-`PlayerProfile.id` (a `String`) bridges to `Match`/`RefereeMatch.player1Id`/
-`player2Id` (`UUID?`) via `UUID(uuidString:)` at that point — no Core type
-change needed. With a real player id available, Android computes and stores
-real badge awards too: `BadgeAwardStore` (Room schema 6, table
-`badge_awards`) is a behaviour-identical Kotlin counterpart of
-`BadgeAwarder` without CloudKit, called from
-`RoomCoachMatchStore`/`RoomRefereeMatchStore` on every `save()`/`abandon()`.
-Its rows have the iOS `SavedBadgeAward` shape (card id, badge, match,
-earnedAt, opponent name, awarding install id, deletedAt) and the shared
-`AwardValue.awardId` id, so awards merge across platforms: an award lives on
-the player's card (`players.cardId ?: players.id`, like `badgeCardId`), a
-player without a `players` row earns nothing, an undone rally removes the
-award outright, a deleted award stays deleted, and career badges are stored
-with the decided match that earned them (history built like
-`BadgeAwarder.history(of:)`: decided matches only, head start counted,
-opponent keyed by id or lowercased name; once-only badges not awarded twice).
-The install id is kept in the app's `SharedPreferences`. Earned badges are
-now visible too: a shared `PlayerBadgeSummaryStore` protocol
-(`badges(forPlayer:) -> [BadgeKind]`, `cardSnapshot(forPlayer:)`), implemented by `BadgeAwardStore`
-itself, backs a badge-count pill on each row of `PlayerDirectoryView`
-(Android's "Spelers" screen) and a new shared `SharedPlayerBadgesView`
-(a `BadgeMedallion` grid, with a "Deel kaart" toolbar button that sends the
-card as the same snapshot link iOS shares — `cardSnapshot(forPlayer:)` on the
-protocol, the Android share sheet via a `shareText` closure that `MainActivity`
-passes down and fills with `shareTextIntent`) it taps through to — and card links come back in the same way: `MainActivity` (`singleTask`,
-intent-filters for `squashanalyzer.com/kaart` and `squashanalyzer://kaart`)
-hands the link to a Core `CardInbox`, and `AndroidHomeView` shows
-`SharedCardImportView` over any screen while one is pending; `BadgeAwardStore`
-implements the Core `CardImportStore` with iOS' `CardStore` rules (link moves
-the player's own awards onto the card, merge where a deletion wins, one
-transaction); after an import `CardInbox.importCount` goes up and the open player list
-and badge screen reload (`.task(id:)`). Checked end to end between the iOS
-simulator, the Android emulator and the website (docs/android-port.md, step 6) — named `Shared...`, not
-`PlayerBadgesView`, for the same reason as `SharedBadgeCatalogView`: the
-iOS app target already has its own, richer `PlayerBadgesView`. A "Badges
-verdiend" strip now shows on the match-over screen too: `SharedMatchBadgesStrip`
-computes earnings the same way `BadgeAwardStore` does (running `BadgeEngine`
-over the match's `badgeInput`), but purely for display, no store needed —
-wired into both `CoachScoringView.matchOverBanner` and `RefereeScoringView`'s
-match-over block.
+De Android-port is beschikbaar voor testers als 0.5 (5). De app gebruikt
+Swift/SwiftUI via Skip, met gedeelde schermen in SquashAnalyzerUI en regels in
+SquashAnalyzerCore. Coach- en scheidsrechtermodus, spelers met foto's, badges,
+kaartlinks, geschiedenis, analyse, delen, Mijn team en teamimport zijn aanwezig.
+Competitie en live teamwedstrijden staan op main voor de nog niet geüploade
+build 19 / Android 0.6 (6).
 
-Android also now has a read-only history browser: a shared
-`MatchHistoryStore` protocol (`loadHistory() -> [MatchHistorySummary]`,
-`MatchHistorySummary` a small flat record — names, games won, status, date,
-not full point-by-point data) backs the "Afgeronde wedstrijden" tile.
-`RoomMatchHistoryStore` merges completed/abandoned coach and referee
-matches into one sorted list; games-won counts come straight from each
-record's own game winners rather than restoring a live `Match`/
-`RefereeMatch`, so a head start is not added in (an accepted simplification
-for this summary list). The new `SharedMatchHistoryView` (much smaller than
-iOS' full `MatchHistoryView` — no import/export, backup or filters, no
-tap-through detail yet) renders it.
+Opslag loopt via de gedeelde store-protocollen. iOS gebruikt SwiftData-adapters;
+Android Room-adapters. Teamwedstrijden staan in een afzonderlijk JSON-bestand.
+Back-ups zijn uitwisselbaar tussen iOS en Android en bevatten teamdata via
+formaat 4 wanneer die aanwezig is. Automatische back-ups zijn op beide platforms
+wekelijks: iOS naar iCloud Drive, Android naar een gekozen map. Herstellen moet
+valideren voordat bestaande gegevens worden vervangen.
 
-Mijn team runs on both platforms from Core: `LeagueTeamLink` (validation),
-`LeagueTeamParser` (the SBN team and standings pages; a tiny `LeagueRegex`
-wraps NSRegularExpression on Apple and `kotlin.text.Regex` on Android, since
-Skip has no NSRegularExpression), `LeagueTeamFetcher` (the cookie-wall
-consent and all sanity checks) and `LeagueTeamStorage` (same UserDefaults
-keys as iOS). Only the page loader is per platform (`LeaguePageLoader`):
-`URLSessionLeaguePageLoader` on iOS, `HttpLeaguePageLoader` (Kotlin,
-HttpURLConnection + a process CookieManager) on Android, because Skip's
-URLSession keeps no cookies and the cookie wall needs them. Android shows it
-with `SharedLeagueTeamCard` on the home screen, `SharedLeagueTeamDetailView`,
-and `SharedSettingsView` (the gear: team link and AI Coach key).
-
-The coach dashboard's local advice (`CoachAdvice`) and AI Coach
-(`AICoachPrompt`, `AICoachClient`) are in Core too; the platforms supply
-`AICoachTransport` (URLSession on iOS, `HttpAICoachTransport` on Android) and
-`APIKeyStore` (Keychain via `APIKeyManager` on iOS, `KeystoreAPIKeyStore`,
-AES-GCM with an Android Keystore key, on Android). Android's
-`SharedCoachDashboardView` opens from ANALYSE on a finished coach game.
-
-Backups use one file format on both platforms: `FullBackup` and
-`BackupCodec` (envelope + SHA-256 over sorted-key ISO 8601 JSON) are in Core;
-Skip's JSONEncoder produces the same bytes as Apple's, so a backup from
-either platform passes the checksum on the other (pinned by a test that runs
-on both). iOS' `ExportService` and Android's `RoomBackupStore` map their
-stores to and from it; Android picks files with the system document pickers
-(`ActivityBackupFiles`). Automatic backups follow Core's `AutoBackupPlan`
-(weekly, newest 7, made when the app goes to the background): iOS'
-`AutomaticBackup` writes to iCloud Drive, Android's `AutoBackup` to a folder
-the user picked.
-Full plan, phase status, toolchain setup and transpile gotchas found so far:
-see [`docs/android-port.md`](docs/android-port.md). Read that file before
-touching anything Android-related, and keep it updated as phases complete.
+[Android-port](docs/android-port.md) bevat het technische logboek, de toolchain
+en Skip-beperkingen. [Opleveren en hosting](docs/opleveren-en-hosting.md) bevat
+de actuele test- en releaseprocedure. Oudere fasen zijn geen open backlog.
 
 ## Sharing a score
 
-`MatchShareReport` holds the three WhatsApp layouts (Kort, Scorekaart, Verslag, `MatchShareStyle`). Coach mode (`Match.shareReport`) and referee mode (`RefereeMatch.shareReport`) both build one, and both match-over / game-over screens open the same `MatchShareSheet`, so a change to the texts or the sheet applies to both modes.
+De zichtbare deelopties zijn **Scorekaart, Verslag en Plaatje** (`MatchShareChoice`). `MatchShareReport` levert de gedeelde tekstgegevens voor coach- en scheidsrechtermodus. `MatchShareStyle` bevat intern ook nog Kort; dat is geen vierde zichtbare deeloptie. De gedeelde UI verzorgt tekst en afbeelding op beide platforms.
 
 ## Taal (besluit T24, 3 oktober 2026)
 

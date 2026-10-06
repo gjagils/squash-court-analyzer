@@ -4,12 +4,17 @@ Doorlopend overzicht van wat er sinds de laatste upload is veranderd. Bij elke
 nieuwe build schuift het blok "Volgende build" naar beneden onder het
 buildnummer, en de releasenotes (`release-notes/`) worden eruit geschreven.
 
+Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
+en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
+SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
+
 ## Volgende build (nog niet geüpload)
 
 Vergeleken met iOS 2.2 (18) en Android 0.5 (5), 5 oktober 2026. Planning van
-de builds in de testperiode (drie tot vier, elk hooguit één feature):
+de builds in de testperiode (twee beoogde uploads, elk hooguit één feature):
 `docs/buildplanning-testperiode.md`: testperiode twaalf dagen, twee builds
-(rond 10 en 15 oktober), daarna productie aanvragen voor Android. Build 19
+(rond 10 en 15 oktober). Productie aanvragen voor Android kan pas na de
+vereiste testduur en bevestiging in de Play Console. Build 19
 krijgt de competitiekoppeling (besluit Gerd-Jan, 5 oktober); de
 badgevoortgang schuift door. Hosting:
 `docs/hosting-verhuizing.md`.
@@ -85,9 +90,9 @@ Tekst voor de releasenotes (gebruikerstaal):
 > altijd bereikbaar (ook als een thuisverbinding hapert) en elke
 > livewedstrijd krijgt zijn eigen stukje server, dus drukte bij de ene
 > wedstrijd raakt de andere niet. Voor jou verandert er niets: dezelfde
-> links, dezelfde app. Er wordt nog steeds niets bewaard: alleen voornamen,
-> de stand en een kleine spelersfoto, en twee uur na de wedstrijd wordt
-> alles gewist.
+> links, dezelfde app. De live-dienst bewaart voornamen,
+> de stand en eventuele kleine spelersfoto's tijdelijk bij Cloudflare.
+> Twee uur na de laatste stand-update wordt de sessie-inhoud verwijderd.
 >
 > **Op de livepagina** krijgt elke gewonnen game de kleur van de winnaar en
 > staan de scores netjes onder elkaar.
@@ -178,7 +183,18 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
 
 ## Backlog
 
-- [x] **Wedstrijd koppelen aan een competitiewedstrijd** (gebouwd 5 oktober voor build 19, zie hierboven; live per teamwedstrijd en SBN-vergelijking nog niet).
+- [ ] **SquashLevels-profiel bij een speler** (afgesproken 6 oktober,
+      nog niet gebouwd; build nog te bepalen). Bij Spelers een optioneel
+      speler-ID of een profiellink per opgeslagen speler vastleggen (niet in
+      algemene Instellingen), met **Bekijk op SquashLevels**
+      het profiel openen in de standaardbrowser. Geen automatische
+      rankingverzoeken. Inclusief wijzigen/verwijderen, lokale validatie,
+      opslag en back-up op iOS en Android. Een optionele
+      `squashLevelsProfileURL` per speler in `team.json` wordt meegenomen
+      bij teamimport uit zip of via link. Uitwerking en acceptatiecriteria:
+      [plan-squashlevels-profiel.md](plan-squashlevels-profiel.md).
+
+- [x] **Wedstrijd koppelen aan een competitiewedstrijd** (gebouwd 5 oktober voor build 19, zie hierboven; live teamwedstrijden ook gebouwd op 6 oktober, SBN-vergelijking nog niet).
       Een SBN-teamwedstrijd = 4 partijen (E1–E4, singles, best of 5 tot 11).
       Uitslag = gewonnen games over de 4 partijen; competitiepunten = games + 3
       bonuspunten voor de winnaar. Winnaar: eerst meeste games; gelijk → meeste

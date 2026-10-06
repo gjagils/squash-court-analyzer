@@ -1,123 +1,58 @@
-# Buildplanning testperiode (vanaf 5 oktober 2026)
+# Buildplanning testperiode — bijgewerkt 6 oktober 2026
 
-De externe test is op 5 oktober gestart met iOS 2.2 (18) en Android 0.5 (5).
-Tijdens de testperiode komen er drie tot vier externe builds, elk met
-bugfixes en kleine verbeteringen uit de testfeedback en **hooguit één
-feature**. Grote onderwerpen (trainingsmodus, clubranglijst) wachten tot
-na de testperiode. **Uitzondering (5 oktober):** Gerd-Jan koos de
-competitiekoppeling als feature van build 19; de badgevoortgang schuift
-een build door.
+De externe test is op 5 oktober gestart met **iOS 2.2 (18)** en
+**Android 0.5 (5)**. De voorgenomen planning bevat twee testupdates, rond
+10 en 15 oktober. Dit zijn richtdata, geen uploadopdrachten.
 
-**Bijgesteld 5 oktober:** de testperiode duurt twaalf dagen (tot en met
-17 oktober); daarna wordt voor Android productie aangevraagd. In twaalf dagen
-passen twee builds verantwoord, niet vier. De features houden hun volgorde;
-build 21 en 22 komen na de productieaanvraag, als gewone updates. Let op de
-Play-regel voor een nieuw persoonlijk ontwikkelaarsaccount: minstens 12
-testers die 14 dagen aaneengesloten aangemeld blijven; controleer in de Play
-Console wat daar precies staat voordat je de aanvraag doet. Nieuwe builds
-tijdens de gesloten test zijn toegestaan en onderbreken die termijn niet,
-zolang de testers aangemeld blijven.
+## Build 19 — iOS 2.2 (19), Android 0.6 (6)
 
-## Spelregels per build
+**Competitie en live teamwedstrijden** zijn de gekozen feature en zijn op main
+gebouwd: vier partijen, handmatig invullen of koppelen aan bijgehouden
+wedstrijden, teamstand en verslag, plus live volgen en samenwerken via een
+teamlink. Teamdata reist mee in back-upformaat 4 wanneer die aanwezig is.
+Dit is een bewuste aanvulling op het eerdere streven formaten ongemoeid te laten.
 
-- **Eén feature, klein genoeg voor één week:** vooral Core-logica met tests
-  en één gedeeld scherm of kaart, zodat iPhone en Android gelijk blijven.
-- **Bugfixes eerst.** Een gemelde fout die gegevens raakt (back-up, badges,
-  opslaan, hervatten) gaat altijd mee, ook als de feature daardoor een build
-  opschuift.
-- **Geen schema- of formaatwijzigingen** zonder noodzaak: geen nieuwe
-  SwiftData-versie, geen Room-migratie, geen wijziging van het back-upformaat
-  of de kaartlink. Testers moeten tussen builds hun gegevens houden.
-- **Badge-ids blijven zoals ze zijn**; nieuwe badges alleen als eigen feature.
-- **Feature-freeze twee dagen voor de upload:** daarna alleen fixes, testen
-  op de simulator, de emulator en beide toestellen (standaard en 1,3× tekst).
-- **Elke build:** `scripts/lint.sh`, Core- en UI-tests via `swift test` en
-  `skip test`, `xcodebuild test`, Android-unittests; releasenotes
-  (`release-notes/2.2-<build>.md`, `release-notes/android-0.<n>-<n>.md`);
-  `website/testen.html` ("Nieuw in deze versie" en de versieregel); upload
-  met `scripts/testflight_distribute.py` en `scripts/play_upload.py`. De
-  stappen staan uitgewerkt in `docs/badges-afronden-instructie.md`
-  (stap 5 tot en met 9).
-- **Versienummers:** iOS blijft 2.2 met oplopend buildnummer; Android
-  `versionCode` en `versionName` lopen samen op (0.6 (6), 0.7 (7), …).
+Simulator- en emulatortests staan als geslaagd gedocumenteerd. Praktijktesten
+van live teamwedstrijden op iPhone en A13 staan nog open. De app-build is nog
+niet geüpload. Zie [Competitie](competitie-vervolg.md),
+[live teamwedstrijden](plan-live-teamwedstrijd.md) en
+[opleveren en hosting](opleveren-en-hosting.md).
 
-## Feedback verzamelen en verdelen
+## Volgende testupdate — beoogd build 20 / Android 0.7 (7)
 
-Meldingen van testers (TestFlight-screenshots, Play, WhatsApp, mail) komen in
-`docs/wijzigingen-builds.md` onder "Volgende build" met één regel per melding:
-wat, wie, platform, en de keuze **nu** (deze build), **volgende** of **later**.
-Vuistregel: een fout die iemand in een echte wedstrijd hindert is "nu"; een
-wens die één scherm raakt is "volgende"; alles wat een nieuw onderdeel vraagt
-is "later" en gaat naar de backlog.
+Badgevoortgang schuift volgens de keuze van 5 oktober één build door en is
+de volgende geplande feature. Bugfixes uit testfeedback gaan voor; definitieve
+inhoud en uploadmoment volgen uit de releasebacklog en een uploadopdracht.
 
-## De builds
+Onderlinge stand bij Kies speler en een spelersprofiel met trends blijven
+backlog. De oude toewijzingen aan builds 20–22 zijn achterhaald; hiervoor zijn
+nog geen vervangende releasedatums vastgelegd. SquashLevels-profielen per
+opgeslagen speler zijn eveneens backlog, zonder toegewezen build.
 
-### Build 19 · iOS 2.2 (19), Android 0.6 (6) · rond 10 oktober (dag 5)
+## Productieaanvraag Android
 
-- **Feature: voortgang naar de volgende trede.** Op de badgetegel en bij de
-  momenten staat hoe ver de speler is: "Goud · 1×, zilver was 6, goud bij 8"
-  wordt "nog 2 drops tot goud" op basis van de beste game of wedstrijd tot nu
-  toe; bij carrièrebadges "nog 3 wedstrijden tot Veteran zilver". De
-  drempels staan al op `BadgeKind.threshold`; de beste waarde per badge komt
-  uit dezelfde geschiedenis als de carrièrebadges plus de opgeslagen
-  wedstrijden. Puur Core (`BadgeProgress`, met tests) en één regel tekst in
-  `SharedPlayerBadgesView` en de momentenlijst.
-- **Bugfixes en klein:** alles wat de eerste week over de treden en de
-  nieuwe badges binnenkomt (verkeerde trede, dubbele momenten, kaart in de
-  browser, leesbaarheid van de getallen op kleine telefoons), plus de
-  bekende kleine punten uit de handleiding-controle.
-- **Website:** testen.html; badgepagina alleen als er iets aan de teksten
-  verandert.
+De interne wens van een testperiode van twaalf dagen is **geen bewijs dat
+Google Play productie al toestaat**. Voor nieuwe persoonlijke accounts waarop
+de regel van toepassing is, vereist Google minimaal 12 testers die 14 dagen
+aaneengesloten zijn aangemeld. Controleer de feitelijke voortgang en verdere
+vragen in de Play Console vóór de productieaanvraag. Zie
+[de officiële Google Play-uitleg](https://support.google.com/googleplay/android-developer/answer/14151465?hl=en-GB).
+Er is geen gegarandeerde productiedatum of automatische App Store-indiening.
 
-### Build 20 · iOS 2.2 (20), Android 0.7 (7) · rond 15 oktober (dag 10, laatste testbuild)
+## Werkwijze
 
-Dit is de build waarmee Android productie wordt aangevraagd: na de upload
-twee dagen alleen nog kijken, niets meer uploaden. Alles wat na 13 oktober
-binnenkomt en niet gegevens raakt, gaat naar build 21.
+- Bugfixes voor opslaan, herstellen, hervatten en echte wedstrijdsituaties gaan voor.
+- Zet feedback en besluiten in [wijzigingen per build](wijzigingen-builds.md).
+- Houd schema's en badge-ids compatibel; formatwijzigingen vereisen gerichte hersteltests.
+- Voer vóór een upload de controles uit [opleveren en hosting](opleveren-en-hosting.md) uit.
+  Dat document bevat de actuele commando's; het UI-package heeft geen los Swift-testtarget.
+- Werk releasenotes, handleidingen en de testpagina bij voor de daadwerkelijk
+  aangeboden versie. Vooruitblikken moeten herkenbaar blijven.
+- TestFlight/Play-upload en versieverhoging gebeuren alleen op expliciete opdracht.
 
-- **Feature: onderlinge stand bij "Kies speler".** Zodra beide spelers
-  gekozen zijn, een kaartje in de huisstijl: hoe vaak tegen elkaar gespeeld,
-  wie won, de laatste uitslag in games, en welke badge een van beiden in deze
-  wedstrijd kan halen (Nemesis-trede of Rivalen). Gegevens uit de bestaande
-  carrièregeschiedenis (`BadgeAwarder.history` op iOS,
-  `BadgeAwardStore.careerHistory` op Android), berekening in Core
-  (`HeadToHead`, met tests), één gedeeld kaartje in het kies-speler-scherm
-  van coach en scheidsrechter.
-- **Bugfixes en klein:** feedback van week 2, met voorrang voor alles rond
-  hervatten, opslaan en live meekijken, omdat testers dan echte
-  competitiewedstrijden spelen.
+## Later
 
-### Build 21 · iOS 2.2 (21), Android 0.8 (8) · na de productieaanvraag, rond 24 oktober
-
-- **Feature: spelersprofiel met trend, eerste helft.** Het scherm "Profiel"
-  uit de backlog met drie kaarten: Vorm (laatste 10 uitslagen), Winners
-  tegenover unforced errors per game als trend, en Tegenstanders. De
-  Core-berekening (`PlayerTrend`) wordt meteen compleet gebouwd en getest;
-  de kaarten Slagen, Baan en Tempo volgen in build 22.
-- **Bugfixes en klein:** feedback van week 3; tekstcorrecties in de
-  handleiding en releasenotes van eerdere builds meenemen.
-
-### Build 22 (optioneel) · iOS 2.2 (22), Android 0.9 (9) · rond 31 oktober
-
-Alleen als er genoeg feedback is om te verwerken. De feature is één van deze
-twee, te kiezen op basis van wat testers vragen:
-
-- **Spelersprofiel, tweede helft:** Slagen, Baan en Tempo, plus de
-  periode-keuze (10, 25, alles).
-- **Partijen achteraf invullen** als eerste stap van de competitiekoppeling:
-  bij een wedstrijd van Mijn team de vier partijen met game-standen invullen
-  zonder ze bij te houden. Alleen als de competitiekoppeling in de
-  testperiode al is verkend en het datamodel vaststaat; anders schuift dit
-  naar de periode erna.
-
-De Play-productierelease gaat uit van build 20; de App Store-indiening kan
-op dezelfde build of op build 21, zonder nieuwe feature ten opzichte van de
-laatste testbuild.
-
-## Wat niet in deze builds komt
-
-- Competitiekoppeling als geheel (teamwedstrijd met vier partijen, live per
-  teamwedstrijd, vergelijken met de SBN-uitslag).
-- Badgecategorie voor competitiewedstrijden (Teamspeler).
-- Clubranglijst uit gedeelde kaarten en de trainingsmodus.
-- Nieuwe badges of ander badge-artwork.
+SBN-uitslagen vergelijken, Teamspeler-badges, onderlinge stand, spelersprofielen,
+SquashLevels-links, trainingsmodus en clubranglijst staan op de backlog.
+Partijen achteraf invullen en live teamwedstrijden zijn al gebouwd en horen
+niet meer in die lijst.

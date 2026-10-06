@@ -18,9 +18,9 @@ teamwedstrijden (6 oktober). Wat er in de app gebeurt staat in
 
 Gevolgen van de verhuizing:
 
-- **De website wordt niet meer via Portainer gepubliceerd.** Alle oude
-  instructies met "Portainer, stack 85" zijn vervangen door de
-  `wrangler deploy` hierboven.
+- **De website wordt niet meer via Portainer gepubliceerd.** Actuele
+  instructies gebruiken de `wrangler deploy` hierboven. Verwijzingen naar
+  Portainer in historische plannen beschrijven de vroegere situatie.
 - **De map `website/screenshots/` en `website/teams/` staan buiten git** (de
   repo is publiek; teamzips bevatten namen en foto's en mogen nooit gecommit
   worden). Een deploy moet dus vanaf een checkout waar die mappen staan (de
@@ -72,14 +72,17 @@ bij Cloudflare:
 - Per teamwedstrijd (nieuw): `TeamSession`, API `/api/team…`, kijkpagina
   `/t/<id>`. Eén gedeelde schrijfsleutel per teamwedstrijd; de uitnodiging is
   `id.key` als link (`https://squashanalyzer.com/team#<id>.<key>`), als code of
-  als `squashanalyzer://team#…`. Iedere telefoon schrijft alleen zijn eigen
-  partij. Lege namen blijven leeg op de server; pagina en app tonen dan de
+  als `squashanalyzer://team#…`. De app werkt de gekozen partij bij; de
+  gedeelde sleutel geeft technisch schrijfrecht op alle partijen. Lege namen blijven leeg op de server; pagina en app tonen dan de
   teamnaam met de partij erachter ("Delft 7 E1"). Alles wordt twee uur na de
   laatste update gewist. Ontwerp en beslissingen:
   `docs/plan-live-teamwedstrijd.md`; codepad: sectie Competitie in
   `ARCHITECTURE.md`.
-- Privacy: alleen teamnamen, voornamen, stand en (optioneel) kleine
-  spelersfoto's gaan naar de server; de tekst staat in `website/privacy.html`.
+- Opslag: live-inhoud staat tijdelijk in persistente Durable Object-opslag
+  (SQLite); het alarm verwijdert de sessie-inhoud na twee uur zonder
+  stand-update. De limiter bewaart apart technische aanmaakadministratie.
+- Privacy: teamnamen, datum, voornamen, stand en (bij losse wedstrijden
+  optioneel) kleine spelersfoto's gaan naar de server; de tekst staat in `website/privacy.html`.
   Wijzig je wat er verstuurd wordt, pas die tekst dan ook aan.
 
 ## 3. Bouwen en testen

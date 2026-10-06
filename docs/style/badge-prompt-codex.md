@@ -1,3 +1,5 @@
+> **Afgeronde artworkopdracht van 5 oktober 2026.** Dit is de oorspronkelijke prompt, geen nieuwe opdracht. De treden zijn inmiddels geïntegreerd en uitgeleverd in build 18; zie [de overdracht](badge-artwork-overdracht-claude-code.md).
+
 # Prompt voor Codex: badge-artwork voor brons, zilver en goud
 
 Badges krijgen treden (brons, zilver, goud), plus een paar nieuwe badges. Claude

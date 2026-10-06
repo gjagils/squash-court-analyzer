@@ -1,7 +1,7 @@
 # squash-live-beta: live meekijken op Cloudflare Workers
 
-De Cloudflare-versie van [`server/live`](../live/README.md): dezelfde API,
-dezelfde kijkpagina, maar zonder eigen server. Sinds 5 oktober 2026 **de**
+De Cloudflare-versie van [`server/live`](../live/README.md): dezelfde API voor losse wedstrijden,
+met daarnaast live teamwedstrijden en een teamkijkpagina, maar zonder eigen server. Sinds 5 oktober 2026 **de**
 live-server: `live.squashanalyzer.com` (de app) en `beta.squashanalyzer.com`
 (alias uit de testfase) zijn allebei custom domains van deze Worker;
 `PUBLIC_URL` is `https://live.squashanalyzer.com`. De Node-versie op de NAS
@@ -22,8 +22,16 @@ is reserve.
   kijkpagina (`public/live.html`) en het logo zijn statische assets; de
   Worker vult de linkpreview in.
 - Het bezoekers-IP komt uit `CF-Connecting-IP`, dat Cloudflare zelf zet.
-- Alleen voornamen, de stand en de foto's (max 24 KB per speler), nergens
-  anders dan in het sessie-object; weg met de sessie.
+- Losse sessies bevatten voornamen, stand en optioneel foto's (max 24 KB per speler).
+  Stoppen of het alarm na twee uur sinds de laatste stand-update wist de sessieopslag.
+  Reeds ontvangen browserinhoud en kopieën verdwijnen daardoor niet automatisch.
+- `TeamSession` (`src/team.js`) bewaart de teamnamen, vier partijen en de gedeelde
+  schrijfsleutel in persistente Durable Object-opslag, zonder foto's. Een team-
+  of partijupdate vernieuwt het alarm. De team-API ontbreekt in de NAS-reserve.
+  De gedeelde sleutel geeft schrijfrecht op alle partijen, niet alleen de eigen.
+- De limiter bewaart apart IP-adressen en tijdstippen. De sessietermijn van
+  twee uur geldt niet voor die administratie; oude verzoeken worden bij
+  volgende aanmaakverzoeken gefilterd, zonder afzonderlijk verwijderalarm.
 
 Verschil met de Node-versie: geen totaalmaximum op kijkers over alle
 sessies (wel per sessie), en een herstart van de Worker breekt geen sessies.
@@ -33,7 +41,7 @@ sessies (wel per sessie), en een herstart van de Worker breekt geen sessies.
 ```bash
 cd server/live-worker
 npm install
-npm test          # vitest met de Workers-testomgeving (workerd), twee projecten
+npm test          # vitest met de Workers-testomgeving (workerd)
 ```
 
 `test/api.test.js` draait tegen de echte limieten; `test/limits.test.js`

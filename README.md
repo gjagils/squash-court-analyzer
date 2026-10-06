@@ -35,9 +35,12 @@ Lokaal Android bouwen (Xcode/Swift, Skip en Android Studio SDK zijn nodig):
 cd Android
 export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 ./gradlew :app:assembleDebug :app:testDebugUnitTest
-# Met een emulator of verbonden Android-toestel:
-./gradlew :app:connectedDebugAndroidTest
+# Alleen op de testemulator; controleer het serienummer met adb devices.
+# Niet op de fysieke Samsung A13: deze tests wissen appgegevens.
+ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest
 ```
 
-Tijdens de Android-port worden iOS-builds lokaal getest. TestFlight-publicatie
-wordt pas hervat na een expliciet afgesproken mijlpaal.
+Laatste gedocumenteerde uploads (5 oktober): **iOS 2.2 (18)** en **Android 0.5 (5)**.
+Competitie en live teamwedstrijden zijn gebouwd op main voor build 19 / Android
+0.6 (6), nog niet geüpload. Zie [de actuele stand](docs/stand-van-zaken-2026-10-06.md).
+Een nieuwe app-upload gebeurt alleen op expliciete opdracht.

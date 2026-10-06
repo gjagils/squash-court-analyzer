@@ -1,5 +1,9 @@
 # Google Play: Android-app publiceren
 
+**Actuele status — 6 oktober 2026:** de laatste gedocumenteerde upload is Android **0.5 (5)**, in gesloten test. Ondertekening, upload en App Links zijn ingericht. Android 0.6 (6) is voorbereid maar nog niet geüpload. Volg voor nieuw werk [opleveren en hosting](opleveren-en-hosting.md) en [de buildplanning](buildplanning-testperiode.md).
+
+**Historisch inrichtingslogboek:** de onderstaande stappen en vroege versienummers zijn van de oorspronkelijke inrichting, geen nog af te werken checklist. Oude privacy-antwoorden van vóór AI/live/teamimport zijn niet bruikbaar voor de huidige Data safety-vragen. Gebruik de huidige [privacytekst](../website/privacy.html) en controleer de feitelijke gegevensstromen; dit document bevestigt geen actuele Console- of juridische status.
+
 Stappenplan om de Android-app via Google Play te testen (interne test, de
 Android-tegenhanger van TestFlight) en later te publiceren. Deel A (code) is
 gedaan; deel B doet Gerd-Jan in de terminal en de Play Console; deel C

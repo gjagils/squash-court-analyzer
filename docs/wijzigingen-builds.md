@@ -238,7 +238,7 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       [plan-squashlevels-profiel.md](plan-squashlevels-profiel.md).
 
 - [ ] **Spelers van Mijn team in één keer importeren** (idee Gerd-Jan,
-      7 oktober, nog niet gebouwd). Wie bij Instellingen de SBN-teamlink heeft
+      7 oktober, nog niet gebouwd; kandidaat voor de definitieve 3.0). Wie bij Instellingen de SBN-teamlink heeft
       ingevuld, krijgt bij Spelers een knop "Importeer Mijn team" die alle
       spelers van de teampagina als opgeslagen speler toevoegt. De app leest
       de spelers al in: `LeagueTeamPage.team` vult `LeagueTeamSnapshot.players`
@@ -248,20 +248,24 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       matchen op naam zoals de team-zip-import (hoofdletterongevoelig, bijwerken
       in plaats van dubbel), het SBN-spelerpad per speler bewaren voor latere
       koppelingen (opstelling E1–E4, SBN-vergelijking), geen foto's (die staan
-      niet op de SBN-pagina). Open vragen: ook invallers uit andere teams, en
-      wat doen met spelers die van de teampagina verdwijnen (laten staan).
+      niet op de SBN-pagina). Besloten 7 oktober: **invallers niet meenemen**;
+      kunnen we ze op de teampagina niet van vaste spelers onderscheiden, dan
+      gaan ze toch mee. **Spelers die van de teampagina verdwijnen** laten we
+      met rust (niet verwijderen, niet markeren); pas bij een nieuw seizoen
+      synchroniseren we opnieuw.
 
-- [ ] **Meldingen bij live meekijken** (idee Gerd-Jan, 7 oktober, nog niet
-      uitgezocht). Wie een live wedstrijd of live teamwedstrijd volgt, krijgt
+- [ ] **Meldingen bij live meekijken** (idee Gerd-Jan, 7 oktober; **3.1 of
+      later**, niet voor 3.0: te ingrijpend, eerst releasen). Gekozen route:
+      **2, pushmeldingen in de app**. Wie een live wedstrijd of live teamwedstrijd volgt, krijgt
       een melding op de telefoon bij een gewonnen game, een gewonnen partij en
       de einduitslag van de teamwedstrijd. Nu is er geen pushinfrastructuur:
       kijkers volgen via de webpagina op `live.squashanalyzer.com` (SSE), de
-      app heeft geen push-registratie meer. Twee routes om uit te zoeken:
+      app heeft geen push-registratie meer. De twee routes die zijn bekeken:
       1. **Web Push op de kijkpagina** (knop "Meldingen aan"): werkt zonder
          app-wijziging, de Worker stuurt de melding (VAPID-sleutels, abonnement
          per sessie in de Durable Object). Beperking: op iPhone alleen als de
          pagina aan het beginscherm is toegevoegd (iOS 16.4+).
-      2. **Pushmeldingen in de app** (APNs en Firebase Cloud Messaging): een
+      2. **Pushmeldingen in de app** (gekozen) (APNs en Firebase Cloud Messaging): een
          "Volg"-knop in de app, de Worker stuurt bij een gamewissel. Meer werk
          (sleutels, entitlements, privacylabel, Skip/Android-kant), wel de
          beste ervaring.

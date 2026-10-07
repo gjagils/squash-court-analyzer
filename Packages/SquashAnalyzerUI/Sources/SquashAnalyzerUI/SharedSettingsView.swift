@@ -81,11 +81,11 @@ public struct SharedSettingsView: View {
                     HStack(spacing: 8) {
                         HomeTileIconView(icon: .players, color: SharedColors.accent, size: 20)
                         Text("Mijn team")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(SharedFonts.system(16, weight: .semibold))
                             .foregroundColor(SharedColors.textPrimary)
                     }
                     Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
-                        .font(.system(size: 13))
+                        .font(SharedFonts.system(13))
                         .foregroundColor(SharedColors.textSecondary)
                     TextField("https://sbn.toernooi.nl/league/.../team/...", text: $draft)
                         .accessibilityLabel("Teamlink")
@@ -106,7 +106,7 @@ public struct SharedSettingsView: View {
                     }
                     if let message {
                         Text(message)
-                            .font(.system(size: 12))
+                            .font(SharedFonts.system(12))
                             .foregroundColor(messageIsError ? SharedColors.error : SharedColors.positive)
                     }
                     // Same order as iOS: back-up, then AI Coach and what it is
@@ -137,14 +137,14 @@ public struct SharedSettingsView: View {
     private var manualSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Handleiding")
-                .font(.system(size: 16, weight: .semibold))
+                .font(SharedFonts.system(16, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             Text("Per tegel uitgelegd hoe alles werkt, op squashanalyzer.com.")
-                .font(.system(size: 13))
+                .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
             Link(destination: UserManual.android) {
                 Text("Open de handleiding")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(SharedFonts.system(14, weight: .semibold))
                     .foregroundColor(SharedColors.accent)
             }
             .accessibilityLabel("Open de handleiding")
@@ -154,23 +154,23 @@ public struct SharedSettingsView: View {
     private var liveSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Live meekijken")
-                .font(.system(size: 16, weight: .semibold))
+                .font(SharedFonts.system(16, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             Toggle(isOn: $liveSharing) {
                 Text("Knop LIVE bij Coach en Scheidsrechter")
-                    .font(.system(size: 14))
+                    .font(SharedFonts.system(14))
                     .foregroundColor(SharedColors.textPrimary)
             }
             .tint(SharedColors.accent)
             Toggle(isOn: $livePhotos) {
                 Text("Foto's van de spelers meesturen")
-                    .font(.system(size: 14))
+                    .font(SharedFonts.system(14))
                     .foregroundColor(liveSharing ? SharedColors.textPrimary : SharedColors.textMuted)
             }
             .tint(SharedColors.accent)
             .disabled(!liveSharing)
             Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.")
-                .font(.system(size: 12))
+                .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
         }
     }
@@ -178,7 +178,7 @@ public struct SharedSettingsView: View {
     private var courtSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Baanindeling")
-                .font(.system(size: 16, weight: .semibold))
+                .font(SharedFonts.system(16, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             Picker("Baanindeling", selection: $courtLayout) {
                 Text("6 vakken").tag(CourtLayout.six.rawValue)
@@ -186,7 +186,7 @@ public struct SharedSettingsView: View {
             }
             .pickerStyle(.segmented)
             Text("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak.")
-                .font(.system(size: 12))
+                .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
         }
     }
@@ -194,10 +194,10 @@ public struct SharedSettingsView: View {
     private var aiCoachSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("AI Coach")
-                .font(.system(size: 16, weight: .semibold))
+                .font(SharedFonts.system(16, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             Text("Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach.")
-                .font(.system(size: 13))
+                .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 8) {
                 if showingKey {
@@ -230,7 +230,7 @@ public struct SharedSettingsView: View {
                     .fill(hasKey ? SharedColors.positive : SharedColors.error)
                     .frame(width: 8, height: 8)
                 Text(keyMessage ?? (hasKey ? "API key geconfigureerd" : "Geen API key ingesteld"))
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textMuted)
             }
         }
@@ -240,7 +240,7 @@ public struct SharedSettingsView: View {
     private var aboutAICoachSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Over AI Coach")
-                .font(.system(size: 16, weight: .semibold))
+                .font(SharedFonts.system(16, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             infoRow("Veilig", "Je API key wordt versleuteld op dit toestel bewaard")
             infoRow("Kosten", "~€0.01 per analyse (het goedkoopste beschikbare model)")
@@ -252,10 +252,10 @@ public struct SharedSettingsView: View {
     private func infoRow(_ title: String, _ detail: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.system(size: 14, weight: .semibold))
+                .font(SharedFonts.system(14, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             Text(detail)
-                .font(.system(size: 12))
+                .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textSecondary)
         }
     }
@@ -263,10 +263,10 @@ public struct SharedSettingsView: View {
     private var backupSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Back-up")
-                .font(.system(size: 16, weight: .semibold))
+                .font(SharedFonts.system(16, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             Text("Bewaar spelers, coach- en scheidsrechterwedstrijden en badges in een bestand, bijvoorbeeld op Google Drive. Een back-up van Android kun je ook op een iPhone terugzetten, en andersom.")
-                .font(.system(size: 13))
+                .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 12) {
                 Button("Maak back-up") { makeBackup() }
@@ -285,7 +285,7 @@ public struct SharedSettingsView: View {
             }
             if let backupMessage {
                 Text(backupMessage)
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(backupIsError ? SharedColors.error : SharedColors.positive)
             }
         }
@@ -301,12 +301,12 @@ public struct SharedSettingsView: View {
     private func autoBackupRow(_ auto: any AutoBackupControl) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Automatische back-up")
-                .font(.system(size: 14, weight: .semibold))
+                .font(SharedFonts.system(14, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
                 .padding(.top, 8)
             if let folder = autoFolder {
                 Text("Aan · map \u{201C}\(folder)\u{201D}\(autoLast.map { date in " · laatste \(Self.shortDate(date))" } ?? "")")
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                 Button("Uitzetten") {
                     auto.turnOff()
@@ -315,7 +315,7 @@ public struct SharedSettingsView: View {
                 .foregroundColor(SharedColors.textSecondary)
             } else {
                 Text("Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in een map die je kiest (bijvoorbeeld Documenten). De 7 nieuwste blijven bewaard.")
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textMuted)
                 Button("Aanzetten en map kiezen") { turnOnAuto(auto) }
                     .foregroundColor(SharedColors.accent)

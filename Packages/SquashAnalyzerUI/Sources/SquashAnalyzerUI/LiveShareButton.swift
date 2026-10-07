@@ -50,7 +50,7 @@ public struct LiveShareButton: View {
                     .fill(isLive ? Color.white : grey)
                     .frame(width: 7, height: 7)
                 Text(busy ? "…" : (newLink ? "NIEUWE LINK" : "LIVE"))
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .font(SharedFonts.system(11, weight: .bold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(isLive ? Color.white : grey)
             }

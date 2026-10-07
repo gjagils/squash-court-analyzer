@@ -22,7 +22,7 @@ public struct ActionButton: View {
     let disabled: Bool
     let action: () -> Void
 
-    public static let font = Font.system(size: 14, weight: .semibold, design: .rounded)
+    public static let font = SharedFonts.system(14, weight: .semibold, design: .rounded)
 
     public init(_ title: String, icon: String? = nil, style: Style = .outlined, color: Color = SharedColors.accent,
                 disabled: Bool = false, action: @escaping () -> Void) {

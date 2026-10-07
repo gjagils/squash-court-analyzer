@@ -143,8 +143,11 @@ badgeregels, kosten) is niet zonder Gerd-Jan doorgevoerd.
       zonder beter testnet, het zijn twee semantieken (eindstand, gebonden wedstrijden).
 - [ ] Eén "afgeronde game"-vorm in plaats van zeven: niet gedaan (raakt persistentie en
       back-ups).
-- [ ] `SharedFonts`, `SectionHeader`, `ChoiceChip`, `CloseButton` en een lint op
-      `.font(.system(size:`: hoort bij de ontwerpronde (T17/T20); niet gedaan.
+- [x] `SharedFonts.system` (alle 372 lettertypes in de gedeelde UI en op iOS, `AppFonts`
+      erop), `SectionHeader` (tien gelijke koppen in Competitie), `TagChip` (focus-tags),
+      `CloseButton` gedeeld (iOS en Android, in alle sheets met `.cancellationAction`;
+      "Annuleer" overal "Annuleren") en lintregels op `system(size:` en losse systeemkleuren.
+      7 oktober. `ChoiceChip` niet gemaakt: er is maar één kiesbare chip (focus bij Spelers).
 - [x] Skip: `keyboardType` ook op Android (gecontroleerd op de emulator), `"plus"`-icoon.
       Het alert-patroon in `TeamPartijEditor` is niet aangepast.
 - [x] Docs-drift uit §7, `docs/archief/` (afgeronde plannen en instructies) en

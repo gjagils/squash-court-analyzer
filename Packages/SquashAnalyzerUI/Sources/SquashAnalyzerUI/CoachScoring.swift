@@ -45,14 +45,14 @@ public struct SharedScoreboardView: View {
     private var gameColumn: some View {
         VStack(spacing: 3) {
             Text("GAME \(match?.currentGameNumber ?? 1)")
-                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(10, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textMuted)
                 .tracking(2)
             Text("\(match?.player1GamesWon ?? 0) – \(match?.player2GamesWon ?? 0)")
-                .font(.system(size: 22, weight: .bold, design: .monospaced))
+                .font(SharedFonts.system(22, weight: .bold, design: .monospaced))
                 .foregroundColor(SharedColors.textPrimary)
             Text("GAMES")
-                .font(.system(size: 8, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(8, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textMuted)
                 .tracking(1.5)
 
@@ -124,7 +124,7 @@ public struct SharedScoreboardView: View {
         HStack(spacing: 2) {
             if !dotOnRight { timelineDot(color, dotSize) }
             Text(text)
-                .font(.system(size: 8, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(8, weight: .semibold, design: .rounded))
                 .foregroundColor(.white)
             if dotOnRight { timelineDot(color, dotSize) }
         }
@@ -161,7 +161,7 @@ public struct SharedScoreboardView: View {
                 VStack(spacing: 4) {
                     PlayerAvatarPlaceholder(color: color, size: 34, active: isServing, photo: photo(for: player))
                     Text(game.name(for: player))
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .font(SharedFonts.system(13, weight: .bold, design: .rounded))
                         .foregroundColor(highlight.name)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -188,7 +188,7 @@ public struct SharedScoreboardView: View {
 
             Button(action: { onSelectPlayer?(player) }) {
                 Text("\(score)")
-                    .font(.system(size: 52, weight: .bold, design: .rounded))
+                    .font(SharedFonts.system(52, weight: .bold, design: .rounded))
                     .foregroundColor(highlight.score)
                     .frame(maxWidth: .infinity)
             }
@@ -354,7 +354,7 @@ public struct CoachScoringView: View {
                         AppSymbol("xmark", size: 14, color: SharedColors.textSecondary)
                         Text("Stop").lineLimit(1)
                     }
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textSecondary)
                 }
                 if !match.isMatchOver {
@@ -406,23 +406,23 @@ public struct CoachScoringView: View {
                 switch game.scoringStep {
                 case .selectPlayer:
                     Text(game.isStarted ? "Tik op de score van wie scoort" : "Tik START bij de eerste service")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textSecondary)
                 case .selectPointType:
                     Text("Hoe werd het punt gewonnen?")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                 case .selectErrorKind:
                     Text("Wat voor fout was het?")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                 case .selectZone:
                     Text("Tik op de baan waar het punt viel")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                 case .selectShot:
                     Text("Kies het type slag")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                 }
             }
@@ -493,7 +493,7 @@ public struct CoachScoringView: View {
                 Spacer(minLength: 0)
                 if let zone = game.selectedZone {
                     Text(zone.rawValue.uppercased())
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                         .tracking(1.5)
                 }
@@ -535,7 +535,7 @@ public struct CoachScoringView: View {
             HStack(spacing: 10) {
                 AppSymbol("play.fill", size: 16, color: Color.black.opacity(0.8))
                 Text("START GAME \(match.currentGameNumber)")
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .font(SharedFonts.system(15, weight: .bold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(Color.black.opacity(0.8))
             }
@@ -560,7 +560,7 @@ public struct CoachScoringView: View {
             volley = false
         }) {
             Text("Annuleer")
-                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(13, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textMuted)
                 .padding(.vertical, 6)
         }
@@ -646,7 +646,7 @@ public struct CoachScoringView: View {
                 Text(" ")
             }
         }
-        .font(.system(size: 11))
+        .font(SharedFonts.system(11))
         .foregroundColor(SharedColors.textMuted)
         .lineLimit(1)
         .frame(height: 16)
@@ -660,11 +660,11 @@ public struct CoachScoringView: View {
                 .onTapGesture { showingLet = false }
             VStack(spacing: 20) {
                 Text("LET")
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .font(SharedFonts.system(22, weight: .bold, design: .rounded))
                     .tracking(3)
                     .foregroundColor(SharedColors.gold)
                 Text("Wie vraagt de let?")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textSecondary)
                 HStack(spacing: 16) {
                     letButton(Player.player1, SharedColors.accent)
@@ -672,12 +672,12 @@ public struct CoachScoringView: View {
                 }
                 if game.totalLets > 0 {
                     Text("Lets deze game: \(game.totalLets)")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textMuted)
                 }
                 Button { showingLet = false } label: {
                     Text("Annuleren")
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                         .foregroundColor(SharedColors.textSecondary)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 10)
@@ -699,7 +699,7 @@ public struct CoachScoringView: View {
             VStack(spacing: 8) {
                 AppSymbol("arrow.counterclockwise", size: 24, color: SharedColors.textPrimary)
                 Text(match.name(for: player))
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
@@ -742,10 +742,10 @@ public struct CoachScoringView: View {
     private var stopOverlay: some View {
         overlayCard {
             Text(Match.stopTitle)
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
             Text(match.stopMessage)
-                .font(.system(size: 13))
+                .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
                 .multilineTextAlignment(.center)
             overlayButton("Bewaar en ga later verder", SharedColors.accent) {
@@ -874,11 +874,11 @@ struct RallyClock: View {
             AppSymbol("timer", size: 12, color: SharedColors.gold.opacity(0.5))
             VStack(alignment: .leading, spacing: 1) {
             Text("RALLY")
-                .font(.system(size: 8, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(8, weight: .medium, design: .rounded))
                 .tracking(1)
                 .foregroundColor(SharedColors.textMuted)
             Text(text)
-                .font(.system(size: 14, weight: .bold, design: .monospaced))
+                .font(SharedFonts.system(14, weight: .bold, design: .monospaced))
                 .foregroundColor(SharedColors.textSecondary)
             }
         }

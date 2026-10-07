@@ -32,11 +32,11 @@ public struct PointTypeButton: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(pointType.title.uppercased())
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                         .foregroundColor(SharedColors.textPrimary)
                         .tracking(0.5)
                     Text(pointType.description)
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textSecondary)
                 }
 
@@ -59,7 +59,7 @@ struct FistIcon: View {
 
     var body: some View {
         Text("✊")
-            .font(.system(size: size * 0.92))
+            .font(SharedFonts.system(size * 0.92))
             .grayscale(1)
             .brightness(0.12)
             .colorMultiply(color)

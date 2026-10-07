@@ -25,15 +25,12 @@ struct TeamLiveCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                Text("LIVE")
-                    .font(.system(size: 11, weight: .semibold))
-                    .tracking(1.4)
-                    .foregroundColor(SharedColors.accent)
+                SectionHeader("LIVE")
                 if match.isLive {
                     HStack(spacing: 5) {
                         Circle().fill(Color.white).frame(width: 7, height: 7)
                         Text("LIVE")
-                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .font(SharedFonts.system(10, weight: .bold, design: .rounded))
                             .tracking(1)
                             .foregroundColor(Color.white)
                     }
@@ -46,7 +43,7 @@ struct TeamLiveCard: View {
             }
             if match.isLive {
                 Text("Kijkers volgen de hele teamavond op één pagina. Teamgenoten die de uitnodiging openen, zetten hun eigen partij erop. 2 uur na de laatste update wordt alles gewist.")
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 if canShare {
@@ -56,13 +53,13 @@ struct TeamLiveCard: View {
                 if let id = match.liveId, let key = match.liveKey {
                     // Also readable when nothing can be shared (no share sheet): the code teammates paste at Deelnemen
                     Text("Code om mee te doen: \(TeamInvite(id: id, key: key).code)")
-                        .font(.system(size: 11))
+                        .font(SharedFonts.system(11))
                         .foregroundColor(SharedColors.textMuted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if let problem {
                     Text(problem)
-                        .font(.system(size: 12))
+                        .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.error)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -74,7 +71,7 @@ struct TeamLiveCard: View {
                 }
             } else {
                 Text("Laat je team en de groepsapp de stand van de hele avond live volgen, per partij ook punt voor punt. Alleen teamnamen, voornamen en de stand gaan mee.")
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 ActionButton(busy ? "Even geduld…" : "Live delen", style: .filled, disabled: busy, action: onGoLive)
@@ -136,11 +133,11 @@ public struct SharedTeamJoinView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Een teamgenoot deelde een link of code van de live teamwedstrijd. Plak die hier; je partij komt dan op dezelfde livepagina.")
-                            .font(.system(size: 13))
+                            .font(SharedFonts.system(13))
                             .foregroundColor(SharedColors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                         TextField("Link of code", text: $text)
-                            .font(.system(size: 14))
+                            .font(SharedFonts.system(14))
                             .foregroundColor(SharedColors.textPrimary)
                             .padding(10)
                             .background(Color.white.opacity(0.06))
@@ -155,7 +152,7 @@ public struct SharedTeamJoinView: View {
                             found(state)
                         }
                         if let message {
-                            Text(message).font(.system(size: 12)).foregroundColor(SharedColors.error)
+                            Text(message).font(SharedFonts.system(12)).foregroundColor(SharedColors.error)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
@@ -165,7 +162,7 @@ public struct SharedTeamJoinView: View {
             .pageTitle("Deelnemen")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuleer", action: onCancel).foregroundColor(SharedColors.textSecondary)
+                    CloseButton(title: "Annuleren", action: onCancel)
                 }
             }
             .task {
@@ -177,21 +174,18 @@ public struct SharedTeamJoinView: View {
 
     private func found(_ state: TeamLiveState) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("GEVONDEN")
-                .font(.system(size: 11, weight: .semibold))
-                .tracking(1.4)
-                .foregroundColor(SharedColors.accent)
+            SectionHeader("GEVONDEN")
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(state.team.home) – \(state.team.away)")
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .font(SharedFonts.system(17, weight: .semibold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
                 Text("\(TeamMatchReport.dayText(Date(timeIntervalSince1970: Double(state.team.date) / 1000.0))) · \(state.partijen.count) van 4 partijen staan erop")
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
             }
             Text("Welk team is van jou?")
-                .font(.system(size: 13, weight: .semibold))
+                .font(SharedFonts.system(13, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             HStack(spacing: 10) {
                 sideButton(state.team.home, side: TeamSide.home)
@@ -211,7 +205,7 @@ public struct SharedTeamJoinView: View {
         let selected = ownSide == side
         return Button { ownSide = side } label: {
             Text(name)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                 .foregroundColor(selected ? SharedColors.background : SharedColors.accent)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)

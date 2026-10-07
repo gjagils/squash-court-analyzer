@@ -33,11 +33,11 @@ public struct HomeMenuHeader: View {
                     Text("Squash").foregroundColor(SharedColors.textPrimary)
                     Text("Analyzer").foregroundColor(SharedColors.accent)
                 }
-                .font(.system(size: 23, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(23, weight: .bold, design: .rounded))
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
                 Text("Jouw spel scherp in beeld. Voor jou en je team.")
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -79,7 +79,7 @@ public struct HomeMenuTiles: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Klaar om te spelen?")
-                .font(.system(size: 14, weight: .semibold))
+                .font(SharedFonts.system(14, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             HStack(spacing: 12) {
                 HomeMenuTile(title: "Coach", subtitle: "Start met coachen", icon: .coach, action: onCoach)
@@ -104,7 +104,7 @@ public struct HomeMenuTiles: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 HomeTileIconView(icon: icon, color: SharedColors.accent, size: 23)
-                Text(title).font(.system(size: 14))
+                Text(title).font(SharedFonts.system(14))
                 Spacer()
                 AppSymbol("chevron.right", size: 12, color: SharedColors.textPrimary)
             }
@@ -127,14 +127,14 @@ public struct HomeTeamSummary: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Jouw team").font(.system(size: 14, weight: .semibold))
+                Text("Jouw team").font(SharedFonts.system(14, weight: .semibold))
                 Spacer()
-                Text("Competitie").font(.system(size: 12)).foregroundColor(SharedColors.textSecondary)
+                Text("Competitie").font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
             }
             VStack(alignment: .leading, spacing: 10) {
-                Text("MIJN TEAM").font(.system(size: 11, weight: .semibold))
+                Text("MIJN TEAM").font(SharedFonts.system(11, weight: .semibold))
                     .tracking(1.4).foregroundColor(SharedColors.accent)
-                Text(snapshot.name).font(.system(size: 20, weight: .semibold, design: .rounded))
+                Text(snapshot.name).font(SharedFonts.system(20, weight: .semibold, design: .rounded))
                     .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 28) {
                     stat("STAND", snapshot.rank)
@@ -144,7 +144,7 @@ public struct HomeTeamSummary: View {
                 if let next = snapshot.nextFixture() {
                     Divider().overlay(Color.white.opacity(0.15))
                     Text("Volgende · \(LeagueDates.day(next.date)) · \(next.home) – \(next.away)")
-                        .font(.system(size: 12)).foregroundColor(SharedColors.textSecondary)
+                        .font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -159,8 +159,8 @@ public struct HomeTeamSummary: View {
     private func stat(_ title: String, _ value: Int?) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(value.map { String($0) } ?? "–")
-                .font(.system(size: 24, weight: .bold, design: .rounded)).foregroundColor(SharedColors.accent)
-            Text(title).font(.system(size: 10)).foregroundColor(SharedColors.textSecondary)
+                .font(SharedFonts.system(24, weight: .bold, design: .rounded)).foregroundColor(SharedColors.accent)
+            Text(title).font(SharedFonts.system(10)).foregroundColor(SharedColors.textSecondary)
         }
     }
 }
@@ -180,7 +180,7 @@ private struct HomeMenuTile: View {
             VStack(spacing: 10) {
                 HomeTileIconView(icon: icon, color: color, size: 30)
                 Text(title.uppercased())
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(SharedColors.textPrimary)
                     .multilineTextAlignment(.center)
@@ -188,7 +188,7 @@ private struct HomeMenuTile: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
                 Text(subtitle)
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .multilineTextAlignment(.center)
             }
@@ -275,7 +275,7 @@ struct HomeTileIconView: View {
             .frame(width: size, height: size)
         } else {
             Image(systemName: icon.symbol)
-                .font(.system(size: size * 0.85, weight: .semibold))
+                .font(SharedFonts.system(size * 0.85, weight: .semibold))
                 .foregroundColor(color)
                 .frame(width: size, height: size)
         }

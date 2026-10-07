@@ -390,7 +390,7 @@ struct InfoRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 16))
+                .font(SharedFonts.system(16))
                 .foregroundColor(AppColors.textMuted)
                 .frame(width: 24)
 

@@ -48,7 +48,7 @@ struct PlayerPhotoView: View {
 
     private var initial: some View {
         Text(String(name.prefix(1)).uppercased())
-            .font(.system(size: size * 0.45, weight: .bold, design: .rounded))
+            .font(SharedFonts.system(size * 0.45, weight: .bold, design: .rounded))
             .foregroundColor(color)
             .frame(width: size, height: size)
             .background(color.opacity(0.15))

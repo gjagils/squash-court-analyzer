@@ -7,7 +7,7 @@ import SwiftUI
 public enum PageTitleStyle {
     public static let size: CGFloat = 20.0
 
-    public static var font: Font { .system(size: size, weight: .semibold) }
+    public static var font: Font { SharedFonts.system(size, weight: .semibold) }
 }
 
 extension View {

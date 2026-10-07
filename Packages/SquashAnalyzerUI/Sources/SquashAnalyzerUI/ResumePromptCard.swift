@@ -15,10 +15,10 @@ struct ResumePromptCard: View {
             Color.black.opacity(0.6).ignoresSafeArea()
             VStack(spacing: 14) {
                 Text("Wedstrijd hervatten?")
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
                 Text(message)
-                    .font(.system(size: 13))
+                    .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.textSecondary)
                     .multilineTextAlignment(.center)
                 button("Hervatten", SharedColors.accent, action: onResume)

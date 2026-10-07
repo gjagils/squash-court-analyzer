@@ -32,6 +32,11 @@ hits=$(grep -rnE '(Color)?\.(green|red|blue|yellow|orange|purple|pink)\b' Packag
     | grep -E 'Color\.(green|red|blue|yellow|orange|purple|pink)\b|(foregroundColor|fill|stroke|tint|background)\(\.(green|red|blue|yellow|orange|purple|pink)\b|[?:] \.(green|red|blue|yellow|orange|purple|pink)\b')
 report "No system colours (.green, Color.red, …) outside SharedColors" "$hits"
 
+# 2b. Fonts go through SharedFonts.system (one place for a later text-size step)
+hits=$(grep -rn 'system(size:' Packages/SquashAnalyzerUI/Sources SquashAnalyzer --include='*.swift' \
+    | grep -v 'SharedFonts.swift')
+report "Fonts only via SharedFonts.system" "$hits"
+
 # 3. No keypath literals in Core: Skip cannot transpile them (use closures)
 hits=$(grep -rnE '\\\.[a-zA-Z]' Packages/SquashAnalyzerCore/Sources --include='*.swift' | grep -vE '^\S+:\s*//')
 report "No keypath literals in SquashAnalyzerCore" "$hits"

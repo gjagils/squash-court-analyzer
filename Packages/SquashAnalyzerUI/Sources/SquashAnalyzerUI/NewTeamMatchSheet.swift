@@ -33,22 +33,19 @@ struct NewTeamMatchSheet: View {
                     VStack(alignment: .leading, spacing: 18) {
                         if let team, !openFixtures.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("UIT HET PROGRAMMA VAN \(team.name.uppercased())")
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .tracking(1.4)
-                                    .foregroundColor(SharedColors.accent)
+                                SectionHeader("UIT HET PROGRAMMA VAN \(team.name.uppercased())")
                                 ForEach(openFixtures) { fixture in
                                     Button { onCreate(TeamMatch.from(fixture: fixture, ownTeam: team.name)) } label: {
                                         HStack(spacing: 10) {
                                             Text(TeamMatchReport.dayText(fixture.date))
-                                                .font(.system(size: 11))
+                                                .font(SharedFonts.system(11))
                                                 .foregroundColor(SharedColors.textMuted)
                                                 .frame(width: 70, alignment: .leading)
                                             VStack(alignment: .leading, spacing: 2) {
                                                 Text(fixture.home).foregroundColor(SharedColors.textPrimary)
                                                 Text(fixture.away).foregroundColor(SharedColors.textSecondary)
                                             }
-                                            .font(.system(size: 13))
+                                            .font(SharedFonts.system(13))
                                             Spacer()
                                             AppSymbol("chevron.right", size: 12, color: SharedColors.textMuted)
                                         }
@@ -61,17 +58,14 @@ struct NewTeamMatchSheet: View {
                             }
                         }
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("ZELF INVULLEN")
-                                .font(.system(size: 11, weight: .semibold))
-                                .tracking(1.4)
-                                .foregroundColor(SharedColors.accent)
+                            SectionHeader("ZELF INVULLEN")
                             VStack(alignment: .leading, spacing: 10) {
                                 TextField("Ons team", text: $ownTeam)
-                                    .font(.system(size: 14))
+                                    .font(SharedFonts.system(14))
                                     .padding(10)
                                     .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.06)))
                                 TextField("Tegenstander", text: $opponent)
-                                    .font(.system(size: 14))
+                                    .font(SharedFonts.system(14))
                                     .padding(10)
                                     .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.06)))
                                 Picker("Waar", selection: $atHome) {
@@ -80,7 +74,7 @@ struct NewTeamMatchSheet: View {
                                 }
                                 .pickerStyle(.segmented)
                                 DatePicker("Datum", selection: $date, displayedComponents: .date)
-                                    .font(.system(size: 14))
+                                    .font(SharedFonts.system(14))
                                     .foregroundColor(SharedColors.textPrimary)
                                 ActionButton("Maak teamwedstrijd", style: .filled, disabled: ownTeam.trimmingCharacters(in: .whitespaces).isEmpty || opponent.trimmingCharacters(in: .whitespaces).isEmpty) {
                                     let own = ownTeam.trimmingCharacters(in: .whitespaces)
@@ -99,7 +93,7 @@ struct NewTeamMatchSheet: View {
             .pageTitle("Nieuwe teamwedstrijd")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuleer", action: onCancel).foregroundColor(SharedColors.textSecondary)
+                    CloseButton(title: "Annuleren", action: onCancel)
                 }
             }
             .onAppear { if ownTeam.isEmpty, let team { ownTeam = team.name } }

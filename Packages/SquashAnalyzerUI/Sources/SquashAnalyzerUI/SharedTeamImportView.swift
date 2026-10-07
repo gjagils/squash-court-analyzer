@@ -23,7 +23,7 @@ struct SharedTeamImportView: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Text("TEAM IMPORTEREN")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                         .tracking(2)
                         .foregroundColor(SharedColors.gold)
                         .lineLimit(1)
@@ -36,7 +36,7 @@ struct SharedTeamImportView: View {
                     .accessibilityLabel("Sluiten")
                 }
                 Text("Plak de teamlink die je hebt gekregen, zoals https://squashanalyzer.com/teams/…/team.zip. Spelers met dezelfde naam worden bijgewerkt, nieuwe worden toegevoegd.")
-                    .font(.system(size: 14))
+                    .font(SharedFonts.system(14))
                     .foregroundColor(SharedColors.textSecondary)
                 TextField("https://squashanalyzer.com/teams/…", text: $link)
                     .foregroundColor(SharedColors.textPrimary)
@@ -47,18 +47,18 @@ struct SharedTeamImportView: View {
                              disabled: isImporting || link.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, action: start)
                 if filePicker != nil {
                     Text("Of kies een team-zip van je telefoon.")
-                        .font(.system(size: 14))
+                        .font(SharedFonts.system(14))
                         .foregroundColor(SharedColors.textSecondary)
                     ActionButton("KIES ZIP-BESTAND", color: SharedColors.gold, disabled: isImporting, action: pickZip)
                 }
                 if let resultText {
                     Text(resultText)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(SharedFonts.system(14, weight: .semibold))
                         .foregroundColor(SharedColors.gold)
                 }
                 if let errorText {
                     Text(errorText)
-                        .font(.system(size: 14))
+                        .font(SharedFonts.system(14))
                         .foregroundColor(SharedColors.error)
                 }
                 Spacer()

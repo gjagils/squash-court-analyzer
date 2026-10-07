@@ -1,4 +1,5 @@
 import SwiftUI
+import SquashAnalyzerUI
 import SwiftData
 
 /// The drawing part, usable when the photo is already at hand (player list, edit sheet)
@@ -19,7 +20,7 @@ struct PlayerAvatarImage: View {
                     .opacity(active ? 1.0 : 0.55)
             } else {
                 Image(systemName: "person.fill")
-                    .font(.system(size: size * 0.42))
+                    .font(SharedFonts.system(size * 0.42))
                     .foregroundColor(color.opacity(active ? 1.0 : 0.4))
             }
             Circle()

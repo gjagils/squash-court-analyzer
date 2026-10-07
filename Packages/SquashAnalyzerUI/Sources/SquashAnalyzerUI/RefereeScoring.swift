@@ -143,7 +143,7 @@ public struct RefereeScoringView: View {
                     AppSymbol("xmark", size: 13, color: SharedColors.textSecondary)
                     Text("Sluiten").lineLimit(1)
                 }
-                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(14, weight: .medium, design: .rounded))
             }
             .foregroundColor(SharedColors.textSecondary)
             if !match.isMatchOver {
@@ -176,19 +176,19 @@ public struct RefereeScoringView: View {
     private var gameHeader: some View {
         VStack(spacing: 4) {
             Text("GAME \(match.currentGameNumber)")
-                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(10, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textMuted)
                 .tracking(2)
             HStack(spacing: 8) {
                 Text(match.player1Name)
                     .foregroundColor(SharedColors.accent)
                 Text("\(match.player1GamesWon) – \(match.player2GamesWon)")
-                    .font(.system(size: 22, weight: .bold, design: .monospaced))
+                    .font(SharedFonts.system(22, weight: .bold, design: .monospaced))
                     .foregroundColor(SharedColors.textPrimary)
                 Text(match.player2Name)
                     .foregroundColor(SharedColors.steelBlue)
             }
-            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .font(SharedFonts.system(13, weight: .bold, design: .rounded))
             if !match.completedGames.isEmpty || match.firstGameNumber > 1 {
                 // Plain small text, as on iOS
                 HStack(spacing: 10) {
@@ -207,7 +207,7 @@ public struct RefereeScoringView: View {
 
     private func gameChip(_ text: String, color: Color) -> some View {
         Text(text)
-            .font(.system(size: 9, weight: .medium, design: .rounded))
+            .font(SharedFonts.system(9, weight: .medium, design: .rounded))
             .foregroundColor(color)
     }
 
@@ -230,7 +230,7 @@ public struct RefereeScoringView: View {
             PlayerAvatarPlaceholder(color: color, size: 48, active: isServer,
                                     photo: PlayerPhotos.photo(in: photos, id: player == Player.player1 ? match.player1Id : match.player2Id, name: match.name(for: player)))
             Text(match.name(for: player))
-                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(14, weight: .bold, design: .rounded))
                 .foregroundColor(highlight.name)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
@@ -256,10 +256,10 @@ public struct RefereeScoringView: View {
             }) {
                 VStack(spacing: 4) {
                     Text("\(score)")
-                        .font(.system(size: 76, weight: .bold, design: .rounded))
+                        .font(SharedFonts.system(76, weight: .bold, design: .rounded))
                         .foregroundColor(highlight.score)
                     Text("TIK = PUNT")
-                        .font(.system(size: 9, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(9, weight: .medium, design: .rounded))
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                         .foregroundColor(highlight.caption)
@@ -304,7 +304,7 @@ public struct RefereeScoringView: View {
                     withAnimation(.easeInOut(duration: 0.15)) { match.confirmNextGame() }
                     matchChanged()
                 }
-                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(14, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.background)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
@@ -318,7 +318,7 @@ public struct RefereeScoringView: View {
     private func actionButton(_ title: String, color: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(13, weight: .bold, design: .rounded))
                 .tracking(1)
                 .foregroundColor(match.isGameOver ? SharedColors.textMuted : color)
                 .frame(maxWidth: .infinity)
@@ -340,7 +340,7 @@ public struct RefereeScoringView: View {
                 AppSymbol("arrow.uturn.backward", size: 16, color: match.canUndo ? SharedColors.textPrimary : SharedColors.textMuted)
                 Text("Undo")
             }
-            .font(.system(size: 16, weight: .bold, design: .rounded))
+            .font(SharedFonts.system(16, weight: .bold, design: .rounded))
             .foregroundColor(match.canUndo ? SharedColors.textPrimary : SharedColors.textMuted)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
@@ -355,7 +355,7 @@ public struct RefereeScoringView: View {
 
     private func callFlash(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 28, weight: .bold, design: .rounded))
+            .font(SharedFonts.system(28, weight: .bold, design: .rounded))
             .foregroundColor(.white)
             .tracking(3)
             .padding(.horizontal, 28)
@@ -400,11 +400,11 @@ struct RefereeTimers: View {
         let text = (total / 60 < 10 ? "0" : "") + "\(total / 60):" + (total % 60 < 10 ? "0" : "") + "\(total % 60)"
         return VStack(alignment: alignment, spacing: 1) {
             Text(label)
-                .font(.system(size: 8, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(8, weight: .medium, design: .rounded))
                 .tracking(1)
                 .foregroundColor(SharedColors.textMuted)
             Text(text)
-                .font(.system(size: 16, weight: .bold, design: .monospaced))
+                .font(SharedFonts.system(16, weight: .bold, design: .monospaced))
                 .foregroundColor(SharedColors.textSecondary)
         }
         .accessibilityLabel("\(label == "MATCH" ? "Wedstrijdtijd" : "Gametijd") \(text)")

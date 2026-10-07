@@ -36,7 +36,7 @@ public struct ShotTypeButton: View {
                 .frame(height: 32)
 
                 Text(shotType.rawValue.uppercased())
-                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                    .font(SharedFonts.system(10, weight: .medium, design: .rounded))
                     .foregroundColor(isPressed ? color : SharedColors.textSecondary)
                     .tracking(0.5)
             }

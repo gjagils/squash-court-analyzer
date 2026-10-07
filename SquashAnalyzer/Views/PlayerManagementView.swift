@@ -70,7 +70,7 @@ struct PlayerManagementView: View {
                         HStack(spacing: 14) {
                             Button(action: { showingBadgeCatalog = true }) {
                                 Image(systemName: "medal")
-                                    .font(.system(size: 20))
+                                    .font(SharedFonts.system(20))
                                     .foregroundColor(AppColors.accentGold)
                             }
                             .accessibilityLabel("Alle badges")
@@ -88,7 +88,7 @@ struct PlayerManagementView: View {
                                         .tint(AppColors.accentGold)
                                 } else {
                                     Image(systemName: "square.and.arrow.down")
-                                        .font(.system(size: 20))
+                                        .font(SharedFonts.system(20))
                                         .foregroundColor(AppColors.accentGold)
                                 }
                             }
@@ -97,7 +97,7 @@ struct PlayerManagementView: View {
 
                             Button(action: { showingAddPlayer = true }) {
                                 Image(systemName: "plus.circle")
-                                    .font(.system(size: 22))
+                                    .font(SharedFonts.system(22))
                                     .foregroundColor(AppColors.accentGold)
                             }
                         }
@@ -110,7 +110,7 @@ struct PlayerManagementView: View {
                         Spacer()
                         VStack(spacing: 12) {
                             Image(systemName: "person.2")
-                                .font(.system(size: 40))
+                                .font(SharedFonts.system(40))
                                 .foregroundColor(AppColors.textMuted)
                             Text("Nog geen spelers opgeslagen")
                                 .font(AppFonts.body(16))
@@ -281,7 +281,7 @@ struct PlayerRowView: View {
                     if badgeCount > 0 {
                         HStack(spacing: 3) {
                             Image(systemName: "medal.fill")
-                                .font(.system(size: 10))
+                                .font(SharedFonts.system(10))
                             Text("\(badgeCount)")
                                 .font(AppFonts.caption(11))
                         }
@@ -319,19 +319,19 @@ struct PlayerRowView: View {
             if isPickerMode {
                 Button(action: onSelect) {
                     Image(systemName: "chevron.right.circle.fill")
-                        .font(.system(size: 24))
+                        .font(SharedFonts.system(24))
                         .foregroundColor(AppColors.accentGold)
                 }
             } else {
                 HStack(spacing: 18) {
                     Button(action: onEdit) {
                         Image(systemName: "pencil")
-                            .font(.system(size: 16))
+                            .font(SharedFonts.system(16))
                             .foregroundColor(AppColors.textSecondary)
                     }
                     Button(action: { showingDeleteConfirm = true }) {
                         Image(systemName: "trash")
-                            .font(.system(size: 15))
+                            .font(SharedFonts.system(15))
                             .foregroundColor(AppColors.textMuted)
                     }
                     .accessibilityLabel("Verwijder \(player.name)")
@@ -410,7 +410,7 @@ struct PlayerEditSheet: View {
                 ZStack(alignment: .bottomTrailing) {
                     PlayerAvatarImage(photo: photoImage, color: AppColors.accentGold, size: 96)
                     Image(systemName: "camera.fill")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(SharedFonts.system(12, weight: .semibold))
                         .foregroundColor(AppColors.backgroundDark)
                         .padding(7)
                         .background(Circle().fill(AppColors.accentGold))

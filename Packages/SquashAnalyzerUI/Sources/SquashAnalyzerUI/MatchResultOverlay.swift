@@ -73,7 +73,7 @@ public struct MatchResultOverlay: View {
     private var card: some View {
         VStack(spacing: 22) {
             Text(result.title)
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(20, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
                 .tracking(3)
                 .lineLimit(1)
@@ -82,7 +82,7 @@ public struct MatchResultOverlay: View {
             HStack(alignment: .bottom, spacing: 4) {
                 side(Player.player1, name: result.player1Name, score: result.player1Score, photo: player1Photo)
                 Text("–")
-                    .font(.system(size: 35, weight: .bold, design: .rounded))
+                    .font(SharedFonts.system(35, weight: .bold, design: .rounded))
                     .foregroundColor(SharedColors.textMuted)
                     .padding(.bottom, 14)
                 side(Player.player2, name: result.player2Name, score: result.player2Score, photo: player2Photo)
@@ -92,7 +92,7 @@ public struct MatchResultOverlay: View {
 
             if let winner = result.winner, let text = result.winnerText {
                 Text(text)
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .font(SharedFonts.system(16, weight: .medium, design: .rounded))
                     .foregroundColor(Self.color(for: winner))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
@@ -111,7 +111,7 @@ public struct MatchResultOverlay: View {
                             .fill(SharedColors.positive)
                             .frame(width: 8, height: 8)
                         Text(note)
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.textMuted)
                     }
                 }
@@ -139,7 +139,7 @@ public struct MatchResultOverlay: View {
                 if let link {
                     Button(action: link.action) {
                         Text(link.title)
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .font(SharedFonts.system(13, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.textMuted)
                     }
                     .buttonStyle(.plain)
@@ -164,12 +164,12 @@ public struct MatchResultOverlay: View {
         return VStack(spacing: 6) {
             PlayerAvatarPlaceholder(color: color, size: 44, active: won, photo: photo)
             Text(name)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                 .foregroundColor(won ? color : SharedColors.textSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             Text("\(score)")
-                .font(.system(size: 64, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(64, weight: .bold, design: .rounded))
                 .foregroundColor(won ? color : SharedColors.textPrimary.opacity(0.55))
         }
         .frame(maxWidth: .infinity)
@@ -191,11 +191,11 @@ public struct MatchResultOverlay: View {
     private func chip(number: Int, score: String, color: Color) -> some View {
         VStack(spacing: 1) {
             Text("G\(number)")
-                .font(.system(size: 9, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(9, weight: .medium, design: .rounded))
                 .foregroundColor(color.opacity(0.7))
                 .tracking(1)
             Text(score)
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
                 .foregroundColor(color)
         }
         .padding(.horizontal, 9)
@@ -211,7 +211,7 @@ public struct MatchResultOverlay: View {
                 AppSymbol("timer", size: 11, color: SharedColors.gold.opacity(0.6))
             }
             Text(line.text)
-                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
@@ -256,7 +256,7 @@ public struct MatchBadgesRow: View {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("BADGES VERDIEND")
-                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                         .tracking(1)
                         .foregroundColor(color)
                     ForEach(earnings) { earning in
@@ -284,7 +284,7 @@ public struct MatchBadgesRow: View {
                 }
             }
             Text("\(earning.name) · " + (earning.badges.count == 1 ? earning.badges[0].tieredTitle : "\(earning.badges.count) badges"))
-                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(13, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
                 .lineLimit(1)
                 // Five medallions plus "Bombardino · 5 badges" is wider than
@@ -344,7 +344,7 @@ public struct SharedMatchBadgesSheet: View {
                 Image(systemName: "xmark")
                 Text("Sluiten")
             }
-            .font(.system(size: 14, weight: .medium, design: .rounded))
+            .font(SharedFonts.system(14, weight: .medium, design: .rounded))
             .foregroundColor(SharedColors.textSecondary)
             .lineLimit(1)
             .fixedSize()
@@ -358,7 +358,7 @@ public struct SharedMatchBadgesSheet: View {
     private func playerSection(_ earning: MatchBadgeEarning) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(earning.name.uppercased())
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
                 .tracking(1.2)
                 .foregroundColor(SharedColors.gold)
             ForEach(earning.badges) { kind in
@@ -366,10 +366,10 @@ public struct SharedMatchBadgesSheet: View {
                     BadgeMedallion(kind: kind, size: 52, showsTitle: false)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(kind.tieredTitle)
-                            .font(.system(size: 15, weight: .semibold))
+                            .font(SharedFonts.system(15, weight: .semibold))
                             .foregroundColor(SharedColors.textPrimary)
                         Text(kind.detail)
-                            .font(.system(size: 12))
+                            .font(SharedFonts.system(12))
                             .foregroundColor(SharedColors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }

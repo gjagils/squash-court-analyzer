@@ -99,7 +99,7 @@ public struct SharedCoachDashboardView: View {
                 HStack {
                     Button { shareText(GameSummaryText.text(for: game)) } label: {
                         Text("Deel")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(SharedFonts.system(13, weight: .semibold))
                             .foregroundColor(SharedColors.gold)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
@@ -127,7 +127,7 @@ public struct SharedCoachDashboardView: View {
                 .foregroundColor(SharedColors.textPrimary)
             if let winner = game.winner {
                 Text("\(game.name(for: winner)) wint!")
-                    .font(.system(size: 14))
+                    .font(SharedFonts.system(14))
                     .foregroundColor(SharedColors.gold)
             }
         }
@@ -141,7 +141,7 @@ public struct SharedCoachDashboardView: View {
         HStack(spacing: 8) {
             playerButton(Player.player1, score: game.player1Score)
             Text("-")
-                .font(.system(size: 30, weight: .bold, design: .monospaced))
+                .font(SharedFonts.system(30, weight: .bold, design: .monospaced))
                 .foregroundColor(SharedColors.textMuted)
             playerButton(Player.player2, score: game.player2Score)
         }
@@ -152,11 +152,11 @@ public struct SharedCoachDashboardView: View {
         return Button { choose(side) } label: {
             VStack(spacing: 2) {
                 Text(game.name(for: side))
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(SharedFonts.system(12, weight: .semibold))
                     .lineLimit(1)
                     .foregroundColor(selected ? color(for: side) : SharedColors.textSecondary)
                 Text("\(score)")
-                    .font(.system(size: 34, weight: .bold, design: .monospaced))
+                    .font(SharedFonts.system(34, weight: .bold, design: .monospaced))
                     .foregroundColor(selected ? color(for: side) : SharedColors.textPrimary)
             }
             .frame(maxWidth: .infinity)
@@ -175,7 +175,7 @@ public struct SharedCoachDashboardView: View {
                     let candidate = games[index]
                     Button { chooseGame(index) } label: {
                         Text("Game \(gameNumber(of: candidate)) (\(candidate.player1Score)-\(candidate.player2Score))")
-                            .font(.system(size: 11))
+                            .font(SharedFonts.system(11))
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
                             .foregroundColor(index == gameIndex ? SharedColors.textPrimary : SharedColors.textMuted)
@@ -238,13 +238,13 @@ public struct SharedCoachDashboardView: View {
                 AppSymbol(icon, size: 12, color: tint)
             }
             Text(value)
-                .font(.system(size: 13, weight: .bold))
+                .font(SharedFonts.system(13, weight: .bold))
                 .foregroundColor(tint)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .minimumScaleFactor(0.7)
             Text(label)
-                .font(.system(size: 9))
+                .font(SharedFonts.system(9))
                 .foregroundColor(SharedColors.textMuted)
         }
         .frame(maxWidth: .infinity, minHeight: 56)
@@ -262,7 +262,7 @@ public struct SharedCoachDashboardView: View {
         let highest = most
         return VStack(spacing: 6) {
             Text("Heatmap")
-                .font(.system(size: 10))
+                .font(SharedFonts.system(10))
                 .foregroundColor(SharedColors.textMuted)
             VStack(spacing: 2) {
                 ForEach(0..<rows.count, id: \.self) { row in
@@ -272,7 +272,7 @@ public struct SharedCoachDashboardView: View {
                             ZStack {
                                 Rectangle().fill(SharedColors.positive.opacity(0.2 + Double(count) / Double(highest) * 0.6))
                                 Text("\(count)")
-                                    .font(.system(size: 10))
+                                    .font(SharedFonts.system(10))
                                     .foregroundColor(SharedColors.textPrimary)
                             }
                             .frame(width: rows[row].count == 2 ? CGFloat(43) : CGFloat(28), height: 28)
@@ -294,12 +294,12 @@ public struct SharedCoachDashboardView: View {
         let top = CoachAdvice.topShots(in: game, for: player)
         return VStack(alignment: .leading, spacing: 6) {
             Text("Slagen")
-                .font(.system(size: 10))
+                .font(SharedFonts.system(10))
                 .foregroundColor(SharedColors.textMuted)
                 .frame(maxWidth: .infinity)
             if top.isEmpty {
                 Text("Nog geen slagen")
-                    .font(.system(size: 10))
+                    .font(SharedFonts.system(10))
                     .foregroundColor(SharedColors.textMuted)
             }
             ForEach(0..<top.count, id: \.self) { index in
@@ -323,7 +323,7 @@ public struct SharedCoachDashboardView: View {
             ShotIconView(type: item.shot, color: SharedColors.gold, size: 14)
                 .frame(width: 14, height: 14)
             Text(item.name)
-                .font(.system(size: 10))
+                .font(SharedFonts.system(10))
                 .foregroundColor(SharedColors.textSecondary)
                 .lineLimit(1)
             Spacer(minLength: 2)
@@ -335,7 +335,7 @@ public struct SharedCoachDashboardView: View {
             }
             .frame(width: 40, height: 8)
             Text("\(item.count)")
-                .font(.system(size: 10))
+                .font(SharedFonts.system(10))
                 .foregroundColor(SharedColors.textPrimary)
                 .frame(width: 16, alignment: .trailing)
         }
@@ -357,7 +357,7 @@ public struct SharedCoachDashboardView: View {
             // How the own unforced errors went: "Down 2 · Out 1"
             if let kinds = ErrorKind.summary(game.errorKindCounts(madeBy: player)) {
                 Text("Eigen fouten: \(kinds)")
-                    .font(.system(size: 11))
+                    .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textSecondary)
             }
         }
@@ -372,15 +372,15 @@ public struct SharedCoachDashboardView: View {
             AppSymbol("bolt.fill", size: 18, color: SharedColors.gold)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Uit de lucht")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(SharedFonts.system(12, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                 Text(CoachAdvice.volleyBreakdown(in: game, for: player) ?? "Nog geen volleys")
-                    .font(.system(size: 11))
+                    .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textSecondary)
             }
             Spacer()
             Text("\(count)")
-                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(22, weight: .bold, design: .rounded))
                 .foregroundColor(count > 0 ? SharedColors.gold : SharedColors.textMuted)
         }
         .padding(14)
@@ -390,10 +390,10 @@ public struct SharedCoachDashboardView: View {
     private func countBadge(_ label: String, _ count: Int, _ tint: Color) -> some View {
         VStack(spacing: 2) {
             Text("\(count)")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                 .foregroundColor(tint)
             Text(label)
-                .font(.system(size: 10))
+                .font(SharedFonts.system(10))
                 .foregroundColor(SharedColors.textSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
@@ -408,7 +408,7 @@ public struct SharedCoachDashboardView: View {
         HStack(spacing: 8) {
             AppSymbol(icon, size: 15, color: SharedColors.gold)
             Text(title)
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
         }
     }
@@ -424,7 +424,7 @@ public struct SharedCoachDashboardView: View {
                 .padding(.bottom, 4)
             if items.isEmpty {
                 Text("Nog te weinig punten voor advies.")
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textMuted)
             }
             ForEach(0..<items.count, id: \.self) { index in
@@ -434,7 +434,7 @@ public struct SharedCoachDashboardView: View {
                         .frame(width: 16)
                         .padding(.top, 2)
                     Text(items[index].text)
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -485,7 +485,7 @@ public struct SharedCoachDashboardView: View {
                 Spacer()
                 if !hasKey {
                     Text("API key vereist")
-                        .font(.system(size: 10))
+                        .font(SharedFonts.system(10))
                         .foregroundColor(SharedColors.textMuted)
                 }
             }
@@ -493,7 +493,7 @@ public struct SharedCoachDashboardView: View {
                 aiAdviceView(advice)
             } else if let aiError {
                 Text(aiError)
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.accent)
                 Button("Opnieuw proberen") { requestAdvice() }
                     .foregroundColor(SharedColors.steelBlueLight)
@@ -501,13 +501,13 @@ public struct SharedCoachDashboardView: View {
                 HStack(spacing: 10) {
                     ProgressView()
                     Text("AI analyseert de game…")
-                        .font(.system(size: 13))
+                        .font(SharedFonts.system(13))
                         .foregroundColor(SharedColors.textSecondary)
                 }
             } else {
                 Button { requestAdvice() } label: {
                     Text(hasKey ? "Vraag AI Coach om advies" : "Stel je API key in bij Instellingen")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(SharedFonts.system(13, weight: .semibold))
                         .foregroundColor(hasKey ? SharedColors.steelBlueLight : SharedColors.textMuted)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
@@ -525,13 +525,13 @@ public struct SharedCoachDashboardView: View {
     private func aiAdviceView(_ advice: TacticalAdvice) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(advice.samenvatting)
-                .font(.system(size: 13))
+                .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             bulletList("Sterke punten:", advice.sterktePunten, SharedColors.positive)
             bulletList("Werkpunten:", advice.werkPunten, SharedColors.accent)
             Text(advice.focusVolgendeGame)
-                .font(.system(size: 12, weight: .semibold))
+                .font(SharedFonts.system(12, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
                 .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -543,11 +543,11 @@ public struct SharedCoachDashboardView: View {
         VStack(alignment: .leading, spacing: 4) {
             if !lines.isEmpty {
                 Text(title)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(SharedFonts.system(11, weight: .semibold))
                     .foregroundColor(tint)
                 ForEach(0..<lines.count, id: \.self) { index in
                     Text("• \(lines[index])")
-                        .font(.system(size: 12))
+                        .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }

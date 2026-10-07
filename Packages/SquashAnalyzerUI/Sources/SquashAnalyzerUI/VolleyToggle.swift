@@ -18,7 +18,7 @@ public struct VolleyToggle: View {
             HStack(spacing: 8) {
                 AppSymbol("bolt.fill", size: 14, color: isOn ? Color.black.opacity(0.8) : color)
                 Text("UIT DE LUCHT")
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .font(SharedFonts.system(12, weight: .bold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(isOn ? Color.black.opacity(0.8) : color)
             }

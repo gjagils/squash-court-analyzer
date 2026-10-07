@@ -38,7 +38,7 @@ public struct PlayerProfileFields: View {
                     }
                     .tint(SharedColors.accent)
                     Text("Spelers in je team staan bovenaan als je een partij van een teamwedstrijd invult.")
-                        .font(.system(size: 12))
+                        .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textMuted)
                 }
             }
@@ -52,7 +52,7 @@ public struct PlayerProfileFields: View {
                             else { focus.append(tag.rawValue) }
                         } label: {
                             Text(tag.rawValue)
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
                                 .foregroundColor(selected ? Color.black : SharedColors.textPrimary)
@@ -76,12 +76,12 @@ public struct PlayerProfileFields: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
             }
         }
-        .font(.system(size: 16, design: .rounded))
+        .font(SharedFonts.system(16, design: .rounded))
         .foregroundColor(SharedColors.textPrimary)
     }
 
     private func caption(_ title: String) -> some View {
-        Text(title).font(.system(size: 11, weight: .semibold, design: .rounded))
+        Text(title).font(SharedFonts.system(11, weight: .semibold, design: .rounded))
             .tracking(1).foregroundColor(SharedColors.gold)
     }
 }
@@ -204,7 +204,7 @@ public struct PlayerDirectoryView: View {
                                                     Text(player.name).font(.headline)
                                                     if TeamRoster.contains(player.id, in: rosterRaw) {
                                                         Text("TEAM")
-                                                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                                                            .font(SharedFonts.system(9, weight: .bold, design: .rounded))
                                                             .tracking(1)
                                                             .foregroundColor(SharedColors.accent)
                                                             .padding(.horizontal, 6)
@@ -217,7 +217,7 @@ public struct PlayerDirectoryView: View {
                                                         HStack(spacing: 3) {
                                                             AppSymbol("medal.fill", size: 11, color: SharedColors.gold)
                                                             Text("\(count)")
-                                                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                                                .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                                                                 .foregroundColor(SharedColors.gold)
                                                         }
                                                     }
@@ -225,18 +225,12 @@ public struct PlayerDirectoryView: View {
                                                 if !player.coachingFocusAreas.isEmpty {
                                                     HStack(spacing: 6) {
                                                         ForEach(player.coachingFocusAreas, id: \.self) { tag in
-                                                            Text(tag)
-                                                                .font(.system(size: 10, weight: .medium, design: .rounded))
-                                                                .foregroundColor(SharedColors.gold)
-                                                                .padding(.horizontal, 8)
-                                                                .padding(.vertical, 3)
-                                                                .background(SharedColors.gold.opacity(0.15))
-                                                                .clipShape(Capsule())
+                                                            TagChip(tag, color: SharedColors.gold, size: 10, fillOpacity: 0.15)
                                                         }
                                                     }
                                                 } else if !player.coachingNotes.isEmpty {
                                                     Text(player.coachingNotes)
-                                                        .font(.system(size: 11)).foregroundColor(SharedColors.textSecondary)
+                                                        .font(SharedFonts.system(11)).foregroundColor(SharedColors.textSecondary)
                                                         .lineLimit(1)
                                                 }
                                             }
@@ -411,7 +405,7 @@ struct PlayerProfileEditor: View {
             ScrollView {
                 VStack(spacing: 24) {
                     Text(isNew ? "SPELER TOEVOEGEN" : "SPELER BEWERKEN")
-                        .font(.system(size: 18, weight: .bold, design: .rounded)).tracking(2)
+                        .font(SharedFonts.system(18, weight: .bold, design: .rounded)).tracking(2)
                     if photoStore != nil && filePicker != nil {
                         photoSection
                     }

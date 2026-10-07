@@ -29,7 +29,7 @@ public struct ErrorKindPicker: View {
             }
             Button { onSelect(nil) } label: {
                 Text("Weet niet")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .font(SharedFonts.system(13, weight: .medium, design: .rounded))
                     .foregroundColor(color)
                     .padding(.vertical, 6)
                     .padding(.horizontal, 16)
@@ -50,11 +50,11 @@ public struct ErrorKindPicker: View {
                 AppSymbol(kind.icon, size: 24, color: tint)
                     .frame(height: 30.0)
                 Text(kind.title.uppercased())
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .font(SharedFonts.system(13, weight: .bold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(isAvailable ? Color.white.opacity(0.9) : Color.white.opacity(0.3))
                 Text(kind.description)
-                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                    .font(SharedFonts.system(10, weight: .medium, design: .rounded))
                     .foregroundColor(isAvailable ? Color.white.opacity(0.55) : Color.white.opacity(0.2))
                     .multilineTextAlignment(.center)
                     .lineLimit(2)

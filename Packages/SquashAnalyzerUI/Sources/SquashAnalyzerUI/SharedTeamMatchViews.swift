@@ -63,16 +63,13 @@ public struct TeamMatchLinkPrompt: View {
             SharedColors.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("COMPETITIE VANDAAG")
-                        .font(.system(size: 11, weight: .semibold))
-                        .tracking(1.4)
-                        .foregroundColor(SharedColors.accent)
+                    SectionHeader("COMPETITIE VANDAAG")
                     Text(team.title)
-                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                        .font(SharedFonts.system(20, weight: .semibold, design: .rounded))
                         .foregroundColor(SharedColors.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
                     Text("Hoort \(player1Name) – \(player2Name) bij deze teamwedstrijd? Kies de partij.")
-                        .font(.system(size: 14))
+                        .font(SharedFonts.system(14))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                     VStack(spacing: 8) {
@@ -80,7 +77,7 @@ public struct TeamMatchLinkPrompt: View {
                             Button { slot = partij.slot } label: {
                                 HStack(spacing: 12) {
                                     Text(partij.label)
-                                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                                        .font(SharedFonts.system(12, weight: .bold, design: .rounded))
                                         .foregroundColor(SharedColors.background)
                                         .frame(width: 30, height: 30)
                                         .background(slot == partij.slot ? SharedColors.accent : SharedColors.textMuted)
@@ -88,7 +85,7 @@ public struct TeamMatchLinkPrompt: View {
                                     Text(partij.hasEntry
                                          ? "\(team.ownDisplayName(partij)) – \(team.opponentDisplayName(partij)) · \(partij.standText)"
                                          : "nog leeg")
-                                        .font(.system(size: 14))
+                                        .font(SharedFonts.system(14))
                                         .foregroundColor(partij.hasEntry ? SharedColors.textPrimary : SharedColors.textMuted)
                                         .lineLimit(1)
                                     Spacer()
@@ -102,7 +99,7 @@ public struct TeamMatchLinkPrompt: View {
                     }
                     if let slot {
                         Text("Wie is onze speler (\(team.ownName))?")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(SharedFonts.system(14, weight: .semibold))
                             .foregroundColor(SharedColors.textPrimary)
                         HStack(spacing: 10) {
                             ActionButton(player1Name, style: .filled) { onLink(slot, true) }
@@ -145,7 +142,7 @@ public struct SharedTeamMatchesView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Een teamwedstrijd van de SBN-competitie: vier partijen (E1–E4). Koppel de wedstrijden die je bijhield of vul de game-standen in; de app telt de games, de bonuspunten en de winnaar.")
-                        .font(.system(size: 13))
+                        .font(SharedFonts.system(13))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                     ActionButton("Nieuwe teamwedstrijd", style: .filled) { creating = true }
@@ -154,7 +151,7 @@ public struct SharedTeamMatchesView: View {
                         ProgressView().frame(maxWidth: .infinity)
                     } else if matches.isEmpty {
                         Text("Nog geen teamwedstrijden.")
-                            .font(.system(size: 14))
+                            .font(SharedFonts.system(14))
                             .foregroundColor(SharedColors.textMuted)
                             .frame(maxWidth: .infinity)
                             .padding(.top, 24)
@@ -164,7 +161,7 @@ public struct SharedTeamMatchesView: View {
                         }
                     }
                     if let message {
-                        Text(message).font(.system(size: 12)).foregroundColor(SharedColors.error)
+                        Text(message).font(SharedFonts.system(12)).foregroundColor(SharedColors.error)
                     }
                 }
                 .padding(24)
@@ -228,20 +225,20 @@ struct TeamMatchCard: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 6) {
                     Text(TeamMatchReport.dayText(match.date))
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textSecondary)
                     Spacer()
                     if score.isComplete, let winner = match.winnerName {
                         HStack(spacing: 4) {
                             AppSymbol("crown.fill", size: 10, color: SharedColors.gold)
                             Text(winner)
-                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                                 .foregroundColor(SharedColors.gold)
                                 .lineLimit(1)
                         }
                     } else {
                         Text(score.partijenPlayed == 0 ? "NOG NIET BEGONNEN" : "BEZIG")
-                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                            .font(SharedFonts.system(9, weight: .bold, design: .rounded))
                             .tracking(1.2)
                             .foregroundColor(SharedColors.textMuted)
                     }
@@ -249,13 +246,13 @@ struct TeamMatchCard: View {
                 HStack(alignment: .center, spacing: 12) {
                     teamSide(match.home, own: match.ownSide == TeamSide.home)
                     Text(match.gamesText)
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .font(SharedFonts.system(28, weight: .bold, design: .rounded))
                         .foregroundColor(SharedColors.textPrimary)
                         .lineLimit(1)
                     teamSide(match.away, own: match.ownSide == TeamSide.away)
                 }
                 Text("\(match.homePartijen)-\(match.awayPartijen) in partijen · \(match.homeCompetitionPoints)-\(match.awayCompetitionPoints) competitiepunten")
-                    .font(.system(size: 11))
+                    .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
             }
             .padding(16)
@@ -269,7 +266,7 @@ struct TeamMatchCard: View {
 
     private func teamSide(_ name: String, own: Bool) -> some View {
         Text(name)
-            .font(.system(size: 14, weight: own ? .bold : .regular, design: .rounded))
+            .font(SharedFonts.system(14, weight: own ? .bold : .regular, design: .rounded))
             .foregroundColor(own ? SharedColors.accent : SharedColors.textPrimary)
             .lineLimit(2)
             .multilineTextAlignment(.center)
@@ -325,7 +322,7 @@ public struct SharedTeamMatchView: View {
                                  onRefresh: { Task { await refreshLive() } },
                                  onStop: { confirmStopLive = true })
                     if let message {
-                        Text(message).font(.system(size: 12)).foregroundColor(SharedColors.error)
+                        Text(message).font(SharedFonts.system(12)).foregroundColor(SharedColors.error)
                     }
                     if tools.shareText != nil {
                         ActionButton("Deel verslag", icon: "square.and.arrow.up", style: .filled) { sharing = true }
@@ -342,7 +339,7 @@ public struct SharedTeamMatchView: View {
         }
         .alert(match.isLiveOwner ? "Live stoppen?" : "Live verlaten?", isPresented: $confirmStopLive) {
             Button(match.isLiveOwner ? "Stop live" : "Verlaat live", role: .destructive) { Task { await stopLive() } }
-            Button("Annuleer", role: .cancel) { }
+            Button("Annuleren", role: .cancel) { }
         } message: {
             Text(match.isLiveOwner
                  ? "De livepagina is meteen weg voor iedereen. Je teamwedstrijd blijft in de app staan."
@@ -378,7 +375,7 @@ public struct SharedTeamMatchView: View {
         }
         .alert("Teamwedstrijd verwijderen?", isPresented: $confirmDelete) {
             Button("Verwijder", role: .destructive) { Task { await remove() } }
-            Button("Annuleer", role: .cancel) { }
+            Button("Annuleren", role: .cancel) { }
         } message: {
             Text("De gekoppelde coach- en scheidsrechterwedstrijden blijven in Afgeronde wedstrijden staan.")
         }
@@ -455,32 +452,32 @@ public struct SharedTeamMatchView: View {
         let score = match.score
         return VStack(alignment: .leading, spacing: 10) {
             Text("\(TeamMatchReport.dayText(match.date)) · \(match.ownSide == TeamSide.home ? "thuis" : "uit")")
-                .font(.system(size: 12))
+                .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textSecondary)
             HStack(alignment: .center, spacing: 12) {
                 VStack(spacing: 4) {
                     Text(match.home)
-                        .font(.system(size: 15, weight: match.ownSide == TeamSide.home ? .bold : .regular, design: .rounded))
+                        .font(SharedFonts.system(15, weight: match.ownSide == TeamSide.home ? .bold : .regular, design: .rounded))
                         .foregroundColor(match.ownSide == TeamSide.home ? SharedColors.accent : SharedColors.textPrimary)
                         .multilineTextAlignment(.center)
                     Text("\(match.homeGames)")
-                        .font(.system(size: 44, weight: .bold, design: .rounded))
+                        .font(SharedFonts.system(44, weight: .bold, design: .rounded))
                         .foregroundColor(SharedColors.textPrimary)
                 }
                 .frame(maxWidth: .infinity)
-                Text("–").font(.system(size: 32, weight: .bold, design: .rounded)).foregroundColor(SharedColors.textMuted)
+                Text("–").font(SharedFonts.system(32, weight: .bold, design: .rounded)).foregroundColor(SharedColors.textMuted)
                 VStack(spacing: 4) {
                     Text(match.away)
-                        .font(.system(size: 15, weight: match.ownSide == TeamSide.away ? .bold : .regular, design: .rounded))
+                        .font(SharedFonts.system(15, weight: match.ownSide == TeamSide.away ? .bold : .regular, design: .rounded))
                         .foregroundColor(match.ownSide == TeamSide.away ? SharedColors.accent : SharedColors.textPrimary)
                         .multilineTextAlignment(.center)
                     Text("\(match.awayGames)")
-                        .font(.system(size: 44, weight: .bold, design: .rounded))
+                        .font(SharedFonts.system(44, weight: .bold, design: .rounded))
                         .foregroundColor(SharedColors.textPrimary)
                 }
                 .frame(maxWidth: .infinity)
             }
-            Text("games").font(.system(size: 10)).tracking(1.2).foregroundColor(SharedColors.textMuted).frame(maxWidth: .infinity)
+            Text("games").font(SharedFonts.system(10)).tracking(1.2).foregroundColor(SharedColors.textMuted).frame(maxWidth: .infinity)
             Divider().overlay(Color.white.opacity(0.15))
             HStack {
                 statCell("PARTIJEN", "\(match.homePartijen)-\(match.awayPartijen)")
@@ -490,12 +487,12 @@ public struct SharedTeamMatchView: View {
                          : "–")
             }
             Text(match.statusText)
-                .font(.system(size: 13, weight: .semibold))
+                .font(SharedFonts.system(13, weight: .semibold))
                 .foregroundColor(score.isComplete ? SharedColors.gold : SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             if score.isComplete {
                 Text("Winnaar: meeste games; gelijk → meeste partijen; nog gelijk → meeste rallypunten. Competitiepunten: games + 3 bonus voor de winnaar.")
-                    .font(.system(size: 11))
+                    .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -510,19 +507,16 @@ public struct SharedTeamMatchView: View {
     private func statCell(_ title: String, _ value: String) -> some View {
         VStack(spacing: 3) {
             Text(value)
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.accent)
-            Text(title).font(.system(size: 9)).tracking(1.0).foregroundColor(SharedColors.textSecondary)
+            Text(title).font(SharedFonts.system(9)).tracking(1.0).foregroundColor(SharedColors.textSecondary)
         }
         .frame(maxWidth: .infinity)
     }
 
     private var partijenList: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("PARTIJEN")
-                .font(.system(size: 11, weight: .semibold))
-                .tracking(1.4)
-                .foregroundColor(SharedColors.accent)
+            SectionHeader("PARTIJEN")
             VStack(spacing: 0) {
                 ForEach(match.partijen, id: \.slot) { partij in
                     partijRow(partij)
@@ -531,7 +525,7 @@ public struct SharedTeamMatchView: View {
             }
             .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.04)))
             Text("Tik op een partij om spelers en games in te vullen of een bijgehouden wedstrijd te koppelen.")
-                .font(.system(size: 11))
+                .font(SharedFonts.system(11))
                 .foregroundColor(SharedColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -541,7 +535,7 @@ public struct SharedTeamMatchView: View {
         Button { editing = partij } label: {
             HStack(alignment: .top, spacing: 12) {
                 Text(partij.label)
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .font(SharedFonts.system(12, weight: .bold, design: .rounded))
                     .foregroundColor(SharedColors.background)
                     .frame(width: 30, height: 30)
                     .background(partij.hasEntry ? SharedColors.accent : SharedColors.textMuted)
@@ -549,22 +543,22 @@ public struct SharedTeamMatchView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
                         Text(match.ownDisplayName(partij))
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(SharedFonts.system(14, weight: .semibold))
                             .foregroundColor(partij.ownPlayer.isEmpty ? SharedColors.textMuted : SharedColors.accent)
                             .lineLimit(1)
                         Text("–").foregroundColor(SharedColors.textMuted)
                         Text(match.opponentDisplayName(partij))
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(SharedFonts.system(14, weight: .semibold))
                             .foregroundColor(partij.opponentPlayer.isEmpty ? SharedColors.textMuted : SharedColors.steelBlueLight)
                             .lineLimit(1)
                     }
                     if partij.hasEntry {
                         HStack(spacing: 6) {
                             Text(partij.standText)
-                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .font(SharedFonts.system(13, weight: .bold, design: .rounded))
                                 .foregroundColor(partij.ownWon == true ? SharedColors.accent : (partij.ownWon == false ? SharedColors.steelBlueLight : SharedColors.textPrimary))
                             Text(partij.gamesText)
-                                .font(.system(size: 12))
+                                .font(SharedFonts.system(12))
                                 .foregroundColor(SharedColors.textSecondary)
                                 .lineLimit(1)
                             if partij.isLinked {
@@ -573,12 +567,12 @@ public struct SharedTeamMatchView: View {
                         }
                     } else {
                         Text("Nog niet ingevuld")
-                            .font(.system(size: 12))
+                            .font(SharedFonts.system(12))
                             .foregroundColor(SharedColors.textMuted)
                     }
                     if let order = partij.playOrder {
                         Text("Gespeeld als \(order)e")
-                            .font(.system(size: 10))
+                            .font(SharedFonts.system(10))
                             .foregroundColor(SharedColors.textMuted)
                     }
                 }

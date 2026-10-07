@@ -122,7 +122,7 @@ public struct CourtView: View {
 
         return VStack {
             Text("KIES EEN ZONE")
-                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                 .foregroundColor(color)
                 .tracking(1.5)
                 .padding(.horizontal, 12)

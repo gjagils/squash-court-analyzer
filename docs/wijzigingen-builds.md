@@ -22,6 +22,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   lek meer via `saver.onExit`; payload-`version` 4; losse systeemkleuren weg
   (plus lintregel); Worker geeft de plek vrij vóór het opruimen. Gebruikers
   merken hooguit dat lijsten met foto's op Android vlotter scrollen.
+- **Gedeelde bouwstenen (7 oktober 2026)**: lettertypes via `SharedFonts`,
+  `SectionHeader`, `TagChip` en één gedeelde sluitknop. Zichtbaar voor de
+  gebruiker: op Android hebben de sheets nu ook "✕ Sluiten"/"✕ Annuleren" zoals
+  op de iPhone, en "Annuleer" heet overal "Annuleren".
 
 ## 3.0 build 1, 6 oktober 2026 (geüpload)
 

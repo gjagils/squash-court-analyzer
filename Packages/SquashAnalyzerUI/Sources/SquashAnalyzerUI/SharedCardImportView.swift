@@ -27,10 +27,10 @@ public struct SharedCardImportView: View {
                 Section {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(snapshot.name)
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .font(SharedFonts.system(20, weight: .bold, design: .rounded))
                             .foregroundColor(SharedColors.textPrimary)
                         Text(preview?.summary ?? "Kaart lezen…")
-                            .font(.system(size: 13))
+                            .font(SharedFonts.system(13))
                             .foregroundColor(SharedColors.textSecondary)
                     }
                     .listRowBackground(Color.clear)
@@ -64,7 +64,7 @@ public struct SharedCardImportView: View {
                                         Spacer()
                                         if player.name.lowercased() == snapshot.name.lowercased() {
                                             Text("zelfde naam")
-                                                .font(.system(size: 11))
+                                                .font(SharedFonts.system(11))
                                                 .foregroundColor(SharedColors.textMuted)
                                         }
                                     }
@@ -78,7 +78,7 @@ public struct SharedCardImportView: View {
             .pageTitle("Spelerskaart")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuleren") { onClose(false) }
+                    CloseButton(title: "Annuleren") { onClose(false) }
                 }
             }
             .alert("Koppelen mislukt", isPresented: $failed) {

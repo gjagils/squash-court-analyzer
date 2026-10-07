@@ -20,7 +20,7 @@ public struct ZoneProfileTable: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Waar vallen de punten")
-                .font(.system(size: 11, weight: .semibold))
+                .font(SharedFonts.system(11, weight: .semibold))
                 .foregroundColor(ZoneProfileTable.muted)
             // Explicit rows, not a nested ForEach (see docs/android-port.md)
             header
@@ -40,13 +40,13 @@ public struct ZoneProfileTable: View {
             cell("Links", ZoneProfileTable.muted)
             cell("Rechts", ZoneProfileTable.muted)
         }
-        .font(.system(size: 10))
+        .font(SharedFonts.system(10))
     }
 
     private func line(_ title: String, _ tally: AreaTally, _ color: Color) -> some View {
         HStack(spacing: 4) {
             Text(title)
-                .font(.system(size: 11))
+                .font(SharedFonts.system(11))
                 .foregroundColor(ZoneProfileTable.text)
                 .frame(width: 66, alignment: .leading)
             number(tally.front, color)
@@ -68,7 +68,7 @@ public struct ZoneProfileTable: View {
 
     private func number(_ value: Int, _ color: Color) -> some View {
         Text("\(value)")
-            .font(.system(size: 13, weight: .semibold, design: .rounded))
+            .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
             .foregroundColor(value > 0 ? color : ZoneProfileTable.muted)
             .frame(maxWidth: .infinity)
     }

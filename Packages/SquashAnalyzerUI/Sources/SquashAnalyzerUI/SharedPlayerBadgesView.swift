@@ -153,10 +153,10 @@ public struct SharedPlayerBadgesView: View {
             PlayerAvatarPlaceholder(color: SharedColors.gold, size: 52, photo: photo)
             VStack(alignment: .leading, spacing: 4) {
                 Text(playerName)
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
                 Text(moments.count == 1 ? "1 badge verdiend" : "\(moments.count) badges verdiend")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textSecondary)
             }
         }
@@ -165,7 +165,7 @@ public struct SharedPlayerBadgesView: View {
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                 .tracking(1.5)
                 .foregroundColor(SharedColors.textMuted)
             content()
@@ -179,11 +179,11 @@ public struct SharedPlayerBadgesView: View {
             BadgeMedallion(kind: shown, size: 76, showsTitle: true, isLocked: earned == 0)
             if earned > 0 {
                 Text(Self.earnedText(shown, count: earned))
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                     .foregroundColor(SharedColors.gold)
             } else {
                 Text(family.detail)
-                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                    .font(SharedFonts.system(10, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textMuted)
                     .multilineTextAlignment(.center)
                     .lineLimit(3)
@@ -255,23 +255,23 @@ struct SharedBadgeMomentsView: View {
                         BadgeMedallion(kind: shownKind, size: 72, showsTitle: false, isLocked: moments.isEmpty)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(family.title)
-                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .font(SharedFonts.system(17, weight: .bold, design: .rounded))
                                 .foregroundColor(SharedColors.textPrimary)
                             Text(family.detail)
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                                 .foregroundColor(SharedColors.textSecondary)
                             if let summary = family.tierSummary {
                                 Text(summary)
-                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                                     .foregroundColor(SharedColors.textMuted)
                             }
                             if family.coachOnly {
                                 Text("Alleen in coachmodus, waar de slagen worden bijgehouden")
-                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                                     .foregroundColor(SharedColors.textMuted)
                             } else if family.isCareer {
                                 Text("Telt de wedstrijden op dit toestel")
-                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                                     .foregroundColor(SharedColors.textMuted)
                             }
                         }
@@ -282,10 +282,10 @@ struct SharedBadgeMomentsView: View {
                     ForEach(moments) { moment in
                         VStack(alignment: .leading, spacing: 2) {
                             Text(Self.momentTitle(moment))
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                                 .foregroundColor(SharedColors.textPrimary)
                             Text(Self.dateText(moment.earnedAt))
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                                 .foregroundColor(SharedColors.textMuted)
                         }
                         // Opaque: Android draws the red swipe-to-delete layer underneath

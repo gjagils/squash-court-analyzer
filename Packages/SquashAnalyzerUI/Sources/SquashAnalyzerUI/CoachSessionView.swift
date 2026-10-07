@@ -119,7 +119,7 @@ public struct CoachSessionView: View {
                     SharedMatchHistoryView(store: historyStore, aiCoach: aiCoach, shareText: shareText)
                         .toolbar {
                             ToolbarItem(placement: .cancellationAction) {
-                                Button("Sluiten") { showingHistory = false }
+                                CloseButton { showingHistory = false }
                             }
                         }
                 }
@@ -131,7 +131,7 @@ public struct CoachSessionView: View {
                     SharedSettingsView(aiCoach: settings.aiCoach, backup: settings.backup)
                         .toolbar {
                             ToolbarItem(placement: .cancellationAction) {
-                                Button("Sluiten") { showingSettings = false }
+                                CloseButton { showingSettings = false }
                             }
                         }
                 }

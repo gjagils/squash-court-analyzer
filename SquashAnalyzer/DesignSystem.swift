@@ -42,29 +42,29 @@ enum AppColors {
 struct AppFonts {
     /// Main title font
     static func title(_ size: CGFloat = 18) -> Font {
-        .system(size: size, weight: .bold, design: .rounded)
+        SharedFonts.system(size, weight: .bold, design: .rounded)
     }
 
     /// Label font (uppercase tracking)
     static func label(_ size: CGFloat = 12) -> Font {
-        .system(size: size, weight: .semibold, design: .rounded)
+        SharedFonts.system(size, weight: .semibold, design: .rounded)
     }
 
     /// Body text
     static func body(_ size: CGFloat = 14) -> Font {
-        .system(size: size, weight: .medium, design: .rounded)
+        SharedFonts.system(size, weight: .medium, design: .rounded)
     }
 
     /// Score/LED display font
     static func score(_ size: CGFloat = 48) -> Font {
-        .system(size: size, weight: .bold, design: .monospaced)
+        SharedFonts.system(size, weight: .bold, design: .monospaced)
     }
 
     /// Button text
 
     /// Small caption
     static func caption(_ size: CGFloat = 10) -> Font {
-        .system(size: size, weight: .medium, design: .rounded)
+        SharedFonts.system(size, weight: .medium, design: .rounded)
     }
 
     /// Player name in scoreboard
@@ -104,29 +104,6 @@ struct SportsPanel<Content: View>: View {
 
 
 // MARK: - Close button
-
-/// "✕ Sluiten" as on Spelers: the one close button of the app (also for
-/// "Annuleren"). Grey text, no capsule.
-struct CloseButton: View {
-    var title: String = "Sluiten"
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                Image(systemName: "xmark")
-                Text(title)
-            }
-            .font(AppFonts.body(14))
-            .foregroundColor(AppColors.textSecondary)
-            .lineLimit(1)
-            .fixedSize()
-            // Toolbars draw icons a size up; keep the ✕ as small as on Spelers
-            .imageScale(.medium)
-        }
-        .buttonStyle(.plain)
-    }
-}
 
 /// `CloseButton` top left in a navigation bar, without the glass capsule
 /// iOS 26 puts around toolbar buttons, so it looks like the one on Spelers

@@ -40,7 +40,7 @@ public struct ServiceSideSelector: View {
     public var body: some View {
         VStack(spacing: compact ? 2.0 : 3.0) {
             Text("SERVICE")
-                .font(.system(size: compact ? 8.0 : 9.0, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(compact ? 8.0 : 9.0, weight: .medium, design: .rounded))
                 .foregroundColor(color.opacity(0.6))
                 .tracking(1)
 
@@ -59,7 +59,7 @@ public struct ServiceSideSelector: View {
                     AppSymbol("pin.fill", size: 7, color: active ? SharedColors.background : color.opacity(0.4))
                 }
                 Text(label)
-                    .font(.system(size: compact ? 11.0 : 12.0, weight: .bold, design: .rounded))
+                    .font(SharedFonts.system(compact ? 11.0 : 12.0, weight: .bold, design: .rounded))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }

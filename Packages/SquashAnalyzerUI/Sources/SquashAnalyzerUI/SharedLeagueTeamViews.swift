@@ -54,7 +54,7 @@ public struct SharedLeagueTeamCard: View {
                         ProgressView()
                     }
                     Text(loading ? "Mijn team laden…" : (errorMessage ?? "Team laden niet gelukt"))
-                        .font(.system(size: 12))
+                        .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                     Spacer()
                     if !loading {
@@ -121,10 +121,10 @@ public struct SharedLeagueTeamDetailView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(snapshot.name)
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .font(SharedFonts.system(24, weight: .bold, design: .rounded))
                             .foregroundColor(SharedColors.textPrimary)
                         Text("\(snapshot.division) · \(snapshot.competition)")
-                            .font(.system(size: 12))
+                            .font(SharedFonts.system(12))
                             .foregroundColor(SharedColors.textSecondary)
                     }
                     section("STAND") {
@@ -154,7 +154,7 @@ public struct SharedLeagueTeamDetailView: View {
                         ForEach(snapshot.fixtures) { fixture in
                             HStack(spacing: 10) {
                                 Text(LeagueDates.day(fixture.date))
-                                    .font(.system(size: 11))
+                                    .font(SharedFonts.system(11))
                                     .foregroundColor(SharedColors.textMuted)
                                     .frame(width: 82, alignment: .leading)
                                 VStack(alignment: .leading, spacing: 2) {
@@ -174,7 +174,7 @@ public struct SharedLeagueTeamDetailView: View {
                                 Text(player.name).foregroundColor(SharedColors.textPrimary)
                                 Spacer()
                                 Text(player.record)
-                                    .font(.system(size: 12))
+                                    .font(SharedFonts.system(12))
                                     .foregroundColor(SharedColors.textSecondary)
                             }
                             .padding(.vertical, 4)
@@ -182,7 +182,7 @@ public struct SharedLeagueTeamDetailView: View {
                     }
                     HStack(spacing: 12) {
                         Text(refreshError ?? "Bijgewerkt: \(LeagueDates.day(snapshot.updatedAt)) \(LeagueDates.time(snapshot.updatedAt))")
-                            .font(.system(size: 11))
+                            .font(SharedFonts.system(11))
                             .foregroundColor(SharedColors.textMuted)
                         Spacer()
                         if fetcher != nil {
@@ -190,7 +190,7 @@ public struct SharedLeagueTeamDetailView: View {
                                 ProgressView()
                             } else {
                                 Button("Vernieuwen") { Task { await refresh() } }
-                                    .font(.system(size: 13, weight: .semibold))
+                                    .font(SharedFonts.system(13, weight: .semibold))
                                     .foregroundColor(SharedColors.accent)
                             }
                         }
@@ -224,10 +224,7 @@ public struct SharedLeagueTeamDetailView: View {
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.system(size: 11, weight: .semibold))
-                .tracking(1.4)
-                .foregroundColor(SharedColors.accent)
+            SectionHeader(title)
             VStack(alignment: .leading, spacing: 0) {
                 content()
             }

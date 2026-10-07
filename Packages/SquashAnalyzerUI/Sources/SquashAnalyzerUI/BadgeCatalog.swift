@@ -89,7 +89,7 @@ public struct SharedBadgeCatalogView: View {
         List {
             Section {
                 Text("Spelers die je kiest via \"Kies speler\" verdienen badges tijdens een wedstrijd, in coach- en scheidsrechtermodus. Badges met het label Coach vragen om de slagen die alleen coachmodus bijhoudt. Een badge met drie treden verdien je in brons, zilver en goud: de rand laat zien hoe ver je bent.")
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .listRowBackground(Color.clear)
             }
@@ -100,14 +100,14 @@ public struct SharedBadgeCatalogView: View {
                             BadgeSeriesArtwork(family: family)
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(family.title)
-                                    .font(.system(size: 15, weight: .semibold))
+                                    .font(SharedFonts.system(15, weight: .semibold))
                                     .foregroundColor(SharedColors.textPrimary)
                                 Text(family.detail)
-                                    .font(.system(size: 12))
+                                    .font(SharedFonts.system(12))
                                     .foregroundColor(SharedColors.textSecondary)
                                 if let summary = family.tierSummary {
                                     Text(summary)
-                                        .font(.system(size: 11, weight: .medium))
+                                        .font(SharedFonts.system(11, weight: .medium))
                                         .foregroundColor(SharedColors.textMuted)
                                 }
                                 HStack(spacing: 6) {
@@ -121,7 +121,7 @@ public struct SharedBadgeCatalogView: View {
                     }
                 } header: {
                     Text(category.rawValue.uppercased())
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(SharedFonts.system(11, weight: .semibold))
                         .tracking(1.5)
                         .foregroundColor(SharedColors.gold)
                 }
@@ -134,7 +134,7 @@ public struct SharedBadgeCatalogView: View {
 
     private func tag(_ text: String) -> some View {
         Text(text.uppercased())
-            .font(.system(size: 9, weight: .semibold))
+            .font(SharedFonts.system(9, weight: .semibold))
             .tracking(1)
             .foregroundColor(SharedColors.gold)
             .padding(.horizontal, 6)

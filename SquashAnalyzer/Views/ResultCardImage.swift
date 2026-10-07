@@ -28,7 +28,7 @@ struct ResultCardImage: View {
     var body: some View {
         VStack(spacing: 26) {
             Text(card.title)
-                .font(.system(size: 26, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(26, weight: .bold, design: .rounded))
                 .tracking(6)
                 .foregroundColor(AppColors.textPrimary)
                 .lineLimit(1)
@@ -49,11 +49,11 @@ struct ResultCardImage: View {
                     .foregroundColor(scoreColor(.player2))
                     .frame(maxWidth: .infinity)
             }
-            .font(.system(size: 84, weight: .heavy, design: .rounded))
+            .font(SharedFonts.system(84, weight: .heavy, design: .rounded))
 
             if let text = card.winnerText {
                 Text(text)
-                    .font(.system(size: 20, weight: .medium, design: .rounded))
+                    .font(SharedFonts.system(20, weight: .medium, design: .rounded))
                     .foregroundColor(card.winner.map { color($0) } ?? AppColors.textSecondary)
                     .multilineTextAlignment(.center)
             }
@@ -75,7 +75,7 @@ struct ResultCardImage: View {
                     .fill(AppColors.accentGold)
                     .frame(width: 8, height: 8)
                 Text(card.footer)
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                     .tracking(2)
                     .foregroundColor(muted)
             }
@@ -92,7 +92,7 @@ struct ResultCardImage: View {
     private var rowsView: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("PARTIJEN")
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                 .tracking(3)
                 .foregroundColor(muted)
                 .padding(.bottom, 6)
@@ -118,24 +118,24 @@ struct ResultCardImage: View {
         let away = Text(row.away).fontWeight(row.winner == .player2 ? .semibold : .regular).foregroundColor(tone(.player2))
         return HStack(alignment: .firstTextBaseline, spacing: 10) {
             Text(row.label)
-                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                 .tracking(1)
                 .foregroundColor(muted)
                 .frame(width: 24, alignment: .leading)
             VStack(alignment: .leading, spacing: 4) {
                 (home + dash + away)
-                    .font(.system(size: 16, design: .rounded))
+                    .font(SharedFonts.system(16, design: .rounded))
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
                 Text(row.games)
-                    .font(.system(size: 12, design: .rounded))
+                    .font(SharedFonts.system(12, design: .rounded))
                     .foregroundColor(muted)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
             Spacer(minLength: 8)
             Text(row.score)
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(18, weight: .semibold, design: .rounded))
                 .foregroundColor(row.winner.map { color($0) } ?? AppColors.textPrimary)
         }
     }
@@ -152,7 +152,7 @@ struct ResultCardImage: View {
                         .clipShape(Circle())
                 } else {
                     Image(systemName: "person.fill")
-                        .font(.system(size: 26))
+                        .font(SharedFonts.system(26))
                         .foregroundColor(color(player).opacity(0.7))
                 }
                 Circle()
@@ -160,7 +160,7 @@ struct ResultCardImage: View {
                     .frame(width: 64, height: 64)
             }
             Text(card.name(for: player))
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(17, weight: .semibold, design: .rounded))
                 .foregroundColor(player == .player1 ? AppColors.textSecondary : color(player))
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
@@ -174,11 +174,11 @@ struct ResultCardImage: View {
         let tint: Color = chip.winner.map { color($0) } ?? AppColors.textSecondary
         return VStack(spacing: 2) {
             Text(chip.label)
-                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(10, weight: .medium, design: .rounded))
                 .tracking(1)
                 .foregroundColor(tint.opacity(0.8))
             Text(chip.score)
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(15, weight: .semibold, design: .rounded))
                 .foregroundColor(tint)
                 .lineLimit(1)
         }

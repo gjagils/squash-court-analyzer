@@ -58,7 +58,7 @@ struct TeamPartijEditor: View {
             .pageTitle("Partij \(partij.label)")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuleer", action: onCancel).foregroundColor(SharedColors.textSecondary)
+                    CloseButton(title: "Annuleren", action: onCancel)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Bewaar") { onSave(partij) }.fontWeight(.bold).foregroundColor(SharedColors.accent)
@@ -79,7 +79,7 @@ struct TeamPartijEditor: View {
                     Button(chosen.player1Name) { link(chosen, ownIsPlayer1: true) }
                     Button(chosen.player2Name) { link(chosen, ownIsPlayer1: false) }
                 }
-                Button("Annuleer", role: .cancel) { chosen = nil }
+                Button("Annuleren", role: .cancel) { chosen = nil }
             } message: {
                 Text("De games komen uit die wedstrijd, gezien vanuit onze speler.")
             }
@@ -96,7 +96,7 @@ struct TeamPartijEditor: View {
                         ForEach(roster, id: \.self) { name in
                             Button { partij.ownPlayer = name } label: {
                                 Text(name)
-                                    .font(.system(size: 12, weight: .medium))
+                                    .font(SharedFonts.system(12, weight: .medium))
                                     .foregroundColor(partij.ownPlayer == name ? SharedColors.background : SharedColors.accent)
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 6)
@@ -118,7 +118,7 @@ struct TeamPartijEditor: View {
         section("BIJGEHOUDEN WEDSTRIJD") {
             if partij.isLinked {
                 Text("Gekoppeld aan een \(partij.linkedKind == "referee" ? "scheidsrechter" : "coach")wedstrijd uit Afgeronde wedstrijden.")
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 10) {
@@ -128,7 +128,7 @@ struct TeamPartijEditor: View {
                 .padding(.top, 8)
             } else {
                 Text("Hield je deze partij bij als coach of scheidsrechter? Dan komen de games vanzelf mee.")
-                    .font(.system(size: 12))
+                    .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 ActionButton("Kies wedstrijd", icon: "arrow.right") {
@@ -143,18 +143,18 @@ struct TeamPartijEditor: View {
     private var gamesSection: some View {
         section("GAMES") {
             if partij.games.isEmpty {
-                Text("Nog geen games.").font(.system(size: 12)).foregroundColor(SharedColors.textMuted)
+                Text("Nog geen games.").font(SharedFonts.system(12)).foregroundColor(SharedColors.textMuted)
             } else {
                 ForEach(0..<partij.games.count, id: \.self) { index in
                     let game = partij.games[index]
                     HStack {
-                        Text("Game \(index + 1)").font(.system(size: 13)).foregroundColor(SharedColors.textSecondary)
+                        Text("Game \(index + 1)").font(SharedFonts.system(13)).foregroundColor(SharedColors.textSecondary)
                         Spacer()
                         Text(game.text)
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                             .foregroundColor(game.ownWon ? SharedColors.accent : SharedColors.steelBlueLight)
                         Text(game.ownWon ? "wij" : "zij")
-                            .font(.system(size: 11))
+                            .font(SharedFonts.system(11))
                             .foregroundColor(SharedColors.textMuted)
                             .frame(width: 26, alignment: .trailing)
                     }
@@ -162,11 +162,11 @@ struct TeamPartijEditor: View {
                 }
                 HStack {
                     Text("Stand \(partij.standText)")
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .font(SharedFonts.system(13, weight: .bold, design: .rounded))
                         .foregroundColor(partij.isOver ? SharedColors.gold : SharedColors.textPrimary)
                     Spacer()
                     Button("Laatste game wissen") { partij.removeLastGame() }
-                        .font(.system(size: 12))
+                        .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                 }
                 .padding(.top, 4)
@@ -174,7 +174,7 @@ struct TeamPartijEditor: View {
             if partij.canAddGame {
                 Divider().overlay(Color.white.opacity(0.09)).padding(.vertical, 6)
                 Text("Game \(partij.games.count + 1) toevoegen")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(SharedFonts.system(12, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                 HStack(spacing: 10) {
                     scoreField("wij", text: $ownText)
@@ -183,10 +183,10 @@ struct TeamPartijEditor: View {
                     ActionButton("Voeg toe", style: .filled) { addScoredGame() }
                 }
                 if let scoreError {
-                    Text(scoreError).font(.system(size: 11)).foregroundColor(SharedColors.error)
+                    Text(scoreError).font(SharedFonts.system(11)).foregroundColor(SharedColors.error)
                 }
                 Text("Stand niet bekend? Dan alleen wie won:")
-                    .font(.system(size: 11))
+                    .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
                     .padding(.top, 4)
                 HStack(spacing: 10) {
@@ -194,7 +194,7 @@ struct TeamPartijEditor: View {
                     winnerButton("Zij wonnen", own: false, color: SharedColors.steelBlueLight)
                 }
             } else if partij.isOver {
-                Text("Partij beslist.").font(.system(size: 12)).foregroundColor(SharedColors.textMuted).padding(.top, 4)
+                Text("Partij beslist.").font(SharedFonts.system(12)).foregroundColor(SharedColors.textMuted).padding(.top, 4)
             }
         }
     }
@@ -207,7 +207,7 @@ struct TeamPartijEditor: View {
                 if let text = partij.endText {
                     let winner = partij.ownWon == true ? "Wij winnen" : "Zij winnen"
                     Text("\(winner) deze partij door \(text == "opgave" ? "de opgave van de tegenstander" : "het wegblijven van de tegenstander"): alle resterende punten gaan naar de winnaar.")
-                        .font(.system(size: 12))
+                        .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                     ActionButton("Maak ongedaan", color: SharedColors.textSecondary) {
@@ -217,11 +217,11 @@ struct TeamPartijEditor: View {
                     .padding(.top, 6)
                 } else {
                     Text("Geeft een speler op, dan gaan alle resterende punten naar de tegenstander. Kwam een speler niet opdagen, dan wint de ander met 3 keer 11-0.")
-                        .font(.system(size: 12))
+                        .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                     Text("Opgave: stand van de game waarin het gebeurde (optioneel)")
-                        .font(.system(size: 11))
+                        .font(SharedFonts.system(11))
                         .foregroundColor(SharedColors.textMuted)
                         .padding(.top, 4)
                     HStack(spacing: 10) {
@@ -241,7 +241,7 @@ struct TeamPartijEditor: View {
                     }
                 }
                 if let endError {
-                    Text(endError).font(.system(size: 11)).foregroundColor(SharedColors.error)
+                    Text(endError).font(SharedFonts.system(11)).foregroundColor(SharedColors.error)
                 }
             }
         }
@@ -250,7 +250,7 @@ struct TeamPartijEditor: View {
     private func endButton(_ title: String, color: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
                 .foregroundColor(color)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
@@ -293,7 +293,7 @@ struct TeamPartijEditor: View {
                 ForEach(1..<5, id: \.self) { order in
                     Button { partij.playOrder = partij.playOrder == order ? nil : order } label: {
                         Text("\(order)e")
-                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                             .foregroundColor(partij.playOrder == order ? SharedColors.background : SharedColors.textPrimary)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 8)
@@ -308,10 +308,7 @@ struct TeamPartijEditor: View {
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.system(size: 11, weight: .semibold))
-                .tracking(1.4)
-                .foregroundColor(SharedColors.accent)
+            SectionHeader(title)
             VStack(alignment: .leading, spacing: 6) {
                 content()
             }
@@ -323,7 +320,7 @@ struct TeamPartijEditor: View {
 
     private func field(_ placeholder: String, text: Binding<String>) -> some View {
         TextField(placeholder, text: text)
-            .font(.system(size: 14))
+            .font(SharedFonts.system(14))
             .foregroundColor(SharedColors.textPrimary)
             .padding(10)
             .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.06)))
@@ -331,7 +328,7 @@ struct TeamPartijEditor: View {
 
     private func scoreField(_ placeholder: String, text: Binding<String>) -> some View {
         let field = TextField(placeholder, text: text)
-            .font(.system(size: 16, weight: .semibold, design: .rounded))
+            .font(SharedFonts.system(16, weight: .semibold, design: .rounded))
             .foregroundColor(SharedColors.textPrimary)
             .multilineTextAlignment(.center)
         #if os(iOS) || SKIP
@@ -358,7 +355,7 @@ struct TeamPartijEditor: View {
             scoreError = nil
         } label: {
             Text(title)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                 .foregroundColor(color)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
@@ -435,40 +432,34 @@ struct TrackedMatchPicker: View {
                 SharedColors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("NIEUWE WEDSTRIJD BIJHOUDEN")
-                            .font(.system(size: 11, weight: .semibold))
-                            .tracking(1.4)
-                            .foregroundColor(SharedColors.accent)
+                        SectionHeader("NIEUWE WEDSTRIJD BIJHOUDEN")
                         HStack(spacing: 10) {
                             ActionButton("Coach") { onNew("coach") }
                             ActionButton("Scheidsrechter") { onNew("referee") }
                         }
                         Text(homeIsOurs ? "Wij spelen thuis: onze speler start als Speler 1." : "Wij spelen uit: onze speler start als Speler 2.")
-                            .font(.system(size: 11))
+                            .font(SharedFonts.system(11))
                             .foregroundColor(SharedColors.textMuted)
-                        Text("OF EEN BIJGEHOUDEN WEDSTRIJD")
-                            .font(.system(size: 11, weight: .semibold))
-                            .tracking(1.4)
-                            .foregroundColor(SharedColors.accent)
+                        SectionHeader("OF EEN BIJGEHOUDEN WEDSTRIJD")
                             .padding(.top, 10)
                         if !loaded {
                             ProgressView().frame(maxWidth: .infinity)
                         } else if entries.isEmpty {
-                            Text("Nog geen bijgehouden wedstrijden.").font(.system(size: 13)).foregroundColor(SharedColors.textMuted)
+                            Text("Nog geen bijgehouden wedstrijden.").font(SharedFonts.system(13)).foregroundColor(SharedColors.textMuted)
                         } else {
                             Text("Wedstrijden van de speeldag staan bovenaan.")
-                                .font(.system(size: 12))
+                                .font(SharedFonts.system(12))
                                 .foregroundColor(SharedColors.textMuted)
                             ForEach(sorted) { entry in
                                 Button { onPick(entry) } label: {
                                     HStack(spacing: 10) {
                                         VStack(alignment: .leading, spacing: 3) {
                                             Text("\(entry.player1Name) – \(entry.player2Name)")
-                                                .font(.system(size: 14, weight: .semibold))
+                                                .font(SharedFonts.system(14, weight: .semibold))
                                                 .foregroundColor(SharedColors.textPrimary)
                                                 .lineLimit(1)
                                             Text("\(TeamMatchReport.dayText(entry.updatedAt)) · \(entry.kind == "referee" ? "scheidsrechter" : "coach") · \(entry.player1Games)-\(entry.player2Games)" + (entry.status == "abandoned" ? " · incompleet" : ""))
-                                                .font(.system(size: 11))
+                                                .font(SharedFonts.system(11))
                                                 .foregroundColor(SharedColors.textSecondary)
                                         }
                                         Spacer()
@@ -488,7 +479,7 @@ struct TrackedMatchPicker: View {
             .pageTitle("Kies wedstrijd")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuleer", action: onCancel).foregroundColor(SharedColors.textSecondary)
+                    CloseButton(title: "Annuleren", action: onCancel)
                 }
             }
         }

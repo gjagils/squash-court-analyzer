@@ -92,7 +92,7 @@ public struct RefereeScoringTimeline: View {
         HStack(spacing: 4) {
             if !dotOnRight { dot(color: color) }
             Text(entry.label)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                 .foregroundColor(.white)
                 #if !SKIP
                 .monospacedDigit()

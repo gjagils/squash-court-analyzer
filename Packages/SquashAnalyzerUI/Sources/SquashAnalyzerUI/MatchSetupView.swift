@@ -147,7 +147,7 @@ public struct MatchSetupView: View {
                 .pageTitle(pickingSlot == 0 ? "Spelers" : "Kies speler")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Sluiten") { pickingSlot = nil }
+                        CloseButton { pickingSlot = nil }
                     }
                 }
                 .sheet(item: $editing) { player in
@@ -179,7 +179,7 @@ public struct MatchSetupView: View {
                         HStack(spacing: 4) {
                             AppSymbol("chevron.left", size: 14, color: SharedColors.textSecondary)
                             Text("Home")
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                                 .foregroundColor(SharedColors.textSecondary)
                         }
                     }
@@ -194,7 +194,7 @@ public struct MatchSetupView: View {
     private func playerRow(label: String, name: Binding<String>, slot: Int, color: Color, focus: [String]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label.uppercased())
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                 .tracking(1)
                 .foregroundColor(color)
             HStack(spacing: 8) {
@@ -213,13 +213,7 @@ public struct MatchSetupView: View {
             if isCoach && !focus.isEmpty {
                 HStack(spacing: 6) {
                     ForEach(focus, id: \.self) { tag in
-                        Text(tag)
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundColor(color)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(color.opacity(0.12))
-                            .clipShape(Capsule())
+                        TagChip(tag, color: color)
                     }
                 }
             }
@@ -230,7 +224,7 @@ public struct MatchSetupView: View {
     private var serverPicker: some View {
         VStack(spacing: 10) {
             Text("Wie serveert eerst?")
-                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 10) {
                 serverButton(Player.player1, name1, SharedColors.accent)
@@ -248,7 +242,7 @@ public struct MatchSetupView: View {
                     .frame(width: 18, height: 18)
                     .overlay(Circle().fill(selected ? color : Color.clear).frame(width: 10, height: 10))
                 Text(name)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                     .lineLimit(1)
                     .foregroundColor(selected ? color : SharedColors.textPrimary)
             }
@@ -270,7 +264,7 @@ public struct MatchSetupView: View {
                     Text(hasHeadStart && headStartIsValid
                          ? "Start bij game \(1 + gamesBefore1 + gamesBefore2) · stand \(gamesBefore1) – \(gamesBefore2)"
                          : (lateStart ? "Later instappen" : "Later instappen?"))
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(hasHeadStart ? SharedColors.gold : SharedColors.textSecondary)
                     AppSymbol(lateStart ? "chevron.up" : "chevron.down", size: 12,
                               color: hasHeadStart ? SharedColors.gold : SharedColors.textSecondary)
@@ -279,14 +273,14 @@ public struct MatchSetupView: View {
             .buttonStyle(.plain)
             if lateStart {
                 Text("GAMES GEWONNEN")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(SharedColors.gold)
                 gamesRow(name1, color: SharedColors.accent, value: gamesBefore1, onMinus: { gamesBefore1 = max(0, gamesBefore1 - 1) }, onPlus: { gamesBefore1 = min(2, gamesBefore1 + 1) })
                 gamesRow(name2, color: SharedColors.steelBlue, value: gamesBefore2, onMinus: { gamesBefore2 = max(0, gamesBefore2 - 1) }, onPlus: { gamesBefore2 = min(2, gamesBefore2 + 1) })
                 if !headStartIsValid {
                     Text("Met deze stand is de wedstrijd al beslist")
-                        .font(.system(size: 12))
+                        .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                 }
             }
@@ -299,15 +293,15 @@ public struct MatchSetupView: View {
                 .foregroundColor(color)
                 .lineLimit(1)
             Spacer()
-            Button(action: onMinus) { Text("−").font(.system(size: 22, weight: .bold)).frame(width: 44, height: 36) }
+            Button(action: onMinus) { Text("−").font(SharedFonts.system(22, weight: .bold)).frame(width: 44, height: 36) }
                 .buttonStyle(.plain)
                 .foregroundColor(color)
                 .accessibilityLabel("Minder games voor \(name)")
             Text("\(value)")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
                 .frame(width: 28)
-            Button(action: onPlus) { Text("+").font(.system(size: 22, weight: .bold)).frame(width: 44, height: 36) }
+            Button(action: onPlus) { Text("+").font(SharedFonts.system(22, weight: .bold)).frame(width: 44, height: 36) }
                 .buttonStyle(.plain)
                 .foregroundColor(color)
                 .accessibilityLabel("Meer games voor \(name)")
@@ -331,7 +325,7 @@ public struct MatchSetupView: View {
             VStack(alignment: .leading, spacing: 10) {
                 Toggle(isOn: Binding(get: { inTeam }, set: { turnTeamOn($0) })) {
                     Text("Onderdeel van een teamwedstrijd")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textPrimary)
                 }
                 .tint(SharedColors.accent)
@@ -341,7 +335,7 @@ public struct MatchSetupView: View {
                             Button { pickedTeam = candidate.id; teamSlot = freeSlot(candidate) } label: {
                                 HStack(spacing: 8) {
                                     Text("\(TeamMatchReport.dayText(candidate.date)) · \(candidate.title)")
-                                        .font(.system(size: 12))
+                                        .font(SharedFonts.system(12))
                                         .foregroundColor(candidate.id == team.id ? SharedColors.accent : SharedColors.textSecondary)
                                         .lineLimit(2)
                                         .multilineTextAlignment(.leading)
@@ -355,18 +349,18 @@ public struct MatchSetupView: View {
                         }
                     } else {
                         Text("\(TeamMatchReport.dayText(team.date)) · \(team.title)")
-                            .font(.system(size: 12))
+                            .font(SharedFonts.system(12))
                             .foregroundColor(SharedColors.textSecondary)
                     }
                     Text("PARTIJ")
-                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                         .tracking(1)
                         .foregroundColor(SharedColors.textMuted)
                     HStack(spacing: 8) {
                         ForEach(1..<5, id: \.self) { slot in
                             Button { teamSlot = slot } label: {
                                 Text("E\(slot)")
-                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                    .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                                     .foregroundColor(teamSlot == slot ? SharedColors.background : (team.partij(slot).hasEntry ? SharedColors.textMuted : SharedColors.accent))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 9)
@@ -377,7 +371,7 @@ public struct MatchSetupView: View {
                         }
                     }
                     Text("WIE IS ONZE SPELER?")
-                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                         .tracking(1)
                         .foregroundColor(SharedColors.textMuted)
                     HStack(spacing: 8) {
@@ -385,7 +379,7 @@ public struct MatchSetupView: View {
                         ownChoice(name2, isPlayer1: false, color: SharedColors.steelBlue)
                     }
                     Text("Het resultaat komt na afloop vanzelf in de partij en, als de teamwedstrijd live is, gaat de stand mee naar de teampagina.")
-                        .font(.system(size: 11))
+                        .font(SharedFonts.system(11))
                         .foregroundColor(SharedColors.textMuted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -400,7 +394,7 @@ public struct MatchSetupView: View {
         let selected = teamOwnIsPlayer1 == isPlayer1
         return Button { teamOwnIsPlayer1 = isPlayer1 } label: {
             Text(name)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                 .foregroundColor(selected ? SharedColors.background : color)
                 .lineLimit(1)
                 .frame(maxWidth: .infinity)

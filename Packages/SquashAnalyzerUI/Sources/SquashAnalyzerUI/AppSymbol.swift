@@ -94,12 +94,12 @@ struct AppSymbol: View {
             }
         } else {
             Image(systemName: name)
-                .font(.system(size: size, weight: weight))
+                .font(SharedFonts.system(size, weight: weight))
                 .foregroundColor(color)
         }
         #else
         Image(systemName: name)
-            .font(.system(size: size, weight: weight))
+            .font(SharedFonts.system(size, weight: weight))
             .foregroundColor(color)
         #endif
     }

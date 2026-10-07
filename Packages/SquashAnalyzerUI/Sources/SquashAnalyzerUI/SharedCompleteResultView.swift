@@ -18,14 +18,14 @@ struct SharedCompleteResultView: View {
             Color.black.opacity(0.6).ignoresSafeArea()
             VStack(spacing: 14) {
                 Text("UITSLAG AANVULLEN")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .font(SharedFonts.system(16, weight: .bold, design: .rounded))
                     .tracking(2)
                     .foregroundColor(SharedColors.textPrimary)
                 Text("Kies per gemiste game wie hem won.")
-                    .font(.system(size: 13))
+                    .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.textSecondary)
                 Text("Nu: \(match.player1Name) \(match.player1GamesWon) – \(match.player2GamesWon) \(match.player2Name)")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(SharedFonts.system(13, weight: .semibold))
                     .foregroundColor(SharedColors.textSecondary)
 
                 ForEach(0..<winners.count, id: \.self) { index in
@@ -37,12 +37,12 @@ struct SharedCompleteResultView: View {
                             .fontWeight(.semibold)
                             .foregroundColor(winners[index] == Player.player1 ? SharedColors.accent : SharedColors.steelBlue)
                     }
-                    .font(.system(size: 14))
+                    .font(SharedFonts.system(14))
                 }
 
                 if !isDecided && winners.count < 5 {
                     Text("Game \(match.firstUnrecordedGameNumber + winners.count): wie won?")
-                        .font(.system(size: 13))
+                        .font(SharedFonts.system(13))
                         .foregroundColor(SharedColors.textPrimary)
                     HStack(spacing: 10) {
                         choice(Player.player1, SharedColors.accent)
@@ -86,7 +86,7 @@ struct SharedCompleteResultView: View {
     private func choice(_ player: Player, _ color: Color) -> some View {
         Button { winners.append(player) } label: {
             Text(match.name(for: player))
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                 .lineLimit(1)
                 .foregroundColor(color)
                 .frame(maxWidth: .infinity)

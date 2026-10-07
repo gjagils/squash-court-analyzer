@@ -17,13 +17,13 @@ public struct SharedMatchBadgesStrip: View {
         if !earnings.isEmpty {
             VStack(spacing: 10) {
                 Text("BADGES VERDIEND")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                     .tracking(1.5)
                     .foregroundColor(SharedColors.gold)
                 ForEach(earnings) { earning in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(earning.name)
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
                             .foregroundColor(SharedColors.textSecondary)
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {

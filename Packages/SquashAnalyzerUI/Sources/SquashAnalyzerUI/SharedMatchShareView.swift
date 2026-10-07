@@ -51,7 +51,7 @@ public struct SharedMatchShareView: View {
                 header
                 styleTabs
                 Text(choice.subtitle)
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textMuted)
                 ScrollView {
                     if let style = choice.textStyle {
@@ -85,7 +85,7 @@ public struct SharedMatchShareView: View {
     private var header: some View {
         ZStack {
             Text("DEEL SCORE")
-                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .font(SharedFonts.system(14, weight: .bold, design: .rounded))
                 .tracking(2)
                 .foregroundColor(SharedColors.textPrimary)
             HStack {
@@ -93,7 +93,7 @@ public struct SharedMatchShareView: View {
                     HStack(spacing: 4) {
                         AppSymbol("xmark", size: 14, color: SharedColors.textSecondary)
                         Text("Sluiten")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.textSecondary)
                     }
                 }
@@ -110,7 +110,7 @@ public struct SharedMatchShareView: View {
                 let active = option == choice
                 Button { storedChoice = option.rawValue } label: {
                     Text(option.title)
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                         .foregroundColor(active ? SharedColors.background : SharedColors.gold)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
@@ -135,7 +135,7 @@ struct WhatsAppPreview: View {
             ForEach(ChatMarkup.blocks(text)) { block in
                 if let mono = block.mono {
                     Text(mono)
-                        .font(.system(size: 12, design: .monospaced))
+                        .font(SharedFonts.system(12, design: .monospaced))
                         .foregroundColor(SharedColors.textPrimary)
                         .padding(.vertical, 2)
                 } else {
@@ -150,7 +150,7 @@ struct WhatsAppPreview: View {
         HStack(spacing: 0) {
             ForEach(segments) { segment in
                 Text(segment.text)
-                    .font(.system(size: 15, weight: segment.bold ? .bold : .regular))
+                    .font(SharedFonts.system(15, weight: segment.bold ? .bold : .regular))
                     .italic(segment.italic)
                     .foregroundColor(SharedColors.textPrimary)
             }

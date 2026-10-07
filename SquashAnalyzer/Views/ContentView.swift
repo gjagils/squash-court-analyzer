@@ -28,6 +28,9 @@ struct ContentView: View {
     @State private var cardInbox = CardInbox()
     /// The join sheet for `cardInbox.pendingTeam` is on screen (not while a full-screen cover is up)
     @State private var showingTeamJoin = false
+    /// A link of ours this version cannot open (made by a newer app)
+    @State private var showingNewerAppNeeded = false
+    @Environment(\.openURL) private var openURL
     #if DEBUG
     /// App Store screenshots (scripts/screenshots.sh): a scoring screen in a prepared state
     @State private var screenshotCoach: Match? = nil
@@ -115,7 +118,9 @@ struct ContentView: View {
         }
         // A player card link (website or squashanalyzer://kaart#…)
         .onOpenURL { url in
-            cardInbox.receive(url.absoluteString)
+            if !cardInbox.receive(url.absoluteString) && CardInbox.needsNewerApp(url.absoluteString) {
+                showingNewerAppNeeded = true
+            }
         }
         .onChange(of: cardInbox.pending) { _, _ in
             presentPendingCard()
@@ -137,6 +142,14 @@ struct ContentView: View {
                     showingTeamJoin = false
                 } onCancel: { showingTeamJoin = false }
             }
+        }
+        .alert("Link niet te openen", isPresented: $showingNewerAppNeeded) {
+            Button("Naar de App Store") {
+                if let url = URL(string: CardInbox.appStoreLink) { openURL(url) }
+            }
+            Button("Later", role: .cancel) { }
+        } message: {
+            Text(CardInbox.newerAppText + " Testers vinden de nieuwe versie in TestFlight.")
         }
         .alert("Veilige tijdelijke opslag actief", isPresented: $showingStartupPersistenceWarning) {
             Button("OK", role: .cancel) { }

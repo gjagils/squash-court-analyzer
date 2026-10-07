@@ -95,7 +95,9 @@ enum TeamLiveTexts {
         guard let id = match.liveId, let key = match.liveKey else { return "" }
         let invite = TeamInvite(id: id, key: key)
         return "Doe mee met onze teamwedstrijd \(match.title) in SquashAnalyzer en zet je eigen partij live: \(invite.link)\n"
-            + "Of plak deze code in de app (Competitie, Deelnemen): \(invite.code)"
+            + "Of plak deze code in de app (Competitie, Deelnemen): \(invite.code)\n"
+            // Someone on an older app sees nothing happen: say why (test, 7 October)
+            + "Gebeurt er niets? \(CardInbox.newerAppText)"
     }
 }
 

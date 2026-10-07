@@ -18,6 +18,7 @@ import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.SystemBarStyle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -187,8 +188,24 @@ class MainActivity : AppCompatActivity() {
                 return@launch
             }
             val snapshot = withContext(Dispatchers.Default) { CardInbox.snapshot(from = link) }
-            if (snapshot != null) cardInbox.accept(snapshot)
+            if (snapshot != null) {
+                cardInbox.accept(snapshot)
+            } else if (CardInbox.needsNewerApp(link)) {
+                showNewerAppNeeded()
+            }
         }
+    }
+
+    /** A link of ours this version cannot open (made by a newer app): say so instead of nothing */
+    private fun showNewerAppNeeded() {
+        AlertDialog.Builder(this, androidx.appcompat.R.style.Theme_AppCompat_Dialog_Alert)
+            .setTitle("Link niet te openen")
+            .setMessage(CardInbox.newerAppText + " Werk de app bij in Google Play.")
+            .setPositiveButton("Naar Google Play") { _, _ ->
+                startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(CardInbox.playStoreLink)))
+            }
+            .setNegativeButton("Later", null)
+            .show()
     }
 
     /** Identifies this install as the awarding coach, like iOS' `BadgeAwarder.installId` */

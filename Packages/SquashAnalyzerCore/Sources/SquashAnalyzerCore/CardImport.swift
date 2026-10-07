@@ -108,6 +108,24 @@ public final class CardInbox {
         return TeamInvite.parse(trimmed)
     }
 
+    /// Shown when a link of ours cannot be opened by this version (Gerd-Jan's wording)
+    public static let newerAppText = "Je hebt een nieuwere (test)versie van SquashAnalyzer nodig."
+    public static let appStoreLink = "https://apps.apple.com/app/squash-analyzer/id6758676921"
+    public static let playStoreLink = "https://play.google.com/store/apps/details?id=com.squashanalyzer.android"
+
+    /// A link to squashanalyzer.com (or `squashanalyzer://`) that this version
+    /// cannot read: most likely made by a newer app, so the screen asks to
+    /// update instead of doing nothing (an older app used to stay silent)
+    public static func needsNewerApp(_ link: String) -> Bool {
+        if invite(from: link) != nil || snapshot(from: link) != nil { return false }
+        let trimmed = link.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.lowercased().hasPrefix("squashanalyzer://") { return true }
+        guard let url = URL(string: trimmed), let host = url.host?.lowercased(),
+              host == "squashanalyzer.com" || host == "www.squashanalyzer.com" else { return false }
+        // A team zip under /teams/ is a download, never something for the app to open
+        return !url.path.hasPrefix("/teams/")
+    }
+
     public func acceptTeam(_ invite: TeamInvite) {
         pendingTeam = invite
     }

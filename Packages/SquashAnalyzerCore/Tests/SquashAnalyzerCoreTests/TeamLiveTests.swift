@@ -117,6 +117,21 @@ final class TeamLiveTests: XCTestCase {
         XCTAssertNil(inbox.pendingTeam)
     }
 
+    func testAnUnknownLinkOfOursAsksForANewerApp() {
+        let code = "abcdefghij12.abcdefghijklmnopqrstu"
+        // What this version opens itself is no reason to update
+        XCTAssertFalse(CardInbox.needsNewerApp("https://squashanalyzer.com/team/#" + code))
+        XCTAssertFalse(CardInbox.needsNewerApp("squashanalyzer://team#" + code))
+        // A link of ours it cannot read: made by a newer app
+        XCTAssertTrue(CardInbox.needsNewerApp("https://squashanalyzer.com/team/#" + "kapot"))
+        XCTAssertTrue(CardInbox.needsNewerApp("https://www.squashanalyzer.com/iets-nieuws/#abc"))
+        XCTAssertTrue(CardInbox.needsNewerApp("squashanalyzer://iets-nieuws#abc"))
+        // Not ours, or a team zip download: no message
+        XCTAssertFalse(CardInbox.needsNewerApp("https://example.com/team/#" + code))
+        XCTAssertFalse(CardInbox.needsNewerApp("https://squashanalyzer.com/teams/1eba617d117e5759a04ac8b8/team.zip"))
+        XCTAssertFalse(CardInbox.needsNewerApp("geen link"))
+    }
+
     func testALinkInASentenceMayEndInPunctuation() {
         let code = "abcdefghij12.abcdefghijklmnopqrstu"
         XCTAssertEqual(TeamInvite.parse("Doe mee: https://squashanalyzer.com/team/#" + code + ".")?.code, code)

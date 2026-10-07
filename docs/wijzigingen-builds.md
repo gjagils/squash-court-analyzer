@@ -14,6 +14,21 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   beginscherm (iOS en Android, `HomeMenuHeader`) en in de hero van de website
   staat "Squash" in de tekstkleur en "Analyzer" in het merkoranje (#F28C26).
   Website gepubliceerd op 7 oktober 2026.
+- **Competitielink met een oudere app (testmelding 7 oktober 2026)**: wie een
+  uitnodiging kreeg met een app van vóór 3.0 zag niets gebeuren (Android: de
+  webpagina, waarna "Open in SquashAnalyzer" niets deed). Een oude app kunnen we
+  niet meer veranderen; nu:
+  - de uitnodigingstekst eindigt op "Gebeurt er niets? Je hebt een nieuwere
+    (test)versie van SquashAnalyzer nodig." (werkt ook voor oude apps);
+  - de webpagina `/team/` zegt hetzelfde, met Google Play voor Android
+    (alleen website, gepubliceerd 7 oktober);
+  - de app zelf meldt voortaan bij een link van squashanalyzer.com die hij niet
+    kan openen "Link niet te openen" met die tekst en een knop naar de App
+    Store of Google Play, in plaats van niets te doen (`CardInbox.needsNewerApp`).
+    Dat helpt vanaf deze versie bij elk volgend nieuw linktype.
+
+  Releasenote: *Opent een link van een teamgenoot niet? Dan zegt de app nu dat
+  je een nieuwere versie nodig hebt, in plaats van niets te doen.*
 - **Technische opruiming (7 oktober 2026, niet voor de releasenotes)**: de
   restpunten "Laag" uit `docs/backlog-code-analyse-2026-10-06.md`. Spelersfoto's
   op Android één keer decoderen (`PhotoBitmapCache`); het Competitie-bestand

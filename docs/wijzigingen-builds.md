@@ -13,7 +13,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 - **Woordmerk zoals op de sticker** (7 oktober 2026): in de kop van het
   beginscherm (iOS en Android, `HomeMenuHeader`) en in de hero van de website
   staat "Squash" in de tekstkleur en "Analyzer" in het merkoranje (#F28C26).
-  Website nog niet gepubliceerd met deze wijziging.
+  Website gepubliceerd op 7 oktober 2026.
 
 ## 3.0 build 1, 6 oktober 2026 (geüpload)
 

@@ -27,6 +27,9 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
     Store of Google Play, in plaats van niets te doen (`CardInbox.needsNewerApp`).
     Dat helpt vanaf deze versie bij elk volgend nieuw linktype.
 
+  Op de iPhone staat de hele app nu op donker (`UIUserInterfaceStyle` = Dark):
+  in lichte modus waren systeemmeldingen en keuzemenu's wit, zoals deze melding.
+
   Releasenote: *Opent een link van een teamgenoot niet? Dan zegt de app nu dat
   je een nieuwere versie nodig hebt, in plaats van niets te doen.*
 - **Technische opruiming (7 oktober 2026, niet voor de releasenotes)**: de

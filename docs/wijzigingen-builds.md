@@ -237,6 +237,37 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       bij teamimport uit zip of via link. Uitwerking en acceptatiecriteria:
       [plan-squashlevels-profiel.md](plan-squashlevels-profiel.md).
 
+- [ ] **Spelers van Mijn team in één keer importeren** (idee Gerd-Jan,
+      7 oktober, nog niet gebouwd). Wie bij Instellingen de SBN-teamlink heeft
+      ingevuld, krijgt bij Spelers een knop "Importeer Mijn team" die alle
+      spelers van de teampagina als opgeslagen speler toevoegt. De app leest
+      de spelers al in: `LeagueTeamPage.team` vult `LeagueTeamSnapshot.players`
+      (`LeaguePlayer`: naam, SBN-spelerpad, record) in
+      `Packages/SquashAnalyzerCore/Sources/SquashAnalyzerCore/LeagueTeam.swift`.
+      Te doen: een lijst met vinkjes (iedereen standaard aan, jezelf herkennen),
+      matchen op naam zoals de team-zip-import (hoofdletterongevoelig, bijwerken
+      in plaats van dubbel), het SBN-spelerpad per speler bewaren voor latere
+      koppelingen (opstelling E1–E4, SBN-vergelijking), geen foto's (die staan
+      niet op de SBN-pagina). Open vragen: ook invallers uit andere teams, en
+      wat doen met spelers die van de teampagina verdwijnen (laten staan).
+
+- [ ] **Meldingen bij live meekijken** (idee Gerd-Jan, 7 oktober, nog niet
+      uitgezocht). Wie een live wedstrijd of live teamwedstrijd volgt, krijgt
+      een melding op de telefoon bij een gewonnen game, een gewonnen partij en
+      de einduitslag van de teamwedstrijd. Nu is er geen pushinfrastructuur:
+      kijkers volgen via de webpagina op `live.squashanalyzer.com` (SSE), de
+      app heeft geen push-registratie meer. Twee routes om uit te zoeken:
+      1. **Web Push op de kijkpagina** (knop "Meldingen aan"): werkt zonder
+         app-wijziging, de Worker stuurt de melding (VAPID-sleutels, abonnement
+         per sessie in de Durable Object). Beperking: op iPhone alleen als de
+         pagina aan het beginscherm is toegevoegd (iOS 16.4+).
+      2. **Pushmeldingen in de app** (APNs en Firebase Cloud Messaging): een
+         "Volg"-knop in de app, de Worker stuurt bij een gamewissel. Meer werk
+         (sleutels, entitlements, privacylabel, Skip/Android-kant), wel de
+         beste ervaring.
+      Aandachtspunten: alleen melden bij game/partij/einduitslag (niet per
+      punt), abonnement verloopt met de sessie, en de privacytekst bijwerken.
+
 - [ ] **Testbuilds vanuit de cloud (GitHub Actions): keuzes die nog gemaakt
       moeten worden.** Een cloudsessie kan geen Xcode draaien, GitHub wel (de
       repo is publiek, dus de macOS-runners zijn gratis). Het idee uit een

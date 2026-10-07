@@ -227,7 +227,7 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
 ## Backlog
 
 - [ ] **SquashLevels-profiel bij een speler** (afgesproken 6 oktober,
-      nog niet gebouwd; build nog te bepalen). Bij Spelers een optioneel
+      nog niet gebouwd; kandidaat voor de definitieve 3.0). Bij Spelers een optioneel
       speler-ID of een profiellink per opgeslagen speler vastleggen (niet in
       algemene Instellingen), met **Bekijk op SquashLevels**
       het profiel openen in de standaardbrowser. Geen automatische
@@ -273,7 +273,7 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       punt), abonnement verloopt met de sessie, en de privacytekst bijwerken.
 
 - [ ] **Testbuilds vanuit de cloud (GitHub Actions): keuzes die nog gemaakt
-      moeten worden.** Een cloudsessie kan geen Xcode draaien, GitHub wel (de
+      moeten worden** (voor later, niet voor 3.0; besloten 7 oktober). Een cloudsessie kan geen Xcode draaien, GitHub wel (de
       repo is publiek, dus de macOS-runners zijn gratis). Het idee uit een
       cloudsessie van 5 oktober (verwijderde branch `claude/great-pasteur-eyskxy`,
       commits `46a8607` en `9b55182`, besluit Gerd-Jan 6 oktober: niet
@@ -336,10 +336,10 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       (tegenstander in geen game boven 5), Clubicoon (10 verschillende
       tegenstanders), Rivalen (10× dezelfde tegenstander), Hand-out held (5 rally's
       op rij bij serve van de ander). Gebouwd voor de volgende build.
-- [ ] Later, met de competitiekoppeling: een eigen badgecategorie voor
-      competitiewedstrijden (o.a. Teamspeler).
+- [ ] **Badgecategorie voor competitiewedstrijden** (o.a. Teamspeler;
+      kandidaat voor de definitieve 3.0).
 - [ ] **Spelersprofiel met trend over wedstrijden** (voorgesteld 5 oktober,
-      kandidaat voor de build na de badges).
+      kandidaat voor de definitieve 3.0).
       *Waarom:* de analyse kijkt nu per wedstrijd (dashboard, heatmap, slagen,
       soorten fouten); een coach ziet niet of een speler vooruitgaat. Het
       profiel laat dat zien over de laatste wedstrijden, zonder nieuwe invoer.
@@ -384,6 +384,15 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       zonder punttypes en met "later instappen"), het scherm op iPhone en
       Android gelijk, standaard en 1,3× tekst gecontroleerd, en een regel in de
       handleiding op de website.
+
+Vroege ideeën, nog niet uitgewerkt en zonder build (7 oktober overgenomen uit
+`stand-van-zaken-2026-10-06.md` en `buildplanning-testperiode.md`):
+
+- [ ] Voortgang naar de volgende badgetrede tonen (bijv. "nog 2 tot zilver").
+- [ ] Onderlinge stand bij Kies speler.
+- [ ] Vergelijken met de officiële SBN-uitslag van een teamwedstrijd.
+- [ ] Trainingsmodus.
+- [ ] Clubranglijst.
 
 ## iOS 2.2 build 17 en Android 0.4 (4), 3 oktober 2026 (geüpload)
 

@@ -23,11 +23,11 @@ enum AutomaticBackup {
     }
 
     /// Called when the app goes to the background. The data is gathered on
-    /// the main thread (SwiftData), the file is written off it, with a
-    /// background task so iOS gives it time to finish.
+    /// the main thread (SwiftData); finding the iCloud folder (which can take
+    /// a moment) and writing the file happen off it, with a background task
+    /// so iOS gives it time to finish.
     static func runIfDue(context: ModelContext, now: Date = Date()) {
-        guard isEnabled, AutoBackupPlan.isDue(lastBackup: lastBackup, now: now),
-              let dir = ExportService.iCloudDirectory else { return }
+        guard isEnabled, AutoBackupPlan.isDue(lastBackup: lastBackup, now: now) else { return }
         let data: Data
         do {
             data = try ExportService.exportFullBackup(
@@ -47,7 +47,7 @@ enum AutomaticBackup {
             taskId = .invalid
         }
         Task.detached(priority: .utility) {
-            let written = (try? ExportService.writeBackup(data, to: dir, now: now)) != nil
+            let written = ExportService.iCloudDirectory.flatMap { dir in try? ExportService.writeBackup(data, to: dir, now: now) } != nil
             await MainActor.run {
                 // No iCloud Drive, or writing failed: tried again the next time
                 if written { UserDefaults.standard.set(now, forKey: lastKey) }

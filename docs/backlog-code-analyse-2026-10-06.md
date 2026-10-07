@@ -99,13 +99,26 @@ badgeregels, kosten) is niet zonder Gerd-Jan doorgevoerd.
 - [-] `RefereeSessionView.close()` met `onExit()` én `dismiss()`: idempotent, geen waarneembare fout.
 - [-] `KeystoreAPIKeyStore` (Android) wist bewust eerst: een mislukte schrijfactie moet
       "niet ingesteld" geven in plaats van een oude sleutel te houden (gedocumenteerd).
-- [ ] `PlayerPhotoView` decodeert op Android bij elke recompose: `remember` brak de Skip-build
-      (zie `docs/skip-valkuilen.md`); niet opgelost.
-- [ ] `JSONFileTeamMatchStore`/`TeamBackup.attach` doen synchrone IO op de main thread
-      (kleine bestanden); `saver.onExit` houdt de view vast; `AutomaticBackup` roept
-      `url(forUbiquityContainerIdentifier:)` op de main thread aan; `contentShape` op Android;
-      Worker `release` na `deleteAll`; Node-reserve `X-Forwarded-For`; payload-`version` = 2;
-      twee rauwe kleuren; `RefereeMatch` klok. Klein of reserve; niet gedaan.
+- [x] `PlayerPhotoView` decodeert op Android niet meer bij elke recompose: `PhotoBitmapCache`
+      (64 foto's, sleutel op inhoud omdat Skip's `Data` op array-identiteit hasht; zonder
+      `remember`). Opgelost 7 oktober.
+- [x] Competitie-bestand van de main thread (7 oktober): iOS `BackgroundTeamMatchStore` (een
+      actor, één bewerking tegelijk), Android `BackgroundTeamMatchStore.kt` (`Dispatchers.IO`
+      met `Mutex`); de logica staat in `TeamMatchFile.newestFirst/upsert/remove`.
+      `TeamBackup.attach` op Android in `Dispatchers.IO`. Op iOS leest de export het bestand
+      nog op de main thread, samen met het ophalen uit SwiftData (klein; bewust zo).
+- [x] `saver.onExit` wordt bij `onDisappear` losgelaten (Coach en Scheidsrechter).
+- [x] `AutomaticBackup` en "Nu naar iCloud" zoeken de iCloud-map buiten de main thread.
+- [x] Worker: `release` vóór `deleteAll`, in een `try` (een mislukte release verloopt vanzelf).
+- [x] Payload-`version` = 4 zoals de envelope (iOS en Android schrijven altijd formaat 4).
+- [x] Losse systeemkleuren (`.green`, `Color.red`) vervangen door `SharedColors.positive` en
+      `warmRed`; `scripts/lint.sh` bewaakt het nu.
+- [x] `RefereeMatch`: de eerste game begint op `matchStartedAt` (injecteerbaar), niet op een
+      tweede `Date()`.
+- [-] `RefereeInProgressStore.load` zette een beschadigd bestand al opzij (was al gedaan).
+- [-] Node-reserve `X-Forwarded-For`: bewust laten staan; de README beschrijft ook een opzet
+      achter een gewone proxy (Nginx), die alleen die header meegeeft. Alleen met `TRUST_PROXY`.
+- [-] `contentShape` is in SkipUI een no-op; op Android maakt `clickable` de hele rij al tikbaar.
 
 ## Cloudflare en CI
 

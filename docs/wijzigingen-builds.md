@@ -14,6 +14,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   beginscherm (iOS en Android, `HomeMenuHeader`) en in de hero van de website
   staat "Squash" in de tekstkleur en "Analyzer" in het merkoranje (#F28C26).
   Website gepubliceerd op 7 oktober 2026.
+- **Technische opruiming (7 oktober 2026, niet voor de releasenotes)**: de
+  restpunten "Laag" uit `docs/backlog-code-analyse-2026-10-06.md`. Spelersfoto's
+  op Android één keer decoderen (`PhotoBitmapCache`); het Competitie-bestand
+  buiten de main thread en één bewerking tegelijk (iOS en Android
+  `BackgroundTeamMatchStore`); iCloud-map zoeken buiten de main thread; geen
+  lek meer via `saver.onExit`; payload-`version` 4; losse systeemkleuren weg
+  (plus lintregel); Worker geeft de plek vrij vóór het opruimen. Gebruikers
+  merken hooguit dat lijsten met foto's op Android vlotter scrollen.
 
 ## 3.0 build 1, 6 oktober 2026 (geüpload)
 

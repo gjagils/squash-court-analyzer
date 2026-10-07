@@ -93,7 +93,8 @@ public class RefereeMatch: Identifiable {
         self.currentGameNumber = 1 + self.player1GamesBefore + self.player2GamesBefore
         self.currentServer = startingServer
         self.matchStartedAt = matchStartedAt
-        self.gameStartedAt = Date()
+        // The first game starts with the match: one injectable moment, not a second Date()
+        self.gameStartedAt = matchStartedAt
     }
 
     public var player1GamesWon: Int { player1GamesBefore + completedGames.filter { $0.winner == .player1 }.count }

@@ -71,9 +71,13 @@ export class ViewerSession extends DurableObject {
       try { controller.close(); } catch { /* already gone */ }
     }
     this.viewers.clear();
+    // Free the place first: a failing release must not stop the clean-up (a
+    // lost entry expires in the limiter after the idle time anyway)
+    try {
+      await this.env.LIMITER.get(this.env.LIMITER.idFromName('global')).release(this.limiterKey(id));
+    } catch { /* expires on its own */ }
     await this.ctx.storage.deleteAlarm();
     await this.ctx.storage.deleteAll();
-    await this.env.LIMITER.get(this.env.LIMITER.idFromName('global')).release(this.limiterKey(id));
   }
 
   /** Nobody updated the session for IDLE_MINUTES: a lost phone, or the evening is long over */

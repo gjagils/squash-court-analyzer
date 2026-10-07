@@ -190,8 +190,9 @@ enum ExportService {
         let matchData = matches.map { matchExportData(from: $0) }
         let gameData = standaloneGames.map { gameExportData(from: $0) }
         let refereeData = refereeMatches.map { refereeBackupData(from: $0) }
+        // The payload says the same version as the envelope: the apps always write format 4
         let backup = FullBackup(
-            version: 2,
+            version: 4,
             backupDate: Date(),
             players: playerData,
             matches: matchData,

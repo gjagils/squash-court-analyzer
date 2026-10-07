@@ -30,6 +30,7 @@ enum AppColors {
     static let coolBlue = SharedColors.coolBlue
     static let coolIndigo = SharedColors.coolIndigo
     static let warmRed = SharedColors.warmRed
+    static let positive = SharedColors.positive
 
     /// Player 1 orange, player 2 steel blue
     static func player(_ player: Player) -> Color {

@@ -1,6 +1,8 @@
 package com.squashanalyzer.android.data
 
 import androidx.room.withTransaction
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import skip.foundation.Date
 import skip.foundation.URL
@@ -53,14 +55,15 @@ class RoomBackupStore(private val db: AppDatabase, private val teamDirectory: UR
             )
         }
         val referee = refereeMatches.history().map(::exportReferee)
+        // The payload says the same version as the envelope: the apps always write format 4
         val backup = FullBackup(
-            version = 2, backupDate = Date(), players = SwiftArray(players),
+            version = 4, backupDate = Date(), players = SwiftArray(players),
             matches = SwiftArray(matches.all().map(::export)), standaloneGames = SwiftArray(),
             badgeAwards = if (awards.isEmpty()) null else SwiftArray(awards),
             refereeMatches = SwiftArray(referee),
         )
-        // Competitie: team matches and the "In mijn team" flags travel along (format 4)
-        return TeamBackup.attach(backup, directory = teamDirectory)
+        // Competitie: team matches and the "In mijn team" flags travel along (format 4); the file is read off the main thread
+        return withContext(Dispatchers.IO) { TeamBackup.attach(backup, directory = teamDirectory) }
     }
 
     override suspend fun restore(backup: FullBackup, replacing: Boolean): BackupCounts {

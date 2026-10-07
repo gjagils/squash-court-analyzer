@@ -28,6 +28,9 @@ report "Image(systemName:) only via AppSymbol in the shared UI" "$hits"
 hits=$(grep -rn 'Color(red:' Packages/SquashAnalyzerUI/Sources SquashAnalyzer --include='*.swift' \
     | grep -v 'SharedColors.swift')
 report "Color(red:…) only in SharedColors" "$hits"
+hits=$(grep -rnE '(Color)?\.(green|red|blue|yellow|orange|purple|pink)\b' Packages/SquashAnalyzerUI/Sources SquashAnalyzer --include='*.swift' \
+    | grep -E 'Color\.(green|red|blue|yellow|orange|purple|pink)\b|(foregroundColor|fill|stroke|tint|background)\(\.(green|red|blue|yellow|orange|purple|pink)\b|[?:] \.(green|red|blue|yellow|orange|purple|pink)\b')
+report "No system colours (.green, Color.red, …) outside SharedColors" "$hits"
 
 # 3. No keypath literals in Core: Skip cannot transpile them (use closures)
 hits=$(grep -rnE '\\\.[a-zA-Z]' Packages/SquashAnalyzerCore/Sources --include='*.swift' | grep -vE '^\S+:\s*//')

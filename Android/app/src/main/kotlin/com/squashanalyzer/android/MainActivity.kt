@@ -30,7 +30,6 @@ import skip.ui.PresentationRoot
 import skip.ui.UIApplication
 import squash.analyzer.core.CardInbox
 import squash.analyzer.core.LeagueTeamFetcher
-import squash.analyzer.core.JSONFileTeamMatchStore
 import skip.foundation.URL
 import squash.analyzer.core.AICoachClient
 import squash.analyzer.core.LiveShare
@@ -40,6 +39,7 @@ import squash.analyzer.ui.ResultImageSharing
 import squash.analyzer.ui.BackupContext
 import com.squashanalyzer.android.backup.ActivityBackupFiles
 import com.squashanalyzer.android.backup.AutoBackup
+import com.squashanalyzer.android.data.BackgroundTeamMatchStore
 import com.squashanalyzer.android.data.RoomBackupStore
 import com.squashanalyzer.android.aicoach.HttpAICoachTransport
 import com.squashanalyzer.android.live.HttpLiveTransport
@@ -90,9 +90,9 @@ class MainActivity : AppCompatActivity() {
         val refereeMatchStore = RoomRefereeMatchStore(refereeMatchDataStore, badgeAwardStore)
         val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore, matchStore, refereeMatchStore, badgeAwardStore)
         val leagueTeamFetcher = LeagueTeamFetcher(loader = HttpLeaguePageLoader())
-        // Competitie: team matches in one JSON file in the app's files directory (shared Core store)
+        // Competitie: team matches in one JSON file in the app's files directory (Core's file, off the main thread)
         val teamDirectory = URL(fileURLWithPath = filesDir.absolutePath, isDirectory = true)
-        val teamMatchStore = JSONFileTeamMatchStore(directory = teamDirectory)
+        val teamMatchStore = BackgroundTeamMatchStore(directory = teamDirectory)
         // Registers activity-result launchers, so it must exist before the activity starts
         val appVersion = "Android " + (packageManager.getPackageInfo(packageName, 0).versionName ?: "?")
         val backupStore = RoomBackupStore(db, teamDirectory)

@@ -67,6 +67,28 @@ public enum TeamMatchFile {
         let data = try encoder.encode(TeamMatchEnvelope(version: TeamMatchFile.formatVersion, matches: matches))
         try data.write(to: url, options: Data.WritingOptions.atomic)
     }
+
+    /// All matches, newest first
+    public static func newestFirst(directory: URL) throws -> [TeamMatch] {
+        return try load(in: directory).sorted(by: { a, b in a.date > b.date })
+    }
+
+    /// Replaces the match with the same id, or adds it
+    public static func upsert(_ match: TeamMatch, directory: URL) throws {
+        var all = try load(in: directory)
+        var replaced = false
+        for index in 0..<all.count where all[index].id == match.id {
+            all[index] = match
+            replaced = true
+        }
+        if !replaced { all.append(match) }
+        try write(all, in: directory)
+    }
+
+    public static func remove(id: UUID, directory: URL) throws {
+        let kept = try load(in: directory).filter { match in match.id != id }
+        try write(kept, in: directory)
+    }
 }
 
 /// One JSON file with all team matches, used on iOS (Application Support)
@@ -83,22 +105,14 @@ public final class JSONFileTeamMatchStore: TeamMatchStore {
     }
 
     public func loadAll() async throws -> [TeamMatch] {
-        return try TeamMatchFile.load(in: directory).sorted(by: { a, b in a.date > b.date })
+        return try TeamMatchFile.newestFirst(directory: directory)
     }
 
     public func save(_ match: TeamMatch) async throws {
-        var all = try TeamMatchFile.load(in: directory)
-        var replaced = false
-        for index in 0..<all.count where all[index].id == match.id {
-            all[index] = match
-            replaced = true
-        }
-        if !replaced { all.append(match) }
-        try TeamMatchFile.write(all, in: directory)
+        try TeamMatchFile.upsert(match, directory: directory)
     }
 
     public func delete(id: UUID) async throws {
-        let kept = try TeamMatchFile.load(in: directory).filter { match in match.id != id }
-        try TeamMatchFile.write(kept, in: directory)
+        try TeamMatchFile.remove(id: id, directory: directory)
     }
 }

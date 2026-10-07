@@ -94,7 +94,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            if let teamSaveMessage { Text(teamSaveMessage).font(AppFonts.caption(12)).foregroundColor(teamSaveMessage.hasPrefix("Teamlink") ? .green : AppColors.warmRed) }
+            if let teamSaveMessage { Text(teamSaveMessage).font(AppFonts.caption(12)).foregroundColor(teamSaveMessage.hasPrefix("Teamlink") ? AppColors.positive : AppColors.warmRed) }
         }.padding().background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03))).overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
     }
 
@@ -301,7 +301,7 @@ struct SettingsView: View {
             // Status indicator
             HStack(spacing: 8) {
                 Circle()
-                    .fill(APIKeyManager.shared.hasOpenAIKey ? Color.green : Color.red)
+                    .fill(APIKeyManager.shared.hasOpenAIKey ? AppColors.positive : AppColors.warmRed)
                     .frame(width: 8, height: 8)
                 Text(APIKeyManager.shared.hasOpenAIKey ? "API key geconfigureerd" : "Geen API key ingesteld")
                     .font(AppFonts.caption(12))
@@ -496,13 +496,29 @@ struct BackupActionsView: View {
             refereeMatches: try modelContext.fetch(FetchDescriptor<SavedRefereeMatch>()))
     }
 
+    /// The data is gathered here (SwiftData); finding the iCloud folder and
+    /// writing happen off the main thread
     private func saveToiCloud() {
+        let data: Data
         do {
-            guard let dir = ExportService.iCloudDirectory else { throw ExportService.iCloudError.unavailable }
-            let url = try ExportService.writeBackup(try backupData(), to: dir)
-            show("Back-up opgeslagen!", "'\(url.lastPathComponent)' staat in iCloud Drive, in de Bestanden-app onder iCloud Drive → Squash Analyzer.")
+            data = try backupData()
         } catch {
             show("Back-up mislukt", error.localizedDescription)
+            return
+        }
+        Task {
+            let result: Result<URL, Error> = await Task.detached(priority: .userInitiated) {
+                Result {
+                    guard let dir = ExportService.iCloudDirectory else { throw ExportService.iCloudError.unavailable }
+                    return try ExportService.writeBackup(data, to: dir)
+                }
+            }.value
+            switch result {
+            case .success(let url):
+                show("Back-up opgeslagen!", "'\(url.lastPathComponent)' staat in iCloud Drive, in de Bestanden-app onder iCloud Drive → Squash Analyzer.")
+            case .failure(let error):
+                show("Back-up mislukt", error.localizedDescription)
+            }
         }
     }
 

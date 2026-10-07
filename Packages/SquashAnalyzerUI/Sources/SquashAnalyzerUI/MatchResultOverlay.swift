@@ -108,7 +108,7 @@ public struct MatchResultOverlay: View {
                 if let note = result.savedNote {
                     HStack(spacing: 6) {
                         Circle()
-                            .fill(Color.green)
+                            .fill(SharedColors.positive)
                             .frame(width: 8, height: 8)
                         Text(note)
                             .font(.system(size: 11, weight: .medium, design: .rounded))

@@ -111,6 +111,8 @@ public struct CoachSessionView: View {
             photos = await PlayerPhotos.load(photoStore: photoStore, playerStore: playerStore)
             if match == nil && pending == nil && !showingSetup { await load() }
         }
+        // The closure holds this view (and so the saver itself): let go once it is gone
+        .onDisappear { saver.onExit = {} }
         .sheet(isPresented: $showingHistory) {
             if let historyStore {
                 NavigationStack {

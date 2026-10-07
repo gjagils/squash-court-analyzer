@@ -14,7 +14,35 @@ import SquashAnalyzerUI
 /// (shared Core store, as on Android); the backup reads the same file
 enum TeamMatchStorage {
     static let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-    @MainActor static let store = JSONFileTeamMatchStore(directory: TeamMatchStorage.directory)
+    @MainActor static let store = BackgroundTeamMatchStore(directory: TeamMatchStorage.directory)
+}
+
+/// Reads and writes the team-match file off the main thread, one request at a
+/// time, so two quick saves cannot overwrite each other
+private actor TeamMatchFileIO {
+    let directory: URL
+
+    init(directory: URL) {
+        self.directory = directory
+    }
+
+    func loadAll() throws -> [TeamMatch] { try TeamMatchFile.newestFirst(directory: directory) }
+    func save(_ match: TeamMatch) throws { try TeamMatchFile.upsert(match, directory: directory) }
+    func delete(id: UUID) throws { try TeamMatchFile.remove(id: id, directory: directory) }
+}
+
+/// The shared screens' `TeamMatchStore` on iOS (Android has its own on Dispatchers.IO)
+@MainActor
+final class BackgroundTeamMatchStore: TeamMatchStore {
+    private let io: TeamMatchFileIO
+
+    init(directory: URL) {
+        io = TeamMatchFileIO(directory: directory)
+    }
+
+    func loadAll() async throws -> [TeamMatch] { try await io.loadAll() }
+    func save(_ match: TeamMatch) async throws { try await io.save(match) }
+    func delete(id: UUID) async throws { try await io.delete(id: id) }
 }
 
 /// The system share sheet from anywhere (the shared screens give a text or a

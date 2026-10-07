@@ -141,6 +141,8 @@ nav {
   line-height: 1.1;
 }
 
+.brand-accent { color: var(--orange); }
+
 .hero p {
   font-size: 18px;
   color: var(--text-2);

@@ -28,11 +28,14 @@ public struct HomeMenuHeader: View {
                 .resizable().scaledToFit().frame(width: 58, height: 58)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
-                Text("SquashAnalyzer")
-                    .font(.system(size: 23, weight: .bold, design: .rounded))
-                    .foregroundColor(SharedColors.textPrimary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
+                // Wordmark as on the sticker: "Analyzer" in brand orange.
+                HStack(spacing: 0) {
+                    Text("Squash").foregroundColor(SharedColors.textPrimary)
+                    Text("Analyzer").foregroundColor(SharedColors.accent)
+                }
+                .font(.system(size: 23, weight: .bold, design: .rounded))
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
                 Text("Jouw spel scherp in beeld. Voor jou en je team.")
                     .font(.system(size: 12))
                     .foregroundColor(SharedColors.textSecondary)

@@ -8,6 +8,13 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
+## Volgende build (na 3.0 build 1)
+
+- **Woordmerk zoals op de sticker** (7 oktober 2026): in de kop van het
+  beginscherm (iOS en Android, `HomeMenuHeader`) en in de hero van de website
+  staat "Squash" in de tekstkleur en "Analyzer" in het merkoranje (#F28C26).
+  Website nog niet gepubliceerd met deze wijziging.
+
 ## 3.0 build 1, 6 oktober 2026 (geüpload)
 
 Nieuwe nummering sinds 6 oktober 2026 (`docs/opleveren-en-hosting.md`,

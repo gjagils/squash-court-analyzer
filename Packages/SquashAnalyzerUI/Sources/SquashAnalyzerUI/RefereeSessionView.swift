@@ -208,6 +208,7 @@ public struct RefereeSessionView: View {
         saver.save(exit: exit) { try await store.save(value) }
     }
 
+    /// Both on purpose and idempotent: the parent closes the screen, dismiss closes the presentation (docs/bewuste-keuzes.md)
     @MainActor private func close() {
         onExit()
         dismiss()

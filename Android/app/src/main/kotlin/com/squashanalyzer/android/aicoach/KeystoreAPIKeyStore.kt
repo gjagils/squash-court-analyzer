@@ -26,6 +26,7 @@ class KeystoreAPIKeyStore(context: Context) : APIKeyStore {
     override var openAIAPIKey: String?
         get() = synchronized(LOCK) { read() }
         set(value) = synchronized(LOCK) {
+            // A failed write empties the key on purpose ("not set", not a stale old key): docs/bewuste-keuzes.md
             if (value.isNullOrEmpty() || !write(value)) prefs.edit().remove(KEY).apply()
         }
 

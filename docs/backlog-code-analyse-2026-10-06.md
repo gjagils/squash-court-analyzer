@@ -1,5 +1,8 @@
 # Backlog uit code-analyse van 6 oktober 2026
 
+> Wat bewust niet is gedaan (status `[-]`) staat met de reden ook in
+> [bewuste-keuzes.md](bewuste-keuzes.md); een nieuwe analyse leest dat eerst.
+
 Bron: `docs/code-analyse-2026-10-06.md` (stand `19fabb8`). Hier staat per punt wat
 er mee gedaan is (stand: 6 oktober 2026, na de verwerking). Status: `[x]` opgelost
 met test of controle, `[~]` deels of anders opgelost (met uitleg), `[ ]` bewust

@@ -12,6 +12,7 @@ public struct RefereeMatchSnapshot: Codable, Equatable, Sendable {
         public let isStroke: Bool
     }
 
+    /// Fixed JSON of the in-progress file. A separate shape on purpose, not merged with the other game types: see docs/bewuste-keuzes.md.
     public struct FinishedGame: Codable, Equatable, Sendable {
         public let id: UUID
         public let number: Int

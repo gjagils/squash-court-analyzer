@@ -224,6 +224,7 @@ function createLiveServer(options = {}) {
       // Cloudflare Tunnel: the visitor is in CF-Connecting-IP (also first in X-Forwarded-For)
       const cf = String(req.headers['cf-connecting-ip'] || '').trim();
       if (cf) return cf;
+      // On purpose (docs/bewuste-keuzes.md): a plain reverse proxy (README) only sends X-Forwarded-For
       const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
       if (forwarded) return forwarded;
     }

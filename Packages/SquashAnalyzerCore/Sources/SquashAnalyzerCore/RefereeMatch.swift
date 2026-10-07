@@ -26,7 +26,7 @@ public struct RefereePointEntry: Identifiable, Equatable {
     public var label: String { "\(score)\(side.shortCode)" }
 }
 
-/// Completed game result.
+/// Completed game result. A separate shape on purpose, not merged with the other game types: see docs/bewuste-keuzes.md.
 public struct CompletedRefereeGame: Identifiable {
     public let id: UUID
     public let number: Int

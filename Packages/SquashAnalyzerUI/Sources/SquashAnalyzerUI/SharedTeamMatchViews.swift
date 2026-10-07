@@ -580,6 +580,7 @@ public struct SharedTeamMatchView: View {
                 AppSymbol("chevron.right", size: 12, color: SharedColors.textMuted)
             }
             .padding(12)
+            // Apple only: a no-op in SkipUI, and Compose's clickable already covers the row (docs/bewuste-keuzes.md)
             #if !SKIP
             .contentShape(Rectangle())
             #endif

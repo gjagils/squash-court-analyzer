@@ -15,7 +15,7 @@ public struct PlayerRun: Equatable {
 /// and referee mode (`RefereeMatch.shareReport`) both build one, so the three
 /// layouts and the share sheet are the same in both modes.
 public struct MatchShareReport {
-    /// One game: finished, or the game on the board while a rally has been played
+    /// One game: finished, or the game on the board while a rally has been played. A separate shape on purpose, not merged with the other game types: see docs/bewuste-keuzes.md.
     public struct Game {
         public let number: Int
         public let player1Score: Int

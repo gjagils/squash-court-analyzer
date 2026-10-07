@@ -27,7 +27,8 @@ public struct SectionHeader: View {
     }
 }
 
-/// A small label in a tinted capsule: a coaching focus tag, "TEAM"
+/// A small label in a tinted capsule: a coaching focus tag. No ChoiceChip next to it on
+/// purpose: there is only one selectable chip (focus at Spelers), see docs/bewuste-keuzes.md.
 public struct TagChip: View {
     let text: String
     let color: Color

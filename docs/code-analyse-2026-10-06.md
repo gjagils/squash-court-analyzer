@@ -1,5 +1,9 @@
 # Code-analyse Squash Analyzer — 6 oktober 2026
 
+> Bijgewerkt 7 oktober 2026: wat hieruit bewust niet is overgenomen staat in
+> [bewuste-keuzes.md](bewuste-keuzes.md), de verwerking in
+> [backlog-code-analyse-2026-10-06.md](backlog-code-analyse-2026-10-06.md).
+
 Stand: `main` op `19fabb8` (branch `claude/squashanalyzer-code-analysis-d803be`). Vervolg op `docs/archief/code-analyse-2026-10-03.md` (stand `bfd68ec`): 96 commits, 556 bestanden, +22.358/−9.188 regels. Niets gewijzigd; dit document bevat alleen bevindingen en aanbevelingen. Regelnummers zijn van `19fabb8`.
 
 Wat er in deze periode bij kwam: de tickets T1–T25 uit de vorige analyse, badges met treden, Competitie (SBN-teamwedstrijden E1–E4), live teamwedstrijd, de verhuizing van NAS naar Cloudflare (live-Worker met Durable Objects, website als Worker met statische assets, CI en auto-deploy), en de iPhone op de gedeelde schermen.

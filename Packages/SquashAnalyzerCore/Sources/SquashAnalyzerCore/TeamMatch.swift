@@ -25,7 +25,7 @@ public enum TeamSide: String, Codable, CaseIterable, Sendable {
 
 /// One game of a partij, seen from our player. The points may be unknown
 /// (a partij filled in from memory, or a game before "Later instappen");
-/// who won is always known.
+/// who won is always known. A separate shape on purpose, not merged with the other game types: see docs/bewuste-keuzes.md.
 public struct TeamGame: Codable, Equatable, Sendable {
     public var ownPoints: Int?
     public var theirPoints: Int?

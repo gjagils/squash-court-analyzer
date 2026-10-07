@@ -110,6 +110,7 @@ public struct HomeMenuTiles: View {
             }
             .foregroundColor(SharedColors.textPrimary)
             .frame(minHeight: 50)
+            // Apple only: a no-op in SkipUI, and Compose's clickable already covers the row (docs/bewuste-keuzes.md)
             #if !SKIP
             .contentShape(Rectangle())
             #endif

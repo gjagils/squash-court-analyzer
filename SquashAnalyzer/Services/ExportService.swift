@@ -200,7 +200,8 @@ enum ExportService {
             badgeAwards: awardData.isEmpty ? nil : awardData,
             refereeMatches: refereeData
         )
-        // Competitie: team matches and the "In mijn team" flags travel along (format 4)
+        // Competitie: team matches and the "In mijn team" flags travel along (format 4). The few kB
+        // are read on the main thread with the SwiftData fetch, on purpose (docs/bewuste-keuzes.md)
         return try BackupCodec.encode(
             TeamBackup.attach(backup, directory: TeamMatchStorage.directory),
             appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"

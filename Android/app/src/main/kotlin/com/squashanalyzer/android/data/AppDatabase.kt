@@ -40,7 +40,7 @@ abstract class AppDatabase : RoomDatabase() {
         /** Unforced errors remember how they went wrong (Down, Out, Service, Via de grond); existing points: not recorded */
         val MIGRATION_8_9 = object : Migration(8, 9) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // Only when missing (tests that rewind the version of a current database already have it)
+                // Only when missing, on purpose (docs/bewuste-keuzes.md): tests that rewind the version of a current database already have it
                 val hasColumn = db.query("PRAGMA table_info(points)").use { cursor ->
                     val name = cursor.getColumnIndex("name")
                     var found = false
@@ -54,7 +54,7 @@ abstract class AppDatabase : RoomDatabase() {
         /** A referee match remembers who served the first rally of its game, so undo works after resuming */
         val MIGRATION_7_8 = object : Migration(7, 8) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // Only when missing (tests that rewind the version of a current database already have them)
+                // Only when missing, on purpose (docs/bewuste-keuzes.md): tests that rewind the version of a current database already have them
                 val columns = db.query("PRAGMA table_info(referee_matches)").use { cursor ->
                     val name = cursor.getColumnIndex("name")
                     val found = mutableSetOf<String>()
@@ -69,7 +69,7 @@ abstract class AppDatabase : RoomDatabase() {
         /** Points remember the volley switch ("Uit de lucht"); existing points were no volleys */
         val MIGRATION_6_7 = object : Migration(6, 7) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // Only when missing (tests that rewind the version of a current database already have it)
+                // Only when missing, on purpose (docs/bewuste-keuzes.md): tests that rewind the version of a current database already have it
                 val hasColumn = db.query("PRAGMA table_info(points)").use { cursor ->
                     val name = cursor.getColumnIndex("name")
                     var found = false

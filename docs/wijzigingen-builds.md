@@ -25,7 +25,8 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 - **Gedeelde bouwstenen (7 oktober 2026)**: lettertypes via `SharedFonts`,
   `SectionHeader`, `TagChip` en één gedeelde sluitknop. Zichtbaar voor de
   gebruiker: op Android hebben de sheets nu ook "✕ Sluiten"/"✕ Annuleren" zoals
-  op de iPhone, en "Annuleer" heet overal "Annuleren".
+  op de iPhone, en "Annuleer" heet overal "Annuleren" (ook de knop onder de
+  slagkeuze in het coachscherm, 7 oktober).
 - **Live meekijken: één verzendlaag (7 oktober 2026, techniek)**: `LiveShare` en
   `TeamLive` delen het versturen (`LiveSender.swift`); gedrag ongewijzigd.
 - **Tests (7 oktober 2026)**: Compose-schermtest voor Competitie

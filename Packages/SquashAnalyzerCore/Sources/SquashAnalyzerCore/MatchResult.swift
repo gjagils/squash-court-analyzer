@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - What the result card shows
 
-/// One finished game as a chip on the result card ("G2 11-8")
+/// One finished game as a chip on the result card ("G2 11-8"). A separate shape on purpose, not merged with the other game types: see docs/bewuste-keuzes.md.
 public struct ResultGame: Identifiable, Equatable {
     public let number: Int
     public let player1Score: Int

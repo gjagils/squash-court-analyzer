@@ -1,6 +1,6 @@
 import Foundation
 
-/// One finished game on a history card ("11-6" in the winner's colour)
+/// One finished game on a history card ("11-6" in the winner's colour). A separate shape on purpose, not merged with the other game types: see docs/bewuste-keuzes.md.
 public struct HistoryGameScore: Equatable, Sendable {
     public let player1Score: Int
     public let player2Score: Int

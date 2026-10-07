@@ -559,7 +559,7 @@ public struct CoachScoringView: View {
             game.clearSelection()
             volley = false
         }) {
-            Text("Annuleer")
+            Text("Annuleren")
                 .font(SharedFonts.system(13, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textMuted)
                 .padding(.vertical, 6)

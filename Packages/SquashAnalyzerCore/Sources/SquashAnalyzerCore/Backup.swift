@@ -45,6 +45,7 @@ public struct FullBackup: Codable, Equatable, Sendable {
 /// incomplete) match, the result per game. iOS only stores this much; Android
 /// also keeps the rallies, which the backup leaves out.
 public struct RefereeMatchBackupData: Codable, Equatable, Sendable {
+    /// Fixed JSON of the backup file. A separate shape on purpose, not merged with the other game types: see docs/bewuste-keuzes.md.
     public struct Game: Codable, Equatable, Sendable {
         public let number: Int
         public let player1Score: Int

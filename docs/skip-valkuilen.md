@@ -71,6 +71,13 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
 
 ## Build
 
+- **"Enum types cannot be instantiated" of "Cannot access 'constructor(rawValue…)'"** bij een
+  aanroep als `ServerSide(rawValue = …)` in gegenereerde Kotlin, terwijl de Swift niet
+  veranderd is: de Skip-uitvoer van het UI-pakket is half bijgewerkt (7 oktober, na alleen
+  commentaarwijzigingen). `gradlew clean` helpt niet. Wel:
+  `rm -rf Packages/SquashAnalyzerUI/.build/plugins/outputs/squashanalyzerui Packages/SquashAnalyzerUI/.build/gradle-skip-stamp`
+  en opnieuw bouwen.
+
 - **Gradle in een worktree** vraagt `JAVA_HOME` (JBR van Android Studio) en
   `ANDROID_HOME`; `skip test --project Packages/SquashAnalyzerCore` (niet `--package-path`).
 - **AGP 9 + KSP**: `android.builtInKotlin=false` en `android.newDsl=false` in

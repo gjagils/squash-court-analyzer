@@ -145,8 +145,13 @@ badgeregels, kosten) is niet zonder Gerd-Jan doorgevoerd.
       en opnieuw aanmaken in `LiveShare`, 401/404 per teampagina in `TeamLive`. Getest met de
       bestaande Live/TeamLive-tests (Swift en Kotlin) en op de emulator tegen de live-Worker
       (stand 3-1 kwam aan, Live stoppen gaf 404).
-- [ ] Eén "afgeronde game"-vorm in plaats van zeven: niet gedaan (raakt persistentie en
-      back-ups).
+- [-] Eén "afgeronde game"-vorm in plaats van zeven: bewust niet (7 oktober). Vijf van de
+      zeven hebben een eigen reden: `RefereeMatchSnapshot.FinishedGame`,
+      `RefereeMatchBackupData.Game` en `TeamGame` zijn bestandsformaten met vaste JSON (en
+      `TeamGame` rekent vanuit onze speler met onbekende punten), `MatchShareReport.Game` kent
+      een lopende game met rally's en strokes, `CompletedRefereeGame` is het model met punten.
+      Alleen `ResultGame` en `HistoryGameScore` overlappen (drie of vier velden); samenvoegen
+      raakt iOS, Android en tests zonder winst.
 - [x] `SharedFonts.system` (alle 372 lettertypes in de gedeelde UI en op iOS, `AppFonts`
       erop), `SectionHeader` (tien gelijke koppen in Competitie), `TagChip` (focus-tags),
       `CloseButton` gedeeld (iOS en Android, in alle sheets met `.cancellationAction`;
@@ -160,7 +165,10 @@ badgeregels, kosten) is niet zonder Gerd-Jan doorgevoerd.
       fixture, Vervang alles met een bron zonder wedstrijden, history-store met
       referee- en losse spellen, `APIKeyManager`); 6 deels (Room); 7 deels (Worker:
       team-sleutel, verify, 413, games-clamp); 8 gedaan (opgave/walkover met
-      competitiepunten, hat trick exact 3/5/7); 9 niet (Compose-screentest, UI-testtarget).
+      competitiepunten, hat trick exact 3/5/7); 9 deels (7 oktober): `CompetitionScreenTest`
+      (Compose, E1 als 3-0 invullen en bewaren) en terugspoeltests voor Room 6→7 en 7→8
+      (`VolleyAndOpeningServeMigrationTest`). Nog open: een `SquashAnalyzerUITests`-target op
+      iOS (een nieuw target maak je het veiligst in Xcode zelf).
 
 ## Besluiten (6 oktober 2026) en wat er nog openstaat
 

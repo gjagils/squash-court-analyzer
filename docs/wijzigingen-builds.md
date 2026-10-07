@@ -28,6 +28,8 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   op de iPhone, en "Annuleer" heet overal "Annuleren".
 - **Live meekijken: één verzendlaag (7 oktober 2026, techniek)**: `LiveShare` en
   `TeamLive` delen het versturen (`LiveSender.swift`); gedrag ongewijzigd.
+- **Tests (7 oktober 2026)**: Compose-schermtest voor Competitie
+  (`CompetitionScreenTest`) en Room-terugspoeltests voor de stappen 6→7 en 7→8.
 
 ## 3.0 build 1, 6 oktober 2026 (geüpload)
 

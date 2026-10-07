@@ -26,6 +26,8 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   `SectionHeader`, `TagChip` en één gedeelde sluitknop. Zichtbaar voor de
   gebruiker: op Android hebben de sheets nu ook "✕ Sluiten"/"✕ Annuleren" zoals
   op de iPhone, en "Annuleer" heet overal "Annuleren".
+- **Live meekijken: één verzendlaag (7 oktober 2026, techniek)**: `LiveShare` en
+  `TeamLive` delen het versturen (`LiveSender.swift`); gedrag ongewijzigd.
 
 ## 3.0 build 1, 6 oktober 2026 (geüpload)
 

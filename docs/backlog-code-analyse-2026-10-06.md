@@ -139,8 +139,12 @@ badgeregels, kosten) is niet zonder Gerd-Jan doorgevoerd.
 - [x] `TeamMatch.swift` gesplitst (model, `TeamMatchReport.swift`, `TeamMatchStore.swift`);
       `TeamTarget` en `TeamMatchSupport` naar Core, met tests; `SharedTeamMatchViews.swift`
       gesplitst (editor, nieuwe wedstrijd, delen); `SharedSettingsView` eigen bestand.
-- [ ] Eén `LiveSender` voor `LiveShare`/`TeamLive` (put/flush/offline): niet gedaan; riskant
-      zonder beter testnet, het zijn twee semantieken (eindstand, gebonden wedstrijden).
+- [x] Eén verzendlaag voor `LiveShare`/`TeamLive` (7 oktober, `LiveSender.swift`):
+      `LatestValueSender` (nieuwste stand per kanaal, samenvoegen, bewaren bij een fout) en
+      `LiveWrite` (PUT/DELETE met sleutel). De eigen betekenis bleef bij de klassen: eindstand
+      en opnieuw aanmaken in `LiveShare`, 401/404 per teampagina in `TeamLive`. Getest met de
+      bestaande Live/TeamLive-tests (Swift en Kotlin) en op de emulator tegen de live-Worker
+      (stand 3-1 kwam aan, Live stoppen gaf 404).
 - [ ] Eén "afgeronde game"-vorm in plaats van zeven: niet gedaan (raakt persistentie en
       back-ups).
 - [x] `SharedFonts.system` (alle 372 lettertypes in de gedeelde UI en op iOS, `AppFonts`

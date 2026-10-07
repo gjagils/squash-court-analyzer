@@ -347,8 +347,8 @@ public final class TeamLive {
     public func isGone(_ teamId: String) -> Bool { goneTeamIds.contains(teamId) }
 
     private var bindings: [UUID: Binding] = [:]
-    private var pending: [String: TeamLivePartij] = [:]
-    private var sending: [String: Bool] = [:]
+    /// The newest state per partij still to send; the channel is "<teamId>/<slot>"
+    private let queue = LatestValueSender<TeamLivePartij>()
 
     public init(transport: (any LiveTransport)? = nil) {
         self.transport = transport
@@ -378,24 +378,16 @@ public final class TeamLive {
         let partij = TeamLivePartij(snapshot: snapshot, homeIsPlayer1: binding.homeIsPlayer1,
                                     homeLabel: binding.homeLabel, awayLabel: binding.awayLabel)
         let key = binding.teamId + "/" + String(binding.slot)
-        pending[key] = partij
-        if sending[key] == true { return }
+        queue.set(partij, for: key)
+        if queue.isSending(key) { return }
         Task { await self.flush(binding, key: key) }
     }
 
     /// Sends the newest state; pile-ups are merged, a failed send is kept for the next point
     private func flush(_ binding: Binding, key: String) async {
-        if sending[key] == true { return }
-        sending[key] = true
-        while let next = pending[key] {
-            pending[key] = nil
-            let result = await put(next, teamId: binding.teamId, slot: binding.slot, writeKey: binding.key)
-            if !result {
-                if pending[key] == nil { pending[key] = next }
-                break
-            }
+        await queue.flush(key) { partij in
+            await self.put(partij, teamId: binding.teamId, slot: binding.slot, writeKey: binding.key)
         }
-        sending[key] = false
     }
 
     // MARK: De teamwedstrijd
@@ -476,21 +468,12 @@ public final class TeamLive {
         guard let id = match.liveId, let key = match.liveKey, let transport = activeTransport,
               let url = URL(string: "\(baseURL)/api/team/\(id)/partij/\(slot)"),
               let body = try? JSONEncoder().encode(TeamLiveEmpty(empty: true)) else { return false }
-        do {
-            let response = try await transport.send(method: "PUT", url: url,
-                                                    headers: ["Content-Type": "application/json", "Authorization": "Bearer \(key)"],
-                                                    body: body)
-            noteResult(response.status, teamId: id)
-            return response.status >= 200 && response.status < 300
-        } catch {
-            offline = true
-            return false
-        }
+        return await send(body, to: url, teamId: id, writeKey: key, transport: transport)
     }
 
     /// Back in the app (or the network is back): what could not be sent is sent now
     public func retryPending() {
-        for (key, _) in pending where sending[key] != true {
+        for key in queue.pendingChannels where !queue.isSending(key) {
             // key is "<teamId>/<slot>"; the binding that wrote it holds the rest
             for (_, binding) in bindings where binding.teamId + "/" + String(binding.slot) == key {
                 Task { await self.flush(binding, key: key) }
@@ -504,33 +487,34 @@ public final class TeamLive {
     public func stop(_ match: TeamMatch) async {
         guard let id = match.liveId, let key = match.liveOwnerKey ?? match.liveKey, let transport = activeTransport,
               let url = URL(string: "\(baseURL)/api/team/\(id)") else { return }
-        _ = try? await transport.send(method: "DELETE", url: url, headers: ["Authorization": "Bearer \(key)"], body: nil)
+        await LiveWrite.delete(url, key: key, transport: transport)
     }
 
     private func put(_ partij: TeamLivePartij, teamId: String, slot: Int, writeKey: String) async -> Bool {
         guard let transport = activeTransport, let url = URL(string: "\(baseURL)/api/team/\(teamId)/partij/\(slot)"),
               let body = try? JSONEncoder().encode(partij) else { return false }
-        do {
-            let response = try await transport.send(method: "PUT", url: url,
-                                                    headers: ["Content-Type": "application/json", "Authorization": "Bearer \(writeKey)"],
-                                                    body: body)
-            noteResult(response.status, teamId: teamId)
-            return response.status >= 200 && response.status < 300
-        } catch {
+        return await send(body, to: url, teamId: teamId, writeKey: writeKey, transport: transport)
+    }
+
+    /// One write to a partij of the page; the answer is noted (offline, refused, gone)
+    private func send(_ body: Data, to url: URL, teamId: String, writeKey: String, transport: any LiveTransport) async -> Bool {
+        guard let status = await LiveWrite.put(body, to: url, key: writeKey, transport: transport) else {
             offline = true
             return false
         }
+        noteResult(status, teamId: teamId)
+        return LiveWrite.isSuccess(status)
     }
 
     /// What the server answered to a send: offline for a failure that may pass,
     /// a refused key (401) shown separately, a page that is gone not a connection problem
     private func noteResult(_ status: Int, teamId: String) {
-        let ok = status >= 200 && status < 300
+        let ok = LiveWrite.isSuccess(status)
         offline = !ok && status != 404 && status != 401
         if status == 404 {
             // The page is gone: nothing more is sent to it (until a new live page is bound)
             if !goneTeamIds.contains(teamId) { goneTeamIds.append(teamId) }
-            for (key, _) in pending where key.hasPrefix(teamId + "/") { pending[key] = nil }
+            queue.drop(prefix: teamId + "/")
         } else if ok {
             goneTeamIds = goneTeamIds.filter { id in id != teamId }
         }

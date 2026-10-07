@@ -244,10 +244,11 @@ public final class LiveShare {
 
     private var sessionId: String? = nil
     private var writeKey: String? = nil
-    private var pending: LiveSnapshot? = nil
+    /// The newest state still to send (one channel: this phone has one live match)
+    private let queue = LatestValueSender<LiveSnapshot>()
+    private static let channel = "match"
     /// Sent after creating the session, and again when it had to be made again
     private var photos: LivePhotos? = nil
-    private var sending = false
     /// Let go of the session once the final state is sent
     private var finishing = false
     /// A failed final send is tried again after this many seconds, up to `maxFinishRetries` times
@@ -279,8 +280,8 @@ public final class LiveShare {
     /// live). Sends that pile up are merged: only the newest state goes.
     public func update(matchId id: UUID, snapshot: LiveSnapshot) {
         guard self.matchId == id, sessionId != nil else { return }
-        pending = snapshot
-        guard !sending else { return }
+        queue.set(snapshot, for: LiveShare.channel)
+        guard !queue.isSending(LiveShare.channel) else { return }
         Task { await flush() }
     }
 
@@ -289,10 +290,10 @@ public final class LiveShare {
     /// it, 2 hours after this last update. "Live stoppen" does delete at once.
     public func finish(matchId id: UUID, snapshot: LiveSnapshot) async {
         guard self.matchId == id, sessionId != nil else { return }
-        pending = snapshot
+        queue.set(snapshot, for: LiveShare.channel)
         finishing = true
         // A send under way picks up the final state and lets go afterwards
-        if !sending { await flush() }
+        if !queue.isSending(LiveShare.channel) { await flush() }
     }
 
     /// Stop sharing: the session is deleted on the server
@@ -301,7 +302,7 @@ public final class LiveShare {
         let key = writeKey
         reset()
         guard let id, let key, let transport, let url = URL(string: "\(sessionBaseURL)/api/live/\(id)") else { return }
-        _ = try? await transport.send(method: "DELETE", url: url, headers: ["Authorization": "Bearer \(key)"], body: nil)
+        await LiveWrite.delete(url, key: key, transport: transport)
     }
 
     /// Tries the final score again a little later; gives up after
@@ -329,7 +330,7 @@ public final class LiveShare {
     /// Sends what is still waiting (the final score after a failed send) right
     /// away, e.g. when the app becomes active again
     public func retryPending() async {
-        guard pending != nil, !sending, sessionId != nil else { return }
+        guard queue.hasPending(LiveShare.channel), !queue.isSending(LiveShare.channel), sessionId != nil else { return }
         await flush()
     }
 
@@ -341,7 +342,7 @@ public final class LiveShare {
         writeKey = nil
         link = nil
         matchId = nil
-        pending = nil
+        queue.drop(LiveShare.channel)
         photos = nil
         finishing = false
         linkChanged = false
@@ -379,29 +380,18 @@ public final class LiveShare {
         guard let photos, !photos.isEmpty, let transport, let id = sessionId, let key = writeKey,
               let url = URL(string: "\(sessionBaseURL)/api/live/\(id)/photos"),
               let body = try? JSONEncoder().encode(photos) else { return }
-        _ = try? await transport.send(method: "PUT", url: url,
-                                      headers: ["Content-Type": "application/json", "Authorization": "Bearer \(key)"],
-                                      body: body)
+        _ = await LiveWrite.put(body, to: url, key: key, transport: transport)
     }
 
+    /// Sends the newest state; a failed one is kept for the next rally
     private func flush() async {
-        guard !sending else { return }
-        sending = true
-        while let next = pending {
-            pending = nil
-            let ok = await put(next)
-            if !ok {
-                // Keep the newest state for the next rally (unless a newer one came in)
-                if pending == nil { pending = next }
-                break
-            }
-        }
-        sending = false
+        guard !queue.isSending(LiveShare.channel) else { return }
+        await queue.flush(LiveShare.channel) { snapshot in await self.put(snapshot) }
         // Match over: this phone lets go once the final score is there; the
         // server keeps it for viewers and removes it after its idle time (2 hours).
         // Not sent (no network): kept and tried again, so viewers still get it.
         if finishing {
-            if pending == nil {
+            if !queue.hasPending(LiveShare.channel) {
                 reset()
             } else {
                 scheduleFinishRetry()
@@ -414,23 +404,24 @@ public final class LiveShare {
         guard let transport, let id = sessionId, let key = writeKey,
               let url = URL(string: "\(sessionBaseURL)/api/live/\(id)"),
               let body = try? JSONEncoder().encode(snapshot) else { return false }
-        do {
-            let response = try await transport.send(method: "PUT", url: url,
-                                                    headers: ["Content-Type": "application/json", "Authorization": "Bearer \(key)"],
-                                                    body: body)
-            if response.status == 404 || response.status == 401 {
-                // At the end of a match a gone page is not made again: the final
-                // score would go to a link nobody has
-                if finishing { return true }
-                try await create(snapshot)
-                linkChanged = true
-                return true
-            }
-            offline = !(response.status >= 200 && response.status < 300)
-            return !offline
-        } catch {
+        guard let status = await LiveWrite.put(body, to: url, key: key, transport: transport) else {
             offline = true
             return false
         }
+        if status == 404 || status == 401 {
+            // At the end of a match a gone page is not made again: the final
+            // score would go to a link nobody has
+            if finishing { return true }
+            do {
+                try await create(snapshot)
+            } catch {
+                offline = true
+                return false
+            }
+            linkChanged = true
+            return true
+        }
+        offline = !LiveWrite.isSuccess(status)
+        return !offline
     }
 }

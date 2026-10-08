@@ -39,9 +39,9 @@ teamgenoten geprobeerd.
 > 3. Tik op jouw partij (E1 tot en met E4) en kies *Nieuwe wedstrijd*. Je
 >    telt zoals altijd; de stand gaat vanzelf naar de teampagina.
 >
-> **Captain:** Competitie → *Nieuwe teamwedstrijd* → onderaan *Live delen* →
-> stuur *Nodig teamgenoten uit* naar het team en *Deel kijkerslink* naar de
-> supporters. Na afloop: *Deel verslag*.
+> **Wie aanmaakt** (kan iedereen uit het team zijn): Competitie → *Nieuwe
+> teamwedstrijd* → onderaan *Live delen* → stuur *Nodig teamgenoten uit* naar
+> het team en *Deel kijkerslink* naar de supporters. Na afloop: *Deel verslag*.
 >
 > Alles op de teampagina verdwijnt 2 uur na de laatste update.
 
@@ -55,7 +55,7 @@ raakt het bevroren schema (V7) of de server-API.
 
 | # | Wijziging | Wat het oplost | Omvang |
 |---|-----------|----------------|--------|
-| 1 | **Eén deelknop** *Deel met team en supporters*: één bericht met twee regels ("Kijken: …" en "Meedoen: …"). De losse knoppen verdwijnen uit beeld. | punt 2 en 3 | klein (tekst en knoppen) |
+| 1 | **Eén deelscherm** *Deel met team en supporters* met twee aparte knoppen: *Deel kijkerslink* (supporters, alleen kijken) en *Nodig teamleden uit* (meedoenlink en code). Niet één bericht met beide links: dan krijgt een supporter in de groepsapp ook de schrijfsleutel. De losse knoppen op het teamwedstrijdscherm verdwijnen. | punt 2 en 3 | klein (tekst en knoppen) |
 | 2 | **Na Deelnemen direct de partijkeuze** ("Welke partij speel of tel jij?") in plaats van terug naar het overzicht, en daarna meteen wedstrijd starten met schakelaar en speler al ingevuld. | punt 4 | middel |
 | 3 | **Mijn team: knop *Start teamwedstrijd* bij de eerstvolgende wedstrijd**, met teams en datum al ingevuld en Live delen alvast aan. | punt 1 en 4 | middel |
 | 4 | **Uitleg bij het eerste gebruik:** drie regels boven in Competitie (zie handleiding), weg te tikken. | punt 5 | klein |
@@ -75,3 +75,12 @@ vermoedelijk vooral de route in punt 4 als het zware deel.
   dat bewust per avond kiezen? (Privacy: er gaan dan voornamen naar de server.)
 - Zou je zelf de handleiding in de groepsapp zetten, of liever op
   `squashanalyzer.com/handleiding` als aparte korte pagina?
+
+## Besluit 8 oktober
+
+Gerd-Jan koos: kijkerslink en meedoenlink blijven aparte berichten. De
+meedoenlink bevat de gedeelde schrijfsleutel en de server beperkt die niet
+tot één partij of team (zie `docs/plan-live-teamwedstrijd.md`), dus hij hoort
+alleen bij teamleden. De rol "captain" bestaat niet in de app: iedereen uit
+het team kan de teamwedstrijd aanmaken; die telefoon wordt de eigenaar en kan
+alleen zelf *Live stoppen* voor iedereen.

@@ -6,13 +6,16 @@ import SquashAnalyzerCore
 struct NewTeamMatchSheet: View {
     let team: LeagueTeamSnapshot?
     let existing: [TeamMatch]
-    let onCreate: (TeamMatch) -> Void
+    /// The new team match and whether it is shared with the team right away
+    let onCreate: (TeamMatch, Bool) -> Void
     let onCancel: () -> Void
 
     @State private var ownTeam = ""
     @State private var opponent = ""
     @State private var atHome = true
     @State private var date = Date()
+    /// "Deel met mijn team": on unless switched off
+    @State private var shareWithTeam = true
 
     /// Matches of Mijn team without a team match yet, nearest to today first
     private var openFixtures: [LeagueFixture] {
@@ -31,11 +34,29 @@ struct NewTeamMatchSheet: View {
                 SharedColors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Toggle(isOn: $shareWithTeam) {
+                                Text("Deel met mijn team")
+                                    .font(SharedFonts.system(14, weight: .medium, design: .rounded))
+                                    .foregroundColor(SharedColors.textPrimary)
+                            }
+                            .tint(SharedColors.accent)
+                            Text(shareWithTeam
+                                 ? "Teamgenoten zetten hun eigen partij erin en supporters kijken mee. Alleen teamnamen, voornamen en de stand gaan naar de server; 2 uur na de laatste update wordt alles gewist."
+                                 : "De teamwedstrijd blijft alleen op deze telefoon. Je kunt hem later nog delen.")
+                                .font(SharedFonts.system(11))
+                                .foregroundColor(SharedColors.textMuted)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(14)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.white.opacity(0.04))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                         if let team, !openFixtures.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
                                 SectionHeader("UIT HET PROGRAMMA VAN \(team.name.uppercased())")
                                 ForEach(openFixtures) { fixture in
-                                    Button { onCreate(TeamMatch.from(fixture: fixture, ownTeam: team.name)) } label: {
+                                    Button { onCreate(TeamMatch.from(fixture: fixture, ownTeam: team.name), shareWithTeam) } label: {
                                         HStack(spacing: 10) {
                                             Text(TeamMatchReport.dayText(fixture.date))
                                                 .font(SharedFonts.system(11))
@@ -80,7 +101,7 @@ struct NewTeamMatchSheet: View {
                                     let own = ownTeam.trimmingCharacters(in: .whitespaces)
                                     let other = opponent.trimmingCharacters(in: .whitespaces)
                                     onCreate(TeamMatch(date: date, home: atHome ? own : other, away: atHome ? other : own,
-                                                       ownSide: atHome ? TeamSide.home : TeamSide.away))
+                                                       ownSide: atHome ? TeamSide.home : TeamSide.away), shareWithTeam)
                                 }
                             }
                             .padding(12)

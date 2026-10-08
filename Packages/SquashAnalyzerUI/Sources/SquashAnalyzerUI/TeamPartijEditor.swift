@@ -46,6 +46,7 @@ struct TeamPartijEditor: View {
                 SharedColors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
+                        teamLine
                         playersSection
                         linkSection
                         gamesSection
@@ -87,6 +88,18 @@ struct TeamPartijEditor: View {
         .preferredColorScheme(.dark)
     }
 
+    /// Which team match this partij is in: shared with the team, or only ours
+    private var teamLine: some View {
+        HStack(spacing: 8) {
+            TeamShareBadge(isLive: match.isLive)
+            Text(match.isLive ? "Je werkt in de gedeelde teamwedstrijd" : "Je werkt in je eigen teamwedstrijd")
+                .font(SharedFonts.system(12))
+                .foregroundColor(SharedColors.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer()
+        }
+    }
+
     private var playersSection: some View {
         section("SPELERS") {
             field(match.defaultOwnName(partij.slot), text: $partij.ownPlayer)
@@ -115,7 +128,7 @@ struct TeamPartijEditor: View {
     }
 
     private var linkSection: some View {
-        section("BIJGEHOUDEN WEDSTRIJD") {
+        section("NIEUWE OF GETELDE WEDSTRIJD") {
             if partij.isLinked {
                 Text("Gekoppeld aan een \(partij.linkedKind == "referee" ? "scheidsrechter" : "coach")wedstrijd uit Afgeronde wedstrijden.")
                     .font(SharedFonts.system(12))
@@ -127,15 +140,23 @@ struct TeamPartijEditor: View {
                 }
                 .padding(.top, 8)
             } else {
-                Text("Hield je deze partij bij als coach of scheidsrechter? Dan komen de games vanzelf mee.")
+                Text("Een wedstrijd die je bijhoudt als coach of scheidsrechter vult de games vanzelf in. Of vul ze hieronder zelf in.")
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
-                ActionButton("Kies wedstrijd", icon: "arrow.right") {
+                Text("Nieuwe wedstrijd starten")
+                    .font(SharedFonts.system(13, weight: .semibold))
+                    .foregroundColor(SharedColors.textPrimary)
+                    .padding(.top, 8)
+                HStack(spacing: 10) {
+                    ActionButton("Coach", style: .filled) { onTrack(partij, "coach") }
+                    ActionButton("Scheidsrechter", style: .filled) { onTrack(partij, "referee") }
+                }
+                ActionButton("Eerder getelde wedstrijd koppelen", icon: "arrow.right") {
                     choosingMatch = true
                     Task { await loadHistory() }
                 }
-                .padding(.top, 8)
+                .padding(.top, 6)
             }
         }
     }

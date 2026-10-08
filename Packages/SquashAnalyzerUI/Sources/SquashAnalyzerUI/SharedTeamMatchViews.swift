@@ -128,6 +128,8 @@ public struct SharedTeamMatchesView: View {
     @State private var creating = false
     @State private var joining = false
     @State private var opened: TeamMatch? = nil
+    /// Opened right after creating it shared: its share screen opens too
+    @State private var shareOnOpen = false
     @State private var message: String? = nil
 
     public init(store: any TeamMatchStore, tools: TeamMatchTools, team: LeagueTeamSnapshot? = nil) {
@@ -156,8 +158,18 @@ public struct SharedTeamMatchesView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.top, 24)
                     } else {
-                        ForEach(matches) { match in
-                            TeamMatchCard(match: match) { opened = match }
+                        // Two groups when both exist: shared with the team (live) and only on this phone
+                        if !sharedMatches.isEmpty && !ownMatches.isEmpty {
+                            SectionHeader("GEDEELD MET MIJN TEAM")
+                        }
+                        ForEach(sharedMatches) { match in
+                            TeamMatchCard(match: match) { shareOnOpen = false; opened = match }
+                        }
+                        if !sharedMatches.isEmpty && !ownMatches.isEmpty {
+                            SectionHeader("ALLEEN OP MIJN TELEFOON")
+                        }
+                        ForEach(ownMatches) { match in
+                            TeamMatchCard(match: match) { shareOnOpen = false; opened = match }
                         }
                     }
                     if let message {
@@ -170,14 +182,15 @@ public struct SharedTeamMatchesView: View {
         .pageTitle("Competitie")
         .task { await load() }
         .sheet(isPresented: $creating) {
-            NewTeamMatchSheet(team: team, existing: matches) { match in
+            NewTeamMatchSheet(team: team, existing: matches) { match, share in
                 creating = false
-                Task { await save(match, thenOpen: true) }
+                Task { await save(match, share: share) }
             } onCancel: { creating = false }
         }
         .sheet(isPresented: $joining) {
             SharedTeamJoinView(store: store, team: team) { joined in
                 joining = false
+                shareOnOpen = false
                 Task {
                     await load()
                     opened = joined
@@ -186,7 +199,7 @@ public struct SharedTeamMatchesView: View {
         }
         .navigationDestination(isPresented: Binding(get: { opened != nil }, set: { if !$0 { opened = nil } })) {
             if let opened {
-                SharedTeamMatchView(match: opened, store: store, tools: tools, team: team) { _ in
+                SharedTeamMatchView(match: opened, store: store, tools: tools, team: team, openShare: shareOnOpen) { _ in
                     Task { await load() }
                 }
             }
@@ -203,11 +216,21 @@ public struct SharedTeamMatchesView: View {
         isLoading = false
     }
 
-    private func save(_ match: TeamMatch, thenOpen: Bool) async {
+    private var sharedMatches: [TeamMatch] { matches.filter { match in match.isLive } }
+    private var ownMatches: [TeamMatch] { matches.filter { match in !match.isLive } }
+
+    /// A new team match: kept, shared with the team when asked (a failure leaves it
+    /// as an own team match; its screen says so), then opened
+    private func save(_ match: TeamMatch, share: Bool) async {
         do {
-            try await store.save(match)
+            var created = match
+            try await store.save(created)
+            if share {
+                if let live = try? await TeamMatchSupport.goLive(created, store: store) { created = live }
+            }
             await load()
-            if thenOpen { opened = match }
+            shareOnOpen = share
+            opened = created
         } catch {
             message = "Opslaan is niet gelukt."
         }
@@ -227,6 +250,7 @@ struct TeamMatchCard: View {
                     Text(TeamMatchReport.dayText(match.date))
                         .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textSecondary)
+                    TeamShareBadge(isLive: match.isLive)
                     Spacer()
                     if score.isComplete, let winner = match.winnerName {
                         HStack(spacing: 4) {
@@ -288,6 +312,10 @@ public struct SharedTeamMatchView: View {
     @State private var confirmDelete = false
     @State private var message: String? = nil
     @State private var sharing = false
+    /// The share screen ("Deel met team en supporters")
+    @State private var sharingTeam = false
+    /// Open the share screen once this screen is up (right after "Deel met mijn team" at creating)
+    private let openShare: Bool
     @State private var liveBusy = false
     @State private var confirmStopLive = false
     /// A tracked match being played for a partij (full screen)
@@ -299,8 +327,9 @@ public struct SharedTeamMatchView: View {
     @Environment(\.dismiss) private var dismiss
 
     public init(match: TeamMatch, store: any TeamMatchStore, tools: TeamMatchTools,
-                team: LeagueTeamSnapshot? = nil, onChange: @escaping (TeamMatch?) -> Void) {
+                team: LeagueTeamSnapshot? = nil, openShare: Bool = false, onChange: @escaping (TeamMatch?) -> Void) {
         _match = State(initialValue: match)
+        self.openShare = openShare
         self.store = store
         self.tools = tools
         self.team = team
@@ -313,12 +342,12 @@ public struct SharedTeamMatchView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     header
+                    TeamShareBanner(match: match)
                     partijenList
                     TeamLiveCard(match: match, busy: liveBusy, canShare: tools.shareText != nil,
                                  problem: liveProblem,
                                  onGoLive: { Task { await goLive() } },
-                                 onShareViewers: { tools.shareText?(TeamLiveTexts.viewers(match, baseURL: TeamLive.shared.baseURL)) },
-                                 onShareInvite: { tools.shareText?(TeamLiveTexts.invite(match)) },
+                                 onShare: { sharingTeam = true },
                                  onRefresh: { Task { await refreshLive() } },
                                  onStop: { confirmStopLive = true })
                     if let message {
@@ -336,6 +365,13 @@ public struct SharedTeamMatchView: View {
         .task {
             players = (try? await tools.playerStore.loadPlayers()) ?? []
             await syncFromLive(showGone: false)
+            if openShare {
+                if match.isLive {
+                    sharingTeam = true
+                } else {
+                    message = "Delen lukte niet. Controleer de internetverbinding en tik op Deel met mijn team om het opnieuw te proberen."
+                }
+            }
         }
         .alert(match.isLiveOwner ? "Live stoppen?" : "Live verlaten?", isPresented: $confirmStopLive) {
             Button(match.isLiveOwner ? "Stop live" : "Verlaat live", role: .destructive) { Task { await stopLive() } }
@@ -362,6 +398,9 @@ public struct SharedTeamMatchView: View {
                     startTracking(updated, kind: kind)
                 } onCancel: { self.editing = nil }
             }
+        }
+        .sheet(isPresented: $sharingTeam) {
+            TeamShareSheet(match: match, baseURL: TeamLive.shared.baseURL, shareText: tools.shareText) { sharingTeam = false }
         }
         .sheet(isPresented: $sharing) {
             if let shareText = tools.shareText {
@@ -613,24 +652,18 @@ public struct SharedTeamMatchView: View {
         }
     }
 
-    /// "Live delen": make the live page, put what is filled in on it, share the viewers' link
+    /// "Deel met mijn team": make the live page, put what is filled in on it, open the share screen
     private func goLive() async {
         liveBusy = true
         defer { liveBusy = false }
         do {
-            let created = try await TeamLive.shared.create(match)
-            var changed = match
-            changed.liveId = created.id
-            changed.liveKey = created.writeKey
-            changed.liveOwnerKey = created.ownerKey
-            try await store.save(changed)
+            let changed = try await TeamMatchSupport.goLive(match, store: store)
             match = changed
             onChange(changed)
-            await TeamLive.shared.pushAll(changed)
             message = nil
-            tools.shareText?(TeamLiveTexts.viewers(changed, baseURL: TeamLive.shared.baseURL))
+            sharingTeam = true
         } catch {
-            message = "Live delen lukte niet. Controleer de internetverbinding en probeer het opnieuw."
+            message = "Delen lukte niet. Controleer de internetverbinding en probeer het opnieuw."
         }
     }
 

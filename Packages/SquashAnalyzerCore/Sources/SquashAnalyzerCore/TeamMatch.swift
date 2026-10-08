@@ -558,6 +558,23 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     }
 
     public var isLive: Bool { liveId != nil && liveKey != nil }
+
+    /// Partijen filled in on another phone and taken in from the live page
+    public var teammatePartijen: Int {
+        var count = 0
+        for partij in partijen where partij.hasEntry && partij.fromLive == true { count += 1 }
+        return count
+    }
+
+    /// Partijen filled in on this phone
+    public var ownPartijen: Int {
+        var count = 0
+        for partij in partijen where partij.hasEntry && partij.fromLive != true { count += 1 }
+        return count
+    }
+
+    /// Joined with an invitation and nothing of ours on it yet: the screen says what to do
+    public var needsOwnPartij: Bool { isLive && !isLiveOwner && ownPartijen == 0 }
     /// This phone started the live page (and may end it)
     public var isLiveOwner: Bool { isLive && liveOwnerKey != nil }
 

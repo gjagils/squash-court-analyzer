@@ -340,6 +340,7 @@ public struct MatchSetupView: View {
                                         .lineLimit(2)
                                         .multilineTextAlignment(.leading)
                                     Spacer()
+                                    TeamShareBadge(isLive: candidate.isLive)
                                 }
                                 .padding(10)
                                 .background(candidate.id == team.id ? SharedColors.accent.opacity(0.12) : Color.white.opacity(0.04))
@@ -348,9 +349,13 @@ public struct MatchSetupView: View {
                             .buttonStyle(.plain)
                         }
                     } else {
-                        Text("\(TeamMatchReport.dayText(team.date)) · \(team.title)")
-                            .font(SharedFonts.system(12))
-                            .foregroundColor(SharedColors.textSecondary)
+                        HStack(spacing: 8) {
+                            Text("\(TeamMatchReport.dayText(team.date)) · \(team.title)")
+                                .font(SharedFonts.system(12))
+                                .foregroundColor(SharedColors.textSecondary)
+                            Spacer()
+                            TeamShareBadge(isLive: team.isLive)
+                        }
                     }
                     Text("PARTIJ")
                         .font(SharedFonts.system(11, weight: .semibold, design: .rounded))

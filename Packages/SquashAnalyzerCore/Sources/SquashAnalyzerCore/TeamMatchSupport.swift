@@ -81,6 +81,21 @@ public struct TeamTarget: Equatable {
 }
 
 public enum TeamMatchSupport {
+    /// Puts the team match on the live page ("Deel met mijn team"): makes the
+    /// page, keeps its keys in the team match and sends what is filled in.
+    /// Throws when the page cannot be made; the team match is then unchanged.
+    @MainActor public static func goLive(_ match: TeamMatch, store: any TeamMatchStore,
+                                         live: TeamLive = TeamLive.shared) async throws -> TeamMatch {
+        let created = try await live.create(match)
+        var changed = match
+        changed.liveId = created.id
+        changed.liveKey = created.writeKey
+        changed.liveOwnerKey = created.ownerKey
+        try await store.save(changed)
+        await live.pushAll(changed)
+        return changed
+    }
+
     /// A match started for a partij is remembered in the team match, so that
     /// leaving and resuming it later picks the coupling up again
     @MainActor public static func track(_ target: TeamTarget, matchId: UUID, store: any TeamMatchStore) async {

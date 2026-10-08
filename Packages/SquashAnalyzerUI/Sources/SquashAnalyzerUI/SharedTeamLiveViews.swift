@@ -16,16 +16,17 @@ struct TeamLiveCard: View {
     let canShare: Bool
     /// What is wrong with sending (a refused key, no connection), or nil
     var problem: String? = nil
+    /// "Deel met mijn team" on a team match that is not shared yet
     let onGoLive: () -> Void
-    let onShareViewers: () -> Void
-    let onShareInvite: () -> Void
+    /// Opens the share screen (viewers' link and invitation)
+    let onShare: () -> Void
     let onRefresh: () -> Void
     let onStop: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                SectionHeader("LIVE")
+                SectionHeader("DELEN")
                 if match.isLive {
                     HStack(spacing: 5) {
                         Circle().fill(Color.white).frame(width: 7, height: 7)
@@ -46,17 +47,8 @@ struct TeamLiveCard: View {
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
-                if canShare {
-                    ActionButton("Deel kijkerslink", icon: "square.and.arrow.up", style: .filled, disabled: busy, action: onShareViewers)
-                    ActionButton("Nodig teamgenoten uit", icon: "square.and.arrow.up", disabled: busy, action: onShareInvite)
-                }
-                if let id = match.liveId, let key = match.liveKey {
-                    // Also readable when nothing can be shared (no share sheet): the code teammates paste at Deelnemen
-                    Text("Code om mee te doen: \(TeamInvite(id: id, key: key).code)")
-                        .font(SharedFonts.system(11))
-                        .foregroundColor(SharedColors.textMuted)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                // The share screen also shows the code (readable when nothing can be shared)
+                ActionButton("Deel met team en supporters", icon: canShare ? "square.and.arrow.up" : nil, style: .filled, disabled: busy, action: onShare)
                 if let problem {
                     Text(problem)
                         .font(SharedFonts.system(12))
@@ -70,11 +62,11 @@ struct TeamLiveCard: View {
                                  disabled: busy, action: onStop)
                 }
             } else {
-                Text("Laat je team en de groepsapp de stand van de hele avond live volgen, per partij ook punt voor punt. Alleen teamnamen, voornamen en de stand gaan mee.")
+                Text("Deel deze teamwedstrijd met je team: teamgenoten zetten hun eigen partij erop en supporters volgen de stand van de hele avond, per partij ook punt voor punt. Alleen teamnamen, voornamen en de stand gaan mee.")
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
-                ActionButton(busy ? "Even geduld…" : "Live delen", style: .filled, disabled: busy, action: onGoLive)
+                ActionButton(busy ? "Even geduld…" : "Deel met mijn team", style: .filled, disabled: busy, action: onGoLive)
             }
         }
         .padding(14)

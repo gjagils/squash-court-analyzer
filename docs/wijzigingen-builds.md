@@ -10,6 +10,44 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 1)
 
+- **Teamwedstrijd: eigen of gedeeld, en delen op één plek (8 oktober 2026,
+  gebouwd, nog niet op een telefoon geprobeerd)**: zie
+  `docs/plan-teamwedstrijd-eenvoudiger-bouw.md`. Iedere teamwedstrijd draagt
+  het label GEDEELD (oranje, heeft een livepagina) of EIGEN (grijs, alleen deze
+  telefoon): in de lijst van Competitie (met de kopjes "Gedeeld met mijn team"
+  en "Alleen op mijn telefoon" als beide bestaan), bovenaan het
+  teamwedstrijdscherm in een banner, in de partij en bij *Onderdeel van een
+  teamwedstrijd* in de setup. Verder:
+  - **Nieuwe teamwedstrijd** heeft de schakelaar *Deel met mijn team* (standaard
+    aan). Aan: de livepagina wordt meteen gemaakt en het deelscherm opent. Lukt
+    dat niet (geen internet), dan blijft de wedstrijd EIGEN en zegt het scherm dat.
+  - **Eén knop** *Deel met team en supporters* in plaats van *Deel kijkerslink*
+    en *Nodig teamgenoten uit*; hij opent het nieuwe deelscherm met twee
+    groepen: *Voor supporters* (alleen de kijkerslink) en *Voor teamleden* (de
+    uitnodiging met link en code). Supporters krijgen zo de schrijfsleutel niet.
+    *Live delen* heet nu *Deel met mijn team*.
+  - **Partij**: bovenaan de regel of je in de gedeelde of eigen teamwedstrijd
+    werkt; *Coach* en *Scheidsrechter* staan nu direct als knoppen onder *Nieuwe
+    wedstrijd starten*, naast *Eerder getelde wedstrijd koppelen* en de
+    handmatige games.
+  - **Meedoen**: wie meedoet en nog niets van zichzelf heeft ingevuld, ziet in
+    de banner "Tik op jouw partij en zet er een wedstrijd op."
+  - Banner gedeeld: "N van 4 partijen komen van teamgenoten" (geteld uit de
+    partijen van de livepagina, geen telefoonaantal).
+  - Niet gedaan: een label in het scoringsscherm zelf van coach en
+    scheidsrechter (de schermen zijn krap, eerst op een telefoon beoordelen).
+
+  Releasenote: *Teamwedstrijd delen is eenvoudiger. Je ziet bij elke
+  teamwedstrijd of hij met je team gedeeld is of alleen op je telefoon staat.
+  Eén knop deelt de kijkerslink met supporters en de uitnodiging met
+  teamleden, en bij een nieuwe teamwedstrijd kun je meteen delen.*
+
+  **Handleiding op de website nog niet aangepast** (hij beschrijft de
+  testversie die live staat): bij het uitrollen in `website/handleiding/iphone.html`
+  en `android.html` (Competitie, de punten *Live meekijken* en *Teamgenoten laten
+  meedoen*) en `website/testen.html` *Live delen* vervangen door *Deel met mijn
+  team* en *Deel met team en supporters*, en publiceren met `npx wrangler deploy
+  -c server/website-worker/wrangler.jsonc`.
 - **Woordmerk zoals op de sticker** (7 oktober 2026): in de kop van het
   beginscherm (iOS en Android, `HomeMenuHeader`) en in de hero van de website
   staat "Squash" in de tekstkleur en "Analyzer" in het merkoranje (#F28C26).

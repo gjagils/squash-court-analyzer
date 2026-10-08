@@ -1,8 +1,9 @@
 # Bouwplan: teamwedstrijd eenvoudiger (per scherm)
 
 Stand 8 oktober 2026. Uitwerking van `docs/voorstel-teamwedstrijd-eenvoudiger.md`
-en het klikbare voorbeeld, gebaseerd op de code van 8 oktober. **Nog niets
-gebouwd.** Het voorbeeld is een mock-up: bij het bouwen gebruiken we de
+en het klikbare voorbeeld, gebaseerd op de code van 8 oktober. **Fase 1 en 2
+gebouwd op 8 oktober, nog niet gecompileerd of op een telefoon geprobeerd**
+(zie "Stand van de bouw" onderaan). Het voorbeeld is een mock-up: bij het bouwen gebruiken we de
 bestaande onderdelen (`ActionButton`, `SectionHeader`, `SharedColors`, de
 LIVE-capsule uit `TeamLiveCard`, stijl uit `docs/style/README.md`) en op
 iPhone en Android dezelfde plekken, namen en iconen. Alle schermen staan in
@@ -218,3 +219,27 @@ besluit over kijkerslink en meedoenlink.
    niet bouwen, het is een teamavond.
 4. **Beginnen met fase 1?** Dan zit er niets in dat de bestaande
    gebruiker verrast; fase 2 pas na een speeldag met deze versie.
+
+## Stand van de bouw (8 oktober 2026)
+
+Gebouwd op branch `claude/sleepy-johnson-h5otiz`, niet op `main`. Gebouwd op
+een machine zonder Swift of Xcode: **de code is nooit gecompileerd en geen test
+is gedraaid** (alleen `scripts/lint.sh`). Eerst `swift test` in
+`Packages/SquashAnalyzerCore`, daarna iOS en `assembleDebug`, dan op de twee
+telefoons.
+
+| Scherm | Stand |
+| --- | --- |
+| 1 Lijst | gedaan: label op de kaart, twee kopjes (`SharedTeamMatchViews.swift`) |
+| 2 Nieuwe teamwedstrijd | gedaan: schakelaar standaard aan, `TeamMatchSupport.goLive` |
+| 3 Teamwedstrijd | gedaan: `TeamShareBanner`, kaart met één deelknop |
+| 4 Deelscherm | gedaan: `TeamShareViews.swift` (`TeamShareSheet`) |
+| 5 Deelnemen | gedaan als regel in de banner (`needsOwnPartij`); de partijkeuze niet automatisch openen |
+| 6 Partij | gedaan, **anders dan gepland**: de volgorde blijft eerst spelers, dan wedstrijd (de namen gaan mee naar de setup); *Coach* en *Scheidsrechter* staan nu direct als knoppen |
+| 7 Setup | gedaan: label bij de gekozen teamwedstrijd in *Onderdeel van een teamwedstrijd*. Komt de gebruiker uit scherm 6, dan toont de setup die keuze niet (de teamwedstrijd staat dan al vast) |
+| 8 Tijdens het tellen | **niet gedaan**: de scoringsschermen zijn krap en ik kon ze niet bekijken |
+| 9 Kijkerspagina, server | geen wijziging |
+
+Tests: `Packages/SquashAnalyzerCore/Tests/SquashAnalyzerCoreTests/TeamShareTests.swift`
+(label-tellers, `goLive` met en zonder verbinding). Geen UI-test toegevoegd
+(`CompetitionScreenTest.kt` nog niet uitgebreid).

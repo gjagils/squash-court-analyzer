@@ -1,0 +1,1 @@
+Zevende testversie. Teamwedstrijd delen is eenvoudiger: elke teamwedstrijd is GEDEELD of EIGEN, en één knop Deel met team en supporters geeft de kijkerslink aan supporters en de uitnodiging aan teamleden. Een link die niet opent meldt nu dat je een nieuwere versie nodig hebt. Uitleg: squashanalyzer.com/testen

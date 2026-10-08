@@ -296,6 +296,61 @@ public extension TeamMatch {
         _ = match.mergeLive(state)
         return match
     }
+
+    /// Whether this phone already has the evening an invitation is for
+    /// (same day, same two teams) as a match of its own
+    public static func twin(of state: TeamLiveState, in all: [TeamMatch]) -> TeamJoinTwin {
+        let day = Date(timeIntervalSince1970: Double(state.team.date) / 1000.0)
+        let calendar = Calendar.current
+        var other: TeamMatch? = nil
+        for match in all where calendar.isDate(match.date, inSameDayAs: day)
+            && sameTeam(match.home, state.team.home) && sameTeam(match.away, state.team.away) {
+            if match.liveId == nil {
+                return match.hasAnyEntry ? TeamJoinTwin.filled(match) : TeamJoinTwin.empty(match)
+            }
+            other = match
+        }
+        if let other { return TeamJoinTwin.sharedElsewhere(other) }
+        return TeamJoinTwin.none
+    }
+
+    /// Nothing was entered yet: this phone's own match gets the live page.
+    /// It keeps its id, its side and its fixture.
+    public func linked(to state: TeamLiveState, invite: TeamInvite) -> TeamMatch {
+        var match = self
+        match.liveId = invite.id
+        match.liveKey = invite.key
+        match.liveOwnerKey = nil
+        _ = match.mergeLive(state)
+        return match
+    }
+
+    /// Takes over the sharer's page: our own partijen are dropped and the
+    /// page's come in. Id, side (`ownSide`) and fixture stay ours.
+    public func takingOver(_ state: TeamLiveState, invite: TeamInvite) -> TeamMatch {
+        var match = self
+        var fresh: [TeamPartij] = []
+        for slot in 1...4 { fresh.append(TeamPartij(slot: slot)) }
+        match.partijen = fresh
+        return match.linked(to: state, invite: invite)
+    }
+
+    /// Something was entered here (games, or a coach/referee match started for it)
+    public var hasAnyEntry: Bool {
+        for partij in partijen where partij.hasEntry || partij.trackingMatchId != nil { return true }
+        return false
+    }
+}
+
+/// A match this phone has for the evening of an invitation
+public enum TeamJoinTwin {
+    case none
+    /// Own match, nothing entered: link it
+    case empty(TeamMatch)
+    /// Own match with partijen: the person chooses
+    case filled(TeamMatch)
+    /// Own match that has another live page already
+    case sharedElsewhere(TeamMatch)
 }
 
 // MARK: - De service

@@ -110,6 +110,8 @@ public struct SharedTeamJoinView: View {
     @State private var ownSide: TeamSide = TeamSide.home
     @State private var busy = false
     @State private var message: String? = nil
+    /// Our own match for this evening that already has partijen: link or take over
+    @State private var filledTwin: TeamMatch? = nil
 
     public init(store: any TeamMatchStore, team: LeagueTeamSnapshot? = nil, initialCode: String = "",
                 onJoined: @escaping (TeamMatch) -> Void, onCancel: @escaping () -> Void) {
@@ -185,8 +187,21 @@ public struct SharedTeamJoinView: View {
                 sideButton(state.team.home, side: TeamSide.home)
                 sideButton(state.team.away, side: TeamSide.away)
             }
-            ActionButton(busy ? "Even geduld…" : "Deelnemen", style: .filled, disabled: busy) {
-                Task { await join(state) }
+            if let twin = filledTwin {
+                Text("Je hebt deze teamwedstrijd al op je telefoon, met partijen die je zelf hebt ingevuld. Neem je de partijen van je teamgenoot over, dan gaan jouw ingevulde partijen verloren.")
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                ActionButton(busy ? "Even geduld…" : "Partijen van mijn teamgenoot overnemen", style: .filled, disabled: busy) {
+                    Task { await takeOver(twin, state) }
+                }
+                ActionButton("Annuleren", style: .text, disabled: busy) {
+                    filledTwin = nil
+                }
+            } else {
+                ActionButton(busy ? "Even geduld…" : "Deelnemen", style: .filled, disabled: busy) {
+                    Task { await join(state) }
+                }
             }
         }
         .padding(14)
@@ -277,6 +292,25 @@ public struct SharedTeamJoinView: View {
                 onJoined(existing)
                 return
             }
+            // The same evening made by hand here: no second copy
+            switch TeamMatch.twin(of: fetched, in: all) {
+            case TeamJoinTwin.empty(let own):
+                let linked = own.linked(to: fetched, invite: invite)
+                try await store.save(linked)
+                busy = false
+                onJoined(linked)
+                return
+            case TeamJoinTwin.filled(let own):
+                filledTwin = own
+                busy = false
+                return
+            case TeamJoinTwin.sharedElsewhere:
+                busy = false
+                message = "Je hebt deze teamwedstrijd al, maar gekoppeld aan een andere livepagina. Stop die eerst of gebruik die."
+                return
+            case TeamJoinTwin.none:
+                break
+            }
             let match = TeamMatch.joining(fetched, invite: invite, ownSide: ownSide)
             try await store.save(match)
             busy = false
@@ -284,6 +318,21 @@ public struct SharedTeamJoinView: View {
         } catch {
             busy = false
             message = "Deelnemen is niet gelukt."
+        }
+    }
+
+    private func takeOver(_ own: TeamMatch, _ fetched: TeamLiveState) async {
+        guard let invite else { return }
+        busy = true
+        do {
+            let taken = own.takingOver(fetched, invite: invite)
+            try await store.save(taken)
+            filledTwin = nil
+            busy = false
+            onJoined(taken)
+        } catch {
+            busy = false
+            message = "Overnemen is niet gelukt."
         }
     }
 }

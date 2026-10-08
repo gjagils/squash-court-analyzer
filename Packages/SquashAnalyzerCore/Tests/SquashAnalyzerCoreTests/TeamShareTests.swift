@@ -83,4 +83,57 @@ final class TeamShareTests: XCTestCase {
         let stored = try await store.loadAll()
         XCTAssertFalse(stored[0].isLive)
     }
+
+    // MARK: Uitnodiging voor een avond die we al hebben
+
+    private let invite = TeamInvite(id: "abcdefghjkmn", key: "K3yK3yK3yK3yK3yK3yK3y_-9")
+
+    private func page() -> TeamLiveState {
+        let json = """
+        {"team":{"home":"All Inn Squash 8","away":"Squash Delft 8","date":1793181600000},
+         "partijen":{"2":{"p1":"Piet","p2":"Jan","bestOf":5,"games":[[11,9],[4,11]],"score":[3,5],"gamesWon":[1,1],"server":1,"side":"R","status":"playing"}},
+         "updatedAt":1793181700000}
+        """
+        return try! JSONDecoder().decode(TeamLiveState.self, from: json.data(using: String.Encoding.utf8)!)
+    }
+
+    func testAnEmptyMatchOfOursIsLinkedAndKeepsItsSide() {
+        let mine = TeamMatch(date: day, home: "All Inn Squash 8", away: "squash delft 8", ownSide: .away, fixtureId: "f1")
+        guard case TeamJoinTwin.empty(let found) = TeamMatch.twin(of: page(), in: [mine]) else { return XCTFail("empty twin expected") }
+        let linked = found.linked(to: page(), invite: invite)
+        XCTAssertEqual(linked.id, mine.id)
+        XCTAssertEqual(linked.ownSide, TeamSide.away, "the sharer's side is not taken over")
+        XCTAssertEqual(linked.fixtureId, "f1")
+        XCTAssertEqual(linked.liveId, invite.id)
+        XCTAssertEqual(linked.liveKey, invite.key)
+        XCTAssertNil(linked.liveOwnerKey)
+        XCTAssertEqual(linked.partij(2).fromLive, true)
+    }
+
+    func testAMatchWithGamesAsksAndTakingOverReplacesOurPartijen() {
+        var mine = TeamMatch(date: day, home: "All Inn Squash 8", away: "Squash Delft 8", ownSide: .home)
+        var partij = TeamPartij(slot: 1, ownPlayer: "Kees", opponentPlayer: "Klaas")
+        XCTAssertTrue(partij.addGame(TeamGame(own: 11, their: 3)))
+        mine.update(partij)
+        guard case TeamJoinTwin.filled(let found) = TeamMatch.twin(of: page(), in: [mine]) else { return XCTFail("filled twin expected") }
+        let taken = found.takingOver(page(), invite: invite)
+        XCTAssertEqual(taken.id, mine.id)
+        XCTAssertEqual(taken.ownSide, TeamSide.home)
+        XCTAssertFalse(taken.partij(1).hasEntry, "our own partij is gone")
+        XCTAssertEqual(taken.partij(2).games.count, 2, "the page's partij came in")
+        XCTAssertTrue(taken.isLive)
+    }
+
+    func testAnotherDayOrAnotherTeamIsNoTwin() {
+        let later = TeamMatch(date: day.addingTimeInterval(3 * 86_400), home: "All Inn Squash 8", away: "Squash Delft 8", ownSide: .home)
+        let other = TeamMatch(date: day, home: "All Inn Squash 8", away: "Squash Leiden 3", ownSide: .home)
+        guard case TeamJoinTwin.none = TeamMatch.twin(of: page(), in: [later, other]) else { return XCTFail("no twin expected") }
+    }
+
+    func testATwinWithAnotherLivePageIsRefused() {
+        var mine = TeamMatch(date: day, home: "All Inn Squash 8", away: "Squash Delft 8", ownSide: .home)
+        mine.liveId = "zzzzzzzzzzzz"
+        mine.liveKey = "K3yK3yK3yK3yK3yK3yK3yK3y"
+        guard case TeamJoinTwin.sharedElsewhere = TeamMatch.twin(of: page(), in: [mine]) else { return XCTFail("refusal expected") }
+    }
 }

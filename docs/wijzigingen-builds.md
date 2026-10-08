@@ -10,7 +10,16 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
-Nog niets.
+- **Uitnodiging voor een avond die je al hebt (8 oktober 2026, gebouwd, nog
+  niet op een telefoon geprobeerd)**: bij *Deelnemen* zoekt de app of je
+  dezelfde avond (zelfde dag, zelfde twee teams) al zelf hebt aangemaakt
+  (`TeamMatch.twin`). Geen tweede kopie meer:
+  - nog niets ingevuld: je eigen wedstrijd krijgt zonder vragen de livepagina
+    (GEDEELD); id, jouw kant en de fixture blijven;
+  - al partijen ingevuld: keuze *Partijen van mijn teamgenoot overnemen* (jouw
+    ingevulde partijen gaan verloren, de tekst zegt dat) of *Annuleren*;
+  - jouw wedstrijd heeft al een andere livepagina: foutmelding;
+  - de kant (`ownSide`) van de deler wordt nooit overgenomen.
 
 ## 3.0 build 2 (geüpload 8 oktober 2026)
 

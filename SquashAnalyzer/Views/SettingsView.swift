@@ -71,6 +71,9 @@ struct SettingsView: View {
             HStack { Image(systemName: "person.3.fill").foregroundColor(AppColors.warmOrange); Text("Mijn team").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary) }
             Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
                 .font(AppFonts.body(13)).foregroundColor(AppColors.textSecondary)
+            Link(destination: UserManual.iPhoneTeamLink) {
+                Text("Waar vind ik mijn teamlink?").font(AppFonts.label(13)).foregroundColor(AppColors.warmOrange)
+            }
             TextField("https://sbn.toernooi.nl/league/.../team/...", text: $teamDraft)
                 .font(AppFonts.body(13)).foregroundColor(AppColors.textPrimary)
                 .textInputAutocapitalization(.never).autocorrectionDisabled()

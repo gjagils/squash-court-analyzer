@@ -33,16 +33,25 @@ public struct SharedLeagueTeamCard: View {
     let onOpen: (LeagueTeamSnapshot) -> Void
     /// Called with the saved or freshly fetched team (the app loads its players into Spelers)
     let onTeam: ((LeagueTeamSnapshot) -> Void)?
+    /// Opens Instellingen, for the prompt shown while no team link is saved; nil hides that button
+    let onSetup: (() -> Void)?
+    /// "Waar vind ik mijn teamlink?" in the manual of this platform
+    let helpURL: URL?
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
+    /// The prompt was closed with the cross: it stays away (Instellingen still has the field)
+    @AppStorage("teamPromptDismissed") private var promptDismissed = false
     @State private var snapshot: LeagueTeamSnapshot?
     @State private var errorMessage: String?
     @State private var loading = false
 
     public init(fetcher: LeagueTeamFetcher, onTeam: ((LeagueTeamSnapshot) -> Void)? = nil,
+                onSetup: (() -> Void)? = nil, helpURL: URL? = nil,
                 onOpen: @escaping (LeagueTeamSnapshot) -> Void) {
         self.fetcher = fetcher
         self.onTeam = onTeam
+        self.onSetup = onSetup
+        self.helpURL = helpURL
         self.onOpen = onOpen
     }
 
@@ -68,10 +77,53 @@ public struct SharedLeagueTeamCard: View {
                 }
                 .padding(16)
                 .background(RoundedRectangle(cornerRadius: 14).fill(SharedColors.surfaceRaised))
+            } else if !promptDismissed {
+                setupPrompt
             }
         }
         .padding(.horizontal, 24)
         .task(id: teamURL) { await load() }
+    }
+
+    /// Shown while no team link is saved: what Mijn team gives, and where to start
+    private var setupPrompt: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top) {
+                Text("Speel je competitie bij SBN?")
+                    .font(SharedFonts.system(16, weight: .semibold))
+                    .foregroundColor(SharedColors.textPrimary)
+                Spacer()
+                Button { promptDismissed = true } label: {
+                    Text("Sluiten")
+                        .font(SharedFonts.system(12))
+                        .foregroundColor(SharedColors.textMuted)
+                }
+                .accessibilityLabel("Sluiten")
+            }
+            Text("Vul de link van je team in en je ziet de stand en het programma, en je teamleden komen vanzelf bij Spelers.")
+                .font(SharedFonts.system(13))
+                .foregroundColor(SharedColors.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 16) {
+                if let onSetup {
+                    Button { onSetup() } label: {
+                        Text("Teamlink invullen")
+                            .font(SharedFonts.system(14, weight: .semibold))
+                            .foregroundColor(SharedColors.accent)
+                    }
+                }
+                if let helpURL {
+                    Link(destination: helpURL) {
+                        Text("Waar vind ik die?")
+                            .font(SharedFonts.system(14))
+                            .foregroundColor(SharedColors.accent)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 14).fill(SharedColors.surfaceRaised))
     }
 
     private func card(_ snapshot: LeagueTeamSnapshot) -> some View {

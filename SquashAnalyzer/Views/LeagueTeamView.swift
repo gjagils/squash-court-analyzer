@@ -6,6 +6,8 @@ import SquashAnalyzerUI
 /// Android), so the followed team stands out in orange and the standings are
 /// fetched only when something can have changed (`LeagueTeamRefresh`).
 struct LeagueTeamCard: View {
+    /// Opens Instellingen (for the prompt while no team link is saved)
+    var onSetup: (() -> Void)? = nil
     @Environment(\.modelContext) private var modelContext
     @State private var openedTeam: LeagueTeamSnapshot?
 
@@ -14,7 +16,7 @@ struct LeagueTeamCard: View {
             // Once per team link: the players of Mijn team into Spelers, marked "In mijn team"
             let store = SwiftDataPlayerStore(context: modelContext)
             Task { _ = await TeamRosterSync.run(snapshot, store: store) }
-        }) { snapshot in
+        }, onSetup: onSetup, helpURL: UserManual.iPhoneTeamLink) { snapshot in
             openedTeam = snapshot
         }
         .sheet(isPresented: Binding(get: { openedTeam != nil }, set: { if !$0 { openedTeam = nil } })) {

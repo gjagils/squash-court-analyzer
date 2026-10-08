@@ -87,6 +87,11 @@ public struct SharedSettingsView: View {
                     Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
                         .font(SharedFonts.system(13))
                         .foregroundColor(SharedColors.textSecondary)
+                    Link(destination: UserManual.androidTeamLink) {
+                        Text("Waar vind ik mijn teamlink?")
+                            .font(SharedFonts.system(13, weight: .semibold))
+                            .foregroundColor(SharedColors.accent)
+                    }
                     TextField("https://sbn.toernooi.nl/league/.../team/...", text: $draft)
                         .accessibilityLabel("Teamlink")
                         // No autocapitalization/URL-keyboard modifiers: this package also builds

@@ -27,7 +27,7 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     HomeMenuHeader(onSettings: onOpenSettings)
-                    LeagueTeamCard()
+                    LeagueTeamCard(onSetup: onOpenSettings)
                     HomeMenuTiles(
                         onCoach: onCoach,
                         onReferee: onReferee,

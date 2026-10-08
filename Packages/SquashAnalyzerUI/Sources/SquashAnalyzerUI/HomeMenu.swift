@@ -449,7 +449,7 @@ public struct AndroidHomeView: View {
                         SharedLeagueTeamCard(fetcher: leagueTeamFetcher, onTeam: { snapshot in
                             let store = playerStore
                             Task { _ = await TeamRosterSync.run(snapshot, store: store) }
-                        }) { snapshot in
+                        }, onSetup: { showingSettings = true }, helpURL: UserManual.androidTeamLink) { snapshot in
                             team = snapshot
                             showingTeam = true
                         }

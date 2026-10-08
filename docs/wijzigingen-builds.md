@@ -10,6 +10,17 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Mijn team makkelijker vinden (8 oktober 2026, gebouwd, nog niet op een
+  telefoon geprobeerd)**: zonder teamlink staat op het beginscherm (iOS en Android) een
+  kaart "Speel je competitie bij SBN?" met *Teamlink invullen* (opent Instellingen),
+  *Waar vind ik die?* en *Sluiten* (de kaart komt dan niet terug;
+  `teamPromptDismissed`). Bij het veld in Instellingen staat *Waar vind ik mijn
+  teamlink?*. Beide linken naar `handleiding/{iphone,android}.html#teamlink-vinden`
+  (`UserManual.iPhoneTeamLink` en `androidTeamLink`). **Dat stuk staat in de
+  handleiding in git maar de website is niet gepubliceerd**: eerst publiceren
+  (`npx wrangler deploy -c server/website-worker/wrangler.jsonc`), anders leiden
+  de links naar het begin van de pagina. Tekst door Gerd-Jan nog te controleren
+  (de stappen op sbn.toernooi.nl zijn niet door mij nagelopen).
 - **Teamleden uit Mijn team in Spelers (8 oktober 2026, gebouwd, nog niet op een
   telefoon geprobeerd)**: zodra de app het team uit Mijn team (de SBN-teampagina
   uit Instellingen) kent, komen de spelers van die pagina automatisch onder

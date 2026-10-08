@@ -95,6 +95,7 @@ Alles draait lokaal op de Mac. Eisen: Xcode, Skip, Android Studio.
 | Core (incl. Skip-transpilatie en de Kotlin-tests) | `cd Packages/SquashAnalyzerCore && swift test` (ook: `skip test --project Packages/SquashAnalyzerCore`, niet `--package-path`) |
 | iOS-tests | `xcodebuild test -project SquashAnalyzer.xcodeproj -scheme SquashAnalyzer -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' -skipPackagePluginValidation -only-testing:SquashAnalyzerTests` |
 | Android unit-tests en debug-APK | `cd Android && export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ANDROID_HOME=$HOME/Library/Android/sdk && ./gradlew testDebugUnitTest assembleDebug` |
+| Mijn team tegen de echte SBN-site (alleen op verzoek; één teampagina en zijn poule) | `cd Packages/SquashAnalyzerCore && SBN_LIVE_TEAM=1 swift test --filter TeamLinkLiveTests` (of `SBN_LIVE_TEAM=<teamlink>`); zonder die variabele wordt hij overgeslagen |
 | Worker | `cd server/live-worker && npm test` (21 tests) |
 | Node-reserve | `cd server/live && node --test` |
 | Lint (incl. versiecontrole iOS/Android en `scripts/test_version.py`) | `scripts/lint.sh` |

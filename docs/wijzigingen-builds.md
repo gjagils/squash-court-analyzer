@@ -19,7 +19,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   (`UserManual.iPhoneTeamLink` en `androidTeamLink`). **Dat stuk staat in de
   handleiding in git maar de website is niet gepubliceerd**: eerst publiceren
   (`npx wrangler deploy -c server/website-worker/wrangler.jsonc`), anders leiden
-  de links naar het begin van de pagina. Tekst door Gerd-Jan nog te controleren
+  de links naar het begin van de pagina. Geen zoektool voor teamlinks: SBN's robots.txt verbiedt crawlen van /league/ (besluit 8 oktober 2026); wie de pagina niet vindt mailt info@squashanalyzer.com (staat in het handleidingstuk). Tekst door Gerd-Jan nog te controleren
   (de stappen op sbn.toernooi.nl zijn niet door mij nagelopen).
 - **Teamleden uit Mijn team in Spelers (8 oktober 2026, gebouwd, nog niet op een
   telefoon geprobeerd)**: zodra de app het team uit Mijn team (de SBN-teampagina

@@ -28,11 +28,11 @@ teamgenoten geprobeerd.
 
 > **Teamwedstrijd live volgen met SquashAnalyzer**
 >
-> **Alleen kijken?** Open de link die de captain deelt. Meer hoef je niet te
+> **Alleen kijken?** Open de link die een teamgenoot deelt. Meer hoef je niet te
 > doen, je hebt geen app nodig.
 >
 > **Zelf je partij bijhouden?** (alleen als je de app hebt)
-> 1. Open de uitnodiging van de captain. Opent de link de app niet? Kopieer
+> 1. Open de uitnodiging van je teamgenoot. Opent de link de app niet? Kopieer
 >    het bericht, open de app, tik op *Competitie* → *Deelnemen met link of
 >    code* en plak.
 > 2. Kies welk team van jou is en tik op *Deelnemen*.
@@ -64,12 +64,12 @@ raakt het bevroren schema (V7) of de server-API.
 
 **Mijn advies:** begin met 1, 4 en 5 (alleen tekst en knoppen, een halve
 dag), stuur de handleiding hierboven nu al naar het team, en kijk na één
-speeldag of 2 en 3 nodig zijn. Een captain die het één keer heeft gedaan, ziet
+speeldag of 2 en 3 nodig zijn. Wie het één keer heeft gedaan, ziet
 vermoedelijk vooral de route in punt 4 als het zware deel.
 
 ## Open vragen voor Gerd-Jan
 
-- Is de teamgenoot die op zijn telefoon zocht de captain of een meespeler?
+- Is de teamgenoot die op zijn telefoon zocht degene die aanmaakte of een meespeler?
   Dat bepaalt of 1 of 2 eerst moet.
 - Mag *Live delen* standaard aan staan bij een nieuwe teamwedstrijd, of wil je
   dat bewust per avond kiezen? (Privacy: er gaan dan voornamen naar de server.)
@@ -84,3 +84,9 @@ tot één partij of team (zie `docs/plan-live-teamwedstrijd.md`), dus hij hoort
 alleen bij teamleden. De rol "captain" bestaat niet in de app: iedereen uit
 het team kan de teamwedstrijd aanmaken; die telefoon wordt de eigenaar en kan
 alleen zelf *Live stoppen* voor iedereen.
+
+Het klikbare voorbeeld is alleen een mock-up. Bij het bouwen gebruiken we de
+bestaande componenten en de stijl van `docs/style/README.md` (`ActionButton`,
+`SectionHeader`, `SharedColors`, de LIVE-capsule uit `TeamLiveCard`) en
+dezelfde plekken, namen en iconen op iPhone en Android. De labels EIGEN en
+GEDEELD worden één gedeeld onderdeel in `SquashAnalyzerUI`.

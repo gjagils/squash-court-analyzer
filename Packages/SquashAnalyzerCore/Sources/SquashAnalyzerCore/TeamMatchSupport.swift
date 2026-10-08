@@ -85,7 +85,8 @@ public enum TeamMatchSupport {
     /// page, keeps its keys in the team match and sends what is filled in.
     /// Throws when the page cannot be made; the team match is then unchanged.
     @MainActor public static func goLive(_ match: TeamMatch, store: any TeamMatchStore,
-                                         live: TeamLive = TeamLive.shared) async throws -> TeamMatch {
+                                         live: TeamLive? = nil) async throws -> TeamMatch {
+        let live = live ?? TeamLive.shared
         let created = try await live.create(match)
         var changed = match
         changed.liveId = created.id

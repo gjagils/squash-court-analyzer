@@ -8,7 +8,11 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.0 build 1)
+## Volgende build (na 3.0 build 2)
+
+Nog niets.
+
+## 3.0 build 2 (geüpload 8 oktober 2026)
 
 - **Teamwedstrijd: eigen of gedeeld, en delen op één plek (8 oktober 2026,
   gebouwd, nog niet op een telefoon geprobeerd)**: zie

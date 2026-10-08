@@ -549,6 +549,7 @@ public struct SharedTeamMatchView: View {
                 .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.accent)
             Text(title).font(SharedFonts.system(9)).tracking(1.0).foregroundColor(SharedColors.textSecondary)
+                .lineLimit(1).minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity)
     }

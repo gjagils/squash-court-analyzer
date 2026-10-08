@@ -10,6 +10,8 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Kleine fix (testmelding 8 oktober 2026)**: in de kop van het teamwedstrijdscherm brak
+  COMPETITIEPUNTEN af ("COMPETITIEPUNTE / N", iOS en Android); het label schaalt nu mee op één regel.
 - **Uitnodiging voor een avond die je al hebt (8 oktober 2026, gebouwd, nog
   niet op een telefoon geprobeerd)**: bij *Deelnemen* zoekt de app of je
   dezelfde avond (zelfde dag, zelfde twee teams) al zelf hebt aangemaakt

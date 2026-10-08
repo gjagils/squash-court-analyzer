@@ -94,3 +94,48 @@ public enum TeamBackup {
         return added
     }
 }
+
+/// Loads the players of Mijn team (the SBN team page) into Spelers, once per
+/// team link, and marks them "In mijn team". A name already in Spelers only
+/// gets the mark; nothing else of that player changes.
+public enum TeamRosterSync {
+    /// The team link (source URL) the players were last loaded for
+    public static let syncedKey = "teamRosterSyncedFor"
+
+    public static func needsSync(_ snapshot: LeagueTeamSnapshot, in defaults: UserDefaults = UserDefaults.standard) -> Bool {
+        !snapshot.players.isEmpty && defaults.string(forKey: syncedKey) != snapshot.source.absoluteString
+    }
+
+    /// Returns how many new players were made; 0 when it already ran for this link.
+    /// A failing store leaves the link unmarked, so the next start tries again.
+    @MainActor @discardableResult
+    public static func run(_ snapshot: LeagueTeamSnapshot, store: any PlayerProfileStore,
+                           in defaults: UserDefaults = UserDefaults.standard) async -> Int {
+        guard needsSync(snapshot, in: defaults) else { return 0 }
+        guard var known = try? await store.loadPlayers() else { return 0 }
+        var ids = TeamRoster.ids(in: defaults)
+        var added = 0
+        do {
+            for incoming in snapshot.players {
+                let name = incoming.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                if name.isEmpty { continue }
+                var matchId: String? = nil
+                for player in known where TeamMatch.sameTeam(player.name, name) { matchId = player.id }
+                if matchId == nil {
+                    let made = PlayerProfile(name: name)
+                    try await store.savePlayer(made)
+                    known.append(made)
+                    matchId = made.id
+                    added += 1
+                }
+                if let matchId, !ids.contains(matchId) { ids.append(matchId) }
+            }
+        } catch {
+            TeamRoster.replace(ids, in: defaults)
+            return added
+        }
+        TeamRoster.replace(ids, in: defaults)
+        defaults.set(snapshot.source.absoluteString, forKey: syncedKey)
+        return added
+    }
+}

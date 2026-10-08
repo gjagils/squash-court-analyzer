@@ -10,6 +10,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Teamleden uit Mijn team in Spelers (8 oktober 2026, gebouwd, nog niet op een
+  telefoon geprobeerd)**: zodra de app het team uit Mijn team (de SBN-teampagina
+  uit Instellingen) kent, komen de spelers van die pagina automatisch onder
+  Spelers en krijgen ze meteen *In mijn team* (`TeamRosterSync`). Eenmalig per
+  teamlink: bij het invullen van de link, of bij de eerste start met een link
+  zonder dat dit eerder is gedaan. Een naam die al bij Spelers staat krijgt
+  alleen het vinkje (hoofdletterongevoelig; verder blijft de speler zoals hij
+  is). Een bewust verwijderde speler komt niet terug zolang de link gelijk blijft.
 - **Kleine fix (testmelding 8 oktober 2026)**: in de kop van het teamwedstrijdscherm brak
   COMPETITIEPUNTEN af ("COMPETITIEPUNTE / N", iOS en Android); het label schaalt nu mee op één regel.
 - **Uitnodiging voor een avond die je al hebt (8 oktober 2026, gebouwd, nog

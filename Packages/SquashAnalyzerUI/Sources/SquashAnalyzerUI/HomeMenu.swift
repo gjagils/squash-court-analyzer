@@ -446,7 +446,10 @@ public struct AndroidHomeView: View {
                 ScrollView {
                     VStack(spacing: 16) {
                         HomeMenuHeader { showingSettings = true }
-                        SharedLeagueTeamCard(fetcher: leagueTeamFetcher) { snapshot in
+                        SharedLeagueTeamCard(fetcher: leagueTeamFetcher, onTeam: { snapshot in
+                            let store = playerStore
+                            Task { _ = await TeamRosterSync.run(snapshot, store: store) }
+                        }) { snapshot in
                             team = snapshot
                             showingTeam = true
                         }

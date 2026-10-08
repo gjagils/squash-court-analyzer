@@ -31,14 +31,18 @@ enum LeagueDates {
 public struct SharedLeagueTeamCard: View {
     let fetcher: LeagueTeamFetcher
     let onOpen: (LeagueTeamSnapshot) -> Void
+    /// Called with the saved or freshly fetched team (the app loads its players into Spelers)
+    let onTeam: ((LeagueTeamSnapshot) -> Void)?
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     @State private var snapshot: LeagueTeamSnapshot?
     @State private var errorMessage: String?
     @State private var loading = false
 
-    public init(fetcher: LeagueTeamFetcher, onOpen: @escaping (LeagueTeamSnapshot) -> Void) {
+    public init(fetcher: LeagueTeamFetcher, onTeam: ((LeagueTeamSnapshot) -> Void)? = nil,
+                onOpen: @escaping (LeagueTeamSnapshot) -> Void) {
         self.fetcher = fetcher
+        self.onTeam = onTeam
         self.onOpen = onOpen
     }
 
@@ -82,6 +86,7 @@ public struct SharedLeagueTeamCard: View {
         // The saved team (also after "Vernieuwen" in the team screen); another link starts empty
         if let cached = LeagueTeamStorage.cachedSnapshot(for: link) {
             snapshot = cached
+            onTeam?(cached)
         } else if snapshot?.source != link.url {
             snapshot = nil
         }
@@ -94,6 +99,7 @@ public struct SharedLeagueTeamCard: View {
             let result = try await fetcher.fetch(link)
             LeagueTeamStorage.store(result)
             snapshot = result
+            onTeam?(result)
         } catch {
             errorMessage = (error as? LeagueTeamError)?.message ?? LeagueTeamError.unavailable.message
         }

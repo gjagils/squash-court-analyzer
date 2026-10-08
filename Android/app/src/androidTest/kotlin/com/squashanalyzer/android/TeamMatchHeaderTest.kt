@@ -36,7 +36,8 @@ class TeamMatchHeaderTest {
     }
 
     private fun lineCount(text: String): Int {
-        val node = compose.onNodeWithText(text).fetchSemanticsNode()
+        // PARTIJEN is also the heading of the list below: the first one is the stat under the score
+        val node = compose.onAllNodesWithText(text)[0].fetchSemanticsNode()
         val results = mutableListOf<TextLayoutResult>()
         node.config[SemanticsActions.GetTextLayoutResult].action?.invoke(results)
         return results.first().lineCount

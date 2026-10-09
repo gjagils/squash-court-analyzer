@@ -278,8 +278,20 @@ final class TeamLiveTests: XCTestCase {
                              ownSide: .home, partijen: [original])
         let payload = original.livePayload(in: team)!
 
-        // On a teammate's phone (also home): the ending's games stay last
-        var copy = TeamPartij.fromLive(payload, slot: 2, ownIsHome: true)!
+        XCTAssertEqual(payload.order, [1, 0, 0, 0])
+
+        // On a teammate's phone, home and away: the order of the evening
+        let same = TeamPartij.fromLive(payload, slot: 2, ownIsHome: true)!
+        XCTAssertEqual(same.gamesText, "–, 8-11, 11-3, 11-0")
+        XCTAssertEqual(same.games, original.games)
+        let away = TeamPartij.fromLive(payload, slot: 2, ownIsHome: false)!
+        XCTAssertEqual(away.gamesText, "–, 11-8, 3-11, 0-11")
+        XCTAssertEqual(away.standText, "1-3")
+
+        // From an older app (no order): the ending's games stay last
+        var older = payload
+        older.order = nil
+        var copy = TeamPartij.fromLive(older, slot: 2, ownIsHome: true)!
         XCTAssertEqual(copy.gamesText, "8-11, –, 11-3, 11-0")
         XCTAssertEqual(copy.standText, original.standText)
         XCTAssertEqual(copy.endedBy, TeamPartijEnd.retired)
@@ -287,11 +299,17 @@ final class TeamLiveTests: XCTestCase {
         XCTAssertEqual(copy.standText, "1-1", "the game won before and 8-11 stay, the ending's two games go")
         XCTAssertEqual(copy.games.filter { game in !game.hasPoints }.count, 1)
 
-        // Without an ending nothing moves: the unscored games come after the scored ones
+        // An order that does not fit the games is ignored
         var plain = TeamPartij(slot: 3)
         XCTAssertTrue(plain.addGame(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: false)))
         XCTAssertTrue(plain.addGame(TeamGame(own: 11, their: 6)))
-        XCTAssertEqual(TeamPartij.fromLive(plain.livePayload(in: team)!, slot: 3, ownIsHome: true)?.gamesText, "11-6, –")
+        var wrong = plain.livePayload(in: team)!
+        XCTAssertEqual(TeamPartij.fromLive(wrong, slot: 3, ownIsHome: true)?.gamesText, "–, 11-6")
+        wrong.order = [0, 1]
+        XCTAssertEqual(TeamPartij.fromLive(wrong, slot: 3, ownIsHome: true)?.gamesText, "11-6, –")
+        // Only scores: no order is sent
+        let onlyScores = TeamPartij(slot: 1, games: [TeamGame(own: 11, their: 2)])
+        XCTAssertNil(onlyScores.livePayload(in: team)?.order)
     }
 
     // MARK: De service
@@ -422,6 +440,14 @@ final class TeamLiveTests: XCTestCase {
         live.forward(matchId: matchId, snapshot: snapshot("Jan", "Piet", score: [2, 0]))
         try await Task.sleep(nanoseconds: 50_000_000)
         XCTAssertEqual(transport.requests.count, sent)
+
+        // Binding a match again starts fresh: a 404 that passed does not keep the partij off the page
+        transport.putStatus = 200
+        live.bind(matchId: matchId, teamId: "abcdefghjkmn", writeKey: "K3yK3yK3yK3yK3yK3yK3yK3y", slot: 2,
+                  homeIsPlayer1: true, homeLabel: "Jan", awayLabel: "")
+        XCTAssertFalse(live.isGone("abcdefghjkmn"))
+        live.forward(matchId: matchId, snapshot: snapshot("Jan", "Piet", score: [3, 0]))
+        try await waitUntil { transport.requests.count > sent }
     }
 
     @MainActor

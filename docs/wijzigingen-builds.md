@@ -10,6 +10,17 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Kleine punten uit de core-review (9 oktober 2026)**: *Sneltrein* is ook in de
+  scheidsrechtermodus te verdienen en heeft geen label Coach meer (besluit Gerd-Jan; ook
+  op `website/badges/`, de website moet nog gepubliceerd worden). Een live-partij die
+  één keer "pagina bestaat niet" (404) kreeg, stuurt weer zodra de wedstrijd opnieuw aan
+  de partij gekoppeld wordt (`TeamLive.bind`). De Start-tik en de rallyklok gebruiken de
+  klok van de game (`Game.now`), zoals de punten.
+- **Live-pagina kent de volgorde van games zonder score (9 oktober 2026)**: een partij op
+  de live-pagina draagt `order` mee (per game: 0 = met score, 1/2 = zonder score, gewonnen
+  door thuis/uit); de Worker bewaart het alleen als het klopt met de games. Een
+  teamgenoot ziet zo "–, 8-11, 11-3, 11-0" in dezelfde volgorde. Van een oudere app
+  (zonder `order`) blijven de games van een opgave achteraan.
 - **Teambestand en volgorde van games (9 oktober 2026, uit de core-review, nog niet op
   een telefoon geprobeerd)**: het teambestand wordt alleen als leeg gezien als het er
   niet is; kan het niet gelezen worden, dan meldt de app dat en slaat er niets overheen

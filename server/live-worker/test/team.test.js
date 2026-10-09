@@ -87,6 +87,18 @@ describe('input', () => {
     expect(validatePartij('nope')).toBeNull();
   });
 
+  it('the order of games without a score is kept when it fits', () => {
+    const base = { status: 'finished', games: [[8, 11], [11, 3], [11, 0]], gamesWon: [3, 1], winner: 1 };
+    expect(validatePartij({ ...base, order: [1, 0, 0, 0] }).order).toEqual([1, 0, 0, 0]);
+    expect(validatePartij(base).order).toBeUndefined();
+    // Not as many scored games as `games`, more unscored wins than games won, or junk: left out
+    expect(validatePartij({ ...base, order: [1, 0, 0] }).order).toBeUndefined();
+    expect(validatePartij({ ...base, order: [2, 2, 0, 0, 0] }).order).toBeUndefined();
+    expect(validatePartij({ ...base, order: [1, 0, 0, 3] }).order).toBeUndefined();
+    expect(validatePartij({ ...base, order: 'nope' }).order).toBeUndefined();
+    expect(validatePartij({ ...base, order: [1, 1, 1, 1, 1, 1, 1, 0] }).order).toBeUndefined();
+  });
+
   it('a partij that was not played out keeps how it ended, and nothing else', () => {
     const ended = validatePartij({ status: 'finished', games: [[0, 11], [0, 11], [0, 11]], gamesWon: [0, 3], winner: 2, end: 'walkover', endAfter: 0 });
     expect(ended).toMatchObject({ end: 'walkover', endAfter: 0, gamesWon: [0, 3] });

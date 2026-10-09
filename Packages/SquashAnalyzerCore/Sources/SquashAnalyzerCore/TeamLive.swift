@@ -29,12 +29,17 @@ public struct TeamLivePartij: Codable, Equatable, Sendable {
     /// above already hold what the ending wrote), and how many games came before it
     public var end: String?
     public var endAfter: Int?
+    /// Where the games without a score were, per game in play order: 0 = the
+    /// next game of `games`, 1 = no score, won by home, 2 = no score, won by
+    /// away. Nil from an older app (or a tracked match, which has no such games).
+    public var order: [Int]?
 
     public init(p1: String, p2: String, bestOf: Int, games: [[Int]], score: [Int], gamesWon: [Int],
                 server: Int, side: String, status: LiveStatus, lastPoint: String? = nil, winner: Int? = nil,
-                end: String? = nil, endAfter: Int? = nil) {
+                end: String? = nil, endAfter: Int? = nil, order: [Int]? = nil) {
         self.end = end
         self.endAfter = endAfter
+        self.order = order
         self.p1 = p1
         self.p2 = p2
         self.bestOf = bestOf
@@ -209,9 +214,13 @@ public extension TeamPartij {
         guard hasEntry else { return nil }
         let homeIsOwn = match.ownSide == TeamSide.home
         var scored: [[Int]] = []
+        var order: [Int] = []
         for game in games {
             if let own = game.ownPoints, let their = game.theirPoints {
                 scored.append(homeIsOwn ? [own, their] : [their, own])
+                order.append(0)
+            } else {
+                order.append(game.ownWon == homeIsOwn ? 1 : 2)
             }
         }
         let ownName = LiveSnapshot.firstName(ownPlayer, fallback: "")
@@ -223,7 +232,18 @@ public extension TeamPartij {
         return TeamLivePartij(p1: homeIsOwn ? ownName : theirName, p2: homeIsOwn ? theirName : ownName,
                               bestOf: bestOf, games: scored, score: [0, 0], gamesWon: [homeGames, awayGames],
                               server: 1, side: "R", status: isOver ? LiveStatus.finished : LiveStatus.between,
-                              winner: winner, end: endedBy?.rawValue, endAfter: endedAfter)
+                              winner: winner, end: endedBy?.rawValue, endAfter: endedAfter,
+                              order: order.count > scored.count ? order : nil)
+    }
+
+    /// Whether a game order from the page matches the games that were taken in
+    static func fits(_ order: [Int], scored: Int, homeUnscored: Int, awayUnscored: Int) -> Bool {
+        var counts = [0, 0, 0]
+        for item in order {
+            if item < 0 || item > 2 { return false }
+            counts[item] += 1
+        }
+        return counts[0] == scored && counts[1] == homeUnscored && counts[2] == awayUnscored
     }
 
     /// A partij from the live page, seen from our team; nil when it holds nothing yet
@@ -256,17 +276,31 @@ public extension TeamPartij {
         var unscored: [TeamGame] = []
         for _ in 0..<homeUnscored { unscored.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsHome)) }
         for _ in 0..<awayUnscored { unscored.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsHome)) }
-        // The page does not say where the unscored games were. An ending's
-        // games (opgave, niet verschenen) are the last ones and always have a
-        // score, so they stay last: taking the ending back here (`clearEnd`)
-        // must remove exactly those, not a game played before it
-        var endingGames = 0
-        if live.end != nil, let after = live.endAfter {
-            endingGames = max(0, min(scored.count, scored.count + unscored.count - after))
+        var games: [TeamGame] = []
+        if let order = live.order, TeamPartij.fits(order, scored: scored.count, homeUnscored: homeUnscored, awayUnscored: awayUnscored) {
+            // The page says where the games without a score were
+            var nextScored = 0
+            for item in order {
+                if item == 0 {
+                    games.append(scored[nextScored])
+                    nextScored += 1
+                } else {
+                    games.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: (item == 1) == ownIsHome))
+                }
+            }
+        } else {
+            // An older app does not say. An ending's games (opgave, niet
+            // verschenen) are the last ones and always have a score, so they stay
+            // last: taking the ending back here (`clearEnd`) must remove exactly
+            // those, not a game played before it
+            var endingGames = 0
+            if live.end != nil, let after = live.endAfter {
+                endingGames = max(0, min(scored.count, scored.count + unscored.count - after))
+            }
+            games = Array(scored.prefix(scored.count - endingGames))
+            games.append(contentsOf: unscored)
+            games.append(contentsOf: scored.suffix(endingGames))
         }
-        var games: [TeamGame] = Array(scored.prefix(scored.count - endingGames))
-        games.append(contentsOf: unscored)
-        games.append(contentsOf: scored.suffix(endingGames))
         var partij = TeamPartij(slot: slot, ownPlayer: ownIsHome ? live.p1 : live.p2,
                                 opponentPlayer: ownIsHome ? live.p2 : live.p1, games: games, bestOf: bestOf)
         partij.fromLive = true
@@ -429,6 +463,9 @@ public final class TeamLive {
     /// match: every change of its state also goes to that partij
     public func bind(matchId: UUID, teamId: String, writeKey: String, slot: Int,
                      homeIsPlayer1: Bool, homeLabel: String, awayLabel: String) {
+        // A fresh start: one 404 earlier (perhaps a passing hiccup) must not keep
+        // this partij off the page; if the page is really gone, the next send says so again
+        goneTeamIds = goneTeamIds.filter { id in id != teamId }
         bindings[matchId] = Binding(teamId: teamId, key: writeKey, slot: slot, homeIsPlayer1: homeIsPlayer1,
                                     homeLabel: homeLabel, awayLabel: awayLabel)
     }

@@ -174,6 +174,18 @@ export function validateTeamHeader(input) {
  * but the names may be empty, and a hand-filled partij has fewer games than
  * games won (their scores are unknown). `{ empty: true }` clears the slot.
  */
+function cleanOrder(value, scored, gamesWon) {
+  if (!Array.isArray(value) || value.length > 7) return null;
+  const counts = [0, 0, 0];
+  for (const item of value) {
+    const n = cleanInt(item, 0, 2);
+    if (n === null) return null;
+    counts[n] += 1;
+  }
+  if (counts[0] !== scored || counts[1] > gamesWon[0] || counts[2] > gamesWon[1]) return null;
+  return value.map(Number);
+}
+
 export function validatePartij(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
   if (input.empty === true) return { empty: true };
@@ -205,6 +217,11 @@ export function validatePartij(input) {
   }
   const winner = cleanInt(input.winner, 1, 2);
   if (winner !== null) partij.winner = winner;
+  // Where the games without a score were: per game in play order 0 = the next
+  // game of `games`, 1 = no score, won by home, 2 = no score, won by away.
+  // Only kept when it fits the games and games won; older apps do not send it.
+  const order = cleanOrder(input.order, games.length, gamesWon);
+  if (order) partij.order = order;
   // A partij not played out (a player gave up or did not show up)
   if (input.end === 'retired' || input.end === 'walkover') {
     partij.end = input.end;

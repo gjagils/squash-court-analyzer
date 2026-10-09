@@ -15,6 +15,9 @@ public enum TeamMatchFileError: Error, Equatable {
     /// The file could not be read; it was set aside under `savedAs` (in the
     /// same folder) so that nothing is lost and a new save starts clean
     case unreadable(savedAs: String)
+    /// The file is there but could not be read (locked, an I/O error): it is
+    /// left alone, and nothing may be saved over it
+    case readFailed
 }
 
 /// The file holds `{"version": 1, "matches": [...]}`; the first builds wrote a
@@ -30,12 +33,19 @@ public enum TeamMatchFile {
     public static let fileName = "team-matches.json"
     public static let formatVersion = 1
 
-    /// All matches; an absent file is an empty list. A file that cannot be
-    /// decoded is moved aside and reported, never silently treated as empty:
-    /// the next save would overwrite what is in it.
+    /// All matches; only an absent file is an empty list. A file that cannot be
+    /// read or decoded is reported, never silently treated as empty: the next
+    /// save would overwrite what is in it. One that cannot be decoded is also
+    /// moved aside, so a new save starts clean.
     public static func load(in directory: URL) throws -> [TeamMatch] {
         let url = directory.appendingPathComponent(TeamMatchFile.fileName)
-        guard let data = try? Data(contentsOf: url) else { return [] }
+        guard FileManager.default.fileExists(atPath: url.path) else { return [] }
+        let data: Data
+        do {
+            data = try Data(contentsOf: url)
+        } catch {
+            throw TeamMatchFileError.readFailed
+        }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         var decoded: [TeamMatch]? = nil
@@ -53,7 +63,8 @@ public enum TeamMatchFile {
     }
 
     /// Like `load`, for code that cannot handle an error: an unreadable file
-    /// is set aside and the list is empty
+    /// is set aside and the list is empty. Not for a backup: there "empty"
+    /// would tell a restore that this phone has no team matches
     public static func read(in directory: URL) -> [TeamMatch] {
         return (try? load(in: directory)) ?? []
     }

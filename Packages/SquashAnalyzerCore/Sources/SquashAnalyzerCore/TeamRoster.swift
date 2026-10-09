@@ -48,16 +48,19 @@ public enum TeamBackup {
     /// The backup with this phone's team matches and team players added
     public static func attach(_ backup: FullBackup, directory: URL) -> FullBackup {
         var result = backup
-        var matches = TeamMatchFile.read(in: directory)
-        // The live key of an evening is no use after the evening: not in the file
-        for index in 0..<matches.count {
-            matches[index].liveId = nil
-            matches[index].liveKey = nil
-            matches[index].liveOwnerKey = nil
+        // Written also when empty: a restore that replaces everything must be
+        // able to tell "this phone has none" from "an older file that does not
+        // say". A team file that cannot be read is left out (nil, "does not
+        // say"), so this backup never wipes team matches on another phone.
+        if var matches = try? TeamMatchFile.load(in: directory) {
+            // The live key of an evening is no use after the evening: not in the file
+            for index in 0..<matches.count {
+                matches[index].liveId = nil
+                matches[index].liveKey = nil
+                matches[index].liveOwnerKey = nil
+            }
+            result.teamMatches = matches
         }
-        // Always written, also empty: a restore that replaces everything must be
-        // able to tell "this phone has none" from "an older file that does not say"
-        result.teamMatches = matches
         result.teamPlayerIds = TeamRoster.ids()
         return result
     }

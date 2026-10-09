@@ -190,7 +190,7 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertEqual(partij.games.count, 4)
         XCTAssertEqual(partij.ownGames, 3)
         XCTAssertEqual(partij.theirGames, 1)
-        XCTAssertEqual(partij.gamesText, "11-8, 9-11, 11-6, –")
+        XCTAssertEqual(partij.gamesText, "–, 11-8, 9-11, 11-6", "the game before scoring started comes first")
         XCTAssertFalse(partij.hasAllPoints)
         XCTAssertEqual(partij.linkedMatchId, "m1")
         XCTAssertEqual(partij.linkedKind, "coach")
@@ -202,7 +202,7 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertEqual(theirs.ownPlayer, "Piet")
         XCTAssertEqual(theirs.ownGames, 1)
         XCTAssertEqual(theirs.theirGames, 3)
-        XCTAssertEqual(theirs.games[0].text, "8-11")
+        XCTAssertEqual(theirs.games[1].text, "8-11")
         XCTAssertEqual(theirs.ownWon, false)
 
         theirs.unlink()
@@ -317,6 +317,36 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertEqual(theirs.gamesText, "11-0, 0-11, 11-0")
         XCTAssertEqual(theirs.ownGames, 2)
         XCTAssertEqual(theirs.linkedKind, "referee")
+    }
+
+    func testVernieuwenKeepsTheGamesInTheOrderOfTheMatch() {
+        // The coach match of testLinkingALiveMatchTakesItsGames, as the history lists it:
+        // one game before scoring (player 2), two tracked, one filled in (player 1)
+        let coach = Match()
+        coach.setupMatch(player1: "Gerd-Jan", player2: "Piet", startingServer: .player1,
+                         player1CoachingFocus: [], player2CoachingFocus: [], player1GamesBefore: 0, player2GamesBefore: 1)
+        for _ in 0..<11 { coach.currentGame.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.backLeft, with: ShotType.drive) }
+        coach.startNewGame()
+        for _ in 0..<11 { coach.currentGame.addPoint(to: Player.player2, pointType: PointType.winner, at: CourtZone.backLeft, with: ShotType.drive) }
+        coach.startNewGame()
+        XCTAssertTrue(coach.completeResult(with: [.player1, .player1]))
+        let summary = MatchHistorySummary(id: coach.id.uuidString, kind: "coach", player1Name: "Gerd-Jan", player2Name: "Piet",
+                                          player1Games: 3, player2Games: 2, status: "completed",
+                                          updatedAt: Date(timeIntervalSince1970: 1_793_181_600.0),
+                                          games: [HistoryGameScore(player1Score: 11, player2Score: 0, winner: Player.player1.rawValue),
+                                                  HistoryGameScore(player1Score: 0, player2Score: 11, winner: Player.player2.rawValue)],
+                                          untrackedBefore: 1, untrackedAfter: 2, player1GamesBefore: 0)
+        for ownIsPlayer1 in [true, false] {
+            var linked = TeamPartij(slot: 1)
+            linked.link(coach: coach, ownIsPlayer1: ownIsPlayer1)
+            var refreshed = linked
+            refreshed.refreshLink(from: summary)
+            XCTAssertEqual(refreshed.games, linked.games, "Vernieuwen changes nothing (own is player 1: \(ownIsPlayer1))")
+        }
+        var partij = TeamPartij(slot: 1)
+        partij.link(summary, ownIsPlayer1: true)
+        XCTAssertEqual(partij.gamesText, "–, 11-0, 0-11, –, –")
+        XCTAssertEqual(partij.games.map { game in game.ownWon }, [false, true, false, true, true])
     }
 
     private func decided() -> TeamMatch {
@@ -481,6 +511,55 @@ final class TeamMatchTests: XCTestCase {
         if let before { defaults.set(before, forKey: TeamRoster.storageKey) } else { defaults.removeObject(forKey: TeamRoster.storageKey) }
         try? FileManager.default.removeItem(at: folder)
         try? FileManager.default.removeItem(at: other)
+    }
+
+    @MainActor
+    func testABackupLeavesOutATeamFileItCannotRead() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("teambackup-\(UUID().uuidString)")
+        let store = JSONFileTeamMatchStore(directory: folder)
+        try await store.save(decided())
+        let url = folder.appendingPathComponent(TeamMatchFile.fileName)
+        let whole = try Data(contentsOf: url)
+        try whole.subdata(in: 0..<(whole.count / 2)).write(to: url)
+
+        let plain = FullBackup(version: 2, backupDate: Date(timeIntervalSince1970: 1_793_181_600.0), players: [], matches: [], standaloneGames: [])
+        let attached = TeamBackup.attach(plain, directory: folder)
+        XCTAssertNil(attached.teamMatches, "not \"this phone has none\": a replacing restore must wipe nothing")
+
+        // A replacing restore of that backup keeps the team matches of the other phone
+        let other = FileManager.default.temporaryDirectory.appendingPathComponent("teambackup-\(UUID().uuidString)")
+        try TeamMatchFile.write([decided()], in: other)
+        try TeamBackup.restore(attached, directory: other, replacing: true)
+        XCTAssertEqual(TeamMatchFile.read(in: other).count, 1)
+        try? FileManager.default.removeItem(at: folder)
+        try? FileManager.default.removeItem(at: other)
+    }
+
+    @MainActor
+    func testATeamFileThatCannotBeReadIsNeverSavedOver() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("teamfile-\(UUID().uuidString)")
+        let store = JSONFileTeamMatchStore(directory: folder)
+        // Something is there that cannot be read (here a folder under the file's name)
+        let url = folder.appendingPathComponent(TeamMatchFile.fileName)
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        do {
+            _ = try await store.loadAll()
+            XCTFail("a file that cannot be read must be reported, not read as empty")
+        } catch let error as TeamMatchFileError {
+            #if !SKIP
+            XCTAssertEqual(error, TeamMatchFileError.readFailed)
+            #else
+            // Skip reads a folder as unreadable content and sets it aside: also nothing lost
+            XCTAssertNotEqual(error, TeamMatchFileError.readFailed)
+            #endif
+        }
+        _ = try? await store.save(decided())
+        // What was there is kept: in its place, or set aside under another name
+        let names = try FileManager.default.contentsOfDirectory(atPath: folder.path)
+        let setAside = names.contains { name in name.hasPrefix("team-matches.unreadable-") }
+        let inPlace = FileManager.default.fileExists(atPath: url.path) && (try? Data(contentsOf: url)) == nil
+        XCTAssertTrue(setAside || inPlace, "left alone: \(names)")
+        try? FileManager.default.removeItem(at: folder)
     }
 
     @MainActor

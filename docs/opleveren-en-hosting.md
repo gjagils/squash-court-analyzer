@@ -218,8 +218,8 @@ GitHub-secrets.
 ## 5. Open punten (voor wie verder wil)
 
 - 3.0 build 1 is op 6 oktober 2026 geüpload (TestFlight in bèta-review, Play internal, alpha en Google Group testers). Na goedkeuring `scripts/testflight_expire_old.py` draaien (houdt nu 3.0 (1) en 2.2 (18)). Schermafbeeldingen en Play-listing zijn bij deze build niet vernieuwd (de App Store-versie 3.0 bestaat nog niet in App Store Connect).
-- Live teamwedstrijd is getest tussen iOS-simulator, Android-emulator, de
-  iPhone en de A13 zijn nog niet door Gerd-Jan geprobeerd.
+- Live teamwedstrijd is getest tussen iOS-simulator en Android-emulator, en
+  door Gerd-Jan op de iPhone en de A13 (9 oktober 2026).
 - Vergelijken met de SBN-uitslag en een badgecategorie Teamspeler (zie
   `docs/competitie-vervolg.md`).
 - De NAS-stacks 85 en 109 opruimen zodra Gerd-Jan de reserve niet meer wil.

@@ -16,7 +16,7 @@ teamlink. Teamdata reist mee in back-upformaat 4; de apps schrijven sinds 6 okto
 Dit is een bewuste aanvulling op het eerdere streven formaten ongemoeid te laten.
 
 Simulator- en emulatortests staan als geslaagd gedocumenteerd. Praktijktesten
-van live teamwedstrijden op iPhone en A13 staan nog open. De app-build is nog
+van live teamwedstrijden op iPhone en A13 zijn op 9 oktober 2026 door Gerd-Jan gedaan. De app-build is nog
 niet geüpload. Zie [Competitie](competitie-vervolg.md),
 [live teamwedstrijden](plan-live-teamwedstrijd.md) en
 [opleveren en hosting](opleveren-en-hosting.md).

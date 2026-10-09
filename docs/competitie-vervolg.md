@@ -58,6 +58,6 @@ begint hier, vinkt af wat klaar is en commit per punt.
 
 ## Nog open
 
-- Op een echte telefoon proberen (iPhone en A13 hebben de debug-build van
-  6 oktober; Gerd-Jan heeft het nog niet geprobeerd).
+- ~~Op een echte telefoon proberen~~: gedaan door Gerd-Jan op iPhone en A13
+  (9 oktober 2026).
 - Upload van build 19 naar TestFlight en Play: alleen als Gerd-Jan het zegt.

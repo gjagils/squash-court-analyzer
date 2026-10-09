@@ -169,7 +169,8 @@ struct PlayerManagementView: View {
                                        badgeStore: SwiftDataBadgeSummaryStore(context: modelContext),
                                        shareText: { IOSShare.text($0) },
                                        shareCard: { snapshot, text in IOSShare.card(snapshot, text: text) },
-                                       cardInbox: badgeInbox)
+                                       cardInbox: badgeInbox,
+                                       historyStore: SwiftDataMatchHistoryStore(context: modelContext))
             }
             .navigationDestination(item: $playerToEdit) { player in
                 PlayerEditSheet(player: player) { name, focus, notes, photo in

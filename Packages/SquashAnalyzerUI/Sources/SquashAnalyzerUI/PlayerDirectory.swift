@@ -117,11 +117,14 @@ public struct PlayerDirectoryView: View {
     private let filePicker: (any PlayerFilePicker)?
     /// "Deel kaart" with a picture
     private let shareCard: ((CardSnapshot, String) -> Void)?
+    /// The matches for a player's profile; nil leaves the profile out
+    private let historyStore: (any MatchHistoryStore)?
 
     public init(store: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 shareText: @escaping (String) -> Void, cardInbox: CardInbox, teamImporter: (any TeamLinkImporter)? = nil,
                 photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil,
-                shareCard: ((CardSnapshot, String) -> Void)? = nil) {
+                shareCard: ((CardSnapshot, String) -> Void)? = nil, historyStore: (any MatchHistoryStore)? = nil) {
+        self.historyStore = historyStore
         self.teamImporter = teamImporter
         self.photoStore = photoStore
         self.filePicker = filePicker
@@ -286,7 +289,7 @@ public struct PlayerDirectoryView: View {
         .navigationDestination(isPresented: Binding(get: { badgesForPlayer != nil }, set: { if !$0 { badgesForPlayer = nil } })) {
             if let player = badgesForPlayer {
                 SharedPlayerBadgesView(playerId: player.id, playerName: player.name, photo: photos[player.id], badgeStore: badgeStore, shareText: shareText,
-                                       shareCard: shareCard, cardInbox: cardInbox)
+                                       shareCard: shareCard, cardInbox: cardInbox, historyStore: historyStore)
             }
         }
         .alert("Speler verwijderen?", isPresented: $confirmDelete) {

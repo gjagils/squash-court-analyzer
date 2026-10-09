@@ -30,6 +30,8 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
 - **Geen `CharacterSet`-splitsen, geen `lastIndex(of:)`, geen range-subscripts op
   strings**: knip met een lus (`TeamInvite.parse`); `s += String(character)` in
   plaats van `s.append(character)`; `Character.isLetter` bestaat niet.
+- **`optional.map { value in … value.rounded() }` wordt `optionalrounded`** in Kotlin
+  (9 oktober, `SharedPlayerTrendView`): schrijf een `guard let` of `if let`.
 - **Lege literals zonder type** (`[]`, `[:]`) laten het type soms niet afleiden:
   geef het type mee.
 - **`Date.FormatStyle` bestaat niet**: gebruik `DateFormatter` met een vast patroon

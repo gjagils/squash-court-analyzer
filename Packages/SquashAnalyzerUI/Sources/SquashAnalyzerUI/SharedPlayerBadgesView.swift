@@ -22,13 +22,17 @@ public struct SharedPlayerBadgesView: View {
     let cardPicture: ((CardSnapshot, String) -> Void)?
     /// Reloads after a card link was imported while this screen was open
     let cardInbox: CardInbox
+    /// The matches for the player's profile (Spelersprofiel); nil hides the button
+    let historyStore: (any MatchHistoryStore)?
 
     @State private var moments: [BadgeMoment] = []
     @State private var isLoading = true
     @State private var shareFailed = false
 
     public init(playerId: String, playerName: String, photo: Data? = nil, badgeStore: any PlayerBadgeSummaryStore,
-                shareText: @escaping (String) -> Void, shareCard: ((CardSnapshot, String) -> Void)? = nil, cardInbox: CardInbox) {
+                shareText: @escaping (String) -> Void, shareCard: ((CardSnapshot, String) -> Void)? = nil, cardInbox: CardInbox,
+                historyStore: (any MatchHistoryStore)? = nil) {
+        self.historyStore = historyStore
         self.playerId = playerId
         self.playerName = playerName
         self.photo = photo
@@ -83,6 +87,30 @@ public struct SharedPlayerBadgesView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         header
+                        if let historyStore {
+                            NavigationLink {
+                                SharedPlayerTrendView(playerId: playerId, playerName: playerName, photo: photo, historyStore: historyStore)
+                            } label: {
+                                HStack(spacing: 10) {
+                                    AppSymbol("chart.bar.xaxis", size: 16, color: SharedColors.gold)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("PROFIEL")
+                                            .font(ActionButton.font)
+                                            .foregroundColor(SharedColors.gold)
+                                        Text("Vorm, winners en fouten over de wedstrijden")
+                                            .font(SharedFonts.system(12))
+                                            .foregroundColor(SharedColors.textSecondary)
+                                    }
+                                    Spacer(minLength: 0)
+                                    AppSymbol("chevron.right", size: 14, color: SharedColors.textMuted)
+                                }
+                                .padding(14)
+                                .background(SharedColors.cardTint)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Profiel van \(playerName)")
+                        }
                         section("BADGES · \(earnedFamilies) VAN \(BadgeKind.families.count)") {
                             // Rows of three, not a LazyVGrid: on Android that becomes a
                             // scroll area of its own inside the page

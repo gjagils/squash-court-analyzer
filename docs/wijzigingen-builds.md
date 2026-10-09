@@ -10,6 +10,19 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Spelersprofiel (9 oktober 2026, gebouwd, nog niet op een telefoon geprobeerd)**: op
+  het badgescherm van een speler staat bovenaan *Profiel* (iOS en Android, gedeeld scherm
+  `SharedPlayerTrendView`, berekening in Core `PlayerTrend`). Kaarten: Vorm (laatste 10
+  uitslagen), Winners en fouten per game als lijnen met "van … naar …" vanaf 4
+  coachwedstrijden, Slagen (top 3 en meest gemaakte fout), Baan (`ZoneProfileTable` over
+  de periode), Tempo (gemiddelde rallyduur gewonnen/verloren), Tegenstanders (top 3 met
+  stand). Eén periodekeuze voor het hele scherm (laatste 10, 25, alles) in plaats van per
+  kaart. Alleen wedstrijden met de speler via Kies speler; scheidsrechterwedstrijden geven
+  alleen de uitslag. "Meest gemaakte fout" is de soort fout (Down, Out, ...): een unforced
+  error heeft geen slag. iOS laadt bij `refereeMatch(id:)` nu ook de speler-id's.
+  Handleidingstuk `#profiel` (iPhone en Android) staat in git, website nog niet
+  gepubliceerd. Releasenote: "Nieuw: Profiel per speler, met vorm, winners en fouten over
+  de wedstrijden, slagen, baan, tempo en tegenstanders."
 - **Kleine punten uit de core-review (9 oktober 2026)**: *Sneltrein* is ook in de
   scheidsrechtermodus te verdienen en heeft geen label Coach meer (besluit Gerd-Jan; ook
   op `website/badges/`, de website moet nog gepubliceerd worden). Een live-partij die
@@ -465,8 +478,8 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       op rij bij serve van de ander). Gebouwd voor de volgende build.
 - [ ] **Badgecategorie voor competitiewedstrijden** (o.a. Teamspeler;
       kandidaat voor de definitieve 3.0).
-- [ ] **Spelersprofiel met trend over wedstrijden** (voorgesteld 5 oktober,
-      kandidaat voor de definitieve 3.0).
+- [x] **Spelersprofiel met trend over wedstrijden** (voorgesteld 5 oktober,
+      gebouwd 9 oktober 2026, zie "Volgende build" bovenaan).
       *Waarom:* de analyse kijkt nu per wedstrijd (dashboard, heatmap, slagen,
       soorten fouten); een coach ziet niet of een speler vooruitgaat. Het
       profiel laat dat zien over de laatste wedstrijden, zonder nieuwe invoer.

@@ -370,7 +370,7 @@ public struct AndroidHomeView: View {
             homeContent
                 .navigationDestination(isPresented: $showingPlayers) {
                     PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox, teamImporter: teamImporter,
-                                        photoStore: photoStore, filePicker: filePicker, shareCard: shareCard)
+                                        photoStore: photoStore, filePicker: filePicker, shareCard: shareCard, historyStore: historyStore)
                 }
                 .navigationDestination(isPresented: $showingCoach) {
                     CoachSessionView(store: matchStore, playerStore: playerStore, photoStore: photoStore, filePicker: filePicker, aiCoach: aiCoach, shareText: shareText,

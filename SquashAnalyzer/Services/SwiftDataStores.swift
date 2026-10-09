@@ -428,6 +428,9 @@ final class SwiftDataMatchHistoryStore: MatchHistoryStore {
         let match = RefereeMatch(id: refereeId(saved), player1Name: saved.player1Name, player2Name: saved.player2Name,
                                  bestOf: saved.bestOf, startingServer: .player1,
                                  player1GamesBefore: saved.player1GamesBefore, player2GamesBefore: saved.player2GamesBefore)
+        // The players picked with Kies speler: the profile finds a player's matches by them
+        match.player1Id = saved.player1Id
+        match.player2Id = saved.player2Id
         match.completedGames = saved.gameResults.sorted { $0.number < $1.number }.compactMap { result in
             guard let winner = Player(rawValue: result.winnerRaw) else { return nil }
             return CompletedRefereeGame(number: result.number, player1Score: result.player1Score,

@@ -30,6 +30,9 @@ public struct MatchHistorySummary: Identifiable, Equatable, Sendable {
     public let games: [HistoryGameScore]
     public let untrackedBefore: Int
     public let untrackedAfter: Int
+    /// How many of the games before scoring player 1 won (the rest of
+    /// `untrackedBefore` is player 2's); nil when not known
+    public let player1GamesBefore: Int?
     public let bestOf: Int
     /// A picked player earned a badge in this match (medal on the card)
     public let hasBadges: Bool
@@ -37,7 +40,7 @@ public struct MatchHistorySummary: Identifiable, Equatable, Sendable {
     public init(id: String, kind: String, player1Name: String, player2Name: String,
                 player1Games: Int, player2Games: Int, status: String, updatedAt: Date,
                 games: [HistoryGameScore] = [], untrackedBefore: Int = 0, untrackedAfter: Int = 0,
-                bestOf: Int = 5, hasBadges: Bool = false) {
+                bestOf: Int = 5, hasBadges: Bool = false, player1GamesBefore: Int? = nil) {
         self.id = id
         self.kind = kind
         self.player1Name = player1Name
@@ -51,6 +54,7 @@ public struct MatchHistorySummary: Identifiable, Equatable, Sendable {
         self.untrackedAfter = untrackedAfter
         self.bestOf = bestOf
         self.hasBadges = hasBadges
+        self.player1GamesBefore = player1GamesBefore
     }
 
     /// The match winner, when one side reached the games needed

@@ -10,6 +10,18 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Teambestand en volgorde van games (9 oktober 2026, uit de core-review, nog niet op
+  een telefoon geprobeerd)**: het teambestand wordt alleen als leeg gezien als het er
+  niet is; kan het niet gelezen worden, dan meldt de app dat en slaat er niets overheen
+  (`TeamMatchFileError.readFailed`). Een back-up neemt een onleesbaar teambestand niet
+  mee als "geen teamwedstrijden" (`teamMatches` blijft leeg), zodat "Vervang alles" op
+  een andere telefoon niets wist. Een gekoppelde partij houdt bij *Vernieuwen* de
+  volgorde van de wedstrijd: games van vóór het meetellen eerst
+  (`MatchHistorySummary.player1GamesBefore`, iOS en Android). Een partij van de
+  live-pagina met opgave of niet verschenen houdt de games van dat einde achteraan, zodat
+  het terugdraaien precies die games weghaalt. Releasenote: "Teamwedstrijden: games
+  staan na Vernieuwen in de goede volgorde, en een teambestand dat niet te lezen is wordt
+  nooit overschreven."
 - **Mijn team makkelijker vinden (8 oktober 2026, gebouwd, door Gerd-Jan op
   een telefoon geprobeerd op 9 oktober)**: zonder teamlink staat op het beginscherm (iOS en Android) een
   kaart "Speel je competitie bij SBN?" met *Teamlink invullen* (opent Instellingen),

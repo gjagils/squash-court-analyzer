@@ -267,6 +267,33 @@ final class TeamLiveTests: XCTestCase {
         XCTAssertEqual(match.partij(2).ownPlayer, "Eigen")
     }
 
+    func testTakingBackAnEndingFromThePageRemovesOnlyTheEndingsGames() {
+        // At home: a head start won (no score), 8-11, then the opponent gave up at 5-3
+        var original = TeamPartij(slot: 2, ownPlayer: "Wij", opponentPlayer: "Zij")
+        XCTAssertTrue(original.addGame(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: true)))
+        XCTAssertTrue(original.addGame(TeamGame(own: 8, their: 11)))
+        XCTAssertTrue(original.giveUp(ownGivesUp: false, currentOwn: 5, currentTheir: 3))
+        XCTAssertEqual(original.gamesText, "–, 8-11, 11-3, 11-0")
+        let team = TeamMatch(date: Date(timeIntervalSince1970: 1_793_181_600.0), home: "All Inn Squash 8", away: "Squash Delft 8",
+                             ownSide: .home, partijen: [original])
+        let payload = original.livePayload(in: team)!
+
+        // On a teammate's phone (also home): the ending's games stay last
+        var copy = TeamPartij.fromLive(payload, slot: 2, ownIsHome: true)!
+        XCTAssertEqual(copy.gamesText, "8-11, –, 11-3, 11-0")
+        XCTAssertEqual(copy.standText, original.standText)
+        XCTAssertEqual(copy.endedBy, TeamPartijEnd.retired)
+        copy.clearEnd()
+        XCTAssertEqual(copy.standText, "1-1", "the game won before and 8-11 stay, the ending's two games go")
+        XCTAssertEqual(copy.games.filter { game in !game.hasPoints }.count, 1)
+
+        // Without an ending nothing moves: the unscored games come after the scored ones
+        var plain = TeamPartij(slot: 3)
+        XCTAssertTrue(plain.addGame(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: false)))
+        XCTAssertTrue(plain.addGame(TeamGame(own: 11, their: 6)))
+        XCTAssertEqual(TeamPartij.fromLive(plain.livePayload(in: team)!, slot: 3, ownIsHome: true)?.gamesText, "11-6, –")
+    }
+
     // MARK: De service
 
     @MainActor

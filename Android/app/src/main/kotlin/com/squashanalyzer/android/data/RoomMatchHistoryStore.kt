@@ -42,6 +42,7 @@ class RoomMatchHistoryStore(
                 untrackedBefore = match.player1GamesBefore + match.player2GamesBefore,
                 untrackedAfter = match.player1GamesAfter + match.player2GamesAfter,
                 bestOf = match.bestOf, hasBadges = match.id in withBadges,
+                player1GamesBefore = match.player1GamesBefore,
             )
         }
         val referee = refereeMatchStore.history().map { match ->
@@ -61,6 +62,7 @@ class RoomMatchHistoryStore(
                 games = SwiftArray(games),
                 untrackedBefore = match.player1GamesBefore + match.player2GamesBefore,
                 bestOf = match.bestOf, hasBadges = match.id in withBadges,
+                player1GamesBefore = match.player1GamesBefore,
             )
         }
         val merged = (coach + referee).sortedByDescending { it.updatedAt.timeIntervalSince1970 }

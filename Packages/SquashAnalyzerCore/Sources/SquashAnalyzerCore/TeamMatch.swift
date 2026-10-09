@@ -245,40 +245,68 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         return end == TeamPartijEnd.retired ? "opgave" : "niet verschenen"
     }
 
-    /// The games of a tracked coach or referee match, seen from our player.
-    /// Games played before scoring started or filled in afterwards have no
-    /// score; only who won them is known (from the stand).
-    public static func linkedGames(from summary: MatchHistorySummary, ownIsPlayer1: Bool) -> [TeamGame] {
+    /// The games of a match seen from our player, in play order: the head
+    /// start ("Later instappen"), the tracked games, then the games filled in
+    /// afterwards. Untracked games have no score, only who won them; within
+    /// the head start and within the filled-in games player 1's come first.
+    static func gamesSeenFromOwn(player1Before: Int, player2Before: Int, tracked: [HistoryGameScore],
+                                 player1After: Int, player2After: Int, ownIsPlayer1: Bool) -> [TeamGame] {
         var result: [TeamGame] = []
-        var trackedPlayer1 = 0
-        var trackedPlayer2 = 0
-        for game in summary.games {
+        for _ in 0..<max(0, player1Before) { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsPlayer1)) }
+        for _ in 0..<max(0, player2Before) { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsPlayer1)) }
+        for game in tracked {
             let player1Won = game.winner == Player.player1.rawValue
-            if player1Won { trackedPlayer1 += 1 } else { trackedPlayer2 += 1 }
             let own = ownIsPlayer1 ? game.player1Score : game.player2Score
             let their = ownIsPlayer1 ? game.player2Score : game.player1Score
             result.append(TeamGame(ownPoints: own, theirPoints: their, ownWon: player1Won == ownIsPlayer1))
         }
-        let untrackedPlayer1 = max(0, summary.player1Games - trackedPlayer1)
-        let untrackedPlayer2 = max(0, summary.player2Games - trackedPlayer2)
-        for _ in 0..<untrackedPlayer1 { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsPlayer1)) }
-        for _ in 0..<untrackedPlayer2 { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsPlayer1)) }
+        for _ in 0..<max(0, player1After) { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsPlayer1)) }
+        for _ in 0..<max(0, player2After) { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsPlayer1)) }
         return result
     }
 
-    /// Takes the names and games of a tracked match; "Vernieuwen" does the same again
-    public mutating func link(_ summary: MatchHistorySummary, ownIsPlayer1: Bool) {
-        ownPlayer = ownIsPlayer1 ? summary.player1Name : summary.player2Name
-        opponentPlayer = ownIsPlayer1 ? summary.player2Name : summary.player1Name
-        games = TeamPartij.linkedGames(from: summary, ownIsPlayer1: ownIsPlayer1)
-        linkedMatchId = summary.id
-        linkedKind = summary.kind
+    /// The games of a tracked coach or referee match, seen from our player.
+    /// The summary says how many untracked games came before scoring started
+    /// and how many of those player 1 won; without that (an older caller)
+    /// player 1's untracked games are taken to come first.
+    public static func linkedGames(from summary: MatchHistorySummary, ownIsPlayer1: Bool) -> [TeamGame] {
+        var trackedPlayer1 = 0
+        var trackedPlayer2 = 0
+        for game in summary.games {
+            if game.winner == Player.player1.rawValue { trackedPlayer1 += 1 } else { trackedPlayer2 += 1 }
+        }
+        let untrackedPlayer1 = max(0, summary.player1Games - trackedPlayer1)
+        let untrackedPlayer2 = max(0, summary.player2Games - trackedPlayer2)
+        let before = max(0, min(summary.untrackedBefore, untrackedPlayer1 + untrackedPlayer2))
+        let player1Before = min(untrackedPlayer1, min(before, max(0, summary.player1GamesBefore ?? before)))
+        let player2Before = min(untrackedPlayer2, before - player1Before)
+        return gamesSeenFromOwn(player1Before: player1Before, player2Before: player2Before, tracked: summary.games,
+                                player1After: untrackedPlayer1 - player1Before, player2After: untrackedPlayer2 - player2Before,
+                                ownIsPlayer1: ownIsPlayer1)
+    }
+
+    /// Names, games and link of a tracked match; the partij is no longer in
+    /// progress and no longer ended by hand
+    private mutating func applyLink(id: String, kind: String, player1Name: String, player2Name: String,
+                                    games: [TeamGame], bestOf: Int, ownIsPlayer1: Bool) {
+        ownPlayer = ownIsPlayer1 ? player1Name : player2Name
+        opponentPlayer = ownIsPlayer1 ? player2Name : player1Name
+        self.games = games
+        linkedMatchId = id
+        linkedKind = kind
         linkedOwnIsPlayer1 = ownIsPlayer1
         trackingMatchId = nil
         trackingOwnIsPlayer1 = nil
         endedBy = nil
         endedAfter = nil
-        bestOf = summary.bestOf
+        self.bestOf = bestOf
+    }
+
+    /// Takes the names and games of a tracked match; "Vernieuwen" does the same again
+    public mutating func link(_ summary: MatchHistorySummary, ownIsPlayer1: Bool) {
+        applyLink(id: summary.id, kind: summary.kind, player1Name: summary.player1Name, player2Name: summary.player2Name,
+                  games: TeamPartij.linkedGames(from: summary, ownIsPlayer1: ownIsPlayer1), bestOf: summary.bestOf,
+                  ownIsPlayer1: ownIsPlayer1)
     }
 
     /// Reads the linked match again (e.g. after its result was completed),
@@ -296,51 +324,29 @@ public struct TeamPartij: Codable, Equatable, Sendable {
     /// The games of a coach match just played, seen from our player: the
     /// head start ("Later instappen") and the filled-in result have no score
     public mutating func link(coach match: Match, ownIsPlayer1: Bool) {
-        var result: [TeamGame] = []
-        for _ in 0..<match.player1GamesBefore { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsPlayer1)) }
-        for _ in 0..<match.player2GamesBefore { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsPlayer1)) }
+        var tracked: [HistoryGameScore] = []
         for game in match.completedGames {
-            let own = ownIsPlayer1 ? game.player1Score : game.player2Score
-            let their = ownIsPlayer1 ? game.player2Score : game.player1Score
-            result.append(TeamGame(ownPoints: own, theirPoints: their, ownWon: own > their))
+            let winner = game.player1Score > game.player2Score ? Player.player1 : Player.player2
+            tracked.append(HistoryGameScore(player1Score: game.player1Score, player2Score: game.player2Score, winner: winner.rawValue))
         }
-        for _ in 0..<match.player1GamesAfter { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsPlayer1)) }
-        for _ in 0..<match.player2GamesAfter { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsPlayer1)) }
-        ownPlayer = ownIsPlayer1 ? match.player1Name : match.player2Name
-        opponentPlayer = ownIsPlayer1 ? match.player2Name : match.player1Name
-        games = result
-        linkedMatchId = match.id.uuidString
-        linkedKind = "coach"
-        linkedOwnIsPlayer1 = ownIsPlayer1
-        trackingMatchId = nil
-        trackingOwnIsPlayer1 = nil
-        endedBy = nil
-        endedAfter = nil
-        bestOf = match.bestOf
+        let games = TeamPartij.gamesSeenFromOwn(player1Before: match.player1GamesBefore, player2Before: match.player2GamesBefore,
+                                                tracked: tracked, player1After: match.player1GamesAfter,
+                                                player2After: match.player2GamesAfter, ownIsPlayer1: ownIsPlayer1)
+        applyLink(id: match.id.uuidString, kind: "coach", player1Name: match.player1Name, player2Name: match.player2Name,
+                  games: games, bestOf: match.bestOf, ownIsPlayer1: ownIsPlayer1)
     }
 
     /// The games of a referee match just played, seen from our player (the
     /// last game is still on the board when the match ends: `allGameResults`)
     public mutating func link(referee match: RefereeMatch, ownIsPlayer1: Bool) {
-        var result: [TeamGame] = []
-        for _ in 0..<match.player1GamesBefore { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsPlayer1)) }
-        for _ in 0..<match.player2GamesBefore { result.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsPlayer1)) }
+        var tracked: [HistoryGameScore] = []
         for game in match.allGameResults {
-            let own = ownIsPlayer1 ? game.player1Score : game.player2Score
-            let their = ownIsPlayer1 ? game.player2Score : game.player1Score
-            result.append(TeamGame(ownPoints: own, theirPoints: their, ownWon: (game.winner == Player.player1) == ownIsPlayer1))
+            tracked.append(HistoryGameScore(player1Score: game.player1Score, player2Score: game.player2Score, winner: game.winner.rawValue))
         }
-        ownPlayer = ownIsPlayer1 ? match.player1Name : match.player2Name
-        opponentPlayer = ownIsPlayer1 ? match.player2Name : match.player1Name
-        games = result
-        linkedMatchId = match.id.uuidString
-        linkedKind = "referee"
-        linkedOwnIsPlayer1 = ownIsPlayer1
-        trackingMatchId = nil
-        trackingOwnIsPlayer1 = nil
-        endedBy = nil
-        endedAfter = nil
-        bestOf = match.bestOf
+        let games = TeamPartij.gamesSeenFromOwn(player1Before: match.player1GamesBefore, player2Before: match.player2GamesBefore,
+                                                tracked: tracked, player1After: 0, player2After: 0, ownIsPlayer1: ownIsPlayer1)
+        applyLink(id: match.id.uuidString, kind: "referee", player1Name: match.player1Name, player2Name: match.player2Name,
+                  games: games, bestOf: match.bestOf, ownIsPlayer1: ownIsPlayer1)
     }
 
     /// Keeps the games as they are, but as a partij filled in by hand

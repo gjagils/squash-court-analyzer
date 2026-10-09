@@ -366,7 +366,8 @@ final class SwiftDataMatchHistoryStore: MatchHistoryStore {
                     status: saved.status, updatedAt: saved.updatedAt, games: games,
                     untrackedBefore: saved.player1GamesBefore + saved.player2GamesBefore,
                     untrackedAfter: saved.player1GamesAfter + saved.player2GamesAfter,
-                    bestOf: saved.bestOf, hasBadges: withBadges.contains(saved.id))
+                    bestOf: saved.bestOf, hasBadges: withBadges.contains(saved.id),
+                    player1GamesBefore: saved.player1GamesBefore)
             }
         // Loose games (a game saved on its own) show as a one-game coach row: they
         // open in the analysis and can be deleted, as in the old iPhone history (B12)
@@ -393,7 +394,8 @@ final class SwiftDataMatchHistoryStore: MatchHistoryStore {
                 status: saved.winnerName == nil ? MatchStatus.abandoned.rawValue : MatchStatus.completed.rawValue,
                 updatedAt: saved.savedAt, games: games,
                 untrackedBefore: saved.player1GamesBefore + saved.player2GamesBefore,
-                bestOf: saved.bestOf, hasBadges: withBadges.contains(id)))
+                bestOf: saved.bestOf, hasBadges: withBadges.contains(id),
+                player1GamesBefore: saved.player1GamesBefore))
         }
         if context.hasChanges {
             do {

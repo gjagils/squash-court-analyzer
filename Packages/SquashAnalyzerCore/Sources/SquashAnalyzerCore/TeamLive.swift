@@ -238,7 +238,7 @@ public extension TeamPartij {
         let homeWon = max(0, min(live.gamesWon[0], toWin))
         var awayWon = max(0, min(live.gamesWon[1], toWin))
         if homeWon == toWin && awayWon == toWin { awayWon = toWin - 1 }
-        var games: [TeamGame] = []
+        var scored: [TeamGame] = []
         var homeWonScored = 0
         var awayWonScored = 0
         for game in live.games {
@@ -248,13 +248,25 @@ public extension TeamPartij {
             let home = game[0]
             let away = game[1]
             if home > away { homeWonScored += 1 } else { awayWonScored += 1 }
-            games.append(TeamGame(own: ownIsHome ? home : away, their: ownIsHome ? away : home))
+            scored.append(TeamGame(own: ownIsHome ? home : away, their: ownIsHome ? away : home))
         }
         // Games without a known score: only who won them is known
         let homeUnscored = max(0, homeWon - homeWonScored)
         let awayUnscored = max(0, awayWon - awayWonScored)
-        for _ in 0..<homeUnscored { games.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsHome)) }
-        for _ in 0..<awayUnscored { games.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsHome)) }
+        var unscored: [TeamGame] = []
+        for _ in 0..<homeUnscored { unscored.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: ownIsHome)) }
+        for _ in 0..<awayUnscored { unscored.append(TeamGame(ownPoints: nil, theirPoints: nil, ownWon: !ownIsHome)) }
+        // The page does not say where the unscored games were. An ending's
+        // games (opgave, niet verschenen) are the last ones and always have a
+        // score, so they stay last: taking the ending back here (`clearEnd`)
+        // must remove exactly those, not a game played before it
+        var endingGames = 0
+        if live.end != nil, let after = live.endAfter {
+            endingGames = max(0, min(scored.count, scored.count + unscored.count - after))
+        }
+        var games: [TeamGame] = Array(scored.prefix(scored.count - endingGames))
+        games.append(contentsOf: unscored)
+        games.append(contentsOf: scored.suffix(endingGames))
         var partij = TeamPartij(slot: slot, ownPlayer: ownIsHome ? live.p1 : live.p2,
                                 opponentPlayer: ownIsHome ? live.p2 : live.p1, games: games, bestOf: bestOf)
         partij.fromLive = true

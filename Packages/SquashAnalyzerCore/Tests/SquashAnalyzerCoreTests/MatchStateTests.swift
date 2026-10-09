@@ -38,6 +38,17 @@ final class MatchStateTests: XCTestCase {
         XCTAssertEqual(game.points.last?.timestamp, Date(timeIntervalSince1970: 1_790_000_012.5))
     }
 
+    func testTheStartTapAndTheRallyClockUseTheGamesClock() {
+        let game = Game()
+        game.now = { Date(timeIntervalSince1970: 1_790_000_000) }
+        game.start()
+        XCTAssertEqual(game.startedAt, Date(timeIntervalSince1970: 1_790_000_000))
+        game.now = { Date(timeIntervalSince1970: 1_790_000_009) }
+        XCTAssertEqual(game.rallySeconds(), 9.0)
+        game.addPoint(to: Player.player1, pointType: PointType.unforcedError, at: nil, with: nil)
+        XCTAssertEqual(game.points.last?.duration, 9.0)
+    }
+
     func testNoLetAfterTheGameIsOver() {
         let game = Game()
         for _ in 0..<11 { game.addPoint(to: Player.player1, pointType: PointType.unforcedError, at: nil, with: nil) }

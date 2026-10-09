@@ -279,6 +279,7 @@ final class BadgeEngineTests: XCTestCase {
         XCTAssertTrue(engine.badges(for: input([quick]))[.player1]!.contains(.sneltrein))
         let slow = BadgeGame(rallies: rallies([(.player1, 11)]), winner: .player1, duration: 6.0 * 60.0)
         XCTAssertFalse(engine.badges(for: input([slow]))[.player1]!.contains(.sneltrein))
+        XCTAssertFalse(BadgeKind.sneltrein.coachOnly, "referee mode times its games too")
     }
 
     func testWholeMatchBadgesNeedEveryGameTracked() {

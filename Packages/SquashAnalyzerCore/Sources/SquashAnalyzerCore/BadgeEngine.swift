@@ -339,11 +339,12 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         return "badge-" + rawValue
     }
 
-    /// Needs the shot, the zone, the kind of point or the rally clock, which only coach mode records
+    /// Needs the shot, the zone, the kind of point or the rally clock, which only coach mode records.
+    /// Not Sneltrein: referee mode times its games too (decision Gerd-Jan, 9 October 2026)
     public var coachOnly: Bool {
         switch family {
         case .dropIt, .krissCross, .aceOfPace, .lobStory, .volleywood, .driveMeCrazy, .boastBuster, .fullHouse,
-             .brickWall, .frontRowKing, .endurance, .rockSolid, .backWallBoss, .sneltrein: return true
+             .brickWall, .frontRowKing, .endurance, .rockSolid, .backWallBoss: return true
         default: return false
         }
     }

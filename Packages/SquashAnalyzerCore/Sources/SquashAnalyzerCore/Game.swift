@@ -183,11 +183,13 @@ public class Game: Identifiable {
     // MARK: - Start of the game
 
     /// The coach taps Start at the first serve; from then the rally clock runs
-    public func start(at date: Date = Date()) {
+    /// (`date` nil = now, from the game's own clock)
+    public func start(at date: Date? = nil) {
         guard startedAt == nil else { return }
-        startedAt = date
+        let moment = date ?? now()
+        startedAt = moment
         startedByFirstPoint = false
-        lastPointTime = date
+        lastPointTime = moment
     }
 
     /// After a game is restored from the store: a game with points was under
@@ -206,10 +208,10 @@ public class Game: Identifiable {
         startedByFirstPoint = false
     }
 
-    /// Seconds of the rally under way, 0 before the start
-    public func rallySeconds(at date: Date = Date()) -> TimeInterval {
+    /// Seconds of the rally under way, 0 before the start (`date` nil = now)
+    public func rallySeconds(at date: Date? = nil) -> TimeInterval {
         guard startedAt != nil else { return 0.0 }
-        return max(0.0, date.timeIntervalSince(lastPointTime))
+        return max(0.0, (date ?? now()).timeIntervalSince(lastPointTime))
     }
 
     /// Back quarter a serve from `side` lands in (cross-court from the box)

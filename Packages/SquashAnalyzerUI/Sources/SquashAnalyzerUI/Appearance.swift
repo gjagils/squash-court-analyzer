@@ -78,3 +78,14 @@ public struct AppearancePicker: View {
         }
     }
 }
+
+/// The screen stays on during a coach or referee match: between games (two
+/// minutes under the 2025 rules) nobody taps, and a locked phone gets in the way.
+/// SkipUI turns the idle timer into Android's keep-screen-on flag.
+enum ScreenAwake {
+    @MainActor static func set(_ on: Bool) {
+        #if os(iOS) || SKIP
+        UIApplication.shared.isIdleTimerDisabled = on
+        #endif
+    }
+}

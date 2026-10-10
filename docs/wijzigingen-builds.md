@@ -10,6 +10,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Scherm blijft aan tijdens een wedstrijd (11 oktober 2026, gebouwd, nog niet op een
+  telefoon geprobeerd)**: coach- en scheidsrechterscherm zetten de schermvergrendeling uit
+  zolang ze open zijn (`ScreenAwake`, via SkipUI ook op Android). Backlog voor de volgende
+  test en de launch: `docs/backlog-personas-2026-10-11.md`.
 - **Lichte modus bijgewerkt na de eerste test (11 oktober 2026)**: de serveerder (de
   laatste scoorder) krijgt in licht de volle spelerskleur en de ander een verzachte, in
   plaats van zwart (`ServerHighlight`). Lichte variant van het logo: het app-icoon op de

@@ -11,13 +11,33 @@
 <meta property="og:image" content="{{IMAGE}}">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#000000">
+<script>
+// Weergave before the first paint: Donker unless Licht or Systeem was chosen (see the end of the page)
+(function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+</script>
 <style>
   :root {
     /* Huisstijl "Clubhuis" (docs/style/README.md): zwart, oranje accent, staalblauw voor speler 2 */
     --bg: #000000; --card: #180E04; --line: rgba(242,140,38,0.35); --gold: #F28C26; --orange: #F28C26;
     --blue: #59738C; --blue-light: #8094AD;
     --text-1: #F2EDE6; --text-2: #B3ADA6; --text-3: #8C8680; --border: rgba(255,255,255,0.09); --live: #E5484D;
+    --won2-line: rgba(128,148,173,0.45); --focus: #F28C26; color-scheme: dark;
   }
+  /* Warm licht (docs/style/README.md, tokens.json → themes.light): deep orange for
+     player 1 and text (5.0:1 on the background), dark steel blue for player 2, a
+     darker live red so the white "Live" label keeps 5.6:1 */
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #F7F3ED; --card: #FFFFFF; --line: #DEC9B4; --gold: #A94F08; --orange: #A94F08;
+    --blue: #405A73; --blue-light: #405A73; --won2-line: rgba(64,90,115,0.4);
+    --text-1: #26211C; --text-2: #71665B; --text-3: #776C61; --border: #E4DBD1; --live: #C62A2F; --focus: #A94F08;
+  }
+  /* The black logo stays a compact black tile on light */
+  :root[data-theme="light"] .brand img { border-radius: 8px; }
+  .theme-choice { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; color: var(--text-3); }
+  .theme-choice select { font: inherit; color: var(--text-1); background: var(--card); border: 1px solid var(--text-3);
+                         border-radius: 8px; padding: 6px 8px; min-height: 36px; cursor: pointer; }
+  .theme-choice select:focus-visible, a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg); color: var(--text-1); min-height: 100vh;
@@ -63,7 +83,7 @@
   .chip { font-size: 13px; color: var(--text-2); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px;
           font-variant-numeric: tabular-nums; }
   .chip.won1 { color: var(--orange); border-color: var(--line); }
-  .chip.won2 { color: var(--blue-light); border-color: rgba(128,148,173,0.45); }
+  .chip.won2 { color: var(--blue-light); border-color: var(--won2-line); }
   .last { margin-top: 14px; text-align: center; font-size: 13px; color: var(--text-2); min-height: 18px; }
   .updated { margin-top: 14px; text-align: center; font-size: 12px; color: var(--text-3); }
   .notice { margin-top: 16px; text-align: center; font-size: 14px; color: var(--text-2); line-height: 1.5; }
@@ -107,6 +127,8 @@
   <footer>
     Live gedeeld vanuit <a href="https://squashanalyzer.com">SquashAnalyzer</a>.<br>
     Alleen voornamen, de stand en eventueel een kleine spelersfoto;<br>2 uur na de wedstrijd wordt alles gewist.
+    <div class="theme-choice"><label for="theme-choice">Weergave</label>
+      <select id="theme-choice"><option value="system">Systeem</option><option value="light">Licht</option><option value="dark" selected>Donker</option></select></div>
   </footer>
 </main>
 <script>
@@ -236,6 +258,37 @@
       setBadge('lost');
     }
   };
+})();
+</script>
+<script>
+// Weergave: Systeem / Licht / Donker, stored in this browser; "Systeem" follows the device
+(function () {
+  var KEY = 'sa-theme';
+  var root = document.documentElement;
+  var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+  function valid(c) { return c === 'light' || c === 'system' ? c : 'dark'; }
+  function stored() { try { return valid(localStorage.getItem(KEY)); } catch (e) { return 'dark'; } }
+  function apply(choice) {
+    var theme = choice === 'system' ? (media && media.matches ? 'light' : 'dark') : choice;
+    root.setAttribute('data-theme', theme);
+    root.setAttribute('data-theme-choice', choice);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'light' ? '#F7F3ED' : '#000000');
+  }
+  var select = document.getElementById('theme-choice');
+  select.value = stored();
+  select.addEventListener('change', function () {
+    var choice = valid(select.value);
+    try { localStorage.setItem(KEY, choice); } catch (e) { /* private mode: only this page */ }
+    apply(choice);
+  });
+  if (media) {
+    var follow = function () { if (stored() === 'system') apply('system'); };
+    if (media.addEventListener) media.addEventListener('change', follow);
+    else if (media.addListener) media.addListener(follow);
+  }
+  window.addEventListener('storage', function (e) { if (e.key === KEY) { select.value = stored(); apply(stored()); } });
+  apply(stored());
 })();
 </script>
 </body>

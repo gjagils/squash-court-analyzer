@@ -5,7 +5,9 @@ import SquashAnalyzerCore
 
 /// The text colours of a player's column on the coach and referee screens,
 /// on iOS and Android: the server's name and score in white, the receiver's in
-/// the player colour. One rule, so all four screens change together.
+/// the player colour. One rule, so all four screens change together. In the
+/// light theme dark text would not stand out, so there the server gets the
+/// player colour at full strength and the receiver a faded one.
 public struct ServerHighlight {
     public let name: Color
     public let score: Color
@@ -13,9 +15,15 @@ public struct ServerHighlight {
     public let caption: Color
 
     @MainActor public init(color: Color, isServer: Bool) {
-        name = isServer ? SharedColors.textPrimary : color
-        score = isServer ? SharedColors.textPrimary : color
-        caption = isServer ? SharedColors.textPrimary.opacity(0.8) : color.opacity(0.55)
+        if AppTheme.shared.isLight {
+            name = isServer ? color : color.opacity(0.55)
+            score = isServer ? color : color.opacity(0.45)
+            caption = isServer ? color.opacity(0.85) : color.opacity(0.45)
+        } else {
+            name = isServer ? SharedColors.textPrimary : color
+            score = isServer ? SharedColors.textPrimary : color
+            caption = isServer ? SharedColors.textPrimary.opacity(0.8) : color.opacity(0.55)
+        }
     }
 }
 

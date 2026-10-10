@@ -169,6 +169,38 @@ nav {
   margin: 0 auto 28px !important;
 }
 
+/* "Scheidsen · Coachen · Delen", the line from the stickers */
+.hero-pillars {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  margin: -12px auto 32px;
+  padding: 0;
+}
+.hero-pillars li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 clamp(16px, 5vw, 32px);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-1);
+}
+.hero-pillars li + li { border-left: 1px solid var(--line); }
+.hero-pillars svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--gold);
+}
+
 .hero-badge {
   display: inline-block;
   font-size: 12px;

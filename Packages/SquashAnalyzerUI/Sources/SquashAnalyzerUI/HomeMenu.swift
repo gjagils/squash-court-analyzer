@@ -24,7 +24,8 @@ public struct HomeMenuHeader: View {
 
     public var body: some View {
         HStack(spacing: 10) {
-            Image("home-logo", bundle: .module)
+            // The logo on its own dark tile, or on warm light in the light theme
+            Image(AppTheme.shared.isLight ? "home-logo-light" : "home-logo", bundle: .module)
                 .resizable().scaledToFit().frame(width: 58, height: 58)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
@@ -40,6 +41,14 @@ public struct HomeMenuHeader: View {
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
+                // The line from the stickers and the website
+                Text("SCHEIDSEN · COACHEN · DELEN")
+                    .font(SharedFonts.system(10, weight: .bold, design: .rounded))
+                    .tracking(1.2)
+                    .foregroundColor(SharedColors.accent)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .accessibilityLabel("Scheidsen, coachen, delen")
             }
             Spacer(minLength: 0)
             if let onSettings {

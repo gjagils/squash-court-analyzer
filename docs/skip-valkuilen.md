@@ -60,6 +60,10 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
   optioneel aangeroepen closure.
 - **Een `.alert` met alleen een `.cancel`-knop krijgt op Android twee knoppen**: geef de
   enige knop geen rol.
+- **`.frame(maxWidth: 520)` als bovengrens werkt in Compose niet zo**: de inhoud werd breder
+  dan het scherm en viel links weg (rondleiding, 11 oktober). Laat de grens weg op telefoonschermen.
+- **`PresentationRoot(defaultColorScheme:)` in `MainActivity`** bepaalt de bovenbalk en Material-
+  vlakken; het moet de keuze in de app volgen (`AppTheme`), niet alleen het systeem.
 - **Titels naast knoppen**: `.lineLimit(1)` + `.minimumScaleFactor(…)`.
 - **iOS-only code**: `#if os(iOS) && !SKIP` (de Android-build draait eerst `swift build`
   voor macOS). `.keyboardType` bestaat in SkipUI: `#if os(iOS) || SKIP`.

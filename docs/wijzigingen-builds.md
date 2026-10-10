@@ -10,6 +10,21 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Lichte modus in de apps, rondleiding, delen en feedback (11 oktober 2026, gebouwd,
+  op iOS-simulator en Android-emulator bekeken, nog niet op een telefoon)**: Instellingen →
+  *Weergave* (Systeem / Licht / Donker, standaard Donker; `AppAppearance`, `AppTheme`).
+  Elke kleur in `SharedColors` heeft een donkere waarde (ongewijzigd) en een warme lichte
+  (`docs/style/tokens.json` → `themes.light`); functionele kleuren hebben donkerdere lichte
+  varianten met minstens 4,5:1 contrast (servermarkering 3,8:1). Vaste wit- en zwartwaarden
+  in de schermen zijn `tint`/`line`/`ink`/`onAccent` geworden. iOS zet de keuze op het
+  venster (alle covers en sheets, statusbalk), Android op `PresentationRoot` en de
+  systeembalken (`MainActivity`); `UIUserInterfaceStyle = Dark` is uit `Info.plist`. De
+  deelafbeelding van een uitslag blijft donker. Rondleiding van zes schermen
+  (`SharedOnboardingView`, `Onboarding`) bij de eerste start, ook één keer voor wie de app
+  al had (versie 1), en via Instellingen → *Over de app* → *Rondleiding opnieuw bekijken*;
+  daar ook *Deel de app* (Play Store en App Store) en *Feedback sturen* (mail met versie).
+  Releasenote: "Nieuw: lichte weergave (Instellingen → Weergave), een korte rondleiding,
+  en de app delen of feedback sturen vanuit Instellingen."
 - **Ontwerp lichte modus (10 oktober 2026, alleen documentatie)**: warm licht
   toegevoegd aan de stijlkaart, stijlgids en ontwerptokens. Implementatie voor
   iOS, Android, website en live kijkpagina’s staat in `docs/style/BACKLOG.md`.

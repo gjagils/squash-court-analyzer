@@ -31,7 +31,9 @@ Pas niet globaal alle kaartvormen, margins of fonts aan op basis van de oorspron
 
 ## Lichte modus in apps en web (10 oktober 2026)
 
-- [ ] **Implementeer warm licht naast donker op iOS, Android en web.**
+- [x] **Implementeer warm licht naast donker op iOS, Android en web.** Gebouwd 11 oktober
+  2026 (zie `docs/wijzigingen-builds.md`); themakeuze Systeem / Licht / Donker, standaard
+  Donker voor iedereen (besluit Gerd-Jan).
   Ontwerp: `README.md`, `tokens.json` → `themes.light` en de lichte sectie in
   `../archief/homepage-options/style-guide.html`. Alleen het ontwerp is nu klaar.
 

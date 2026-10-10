@@ -15,6 +15,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   iOS, Android, website en live kijkpagina’s staat in `docs/style/BACKLOG.md`.
   De apps en gepubliceerde website zijn hiermee nog niet gewijzigd; geen
   gebruikersreleasenote totdat de implementatie klaar is.
+- **Lichte modus op website en livepagina's (11 oktober 2026)**: alle pagina's in
+  `website/` en de kijkpagina's in `server/live-worker/public/` hebben onderaan de keuze
+  *Weergave* (Systeem / Licht / Donker), bewaard in `localStorage` (`sa-theme`),
+  standaard Donker; een klein script in `<head>` zet het thema vóór de eerste weergave.
+  Kleuren in `website/style.css` zijn variabelen (`:root[data-theme="light"]`), gedeeld
+  script `website/theme.js`. Op licht afwijkend van de tokens: tertiaire tekst #776C61
+  (4,6:1) en liverood #C62A2F (wit label 5,6:1). Livepagina's gaan mee met de push naar
+  `main`; de website is nog niet gepubliceerd. De apps volgen apart.
 
 - **Spelersprofiel (9 oktober 2026, gebouwd, nog niet op een telefoon geprobeerd)**: op
   het badgescherm van een speler staat bovenaan *Profiel* (iOS en Android, gedeeld scherm

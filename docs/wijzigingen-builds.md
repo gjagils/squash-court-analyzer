@@ -10,6 +10,12 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Ontwerp lichte modus (10 oktober 2026, alleen documentatie)**: warm licht
+  toegevoegd aan de stijlkaart, stijlgids en ontwerptokens. Implementatie voor
+  iOS, Android, website en live kijkpagina’s staat in `docs/style/BACKLOG.md`.
+  De apps en gepubliceerde website zijn hiermee nog niet gewijzigd; geen
+  gebruikersreleasenote totdat de implementatie klaar is.
+
 - **Spelersprofiel (9 oktober 2026, gebouwd, nog niet op een telefoon geprobeerd)**: op
   het badgescherm van een speler staat bovenaan *Profiel* (iOS en Android, gedeeld scherm
   `SharedPlayerTrendView`, berekening in Core `PlayerTrend`). Kaarten: Vorm (laatste 10

@@ -35,6 +35,46 @@ De volledige merkheader hoort op de startpagina. Vervolgschermen krijgen een com
 
 De transparante kaartvulling wordt op zwart getekend (circa #180E04). Gebruik dezelfde compositie op beide platformen. Geen groen, grijze teamkaart, oranje verloop of gevulde oranje hoofdtegel in deze homepage. Kleur alleen is nooit de enige statusindicator.
 
+## Lichte modus — warm licht (10 oktober 2026)
+
+Ontwerp vastgesteld op verzoek van Gerd-Jan; **nog niet geïmplementeerd** in
+apps of web. De bestaande donkere modus blijft bestaan. De stijlkaart toont
+beide varianten; `tokens.json` bevat de lichte waarden onder `themes.light`.
+De bestaande hoofdvelden in dat bestand beschrijven nog steeds donker.
+
+| Token | Licht | Gebruik |
+| --- | --- | --- |
+| background | #F7F3ED | Warme schermachtergrond |
+| surface | #FFFFFF | Witte kaarten |
+| textPrimary | #26211C | Titels en bodytekst |
+| textSecondary | #71665B | Onderschriften en metadata |
+| brandAccent | #F28C26 | Herkenbaar merkaccent; niet voor kleine tekst op licht |
+| accent | #A94F08 | Tekst, iconen, links en speler 1 |
+| steelBlue | #405A73 | Speler 2 op lichte ondergrond |
+| border | #DEC9B4 | Decoratieve kaartrand |
+| divider | #E4DBD1 | Subtiele scheidingslijn |
+| hover | #FFF6EB | Aanwijzer boven een kaart of knop |
+| pressed | #FBE8D3 | Ingedrukte kaart of knop |
+| focus | #A94F08 | Zichtbare toetsenbordfocus |
+
+Kaarten houden radius 16, rand 1 en padding 16, zonder schaduw. Typografie,
+layout en de gelijke nadruk op Coach en Scheidsrechter blijven behouden.
+Gebruik de lichte rand niet als enige herkenning van een invoerveld of selectie;
+gebruik daarvoor ook accent, vorm en/of een expliciet label.
+
+Het heldere merkoranje blijft beschikbaar voor decoratie en grotere kleurvlakken.
+Tekst en functionele iconen op wit of warm licht krijgen het diepere oranje.
+Gebruik op een gevulde donkeroranje knop witte tekst. Voor het bestaande logo
+met zwarte achtergrond blijft voorlopig een compact zwart beeldvlak zichtbaar;
+de kaart toont dit expliciet. Een transparante logovariant is een afzonderlijke
+ontwerpkeuze, geen automatische kleurinversie.
+
+De functionele betekenis van spelers-, LET/STROKE-, fout-, succes-, baan- en
+badgekleuren blijft gelijk. Behalve speler 1 en 2 zijn de lichte varianten daarvan
+nog per toepassing te bepalen en op contrast te controleren bij implementatie.
+De witte servermarkering moet op licht een even duidelijk equivalent krijgen,
+met behoud van servicelabel en positie. Zie de [implementatiebacklog](BACKLOG.md#lichte-modus-in-apps-en-web-10-oktober-2026).
+
 ## Blauw en functionele wedstrijdkleuren
 
 Blauw is een volwaardig onderdeel van de stijl, geen afwijking van de homepage. Oranje staat in wedstrijden voor speler 1, staalblauw voor speler 2. Gebruik namen, positie en labels naast kleur om het onderscheid duidelijk te houden.

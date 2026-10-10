@@ -28,3 +28,37 @@ Uitgevoerd:
 - `SquashAnalyzer/Views`: iOS-schermen.
 
 Pas niet globaal alle kaartvormen, margins of fonts aan op basis van de oorspronkelijke stijlgids. De latere gebruikersafspraak hierboven gaat voor. Stem af op de laatste code van de foutanalyse; draai geen fixes van andere wijzigingen terug.
+
+## Lichte modus in apps en web (10 oktober 2026)
+
+- [ ] **Implementeer warm licht naast donker op iOS, Android en web.**
+  Ontwerp: `README.md`, `tokens.json` → `themes.light` en de lichte sectie in
+  `../archief/homepage-options/style-guide.html`. Alleen het ontwerp is nu klaar.
+
+Acceptatiecriteria en werkvolgorde:
+
+1. Maak thematische kleuren in `SharedColors` en de iOS-adapter `AppColors`;
+   vervang geforceerde donkere weergave en losse vaste kleuren waar nodig.
+   Behoud de bestaande layouts, bediening en donkere stijl.
+2. Werk alle appschermen bij, inclusief instellingen, sheets, systeemnavigatie,
+   wedstrijdstart, coach, scheidsrechter, analyse, profiel, badges en teamwedstrijden.
+3. Pas hetzelfde palet toe op de website (`website/`, inclusief handleiding,
+   spelerskaart en teamuitnodiging) en de live kijkpagina’s voor losse partijen
+   en teamwedstrijden (`server/live-worker/public/`). De NAS blijft reserve.
+4. Werk de themakeuze uit met Gerd-Jan: voorstel Systeem / Licht / Donker,
+   met lokaal bewaarde voorkeur. Bepaal de standaard voor bestaande en nieuwe
+   gebruikers vóór invoering; die keuze is nog niet gemaakt. Neem op web
+   systeemvoorkeur, handmatige keuze en eerste paginarender zonder kleurflits mee.
+5. Controleer functionele kleuren per achtergrond: spelers, LET/STROKE,
+   fouten/succes, heatmap, badges en servermarkering. Behoud namen en labels;
+   bepaal leesbare lichte varianten waar de huidige kleuren niet voldoen.
+   Controleer het bestaande logo op licht en stem een eventuele transparante
+   variant af. Bepaal ook bewust hoe geëxporteerde scorekaarten/afbeeldingen kleuren.
+6. Verifieer tekstcontrast (normale tekst minimaal 4,5:1, grote tekst 3:1),
+   noodzakelijke bediening/focusmarkeringen (3:1), hover, pressed, selectie,
+   disabled, fouten, lege toestanden, grote tekst en kleine schermen in beide modi.
+   Vergelijk iOS-simulator, Android-emulator en mobiele/desktopbrowser visueel.
+7. Draai vóór push alle suites uit `docs/opleveren-en-hosting.md`. Werk
+   handleiding en releasenotes bij wanneer de modus daadwerkelijk werkt.
+   Website publiceren volgens de hostinginstructies; uploads naar TestFlight
+   of Play uitsluitend op verzoek. Houd de live-API achterwaarts compatibel.

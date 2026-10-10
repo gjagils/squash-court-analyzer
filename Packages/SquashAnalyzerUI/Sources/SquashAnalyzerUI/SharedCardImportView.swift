@@ -87,7 +87,7 @@ public struct SharedCardImportView: View {
                 Text("De kaart van \(snapshot.name) kon niet worden bewaard.")
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(SharedColors.preferredScheme)
         .task { await loadPreview() }
     }
 

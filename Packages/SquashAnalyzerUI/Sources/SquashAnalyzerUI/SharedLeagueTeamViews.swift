@@ -288,7 +288,7 @@ public struct SharedLeagueTeamDetailView: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.04)))
+            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.04)))
         }
     }
 }

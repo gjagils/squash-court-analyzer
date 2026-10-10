@@ -50,7 +50,7 @@ struct NewTeamMatchSheet: View {
                         }
                         .padding(14)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.white.opacity(0.04))
+                        .background(SharedColors.tint(0.04))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         if let team, !openFixtures.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
@@ -71,7 +71,7 @@ struct NewTeamMatchSheet: View {
                                             AppSymbol("chevron.right", size: 12, color: SharedColors.textMuted)
                                         }
                                         .padding(12)
-                                        .background(Color.white.opacity(0.04))
+                                        .background(SharedColors.tint(0.04))
                                         .clipShape(RoundedRectangle(cornerRadius: 12))
                                     }
                                     .buttonStyle(.plain)
@@ -84,11 +84,11 @@ struct NewTeamMatchSheet: View {
                                 TextField("Ons team", text: $ownTeam)
                                     .font(SharedFonts.system(14))
                                     .padding(10)
-                                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.06)))
+                                    .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.06)))
                                 TextField("Tegenstander", text: $opponent)
                                     .font(SharedFonts.system(14))
                                     .padding(10)
-                                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.06)))
+                                    .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.06)))
                                 Picker("Waar", selection: $atHome) {
                                     Text("Thuis").tag(true)
                                     Text("Uit").tag(false)
@@ -105,7 +105,7 @@ struct NewTeamMatchSheet: View {
                                 }
                             }
                             .padding(12)
-                            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.04)))
+                            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.04)))
                         }
                     }
                     .padding(24)
@@ -119,6 +119,6 @@ struct NewTeamMatchSheet: View {
             }
             .onAppear { if ownTeam.isEmpty, let team { ownTeam = team.name } }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(SharedColors.preferredScheme)
     }
 }

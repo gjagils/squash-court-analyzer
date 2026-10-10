@@ -344,11 +344,11 @@ struct PlayerRowView: View {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.05))
+                .fill(SharedColors.tint(0.05))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(SharedColors.line(0.08), lineWidth: 1)
         )
         // swipeActions only work inside a List, so offer the actions on long press too
         .contextMenu {
@@ -471,7 +471,7 @@ struct PlayerEditSheet: View {
                                 .foregroundColor(AppColors.textSecondary)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
-                                .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.07)))
+                                .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.07)))
                         }
 
                         Button(action: {

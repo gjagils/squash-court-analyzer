@@ -26,7 +26,7 @@ public struct PlayerProfileFields: View {
                     .accessibilityLabel("Naam speler")
                     .textFieldStyle(.plain)
                     .padding()
-                    .background(Color.white.opacity(0.08))
+                    .background(SharedColors.tint(0.08))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
             }
             if let playerId {
@@ -55,8 +55,8 @@ public struct PlayerProfileFields: View {
                                 .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
-                                .foregroundColor(selected ? Color.black : SharedColors.textPrimary)
-                                .background(selected ? SharedColors.gold : Color.white.opacity(0.08))
+                                .foregroundColor(selected ? SharedColors.onAccent : SharedColors.textPrimary)
+                                .background(selected ? SharedColors.gold : SharedColors.tint(0.08))
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)
@@ -72,7 +72,7 @@ public struct PlayerProfileFields: View {
                     .textFieldStyle(.plain)
                     .lineLimit(6)
                     .padding()
-                    .background(Color.white.opacity(0.08))
+                    .background(SharedColors.tint(0.08))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
             }
         }
@@ -254,7 +254,7 @@ public struct PlayerDirectoryView: View {
                                 }
                                 .foregroundColor(SharedColors.textPrimary)
                                 .padding(12)
-                                .background(Color.white.opacity(0.05))
+                                .background(SharedColors.tint(0.05))
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                                 // Long press, as on iOS
                                 .contextMenu {

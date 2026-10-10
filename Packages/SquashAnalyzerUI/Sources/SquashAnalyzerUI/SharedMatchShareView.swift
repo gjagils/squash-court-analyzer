@@ -58,9 +58,9 @@ public struct SharedMatchShareView: View {
                         // The preview reads like the chat: *bold*, _italic_ and ``` blocks, as on iOS
                         WhatsAppPreview(text: report.text(style: style))
                             .padding(16)
-                            .background(Color.white.opacity(0.055))
+                            .background(SharedColors.tint(0.055))
                             .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.10), lineWidth: 1))
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.line(0.10), lineWidth: 1))
                     } else {
                         ResultCardPreview(card: card)
                     }

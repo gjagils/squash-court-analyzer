@@ -74,6 +74,8 @@ public struct SharedSettingsView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     manualSection
                         .padding(.bottom, 20)
+                    AppearancePicker()
+                        .padding(.bottom, 20)
                     courtSection
                         .padding(.bottom, 20)
                     liveSection
@@ -99,7 +101,7 @@ public struct SharedSettingsView: View {
                         .autocorrectionDisabled()
                         .foregroundColor(SharedColors.textPrimary)
                         .padding()
-                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
+                        .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.08)))
                     HStack(spacing: 12) {
                         Button("Bewaar teamlink") { save() }
                             .buttonStyle(.borderedProminent)
@@ -125,6 +127,8 @@ public struct SharedSettingsView: View {
                         aboutAICoachSection
                             .padding(.top, 20)
                     }
+                    AboutAppSection(appVersion: backup?.appVersion ?? "Android", manual: UserManual.android)
+                        .padding(.top, 20)
                     // Clear of the system navigation bar
                     Color.clear.frame(height: 40)
                 }
@@ -219,7 +223,7 @@ public struct SharedSettingsView: View {
                     .foregroundColor(SharedColors.textSecondary)
             }
             .padding()
-            .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
+            .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.08)))
             HStack(spacing: 12) {
                 Button("Bewaar API key") { saveKey() }
                     .buttonStyle(.borderedProminent)

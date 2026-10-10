@@ -36,6 +36,11 @@ struct SettingsView: View {
                     VStack(spacing: 24) {
                         manualSection
 
+                        AppearancePicker()
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.03)))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.08), lineWidth: 1))
+
                         courtSection
 
                         liveSection
@@ -49,6 +54,8 @@ struct SettingsView: View {
 
                         // Info Section
                         infoSection
+
+                        AboutAppSection(appVersion: Self.appVersion, manual: UserManual.iPhone)
                     }
                     .padding(.horizontal, 24)
                     .padding(.vertical, 20)
@@ -77,7 +84,7 @@ struct SettingsView: View {
             TextField("https://sbn.toernooi.nl/league/.../team/...", text: $teamDraft)
                 .font(AppFonts.body(13)).foregroundColor(AppColors.textPrimary)
                 .textInputAutocapitalization(.never).autocorrectionDisabled()
-                .padding().background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
+                .padding().background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.08)))
             HStack(spacing: 12) {
                 ActionButton("BEWAAR TEAMLINK", style: .filled, color: AppColors.warmOrange) {
                     do {
@@ -98,7 +105,7 @@ struct SettingsView: View {
                 }
             }
             if let teamSaveMessage { Text(teamSaveMessage).font(AppFonts.caption(12)).foregroundColor(teamSaveMessage.hasPrefix("Teamlink") ? AppColors.positive : AppColors.warmRed) }
-        }.padding().background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03))).overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        }.padding().background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.line(0.03))).overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.08), lineWidth: 1))
     }
 
     // MARK: - Header
@@ -135,6 +142,14 @@ struct SettingsView: View {
 
     // MARK: - Manual Section
     /// The iPhone manual on the website (Android links to its own page)
+    /// "iPhone 3.0 (2.1)", for the feedback mail
+    private static var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        return "iPhone \(version) (\(build))"
+    }
+
     private var manualSection: some View {
         Link(destination: UserManual.iPhone) {
             HStack(spacing: 12) {
@@ -150,8 +165,8 @@ struct SettingsView: View {
                 Image(systemName: "arrow.up.right").foregroundColor(AppColors.textMuted)
             }
             .padding()
-            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.03)))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.08), lineWidth: 1))
         }
         .accessibilityLabel("Open de handleiding")
     }
@@ -169,15 +184,15 @@ struct SettingsView: View {
             }
             .pickerStyle(.segmented)
             // Dark segments so the unselected "9 vakken" stays readable on the dark card
-            .environment(\.colorScheme, .dark)
+            .environment(\.colorScheme, SharedColors.colorScheme)
             Text("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak: voorin Drop, Boast en Kill, in het midden Kill, Drive, Cross en Boast, achterin Drive, Cross en Lob.")
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.03)))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.08), lineWidth: 1))
     }
 
     // MARK: - Live Section
@@ -206,8 +221,8 @@ struct SettingsView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.03)))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.08), lineWidth: 1))
     }
 
     // MARK: - Backup Section
@@ -230,8 +245,8 @@ struct SettingsView: View {
             BackupActionsView()
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.03)))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.08), lineWidth: 1))
     }
 
     private var backupFootnote: String {
@@ -287,7 +302,7 @@ struct SettingsView: View {
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.white.opacity(0.08))
+                        .fill(SharedColors.tint(0.08))
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
@@ -314,11 +329,11 @@ struct SettingsView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.03))
+                .fill(SharedColors.tint(0.03))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(SharedColors.line(0.08), lineWidth: 1)
         )
     }
 
@@ -362,11 +377,11 @@ struct SettingsView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.03))
+                .fill(SharedColors.tint(0.03))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(SharedColors.line(0.08), lineWidth: 1)
         )
     }
 

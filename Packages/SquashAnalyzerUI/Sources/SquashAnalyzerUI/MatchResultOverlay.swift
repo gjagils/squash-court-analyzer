@@ -60,7 +60,7 @@ public struct MatchResultOverlay: View {
 
     public var body: some View {
         ZStack {
-            Color.black.opacity(0.85)
+            SharedColors.background.opacity(0.85)
                 .ignoresSafeArea()
             ScrollView {
                 card
@@ -154,7 +154,7 @@ public struct MatchResultOverlay: View {
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .overlay(
             RoundedRectangle(cornerRadius: 20)
-                .stroke(result.winner.map { Self.color(for: $0).opacity(0.35) } ?? Color.white.opacity(0.10), lineWidth: 1)
+                .stroke(result.winner.map { Self.color(for: $0).opacity(0.35) } ?? SharedColors.line(0.10), lineWidth: 1)
         )
     }
 

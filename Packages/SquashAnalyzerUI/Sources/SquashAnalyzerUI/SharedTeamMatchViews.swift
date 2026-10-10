@@ -91,7 +91,7 @@ public struct TeamMatchLinkPrompt: View {
                                     Spacer()
                                 }
                                 .padding(12)
-                                .background(slot == partij.slot ? SharedColors.accent.opacity(0.14) : Color.white.opacity(0.04))
+                                .background(slot == partij.slot ? SharedColors.accent.opacity(0.14) : SharedColors.tint(0.04))
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                             }
                             .buttonStyle(.plain)
@@ -112,7 +112,7 @@ public struct TeamMatchLinkPrompt: View {
                 .padding(24)
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(SharedColors.preferredScheme)
     }
 }
 
@@ -517,7 +517,7 @@ public struct SharedTeamMatchView: View {
                 .frame(maxWidth: .infinity)
             }
             Text("games").font(SharedFonts.system(10)).tracking(1.2).foregroundColor(SharedColors.textMuted).frame(maxWidth: .infinity)
-            Divider().overlay(Color.white.opacity(0.15))
+            Divider().overlay(SharedColors.line(0.15))
             HStack {
                 statCell("PARTIJEN", "\(match.homePartijen)-\(match.awayPartijen)")
                 statCell("COMPETITIEPUNTEN", "\(match.homeCompetitionPoints)-\(match.awayCompetitionPoints)")
@@ -560,10 +560,10 @@ public struct SharedTeamMatchView: View {
             VStack(spacing: 0) {
                 ForEach(match.partijen, id: \.slot) { partij in
                     partijRow(partij)
-                    if partij.slot < 4 { Divider().overlay(Color.white.opacity(0.09)) }
+                    if partij.slot < 4 { Divider().overlay(SharedColors.line(0.09)) }
                 }
             }
-            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.04)))
+            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.04)))
             Text("Tik op een partij om spelers en games in te vullen of een bijgehouden wedstrijd te koppelen.")
                 .font(SharedFonts.system(11))
                 .foregroundColor(SharedColors.textMuted)

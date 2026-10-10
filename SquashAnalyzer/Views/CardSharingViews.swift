@@ -132,7 +132,7 @@ struct CardImportSheet: View {
                             Label("Bijwerken bij \(linkedPlayer.name)", systemImage: "arrow.triangle.2.circlepath")
                                 .foregroundColor(AppColors.accentGold)
                         }
-                        .listRowBackground(Color.white.opacity(0.05))
+                        .listRowBackground(SharedColors.tint(0.05))
                     }
                 } else {
                     Section("Koppel aan") {
@@ -142,7 +142,7 @@ struct CardImportSheet: View {
                             Label("Nieuwe speler \(snapshot.name)", systemImage: "person.badge.plus")
                                 .foregroundColor(AppColors.accentGold)
                         }
-                        .listRowBackground(Color.white.opacity(0.05))
+                        .listRowBackground(SharedColors.tint(0.05))
 
                         ForEach(players) { player in
                             Button {
@@ -159,7 +159,7 @@ struct CardImportSheet: View {
                                     }
                                 }
                             }
-                            .listRowBackground(Color.white.opacity(0.05))
+                            .listRowBackground(SharedColors.tint(0.05))
                         }
                     }
                 }
@@ -176,7 +176,7 @@ struct CardImportSheet: View {
                 Text(errorMessage ?? "")
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(SharedColors.preferredScheme)
     }
 
     /// Same wording as Android, from `CardImportPreview.summary`

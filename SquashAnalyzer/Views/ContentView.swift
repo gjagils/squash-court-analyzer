@@ -21,6 +21,8 @@ struct ContentView: View {
     @State private var showingReferee = false
     @State private var showingHistory = false
     @State private var showingSettings = false
+    /// The tour version seen; the tour shows by itself until it is current
+    @AppStorage(Onboarding.storageKey) private var tourSeen = 0
     /// A finished coach match opened for its analysis from Afgeronde wedstrijden
     @State private var analysedMatch: Match? = nil
     @State private var showingStartupPersistenceWarning = false
@@ -69,6 +71,16 @@ struct ContentView: View {
                 .toolbar {
                     CloseToolbarItem { showingHistory = false }
                 }
+            }
+        }
+        .fullScreenCover(isPresented: Binding(get: { Onboarding.shouldShow(seenVersion: tourSeen) && !showingSettings },
+                                              set: { if !$0 { tourSeen = Onboarding.currentVersion } })) {
+            SharedOnboardingView(manual: UserManual.iPhone, onTeamLink: {
+                tourSeen = Onboarding.currentVersion
+                // Instellingen opens once the tour has gone
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { showingSettings = true }
+            }) {
+                tourSeen = Onboarding.currentVersion
             }
         }
         .fullScreenCover(isPresented: $showingSettings) {

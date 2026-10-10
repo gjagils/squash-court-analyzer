@@ -11,11 +11,11 @@ public struct ZoneProfileTable: View {
         self.profile = profile
     }
 
-    private static let text = SharedColors.textPrimary
-    private static let muted = SharedColors.textMuted
-    private static let green = SharedColors.positive
-    private static let orange = SharedColors.accent
-    private static let red = SharedColors.error
+    private static var text: Color { SharedColors.textPrimary }
+    private static var muted: Color { SharedColors.textMuted }
+    private static var green: Color { SharedColors.positive }
+    private static var orange: Color { SharedColors.accent }
+    private static var red: Color { SharedColors.error }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 6) {

@@ -44,8 +44,8 @@ public struct PointTypeButton: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, compact ? 9.0 : 14.0)
-            .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.05)))
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.1), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.05)))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(SharedColors.line(0.1), lineWidth: 1))
         }
         .buttonStyle(.plain)
     }

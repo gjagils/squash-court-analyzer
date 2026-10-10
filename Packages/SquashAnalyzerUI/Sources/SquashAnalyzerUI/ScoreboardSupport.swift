@@ -12,7 +12,7 @@ public struct ServerHighlight {
     /// "TIK = PUNT" under the referee score
     public let caption: Color
 
-    public init(color: Color, isServer: Bool) {
+    @MainActor public init(color: Color, isServer: Bool) {
         name = isServer ? SharedColors.textPrimary : color
         score = isServer ? SharedColors.textPrimary : color
         caption = isServer ? SharedColors.textPrimary.opacity(0.8) : color.opacity(0.55)
@@ -56,14 +56,14 @@ public struct ServiceSideSelector: View {
         return Button(action: { onSelect(box) }) {
             HStack(spacing: 3) {
                 if preferredSide == box {
-                    AppSymbol("pin.fill", size: 7, color: active ? SharedColors.background : color.opacity(0.4))
+                    AppSymbol("pin.fill", size: 7, color: active ? SharedColors.background : SharedColors.quiet(color))
                 }
                 Text(label)
                     .font(SharedFonts.system(compact ? 11.0 : 12.0, weight: .bold, design: .rounded))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
-            .foregroundColor(active ? SharedColors.background : color.opacity(0.4))
+            .foregroundColor(active ? SharedColors.background : SharedColors.quiet(color))
             .padding(.horizontal, compact ? 8.0 : 10.0)
             .padding(.vertical, compact ? 4.0 : 5.0)
             .background(
@@ -158,7 +158,7 @@ enum PlayerPhotos {
 /// Screen background: true black (docs/style/tokens.json)
 struct GlowBackground: View {
     var body: some View {
-        Color.black
+        SharedColors.background
             .ignoresSafeArea()
     }
 }

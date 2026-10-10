@@ -22,7 +22,7 @@ struct HomeView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            SharedColors.background.ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 16) {

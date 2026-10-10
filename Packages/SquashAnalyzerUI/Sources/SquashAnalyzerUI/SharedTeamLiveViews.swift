@@ -71,7 +71,7 @@ struct TeamLiveCard: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.04))
+        .background(SharedColors.tint(0.04))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
@@ -136,7 +136,7 @@ public struct SharedTeamJoinView: View {
                             .font(SharedFonts.system(14))
                             .foregroundColor(SharedColors.textPrimary)
                             .padding(10)
-                            .background(Color.white.opacity(0.06))
+                            .background(SharedColors.tint(0.06))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                         if state == nil {
                             ActionButton(busy ? "Even geduld…" : "Zoek teamwedstrijd", style: .filled,
@@ -165,7 +165,7 @@ public struct SharedTeamJoinView: View {
                 if invite == nil, !text.isEmpty, TeamInvite.parse(text) != nil { await lookUp() }
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(SharedColors.preferredScheme)
     }
 
     private func found(_ state: TeamLiveState) -> some View {
@@ -206,7 +206,7 @@ public struct SharedTeamJoinView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.04))
+        .background(SharedColors.tint(0.04))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 

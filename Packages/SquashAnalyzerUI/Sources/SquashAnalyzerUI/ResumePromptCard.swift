@@ -12,7 +12,7 @@ struct ResumePromptCard: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.6).ignoresSafeArea()
+            SharedColors.background.opacity(0.6).ignoresSafeArea()
             VStack(spacing: 14) {
                 Text("Wedstrijd hervatten?")
                     .font(SharedFonts.system(18, weight: .bold, design: .rounded))

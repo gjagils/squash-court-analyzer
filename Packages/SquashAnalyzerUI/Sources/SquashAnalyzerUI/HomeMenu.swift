@@ -87,13 +87,13 @@ public struct HomeMenuTiles: View {
             }
             VStack(spacing: 0) {
                 menuRow("Afgeronde wedstrijden", icon: .history, action: onHistory)
-                Divider().overlay(Color.white.opacity(0.09))
+                Divider().overlay(SharedColors.line(0.09))
                 if let onCompetition {
                     menuRow("Competitie", icon: .competition, action: onCompetition)
-                    Divider().overlay(Color.white.opacity(0.09))
+                    Divider().overlay(SharedColors.line(0.09))
                 }
                 menuRow("Spelers", icon: .players, action: onPlayers)
-                Divider().overlay(Color.white.opacity(0.09))
+                Divider().overlay(SharedColors.line(0.09))
                 menuRow("Badges", icon: .badges, action: onBadges)
             }
         }
@@ -143,7 +143,7 @@ public struct HomeTeamSummary: View {
                     stat("PUNTEN", snapshot.points)
                 }
                 if let next = snapshot.nextFixture() {
-                    Divider().overlay(Color.white.opacity(0.15))
+                    Divider().overlay(SharedColors.line(0.15))
                     Text("Volgende · \(LeagueDates.day(next.date)) · \(next.home) – \(next.away)")
                         .font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -313,6 +313,8 @@ public struct AndroidHomeView: View {
     @State private var showingSettings = false
     @State private var showingTeam = false
     @State private var team: LeagueTeamSnapshot?
+    /// The tour version seen; the tour shows by itself until it is current
+    @AppStorage(Onboarding.storageKey) private var tourSeen = 0
     private let matchStore: any CoachMatchStore
     private let refereeMatchStore: any RefereeMatchStore
     /// Opens the platform share sheet with a text (a card link); Android's
@@ -413,6 +415,15 @@ public struct AndroidHomeView: View {
                     }
                 }
         }
+        .trackedCover(isPresented: Binding(get: { Onboarding.shouldShow(seenVersion: tourSeen) },
+                                           set: { if !$0 { tourSeen = Onboarding.currentVersion } })) {
+            SharedOnboardingView(manual: UserManual.android, onTeamLink: {
+                tourSeen = Onboarding.currentVersion
+                showingSettings = true
+            }) {
+                tourSeen = Onboarding.currentVersion
+            }
+        }
         .sheet(isPresented: Binding(get: { cardInbox.pending != nil },
                                     set: { if !$0 { cardInbox.pending = nil } })) {
             if let snapshot = cardInbox.pending {
@@ -436,12 +447,12 @@ public struct AndroidHomeView: View {
                                          shareText: shareText) { analysedMatch = nil }
             }
         }
-        .preferredColorScheme(.dark)
+        .appAppearance()
     }
 
     private var homeContent: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            SharedColors.background.ignoresSafeArea()
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 16) {
@@ -467,6 +478,6 @@ public struct AndroidHomeView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(SharedColors.preferredScheme)
     }
 }

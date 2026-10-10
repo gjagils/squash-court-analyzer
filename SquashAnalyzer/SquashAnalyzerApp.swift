@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import SquashAnalyzerCore
+import SquashAnalyzerUI
 
 @main
 struct SquashAnalyzerApp: App {
@@ -44,6 +45,7 @@ struct SquashAnalyzerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(startupPersistenceWarning: persistenceWarning)
+                .appAppearance()
         }
         .modelContainer(container)
     }

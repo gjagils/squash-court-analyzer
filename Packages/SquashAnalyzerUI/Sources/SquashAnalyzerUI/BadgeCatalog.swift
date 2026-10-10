@@ -117,7 +117,7 @@ public struct SharedBadgeCatalogView: View {
                             }
                         }
                         .padding(.vertical, 2)
-                        .listRowBackground(Color.white.opacity(0.05))
+                        .listRowBackground(SharedColors.tint(0.05))
                     }
                 } header: {
                     Text(category.rawValue.uppercased())

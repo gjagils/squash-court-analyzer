@@ -15,12 +15,8 @@
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<!-- Live meekijken: lets a local test server (http://<ip>:8080) work; the internet still needs HTTPS -->
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<!-- The app is dark throughout: system alerts, menus and sheets follow (white alert in a light-mode test, 7 October) -->
-	<key>UIUserInterfaceStyle</key>
-	<string>Dark</string>
 </dict>
 </plist>

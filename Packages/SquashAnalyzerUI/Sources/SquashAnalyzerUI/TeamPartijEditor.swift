@@ -85,7 +85,7 @@ struct TeamPartijEditor: View {
                 Text("De games komen uit die wedstrijd, gezien vanuit onze speler.")
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(SharedColors.preferredScheme)
     }
 
     /// Which team match this partij is in: shared with the team, or only ours
@@ -193,7 +193,7 @@ struct TeamPartijEditor: View {
                 .padding(.top, 4)
             }
             if partij.canAddGame {
-                Divider().overlay(Color.white.opacity(0.09)).padding(.vertical, 6)
+                Divider().overlay(SharedColors.line(0.09)).padding(.vertical, 6)
                 Text("Game \(partij.games.count + 1) toevoegen")
                     .font(SharedFonts.system(12, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
@@ -318,7 +318,7 @@ struct TeamPartijEditor: View {
                             .foregroundColor(partij.playOrder == order ? SharedColors.background : SharedColors.textPrimary)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 8)
-                            .background(partij.playOrder == order ? SharedColors.accent : Color.white.opacity(0.06))
+                            .background(partij.playOrder == order ? SharedColors.accent : SharedColors.tint(0.06))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                     .buttonStyle(.plain)
@@ -335,7 +335,7 @@ struct TeamPartijEditor: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.04)))
+            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.04)))
         }
     }
 
@@ -344,7 +344,7 @@ struct TeamPartijEditor: View {
             .font(SharedFonts.system(14))
             .foregroundColor(SharedColors.textPrimary)
             .padding(10)
-            .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.06)))
+            .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.06)))
     }
 
     private func scoreField(_ placeholder: String, text: Binding<String>) -> some View {
@@ -358,14 +358,14 @@ struct TeamPartijEditor: View {
             .lineLimit(1)
             .padding(8)
             .frame(width: 76)
-            .background(Color.white.opacity(0.06))
+            .background(SharedColors.tint(0.06))
             .clipShape(RoundedRectangle(cornerRadius: 10))
         #else
         return field
             .lineLimit(1)
             .padding(8)
             .frame(width: 76)
-            .background(Color.white.opacity(0.06))
+            .background(SharedColors.tint(0.06))
             .clipShape(RoundedRectangle(cornerRadius: 10))
         #endif
     }
@@ -487,7 +487,7 @@ struct TrackedMatchPicker: View {
                                         AppSymbol("chevron.right", size: 12, color: SharedColors.textMuted)
                                     }
                                     .padding(12)
-                                    .background(Color.white.opacity(0.04))
+                                    .background(SharedColors.tint(0.04))
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
                                 }
                                 .buttonStyle(.plain)
@@ -504,6 +504,6 @@ struct TrackedMatchPicker: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(SharedColors.preferredScheme)
     }
 }

@@ -35,9 +35,9 @@ struct TeamMatchShareView: View {
                     if let style = choice.textStyle {
                         WhatsAppPreview(text: TeamMatchReport.text(match, style: style))
                             .padding(16)
-                            .background(Color.white.opacity(0.055))
+                            .background(SharedColors.tint(0.055))
                             .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.10), lineWidth: 1))
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.line(0.10), lineWidth: 1))
                     } else {
                         ResultCardPreview(card: ResultCard.from(match))
                     }
@@ -48,7 +48,7 @@ struct TeamMatchShareView: View {
             .padding(.horizontal, 20)
             .padding(.top, 22)
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(SharedColors.preferredScheme)
     }
 
     private func share() {

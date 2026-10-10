@@ -35,6 +35,8 @@ import skip.foundation.URL
 import squash.analyzer.core.AICoachClient
 import squash.analyzer.core.LiveShare
 import squash.analyzer.core.TeamLive
+import squash.analyzer.core.AppTheme
+import androidx.compose.foundation.isSystemInDarkTheme
 import squash.analyzer.ui.AICoachContext
 import squash.analyzer.ui.ResultImageSharing
 import squash.analyzer.ui.BackupContext
@@ -124,7 +126,18 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val stateHolder = rememberSaveableStateHolder()
             stateHolder.SaveableStateProvider(true) {
-                PresentationRoot(defaultColorScheme = ColorScheme.dark, context = ComposeContext()) { context ->
+                // Weergave (Systeem, Licht, Donker): the base scheme of every screen and top
+                // bar is the app's choice; only under Systeem does it follow the phone
+                val systemDark = isSystemInDarkTheme()
+                val theme = AppTheme.shared
+                val light = if (theme.followsSystem) !systemDark else theme.isLight
+                // Status and navigation bar icons dark on the light theme, light on the dark one
+                SideEffect {
+                    val bar = if (light) SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+                        else SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+                    enableEdgeToEdge(statusBarStyle = bar, navigationBarStyle = bar)
+                }
+                PresentationRoot(defaultColorScheme = if (light) ColorScheme.light else ColorScheme.dark, context = ComposeContext()) { context ->
                     Box(modifier = context.modifier.fillMaxSize()) {
                         AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach, backup = backup, teamImporter = teamImporter, photoStore = playerStore, filePicker = playerFiles, shareCard = { snapshot, text -> shareOffMainThread { CardImage.shareIntent(this@MainActivity, snapshot, text) } }, teamMatchStore = teamMatchStore)
                             // Page titles 20 sp semibold on every top bar, as PageTitleStyle on iOS (docs/style/README.md)

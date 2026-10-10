@@ -19,7 +19,7 @@ struct TeamShareBadge: View {
             .foregroundColor(isLive ? SharedColors.background : SharedColors.textSecondary)
             .padding(.horizontal, 8)
             .padding(.vertical, 3)
-            .background(isLive ? SharedColors.accent : Color.white.opacity(0.08))
+            .background(isLive ? SharedColors.accent : SharedColors.tint(0.08))
             .clipShape(Capsule())
     }
 }
@@ -64,7 +64,7 @@ struct TeamShareBanner: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(match.isLive ? SharedColors.accent.opacity(0.12) : Color.white.opacity(0.04))
+        .background(match.isLive ? SharedColors.accent.opacity(0.12) : SharedColors.tint(0.04))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
@@ -134,7 +134,7 @@ struct TeamShareSheet: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(SharedColors.preferredScheme)
     }
 
     private func group<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
@@ -145,7 +145,7 @@ struct TeamShareSheet: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.04)))
+            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.04)))
         }
     }
 }

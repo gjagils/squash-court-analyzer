@@ -41,7 +41,7 @@ struct SharedTeamImportView: View {
                 TextField("https://squashanalyzer.com/teams/…", text: $link)
                     .foregroundColor(SharedColors.textPrimary)
                     .padding(12)
-                    .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.06)))
+                    .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.06)))
                     .disabled(isImporting)
                 ActionButton(isImporting ? "Bezig met importeren…" : "IMPORTEREN", style: .filled, color: SharedColors.gold,
                              disabled: isImporting || link.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, action: start)

@@ -164,7 +164,7 @@ public struct SharedMatchHistoryView: View {
                     AppSymbol(playerFilter == nil ? "chevron.down" : "xmark", size: 14, color: SharedColors.textSecondary)
                 }
                 .padding(12)
-                .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.05)))
+                .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.05)))
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Filter op speler")
@@ -181,7 +181,7 @@ public struct SharedMatchHistoryView: View {
                 .foregroundColor(selected ? SharedColors.background : SharedColors.gold)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
-                .background(selected ? SharedColors.gold : Color.white.opacity(0.05))
+                .background(selected ? SharedColors.gold : SharedColors.tint(0.05))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
@@ -298,7 +298,7 @@ public struct SharedMatchHistoryView: View {
                                     .foregroundColor(chips[index] == "–" ? SharedColors.textMuted.opacity(0.6) : SharedColors.textMuted)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
-                                    .background(Color.white.opacity(chips[index] == "–" ? 0.03 : 0.05))
+                                    .background(SharedColors.tint(chips[index] == "–" ? 0.03 : 0.05))
                                     .clipShape(Capsule())
                             }
                         }
@@ -341,7 +341,7 @@ public struct SharedMatchHistoryView: View {
         .padding(16)
         .background(SharedColors.surface)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.1), lineWidth: 1))
     }
 
     private func scoreSide(_ name: String, _ games: Int, won: Bool, color: Color) -> some View {
@@ -405,7 +405,7 @@ public struct SharedMatchHistoryView: View {
             }
         }
         .padding(14)
-        .background(Color.white.opacity(0.05))
+        .background(SharedColors.tint(0.05))
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(SharedColors.gold.opacity(0.15), lineWidth: 1))
     }

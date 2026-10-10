@@ -129,7 +129,7 @@ public struct CourtView: View {
                 .padding(.vertical, 6)
                 .background(
                     Capsule()
-                        .fill(Color.black.opacity(0.78))
+                        .fill(SharedColors.background.opacity(0.85))
                         .overlay(Capsule().stroke(color.opacity(0.55), lineWidth: 1))
                 )
         }
@@ -248,11 +248,11 @@ private struct CourtPanel<Content: View>: View {
         content
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white.opacity(0.055))
+                    .fill(SharedColors.tint(0.055))
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
                             .stroke(
-                                accent?.opacity(0.28) ?? Color.white.opacity(0.10),
+                                accent?.opacity(0.28) ?? SharedColors.tint(0.10),
                                 lineWidth: 1
                             )
                     )
@@ -317,17 +317,17 @@ private struct ZoneTapArea: View {
 #Preview("Court - Default") {
     CourtView()
         .padding(20)
-        .background(Color.black)
+        .background(SharedColors.background)
 }
 
 #Preview("Court - Player Selected") {
     CourtView(isInteractive: true, selectedPlayer: .player1) { _ in }
     .padding(20)
-    .background(Color.black)
+    .background(SharedColors.background)
 }
 
 #Preview("Court - Player 2 Selected") {
     CourtView(isInteractive: true, selectedPlayer: .player2) { _ in }
     .padding(20)
-    .background(Color.black)
+    .background(SharedColors.background)
 }

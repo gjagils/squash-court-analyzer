@@ -37,8 +37,8 @@ public struct SharedScoreboardView: View {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.055))
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.10), lineWidth: 1))
+                .fill(SharedColors.tint(0.055))
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.line(0.10), lineWidth: 1))
         )
     }
 
@@ -533,11 +533,11 @@ public struct CoachScoringView: View {
             matchChanged()
         }) {
             HStack(spacing: 10) {
-                AppSymbol("play.fill", size: 16, color: Color.black.opacity(0.8))
+                AppSymbol("play.fill", size: 16, color: SharedColors.onAccent)
                 Text("START GAME \(match.currentGameNumber)")
                     .font(SharedFonts.system(15, weight: .bold, design: .rounded))
                     .tracking(1)
-                    .foregroundColor(Color.black.opacity(0.8))
+                    .foregroundColor(SharedColors.onAccent)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
@@ -655,7 +655,7 @@ public struct CoachScoringView: View {
     /// "Wie vraagt de let?", as iOS' LetSelectorOverlay: tapping beside it cancels
     private var letOverlay: some View {
         ZStack {
-            Color.black.opacity(0.7)
+            SharedColors.background.opacity(0.7)
                 .ignoresSafeArea()
                 .onTapGesture { showingLet = false }
             VStack(spacing: 20) {
@@ -681,7 +681,7 @@ public struct CoachScoringView: View {
                         .foregroundColor(SharedColors.textSecondary)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 10)
-                        .background(Color.white.opacity(0.1))
+                        .background(SharedColors.tint(0.1))
                         .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
@@ -777,7 +777,7 @@ public struct CoachScoringView: View {
 
     private func overlayCard<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         ZStack {
-            Color.black.opacity(0.6).ignoresSafeArea()
+            SharedColors.background.opacity(0.6).ignoresSafeArea()
             VStack(spacing: 14) {
                 content()
             }

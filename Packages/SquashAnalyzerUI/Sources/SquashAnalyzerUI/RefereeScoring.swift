@@ -344,9 +344,9 @@ public struct RefereeScoringView: View {
             .foregroundColor(match.canUndo ? SharedColors.textPrimary : SharedColors.textMuted)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(Color.white.opacity(match.canUndo ? 0.07 : 0.03))
+            .background(SharedColors.tint(match.canUndo ? 0.07 : 0.03))
             .clipShape(RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(match.canUndo ? 0.15 : 0.06), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(SharedColors.line(match.canUndo ? 0.15 : 0.06), lineWidth: 1))
         }
         .buttonStyle(.plain)
         .disabled(!match.canUndo)

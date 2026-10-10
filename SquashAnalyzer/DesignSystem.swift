@@ -8,29 +8,30 @@ import SquashAnalyzerUI
 /// Android cannot drift apart (T17).
 
 // MARK: - Colors
+@MainActor
 enum AppColors {
     /// Brand orange, player 1, primary action
-    static let warmOrange = SharedColors.accent
+    static var warmOrange: Color { SharedColors.accent }
     /// Player 2
-    static let steelBlue = SharedColors.steelBlue
-    static let steelBlueLight = SharedColors.steelBlueLight
+    static var steelBlue: Color { SharedColors.steelBlue }
+    static var steelBlueLight: Color { SharedColors.steelBlueLight }
 
-    static let backgroundDark = SharedColors.background
-    static let backgroundMedium = SharedColors.surface
+    static var backgroundDark: Color { SharedColors.background }
+    static var backgroundMedium: Color { SharedColors.surface }
 
-    static let courtSand = SharedColors.courtSand
+    static var courtSand: Color { SharedColors.courtSand }
 
-    static let textPrimary = SharedColors.textPrimary
-    static let textSecondary = SharedColors.textSecondary
-    static let textMuted = SharedColors.textMuted
+    static var textPrimary: Color { SharedColors.textPrimary }
+    static var textSecondary: Color { SharedColors.textSecondary }
+    static var textMuted: Color { SharedColors.textMuted }
 
-    static let accentGold = SharedColors.gold
+    static var accentGold: Color { SharedColors.gold }
 
     /// Referee actions of the right-hand player, and STROKE of the left-hand one
-    static let coolBlue = SharedColors.coolBlue
-    static let coolIndigo = SharedColors.coolIndigo
-    static let warmRed = SharedColors.warmRed
-    static let positive = SharedColors.positive
+    static var coolBlue: Color { SharedColors.coolBlue }
+    static var coolIndigo: Color { SharedColors.coolIndigo }
+    static var warmRed: Color { SharedColors.warmRed }
+    static var positive: Color { SharedColors.positive }
 
     /// Player 1 orange, player 2 steel blue
     static func player(_ player: Player) -> Color {
@@ -88,11 +89,11 @@ struct SportsPanel<Content: View>: View {
         content
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white.opacity(0.055))
+                    .fill(SharedColors.tint(0.055))
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
                             .stroke(
-                                accent?.opacity(0.28) ?? Color.white.opacity(0.10),
+                                accent?.opacity(0.28) ?? SharedColors.tint(0.10),
                                 lineWidth: 1
                             )
                     )
@@ -129,7 +130,7 @@ struct CloseToolbarItem: ToolbarContent {
 /// Screen background: true black (docs/style/tokens.json)
 struct AppBackground: View {
     var body: some View {
-        Color.black
+        SharedColors.background
             .ignoresSafeArea()
     }
 }

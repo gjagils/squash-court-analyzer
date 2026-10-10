@@ -103,7 +103,7 @@ public struct SharedCoachDashboardView: View {
                             .foregroundColor(SharedColors.gold)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
-                            .background(Capsule().fill(Color.white.opacity(0.1)))
+                            .background(Capsule().fill(SharedColors.tint(0.1)))
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Deel game-analyse")
@@ -113,7 +113,7 @@ public struct SharedCoachDashboardView: View {
             Button(action: onClose) {
                 AppSymbol("xmark", size: 16, color: SharedColors.textSecondary, weight: .medium)
                     .padding(10)
-                    .background(Circle().fill(Color.white.opacity(0.1)))
+                    .background(Circle().fill(SharedColors.tint(0.1)))
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Sluiten")

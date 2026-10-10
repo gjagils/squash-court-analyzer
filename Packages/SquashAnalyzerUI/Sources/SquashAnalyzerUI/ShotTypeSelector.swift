@@ -44,11 +44,11 @@ public struct ShotTypeButton: View {
             .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isPressed ? color.opacity(0.2) : Color.white.opacity(0.05))
+                    .fill(isPressed ? color.opacity(0.2) : SharedColors.tint(0.05))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(isPressed ? color.opacity(0.7) : Color.white.opacity(0.1), lineWidth: isPressed ? 2.0 : 1.0)
+                    .stroke(isPressed ? color.opacity(0.7) : SharedColors.line(0.1), lineWidth: isPressed ? 2.0 : 1.0)
             )
             .scaleEffect(isPressed ? 0.95 : 1.0)
         }

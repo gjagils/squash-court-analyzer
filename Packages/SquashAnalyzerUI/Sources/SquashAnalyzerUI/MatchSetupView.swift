@@ -202,7 +202,7 @@ public struct MatchSetupView: View {
                     .accessibilityLabel(label)
                     .textFieldStyle(.plain)
                     .padding()
-                    .background(Color.white.opacity(0.08))
+                    .background(SharedColors.tint(0.08))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(color.opacity(0.4), lineWidth: 1))
                     .foregroundColor(SharedColors.textPrimary)
@@ -307,7 +307,7 @@ public struct MatchSetupView: View {
                 .accessibilityLabel("Meer games voor \(name)")
         }
         .padding(.horizontal, 12)
-        .background(Color.white.opacity(0.05))
+        .background(SharedColors.tint(0.05))
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
@@ -343,7 +343,7 @@ public struct MatchSetupView: View {
                                     TeamShareBadge(isLive: candidate.isLive)
                                 }
                                 .padding(10)
-                                .background(candidate.id == team.id ? SharedColors.accent.opacity(0.12) : Color.white.opacity(0.04))
+                                .background(candidate.id == team.id ? SharedColors.accent.opacity(0.12) : SharedColors.tint(0.04))
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                             }
                             .buttonStyle(.plain)
@@ -369,7 +369,7 @@ public struct MatchSetupView: View {
                                     .foregroundColor(teamSlot == slot ? SharedColors.background : (team.partij(slot).hasEntry ? SharedColors.textMuted : SharedColors.accent))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 9)
-                                    .background(teamSlot == slot ? SharedColors.accent : Color.white.opacity(0.06))
+                                    .background(teamSlot == slot ? SharedColors.accent : SharedColors.tint(0.06))
                                     .clipShape(RoundedRectangle(cornerRadius: 10))
                             }
                             .buttonStyle(.plain)
@@ -390,7 +390,7 @@ public struct MatchSetupView: View {
                 }
             }
             .padding(14)
-            .background(Color.white.opacity(0.04))
+            .background(SharedColors.tint(0.04))
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
     }

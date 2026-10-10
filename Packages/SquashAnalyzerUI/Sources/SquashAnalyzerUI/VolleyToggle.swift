@@ -16,11 +16,11 @@ public struct VolleyToggle: View {
     public var body: some View {
         Button { isOn.toggle() } label: {
             HStack(spacing: 8) {
-                AppSymbol("bolt.fill", size: 14, color: isOn ? Color.black.opacity(0.8) : color)
+                AppSymbol("bolt.fill", size: 14, color: isOn ? SharedColors.onAccent : color)
                 Text("UIT DE LUCHT")
                     .font(SharedFonts.system(12, weight: .bold, design: .rounded))
                     .tracking(1)
-                    .foregroundColor(isOn ? Color.black.opacity(0.8) : color)
+                    .foregroundColor(isOn ? SharedColors.onAccent : color)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)

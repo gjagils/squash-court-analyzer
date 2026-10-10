@@ -3,13 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Weergave before the first paint: Donker unless Licht or Systeem was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
   <title>SquashAnalyzer – Coach & Scheidsrechter App</title>
   <meta name="description" content="SquashAnalyzer is de app voor squashcoaches en scheidsrechters, voor iPhone en Android (in bèta). Registreer elke rally met punttype, vak en slag, houd de service bij, verdien badges en ontvang AI-coachingadvies." />
   <meta property="og:title" content="SquashAnalyzer" />
   <meta property="og:description" content="De professionele squash-app voor coaches en scheidsrechters." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.squashanalyzer.com" />
-  <link rel="stylesheet" href="style.css?v=20261005b" />
+  <link rel="stylesheet" href="style.css?v=20261011" />
+  <script src="theme.js?v=20261011" defer></script>
   <!-- Icons of the site -->
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=5" />
   <link rel="icon" type="image/png" sizes="256x256" href="favicon.png?v=5" />
@@ -257,7 +263,7 @@
         <p>SquashAnalyzer is gratis te downloaden in de App Store voor iPhone en iPad. Android is beschikbaar via de <a href="testen.html">gesloten test</a>.</p>
 
     <a class="appstore-placeholder" href="https://apps.apple.com/app/squash-analyzer/id6758676921" target="_blank" rel="noopener">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="#F28C26">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
       </svg>
       Downloaden in de App Store
@@ -275,6 +281,7 @@
       <a href="mailto:info@squashanalyzer.com">Contact</a>
       <a href="https://bunq.me/squashanalyzer" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">local_cafe</span> Trakteer</a>
     </div>
+    <div data-theme-choice-slot></div>
   </footer>
 
 </body>

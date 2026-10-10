@@ -2,25 +2,74 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Huisstijl "Clubhuis" (docs/style/README.md, tokens.json) */
-  --bg-dark:    #000000;
-  --bg-medium:  #000000;
+  /* Huisstijl "Clubhuis" (docs/style/README.md, tokens.json). Every colour is a
+     variable: these are the dark values (the default), the block below holds
+     "warm licht" (tokens.json → themes.light). <html data-theme> is set by the
+     inline script in <head> and by theme.js (Systeem / Licht / Donker). */
+  color-scheme: dark;
+  --bg-dark:    #000000;                 /* page background */
+  --bg-medium:  #000000;                 /* phone frames around the screenshots */
   --bg-card:    #180E04;                 /* accent 10% op zwart */
   --surface:    rgba(242,140,38,0.10);
   --line:       rgba(242,140,38,0.35);
+  --line-strong: rgba(242,140,38,0.65);
   --hover:      rgba(242,140,38,0.18);
   --pressed:    rgba(242,140,38,0.25);
-  --gold:       #F28C26;                 /* accent */
+  --gold:       #F28C26;                 /* accent: text, links, icons */
   --gold-dim:   #BF6E1E;
   --orange:     #F28C26;
+  --brand:      #F28C26;                 /* bright brand orange: decoration only */
+  --btn:        #F28C26;                 /* filled button */
+  --btn-hover:  #F5A04D;
+  --on-btn:     #000000;                 /* text on a filled button */
   --blue:       #59738C;                 /* steelBlue */
   --blue-light: #8094AD;
   --text-1:     #F2EDE6;
   --text-2:     #B3ADA6;
   --text-3:     #8C8680;
   --border:     rgba(255,255,255,0.09);  /* divider */
+  --nav-bg:     rgba(0,0,0,0.85);
+  --note-bg:    rgba(242,140,38,0.06);
+  --tint:       rgba(242,140,38,0.12);
+  --tag-line:   rgba(242,140,38,0.5);
+  --phone-shadow: 0 32px 64px rgba(0,0,0,.6);
+  --beta-shadow: 0 2px 8px rgba(0,0,0,.4);
+  --focus:      #F28C26;
   --radius:     16px;
   --radius-sm:  10px;
+}
+
+/* Warm licht (docs/style/README.md, 10 oktober 2026). Text on light uses the
+   deep orange #A94F08 (5.0:1 on the background); the bright #F28C26 only
+   decorates. Filled buttons are deep orange with white text (5.5:1). */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg-dark:    #F7F3ED;
+  --bg-card:    #FFFFFF;
+  --surface:    #FFFFFF;
+  --line:       #DEC9B4;
+  --line-strong: #C9965F;
+  --hover:      #FFF6EB;
+  --pressed:    #FBE8D3;
+  --gold:       #A94F08;
+  --gold-dim:   #F28C26;
+  --orange:     #A94F08;
+  --btn:        #A94F08;
+  --btn-hover:  #8F4206;
+  --on-btn:     #FFFFFF;
+  --blue:       #405A73;
+  --blue-light: #405A73;
+  --text-1:     #26211C;
+  --text-2:     #71665B;
+  --text-3:     #776C61;                 /* 4.6:1 on the background */
+  --border:     #E4DBD1;
+  --nav-bg:     rgba(247,243,237,0.88);
+  --note-bg:    #FFF6EB;
+  --tint:       #FFF1E2;
+  --tag-line:   #DEC9B4;
+  --phone-shadow: 0 20px 44px rgba(38,33,28,.18);
+  --beta-shadow: 0 2px 8px rgba(38,33,28,.25);
+  --focus:      #A94F08;
 }
 
 html { scroll-behavior: smooth; }
@@ -42,7 +91,7 @@ nav {
   top: 0;
   z-index: 100;
   backdrop-filter: blur(20px);
-  background: rgba(0, 0, 0, 0.85);
+  background: var(--nav-bg);
   border-bottom: 1px solid var(--border);
 }
 
@@ -77,8 +126,8 @@ nav {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--gold);
-  color: var(--bg-dark);
+  background: var(--btn);
+  color: var(--on-btn);
   font-size: 13px;
   font-weight: 700;
   padding: 8px 18px;
@@ -86,7 +135,7 @@ nav {
   transition: background .15s;
 }
 
-.nav-cta:hover { background: #F5A04D; text-decoration: none; }
+.nav-cta:hover { background: var(--btn-hover); text-decoration: none; }
 .nav-cta svg { flex-shrink: 0; }
 
 /* ── Hero ─────────────────────────────────────────────────── */
@@ -161,8 +210,8 @@ nav {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: var(--gold);
-  color: var(--bg-dark);
+  background: var(--btn);
+  color: var(--on-btn);
   font-weight: 700;
   font-size: 15px;
   padding: 14px 26px;
@@ -170,7 +219,7 @@ nav {
   transition: background .15s;
 }
 
-.btn-primary:hover { background: #F5A04D; text-decoration: none; }
+.btn-primary:hover { background: var(--btn-hover); text-decoration: none; }
 
 .btn-secondary {
   display: inline-flex;
@@ -186,7 +235,7 @@ nav {
   transition: background .15s, border-color .15s;
 }
 
-.btn-secondary:hover { background: var(--hover); border-color: rgba(242,140,38,.65); text-decoration: none; }
+.btn-secondary:hover { background: var(--hover); border-color: var(--line-strong); text-decoration: none; }
 .btn-secondary:active { background: var(--pressed); }
 
 /* ── Mockup strip ─────────────────────────────────────────── */
@@ -205,7 +254,7 @@ nav {
   background: var(--bg-medium);
   aspect-ratio: 9/19.5;
   overflow: hidden;
-  box-shadow: 0 32px 64px rgba(0,0,0,.6);
+  box-shadow: var(--phone-shadow);
   flex-shrink: 0;
 }
 
@@ -477,9 +526,9 @@ footer {
   padding: 10px 18px; border-radius: 12px; border: 1px solid var(--line);
   background: var(--surface); color: var(--text-1); font-weight: 600; font-size: 14px;
 }
-.platform-switch a.active { background: var(--gold); color: #000; border-color: var(--gold); }
+.platform-switch a.active { background: var(--btn); color: var(--on-btn); border-color: var(--btn); }
 .platform-switch a:hover { text-decoration: none; background: var(--hover); }
-.platform-switch a.active:hover { background: var(--gold); }
+.platform-switch a.active:hover { background: var(--btn); }
 .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 8px; }
 .toc a {
   font-size: 13px; padding: 6px 12px; border-radius: 10px;
@@ -503,14 +552,14 @@ footer {
 .tile .ui { color: var(--text-1); font-weight: 600; white-space: nowrap; }
 .tile .note {
   border-left: 3px solid var(--gold-dim); padding: 8px 12px; margin: 12px 0;
-  background: rgba(242,140,38,0.06); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--note-bg); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   font-size: 14px; color: var(--text-2);
 }
 .shots { display: flex; flex-direction: column; gap: 14px; }
 .shots figure { margin: 0; }
 .shots img {
   width: 100%; height: auto; display: block; border-radius: 18px;
-  border: 1px solid var(--border); background: #000;
+  border: 1px solid var(--border); background: var(--bg-medium);
 }
 .shots figcaption { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 6px; }
 .chooser { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 28px; }
@@ -518,7 +567,7 @@ footer {
   background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 24px; color: var(--text-1);
 }
-.chooser a:hover { background: var(--hover); border-color: rgba(242,140,38,.65); text-decoration: none; }
+.chooser a:hover { background: var(--hover); border-color: var(--line-strong); text-decoration: none; }
 .chooser h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
 .chooser p { color: var(--text-2); font-size: 15px; }
 @media (max-width: 760px) {
@@ -541,8 +590,8 @@ footer {
 .beta-tag {
   position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 2;
   font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-  color: #000; background: var(--orange); padding: 4px 9px; border-radius: 999px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  color: #000; background: var(--brand); padding: 4px 9px; border-radius: 999px;
+  box-shadow: var(--beta-shadow);
 }
 .shots .beta-tag { bottom: 34px; font-size: 10px; padding: 3px 7px; }
 .beta-note { font-size: 13px; color: var(--text-3); text-align: center; margin: -28px auto 8px; max-width: 640px; padding: 0 24px; }
@@ -552,7 +601,7 @@ footer {
 .donate-card .home-links { justify-content: center; }
 
 /* ── Toetsenbordfocus en minder beweging ────────────────────── */
-a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
+a:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 6px; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
 
 /* Icon font: the 21 Material Symbols (Outlined, filled) the pages use, served from
@@ -580,3 +629,18 @@ a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-ra
 .tile h2 .icon .ms { font-size: 24px; }
 .btn-primary .ms { color: inherit; font-size: 20px; }
 .footer-links .ms { font-size: 16px; vertical-align: -3px; }
+
+/* ── Logo op licht: het zwarte logo als compact zwart vlak ──── */
+:root[data-theme="light"] .nav-logo-icon { border-radius: 8px; }
+:root[data-theme="light"] .hero-brand img { border-radius: 22%; }
+.appstore-placeholder svg { color: var(--gold); }
+
+/* ── Weergave: Systeem / Licht / Donker (theme.js) ──────────── */
+.theme-choice { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-3); }
+.theme-choice select {
+  font: inherit; color: var(--text-1); background: var(--bg-card);
+  border: 1px solid var(--text-3); border-radius: 8px; padding: 6px 8px; min-height: 36px; cursor: pointer;
+}
+.theme-choice select:hover { background: var(--hover); }
+.theme-choice select:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.page-foot { text-align: center; margin: 8px auto 40px; padding: 0 20px; }

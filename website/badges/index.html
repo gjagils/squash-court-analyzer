@@ -3,12 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Weergave before the first paint: Donker unless Licht or Systeem was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
   <title>Badges – SquashAnalyzer</title>
   <meta name="description" content="Alle badges die spelers in SquashAnalyzer kunnen verdienen tijdens een squashwedstrijd." />
   <meta property="og:title" content="Badges – SquashAnalyzer" />
   <meta property="og:description" content="37 badges om te verdienen tijdens je squashwedstrijden, 17 in brons, zilver en goud." />
   <meta property="og:image" content="https://www.squashanalyzer.com/badges/five-in-a-row.png" />
-  <link rel="stylesheet" href="../style.css?v=20261005b" />
+  <link rel="stylesheet" href="../style.css?v=20261011" />
+  <script src="../theme.js?v=20261011" defer></script>
   <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png?v=5" />
   <link rel="icon" type="image/png" sizes="256x256" href="../favicon.png?v=5" />
   <link rel="apple-touch-icon" href="../logo.png?v=4" />
@@ -22,7 +28,7 @@
     .badge-card img { display: block; margin: 0 auto 12px; width: 96px; height: 96px; }
     .badge-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
     .badge-card p { font-size: 13px; color: var(--text-2); line-height: 1.4; }
-    .tag { display: inline-block; margin-top: 10px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(242,140,38,0.5); border-radius: 999px; padding: 2px 8px; }
+    .tag { display: inline-block; margin-top: 10px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); border: 1px solid var(--tag-line); border-radius: 999px; padding: 2px 8px; }
     .back { display: inline-block; margin-bottom: 24px; color: var(--text-2); }
     .badge-card .tiers { display: flex; justify-content: center; gap: 4px; margin: 0 auto 12px; }
     .badge-card .tiers img { width: 72px; height: 72px; margin: 0; }
@@ -267,6 +273,7 @@
         </div>
     </div>
 
+    <div class="page-foot"><div data-theme-choice-slot></div></div>
   </main>
 </body>
 </html>

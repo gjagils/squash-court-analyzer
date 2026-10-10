@@ -3,13 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Weergave before the first paint: Donker unless Licht or Systeem was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
   <title>Badgekaart – SquashAnalyzer</title>
   <meta name="description" content="Badgekaart van een squashspeler, gedeeld vanuit SquashAnalyzer." />
   <meta name="robots" content="noindex" />
   <meta property="og:title" content="Badgekaart – SquashAnalyzer" />
   <meta property="og:description" content="Bekijk de badges die in squashwedstrijden zijn verdiend." />
   <meta property="og:image" content="https://www.squashanalyzer.com/logo.png?v=4" />
-  <link rel="stylesheet" href="../style.css?v=20261005b" />
+  <link rel="stylesheet" href="../style.css?v=20261011" />
+  <script src="../theme.js?v=20261011" defer></script>
   <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png?v=5" />
   <link rel="icon" type="image/png" sizes="256x256" href="../favicon.png?v=5" />
   <link rel="apple-touch-icon" href="../logo.png?v=4" />
@@ -21,7 +27,7 @@
     .badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 18px 12px; }
     .badge { text-align: center; }
     .medal { width: 76px; height: 76px; margin: 0 auto 6px; border-radius: 50%; display: flex;
-             align-items: center; justify-content: center; font-size: 40px; background: rgba(242,140,38,0.12); }
+             align-items: center; justify-content: center; font-size: 40px; background: var(--tint); }
     .medal img { width: 100%; height: 100%; display: block; }
     .badge.locked .medal { filter: grayscale(1); opacity: 0.35; }
     .badge.locked .badge-title { color: var(--text-3); }
@@ -36,7 +42,7 @@
     .actions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
     .actions[hidden] { display: none; }
     .actions a { display: block; text-align: center; padding: 14px; border-radius: 12px; font-weight: 600; }
-    .open-app { background: var(--orange); color: #000; }
+    .open-app { background: var(--btn); color: var(--on-btn); }
     .get-app { background: var(--surface); border: 1px solid var(--line); color: var(--text-1); }
     .note { margin-top: 20px; font-size: 13px; color: var(--text-3); }
     .error { color: var(--text-2); }
@@ -53,6 +59,7 @@
       <a class="get-app" href="https://squashanalyzer.com/testen.html#aanmelden">Android: doe mee met de test</a>
     </div>
     <p class="note">De kaart staat in de link zelf. Deze pagina stuurt niets naar een server en bewaart niets.</p>
+    <div class="page-foot"><div data-theme-choice-slot></div></div>
   </main>
 
   <script>

@@ -3,13 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Weergave before the first paint: Donker unless Licht or Systeem was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
   <title>Teamwedstrijd live – SquashAnalyzer</title>
   <meta name="description" content="Doe mee met een live teamwedstrijd in SquashAnalyzer." />
   <meta name="robots" content="noindex" />
   <meta property="og:title" content="Doe mee met onze teamwedstrijd – SquashAnalyzer" />
   <meta property="og:description" content="Open de link in SquashAnalyzer en zet je eigen partij live." />
   <meta property="og:image" content="https://www.squashanalyzer.com/logo.png?v=4" />
-  <link rel="stylesheet" href="../style.css?v=20261005b" />
+  <link rel="stylesheet" href="../style.css?v=20261011" />
+  <script src="../theme.js?v=20261011" defer></script>
   <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png?v=5" />
   <link rel="icon" type="image/png" sizes="256x256" href="../favicon.png?v=5" />
   <link rel="apple-touch-icon" href="../logo.png?v=4" />
@@ -22,7 +28,7 @@
             font-size: 12px; overflow-wrap: anywhere; color: var(--text-2); }
     .actions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
     .actions a { display: block; text-align: center; padding: 14px; border-radius: 12px; font-weight: 600; }
-    .open-app { background: var(--orange); color: #000; }
+    .open-app { background: var(--btn); color: var(--on-btn); }
     .get-app { background: var(--surface); border: 1px solid var(--line); color: var(--text-1); }
     .note { margin-top: 20px; font-size: 13px; color: var(--text-3); }
     .error { color: var(--text-2); }
@@ -48,6 +54,7 @@
     <p class="note update" id="update" hidden><strong>Gebeurt er niets?</strong> Je hebt een nieuwere (test)versie van SquashAnalyzer nodig.
       iPhone: werk bij via TestFlight of de App Store. Android: werk bij via Google Play.</p>
     <p class="note" id="note">De code staat in de link zelf. Deze pagina stuurt niets naar een server en bewaart niets.</p>
+    <div class="page-foot"><div data-theme-choice-slot></div></div>
   </main>
 
   <script>

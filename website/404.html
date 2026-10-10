@@ -3,16 +3,23 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Weergave before the first paint: Donker unless Licht or Systeem was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
   <meta name="robots" content="noindex" />
   <title>Pagina niet gevonden – SquashAnalyzer</title>
   <link rel="icon" href="/favicon.png" />
-  <link rel="stylesheet" href="/style.css?v=20261005b" />
+  <link rel="stylesheet" href="/style.css?v=20261011" />
+  <script src="/theme.js?v=20261011" defer></script>
 </head>
 <body>
   <main class="container" style="max-width: 640px; margin: 18vh auto; padding: 0 20px; text-align: center;">
     <h1>Deze pagina bestaat niet</h1>
     <p>De link is misschien verouderd of verkeerd getypt.</p>
     <p><a href="/">Naar de startpagina van SquashAnalyzer</a></p>
+    <div class="page-foot"><div data-theme-choice-slot></div></div>
   </main>
 </body>
 </html>

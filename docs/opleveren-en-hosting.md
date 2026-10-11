@@ -217,7 +217,14 @@ GitHub-secrets.
 
 ## 5. Open punten (voor wie verder wil)
 
-- 3.0 build 1 is op 6 oktober 2026 geüpload (TestFlight in bèta-review, Play internal, alpha en Google Group testers). Na goedkeuring `scripts/testflight_expire_old.py` draaien (houdt nu 3.0 (1) en 2.2 (18)). Schermafbeeldingen en Play-listing zijn bij deze build niet vernieuwd (de App Store-versie 3.0 bestaat nog niet in App Store Connect).
+- **Feature freeze sinds 11 oktober 2026**: geen nieuwe features meer, alleen bugfixes, fouten en
+  afronding richting de productie-uitrol van 3.0 (besluit Gerd-Jan). Iets nieuws alleen op zijn
+  expliciete vraag; ideeën gaan op de backlog.
+- **Google Play productie**: op 11 oktober 2026 meldt de Play Console dat 12 testers 6 dagen
+  aaneengesloten in de gesloten test zitten; de eis is 14 dagen. Op zijn vroegst op 19 oktober 2026
+  kan "Toegang tot productie aanvragen" (Dashboard → Productie), mits niemand afhaakt. De
+  gesloten test (Google Group testers) moet tot die tijd blijven staan.
+- 3.0 build 3 is op 12 oktober 2026 geüpload (TestFlight groep Squashteam, Play intern, alpha en Google Group testers); zie `docs/wijzigingen-builds.md`. Het App Store-concept 3.0 bestaat met nieuwe schermafbeeldingen maar is nog niet ingediend; de Play-listing is nog niet vernieuwd.
 - Live teamwedstrijd is getest tussen iOS-simulator en Android-emulator, en
   door Gerd-Jan op de iPhone en de A13 (9 oktober 2026).
 - Vergelijken met de SBN-uitslag en een badgecategorie Teamspeler (zie

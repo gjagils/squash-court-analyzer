@@ -34,6 +34,12 @@ opgeslagen speler zijn eveneens backlog, zonder toegewezen build.
 
 ## Productieaanvraag Android
 
+Stand 11 oktober 2026 (Play Console, Dashboard → Productie): de release van de
+gesloten test is gepubliceerd en er zijn 12 testers aangemeld; zij zitten op
+dat moment 6 dagen aaneengesloten in de test. De 14 dagen zijn op zijn vroegst
+op 19 oktober 2026 vol; daarna kan de productieaanvraag. Sinds 11 oktober geldt
+een feature freeze: alleen bugfixes, fouten en afronding tot de uitrol.
+
 De interne wens van een testperiode van twaalf dagen is **geen bewijs dat
 Google Play productie al toestaat**. Voor nieuwe persoonlijke accounts waarop
 de regel van toepassing is, vereist Google minimaal 12 testers die 14 dagen

@@ -32,6 +32,9 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
   plaats van `s.append(character)`; `Character.isLetter` bestaat niet.
 - **`optional.map { value in … value.rounded() }` wordt `optionalrounded`** in Kotlin
   (9 oktober, `SharedPlayerTrendView`): schrijf een `guard let` of `if let`.
+- **`for x in stride(from: n, through: 0, by: -1)` met een gefilterde binnenlus** gaf in Kotlin
+  een ander resultaat dan in Swift (coachkaart, 12 oktober). Schrijf een `while`-lus met een
+  teller en een gewone `if … continue`.
 - **Lege literals zonder type** (`[]`, `[:]`) laten het type soms niet afleiden:
   geef het type mee.
 - **`Date.FormatStyle` bestaat niet**: gebruik `DateFormatter` met een vast patroon

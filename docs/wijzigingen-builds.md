@@ -10,6 +10,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Coachkaart (12 oktober 2026, eerste versie om te ervaren, nog niet op een telefoon
+  geprobeerd)**: in het coachdashboard (na een game en bij Afgeronde wedstrijden, dus ook voor
+  al gecoachte wedstrijden) staat bovenaan *Coachkaart*: één scherm om de speler tussen games
+  te laten zien, met de heatmap van beide spelers (punten gewonnen per vak), de 3
+  belangrijkste coachpunten van de game (uit het lokale advies) en vanaf game 2 *Sinds game N*:
+  *Nog steeds* bij een werkpunt dat terugkomt, *Verbeterd!* bij een werkpunt van de vorige
+  kaart dat weg of gehalveerd is, *Pak dit op zoals je in game N deed* bij iets dat eerder
+  goed ging en nu niet (`CoachCard`, `SharedCoachCardView`). Geen timer (besluit Gerd-Jan).
 - **Instellingen gelijkgetrokken (12 oktober 2026, testmelding)**: een uitgeschakelde gevulde
   knop (zoals *Bewaar API key* zonder sleutel) was lichte tekst op grijs; `ActionButton`
   tekent hem nu als rustige omlijnde knop, in de hele app. In het gedeelde Instellingen-scherm

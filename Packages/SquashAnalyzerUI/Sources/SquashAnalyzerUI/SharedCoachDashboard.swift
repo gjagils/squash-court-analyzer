@@ -30,6 +30,7 @@ public struct SharedCoachDashboardView: View {
     @State private var hasKey = false
     @State private var aiError: String?
     @State private var loadingAI = false
+    @State private var showingCard = false
 
     /// Finished games, and the one being looked at when it is still open
     private let games: [Game]
@@ -54,6 +55,13 @@ public struct SharedCoachDashboardView: View {
 
     private var game: Game { games.isEmpty ? match.currentGame : games[min(gameIndex, games.count - 1)] }
 
+    /// The shown game's place in `match.games`, for the coach card
+    private var matchGameIndex: Int {
+        let shown = game
+        for (index, candidate) in match.games.enumerated() where candidate === shown { return index }
+        return max(0, match.games.count - 1)
+    }
+
     public var body: some View {
         ZStack {
             SharedColors.background.ignoresSafeArea()
@@ -64,6 +72,10 @@ public struct SharedCoachDashboardView: View {
                     playerPicker
                     if games.count > 1 {
                         gamePicker
+                    }
+                    // De coachkaart: the game's three points for the player, to show between games
+                    ActionButton("COACHKAART", icon: "lightbulb.fill", style: .filled, color: SharedColors.accent) {
+                        showingCard = true
                     }
                     quickStats
                     HStack(alignment: .top, spacing: 12) {
@@ -84,6 +96,9 @@ public struct SharedCoachDashboardView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
             }
+        }
+        .trackedCover(isPresented: $showingCard) {
+            SharedCoachCardView(match: match, gameIndex: matchGameIndex, player: player) { showingCard = false }
         }
     }
 

@@ -44,6 +44,13 @@ public struct SharedCoachCardView: View {
                     ForEach(0..<current.points.count, id: \.self) { index in
                         pointRow(current.points[index], number: index + 1)
                     }
+                    if !GameNotes.shared.note(for: game.id).isEmpty {
+                        section("JOUW NOTITIE")
+                        Text(GameNotes.shared.note(for: game.id))
+                            .font(SharedFonts.system(17))
+                            .foregroundColor(SharedColors.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     if let previous = current.previousGameNumber, !current.changes.isEmpty {
                         section("SINDS GAME \(previous)")
                         ForEach(0..<current.changes.count, id: \.self) { index in

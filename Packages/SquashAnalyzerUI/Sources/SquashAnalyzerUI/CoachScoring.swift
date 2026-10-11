@@ -247,6 +247,7 @@ public struct CoachScoringView: View {
     @State private var showingAnalysis = false
     @State private var showingShare = false
     @State private var showingBadges = false
+    @State private var showingNote = false
     /// 6 or 9 zones, a setting (Instellingen)
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     /// "Uit de lucht" for the point being entered; off again after every point
@@ -362,6 +363,13 @@ public struct CoachScoringView: View {
                                     photos: { [photo(Player.player1), photo(Player.player2)] }, share: shareText)
                 }
                 Spacer()
+                // The coach's note for the game under way (C3)
+                Button { showingNote = true } label: {
+                    AppSymbol("pencil", size: 18, color: GameNotes.shared.note(for: game.id).isEmpty ? SharedColors.textSecondary : SharedColors.accent)
+                        .frame(width: 36, height: 32)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Notitie bij deze game")
                 // The previous game's analysis while playing, from game 2 on (as on iOS)
                 if match.currentGameIndex > 0 && !game.isGameOver && !match.isMatchOver {
                     Button {
@@ -617,6 +625,9 @@ public struct CoachScoringView: View {
             },
             link: match.isMatchOver ? nil : ResultButton("Stop wedstrijd") { requestStop() }
         )
+        .sheet(isPresented: $showingNote) {
+            GameNoteEditor(gameId: game.id, title: "Notitie · Game \(match.currentGameNumber)") { showingNote = false }
+        }
         .sheet(isPresented: $showingShare) {
             if let shareText {
                 SharedMatchShareView(report: match.shareReport, player1Photo: photo(Player.player1), player2Photo: photo(Player.player2),

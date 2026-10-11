@@ -31,6 +31,7 @@ public struct SharedCoachDashboardView: View {
     @State private var aiError: String?
     @State private var loadingAI = false
     @State private var showingCard = false
+    @State private var showingNote = false
 
     /// Finished games, and the one being looked at when it is still open
     private let games: [Game]
@@ -77,12 +78,14 @@ public struct SharedCoachDashboardView: View {
                     ActionButton("COACHKAART", icon: "lightbulb.fill", style: .filled, color: SharedColors.accent) {
                         showingCard = true
                     }
+                    GameNoteCard(gameId: game.id) { showingNote = true }
                     quickStats
                     HStack(alignment: .top, spacing: 12) {
                         heatmap
                         shots
                     }
                     pointTypes
+                    ServiceReturnCard(game: game, player: player)
                     volleys
                     localAdvice
                     // Only with an OpenAI key (Instellingen); without one the local advice is it
@@ -96,6 +99,10 @@ public struct SharedCoachDashboardView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
             }
+        }
+        .onAppear { GameNotes.shared.reload() }
+        .sheet(isPresented: $showingNote) {
+            GameNoteEditor(gameId: game.id, title: "Notitie · Game \(match.gameNumber(at: matchGameIndex))") { showingNote = false }
         }
         .trackedCover(isPresented: $showingCard) {
             SharedCoachCardView(match: match, gameIndex: matchGameIndex, player: player) { showingCard = false }

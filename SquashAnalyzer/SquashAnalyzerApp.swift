@@ -13,6 +13,8 @@ struct SquashAnalyzerApp: App {
         LiveShare.shared.transport = URLSessionLiveTransport()
         // "Deel als plaatje" in the shared share screen
         IOSShare.installResultImageSharing()
+        // The coach's notes per game live next to the team matches (GameNotes)
+        GameNotes.shared.configure(directory: TeamMatchStorage.directory)
         // Explicitly disable SwiftData's CloudKit mirroring: the store stays local.
         // iCloud Drive holds the file backups (ExportService); player cards are
         // shared as links (CardSnapshot), not through CloudKit.

@@ -36,6 +36,7 @@ import squash.analyzer.core.AICoachClient
 import squash.analyzer.core.LiveShare
 import squash.analyzer.core.TeamLive
 import squash.analyzer.core.AppTheme
+import squash.analyzer.core.GameNotes
 import androidx.compose.foundation.isSystemInDarkTheme
 import squash.analyzer.ui.AICoachContext
 import squash.analyzer.ui.ResultImageSharing
@@ -96,6 +97,8 @@ class MainActivity : AppCompatActivity() {
         // Competitie: team matches in one JSON file in the app's files directory (Core's file, off the main thread)
         val teamDirectory = URL(fileURLWithPath = filesDir.absolutePath, isDirectory = true)
         val teamMatchStore = BackgroundTeamMatchStore(directory = teamDirectory)
+        // The coach's notes per game live next to the team matches (GameNotes)
+        GameNotes.shared.configure(directory = teamDirectory)
         // Registers activity-result launchers, so it must exist before the activity starts
         val appVersion = "Android " + (packageManager.getPackageInfo(packageName, 0).versionName ?: "?")
         val backupStore = RoomBackupStore(db, teamDirectory)

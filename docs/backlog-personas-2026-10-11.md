@@ -38,10 +38,10 @@ tussen games) en in het vervolg na de wedstrijd.
 
 | # | Punt | Waarom | Grootte | Voorstel |
 |---|---|---|---|---|
-| C1 | **Pauzekaart tussen games**: na "Game klaar" één scherm met 3 korte punten in grote letters (uit het lokale advies), om de speler in de pauze te laten zien | De pauze duurt 2 minuten; het dashboard is te druk om samen met de speler te bekijken | M | B3 |
+| C1 | **Pauzekaart tussen games**: na "Game klaar" één scherm met 3 korte punten in grote letters (uit het lokale advies), om de speler in de pauze te laten zien | De pauze duurt 2 minuten; het dashboard is te druk om samen met de speler te bekijken | M | **Gebouwd 12 oktober** (Coachkaart) |
 | C2 | **Snelle invoer** (instelling): alleen wie en hoe (winner/fout), zonder vak en slag | Bij snelle rally's of een eerste keer is 4 tikken per punt veel; liever minder detail dan gemiste punten | M | B3 |
-| C3 | **Notitie per game** (tekst, eventueel dicteren) die in de analyse en het verslag terugkomt | Coaches onthouden "backhand-volley te laat" niet tot na de wedstrijd | S | B3 |
-| C4 | **Service en return**: punten gewonnen op eigen service versus bij hand-out, per speler | Data is er al (`Point.server`); zegt veel over druk zetten | S | B3 |
+| C3 | **Notitie per game** (tekst, eventueel dicteren) die in de analyse en het verslag terugkomt | Coaches onthouden "backhand-volley te laat" niet tot na de wedstrijd | S | **Gebouwd 12 oktober** |
+| C4 | **Service en return**: punten gewonnen op eigen service versus bij hand-out, per speler | Data is er al (`Point.server`); zegt veel over druk zetten | S | **Gebouwd 12 oktober** |
 | C5 | **Verslag voor de speler** (pdf of plaatje) met analyse, advies en de profiellijn | Nu deel je de score; de analyse zelf blijft op de telefoon van de coach | M | Later |
 | C6 | **Scouting**: profiel van een tegenstander (als die opgeslagen is) vóór een wedstrijd, ook vanuit het programma van Mijn team | Het profiel werkt al voor iedere gekozen speler; alleen de ingang ontbreekt | S | Later |
 | C7 | **Coachingfocus koppelen aan cijfers** (focus "Backhand" → hoe vaak won/verloor je links achter) | De focus-tags staan nu los van de analyse | M | Later |

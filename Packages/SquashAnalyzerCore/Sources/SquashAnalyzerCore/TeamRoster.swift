@@ -62,6 +62,9 @@ public enum TeamBackup {
             result.teamMatches = matches
         }
         result.teamPlayerIds = TeamRoster.ids()
+        // The coach's notes per game live in the same folder (GameNotes)
+        let notes = GameNoteFile.read(in: directory)
+        if !notes.isEmpty { result.gameNotes = GameNoteFile.list(notes) }
         return result
     }
 
@@ -88,6 +91,12 @@ public enum TeamBackup {
                 }
             }
             try TeamMatchFile.write(current, in: directory)
+        }
+        if let incoming = backup.gameNotes {
+            // Merging keeps a note this phone already has; replacing takes the file's
+            var notes: [String: String] = replacing ? [:] : GameNoteFile.read(in: directory)
+            for note in incoming where notes[note.gameId] == nil { notes[note.gameId] = note.text }
+            try GameNoteFile.write(notes, in: directory)
         }
         if let ids = backup.teamPlayerIds {
             var merged: [String] = replacing ? [] : TeamRoster.ids()

@@ -35,6 +35,8 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
 - **`for x in stride(from: n, through: 0, by: -1)` met een gefilterde binnenlus** gaf in Kotlin
   een ander resultaat dan in Swift (coachkaart, 12 oktober). Schrijf een `while`-lus met een
   teller en een gewone `if … continue`.
+- **Een `[String: String]` in een `Codable`-type kan Skip niet coderen** (`Tuple2 cannot be cast to
+  Encodable`, 12 oktober, notities per game). Bewaar een lijst van structs (`[GameNote]`).
 - **Lege literals zonder type** (`[]`, `[:]`) laten het type soms niet afleiden:
   geef het type mee.
 - **`Date.FormatStyle` bestaat niet**: gebruik `DateFormatter` met een vast patroon

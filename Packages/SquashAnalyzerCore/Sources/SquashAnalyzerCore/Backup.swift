@@ -24,11 +24,14 @@ public struct FullBackup: Codable, Equatable, Sendable {
     public var teamMatches: [TeamMatch]? = nil
     /// The ids of the players marked "In mijn team" (format 4)
     public var teamPlayerIds: [String]? = nil
+    /// The coach's note per game, by game id (`GameNotes`); left out when there are none
+    public var gameNotes: [GameNote]? = nil
 
     public init(version: Int, backupDate: Date, players: [PlayerBackupData], matches: [MatchExportData],
                 standaloneGames: [GameExportData], badgeAwards: [BadgeAwardBackupData]? = nil,
                 refereeMatches: [RefereeMatchBackupData]? = nil,
-                teamMatches: [TeamMatch]? = nil, teamPlayerIds: [String]? = nil) {
+                teamMatches: [TeamMatch]? = nil, teamPlayerIds: [String]? = nil, gameNotes: [GameNote]? = nil) {
+        self.gameNotes = gameNotes
         self.teamMatches = teamMatches
         self.teamPlayerIds = teamPlayerIds
         self.version = version

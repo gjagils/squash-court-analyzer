@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// The icons of the tour and the home tiles, drawn by the app itself so iOS
+/// The icons of the tour and the home tiles (and the medal of the badges),
+/// drawn by the app itself so iOS
 /// and Android show exactly the same picture (choice 11 October 2026; before,
 /// Apple used SF Symbols and Android the Material icons, which differ in
 /// shape). Every icon is an outline on a 24×24 grid in the spirit of the
@@ -12,6 +13,7 @@ enum OutlineIcon {
     case people
     case trophy
     case share
+    case medal
 
     /// The icon for an SF Symbol name used in the shared screens, if it is one of ours
     static func named(_ name: String) -> OutlineIcon? {
@@ -21,6 +23,7 @@ enum OutlineIcon {
         case "person.2", "person.2.fill": return .people
         case "trophy", "trophy.fill": return .trophy
         case "square.and.arrow.up": return .share
+        case "medal", "medal.fill": return .medal
         default: return nil
         }
     }
@@ -35,6 +38,7 @@ enum OutlineIcon {
         case .people: OutlineIcon.drawPeople(&path, grid)
         case .trophy: OutlineIcon.drawTrophy(&path, grid)
         case .share: OutlineIcon.drawShare(&path, grid)
+        case .medal: OutlineIcon.drawMedal(&path, grid)
         }
         return path
     }
@@ -133,6 +137,32 @@ enum OutlineIcon {
         path.move(to: g.pt(8.5, 7))
         path.addLine(to: g.pt(12, 3.5))
         path.addLine(to: g.pt(15.5, 7))
+    }
+
+    /// A medal: a disc with a star, hanging from a ribbon that splits in two
+    private static func drawMedal(_ path: inout Path, _ g: IconGrid) {
+        path.addEllipse(in: g.rect(6.5, 10, 11, 11))
+        // The two bands of the ribbon meet at the top of the disc
+        path.move(to: g.pt(8.46, 11.29))
+        path.addLine(to: g.pt(5, 3))
+        path.addLine(to: g.pt(9.5, 3))
+        path.addLine(to: g.pt(12, 10))
+        path.move(to: g.pt(15.54, 11.29))
+        path.addLine(to: g.pt(19, 3))
+        path.addLine(to: g.pt(14.5, 3))
+        path.addLine(to: g.pt(12, 10))
+        // A five-pointed star (outer radius 3, inner 1.25) round the disc's centre
+        path.move(to: g.pt(12, 12.5))
+        path.addLine(to: g.pt(12.73, 14.49))
+        path.addLine(to: g.pt(14.85, 14.57))
+        path.addLine(to: g.pt(13.19, 15.89))
+        path.addLine(to: g.pt(13.76, 17.93))
+        path.addLine(to: g.pt(12, 16.75))
+        path.addLine(to: g.pt(10.24, 17.93))
+        path.addLine(to: g.pt(10.81, 15.89))
+        path.addLine(to: g.pt(9.15, 14.57))
+        path.addLine(to: g.pt(11.27, 14.49))
+        path.closeSubpath()
     }
 }
 

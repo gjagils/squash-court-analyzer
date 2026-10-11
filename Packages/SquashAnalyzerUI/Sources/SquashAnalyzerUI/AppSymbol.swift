@@ -22,7 +22,6 @@ import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.SportsScore
 import androidx.compose.material.icons.outlined.FrontHand
 import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.MilitaryTech
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.PlayArrow
@@ -61,7 +60,7 @@ import androidx.compose.ui.unit.dp
 
 /// An SF Symbol on Apple and the matching Material icon on Android, always
 /// as an outline (Material "Outlined"; on Apple the symbol without ".fill").
-/// The tour and home-tile icons (whistle, clipboard, players, cup, share) are
+/// The tour and home-tile icons (whistle, clipboard, players, cup, share, medal) are
 /// drawn by the app itself on both platforms (`OutlineIcon`). Skip's
 /// `Image(systemName:)` only knows a small set of SF Symbols and draws a
 /// warning triangle for the rest (forced/unforced error, service point,
@@ -139,7 +138,6 @@ struct AppSymbol: View {
         case "hand.raised.fill": return Icons.Outlined.FrontHand
         case "figure.tennis": return Icons.Outlined.SportsTennis
         case "pin.fill": return Icons.Outlined.PushPin
-        case "medal", "medal.fill": return Icons.Outlined.MilitaryTech
         case "arrow.uturn.backward": return Icons.AutoMirrored.Outlined.Undo
         case "arrow.counterclockwise": return Icons.Outlined.Replay
         case "clock.arrow.circlepath": return Icons.Outlined.History

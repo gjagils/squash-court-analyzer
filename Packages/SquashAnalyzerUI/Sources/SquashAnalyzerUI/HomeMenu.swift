@@ -233,7 +233,7 @@ private struct HomeMenuTile: View {
 enum HomeTileIcon {
     case coach, referee, history, players, badges, competition
 
-    /// The AppSymbol name; clipboard, whistle, players and cup are drawn by the app (`OutlineIcon`)
+    /// The AppSymbol name; all but history are drawn by the app (`OutlineIcon`)
     var symbol: String {
         switch self {
         case .coach: return "list.bullet.clipboard"

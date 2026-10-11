@@ -16,10 +16,9 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   test en de launch: `docs/backlog-personas-2026-10-11.md`.
 - **Lichte modus bijgewerkt na de eerste test (11 oktober 2026)**: de serveerder (de
   laatste scoorder) krijgt in licht de volle spelerskleur en de ander een verzachte, in
-  plaats van zwart (`ServerHighlight`). Lichte variant van het logo: het app-icoon op de
-  iPhone heeft een lichte versie voor het lichte beginscherm van iOS (de donkere blijft voor
-  donker; Android kent geen icoon per thema), en het logo bovenin het beginscherm van de app
-  wisselt mee (`home-logo-light`). Tagline van de stickers *Scheidsen · Coachen · Delen*
+  plaats van zwart (`ServerHighlight`). Lichte variant van het logo bovenin het beginscherm
+  van de app (`home-logo-light`). Het app-icoon zelf blijft altijd donker (besluit Gerd-Jan,
+  11 oktober; een lichte iOS-variant is geprobeerd en weer weggehaald). Tagline van de stickers *Scheidsen · Coachen · Delen*
   bovenin de app en in de hero van de website.
 - **Lichte modus in de apps, rondleiding, delen en feedback (11 oktober 2026, gebouwd,
   op iOS-simulator en Android-emulator bekeken, nog niet op een telefoon)**: Instellingen →

@@ -112,9 +112,7 @@ Vóór de upload:
 - **App Store 3.0**: de versie 3.0 bestaat nog niet in App Store Connect;
   schermafbeeldingen, "Wat is er nieuw", privacylabel (feedback per mail, live,
   AI Coach) en review-notities (hoe live en Competitie te proberen).
-- **Besluit app-icoon**: het iOS-icoon heeft sinds 11 oktober een lichte
-  variant voor de lichte weergave van iOS. De App Store toont de standaard
-  (lichte) variant; wil je daar het donkere icoon, dan moet het andersom.
+- **App-icoon**: blijft altijd donker, ook in de App Store (besluit 11 oktober).
 - **Play-listing**: beschrijving bijwerken (Competitie, live, badges, profiel,
   lichte modus), nieuwe schermafbeeldingen, data-safety-formulier nalopen.
 - **Website**: schermafbeeldingen en de tekst "Nieuwe bètaversie" bijwerken;
@@ -129,7 +127,6 @@ Vóór de upload:
 - **Lichte modus**: alle schermen langs, ook analyse na een coachwedstrijd,
   profiel, badges, Competitie en een teamwedstrijd; wisselen tijdens een
   wedstrijd; Systeem met de telefoon op licht en op donker.
-- **App-icoon**: iPhone-beginscherm met de telefoon op licht en op donker.
 - **Scheidsrechter en coach**: de nadruk op de serveerder in licht.
 - **Scherm blijft aan** tijdens een wedstrijd, en gaat weer op slot na afloop.
 - **Profiel** van een speler met een paar wedstrijden.

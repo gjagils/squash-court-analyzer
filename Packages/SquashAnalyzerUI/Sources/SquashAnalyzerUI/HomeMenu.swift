@@ -48,9 +48,10 @@ public struct HomeMenuHeader: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
-                        .padding(.top, 1)
-                    // The line from the stickers and the website, with room
-                    // above it so it does not stick to the sentence
+                        .padding(.top, 2)
+                    // The line from the stickers and the website; the sentence
+                    // sits halfway between the wordmark and this line (the wordmark's
+                    // line already has some room under it, hence 2 and 6)
                     Text("SCHEIDSEN · COACHEN · DELEN")
                         .font(SharedFonts.system(11, weight: .bold, design: .rounded))
                         .tracking(1.4)
@@ -58,11 +59,16 @@ public struct HomeMenuHeader: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .accessibilityLabel("Scheidsen, coachen, delen")
-                        .padding(.top, 9)
+                        .padding(.top, 6)
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: HomeMenuHeader.logoSize)
             }
+            // Outlined like the other blocks on the home screen; no fill, so
+            // the logo keeps the page background it was made for
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 12)

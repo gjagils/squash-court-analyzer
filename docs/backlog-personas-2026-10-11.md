@@ -13,7 +13,7 @@ punten zijn voorstellen.
 
 Grootte: **S** = een paar uur, **M** = een dag, **L** = meerdere dagen.
 Voorstel per punt: **B3** (in 3.0 build 3), **Launch** (vóór productie),
-**Later**.
+**Later** of **Backlog** (besloten: nu niet).
 
 ## Wat al goed staat
 
@@ -51,6 +51,9 @@ tussen games) en in het vervolg na de wedstrijd.
 
 Vraag: werkt dit goed genoeg om als scheidsrechter te nemen?
 
+**Besluit 12 oktober: de scheidsrechtermodus wordt nu niet uitgebreid.** De
+punten hieronder staan op de backlog voor later.
+
 Wel, voor een clubwedstrijd: de telling, de servicekant en de calls kloppen en
 zijn snel. Voor een competitie- of toernooiwedstrijd mist de app wat de regels
 van een scheidsrechter vragen en wat andere apps bieden (zie de vergelijking
@@ -60,20 +63,22 @@ hieronder). Let op: de WSF-regels zijn in 2025 aangepast (inspelen 4 minuten,
 | # | Punt | Waarom | Grootte | Voorstel |
 |---|---|---|---|---|
 | R1 | **Scherm blijft aan** tijdens een wedstrijd | In de pauze ging het scherm op slot | S | **Gedaan 11 oktober** (iOS en Android, nog op een telefoon te proberen) |
-| R2 | **Officiële timers** met waarschuwing: inspelen 4 min (wissel na 2), 1 min tot start, 2 min tussen games, "15 seconden" en "Time" (trillen of geluid) | Een scheidsrechter moet de tijd bewaken; nu is er alleen een stopwatch | M | B3 |
-| R3 | **Conduct**: waarschuwing, conduct stroke, game, match, met de soort overtreding; een conduct stroke verandert het servicevak niet | Regel 14; elke serieuze scheidsrechterapp heeft het | M | B3 |
-| R4 | **"No let"** als vastgelegde beslissing, plus **appeals**, met een beslissingenlijst in de wedstrijd | Nu tel je bij "no let" alleen het punt; achteraf is niet terug te zien wat er beslist is | M | B3 |
-| R5 | **Best of 3** kiezen (nu altijd best of 5) | Jeugd, toernooien en oefenpartijen; de coachmodus heeft hetzelfde | S | B3 |
-| R6 | **Blessuretimer per soort** (3 min eigen, 15 min veroorzaakt, 5 min bloed, 2 min materiaal) en opgave | Op het lastigste moment geen regels opzoeken | M | Later |
-| R7 | **Stand omroepen**: tekst in WSF-bewoording op het scherm ("Hand-out, 5-3", "Game ball", "10-all"), optioneel uitgesproken | Helpt clubleden die zelden fluiten | M | Later |
-| R8 | **Wedstrijdformulier** als pdf (games, beslissingen, conduct) | SBN werkt met een papieren formulier; de captain voert de uitslag in | M | Later |
-| R9 | **Liggend scherm en tablet**, grote stand leesbaar door het glas | Wat Squore en Squash Score Referee gewaardeerd maakt | L | Later |
-| R10 | **Invoer zonder te kijken**: Apple Watch, toetsenbord of bluetooth-klikker | Niche, maar gevraagd door scheidsrechters op de galerij | L | Later |
+| R2 | **Officiële timers** met waarschuwing: inspelen 4 min (wissel na 2), 1 min tot start, 2 min tussen games, "15 seconden" en "Time" (trillen of geluid) | Een scheidsrechter moet de tijd bewaken; nu is er alleen een stopwatch | M | Backlog |
+| R3 | **Conduct**: waarschuwing, conduct stroke, game, match, met de soort overtreding; een conduct stroke verandert het servicevak niet | Regel 14; elke serieuze scheidsrechterapp heeft het | M | Backlog |
+| R4 | **"No let"** als vastgelegde beslissing, plus **appeals**, met een beslissingenlijst in de wedstrijd | Nu tel je bij "no let" alleen het punt; achteraf is niet terug te zien wat er beslist is | M | Backlog |
+| R5 | **Best of 3** kiezen (nu altijd best of 5) | Jeugd, toernooien en oefenpartijen; de coachmodus heeft hetzelfde | S | Backlog |
+| R6 | **Blessuretimer per soort** (3 min eigen, 15 min veroorzaakt, 5 min bloed, 2 min materiaal) en opgave | Op het lastigste moment geen regels opzoeken | M | Backlog |
+| R7 | **Stand omroepen**: tekst in WSF-bewoording op het scherm ("Hand-out, 5-3", "Game ball", "10-all"), optioneel uitgesproken | Helpt clubleden die zelden fluiten | M | Backlog |
+| R8 | **Wedstrijdformulier** als pdf (games, beslissingen, conduct) | SBN werkt met een papieren formulier; de captain voert de uitslag in | M | Backlog |
+| R9 | **Liggend scherm en tablet**, grote stand leesbaar door het glas | Wat Squore en Squash Score Referee gewaardeerd maakt | L | Backlog |
+| R10 | **Invoer zonder te kijken**: Apple Watch, toetsenbord of bluetooth-klikker | Niche, maar gevraagd door scheidsrechters op de galerij | L | Backlog |
 
 ## Teamgenoot
 
 Vraag: kan ik mijn team makkelijk op de hoogte houden en krijg ik betere info
 over mijn team?
+
+**Besluit 12 oktober: T1, T2 en T3 naar de backlog, niet in build 3.**
 
 Wel op de speelavond: de live teampagina en het verslag werken goed. Tussen de
 speelavonden is er weinig dat je terug laat komen: geen herinnering, geen
@@ -81,20 +86,28 @@ opstelling, geen seizoensoverzicht.
 
 | # | Punt | Waarom | Grootte | Voorstel |
 |---|---|---|---|---|
-| T1 | **Programma in je agenda** (.ics-export van de wedstrijden van Mijn team) | Klein, en iedereen in het team wil het | S | B3 |
-| T2 | **Seizoensoverzicht per teamlid**: partijen, gewonnen/verloren, games, uit de teamwedstrijden in de app en het record van SBN | "Hoe staan we ervoor" gaat nu alleen over het team | M | B3 |
-| T3 | **Vergelijken met de SBN-uitslag** na de wedstrijd (staat al op de lijst) | Fouten in de invoer bij SBN vallen dan op | M | Launch |
+| T1 | **Programma in je agenda** (.ics-export van de wedstrijden van Mijn team) | Klein, en iedereen in het team wil het | S | Backlog |
+| T2 | **Seizoensoverzicht per teamlid**: partijen, gewonnen/verloren, games, uit de teamwedstrijden in de app en het record van SBN | "Hoe staan we ervoor" gaat nu alleen over het team | M | Backlog |
+| T3 | **Vergelijken met de SBN-uitslag** na de wedstrijd (staat al op de lijst) | Fouten in de invoer bij SBN vallen dan op | M | Backlog |
 | T4 | **Opstelling plannen**: wie speelt E1–E4 volgende week, met beschikbaarheid via de teamlink | Captains regelen dit nu in de groepsapp | L | Later |
 | T5 | **Tegenstander bekijken**: de vorige uitslag tegen dit team en hun stand, vanuit het programma | De gegevens staan al op de SBN-pagina's die de app leest | S | Later |
 | T6 | **Melding als een teamgenoot een partij invult** tijdens een live teamwedstrijd | Nu moet je op Vernieuwen tikken | L (vraagt push) | Later |
 | T7 | **Badgecategorie Teamspeler** (staat al op de lijst) | Beloont meedoen aan de competitie | M | Later |
+| T8 | **Koppeling met toernooi.nl** (idee Gerd-Jan, 12 oktober): uitslagen, opstelling en spelers rechtstreeks van het competitiesysteem, in plaats van de openbare teampagina | Maakt T2–T5 eenvoudiger; de opstelling komt dan ook in beeld | L | Backlog, eerst uitzoeken |
+
+Over T8: de app leest nu alleen de openbare teampagina die de gebruiker zelf
+instelt. Een zoektool over sbn.toernooi.nl is op 8 oktober bewust niet gebouwd,
+omdat robots.txt crawlen van /league/ verbiedt. Een echte koppeling loopt dus
+via een officiële weg: navragen bij SBN of Tournament Software (de leverancier
+van toernooi.nl) of er een API of export is voor clubs en teams, en onder
+welke voorwaarden.
 
 ## Naar de volgende externe test (3.0 build 3)
 
 Voorstel: wat op 9–11 oktober gebouwd is (spelersprofiel, lichte modus,
 rondleiding, delen en feedback, scherm aan, de fixes uit de core-review) plus
-een kleine selectie hierboven: **C1, C3, C4, R2, R3, R4, R5, T1**. Samen
-ongeveer vier tot vijf dagen werk. C2 en T2 als er ruimte is.
+van de coachpunten: **C1, C3, C4**, en C2 als er ruimte is. Ongeveer twee
+dagen werk. Scheidsrechter en teamgenoot staan op de backlog (besluit 12 oktober).
 
 Vóór de upload:
 

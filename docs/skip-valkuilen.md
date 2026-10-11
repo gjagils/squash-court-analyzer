@@ -58,7 +58,11 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
 ## UI
 
 - **Geen `Image(systemName:)` in de gedeelde UI**: gebruik `AppSymbol` (alleen symbolen
-  met een Android-mapping in `AppSymbol.swift`; lint-regel).
+  met een Android-mapping in `AppSymbol.swift`; lint-regel). Moet een icoon op beide
+  platforms exact gelijk zijn, teken het dan als `Path` met `.stroke()` zoals
+  `OutlineIcons.swift` (fluit, klembord, spelers, beker, delen): `move`, `addLine`,
+  `addQuadCurve`, `addCurve`, `addArc`, `addEllipse` en `addRoundedRect` werken op Android,
+  en `addArc(clockwise: false)` draait op het scherm met de klok mee, net als in SwiftUI.
 - **Kleuren uit `SharedColors`**, geen `Color(red:…)` (lint-regel). Liever
   `.background(kleur)` + `.clipShape` dan `RoundedRectangle().fill`.
   Op Android gaf `.background(RoundedRectangle().fill(kleur))` in licht een lavendelzweem

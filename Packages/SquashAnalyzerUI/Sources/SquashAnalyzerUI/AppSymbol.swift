@@ -48,7 +48,6 @@ import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.SportsTennis
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.SwapHoriz
@@ -56,15 +55,14 @@ import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.outlined.VerticalAlignBottom
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Sports
-import androidx.compose.material.icons.outlined.People
-import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material3.Icon
 import androidx.compose.ui.unit.dp
 #endif
 
 /// An SF Symbol on Apple and the matching Material icon on Android, always
-/// as an outline (Material "Outlined"; on Apple the symbol without ".fill"). Skip's
+/// as an outline (Material "Outlined"; on Apple the symbol without ".fill").
+/// The tour and home-tile icons (whistle, clipboard, players, cup, share) are
+/// drawn by the app itself on both platforms (`OutlineIcon`). Skip's
 /// `Image(systemName:)` only knows a small set of SF Symbols and draws a
 /// warning triangle for the rest (forced/unforced error, service point,
 /// undo, medal, cross, volley, drop…), so every symbol the shared screens use
@@ -92,6 +90,15 @@ struct AppSymbol: View {
 
     @ViewBuilder
     private var symbol: some View {
+        if let icon = OutlineIcon.named(name) {
+            OutlineIconView(icon: icon, color: color, size: size)
+        } else {
+            platformSymbol
+        }
+    }
+
+    @ViewBuilder
+    private var platformSymbol: some View {
         #if SKIP
         if let vector = AppSymbol.material(name) {
             ComposeView { context in
@@ -103,13 +110,9 @@ struct AppSymbol: View {
                 .foregroundColor(color)
         }
         #else
-        if name == "whistle" {
-            WhistleOutline(color: color, size: size)
-        } else {
-            Image(systemName: AppSymbol.outlined(name))
-                .font(SharedFonts.system(size, weight: weight))
-                .foregroundColor(color)
-        }
+        Image(systemName: AppSymbol.outlined(name))
+            .font(SharedFonts.system(size, weight: weight))
+            .foregroundColor(color)
         #endif
     }
 
@@ -174,7 +177,6 @@ struct AppSymbol: View {
         case "person.2.circle": return Icons.Outlined.Groups
         case "mappin": return Icons.Outlined.Place
         case "sparkles": return Icons.Outlined.AutoAwesome
-        case "square.and.arrow.up": return Icons.Outlined.Share
         case "chevron.down": return Icons.Outlined.KeyboardArrowDown
         case "chevron.up": return Icons.Outlined.KeyboardArrowUp
         case "chevron.left": return Icons.AutoMirrored.Outlined.KeyboardArrowLeft
@@ -184,10 +186,6 @@ struct AppSymbol: View {
         case "arrow.left": return Icons.AutoMirrored.Outlined.ArrowBack
         case "play.fill": return Icons.Outlined.PlayArrow
         case "magnifyingglass": return Icons.Outlined.Search
-        case "list.bullet.clipboard", "list.bullet.clipboard.fill": return Icons.AutoMirrored.Outlined.Assignment
-        case "whistle": return Icons.Outlined.Sports
-        case "trophy", "trophy.fill": return Icons.Outlined.EmojiEvents
-        case "person.2", "person.2.fill": return Icons.Outlined.People
         default: return nil
         }
     }

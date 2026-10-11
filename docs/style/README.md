@@ -118,7 +118,7 @@ De compacte webmockup bevat kleinere onderschriften (9–11 px). Neem die niet b
 - **Coach en Scheidsrechter:** twee even brede en hoge tegels; circa 110 hoog als startmaat. Oranje icoon boven gecentreerde titel. Onderschriften: “Start met coachen” en “Start met fluiten”. Geen pijltjes. De hele tegel is klikbaar. Beide acties zijn even belangrijk.
 - **Mijn team:** links uitgelijnde inhoud, label, teamnaam, stand/gespeeld/punten en volgende wedstrijd. Geen pijltje. De hele kaart opent het teamoverzicht. Bij ontbrekende gegevens geen fictieve cijfers tonen; bied een compacte koppelmogelijkheid of lege toestand.
 - **Menurijen:** oranje icoon links, tekst en eventueel een chevron rechts. De verwijderde pijltjes gelden voor de teamkaart en de twee actietegels, niet voor alle navigatie.
-- **Iconen:** consistente eenvoudige symbolen. Clipboard voor Coach, fluitje voor Scheidsrechter, historie, spelers en medaille. Gebruik de bestaande platformimplementaties; geen emoji als bedieningsicoon.
+- **Iconen:** consistente eenvoudige symbolen. Clipboard voor Coach, fluitje voor Scheidsrechter, historie, spelers en medaille. Clipboard, fluitje, spelers, beker en delen tekent de app zelf als lijnicoon (`OutlineIcons.swift`, 24-raster, lijn 1,8), zodat iPhone en Android hetzelfde tonen (keuze 11 oktober 2026); de overige symbolen gebruiken de platformimplementaties via `AppSymbol`. Geen emoji als bedieningsicoon.
 
 ## Layout en toegankelijkheid
 

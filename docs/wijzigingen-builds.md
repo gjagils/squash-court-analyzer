@@ -10,7 +10,13 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 3)
 
-(nog niets)
+- **Dezelfde pictogrammen op iPhone en Android (11 oktober 2026)**: de rondleiding en de
+  starttegels toonden op de iPhone SF Symbols en op Android Material-iconen, met een andere vorm
+  van de fluit, het klembord, de spelers, de beker en het deel-pictogram. Die vijf tekent de app nu
+  zelf als lijnicoon (`OutlineIcon`, 24-raster, in de stijl van de sticker), op beide platforms
+  gelijk. Ze gelden overal waar die namen staan: rondleiding, beginscherm, kopjes in Afgeronde
+  wedstrijden, Coachkaart- en deelknoppen. De verschuiving van het deel-pictogram in de rondleiding
+  en de losse Apple-fluit zijn weg.
 
 ## 3.0 build 3 (geüpload 12 oktober 2026)
 

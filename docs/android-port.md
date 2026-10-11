@@ -1999,6 +1999,17 @@ Verificatie: Core 45 op Darwin / 44 JUnit op Android,
 `:app:testDebugUnitTest` 46/46, `:app:connectedDebugAndroidTest` 20/20, iOS
 **TEST SUCCEEDED**.
 
+## Rondleiding en starttegels: eigen lijniconen op beide platforms (2026-10-11)
+
+Gerd-Jan wilde in de rondleiding op iPhone en Android dezelfde pictogrammen.
+Gekozen: de fluit, het klembord, de twee spelers, de beker en het
+deel-pictogram tekent de app zelf (`OutlineIcons.swift`: `Path` op een
+24-raster, lijn 1,8, ronde uiteinden), zoals de slag-iconen in de coachmodus.
+`AppSymbol` kiest die tekening vóór het platformsymbool, dus elk scherm dat
+die SF-namen gebruikt krijgt ze. De Apple-fluit uit `HomeMenu.swift` en de
+Material-mapping van die vijf zijn weg. De tweede route (Material-SVG's als
+template-afbeelding op iPhone) is niet gekozen.
+
 ## Starttegels: één kleur, betere icoontjes (2026-09-30)
 
 Op verzoek van Gerd-Jan hebben alle vijf starttegels (gedeeld

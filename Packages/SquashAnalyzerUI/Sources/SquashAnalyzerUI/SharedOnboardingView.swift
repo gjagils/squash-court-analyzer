@@ -128,16 +128,8 @@ public struct SharedOnboardingView: View {
             .overlay(Circle().stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
     }
 
-    @ViewBuilder
     private func tourIcon(_ symbol: String, size: CGFloat) -> some View {
-        #if SKIP
         AppSymbol(symbol, size: size, color: SharedColors.accent, weight: .medium)
-        #else
-        // The SF share symbol's box sits low with the arrow above it: lift it
-        // so it looks centred in the circle (the Material icon already is)
-        AppSymbol(symbol, size: size, color: SharedColors.accent, weight: .medium)
-            .offset(y: symbol == "square.and.arrow.up" ? -size * 0.08 : 0.0)
-        #endif
     }
 
     private var dots: some View {

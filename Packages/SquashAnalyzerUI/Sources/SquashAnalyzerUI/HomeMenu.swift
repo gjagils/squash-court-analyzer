@@ -233,7 +233,7 @@ private struct HomeMenuTile: View {
 enum HomeTileIcon {
     case coach, referee, history, players, badges, competition
 
-    /// The AppSymbol name; AppSymbol draws the whistle itself on Apple
+    /// The AppSymbol name; clipboard, whistle, players and cup are drawn by the app (`OutlineIcon`)
     var symbol: String {
         switch self {
         case .coach: return "list.bullet.clipboard"
@@ -245,49 +245,6 @@ enum HomeTileIcon {
         }
     }
 }
-
-#if !SKIP
-/// A referee's whistle as an outline, in the spirit of Material's outlined
-/// "Sports" icon: a round body with a mouthpiece to the right, the air hole,
-/// and a ring for the cord. On a 24×24 grid, scaled to `size`. The SF
-/// `whistle` symbols render as an empty glyph on the iOS runtime we test on.
-struct WhistleOutline: View {
-    let color: Color
-    let size: CGFloat
-
-    var body: some View {
-        let scale = size / 24
-        let line = max(1.2, 1.8 * scale)
-        return ZStack {
-            WhistleShape(part: .body).stroke(color, style: StrokeStyle(lineWidth: line, lineJoin: .round))
-            WhistleShape(part: .holes).stroke(color, lineWidth: line)
-        }
-        .frame(width: size, height: size)
-    }
-}
-
-/// The whistle's parts on a 24×24 grid: the body is one outline (circle and
-/// mouthpiece joined), the holes are the air hole and the cord ring
-struct WhistleShape: Shape {
-    enum Part { case body, holes }
-    let part: Part
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        switch part {
-        case .body:
-            let round = Path(ellipseIn: CGRect(x: 2, y: 9, width: 12, height: 12))
-            let mouth = Path(roundedRect: CGRect(x: 8, y: 9, width: 14, height: 5), cornerSize: CGSize(width: 1.2, height: 1.2))
-            path = round.union(mouth)
-        case .holes:
-            path.addEllipse(in: CGRect(x: 6, y: 13, width: 4, height: 4))
-            path.addEllipse(in: CGRect(x: 3, y: 3.5, width: 4.5, height: 4.5))
-        }
-        let scale = min(rect.width, rect.height) / 24
-        return path.applying(CGAffineTransform(scaleX: scale, y: scale).translatedBy(x: rect.minX / scale, y: rect.minY / scale))
-    }
-}
-#endif
 
 /// The home tiles' icons in one place, so the tour and the menu draw the same
 struct HomeTileIconView: View {

@@ -39,7 +39,7 @@ tussen games) en in het vervolg na de wedstrijd.
 | # | Punt | Waarom | Grootte | Voorstel |
 |---|---|---|---|---|
 | C1 | **Pauzekaart tussen games**: na "Game klaar" één scherm met 3 korte punten in grote letters (uit het lokale advies), om de speler in de pauze te laten zien | De pauze duurt 2 minuten; het dashboard is te druk om samen met de speler te bekijken | M | **Gebouwd 12 oktober** (Coachkaart) |
-| C2 | **Snelle invoer** (instelling): alleen wie en hoe (winner/fout), zonder vak en slag | Bij snelle rally's of een eerste keer is 4 tikken per punt veel; liever minder detail dan gemiste punten | M | B3 |
+| C2 | **Snelle invoer** (instelling): alleen wie en hoe (winner/fout), zonder vak en slag | Bij snelle rally's of een eerste keer is 4 tikken per punt veel; liever minder detail dan gemiste punten | M | Backlog (idee; besluit 12 oktober: nu niet) |
 | C3 | **Notitie per game** (tekst, eventueel dicteren) die in de analyse en het verslag terugkomt | Coaches onthouden "backhand-volley te laat" niet tot na de wedstrijd | S | **Gebouwd 12 oktober** |
 | C4 | **Service en return**: punten gewonnen op eigen service versus bij hand-out, per speler | Data is er al (`Point.server`); zegt veel over druk zetten | S | **Gebouwd 12 oktober** |
 | C5 | **Verslag voor de speler** (pdf of plaatje) met analyse, advies en de profiellijn | Nu deel je de score; de analyse zelf blijft op de telefoon van de coach | M | Later |
@@ -106,8 +106,8 @@ welke voorwaarden.
 
 Voorstel: wat op 9–11 oktober gebouwd is (spelersprofiel, lichte modus,
 rondleiding, delen en feedback, scherm aan, de fixes uit de core-review) plus
-van de coachpunten: **C1, C3, C4**, en C2 als er ruimte is. Ongeveer twee
-dagen werk. Scheidsrechter en teamgenoot staan op de backlog (besluit 12 oktober).
+van de coachpunten: **C1, C3, C4** (alle drie gebouwd op 12 oktober). C2
+staat als idee op de backlog. Scheidsrechter en teamgenoot staan op de backlog (besluit 12 oktober).
 
 Vóór de upload:
 

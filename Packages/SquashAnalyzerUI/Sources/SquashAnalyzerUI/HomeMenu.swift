@@ -21,10 +21,12 @@ public struct HomeMenuHeader: View {
                 Spacer()
                 if let onSettings {
                     Button(action: onSettings) {
-                        AppSymbol("gearshape", size: 21, color: SharedColors.textSecondary)
-                            .frame(width: 44, height: 36)
+                        AppSymbol("gearshape", size: 20, color: SharedColors.textSecondary)
+                            .frame(width: 36, height: 36)
                     }
                     .accessibilityLabel("Instellingen")
+                    // Same spot as the gear in the coach and referee headers (20 pt from the edge)
+                    .padding(.trailing, -4)
                 }
             }
             .frame(height: 36)
@@ -385,6 +387,7 @@ public struct AndroidHomeView: View {
                 }
                 .navigationDestination(isPresented: $showingReferee) {
                     RefereeSessionView(store: refereeMatchStore, playerStore: playerStore, photoStore: photoStore, filePicker: filePicker, shareText: shareText,
+                                       settings: SettingsContext(aiCoach: aiCoach, backup: backup),
                                        teamMatchStore: teamMatchStore, onExit: { showingReferee = false })
                         .navigationBarBackButtonHidden(true)
                 }

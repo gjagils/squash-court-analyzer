@@ -19,6 +19,9 @@ public struct RefereeSessionView: View {
     @Environment(\.dismiss) private var dismiss
     /// Competitie: after a finished match on a match day, ask which partij it is
     let teamMatchStore: (any TeamMatchStore)?
+    /// Instellingen from the referee header (nil hides the gear), as in `CoachSessionView`
+    let settings: SettingsContext?
+    @State private var showingSettings = false
     /// A match started for a partij of a team match (see `CoachSessionView`)
     @State private var activeTarget: TeamTarget?
     @State private var linkCandidate: TeamMatch? = nil
@@ -31,8 +34,10 @@ public struct RefereeSessionView: View {
     @State private var saver = SessionSaver(busy: true)
 
     public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil, shareText: ((String) -> Void)? = nil,
+                settings: SettingsContext? = nil,
                 teamMatchStore: (any TeamMatchStore)? = nil, teamTarget: TeamTarget? = nil,
                 onExit: @escaping @MainActor () -> Void) {
+        self.settings = settings
         self.teamMatchStore = teamMatchStore
         _activeTarget = State(initialValue: teamTarget)
         self.shareText = shareText
@@ -47,7 +52,9 @@ public struct RefereeSessionView: View {
         ZStack {
             SharedColors.background.ignoresSafeArea()
             if let match {
-                RefereeScoringView(match: match, shareText: shareText, photos: photos, onMatchChanged: { changed in
+                RefereeScoringView(match: match, shareText: shareText, photos: photos,
+                                   onSettings: settings == nil ? nil : { showingSettings = true },
+                                   onMatchChanged: { changed in
                     persist(changed, exit: false)
                 }, onExit: { requestExit(match) })
                 .disabled(saver.busy || saver.failed)
@@ -100,6 +107,18 @@ public struct RefereeSessionView: View {
         .onDisappear {
             saver.onExit = {}
             ScreenAwake.set(false)
+        }
+        .sheet(isPresented: $showingSettings) {
+            if let settings {
+                NavigationStack {
+                    SharedSettingsView(aiCoach: settings.aiCoach, backup: settings.backup)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                CloseButton { showingSettings = false }
+                            }
+                        }
+                }
+            }
         }
         .sheet(isPresented: Binding(get: { linkCandidate != nil }, set: { if !$0 { linkCandidate = nil } })) {
             if let candidate = linkCandidate, let match {

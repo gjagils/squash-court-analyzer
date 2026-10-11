@@ -10,6 +10,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Tandwiel ook bij Scheidsrechter (12 oktober 2026)**: rechtsboven in het scheidsrechterscherm
+  staat nu Instellingen, op dezelfde plek als bij Coach en op het beginscherm (altijd het laatste
+  icoon in de hoek; delen staat ervoor). De titel krimpt mee in plaats van over LIVE te vallen. De
+  screenshotscenario's tonen dezelfde knoppen als de echte schermen.
 - **Kop van het beginscherm (12 oktober 2026)**: het tandwiel staat rechtsboven in de hoek, het logo
   is groter (72 pt) en even hoog als het tekstblok ernaast; SquashAnalyzer, de zin en de tagline
   staan gecentreerd. De kop staat in een kader zoals de andere blokken (zonder vulling, zodat het logo op

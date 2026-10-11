@@ -57,6 +57,7 @@ struct ContentView: View {
             let players = SwiftDataPlayerStore(context: modelContext)
             RefereeSessionView(store: SwiftDataRefereeMatchStore(context: modelContext), playerStore: players,
                                photoStore: players, shareText: { IOSShare.text($0) },
+                               settings: SettingsContext(aiCoach: IOSAICoach.context, backup: nil),
                                teamMatchStore: TeamMatchStorage.store,
                                onExit: { showingReferee = false })
         }
@@ -95,12 +96,14 @@ struct ContentView: View {
         #if DEBUG
         .fullScreenCover(isPresented: Binding(get: { screenshotCoach != nil }, set: { if !$0 { screenshotCoach = nil } })) {
             if let match = screenshotCoach {
-                CoachScoringView(match: match, onMatchChanged: { _ in }, onExit: { screenshotCoach = nil })
+                // The same header buttons as the real screen (history, settings)
+                CoachScoringView(match: match, onMatchChanged: { _ in }, onHistory: {}, onSettings: {}, onExit: { screenshotCoach = nil })
             }
         }
         .fullScreenCover(isPresented: Binding(get: { screenshotReferee != nil }, set: { if !$0 { screenshotReferee = nil } })) {
             if let match = screenshotReferee {
-                RefereeScoringView(match: match, onMatchChanged: { _ in }, onExit: { screenshotReferee = nil })
+                // The same header buttons as the real screen (share, settings)
+                RefereeScoringView(match: match, shareText: { _ in }, onSettings: {}, onMatchChanged: { _ in }, onExit: { screenshotReferee = nil })
             }
         }
         #endif

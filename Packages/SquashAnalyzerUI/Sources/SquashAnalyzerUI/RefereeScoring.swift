@@ -11,6 +11,8 @@ public struct RefereeScoringView: View {
     let onMatchChanged: (RefereeMatch) -> Void
     let onExit: @MainActor () -> Void
     let shareText: ((String) -> Void)?
+    /// Instellingen from the header, in the top right corner as on the other screens (nil hides it)
+    let onSettings: (() -> Void)?
     /// Photos of the picked players, by player id
     let photos: [String: Data]
     /// Sharing the stand during the match (the share icon in the header)
@@ -23,8 +25,10 @@ public struct RefereeScoringView: View {
     @State private var showingBadges = false
 
     public init(match: RefereeMatch, shareText: ((String) -> Void)? = nil, photos: [String: Data] = [:],
+                onSettings: (() -> Void)? = nil,
                 onMatchChanged: @escaping (RefereeMatch) -> Void, onExit: @escaping @MainActor () -> Void) {
         self.match = match
+        self.onSettings = onSettings
         self.photos = photos
         self.shareText = shareText
         self.onMatchChanged = onMatchChanged
@@ -136,8 +140,12 @@ public struct RefereeScoringView: View {
         LiveShareSync.send(matchId: match.id, snapshot: match.liveSnapshot)
     }
 
+    /// Sluiten and LIVE on the left, share and Instellingen on the right (the
+    /// gear always last, in the top right corner like on the other screens),
+    /// the title in the space between: "Scheidsrechter" is too long to sit in
+    /// the exact middle next to LIVE, so it shrinks rather than overlaps
     private var header: some View {
-        HStack {
+        HStack(spacing: 8) {
             Button(action: close) {
                 HStack(spacing: 6) {
                     AppSymbol("xmark", size: 13, color: SharedColors.textSecondary)
@@ -146,27 +154,34 @@ public struct RefereeScoringView: View {
                 .font(SharedFonts.system(14, weight: .medium, design: .rounded))
             }
             .foregroundColor(SharedColors.textSecondary)
+            .fixedSize()
             if !match.isMatchOver {
                 LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot },
                                 photos: { [photo(Player.player1), photo(Player.player2)] }, share: shareText)
+                    .fixedSize()
             }
-            Spacer()
+            Spacer(minLength: 4)
             Text("Scheidsrechter")
                 .font(PageTitleStyle.font)
                 .foregroundColor(SharedColors.textPrimary)
-                // With the LIVE button next to it the title broke into "SCHEIDSRECHTE / R" on Android
                 .lineLimit(1)
-                .minimumScaleFactor(0.6)
-            Spacer()
+                .minimumScaleFactor(0.5)
+            Spacer(minLength: 4)
             if shareText != nil {
                 Button { sharingNow = true } label: {
                     AppSymbol("square.and.arrow.up", size: 20, color: SharedColors.accent)
-                        .frame(width: 74, height: 32, alignment: .trailing)
+                        .frame(width: 36, height: 32)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Deel de stand")
-            } else {
-                Color.clear.frame(width: 74, height: 1)
+            }
+            if let onSettings {
+                Button(action: onSettings) {
+                    AppSymbol("gearshape", size: 20, color: SharedColors.textSecondary)
+                        .frame(width: 36, height: 32)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Instellingen")
             }
         }
         .padding(.horizontal, 20)

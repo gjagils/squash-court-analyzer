@@ -39,6 +39,13 @@ struct ContentView: View {
     @State private var screenshotReferee: RefereeMatch? = nil
     #endif
 
+    /// The gear in the coach and referee headers opens the same Instellingen as the home screen
+    private var iosSettings: SettingsContext {
+        SettingsContext(aiCoach: IOSAICoach.context, backup: nil, ownScreen: { close in
+            AnyView(SettingsView(isPresented: Binding(get: { true }, set: { if !$0 { close() } })))
+        })
+    }
+
     var body: some View {
         HomeView(onCoach: { showingCoach = true },
                  onReferee: { showingReferee = true },
@@ -49,7 +56,7 @@ struct ContentView: View {
             CoachSessionView(store: SwiftDataCoachMatchStore(context: modelContext), playerStore: players, photoStore: players,
                              aiCoach: IOSAICoach.context, shareText: { IOSShare.text($0) },
                              historyStore: SwiftDataMatchHistoryStore(context: modelContext),
-                             settings: SettingsContext(aiCoach: IOSAICoach.context, backup: nil),
+                             settings: iosSettings,
                              teamMatchStore: TeamMatchStorage.store,
                              onExit: { showingCoach = false })
         }
@@ -57,7 +64,7 @@ struct ContentView: View {
             let players = SwiftDataPlayerStore(context: modelContext)
             RefereeSessionView(store: SwiftDataRefereeMatchStore(context: modelContext), playerStore: players,
                                photoStore: players, shareText: { IOSShare.text($0) },
-                               settings: SettingsContext(aiCoach: IOSAICoach.context, backup: nil),
+                               settings: iosSettings,
                                teamMatchStore: TeamMatchStorage.store,
                                onExit: { showingReferee = false })
         }

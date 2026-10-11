@@ -131,14 +131,7 @@ public struct CoachSessionView: View {
         }
         .sheet(isPresented: $showingSettings) {
             if let settings {
-                NavigationStack {
-                    SharedSettingsView(aiCoach: settings.aiCoach, backup: settings.backup)
-                        .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                CloseButton { showingSettings = false }
-                            }
-                        }
-                }
+                SettingsSheet(settings: settings) { showingSettings = false }
             }
         }
         .sheet(isPresented: Binding(get: { linkCandidate != nil }, set: { if !$0 { linkCandidate = nil } })) {

@@ -10,6 +10,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **iPhone: overal dezelfde Instellingen (12 oktober 2026)**: het tandwiel bij Coach en
+  Scheidsrechter opende op de iPhone het gedeelde (Android-)scherm, zonder iCloud-back-up en met de
+  Android-handleiding en "Android" als versie in de feedbackmail. Nu opent het overal het eigen
+  iPhone-scherm (`SettingsContext.ownScreen`, `SettingsSheet`); Android houdt het gedeelde scherm.
 - **Tandwiel ook bij Scheidsrechter (12 oktober 2026)**: rechtsboven in het scheidsrechterscherm
   staat nu Instellingen, op dezelfde plek als bij Coach en op het beginscherm (altijd het laatste
   icoon in de hoek; delen staat ervoor). De titel krimpt mee in plaats van over LIVE te vallen. De

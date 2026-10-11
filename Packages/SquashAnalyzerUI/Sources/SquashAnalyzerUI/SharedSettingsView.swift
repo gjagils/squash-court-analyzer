@@ -26,10 +26,52 @@ public struct BackupContext {
 public struct SettingsContext {
     public let aiCoach: AICoachContext?
     public let backup: BackupContext?
+    #if !SKIP
+    /// The iPhone's own Instellingen (with iCloud back-up and the iPhone
+    /// manual), so the gear opens the same screen everywhere; nil uses the
+    /// shared one. Gets a closure that closes it.
+    public let ownScreen: ((@escaping () -> Void) -> AnyView)?
 
+    public init(aiCoach: AICoachContext?, backup: BackupContext?, ownScreen: ((@escaping () -> Void) -> AnyView)? = nil) {
+        self.aiCoach = aiCoach
+        self.backup = backup
+        self.ownScreen = ownScreen
+    }
+    #else
     public init(aiCoach: AICoachContext?, backup: BackupContext?) {
         self.aiCoach = aiCoach
         self.backup = backup
+    }
+    #endif
+}
+
+/// Instellingen opened from a coach or referee header: the platform's own
+/// screen when the host gave one (iPhone), else the shared screen with a close button
+struct SettingsSheet: View {
+    let settings: SettingsContext
+    let close: () -> Void
+
+    var body: some View {
+        #if !SKIP
+        if let own = settings.ownScreen {
+            own(close)
+        } else {
+            shared
+        }
+        #else
+        shared
+        #endif
+    }
+
+    private var shared: some View {
+        NavigationStack {
+            SharedSettingsView(aiCoach: settings.aiCoach, backup: settings.backup)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        CloseButton { close() }
+                    }
+                }
+        }
     }
 }
 

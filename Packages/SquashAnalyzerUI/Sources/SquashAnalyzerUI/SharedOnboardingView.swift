@@ -40,11 +40,11 @@ public struct SharedOnboardingView: View {
                 Spacer(minLength: 16)
 
                 VStack(spacing: 22) {
-                    AppSymbol(current.symbol, size: 54, color: SharedColors.accent)
-                        .frame(width: 112, height: 112)
-                        .background(SharedColors.brandCard)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
+                    if page == Onboarding.welcomePage {
+                        themes
+                    } else {
+                        badge(current.symbol, size: 112)
+                    }
                     Text(current.title)
                         .font(SharedFonts.system(26, weight: .bold, design: .rounded))
                         .foregroundColor(SharedColors.textPrimary)
@@ -97,6 +97,61 @@ public struct SharedOnboardingView: View {
                 }
         )
         .preferredColorScheme(SharedColors.preferredScheme)
+    }
+
+    /// Coach, scheids en deel: the three things the app is for, on the first page
+    private var themes: some View {
+        HStack(spacing: 18) {
+            theme("list.bullet.clipboard.fill", "Coach")
+            theme("whistle", "Scheids")
+            theme("square.and.arrow.up", "Deel")
+        }
+    }
+
+    private func theme(_ symbol: String, _ title: String) -> some View {
+        VStack(spacing: 10) {
+            badge(symbol, size: 84)
+            Text(title.uppercased())
+                .font(SharedFonts.system(12, weight: .semibold))
+                .tracking(1.4)
+                .foregroundColor(SharedColors.accent)
+        }
+    }
+
+    /// A page's symbol in the round brand badge; the home tiles' own icons
+    /// where the tour talks about the same thing
+    private func badge(_ symbol: String, size: CGFloat) -> some View {
+        let iconSize = size * 0.48
+        return tourIcon(symbol, size: iconSize)
+            .frame(width: size, height: size)
+            .background(SharedColors.brandCard)
+            .clipShape(Circle())
+            .overlay(Circle().stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
+    }
+
+    @ViewBuilder
+    private func tourIcon(_ symbol: String, size: CGFloat) -> some View {
+        switch symbol {
+        case "list.bullet.clipboard.fill":
+            HomeTileIconView(icon: .coach, color: SharedColors.accent, size: size)
+        case "whistle":
+            HomeTileIconView(icon: .referee, color: SharedColors.accent, size: size)
+        case "person.2.fill":
+            HomeTileIconView(icon: .players, color: SharedColors.accent, size: size)
+        case "trophy.fill":
+            HomeTileIconView(icon: .competition, color: SharedColors.accent, size: size)
+        case "square.and.arrow.up":
+            // The SF symbol's box sits low with the arrow above it: lift it
+            // so it looks centred in the circle (the Material icon already is)
+            #if SKIP
+            AppSymbol(symbol, size: size, color: SharedColors.accent)
+            #else
+            AppSymbol(symbol, size: size, color: SharedColors.accent)
+                .offset(y: -size * 0.08)
+            #endif
+        default:
+            AppSymbol(symbol, size: size, color: SharedColors.accent)
+        }
     }
 
     private var dots: some View {

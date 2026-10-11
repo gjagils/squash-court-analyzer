@@ -335,7 +335,7 @@ struct TeamPartijEditor: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.04)))
+            .background(SharedColors.tint(0.04)).clipShape(RoundedRectangle(cornerRadius: 12))
         }
     }
 
@@ -344,7 +344,7 @@ struct TeamPartijEditor: View {
             .font(SharedFonts.system(14))
             .foregroundColor(SharedColors.textPrimary)
             .padding(10)
-            .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.06)))
+            .background(SharedColors.tint(0.06)).clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
     private func scoreField(_ placeholder: String, text: Binding<String>) -> some View {

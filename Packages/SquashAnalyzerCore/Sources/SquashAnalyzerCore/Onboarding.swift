@@ -33,19 +33,24 @@ public enum Onboarding {
     /// Page 5 offers "Teamlink invullen"; page 6 is the last one
     public static let competitionPage = 4
 
+    /// The first page shows the three themes (coach, scheids, deel) instead of one symbol
+    public static let welcomePage = 0
+
+    /// The symbols are the home screen's: the UI draws "list.bullet.clipboard.fill",
+    /// "whistle", "person.2.fill" and "trophy.fill" as the home tiles do
     public static let pages: [Page] = [
-        Page(symbol: "figure.tennis", title: "Welkom bij Squash Analyzer",
-             text: "Jouw spel scherp in beeld. Je houdt een wedstrijd bij als coach of als scheidsrechter."),
-        Page(symbol: "chart.bar.fill", title: "Coach",
-             text: "Leg per punt vast wie scoorde, hoe (winner, druk, fout of servicepunt), waar op de baan en met welke slag. Na elke game zie je de analyse en krijg je advies."),
-        Page(symbol: "flag.checkered", title: "Scheidsrechter",
+        Page(symbol: "", title: "Welkom bij Squash Analyzer",
+             text: "Jouw spel scherp in beeld. Coach je teamgenoot, fluit een wedstrijd en deel de stand met je team."),
+        Page(symbol: "list.bullet.clipboard.fill", title: "Coach",
+             text: "Om je teamgenoot beter te coachen. Leg per punt vast wie scoorde, hoe, waar op de baan en met welke slag. Na elke game zie je de analyse, en de coachkaart laat je speler in één scherm zien waar het om draait."),
+        Page(symbol: "whistle", title: "Scheidsrechter",
              text: "Tik op de score van wie de rally wint. LET, STROKE, undo en de servicekant zitten erbij; de app houdt games en tijd bij."),
-        Page(symbol: "medal.fill", title: "Kies speler",
+        Page(symbol: "person.2.fill", title: "Kies speler",
              text: "Sla spelers op en kies ze bij het starten via Kies speler. Alleen dan verdienen ze badges en groeit hun profiel over de wedstrijden."),
-        Page(symbol: "person.2.circle", title: "Competitie",
-             text: "Speel je bij SBN? Vul je teamlink in, dan zie je je programma en de stand, en deel je een teamwedstrijd live met je team."),
-        Page(symbol: "square.and.arrow.up", title: "Live meekijken en je gegevens",
-             text: "Met LIVE deel je de stand met een link. Alles staat op je eigen telefoon: maak af en toe een back-up in Instellingen."),
+        Page(symbol: "trophy.fill", title: "Competitie",
+             text: "Speel je bij SBN? Vul je teamlink in, dan zie je je programma en de stand. Die deel je met je team, bijvoorbeeld via WhatsApp."),
+        Page(symbol: "square.and.arrow.up", title: "Delen",
+             text: "Houd je teamgenoten en supporters op de hoogte van de wedstrijden en de competitie. Met LIVE kijken ze mee via een link. Alles staat op je eigen telefoon: maak af en toe een back-up in Instellingen."),
     ]
 }
 

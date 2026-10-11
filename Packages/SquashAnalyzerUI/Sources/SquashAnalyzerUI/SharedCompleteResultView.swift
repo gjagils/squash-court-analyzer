@@ -77,7 +77,7 @@ struct SharedCompleteResultView: View {
                 }
             }
             .padding(24)
-            .background(RoundedRectangle(cornerRadius: 20).fill(SharedColors.surface))
+            .background(SharedColors.surface).clipShape(RoundedRectangle(cornerRadius: 20))
             .overlay(RoundedRectangle(cornerRadius: 20).stroke(SharedColors.accent.opacity(0.4), lineWidth: 1))
             .padding(24)
         }

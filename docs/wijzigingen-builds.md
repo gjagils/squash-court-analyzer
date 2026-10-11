@@ -10,6 +10,20 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Rondleiding bijgewerkt (12 oktober 2026)**: het eerste scherm toont de drie thema's
+  (Coach, Scheids, Deel) met de iconen van het beginscherm. Coach noemt teamgenoot, analyse en
+  coachkaart; Scheidsrechter heeft de fluit, Kies speler het spelersicoon, Competitie de beker en
+  delen via WhatsApp; de laatste pagina heet *Delen* (teamgenoten en supporters op de hoogte
+  houden) en het deelicoon staat nu in het midden van de cirkel. Geen nieuwe rondleidingsversie:
+  wie hem al zag, krijgt hem niet opnieuw.
+- **UI-check 12 oktober, Android licht**: kaarten en tegels kregen een lavendelzweem
+  (`RoundedRectangle().fill(...)` in een `.background` tekent op Android over een
+  Material-oppervlak). Alle 34 plekken zijn nu `.background(kleur).clipShape(...)`, en de lichte
+  kaartkleur is een vaste kleur in plaats van doorzichtig wit.
+- **Eén naam: Analyse (12 oktober 2026)**: het scherm heette "Coach dashboard" terwijl de
+  knoppen erheen *Analyse* en *Bekijk analyse* zeggen. De titel is nu *Analyse*, ook in de
+  handleiding.
+
 - **Na de eerste test van coachkaart en notities (12 oktober 2026)**: na een game staan
   *Analyse*, *Coachkaart* en *Deel score*. De coachkaart opent op de speler uit Mijn team
   (bij geen of allebei: de eerstgenoemde; `CoachCard.focus`). Het potlood in het coachscherm

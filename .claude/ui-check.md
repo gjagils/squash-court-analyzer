@@ -25,13 +25,21 @@ Skip). Run from a worktree, not the main checkout.
 The app has its own setting (Instellingen → Weergave: Systeem / Licht / Donker,
 default Donker), independent of the system.
 
-- iOS: before launching, `xcrun simctl spawn <udid> defaults write com.squashanalyzer.app appearance light` (or `dark`).
-  Set `onboardingVersion` to `1` the same way (`defaults write … onboardingVersion -int 1`) to skip the tour.
+- iOS: **terminate the app first** (`xcrun simctl terminate <udid> com.squashanalyzer.app`, wait 1 s):
+  a running app writes its settings back on exit and undoes the change. Then
+  `xcrun simctl spawn <udid> defaults write com.squashanalyzer.app appearance light` (or `dark`)
+  and `defaults write … onboardingVersion -int 1` to skip the tour (`0` to show it).
+- iOS scenario data mixes with what is already on the simulator (for example "Wedstrijd
+  hervatten?" on setup): uninstall and install the app for a clean run.
 - Android: open Instellingen (gear, content description "Instellingen") and tap
   "Licht" or "Donker" under Weergave, then back. A fresh install shows the tour
   first: tap "Overslaan".
-- Large text: iOS `ios-textsize large`, Android `android-textsize large` (font scale 1.3).
-  Put both back to normal afterwards.
+- Large text: only Android (`android-textsize large`, font scale 1.3; put it back to
+  normal afterwards). iOS uses fixed font sizes on purpose (`SharedFonts`), so a large-text
+  pass there shows nothing new.
+- Android has no scenarios and a fresh emulator has no matches: play a game via taps
+  (Coach → names → START WEDSTRIJD → START GAME 1 → tap a score → SERVICEPUNT, 11 times).
+  An unfinished match is not in Afgeronde wedstrijden; reach it again via Coach → Hervatten.
 
 ## Route
 
@@ -49,12 +57,13 @@ whatever data the emulator has.
 | 05 | Game over | `-screenshot coach-gameover` | — | yes |
 | 06 | Referee | `-screenshot referee` | tap "Scheidsrechter" | no |
 | 07 | History | `-screenshot history` | tap "Afgeronde wedstrijden" | yes |
-| 08 | Coach dashboard | `-screenshot dashboard` | in History, tap a coach match | yes |
+| 08 | Analyse (coach dashboard) | `-screenshot dashboard` | in History, tap a coach match | yes |
 | 09 | Badges | `-screenshot badges` | tap "Badges" | no |
 | 10 | Settings | from home: gear (tap with the simulator tool) | gear "Instellingen", swipe up for the rest | yes |
 | 11 | Players | from home: "Spelers" | tap "Spelers" | no |
 | 12 | Competitie | from home: "Competitie" | tap "Competitie" | no |
 | 13 | Coach card | dashboard → "COACHKAART" | dashboard → "COACHKAART" | yes |
+| 14 | Tour | `onboardingVersion -int 0`, launch | Instellingen → "Rondleiding opnieuw bekijken" | no |
 
 On iOS, screens without a scenario need taps: use the iOS Simulator control tool
 (`mcp__Claude_Code_iOS_Simulator__control`, points = pixels / 3 on this device).

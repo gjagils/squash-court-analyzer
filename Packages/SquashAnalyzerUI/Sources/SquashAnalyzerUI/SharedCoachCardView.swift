@@ -83,7 +83,7 @@ public struct SharedCoachCardView: View {
             Button(action: onClose) {
                 AppSymbol("xmark", size: 16, color: SharedColors.textSecondary, weight: .medium)
                     .padding(10)
-                    .background(Circle().fill(SharedColors.tint(0.1)))
+                    .background(SharedColors.tint(0.1)).clipShape(Circle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Sluiten")

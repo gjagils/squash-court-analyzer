@@ -84,11 +84,11 @@ struct NewTeamMatchSheet: View {
                                 TextField("Ons team", text: $ownTeam)
                                     .font(SharedFonts.system(14))
                                     .padding(10)
-                                    .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.06)))
+                                    .background(SharedColors.tint(0.06)).clipShape(RoundedRectangle(cornerRadius: 10))
                                 TextField("Tegenstander", text: $opponent)
                                     .font(SharedFonts.system(14))
                                     .padding(10)
-                                    .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.06)))
+                                    .background(SharedColors.tint(0.06)).clipShape(RoundedRectangle(cornerRadius: 10))
                                 Picker("Waar", selection: $atHome) {
                                     Text("Thuis").tag(true)
                                     Text("Uit").tag(false)
@@ -105,7 +105,7 @@ struct NewTeamMatchSheet: View {
                                 }
                             }
                             .padding(12)
-                            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.04)))
+                            .background(SharedColors.tint(0.04)).clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                     }
                     .padding(24)

@@ -101,7 +101,7 @@ public struct SharedSettingsView: View {
                         .autocorrectionDisabled()
                         .foregroundColor(SharedColors.textPrimary)
                         .padding()
-                        .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.08)))
+                        .background(SharedColors.tint(0.08)).clipShape(RoundedRectangle(cornerRadius: 10))
                     HStack(spacing: 12) {
                         // ActionButton as everywhere else: a system button turned white on grey in the light theme
                         ActionButton("BEWAAR TEAMLINK", style: .filled, color: SharedColors.accent) { save() }
@@ -221,7 +221,7 @@ public struct SharedSettingsView: View {
                     .foregroundColor(SharedColors.textSecondary)
             }
             .padding()
-            .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.08)))
+            .background(SharedColors.tint(0.08)).clipShape(RoundedRectangle(cornerRadius: 10))
             HStack(spacing: 12) {
                 ActionButton("BEWAAR API KEY", style: .filled, color: SharedColors.accent,
                              disabled: keyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) { saveKey() }

@@ -164,7 +164,7 @@ public struct SharedMatchHistoryView: View {
                     AppSymbol(playerFilter == nil ? "chevron.down" : "xmark", size: 14, color: SharedColors.textSecondary)
                 }
                 .padding(12)
-                .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.05)))
+                .background(SharedColors.tint(0.05)).clipShape(RoundedRectangle(cornerRadius: 10))
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Filter op speler")

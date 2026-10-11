@@ -563,7 +563,7 @@ public struct SharedTeamMatchView: View {
                     if partij.slot < 4 { Divider().overlay(SharedColors.line(0.09)) }
                 }
             }
-            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.04)))
+            .background(SharedColors.tint(0.04)).clipShape(RoundedRectangle(cornerRadius: 12))
             Text("Tik op een partij om spelers en games in te vullen of een bijgehouden wedstrijd te koppelen.")
                 .font(SharedFonts.system(11))
                 .foregroundColor(SharedColors.textMuted)

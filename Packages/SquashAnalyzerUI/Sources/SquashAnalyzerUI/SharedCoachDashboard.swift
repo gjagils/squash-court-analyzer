@@ -128,7 +128,7 @@ public struct SharedCoachDashboardView: View {
                             .foregroundColor(SharedColors.gold)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
-                            .background(Capsule().fill(SharedColors.tint(0.1)))
+                            .background(SharedColors.tint(0.1)).clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Deel game-analyse")
@@ -138,7 +138,7 @@ public struct SharedCoachDashboardView: View {
             Button(action: onClose) {
                 AppSymbol("xmark", size: 16, color: SharedColors.textSecondary, weight: .medium)
                     .padding(10)
-                    .background(Circle().fill(SharedColors.tint(0.1)))
+                    .background(SharedColors.tint(0.1)).clipShape(Circle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Sluiten")
@@ -147,7 +147,7 @@ public struct SharedCoachDashboardView: View {
 
     private var titleBlock: some View {
         VStack(spacing: 4) {
-            Text("Coach dashboard")
+            Text("Analyse")
                 .font(PageTitleStyle.font)
                 .foregroundColor(SharedColors.textPrimary)
             if let winner = game.winner {
@@ -186,7 +186,7 @@ public struct SharedCoachDashboardView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
-            .background(RoundedRectangle(cornerRadius: 10).fill(selected ? color(for: side).opacity(0.15) : SharedColors.cardTint))
+            .background(selected ? color(for: side).opacity(0.15) : SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(selected ? color(for: side).opacity(0.5) : Color.clear, lineWidth: 1))
         }
         .buttonStyle(.plain)
@@ -206,7 +206,7 @@ public struct SharedCoachDashboardView: View {
                             .foregroundColor(index == gameIndex ? SharedColors.textPrimary : SharedColors.textMuted)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(RoundedRectangle(cornerRadius: 8).fill(index == gameIndex ? SharedColors.gold.opacity(0.3) : SharedColors.cardTint))
+                            .background(index == gameIndex ? SharedColors.gold.opacity(0.3) : SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     .buttonStyle(.plain)
                 }
@@ -274,7 +274,7 @@ public struct SharedCoachDashboardView: View {
         }
         .frame(maxWidth: .infinity, minHeight: 56)
         .padding(6)
-        .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.cardTint))
+        .background(SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
     /// 2×3 or 3×3, whichever the game was played with (`Game.heatmapLayout`)
@@ -312,7 +312,7 @@ public struct SharedCoachDashboardView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity)
-        .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.cardTint))
+        .background(SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private var shots: some View {
@@ -333,7 +333,7 @@ public struct SharedCoachDashboardView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity)
-        .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.cardTint))
+        .background(SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private func mostShots(_ top: [ShotCount]) -> Int {
@@ -387,7 +387,7 @@ public struct SharedCoachDashboardView: View {
             }
         }
         .padding(14)
-        .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.cardTint))
+        .background(SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     /// Points won out of the air, with the shots: "3 drop, 1 kill"
@@ -409,7 +409,7 @@ public struct SharedCoachDashboardView: View {
                 .foregroundColor(count > 0 ? SharedColors.gold : SharedColors.textMuted)
         }
         .padding(14)
-        .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.cardTint))
+        .background(SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private func countBadge(_ label: String, _ count: Int, _ tint: Color) -> some View {
@@ -425,7 +425,7 @@ public struct SharedCoachDashboardView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
-        .background(RoundedRectangle(cornerRadius: 8).fill(tint.opacity(0.10)))
+        .background(tint.opacity(0.10)).clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
     /// Gold icon and the title, as on iOS
@@ -467,7 +467,7 @@ public struct SharedCoachDashboardView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.cardTint))
+        .background(SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     /// The same symbol per advice topic as iOS (CoachDashboardView.icon(for:))
@@ -536,7 +536,7 @@ public struct SharedCoachDashboardView: View {
                         .foregroundColor(hasKey ? SharedColors.steelBlueLight : SharedColors.textMuted)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(RoundedRectangle(cornerRadius: 8).fill(hasKey ? SharedColors.steelBlueLight.opacity(0.2) : SharedColors.cardTint))
+                        .background(hasKey ? SharedColors.steelBlueLight.opacity(0.2) : SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 8))
                 }
                 .buttonStyle(.plain)
                 .disabled(!hasKey)
@@ -544,7 +544,7 @@ public struct SharedCoachDashboardView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.cardTint))
+        .background(SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private func aiAdviceView(_ advice: TacticalAdvice) -> some View {
@@ -560,7 +560,7 @@ public struct SharedCoachDashboardView: View {
                 .foregroundColor(SharedColors.textPrimary)
                 .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(RoundedRectangle(cornerRadius: 8).fill(SharedColors.gold.opacity(0.15)))
+                .background(SharedColors.gold.opacity(0.15)).clipShape(RoundedRectangle(cornerRadius: 8))
         }
     }
 

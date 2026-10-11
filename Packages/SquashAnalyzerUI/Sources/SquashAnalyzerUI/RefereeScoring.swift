@@ -360,7 +360,7 @@ public struct RefereeScoringView: View {
             .tracking(3)
             .padding(.horizontal, 28)
             .padding(.vertical, 18)
-            .background(RoundedRectangle(cornerRadius: 16).fill(Color.black.opacity(0.85)))
+            .background(Color.black.opacity(0.85)).clipShape(RoundedRectangle(cornerRadius: 16))
             .transition(.scale.combined(with: .opacity))
     }
 

@@ -76,7 +76,7 @@ public struct SharedLeagueTeamCard: View {
                     }
                 }
                 .padding(16)
-                .background(RoundedRectangle(cornerRadius: 14).fill(SharedColors.surfaceRaised))
+                .background(SharedColors.surfaceRaised).clipShape(RoundedRectangle(cornerRadius: 14))
             } else if !promptDismissed {
                 setupPrompt
             }
@@ -123,7 +123,7 @@ public struct SharedLeagueTeamCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 14).fill(SharedColors.surfaceRaised))
+        .background(SharedColors.surfaceRaised).clipShape(RoundedRectangle(cornerRadius: 14))
     }
 
     private func card(_ snapshot: LeagueTeamSnapshot) -> some View {
@@ -204,7 +204,7 @@ public struct SharedLeagueTeamDetailView: View {
                             // The team you follow stands out: an orange band, as on the home tiles
                             // (every row indented alike; Compose has no negative padding)
                             .padding(.horizontal, 8)
-                            .background(RoundedRectangle(cornerRadius: 8).fill(own ? SharedColors.accent.opacity(0.14) : Color.clear))
+                            .background(own ? SharedColors.accent.opacity(0.14) : Color.clear).clipShape(RoundedRectangle(cornerRadius: 8))
                             .overlay(RoundedRectangle(cornerRadius: 8).stroke(own ? SharedColors.accent.opacity(0.5) : Color.clear, lineWidth: 1))
                         }
                     }
@@ -288,7 +288,7 @@ public struct SharedLeagueTeamDetailView: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.04)))
+            .background(SharedColors.tint(0.04)).clipShape(RoundedRectangle(cornerRadius: 12))
         }
     }
 }

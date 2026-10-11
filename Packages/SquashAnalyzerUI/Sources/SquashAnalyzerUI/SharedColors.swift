@@ -79,7 +79,14 @@ public enum SharedColors {
     /// A card or chip fill: white at `opacity` on black; on light a white card
     /// (stronger for the higher values, so pressed and selected still differ)
     public static func tint(_ opacity: Double) -> Color {
-        SharedColors.light ? Color.white.opacity(min(1.0, opacity * 14.0)) : Color.white.opacity(opacity)
+        SharedColors.light ? lightCard(min(1.0, opacity * 14.0)) : Color.white.opacity(opacity)
+    }
+
+    /// White over the light background, mixed to a solid colour: a see-through
+    /// white picks up Android's lavender Material surface under a sheet
+    private static func lightCard(_ amount: Double) -> Color {
+        let mix: (Double) -> Double = { base in (base + (255.0 - base) * amount) / 255.0 }
+        return Color(red: mix(247.0), green: mix(243.0), blue: mix(237.0))
     }
 
     /// A card edge or divider: white at `opacity` on black; the warm border (#DEC9B4) on light

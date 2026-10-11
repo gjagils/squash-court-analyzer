@@ -1,0 +1,1 @@
+Gebouwd op jullie input als testers: dank voor alle feedback! Nieuw: Coachkaart om je speler tussen de games te coachen, notitie per game, service en return, lichte weergave, een korte rondleiding, delen en feedback vanuit Instellingen, nieuwe lijniconen en een beginscherm volgens Scheidsen · Coachen · Delen. Uitleg: squashanalyzer.com/testen

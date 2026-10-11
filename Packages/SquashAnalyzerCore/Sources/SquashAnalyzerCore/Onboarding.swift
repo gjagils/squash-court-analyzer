@@ -36,18 +36,17 @@ public enum Onboarding {
     /// The first page shows the three themes in the sticker's order (scheidsen, coachen, delen) instead of one symbol
     public static let welcomePage = 0
 
-    /// The symbols are the home screen's: the UI draws "list.bullet.clipboard.fill",
-    /// "whistle", "person.2.fill" and "trophy.fill" as the home tiles do
+    /// The symbols are the home screen's outline icons (AppSymbol names)
     public static let pages: [Page] = [
         Page(symbol: "", title: "Welkom bij Squash Analyzer",
              text: "Jouw spel scherp in beeld. Fluit een wedstrijd, coach je teamgenoot en deel de stand met je team."),
         Page(symbol: "whistle", title: "Scheidsrechter",
              text: "Tik op de score van wie de rally wint. LET, STROKE, undo en de servicekant zitten erbij; de app houdt games en tijd bij."),
-        Page(symbol: "list.bullet.clipboard.fill", title: "Coach",
+        Page(symbol: "list.bullet.clipboard", title: "Coach",
              text: "Om je teamgenoot beter te coachen. Leg per punt vast wie scoorde, hoe, waar op de baan en met welke slag. Na elke game zie je de analyse, en de coachkaart laat je speler in één scherm zien waar het om draait."),
-        Page(symbol: "person.2.fill", title: "Kies speler",
+        Page(symbol: "person.2", title: "Kies speler",
              text: "Sla spelers op en kies ze bij het starten via Kies speler. Alleen dan verdienen ze badges en groeit hun profiel over de wedstrijden."),
-        Page(symbol: "trophy.fill", title: "Competitie",
+        Page(symbol: "trophy", title: "Competitie",
              text: "Speel je bij SBN? Vul je teamlink in, dan zie je je programma en de stand. Die deel je met je team, bijvoorbeeld via WhatsApp."),
         Page(symbol: "square.and.arrow.up", title: "Delen",
              text: "Houd je teamgenoten en supporters op de hoogte van de wedstrijden en de competitie. Met LIVE kijken ze mee via een link. Alles staat op je eigen telefoon: maak af en toe een back-up in Instellingen."),

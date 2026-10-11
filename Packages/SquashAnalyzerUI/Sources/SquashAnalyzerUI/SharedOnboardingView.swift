@@ -103,7 +103,7 @@ public struct SharedOnboardingView: View {
     private var themes: some View {
         HStack(spacing: 14) {
             theme("whistle", "Scheidsen")
-            theme("list.bullet.clipboard.fill", "Coachen")
+            theme("list.bullet.clipboard", "Coachen")
             theme("square.and.arrow.up", "Delen")
         }
     }
@@ -118,8 +118,7 @@ public struct SharedOnboardingView: View {
         }
     }
 
-    /// A page's symbol in the round brand badge; the home tiles' own icons
-    /// where the tour talks about the same thing
+    /// A page's symbol in the round brand badge, the same outline icons as the home tiles
     private func badge(_ symbol: String, size: CGFloat) -> some View {
         let iconSize = size * 0.48
         return tourIcon(symbol, size: iconSize)
@@ -131,27 +130,14 @@ public struct SharedOnboardingView: View {
 
     @ViewBuilder
     private func tourIcon(_ symbol: String, size: CGFloat) -> some View {
-        switch symbol {
-        case "list.bullet.clipboard.fill":
-            HomeTileIconView(icon: .coach, color: SharedColors.accent, size: size)
-        case "whistle":
-            HomeTileIconView(icon: .referee, color: SharedColors.accent, size: size)
-        case "person.2.fill":
-            HomeTileIconView(icon: .players, color: SharedColors.accent, size: size)
-        case "trophy.fill":
-            HomeTileIconView(icon: .competition, color: SharedColors.accent, size: size)
-        case "square.and.arrow.up":
-            // The SF symbol's box sits low with the arrow above it: lift it
-            // so it looks centred in the circle (the Material icon already is)
-            #if SKIP
-            AppSymbol(symbol, size: size, color: SharedColors.accent)
-            #else
-            AppSymbol(symbol, size: size, color: SharedColors.accent)
-                .offset(y: -size * 0.08)
-            #endif
-        default:
-            AppSymbol(symbol, size: size, color: SharedColors.accent)
-        }
+        #if SKIP
+        AppSymbol(symbol, size: size, color: SharedColors.accent, weight: .medium)
+        #else
+        // The SF share symbol's box sits low with the arrow above it: lift it
+        // so it looks centred in the circle (the Material icon already is)
+        AppSymbol(symbol, size: size, color: SharedColors.accent, weight: .medium)
+            .offset(y: symbol == "square.and.arrow.up" ? -size * 0.08 : 0.0)
+        #endif
     }
 
     private var dots: some View {

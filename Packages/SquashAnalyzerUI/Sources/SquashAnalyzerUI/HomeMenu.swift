@@ -1,17 +1,5 @@
 import SwiftUI
 import SquashAnalyzerCore
-#if SKIP
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.MilitaryTech
-import androidx.compose.material.icons.filled.Sports
-import androidx.compose.material3.Icon
-import androidx.compose.ui.unit.dp
-#endif
 
 /// Platform-independent home presentation. Navigation and persistence belong to
 /// the host app; iOS keeps its existing destinations and Android adds them in phase 5.
@@ -214,31 +202,47 @@ private struct HomeMenuTile: View {
     }
 }
 
-/// The five home tiles' icons: a clipboard (coach), a whistle or raised hand
-/// (referee), history, a group (players) and a medal (badges).
+/// The home tiles' icons, outlines like the sticker: a clipboard (coach), a
+/// whistle (referee), history, a group (players), a medal (badges) and a cup
+/// (competition). The clipboard also marks the coach card, everywhere.
 enum HomeTileIcon {
     case coach, referee, history, players, badges, competition
 
-    /// SF Symbol on Apple. The referee is drawn (`WhistleShape`): the
-    /// `whistle` symbols render as an empty glyph on the iOS SF Symbols
-    /// runtime we test on, so this name is only a fallback.
+    /// The AppSymbol name; AppSymbol draws the whistle itself on Apple
     var symbol: String {
         switch self {
-        case .coach: return "list.bullet.clipboard.fill"
-        case .referee: return "hand.raised.fill"
+        case .coach: return "list.bullet.clipboard"
+        case .referee: return "whistle"
         case .history: return "clock.arrow.circlepath"
-        case .players: return "person.2.fill"
-        case .badges: return "medal.fill"
-        case .competition: return "trophy.fill"
+        case .players: return "person.2"
+        case .badges: return "medal"
+        case .competition: return "trophy"
         }
     }
 }
 
 #if !SKIP
-/// A referee's whistle for iOS, in the spirit of Android's Material "Sports"
-/// icon: a round body with an air hole, a mouthpiece to the right and a ring
-/// for the cord. Drawn on a 24×24 grid and scaled to the frame; the body and
-/// the holes are separate parts so the holes can be cut out of the union.
+/// A referee's whistle as an outline, in the spirit of Material's outlined
+/// "Sports" icon: a round body with a mouthpiece to the right, the air hole,
+/// and a ring for the cord. On a 24×24 grid, scaled to `size`. The SF
+/// `whistle` symbols render as an empty glyph on the iOS runtime we test on.
+struct WhistleOutline: View {
+    let color: Color
+    let size: CGFloat
+
+    var body: some View {
+        let scale = size / 24
+        let line = max(1.2, 1.8 * scale)
+        return ZStack {
+            WhistleShape(part: .body).stroke(color, style: StrokeStyle(lineWidth: line, lineJoin: .round))
+            WhistleShape(part: .holes).stroke(color, lineWidth: line)
+        }
+        .frame(width: size, height: size)
+    }
+}
+
+/// The whistle's parts on a 24×24 grid: the body is one outline (circle and
+/// mouthpiece joined), the holes are the air hole and the cord ring
 struct WhistleShape: Shape {
     enum Part { case body, holes }
     let part: Part
@@ -247,12 +251,12 @@ struct WhistleShape: Shape {
         var path = Path()
         switch part {
         case .body:
-            path.addEllipse(in: CGRect(x: 1, y: 8, width: 13, height: 13))
-            path.addRoundedRect(in: CGRect(x: 8, y: 8, width: 15, height: 5.5), cornerSize: CGSize(width: 1.5, height: 1.5))
-            path.addEllipse(in: CGRect(x: 2.5, y: 3, width: 5, height: 5))
+            let round = Path(ellipseIn: CGRect(x: 2, y: 9, width: 12, height: 12))
+            let mouth = Path(roundedRect: CGRect(x: 8, y: 9, width: 14, height: 5), cornerSize: CGSize(width: 1.2, height: 1.2))
+            path = round.union(mouth)
         case .holes:
-            path.addEllipse(in: CGRect(x: 5, y: 12.5, width: 5, height: 5))
-            path.addEllipse(in: CGRect(x: 4, y: 4.5, width: 2, height: 2))
+            path.addEllipse(in: CGRect(x: 6, y: 13, width: 4, height: 4))
+            path.addEllipse(in: CGRect(x: 3, y: 3.5, width: 4.5, height: 4.5))
         }
         let scale = min(rect.width, rect.height) / 24
         return path.applying(CGAffineTransform(scaleX: scale, y: scale).translatedBy(x: rect.minX / scale, y: rect.minY / scale))
@@ -260,50 +264,16 @@ struct WhistleShape: Shape {
 }
 #endif
 
-/// SF Symbols on Apple; on Android the matching Material icons, drawn
-/// directly with Compose, because Skip only maps a small set of SF Symbols
-/// (the rest become a warning triangle).
+/// The home tiles' icons in one place, so the tour and the menu draw the same
 struct HomeTileIconView: View {
     let icon: HomeTileIcon
     let color: Color
     let size: CGFloat
 
     var body: some View {
-        #if SKIP
-        ComposeView { context in
-            Icon(imageVector: materialIcon(), contentDescription: nil,
-                 modifier: context.modifier.size(size.dp), tint: color.colorImpl())
-        }
-        #else
-        if icon == .referee {
-            // Solid whistle, then the air hole and the cord hole cut out
-            ZStack {
-                WhistleShape(part: .body).fill(color)
-                WhistleShape(part: .holes).fill(Color.black).blendMode(.destinationOut)
-            }
-            .compositingGroup()
+        AppSymbol(icon.symbol, size: size, color: color, weight: .medium)
             .frame(width: size, height: size)
-        } else {
-            Image(systemName: icon.symbol)
-                .font(SharedFonts.system(size * 0.85, weight: .semibold))
-                .foregroundColor(color)
-                .frame(width: size, height: size)
-        }
-        #endif
     }
-
-    #if SKIP
-    private func materialIcon() -> androidx.compose.ui.graphics.vector.ImageVector {
-        switch icon {
-        case .coach: return Icons.AutoMirrored.Filled.Assignment
-        case .referee: return Icons.Filled.Sports
-        case .history: return Icons.Filled.History
-        case .players: return Icons.Filled.Groups
-        case .badges: return Icons.Filled.MilitaryTech
-        case .competition: return Icons.Filled.EmojiEvents
-        }
-    }
-    #endif
 }
 
 /// Android's first screen: the Mijn team card (once a team link is saved in

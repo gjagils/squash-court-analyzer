@@ -75,7 +75,7 @@ struct SettingsView: View {
 
     private var teamSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack { Image(systemName: "person.3.fill").foregroundColor(AppColors.warmOrange); Text("Mijn team").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary) }
+            HStack { Image(systemName: "person.3").foregroundColor(AppColors.warmOrange); Text("Mijn team").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary) }
             Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
                 .font(AppFonts.body(13)).foregroundColor(AppColors.textSecondary)
             Link(destination: UserManual.iPhoneTeamLink) {

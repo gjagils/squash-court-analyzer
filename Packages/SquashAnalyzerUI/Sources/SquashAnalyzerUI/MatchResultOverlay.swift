@@ -282,20 +282,20 @@ public struct MatchBadgesRow: View {
         .accessibilityLabel("Bekijk badges")
     }
 
+    /// The name and what was earned on one line, the medallions under it: with
+    /// eight or nine medallions next to it the name was cut off ("Thé · 8…")
     private func earningLine(_ earning: MatchBadgeEarning) -> some View {
-        HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("\(earning.name) · " + (earning.badges.count == 1 ? earning.badges[0].tieredTitle : "\(earning.badges.count) badges"))
+                .font(SharedFonts.system(13, weight: .medium, design: .rounded))
+                .foregroundColor(SharedColors.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             HStack(spacing: 4) {
                 ForEach(earning.badges) { kind in
                     BadgeMedallion(kind: kind, size: 26, showsTitle: false)
                 }
             }
-            Text("\(earning.name) · " + (earning.badges.count == 1 ? earning.badges[0].tieredTitle : "\(earning.badges.count) badges"))
-                .font(SharedFonts.system(13, weight: .medium, design: .rounded))
-                .foregroundColor(SharedColors.textPrimary)
-                .lineLimit(1)
-                // Five medallions plus "Bombardino · 5 badges" is wider than
-                // the row; Android clips instead of shortening, so shrink
-                .minimumScaleFactor(0.7)
         }
     }
 }

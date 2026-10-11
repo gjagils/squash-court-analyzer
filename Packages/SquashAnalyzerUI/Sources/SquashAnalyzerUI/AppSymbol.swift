@@ -2,64 +2,69 @@ import SwiftUI
 #if SKIP
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.Undo
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.SportsScore
-import androidx.compose.material.icons.filled.FrontHand
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.MilitaryTech
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.FastForward
-import androidx.compose.material.icons.filled.HourglassBottom
-import androidx.compose.material.icons.filled.Psychology
-import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
-import androidx.compose.material.icons.filled.ArrowCircleUp
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.automirrored.filled.DirectionsRun
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material.icons.filled.GpsFixed
-import androidx.compose.material.icons.filled.ArrowCircleDown
-import androidx.compose.material.icons.filled.CenterFocusStrong
-import androidx.compose.material.icons.filled.OfflineBolt
-import androidx.compose.material.icons.filled.PieChart
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.SportsTennis
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material.icons.filled.VerticalAlignBottom
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.Undo
+import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.EmojiEvents
+import androidx.compose.material.icons.outlined.SportsScore
+import androidx.compose.material.icons.outlined.FrontHand
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.MilitaryTech
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.FastForward
+import androidx.compose.material.icons.outlined.HourglassBottom
+import androidx.compose.material.icons.outlined.Psychology
+import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
+import androidx.compose.material.icons.outlined.ArrowCircleUp
+import androidx.compose.material.icons.outlined.Error
+import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
+import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.outlined.GpsFixed
+import androidx.compose.material.icons.outlined.ArrowCircleDown
+import androidx.compose.material.icons.outlined.CenterFocusStrong
+import androidx.compose.material.icons.outlined.OfflineBolt
+import androidx.compose.material.icons.outlined.PieChart
+import androidx.compose.material.icons.outlined.Lightbulb
+import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material.icons.outlined.Replay
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.SportsTennis
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.SwapHoriz
+import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material.icons.outlined.Sync
+import androidx.compose.material.icons.outlined.VerticalAlignBottom
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Sports
+import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material3.Icon
 import androidx.compose.ui.unit.dp
 #endif
 
-/// An SF Symbol on Apple and the matching Material icon on Android. Skip's
+/// An SF Symbol on Apple and the matching Material icon on Android, always
+/// as an outline (Material "Outlined"; on Apple the symbol without ".fill"). Skip's
 /// `Image(systemName:)` only knows a small set of SF Symbols and draws a
 /// warning triangle for the rest (forced/unforced error, service point,
 /// undo, medal, cross, volley, drop…), so every symbol the shared screens use
@@ -98,68 +103,91 @@ struct AppSymbol: View {
                 .foregroundColor(color)
         }
         #else
-        Image(systemName: name)
-            .font(SharedFonts.system(size, weight: weight))
-            .foregroundColor(color)
+        if name == "whistle" {
+            WhistleOutline(color: color, size: size)
+        } else {
+            Image(systemName: AppSymbol.outlined(name))
+                .font(SharedFonts.system(size, weight: weight))
+                .foregroundColor(color)
+        }
         #endif
     }
+
+    #if !SKIP
+    /// The app draws every symbol as an outline, like the sticker (decision
+    /// 12 October 2026): "medal.fill" becomes "medal" when that symbol exists
+    static func outlined(_ name: String) -> String {
+        guard name.hasSuffix(".fill") else { return name }
+        let plain = String(name.dropLast(5))
+        #if canImport(UIKit)
+        return UIImage(systemName: plain) != nil ? plain : name
+        #else
+        return NSImage(systemSymbolName: plain, accessibilityDescription: nil) != nil ? plain : name
+        #endif
+    }
+    #endif
 
     #if SKIP
     static func material(_ name: String) -> androidx.compose.ui.graphics.vector.ImageVector? {
         switch name {
-        case "star.fill": return Icons.Filled.Star
-        case "arrow.triangle.2.circlepath": return Icons.Filled.Sync
-        case "xmark.circle": return Icons.Filled.Cancel
-        case "hand.raised.fill": return Icons.Filled.FrontHand
-        case "figure.tennis": return Icons.Filled.SportsTennis
-        case "pin.fill": return Icons.Filled.PushPin
-        case "medal", "medal.fill": return Icons.Filled.MilitaryTech
-        case "arrow.uturn.backward": return Icons.AutoMirrored.Filled.Undo
-        case "arrow.counterclockwise": return Icons.Filled.Replay
-        case "clock.arrow.circlepath": return Icons.Filled.History
-        case "arrow.left.and.right": return Icons.Filled.SwapHoriz
-        case "bolt.fill": return Icons.Filled.Bolt
-        case "arrow.down.to.line": return Icons.Filled.VerticalAlignBottom
-        case "xmark": return Icons.Filled.Close
-        case "square.and.arrow.down": return Icons.Filled.Download
-        case "trash": return Icons.Filled.Delete
-        case "pencil": return Icons.Filled.Edit
-        case "plus": return Icons.Filled.Add
-        case "person.crop.circle": return Icons.Filled.AccountCircle
-        case "chart.bar.fill", "chart.bar.xaxis": return Icons.Filled.BarChart
-        case "crown.fill": return Icons.Filled.EmojiEvents
-        case "flag.checkered": return Icons.Filled.SportsScore
-        case "gearshape": return Icons.Filled.Settings
-        case "timer": return Icons.Filled.Timer
-        case "camera.fill": return Icons.Filled.PhotoCamera
-        case "hare.fill": return Icons.Filled.FastForward
-        case "tortoise.fill": return Icons.Filled.HourglassBottom
-        case "brain.head.profile", "brain": return Icons.Filled.Psychology
-        case "figure.walk": return Icons.AutoMirrored.Filled.DirectionsWalk
-        case "arrow.up.circle": return Icons.Filled.ArrowCircleUp
-        case "exclamationmark.circle": return Icons.Filled.Error
-        case "figure.run": return Icons.AutoMirrored.Filled.DirectionsRun
-        case "exclamationmark.triangle": return Icons.Filled.Warning
-        case "star": return Icons.Filled.StarBorder
-        case "target": return Icons.Filled.GpsFixed
-        case "arrow.down.right.circle": return Icons.Filled.ArrowCircleDown
-        case "scope": return Icons.Filled.CenterFocusStrong
-        case "bolt.circle": return Icons.Filled.OfflineBolt
-        case "chart.pie.fill": return Icons.Filled.PieChart
-        case "lightbulb.fill": return Icons.Filled.Lightbulb
-        case "person.badge.plus": return Icons.Filled.PersonAdd
-        case "person.2.circle": return Icons.Filled.Groups
-        case "mappin": return Icons.Filled.Place
-        case "sparkles": return Icons.Filled.AutoAwesome
-        case "square.and.arrow.up": return Icons.Filled.Share
-        case "chevron.down": return Icons.Filled.KeyboardArrowDown
-        case "chevron.up": return Icons.Filled.KeyboardArrowUp
-        case "chevron.left": return Icons.AutoMirrored.Filled.KeyboardArrowLeft
-        case "chevron.right": return Icons.AutoMirrored.Filled.KeyboardArrowRight
-        case "person.fill": return Icons.Filled.Person
-        case "arrow.right": return Icons.AutoMirrored.Filled.ArrowForward
-        case "arrow.left": return Icons.AutoMirrored.Filled.ArrowBack
-        case "play.fill": return Icons.Filled.PlayArrow
+        case "star.fill": return Icons.Outlined.StarBorder
+        case "arrow.triangle.2.circlepath": return Icons.Outlined.Sync
+        case "xmark.circle": return Icons.Outlined.Cancel
+        case "hand.raised.fill": return Icons.Outlined.FrontHand
+        case "figure.tennis": return Icons.Outlined.SportsTennis
+        case "pin.fill": return Icons.Outlined.PushPin
+        case "medal", "medal.fill": return Icons.Outlined.MilitaryTech
+        case "arrow.uturn.backward": return Icons.AutoMirrored.Outlined.Undo
+        case "arrow.counterclockwise": return Icons.Outlined.Replay
+        case "clock.arrow.circlepath": return Icons.Outlined.History
+        case "arrow.left.and.right": return Icons.Outlined.SwapHoriz
+        case "bolt.fill": return Icons.Outlined.Bolt
+        case "arrow.down.to.line": return Icons.Outlined.VerticalAlignBottom
+        case "xmark": return Icons.Outlined.Close
+        case "square.and.arrow.down": return Icons.Outlined.Download
+        case "trash": return Icons.Outlined.Delete
+        case "pencil": return Icons.Outlined.Edit
+        case "plus": return Icons.Outlined.Add
+        case "person.crop.circle": return Icons.Outlined.AccountCircle
+        case "chart.bar.fill", "chart.bar.xaxis": return Icons.Outlined.BarChart
+        case "crown.fill": return Icons.Outlined.EmojiEvents
+        case "flag.checkered": return Icons.Outlined.SportsScore
+        case "gearshape": return Icons.Outlined.Settings
+        case "timer": return Icons.Outlined.Timer
+        case "camera.fill": return Icons.Outlined.PhotoCamera
+        case "hare.fill": return Icons.Outlined.FastForward
+        case "tortoise.fill": return Icons.Outlined.HourglassBottom
+        case "brain.head.profile", "brain": return Icons.Outlined.Psychology
+        case "figure.walk": return Icons.AutoMirrored.Outlined.DirectionsWalk
+        case "arrow.up.circle": return Icons.Outlined.ArrowCircleUp
+        case "exclamationmark.circle": return Icons.Outlined.Error
+        case "figure.run": return Icons.AutoMirrored.Outlined.DirectionsRun
+        case "exclamationmark.triangle": return Icons.Outlined.Warning
+        case "star": return Icons.Outlined.StarBorder
+        case "target": return Icons.Outlined.GpsFixed
+        case "arrow.down.right.circle": return Icons.Outlined.ArrowCircleDown
+        case "scope": return Icons.Outlined.CenterFocusStrong
+        case "bolt.circle": return Icons.Outlined.OfflineBolt
+        case "chart.pie.fill": return Icons.Outlined.PieChart
+        case "lightbulb.fill": return Icons.Outlined.Lightbulb
+        case "person.badge.plus": return Icons.Outlined.PersonAdd
+        case "person.2.circle": return Icons.Outlined.Groups
+        case "mappin": return Icons.Outlined.Place
+        case "sparkles": return Icons.Outlined.AutoAwesome
+        case "square.and.arrow.up": return Icons.Outlined.Share
+        case "chevron.down": return Icons.Outlined.KeyboardArrowDown
+        case "chevron.up": return Icons.Outlined.KeyboardArrowUp
+        case "chevron.left": return Icons.AutoMirrored.Outlined.KeyboardArrowLeft
+        case "chevron.right": return Icons.AutoMirrored.Outlined.KeyboardArrowRight
+        case "person.fill": return Icons.Outlined.Person
+        case "arrow.right": return Icons.AutoMirrored.Outlined.ArrowForward
+        case "arrow.left": return Icons.AutoMirrored.Outlined.ArrowBack
+        case "play.fill": return Icons.Outlined.PlayArrow
+        case "magnifyingglass": return Icons.Outlined.Search
+        case "list.bullet.clipboard", "list.bullet.clipboard.fill": return Icons.AutoMirrored.Outlined.Assignment
+        case "whistle": return Icons.Outlined.Sports
+        case "trophy", "trophy.fill": return Icons.Outlined.EmojiEvents
+        case "person.2", "person.2.fill": return Icons.Outlined.People
         default: return nil
         }
     }

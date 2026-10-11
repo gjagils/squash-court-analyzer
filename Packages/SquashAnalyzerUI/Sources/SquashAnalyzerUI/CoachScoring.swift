@@ -35,11 +35,9 @@ public struct SharedScoreboardView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(SharedColors.tint(0.055))
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.line(0.10), lineWidth: 1))
-        )
+        .background(SharedColors.tint(0.055))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.line(0.10), lineWidth: 1))
     }
 
     private var gameColumn: some View {
@@ -198,11 +196,9 @@ public struct SharedScoreboardView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 4)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(isScoring ? color.opacity(0.18) : (isServing ? color.opacity(0.06) : Color.clear))
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(isScoring ? 0.7 : 0.0), lineWidth: 1))
-        )
+        .background(isScoring ? color.opacity(0.18) : (isServing ? color.opacity(0.06) : Color.clear))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(isScoring ? 0.7 : 0.0), lineWidth: 1))
     }
 }
 
@@ -376,7 +372,7 @@ public struct CoachScoringView: View {
                         analysedGame = match.games[match.currentGameIndex - 1]
                         showingAnalysis = true
                     } label: {
-                        AppSymbol("chart.bar.xaxis", size: 18, color: SharedColors.gold)
+                        AppSymbol("magnifyingglass", size: 18, color: SharedColors.accent)
                             .frame(width: 36, height: 32)
                     }
                     .buttonStyle(.plain)
@@ -592,11 +588,11 @@ public struct CoachScoringView: View {
 
     /// Game over and match over, the same card as iOS' GameOverOverlay
     private var resultCard: some View {
-        var secondary: [ResultButton] = [ResultButton("Analyse", icon: "chart.bar.xaxis") {
+        var secondary: [ResultButton] = [ResultButton("Analyse", icon: "magnifyingglass") {
             analysedGame = game
             showingAnalysis = true
         }]
-        secondary.append(ResultButton("Coachkaart", icon: "lightbulb.fill") { showingCard = true })
+        secondary.append(ResultButton("Coachkaart", icon: "list.bullet.clipboard") { showingCard = true })
         if shareText != nil {
             secondary.append(ResultButton("Deel score", icon: "square.and.arrow.up") { showingShare = true })
         }

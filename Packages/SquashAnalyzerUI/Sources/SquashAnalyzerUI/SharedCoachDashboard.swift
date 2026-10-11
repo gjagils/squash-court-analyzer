@@ -75,7 +75,7 @@ public struct SharedCoachDashboardView: View {
                         gamePicker
                     }
                     // De coachkaart: the game's three points for the player, to show between games
-                    ActionButton("COACHKAART", icon: "lightbulb.fill", style: .filled, color: SharedColors.accent) {
+                    ActionButton("COACHKAART", icon: "list.bullet.clipboard", style: .filled, color: SharedColors.accent) {
                         showingCard = true
                     }
                     GameNoteCard(gameId: game.id) { showingNote = true }

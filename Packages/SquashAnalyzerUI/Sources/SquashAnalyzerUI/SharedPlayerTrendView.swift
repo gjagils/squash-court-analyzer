@@ -62,7 +62,7 @@ public struct SharedPlayerTrendView: View {
                     .pickerStyle(.segmented)
                     formCard(summary)
                     if summary.coachMatches.isEmpty {
-                        card("COACHWEDSTRIJDEN", icon: "chart.bar.fill") {
+                        card("COACHWEDSTRIJDEN", icon: "list.bullet.clipboard") {
                             Text("Winners, slagen, baan en tempo komen uit coachwedstrijden, waar elk punt wordt bijgehouden. In deze periode is er geen.")
                                 .font(SharedFonts.system(13))
                                 .foregroundColor(SharedColors.textSecondary)

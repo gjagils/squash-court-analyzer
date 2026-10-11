@@ -267,11 +267,9 @@ public struct RefereeScoringView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(color.opacity(isServer ? 0.10 : 0.05))
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(color.opacity(isServer ? 0.35 : 0.12), lineWidth: 1))
-                )
+                .background(color.opacity(isServer ? 0.10 : 0.05))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(color.opacity(isServer ? 0.35 : 0.12), lineWidth: 1))
             }
             .buttonStyle(.plain)
             .disabled(match.isGameOver)
@@ -323,11 +321,9 @@ public struct RefereeScoringView: View {
                 .foregroundColor(match.isGameOver ? SharedColors.textMuted : color)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(color.opacity(match.isGameOver ? 0.04 : 0.12))
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(match.isGameOver ? 0.08 : 0.35), lineWidth: 1))
-                )
+                .background(color.opacity(match.isGameOver ? 0.04 : 0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(match.isGameOver ? 0.08 : 0.35), lineWidth: 1))
         }
         .buttonStyle(.plain)
         .disabled(match.isGameOver)

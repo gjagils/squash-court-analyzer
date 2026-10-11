@@ -281,7 +281,7 @@ struct PlayerRowView: View {
                     }
                     if badgeCount > 0 {
                         HStack(spacing: 3) {
-                            Image(systemName: "medal.fill")
+                            Image(systemName: "medal")
                                 .font(SharedFonts.system(10))
                             Text("\(badgeCount)")
                                 .font(AppFonts.caption(11))
@@ -319,7 +319,7 @@ struct PlayerRowView: View {
 
             if isPickerMode {
                 Button(action: onSelect) {
-                    Image(systemName: "chevron.right.circle.fill")
+                    Image(systemName: "chevron.right.circle")
                         .font(SharedFonts.system(24))
                         .foregroundColor(AppColors.accentGold)
                 }
@@ -410,7 +410,7 @@ struct PlayerEditSheet: View {
             PhotosPicker(selection: $pickedPhoto, matching: .images) {
                 ZStack(alignment: .bottomTrailing) {
                     PlayerAvatarImage(photo: photoImage, color: AppColors.accentGold, size: 96)
-                    Image(systemName: "camera.fill")
+                    Image(systemName: "camera")
                         .font(SharedFonts.system(12, weight: .semibold))
                         .foregroundColor(AppColors.backgroundDark)
                         .padding(7)

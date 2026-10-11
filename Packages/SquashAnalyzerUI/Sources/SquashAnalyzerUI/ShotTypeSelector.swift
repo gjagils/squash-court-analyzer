@@ -42,10 +42,8 @@ public struct ShotTypeButton: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(isPressed ? color.opacity(0.2) : SharedColors.tint(0.05))
-            )
+            .background(isPressed ? color.opacity(0.2) : SharedColors.tint(0.05))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
                     .stroke(isPressed ? color.opacity(0.7) : SharedColors.line(0.1), lineWidth: isPressed ? 2.0 : 1.0)

@@ -37,6 +37,8 @@ default Donker), independent of the system.
 - Large text: only Android (`android-textsize large`, font scale 1.3; put it back to
   normal afterwards). iOS uses fixed font sizes on purpose (`SharedFonts`), so a large-text
   pass there shows nothing new.
+- Android sheets slide in: wait 2 s after opening one (Analyse) or the shot catches a squeezed layout
+  mid-animation. After `android-textsize` the app restarts: launch with `--wait 8`.
 - Android has no scenarios and a fresh emulator has no matches: play a game via taps
   (Coach → names → START WEDSTRIJD → START GAME 1 → tap a score → SERVICEPUNT, 11 times).
   An unfinished match is not in Afgeronde wedstrijden; reach it again via Coach → Hervatten.

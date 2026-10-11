@@ -87,13 +87,13 @@ public struct SharedMatchHistoryView: View {
                                 .padding(.top, 24)
                         }
                         if !coachEntries.isEmpty {
-                            sectionHeader("COACH", icon: "chart.bar.xaxis")
+                            sectionHeader("COACH", icon: "list.bullet.clipboard")
                             ForEach(coachEntries) { entry in
                                 coachCard(entry)
                             }
                         }
                         if !refereeEntries.isEmpty {
-                            sectionHeader("SCHEIDSRECHTER", icon: "hand.raised.fill")
+                            sectionHeader("SCHEIDSRECHTER", icon: "whistle")
                             ForEach(refereeEntries) { entry in
                                 refereeCard(entry)
                             }
@@ -178,10 +178,10 @@ public struct SharedMatchHistoryView: View {
                 .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-                .foregroundColor(selected ? SharedColors.background : SharedColors.gold)
+                .foregroundColor(selected ? SharedColors.onAccent : SharedColors.accent)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
-                .background(selected ? SharedColors.gold : SharedColors.tint(0.05))
+                .background(selected ? SharedColors.accent : SharedColors.tint(0.05))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
@@ -203,11 +203,11 @@ public struct SharedMatchHistoryView: View {
 
     private func sectionHeader(_ title: String, icon: String) -> some View {
         HStack(spacing: 6) {
-            AppSymbol(icon, size: 11, color: SharedColors.gold)
+            AppSymbol(icon, size: 11, color: SharedColors.accent)
             Text(title)
                 .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                 .tracking(2)
-                .foregroundColor(SharedColors.gold)
+                .foregroundColor(SharedColors.accent)
             Spacer()
         }
         .padding(.vertical, 8)
@@ -310,14 +310,14 @@ public struct SharedMatchHistoryView: View {
             if entry.status == "abandoned" {
                 Button { open(entry, analysis: false) } label: {
                     HStack(spacing: 4) {
-                        AppSymbol("flag.checkered", size: 12, color: SharedColors.gold)
+                        AppSymbol("flag.checkered", size: 12, color: SharedColors.accent)
                         Text("Uitslag aanvullen")
                             .font(SharedFonts.system(11, weight: .medium, design: .rounded))
-                            .foregroundColor(SharedColors.gold)
+                            .foregroundColor(SharedColors.accent)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(SharedColors.gold.opacity(0.4), lineWidth: 1))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(SharedColors.accent.opacity(0.4), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
             }
@@ -325,10 +325,10 @@ public struct SharedMatchHistoryView: View {
             HStack {
                 Button { open(entry, analysis: true) } label: {
                     HStack(spacing: 4) {
-                        AppSymbol("chart.bar.xaxis", size: 12, color: SharedColors.gold)
+                        AppSymbol("magnifyingglass", size: 12, color: SharedColors.accent)
                         Text("Bekijk analyse")
                             .font(SharedFonts.system(11, weight: .medium, design: .rounded))
-                            .foregroundColor(SharedColors.gold)
+                            .foregroundColor(SharedColors.accent)
                     }
                 }
                 .buttonStyle(.plain)
@@ -359,9 +359,9 @@ public struct SharedMatchHistoryView: View {
 
     private func refereeCard(_ entry: MatchHistorySummary) -> some View {
         HStack(spacing: 14) {
-            AppSymbol("hand.raised.fill", size: 18, color: SharedColors.gold.opacity(0.8))
+            AppSymbol("whistle", size: 18, color: SharedColors.accent)
                 .frame(width: 36, height: 36)
-                .background(SharedColors.gold.opacity(0.12))
+                .background(SharedColors.accent.opacity(0.12))
                 .clipShape(Circle())
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {

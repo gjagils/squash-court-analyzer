@@ -16,9 +16,9 @@ public struct ServerHighlight {
 
     @MainActor public init(color: Color, isServer: Bool) {
         if AppTheme.shared.isLight {
-            name = isServer ? color : color.opacity(0.55)
-            score = isServer ? color : color.opacity(0.45)
-            caption = isServer ? color.opacity(0.85) : color.opacity(0.45)
+            name = isServer ? color : color.opacity(0.75)
+            score = isServer ? color : color.opacity(0.6)
+            caption = isServer ? color.opacity(0.85) : color.opacity(0.6)
         } else {
             name = isServer ? SharedColors.textPrimary : color
             score = isServer ? SharedColors.textPrimary : color
@@ -61,30 +61,30 @@ public struct ServiceSideSelector: View {
 
     private func chip(_ label: String, _ box: ServerSide) -> some View {
         let active = side == box
-        return Button(action: { onSelect(box) }) {
+        // The chosen box stays enabled (a disabled button is drawn faded on
+        // iOS, which made the chosen "Rechts" hard to read in light); tapping it does nothing
+        return Button(action: { if !active { onSelect(box) } }) {
             HStack(spacing: 3) {
                 if preferredSide == box {
-                    AppSymbol("pin.fill", size: 7, color: active ? SharedColors.background : SharedColors.quiet(color))
+                    AppSymbol("pin.fill", size: 7, color: active ? SharedColors.onAccent : SharedColors.quiet(color))
                 }
                 Text(label)
                     .font(SharedFonts.system(compact ? 11.0 : 12.0, weight: .bold, design: .rounded))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
-            .foregroundColor(active ? SharedColors.background : SharedColors.quiet(color))
+            .foregroundColor(active ? SharedColors.onAccent : SharedColors.quiet(color))
             .padding(.horizontal, compact ? 8.0 : 10.0)
             .padding(.vertical, compact ? 4.0 : 5.0)
-            .background(
+            .background(active ? color : color.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(active ? color : color.opacity(0.1))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(color.opacity(active ? 0.0 : 0.3), lineWidth: 1)
-                    )
+                    .stroke(color.opacity(active ? 0.0 : 0.3), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
-        .disabled(active || disabled)
+        .disabled(disabled)
     }
 }
 

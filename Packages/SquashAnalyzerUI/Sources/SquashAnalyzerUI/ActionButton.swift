@@ -53,8 +53,11 @@ public struct ActionButton: View {
                     .tracking(1)
                     .foregroundColor(foreground)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    // Two buttons side by side with large text on Android
+                    // ("COACHKAART" ran into the edge): shrink rather than clip
+                    .minimumScaleFactor(0.6)
             }
+            .padding(.horizontal, 8)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 13)
             // .background(colour) + clipShape: filled shapes behind text misbehave on Android

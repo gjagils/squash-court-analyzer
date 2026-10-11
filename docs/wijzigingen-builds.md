@@ -10,6 +10,17 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Iconen als omtrek, overal (12 oktober 2026)**: alle iconen in de app zijn nu lijniconen, zoals
+  op de sticker, op iPhone en Android, licht en donker (`AppSymbol`: op Apple het symbool zonder
+  ".fill", op Android Material "Outlined"). *Analyse* heeft overal het vergrootglas, *Coachkaart*
+  en alles van coachen het klembord, *Scheidsrechter* overal de fluit (ook in Afgeronde
+  wedstrijden). De fluit is op iPhone als omtrek getekend (`WhistleOutline`).
+- **UI-check, de rest (12 oktober 2026)**: de gekozen servicekant ("Rechts") was in licht vaag
+  (een uitgeschakelde knop wordt op iOS doorzichtig getekend); de ontvanger is in licht minder
+  vaag; in Afgeronde wedstrijden zijn filter, "Bekijk analyse" en de kopjes oranje in plaats van
+  goud; bij Badges verdiend staat de naam boven de medailles (werd afgekapt); knoppen met grote
+  tekst op Android krimpen in plaats van tegen de rand te lopen. Nagelopen: Android donker en
+  grote tekst, Instellingen, Spelers en Competitie.
 - **Volgorde van de sticker: Scheidsen · Coachen · Delen (12 oktober 2026)**: de rondleiding
   (drie thema's op het eerste scherm, daarna Scheidsrechter vóór Coach), de inleidende zin, de
   handleiding (Scheidsrechter vóór Coach), de introzin op de website en de twee tegels op het

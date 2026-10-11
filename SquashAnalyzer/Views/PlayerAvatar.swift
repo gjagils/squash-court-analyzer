@@ -19,7 +19,7 @@ struct PlayerAvatarImage: View {
                     .clipShape(Circle())
                     .opacity(active ? 1.0 : 0.55)
             } else {
-                Image(systemName: "person.fill")
+                Image(systemName: "person")
                     .font(SharedFonts.system(size * 0.42))
                     .foregroundColor(color.opacity(active ? 1.0 : 0.4))
             }

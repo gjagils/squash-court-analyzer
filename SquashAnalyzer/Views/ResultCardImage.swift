@@ -151,7 +151,7 @@ struct ResultCardImage: View {
                         .frame(width: 64, height: 64)
                         .clipShape(Circle())
                 } else {
-                    Image(systemName: "person.fill")
+                    Image(systemName: "person")
                         .font(SharedFonts.system(26))
                         .foregroundColor(color(player).opacity(0.7))
                 }

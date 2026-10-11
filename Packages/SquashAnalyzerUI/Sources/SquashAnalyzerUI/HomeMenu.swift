@@ -10,45 +10,59 @@ public struct HomeMenuHeader: View {
         self.onSettings = onSettings
     }
 
+    /// The logo and the text block are the same height; the text is centred
+    /// next to the logo, the gear sits in the top right corner so the text
+    /// gets the full width (Gerd-Jan, 12 October 2026)
+    private static let logoSize: CGFloat = 72
+
     public var body: some View {
-        HStack(spacing: 10) {
-            // The logo on its own dark tile, or on warm light in the light theme
-            Image(AppTheme.shared.isLight ? "home-logo-light" : "home-logo", bundle: .module)
-                .resizable().scaledToFit().frame(width: 58, height: 58)
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 4) {
-                // Wordmark as on the sticker: "Analyzer" in brand orange.
-                HStack(spacing: 0) {
-                    Text("Squash").foregroundColor(SharedColors.textPrimary)
-                    Text("Analyzer").foregroundColor(SharedColors.accent)
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
+                if let onSettings {
+                    Button(action: onSettings) {
+                        AppSymbol("gearshape", size: 21, color: SharedColors.textSecondary)
+                            .frame(width: 44, height: 36)
+                    }
+                    .accessibilityLabel("Instellingen")
                 }
-                .font(SharedFonts.system(23, weight: .bold, design: .rounded))
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                Text("Jouw spel scherp in beeld. Voor jou en je team.")
-                    .font(SharedFonts.system(12))
-                    .foregroundColor(SharedColors.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                // The line from the stickers and the website
-                Text("SCHEIDSEN · COACHEN · DELEN")
-                    .font(SharedFonts.system(10, weight: .bold, design: .rounded))
-                    .tracking(1.2)
-                    .foregroundColor(SharedColors.accent)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .accessibilityLabel("Scheidsen, coachen, delen")
             }
-            Spacer(minLength: 0)
-            if let onSettings {
-                Button(action: onSettings) {
-                    AppSymbol("gearshape", size: 21, color: SharedColors.textSecondary)
-                        .frame(width: 48, height: 48)
+            .frame(height: 36)
+            HStack(spacing: 12) {
+                // The logo on its own dark tile, or on warm light in the light theme
+                Image(AppTheme.shared.isLight ? "home-logo-light" : "home-logo", bundle: .module)
+                    .resizable().scaledToFit().frame(width: HomeMenuHeader.logoSize, height: HomeMenuHeader.logoSize)
+                    .accessibilityHidden(true)
+                VStack(alignment: .center, spacing: 4) {
+                    // Wordmark as on the sticker: "Analyzer" in brand orange.
+                    HStack(spacing: 0) {
+                        Text("Squash").foregroundColor(SharedColors.textPrimary)
+                        Text("Analyzer").foregroundColor(SharedColors.accent)
+                    }
+                    .font(SharedFonts.system(26, weight: .bold, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    Text("Jouw spel scherp in beeld. Voor jou en je team.")
+                        .font(SharedFonts.system(12))
+                        .foregroundColor(SharedColors.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                    // The line from the stickers and the website
+                    Text("SCHEIDSEN · COACHEN · DELEN")
+                        .font(SharedFonts.system(11, weight: .bold, design: .rounded))
+                        .tracking(1.4)
+                        .foregroundColor(SharedColors.accent)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .accessibilityLabel("Scheidsen, coachen, delen")
                 }
-                .accessibilityLabel("Instellingen")
+                .frame(maxWidth: .infinity)
+                .frame(height: HomeMenuHeader.logoSize)
             }
         }
         .padding(.horizontal, 24)
-        .padding(.vertical, 12)
+        .padding(.bottom, 12)
     }
 
 }

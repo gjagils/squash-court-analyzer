@@ -10,6 +10,9 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Kop van het beginscherm (12 oktober 2026)**: het tandwiel staat rechtsboven in de hoek, het logo
+  is groter (72 pt) en even hoog als het tekstblok ernaast; SquashAnalyzer, de zin en de tagline
+  staan gecentreerd.
 - **Knoppen oranje, goud alleen voor badges en winnaars (12 oktober 2026)**: Analyse, Coachkaart
   en Deel score na een game, START GAME, de knoppen bij Spelers en bij het importeren van een team
   en Deel kaart waren goud; nu in de nadrukkleur, zoals de rest van de app.

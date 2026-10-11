@@ -14,6 +14,9 @@ commit-uitleg zijn Nederlands, code en commentaar Engels zoals het er al staat.
 - `docs/wijzigingen-builds.md`: wat er sinds de laatste upload veranderd is,
   met de releasenote-teksten. Werk dit bij met elke wijziging.
 - `docs/skip-valkuilen.md`: de Skip-valkuilen (Swift → Kotlin) in een lijst; `docs/android-port.md` is het uitgebreide logboek.
+- `.claude/ui-check.md`: de schermen, apparaten en kleurregels voor de visuele
+  controle met de skill `ui-check` (iOS-simulator en Android-emulator, licht en
+  donker). Draai die vóór een build voor testers.
 - `docs/bewuste-keuzes.md`: **punten die bewust zo zijn en in een
   code-analyse niet opnieuw gemeld moeten worden.** Lees dit vóór elke
   code-analyse of review; een nieuwe bewuste keuze zet je er ook in.

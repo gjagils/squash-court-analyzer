@@ -122,9 +122,15 @@ public struct MatchResultOverlay: View {
             }
 
             VStack(spacing: 12) {
+                // Two side by side; a third (Deel score after Analyse and Coachkaart) gets its own row
                 if !secondary.isEmpty {
                     HStack(spacing: 8) {
-                        ForEach(0..<secondary.count, id: \.self) { index in
+                        ForEach(0..<min(2, secondary.count), id: \.self) { index in
+                            goldButton(secondary[index])
+                        }
+                    }
+                    if secondary.count > 2 {
+                        ForEach(2..<secondary.count, id: \.self) { index in
                             goldButton(secondary[index])
                         }
                     }

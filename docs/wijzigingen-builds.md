@@ -10,9 +10,15 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Na de eerste test van coachkaart en notities (12 oktober 2026)**: na een game staan
+  *Analyse*, *Coachkaart* en *Deel score*. De coachkaart opent op de speler uit Mijn team
+  (bij geen of allebei: de eerstgenoemde; `CoachCard.focus`). Het potlood in het coachscherm
+  is weg (het deed niets en opende de notitie pas na de game); notities alleen via het
+  dashboard. *Service en return* eenvoudiger: % gewonnen op eigen service en op die van de
+  tegenstander, vanaf game 2 omhoog/omlaag ten opzichte van de vorige game, en het
+  percentage over de wedstrijd tot en met die game.
 - **Notitie per game en service/return (12 oktober 2026, C3 en C4, nog niet op een telefoon
-  geprobeerd)**: met het potlood bovenin het coachscherm, of *Notitie* in het dashboard (ook
-  achteraf), schrijf of dicteer je per game wat je opviel. De notitie staat in het dashboard
+  geprobeerd)**: via *Notitie* in het dashboard (ook achteraf) schrijf of dicteer je per game wat je opviel. De notitie staat in het dashboard
   en op de coachkaart, niet in gedeelde teksten. Opslag in `game-notes.json` naast de
   teamwedstrijden (`GameNotes`, geen databasemigratie) en in de back-up (`FullBackup.gameNotes`,
   optioneel, formaat 4). In het dashboard nieuw: *Service en return*, rally's gewonnen op eigen

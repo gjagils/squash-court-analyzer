@@ -85,7 +85,7 @@ public struct SharedCoachDashboardView: View {
                         shots
                     }
                     pointTypes
-                    ServiceReturnCard(game: game, player: player)
+                    ServiceReturnCard(match: match, gameIndex: matchGameIndex, player: player)
                     volleys
                     localAdvice
                     // Only with an OpenAI key (Instellingen); without one the local advice is it
@@ -105,7 +105,10 @@ public struct SharedCoachDashboardView: View {
             GameNoteEditor(gameId: game.id, title: "Notitie · Game \(match.gameNumber(at: matchGameIndex))") { showingNote = false }
         }
         .trackedCover(isPresented: $showingCard) {
-            SharedCoachCardView(match: match, gameIndex: matchGameIndex, player: player) { showingCard = false }
+            SharedCoachCardView(match: match, gameIndex: matchGameIndex,
+                                player: CoachCard.focus(player1Id: match.player1Id, player2Id: match.player2Id, team: TeamRoster.ids())) {
+                showingCard = false
+            }
         }
     }
 

@@ -84,23 +84,33 @@ struct GameNoteCard: View {
     }
 }
 
-/// Rally's won on own serve and on the opponent's (C4), for the dashboard
+/// Rally's won on own serve and on the opponent's (C4), for the dashboard:
+/// the percentage in this game, from game 2 on up or down against the game
+/// before, and the percentage over the match so far
 struct ServiceReturnCard: View {
-    let game: Game
+    let match: Match
+    let gameIndex: Int
     let player: Player
 
     var body: some View {
-        let stats = ServiceReturnStats.of(game, for: player)
-        let opponent = game.name(for: player.opponent)
+        let index = max(0, min(gameIndex, match.games.count - 1))
+        let now = ServiceReturnStats.of(match.games[index], for: player)
+        let before: ServiceReturnStats? = index > 0 ? ServiceReturnStats.of(match.games[index - 1], for: player) : nil
+        let total = ServiceReturnStats.of(match, through: index, for: player)
+        let opponent = match.name(for: player.opponent)
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
                 AppSymbol("figure.tennis", size: 13, color: SharedColors.accent)
                 Text("Service en return")
                     .font(SharedFonts.system(13, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
+                Spacer()
+                Text("game · wedstrijd")
+                    .font(SharedFonts.system(11))
+                    .foregroundColor(SharedColors.textMuted)
             }
-            row("Eigen service", stats.wonOnServe, stats.served)
-            row("Service van \(opponent)", stats.wonOnReturn, stats.received)
+            row("Eigen service", now.servePercentage, before?.servePercentage, total.servePercentage)
+            row("Service van \(opponent)", now.returnPercentage, before?.returnPercentage, total.returnPercentage)
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -108,29 +118,40 @@ struct ServiceReturnCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
-    private func row(_ title: String, _ won: Int, _ total: Int) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text(title)
-                    .font(SharedFonts.system(13))
-                    .foregroundColor(SharedColors.textSecondary)
-                    .lineLimit(1)
-                Spacer()
-                Text(ServiceReturnStats.line(won, of: total))
-                    .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
-                    .foregroundColor(SharedColors.textPrimary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+    private static func text(_ percentage: Int?) -> String {
+        guard let percentage else { return "–" }
+        return "\(percentage)%"
+    }
+
+    private func trendColor(_ trend: String) -> Color {
+        if trend.hasPrefix("▲") { return SharedColors.positive }
+        if trend.hasPrefix("▼") { return SharedColors.error }
+        return SharedColors.textMuted
+    }
+
+    /// "Eigen service   64%  ▲ 12   wedstrijd 58%"
+    private func row(_ title: String, _ game: Int?, _ previous: Int?, _ match: Int?) -> some View {
+        let trend = ServiceReturnStats.trend(game, previous)
+        return HStack(spacing: 8) {
+            Text(title)
+                .font(SharedFonts.system(13))
+                .foregroundColor(SharedColors.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Spacer(minLength: 4)
+            Text(ServiceReturnCard.text(game))
+                .font(SharedFonts.system(17, weight: .bold, design: .rounded))
+                .foregroundColor(SharedColors.textPrimary)
+            if let trend {
+                Text(trend)
+                    .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
+                    .foregroundColor(trendColor(trend))
+                    .frame(minWidth: 38, alignment: .leading)
             }
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    SharedColors.line(0.15)
-                    SharedColors.accent
-                        .frame(width: total > 0 ? geometry.size.width * Double(won) / Double(total) : 0.0)
-                }
-            }
-            .frame(height: 6)
-            .clipShape(Capsule())
+            Text(ServiceReturnCard.text(match))
+                .font(SharedFonts.system(13, weight: .medium, design: .rounded))
+                .foregroundColor(SharedColors.textMuted)
+                .frame(minWidth: 40, alignment: .trailing)
         }
     }
 }

@@ -75,3 +75,41 @@ final class CoachCardTests: XCTestCase {
         XCTAssertEqual(card.previousGameNumber, 2)
     }
 }
+
+/// Whose coach card opens first, and service/return over the match
+final class CoachCardFocusTests: XCTestCase {
+    func testTheCardOpensOnThePlayerFromTheTeam() {
+        let jan = UUID()
+        let piet = UUID()
+        XCTAssertEqual(CoachCard.focus(player1Id: jan, player2Id: piet, team: [piet.uuidString]), Player.player2)
+        XCTAssertEqual(CoachCard.focus(player1Id: jan, player2Id: piet, team: [jan.uuidString.lowercased()]), Player.player1)
+        XCTAssertEqual(CoachCard.focus(player1Id: jan, player2Id: piet, team: [jan.uuidString, piet.uuidString]), Player.player1, "both: the first named")
+        XCTAssertEqual(CoachCard.focus(player1Id: jan, player2Id: piet, team: []), Player.player1, "neither: the first named")
+        XCTAssertEqual(CoachCard.focus(player1Id: nil, player2Id: piet, team: [piet.uuidString]), Player.player2)
+    }
+
+    func testServiceAndReturnOverTheMatchAndTheTrend() {
+        let match = Match()
+        match.setupMatch(player1: "Jan", player2: "Piet", startingServer: .player1)
+        // Game 1: Jan serves and wins everything
+        while !match.currentGame.isGameOver {
+            match.currentGame.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.backLeft, with: ShotType.drive)
+        }
+        match.onGameEnd()
+        // Game 2: Jan loses his serve straight away, then Piet wins everything
+        while !match.currentGame.isGameOver {
+            match.currentGame.addPoint(to: Player.player2, pointType: PointType.winner, at: CourtZone.backLeft, with: ShotType.drive)
+        }
+        let first = ServiceReturnStats.of(match.games[0], for: Player.player1)
+        let second = ServiceReturnStats.of(match.games[1], for: Player.player1)
+        XCTAssertEqual(first.servePercentage, 100)
+        XCTAssertEqual(second.servePercentage, 0, "the one rally he served, he lost")
+        XCTAssertEqual(ServiceReturnStats.trend(second.servePercentage, first.servePercentage), "▼ 100")
+        XCTAssertEqual(ServiceReturnStats.trend(50, 40), "▲ 10")
+        XCTAssertEqual(ServiceReturnStats.trend(50, 50), "=")
+        XCTAssertNil(ServiceReturnStats.trend(nil, 50))
+        let total = ServiceReturnStats.of(match, through: 1, for: Player.player1)
+        XCTAssertEqual(total.served, first.served + second.served)
+        XCTAssertEqual(ServiceReturnStats.of(match, through: 0, for: Player.player1), first)
+    }
+}

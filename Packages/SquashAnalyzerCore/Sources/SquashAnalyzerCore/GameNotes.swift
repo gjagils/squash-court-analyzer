@@ -148,6 +148,36 @@ public struct ServiceReturnStats: Equatable, Sendable {
         return ServiceReturnStats(served: served, wonOnServe: wonOnServe, received: received, wonOnReturn: wonOnReturn)
     }
 
+    /// The match so far: every tracked game up to and including `index` in `match.games`
+    public static func of(_ match: Match, through index: Int, for player: Player) -> ServiceReturnStats {
+        var served = 0
+        var wonOnServe = 0
+        var received = 0
+        var wonOnReturn = 0
+        var position = 0
+        for game in match.games {
+            if position > index { break }
+            let stats = ServiceReturnStats.of(game, for: player)
+            served += stats.served
+            wonOnServe += stats.wonOnServe
+            received += stats.received
+            wonOnReturn += stats.wonOnReturn
+            position += 1
+        }
+        return ServiceReturnStats(served: served, wonOnServe: wonOnServe, received: received, wonOnReturn: wonOnReturn)
+    }
+
+    public var servePercentage: Int? { ServiceReturnStats.percentage(wonOnServe, of: served) }
+    public var returnPercentage: Int? { ServiceReturnStats.percentage(wonOnReturn, of: received) }
+
+    /// "▲ 12", "▼ 8" or "=" against the game before; nil when either has no rallies
+    public static func trend(_ now: Int?, _ before: Int?) -> String? {
+        guard let now, let before else { return nil }
+        if now > before { return "▲ \(now - before)" }
+        if now < before { return "▼ \(before - now)" }
+        return "="
+    }
+
     /// 0...100, nil without rallies
     public static func percentage(_ won: Int, of total: Int) -> Int? {
         guard total > 0 else { return nil }

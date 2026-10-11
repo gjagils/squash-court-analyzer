@@ -108,6 +108,16 @@ public struct CoachCard: Equatable, Sendable {
                          points: points, changes: Array(changes.prefix(changeCount)))
     }
 
+    /// Whose card opens first: the player from Mijn team (`TeamRoster` ids);
+    /// with both or neither in the team, player 1 (decision Gerd-Jan, 12 October 2026)
+    public static func focus(player1Id: UUID?, player2Id: UUID?, team: [String]) -> Player {
+        var inTeam: [String] = []
+        for id in team { inTeam.append(id.lowercased()) }
+        let first = player1Id.map { id in inTeam.contains(id.uuidString.lowercased()) } ?? false
+        let second = player2Id.map { id in inTeam.contains(id.uuidString.lowercased()) } ?? false
+        return second && !first ? Player.player2 : Player.player1
+    }
+
     /// The dashboard's order: the most to gain first, a warning before a success at equal weight
     static func ranked(_ candidates: [AdviceCandidate]) -> [AdviceCandidate] {
         var sorted = candidates

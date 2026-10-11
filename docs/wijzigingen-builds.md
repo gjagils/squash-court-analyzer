@@ -10,6 +10,11 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Volgorde van de sticker: Scheidsen · Coachen · Delen (12 oktober 2026)**: de rondleiding
+  (drie thema's op het eerste scherm, daarna Scheidsrechter vóór Coach), de inleidende zin, de
+  handleiding (Scheidsrechter vóór Coach), de introzin op de website en de twee tegels op het
+  beginscherm (Scheidsrechter links) volgen nu die volgorde. De handleidingfoto's van het
+  beginscherm tonen nog de oude volgorde: vernieuwen bij de volgende build.
 - **Rondleiding bijgewerkt (12 oktober 2026)**: het eerste scherm toont de drie thema's
   (Coach, Scheids, Deel) met de iconen van het beginscherm. Coach noemt teamgenoot, analyse en
   coachkaart; Scheidsrechter heeft de fluit, Kies speler het spelersicoon, Competitie de beker en

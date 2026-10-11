@@ -91,8 +91,8 @@ public struct HomeMenuTiles: View {
                 .font(SharedFonts.system(14, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             HStack(spacing: 12) {
-                HomeMenuTile(title: "Coach", subtitle: "Start met coachen", icon: .coach, action: onCoach)
                 HomeMenuTile(title: "Scheidsrechter", subtitle: "Start met fluiten", icon: .referee, action: onReferee)
+                HomeMenuTile(title: "Coach", subtitle: "Start met coachen", icon: .coach, action: onCoach)
             }
             VStack(spacing: 0) {
                 menuRow("Afgeronde wedstrijden", icon: .history, action: onHistory)

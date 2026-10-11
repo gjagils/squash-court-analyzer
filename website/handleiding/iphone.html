@@ -9,7 +9,7 @@
     (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
   </script>
   <title>Handleiding iPhone – SquashAnalyzer</title>
-  <meta name="description" content="Handleiding van SquashAnalyzer voor iPhone: per tegel uitgelegd hoe coachen, scheidsrechteren, wedstrijden, spelers, badges en instellingen werken." />
+  <meta name="description" content="Handleiding van SquashAnalyzer voor iPhone: per tegel uitgelegd hoe scheidsrechteren, coachen, wedstrijden, spelers, badges en instellingen werken." />
   <link rel="stylesheet" href="../style.css?v=20261011b" />
   <script src="../theme.js?v=20261011" defer></script>
   <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png?v=5" />
@@ -40,8 +40,8 @@
       <div class="toc">
         <a href="#beginscherm">Beginscherm</a>
         <a href="#mijn-team">Mijn team</a>
-        <a href="#coach">Coach</a>
         <a href="#scheidsrechter">Scheidsrechter</a>
+        <a href="#coach">Coach</a>
         <a href="#wedstrijden">Afgeronde wedstrijden</a>
         <a href="#competitie">Competitie</a>
         <a href="#spelers">Spelers</a>
@@ -55,7 +55,7 @@
       <div>
         <h2><span class="icon"><span class="ms" aria-hidden="true">home</span></span>Beginscherm</h2>
         <p class="where">Waar alles begint</p>
-        <p>Bovenaan staat <strong>Mijn team</strong> zodra je een teamlink hebt ingesteld. Daaronder staan de knoppen en rijen voor <span class="ui">Coach</span>, <span class="ui">Scheidsrechter</span>, <span class="ui">Afgeronde wedstrijden</span>, <span class="ui">Spelers</span> en <span class="ui">Badges</span>. Met het tandwiel rechtsboven open je de <a href="#instellingen">Instellingen</a>.</p>
+        <p>Bovenaan staat <strong>Mijn team</strong> zodra je een teamlink hebt ingesteld. Daaronder staan de knoppen en rijen voor <span class="ui">Scheidsrechter</span>, <span class="ui">Coach</span>, <span class="ui">Afgeronde wedstrijden</span>, <span class="ui">Spelers</span> en <span class="ui">Badges</span>. Met het tandwiel rechtsboven open je de <a href="#instellingen">Instellingen</a>.</p>
         <div class="note">Spelers en wedstrijden worden lokaal op je iPhone bewaard. Alleen wanneer je een online functie gebruikt, zoals live meekijken, AI Coach of delen, gaan daarvoor gegevens naar buiten. Een coachwedstrijd wordt na elk punt automatisch bewaard.</div>
       </div>
       <div class="shots">
@@ -96,6 +96,32 @@
         <p>Zodra de link bewaard is, komen de spelers van je team vanzelf bij <span class="ui">Spelers</span>, met het vinkje <span class="ui">In mijn team</span>.</p>
       </div>
       <div class="shots"></div>
+    </section>
+
+    <!-- Scheidsrechter -->
+    <section class="tile" id="scheidsrechter">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">sports</span></span>Scheidsrechter</h2>
+        <p class="where">Snel en officieel scoren, met de serviceregels</p>
+        <h3>Starten</h3>
+        <p>Net als bij <a href="#coach">Coach</a> (hieronder): namen of <span class="ui">Kies speler</span>, wie serveert eerst, eventueel <span class="ui">Later instappen?</span>, en dan <span class="ui">Start scheidsrechter</span>.</p>
+        <h3>Scoren</h3>
+        <ul>
+          <li><strong>Tik op de grote score</strong> (<em>tik = punt</em>) van wie de rally wint.</li>
+          <li>Het servicevak wisselt vanzelf. Bij de serveerder kun je <span class="ui">Links</span>/<span class="ui">Rechts</span> aanpassen; de app onthoudt dat als voorkeur voor die speler (handig voor linkshandigen).</li>
+          <li>In het midden staat de <strong>scorelijn</strong>: elke rally met de nieuwe stand en het vak, bijvoorbeeld <em>4R</em>. Een stroke heeft een witte rand.</li>
+          <li><span class="ui">Let call</span> en <span class="ui">Stroke</span> staan per speler onder de scores.</li>
+          <li>Onderaan lopen de <strong>match</strong>- en <strong>game</strong>-timer, met <span class="ui">Undo</span> voor het laatste punt.</li>
+          <li>Met het deel-icoon rechtsboven deel je de tussenstand; met <span class="ui">LIVE</span> volgt je team de stand in de browser (zie <a href="#coach">Coach</a>).</li>
+        </ul>
+        <h3>Game en wedstrijd klaar</h3>
+        <p>Na een game zie je de stand en duur, met <span class="ui">Volgende game</span>, <span class="ui">Undo laatste punt</span> en <span class="ui">Bekijk stand</span>. Na <span class="ui">Bekijk stand</span> ga je verder met de knop <span class="ui">Volgende game</span> onder de scores. Na de wedstrijd: de winnaar, verdiende badges, <span class="ui">Deel score</span> en <span class="ui">Sluiten</span>.</p>
+        <p>Sluit je halverwege, dan vraagt de Scheidsrechter-tegel later <span class="ui">Wedstrijd hervatten?</span>. Undo werkt na hervatten ook weer voor de lopende game.</p>
+        <div class="note">Een scheidsrechterwedstrijd wordt na elke rally bewaard. Sluit je halverwege, dan ga je via de tegel verder; kies je daar <span class="ui">Nieuwe wedstrijd</span>, dan komt de oude als incompleet in Afgeronde wedstrijden.</div>
+      </div>
+      <div class="shots">
+        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/scheidsrechter.jpg?v=17" alt="Scheidsrechterscherm" loading="lazy"><figcaption>Tik op de score = punt</figcaption></figure>
+      </div>
     </section>
 
     <!-- Coach -->
@@ -160,32 +186,6 @@
         <figure><span class="beta-tag">Bèta</span><img src="img/iphone/coach-zone.jpg?v=17" alt="Baan met 6 vakken" loading="lazy"><figcaption>Kies het vak</figcaption></figure>
         <figure><span class="beta-tag">Bèta</span><img src="img/iphone/coach-game-klaar.jpg?v=17" alt="Game klaar" loading="lazy"><figcaption>Game klaar</figcaption></figure>
         <figure><span class="beta-tag">Bèta</span><img src="img/iphone/analyse.jpg?v=17" alt="Analyse" loading="lazy"><figcaption>Analyse</figcaption></figure>
-      </div>
-    </section>
-
-    <!-- Scheidsrechter -->
-    <section class="tile" id="scheidsrechter">
-      <div>
-        <h2><span class="icon"><span class="ms" aria-hidden="true">sports</span></span>Scheidsrechter</h2>
-        <p class="where">Snel en officieel scoren, met de serviceregels</p>
-        <h3>Starten</h3>
-        <p>Net als bij Coach: namen of <span class="ui">Kies speler</span>, wie serveert eerst, eventueel <span class="ui">Later instappen?</span>, en dan <span class="ui">Start scheidsrechter</span>.</p>
-        <h3>Scoren</h3>
-        <ul>
-          <li><strong>Tik op de grote score</strong> (<em>tik = punt</em>) van wie de rally wint.</li>
-          <li>Het servicevak wisselt vanzelf. Bij de serveerder kun je <span class="ui">Links</span>/<span class="ui">Rechts</span> aanpassen; de app onthoudt dat als voorkeur voor die speler (handig voor linkshandigen).</li>
-          <li>In het midden staat de <strong>scorelijn</strong>: elke rally met de nieuwe stand en het vak, bijvoorbeeld <em>4R</em>. Een stroke heeft een witte rand.</li>
-          <li><span class="ui">Let call</span> en <span class="ui">Stroke</span> staan per speler onder de scores.</li>
-          <li>Onderaan lopen de <strong>match</strong>- en <strong>game</strong>-timer, met <span class="ui">Undo</span> voor het laatste punt.</li>
-          <li>Met het deel-icoon rechtsboven deel je de tussenstand; met <span class="ui">LIVE</span> volgt je team de stand in de browser (zie <a href="#coach">Coach</a>).</li>
-        </ul>
-        <h3>Game en wedstrijd klaar</h3>
-        <p>Na een game zie je de stand en duur, met <span class="ui">Volgende game</span>, <span class="ui">Undo laatste punt</span> en <span class="ui">Bekijk stand</span>. Na <span class="ui">Bekijk stand</span> ga je verder met de knop <span class="ui">Volgende game</span> onder de scores. Na de wedstrijd: de winnaar, verdiende badges, <span class="ui">Deel score</span> en <span class="ui">Sluiten</span>.</p>
-        <p>Sluit je halverwege, dan vraagt de Scheidsrechter-tegel later <span class="ui">Wedstrijd hervatten?</span>. Undo werkt na hervatten ook weer voor de lopende game.</p>
-        <div class="note">Een scheidsrechterwedstrijd wordt na elke rally bewaard. Sluit je halverwege, dan ga je via de tegel verder; kies je daar <span class="ui">Nieuwe wedstrijd</span>, dan komt de oude als incompleet in Afgeronde wedstrijden.</div>
-      </div>
-      <div class="shots">
-        <figure><span class="beta-tag">Bèta</span><img src="img/iphone/scheidsrechter.jpg?v=17" alt="Scheidsrechterscherm" loading="lazy"><figcaption>Tik op de score = punt</figcaption></figure>
       </div>
     </section>
 

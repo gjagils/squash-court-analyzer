@@ -33,18 +33,18 @@ public enum Onboarding {
     /// Page 5 offers "Teamlink invullen"; page 6 is the last one
     public static let competitionPage = 4
 
-    /// The first page shows the three themes (coach, scheids, deel) instead of one symbol
+    /// The first page shows the three themes in the sticker's order (scheidsen, coachen, delen) instead of one symbol
     public static let welcomePage = 0
 
     /// The symbols are the home screen's: the UI draws "list.bullet.clipboard.fill",
     /// "whistle", "person.2.fill" and "trophy.fill" as the home tiles do
     public static let pages: [Page] = [
         Page(symbol: "", title: "Welkom bij Squash Analyzer",
-             text: "Jouw spel scherp in beeld. Coach je teamgenoot, fluit een wedstrijd en deel de stand met je team."),
-        Page(symbol: "list.bullet.clipboard.fill", title: "Coach",
-             text: "Om je teamgenoot beter te coachen. Leg per punt vast wie scoorde, hoe, waar op de baan en met welke slag. Na elke game zie je de analyse, en de coachkaart laat je speler in één scherm zien waar het om draait."),
+             text: "Jouw spel scherp in beeld. Fluit een wedstrijd, coach je teamgenoot en deel de stand met je team."),
         Page(symbol: "whistle", title: "Scheidsrechter",
              text: "Tik op de score van wie de rally wint. LET, STROKE, undo en de servicekant zitten erbij; de app houdt games en tijd bij."),
+        Page(symbol: "list.bullet.clipboard.fill", title: "Coach",
+             text: "Om je teamgenoot beter te coachen. Leg per punt vast wie scoorde, hoe, waar op de baan en met welke slag. Na elke game zie je de analyse, en de coachkaart laat je speler in één scherm zien waar het om draait."),
         Page(symbol: "person.2.fill", title: "Kies speler",
              text: "Sla spelers op en kies ze bij het starten via Kies speler. Alleen dan verdienen ze badges en groeit hun profiel over de wedstrijden."),
         Page(symbol: "trophy.fill", title: "Competitie",

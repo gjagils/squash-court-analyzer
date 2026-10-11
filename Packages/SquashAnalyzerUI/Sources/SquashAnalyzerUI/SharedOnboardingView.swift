@@ -99,12 +99,12 @@ public struct SharedOnboardingView: View {
         .preferredColorScheme(SharedColors.preferredScheme)
     }
 
-    /// Coach, scheids en deel: the three things the app is for, on the first page
+    /// Scheidsen, coachen, delen: the three things the app is for, in the order of the tagline and the sticker
     private var themes: some View {
-        HStack(spacing: 18) {
-            theme("list.bullet.clipboard.fill", "Coach")
-            theme("whistle", "Scheids")
-            theme("square.and.arrow.up", "Deel")
+        HStack(spacing: 14) {
+            theme("whistle", "Scheidsen")
+            theme("list.bullet.clipboard.fill", "Coachen")
+            theme("square.and.arrow.up", "Delen")
         }
     }
 

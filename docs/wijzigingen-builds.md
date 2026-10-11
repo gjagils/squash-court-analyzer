@@ -10,6 +10,12 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Instellingen gelijkgetrokken (12 oktober 2026, testmelding)**: een uitgeschakelde gevulde
+  knop (zoals *Bewaar API key* zonder sleutel) was lichte tekst op grijs; `ActionButton`
+  tekent hem nu als rustige omlijnde knop, in de hele app. In het gedeelde Instellingen-scherm
+  (Android, en op iOS vanuit Coach/Scheidsrechter) zijn de systeemknoppen vervangen door
+  `ActionButton`; de AI Coach-knop en het pictogram zijn op iOS oranje zoals de andere blokken
+  in plaats van goud.
 - **Scherm blijft aan tijdens een wedstrijd (11 oktober 2026, gebouwd, nog niet op een
   telefoon geprobeerd)**: coach- en scheidsrechterscherm zetten de schermvergrendeling uit
   zolang ze open zijn (`ScreenAwake`, via SkipUI ook op Android). Backlog voor de volgende

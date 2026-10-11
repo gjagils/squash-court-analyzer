@@ -103,12 +103,10 @@ public struct SharedSettingsView: View {
                         .padding()
                         .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.08)))
                     HStack(spacing: 12) {
-                        Button("Bewaar teamlink") { save() }
-                            .buttonStyle(.borderedProminent)
-                            .tint(SharedColors.accent)
+                        // ActionButton as everywhere else: a system button turned white on grey in the light theme
+                        ActionButton("BEWAAR TEAMLINK", style: .filled, color: SharedColors.accent) { save() }
                         if !teamURL.isEmpty {
-                            Button("Verwijder") { remove() }
-                                .foregroundColor(SharedColors.textSecondary)
+                            ActionButton("VERWIJDER", style: .outlined, color: SharedColors.textSecondary) { remove() }
                         }
                     }
                     if let message {
@@ -225,13 +223,10 @@ public struct SharedSettingsView: View {
             .padding()
             .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.08)))
             HStack(spacing: 12) {
-                Button("Bewaar API key") { saveKey() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(SharedColors.gold)
-                    .disabled(keyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                ActionButton("BEWAAR API KEY", style: .filled, color: SharedColors.accent,
+                             disabled: keyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) { saveKey() }
                 if hasKey {
-                    Button("Verwijder key") { removeKey() }
-                        .foregroundColor(SharedColors.textSecondary)
+                    ActionButton("VERWIJDER KEY", style: .outlined, color: SharedColors.textSecondary) { removeKey() }
                 }
             }
             HStack(spacing: 8) {
@@ -278,13 +273,8 @@ public struct SharedSettingsView: View {
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 12) {
-                Button("Maak back-up") { makeBackup() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(SharedColors.accent)
-                    .disabled(backupBusy)
-                Button("Zet back-up terug") { pickBackup() }
-                    .foregroundColor(SharedColors.accent)
-                    .disabled(backupBusy)
+                ActionButton("MAAK BACK-UP", style: .filled, color: SharedColors.accent, disabled: backupBusy) { makeBackup() }
+                ActionButton("ZET BACK-UP TERUG", style: .outlined, color: SharedColors.accent, disabled: backupBusy) { pickBackup() }
             }
             if let auto = backup?.auto {
                 autoBackupRow(auto)

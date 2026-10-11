@@ -36,9 +36,13 @@ public struct ActionButton: View {
 
     public var body: some View {
         let tint = disabled ? SharedColors.textMuted : color
-        let foreground = style == .filled ? SharedColors.background : tint
-        let fill = style == .filled ? tint : (style == .outlined ? tint.opacity(disabled ? 0.04 : 0.12) : Color.clear)
-        let border = style == .outlined ? tint.opacity(disabled ? 0.10 : 0.35) : Color.clear
+        // A disabled filled button is drawn as a quiet outlined one: light text on a
+        // grey fill could not be read (on light it was white on grey)
+        let filled = style == .filled && !disabled
+        let outlined = style == .outlined || (style == .filled && disabled)
+        let foreground = filled ? SharedColors.background : tint
+        let fill = filled ? tint : (outlined ? tint.opacity(disabled ? 0.08 : 0.12) : Color.clear)
+        let border = outlined ? tint.opacity(disabled ? 0.30 : 0.35) : Color.clear
         return Button(action: action) {
             HStack(spacing: 6) {
                 if let icon {

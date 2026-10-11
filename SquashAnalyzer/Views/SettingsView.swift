@@ -262,7 +262,7 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(systemName: "brain")
-                    .foregroundColor(AppColors.accentGold)
+                    .foregroundColor(AppColors.warmOrange)
                 Text("AI Coach")
                     .font(AppFonts.label(16))
                     .foregroundColor(AppColors.textPrimary)
@@ -306,13 +306,13 @@ struct SettingsView: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
-                        .stroke(AppColors.accentGold.opacity(0.4), lineWidth: 1)
+                        .stroke(AppColors.warmOrange.opacity(0.4), lineWidth: 1)
                 )
             }
 
             // Save Button
             ActionButton(showingSaveConfirmation ? "OPGESLAGEN!" : "BEWAAR API KEY", style: .filled,
-                         color: showingSaveConfirmation ? SharedColors.positive : AppColors.accentGold) {
+                         color: showingSaveConfirmation ? SharedColors.positive : AppColors.warmOrange) {
                 saveAPIKey()
             }
 

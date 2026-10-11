@@ -8,7 +8,16 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.0 build 2)
+## Volgende build (na 3.0 build 3)
+
+(nog niets)
+
+## 3.0 build 3 (geüpload 12 oktober 2026)
+
+TestFlight (groep Squashteam, bètareview aangevraagd; build 2 is daarbij verlopen) en Google Play
+(intern, alpha, Google Group testers), versionCode 3000300. Releasenotes: `release-notes/3.0-3.md`
+en `release-notes/android-3.0-3.md`, met de nadruk op de input van de testers. App Store-screenshots
+vernieuwd; het oude concept 2.2 in App Store Connect heet nu 3.0 (nog niet ingediend).
 
 - **iPhone: overal dezelfde Instellingen (12 oktober 2026)**: het tandwiel bij Coach en
   Scheidsrechter opende op de iPhone het gedeelde (Android-)scherm, zonder iCloud-back-up en met de

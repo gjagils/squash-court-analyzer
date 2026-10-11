@@ -10,7 +10,7 @@
   </script>
   <title>Handleiding Android – SquashAnalyzer</title>
   <meta name="description" content="Handleiding van SquashAnalyzer voor Android: per tegel uitgelegd hoe scheidsrechteren, coachen, wedstrijden, spelers, badges en instellingen werken." />
-  <link rel="stylesheet" href="../style.css?v=20261011b" />
+  <link rel="stylesheet" href="../style.css?v=20261012b" />
   <script src="../theme.js?v=20261011" defer></script>
   <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png?v=5" />
   <link rel="icon" type="image/png" sizes="256x256" href="../favicon.png?v=5" />
@@ -32,7 +32,7 @@
     <div class="manual-head">
       <h1>Handleiding <span>Android</span></h1>
       <p>Alles wat de app kan, per tegel op het beginscherm. Gebruik je een iPhone? Kies dan hieronder de iPhone-versie. De iPhone- en Android-app hebben nu dezelfde schermen.</p>
-      <p class="where">Deze handleiding beschrijft de huidige testversie (3.0, build 1), inclusief Competitie. Wat er te testen is: <a href="../testen.html">squashanalyzer.com/testen</a>.</p>
+      <p class="where">Deze handleiding beschrijft de testversie 3.0, met Competitie, de Coachkaart en de lichte weergave. Wat er te testen is: <a href="../testen.html">squashanalyzer.com/testen</a>.</p>
       <div class="platform-switch">
         <a href="iphone.html">iPhone</a>
         <a class="active" href="android.html">Android</a>
@@ -43,6 +43,7 @@
         <a href="#scheidsrechter">Scheidsrechter</a>
         <a href="#coach">Coach</a>
         <a href="#wedstrijden">Afgeronde wedstrijden</a>
+        <a href="#competitie">Competitie</a>
         <a href="#spelers">Spelers</a>
         <a href="#badges">Badges</a>
         <a href="#instellingen">Instellingen</a>
@@ -54,11 +55,14 @@
       <div>
         <h2><span class="icon"><span class="ms" aria-hidden="true">home</span></span>Beginscherm</h2>
         <p class="where">Waar alles begint</p>
-        <p>Bovenaan staat <strong>Mijn team</strong> zodra je een teamlink hebt ingesteld. Daaronder staan de knoppen en rijen voor <span class="ui">Scheidsrechter</span>, <span class="ui">Coach</span>, <span class="ui">Afgeronde wedstrijden</span>, <span class="ui">Spelers</span> en <span class="ui">Badges</span>. Met het tandwiel rechtsboven open je de <a href="#instellingen">Instellingen</a>.</p>
-        <div class="note">Coach- en scheidsrechterwedstrijden worden automatisch opgeslagen. Tik later gewoon weer op de tegel om verder te gaan.</div>
+        <p>Bovenin staat <em>Scheidsen · Coachen · Delen</em>: waar de app voor is. Daaronder staat <strong>Mijn team</strong> zodra je een teamlink hebt ingesteld; zonder teamlink staat er de kaart <em>Speel je competitie bij SBN?</em> met <span class="ui">Teamlink invullen</span>, <span class="ui">Waar vind ik die?</span> en <span class="ui">Sluiten</span>. Bij <em>Klaar om te spelen?</em> staan twee tegels: <span class="ui">Scheidsrechter</span> (de fluit) links en <span class="ui">Coach</span> (het klembord) rechts. Daaronder de rijen <span class="ui">Afgeronde wedstrijden</span>, <span class="ui">Competitie</span>, <span class="ui">Spelers</span> en <span class="ui">Badges</span>. Met het tandwiel rechtsboven open je de <a href="#instellingen">Instellingen</a>.</p>
+        <h3 id="rondleiding">Rondleiding</h3>
+        <p>De eerste keer dat je de app opent, krijg je een korte rondleiding van zes schermen: welkom (Scheidsen, Coachen, Delen), <strong>Scheidsrechter</strong>, <strong>Coach</strong>, <strong>Kies speler</strong>, <strong>Competitie</strong> (met <span class="ui">Teamlink invullen</span>) en <strong>Delen</strong> (teamgenoten en supporters op de hoogte houden, LIVE en de back-up). Met <span class="ui">Overslaan</span> ga je meteen naar het beginscherm. Later nog eens kijken? <a href="#instellingen">Instellingen</a> &rarr; <span class="ui">Over de app</span> &rarr; <span class="ui">Rondleiding opnieuw bekijken</span>.</p>
+        <div class="note">Scheidsrechter- en coachwedstrijden worden automatisch opgeslagen. Tik later gewoon weer op de tegel om verder te gaan. Zolang het scheidsrechter- of coachscherm open is, gaat je scherm niet op slot.</div>
       </div>
       <div class="shots">
-        <figure><span class="beta-tag">Bèta</span><img src="img/android/home.jpg?v=4" alt="Beginscherm met Coach, Scheidsrechter en de overige onderdelen" loading="lazy"><figcaption>Het beginscherm</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/home.jpg?v=18" alt="Beginscherm met Scheidsrechter, Coach en de overige onderdelen" loading="lazy"><figcaption>Het beginscherm</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/rondleiding.jpg?v=18" alt="Eerste scherm van de rondleiding met Scheidsen, Coachen en Delen" loading="lazy"><figcaption>De rondleiding bij de eerste start</figcaption></figure>
       </div>
     </section>
 
@@ -118,7 +122,7 @@
         <div class="note">Na elke rally wordt de wedstrijd bewaard. Sluit je halverwege, dan ga je later verder via de Scheidsrechter-tegel.</div>
       </div>
       <div class="shots">
-        <figure><span class="beta-tag">Bèta</span><img src="img/android/scheidsrechter.jpg?v=4" alt="Scheidsrechterscherm" loading="lazy"><figcaption>Tik op de score = punt</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/scheidsrechter.jpg?v=18" alt="Scheidsrechterscherm" loading="lazy"><figcaption>Tik op de score = punt</figcaption></figure>
       </div>
     </section>
 
@@ -145,7 +149,7 @@
           <li>Tik op de baan <strong>waar</strong> het punt viel. Standaard is de baan verdeeld in 6 vakken: voor, midden en achter, links en rechts. (Liever 9 vakken? Zie <a href="#instellingen">Instellingen</a>.)</li>
           <li>Kies de <strong>slag</strong>. Je ziet alleen slagen die bij dat vak passen: voorin Drop, Boast en Kill; in het midden Kill, Drive, Cross en Boast; achterin Drive, Cross en Lob. Was het een volley? Zet dan eerst <span class="ui">Uit de lucht</span> aan.</li>
         </ol>
-        <p>Bij een stroke kies je alleen het vak, bij een unforced error alleen de soort fout; een servicepunt telt meteen. Elke stap heeft een knop <span class="ui">Annuleer</span>.</p>
+        <p>Bij een stroke kies je alleen het vak, bij een unforced error alleen de soort fout; een servicepunt telt meteen. Elke stap heeft een knop <span class="ui">Annuleren</span>.</p>
         <p>Op het scorebord zie je wie serveert en uit welk vak (<span class="ui">Links</span>/<span class="ui">Rechts</span>). Klopt het vak niet, tik dan het andere aan. Links van de instructie loopt de rally-timer.</p>
 
         <h3>Let, undo en het laatste punt</h3>
@@ -156,20 +160,32 @@
         </ul>
 
         <h3>Game en wedstrijd klaar</h3>
-        <p>Aan het eind van een game zie je de uitslag met de knoppen <span class="ui">Analyse</span>, <span class="ui">Deel score</span>, <span class="ui">Volgende game</span>, <span class="ui">Undo laatste punt</span> en <span class="ui">Stop wedstrijd</span>. Na de laatste game zie je ook welke <strong>badges</strong> er verdiend zijn (tik erop voor uitleg) en start je met <span class="ui">Nieuwe wedstrijd</span> een volgende.</p>
+        <p>Aan het eind van een game zie je de uitslag met <span class="ui">Analyse</span>, <span class="ui">Coachkaart</span> en <span class="ui">Deel score</span> (alleen als er iets te delen is), en daaronder <span class="ui">Volgende game</span>, <span class="ui">Undo laatste punt</span> en <span class="ui">Stop wedstrijd</span>. Na de laatste game zie je ook welke <strong>badges</strong> er verdiend zijn (tik erop voor uitleg) en start je met <span class="ui">Nieuwe wedstrijd</span> een volgende.</p>
         <p><span class="ui">Deel score</span>: kies <em>Scorekaart</em> (tabel), <em>Verslag</em> (per game, met tijden) of <em>Plaatje</em> (de uitslag als afbeelding, met de spelersfoto's). Je ziet een voorbeeld; tik op <span class="ui">Delen</span>.</p>
 
         <h3>Live meekijken</h3>
         <p>Tik op <span class="ui">LIVE</span> bovenin en deel de link, bijvoorbeeld in de groepsapp. Wie de link opent, volgt de stand in de browser, met een kleine foto van de spelers. LIVE is grijs tot er een link is en rood zolang je live bent. Nog eens tikken: link opnieuw delen of <span class="ui">Live stoppen</span>. De livegegevens worden 2 uur na de laatste stand-update van de server verwijderd. Een al geopende pagina kan de laatst ontvangen stand nog tonen. LIVE (of alleen de foto's) zet je uit in <a href="#instellingen">Instellingen</a>. Onderaan de livepagina (en onderaan deze website) kies je bij <span class="ui">Weergave</span> voor <em>Licht</em>, <em>Donker</em> of <em>Systeem</em> (volgt je telefoon); standaard is het donker en de keuze blijft alleen in je eigen browser bewaard.</p>
 
-        <h3>Analyse en AI Coach</h3>
-        <p>De <strong>analyse</strong> toont per speler en per game: gemiddelde rallyduur bij winst en verlies, beste zone en slag, een <strong>heatmap</strong> van de baan, de meest gebruikte slagen (een volley staat apart, zoals <em>Volley cross</em>), de puntverdeling, het aantal punten <strong>uit de lucht</strong> en tactisch advies. Met <span class="ui">Deel</span> stuur je een samenvatting.</p>
+        <h3>Analyse</h3>
+        <p>Tik na een game op <span class="ui">Analyse</span> (het vergrootglas). Tijdens een wedstrijd open je vanaf game 2 met het vergrootglas bovenin de analyse van de vorige game. Bovenaan kies je de speler en, als er meer games zijn, de game.</p>
+        <p>De <strong>analyse</strong> toont per speler en per game: gemiddelde rallyduur bij winst en verlies, beste zone en slag, een <strong>heatmap</strong> van de baan, de meest gebruikte slagen (een volley staat apart, zoals <em>Volley cross</em>), de puntverdeling, <strong>Service en return</strong>, het aantal punten <strong>uit de lucht</strong> en tactisch advies. Met <span class="ui">Deel</span> stuur je een samenvatting.</p>
+        <p><strong>Service en return</strong>: welk percentage van de rally's de speler won op eigen service en op die van de tegenstander, in deze game en over de wedstrijd tot en met deze game. Vanaf game 2 zie je met een pijltje of het omhoog of omlaag ging ten opzichte van de vorige game.</p>
         <p>Bovenaan het tactisch advies staat <strong>Waar vallen de punten</strong>: per rij (voor, midden, achter) en kant (links, rechts) hoeveel punten de speler won, verloor en zelf weggaf. Daarop is het advies gebaseerd: hooguit 5 regels, met eerst wat de meeste punten kan opleveren. Zie je hetzelfde ook in een eerdere game, dan staat er bijvoorbeeld <em>Net als in game 1</em>.</p>
-        <p><strong>Coachkaart</strong>: tik na een game of in de analyse op <span class="ui">Coachkaart</span> voor één scherm om je speler tussen de games te laten zien: waar beide spelers hun punten wonnen en de drie belangrijkste coachpunten van de game, voor de speler uit je team. Vanaf game 2 staat erbij wat er sinds de vorige game veranderde: <em>Nog steeds</em>, <em>Verbeterd!</em> of <em>Pak dit op zoals je in game 1 deed</em>. Dat werkt ook voor wedstrijden die je eerder coachte (Afgeronde wedstrijden → analyse).</p>
-        <p><strong>Notitie per game</strong>: tik bij <span class="ui">Notitie</span> in de analyse en schrijf of dicteer wat je opviel. De notitie staat in de analyse en op de coachkaart, niet in wat je deelt, en gaat mee in de back-up. In de analyse zie je ook <strong>Service en return</strong>: welk percentage van de rally's de speler won op eigen service en op die van de tegenstander, vanaf game 2 met een pijltje omhoog of omlaag ten opzichte van de vorige game, en het percentage over de wedstrijd.</p>
+        <p>Heb je een OpenAI-sleutel ingesteld, dan geeft <span class="ui">Vraag AI Coach om advies</span> een uitgebreide analyse met sterke punten, werkpunten en een focus voor de volgende game. Er gaan geen namen mee, alleen cijfers. De app kiest een beschikbaar model uit een voorkeurslijst van betaalbare modellen; hij vergelijkt geen actuele prijzen. Zonder sleutel zie je dit blok niet.</p>
 
+        <h3>Notitie per game</h3>
+        <p>In de analyse staat het blok <strong>Notitie</strong>. Tik op <span class="ui">Schrijf</span> (of <span class="ui">Bewerk</span> als er al iets staat), typ of dicteer met de microfoon van je toetsenbord wat je opviel, en tik op <span class="ui">Bewaar</span>. Dat kan ook achteraf. De notitie is alleen voor jou: hij staat in de analyse en op de coachkaart, niet in wat je deelt, en gaat mee in de back-up.</p>
 
-        <p>Heb je een OpenAI-sleutel ingesteld, dan geeft <span class="ui">Vraag AI Coach om advies</span> een uitgebreide analyse. Er gaan geen namen mee, alleen cijfers. De app kiest een beschikbaar model uit een voorkeurslijst van betaalbare modellen; hij vergelijkt geen actuele prijzen. Zonder sleutel zie je dit blok niet.</p>
+        <h3>Coachkaart</h3>
+        <p>De <strong>coachkaart</strong> (het klembord) is één scherm om je speler tussen de games te laten zien. Je opent hem na een game met <span class="ui">Coachkaart</span>, of bovenaan de analyse. Op de kaart:</p>
+        <ul>
+          <li>de <strong>heatmap</strong> van beide spelers: waar ze hun punten wonnen;</li>
+          <li>de <strong>3 belangrijkste coachpunten</strong> van de game;</li>
+          <li>je <strong>notitie</strong> bij die game, als je er een schreef;</li>
+          <li>vanaf game 2 wat er sinds de vorige game veranderde: <em>Nog steeds</em> (een werkpunt komt terug), <em>Verbeterd!</em> (een werkpunt is weg of gehalveerd) of <em>Pak dit op zoals je in game 1 deed</em> (iets ging eerder goed en nu niet).</li>
+        </ul>
+        <p>De kaart opent op de speler uit je team (bij <a href="#spelers">Spelers</a> staat die op <span class="ui">In mijn team</span>); zijn het er twee of geen, dan op de eerstgenoemde; bovenaan wissel je van speler. Ook voor wedstrijden die je eerder coachte: <a href="#wedstrijden">Afgeronde wedstrijden</a> &rarr; <span class="ui">Bekijk analyse</span> &rarr; <span class="ui">Coachkaart</span>.</p>
+
 
         <h3>Stoppen</h3>
         <p>Tik op <span class="ui">Stop</span>. Is de wedstrijd klaar, dan wordt hij bewaard. Is er nog niets gespeeld, dan verdwijnt hij. Anders kies je:</p>
@@ -182,11 +198,14 @@
         </ul>
       </div>
       <div class="shots">
-        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-start.jpg?v=4" alt="Coachwedstrijd starten" loading="lazy"><figcaption>Wedstrijd starten</figcaption></figure>
-        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-punt.jpg?v=4" alt="Soort punt kiezen" loading="lazy"><figcaption>Hoe werd het punt gewonnen?</figcaption></figure>
-        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-zone.jpg?v=4" alt="Baan met 6 vakken" loading="lazy"><figcaption>Kies het vak</figcaption></figure>
-        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-slag.jpg?v=4" alt="Slag kiezen met Uit de lucht" loading="lazy"><figcaption>Kies de slag</figcaption></figure>
-        <figure><span class="beta-tag">Bèta</span><img src="img/android/analyse.jpg?v=4" alt="Game-analyse" loading="lazy"><figcaption>Game-analyse</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-start.jpg?v=18" alt="Coachwedstrijd starten" loading="lazy"><figcaption>Wedstrijd starten</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach.jpg?v=18" alt="Coachscherm met scorebord" loading="lazy"><figcaption>Tik op de score van wie scoort</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-punt.jpg?v=18" alt="Soort punt kiezen" loading="lazy"><figcaption>Hoe werd het punt gewonnen?</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-zone.jpg?v=18" alt="Baan met 6 vakken" loading="lazy"><figcaption>Kies het vak</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-slag.jpg?v=18" alt="Slag kiezen met Uit de lucht" loading="lazy"><figcaption>Kies de slag</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/coach-game-klaar.jpg?v=18" alt="Game klaar met Analyse, Coachkaart en Deel score" loading="lazy"><figcaption>Game klaar</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/analyse.jpg?v=18" alt="Analyse van een game" loading="lazy"><figcaption>Analyse</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/coachkaart.jpg?v=18" alt="Coachkaart met heatmaps en drie coachpunten" loading="lazy"><figcaption>Coachkaart: laat je speler zien waar het om draait</figcaption></figure>
       </div>
     </section>
 
@@ -196,17 +215,17 @@
         <h2><span class="icon"><span class="ms" aria-hidden="true">history</span></span>Afgeronde wedstrijden</h2>
         <p class="where">Alles terugkijken, delen en opruimen</p>
         <ul>
-          <li>Filter op <span class="ui">Alles</span>, <span class="ui">Coach</span> of <span class="ui">Scheidsrechter</span>, en via <span class="ui">Alle spelers</span> op één speler.</li>
-          <li>Coach- en scheidsrechterwedstrijden staan onder eigen kopjes, met de winnaar, de uitslag per game en een medaille als er een badge is verdiend.</li>
-          <li>Tik op een coachwedstrijd of op <span class="ui">Bekijk analyse</span> voor de analyse.</li>
+          <li>Filter op <span class="ui">Alles</span>, <span class="ui">Scheidsrechter</span> of <span class="ui">Coach</span>, en via <span class="ui">Alle spelers</span> op één speler.</li>
+          <li>Scheidsrechter- en coachwedstrijden staan onder eigen kopjes, met de winnaar, de uitslag per game en een medaille als er een badge is verdiend.</li>
+          <li>Tik op een coachwedstrijd of op <span class="ui">Bekijk analyse</span> voor de <a href="#coach">analyse</a>, met daarin de <span class="ui">Coachkaart</span> en de notitie per game.</li>
           <li><span class="ui">Delen</span> biedt Scorekaart, Verslag of Plaatje om te delen, bijvoorbeeld via WhatsApp.</li>
           <li>Niet afgemaakt? Dan staat er <strong>INCOMPLEET</strong> bij en vul je met <span class="ui">Uitslag aanvullen</span> in wie de resterende games won.</li>
           <li>Met de prullenbak verwijder je een wedstrijd.</li>
         </ul>
-        <p>Een lopende wedstrijd vind je niet hier, maar via de Coach- of Scheidsrechter-tegel. Back-ups maak en zet je terug in <a href="#instellingen">Instellingen</a>.</p>
+        <p>Een lopende wedstrijd vind je niet hier, maar via de Scheidsrechter- of Coach-tegel. Back-ups maak en zet je terug in <a href="#instellingen">Instellingen</a>.</p>
       </div>
       <div class="shots">
-        <figure><span class="beta-tag">Bèta</span><img src="img/android/wedstrijden.jpg?v=4" alt="Afgeronde wedstrijden" loading="lazy"><figcaption>Afgeronde wedstrijden</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/wedstrijden.jpg?v=18" alt="Afgeronde wedstrijden" loading="lazy"><figcaption>Afgeronde wedstrijden</figcaption></figure>
       </div>
     </section>
 
@@ -215,18 +234,19 @@
     <section class="tile" id="competitie">
       <div>
         <h2><span class="icon"><span class="ms" aria-hidden="true">emoji_events</span></span>Competitie</h2>
-        <p class="where">Nieuw in versie 3.0 (build 1)</p>
-        <p>Een teamwedstrijd van de SBN-competitie bestaat uit vier partijen (E1 tot en met E4). Tik op <span class="ui">Nieuwe teamwedstrijd</span> en kies een wedstrijd uit het programma van Mijn team, of vul zelf de teams, thuis of uit en de datum in.</p>
+        <p class="where">Teamwedstrijden van de SBN-competitie, nieuw in versie 3.0</p>
+        <p>Een teamwedstrijd van de SBN-competitie bestaat uit vier partijen (E1 tot en met E4). Tik op <span class="ui">Nieuwe teamwedstrijd</span> en kies een wedstrijd uit het programma van Mijn team, of vul zelf de teams, thuis of uit en de datum in. De schakelaar <span class="ui">Deel met mijn team</span> staat standaard aan: dan maakt de app meteen een livepagina en opent het deelscherm. Uit (of geen internet) blijft de teamwedstrijd alleen op je telefoon; delen kan later nog.</p>
+        <p>Elke teamwedstrijd heeft een label: <strong>GEDEELD</strong> (met je team, er is een livepagina) of <strong>EIGEN</strong> (alleen op deze telefoon).</p>
         <ul>
           <li><strong>Partij invullen</strong>: tik op E1 tot en met E4. Kies onze speler (de selectie van Mijn team staat als knopjes klaar), typ de tegenstander en voeg de games toe met de stand (bijvoorbeeld 11-8), of alleen <span class="ui">Wij wonnen</span> / <span class="ui">Zij wonnen</span> als je de stand niet meer weet.</li>
-          <li><strong>Koppelen</strong>: hield je de partij bij als coach of scheidsrechter? Tik op <span class="ui">Kies wedstrijd</span>, kies hem uit Afgeronde wedstrijden en zeg wie onze speler was. Wil je de partij nu nog gaan bijhouden, kies dan bovenaan <span class="ui">Coach</span> of <span class="ui">Scheidsrechter</span>: de namen staan alvast ingevuld (de thuisspeler is Speler 1) en de uitslag komt na afloop vanzelf in de partij. De games komen dan vanzelf mee; <span class="ui">Vernieuwen</span> haalt ze opnieuw op als je de uitslag later aanvult.</li>
-          <li><strong>Op de speeldag</strong>: na een coach- of scheidsrechterwedstrijd vraagt de app of hij bij de teamwedstrijd van vandaag hoort en bij welke partij.</li>
+          <li><strong>Bijhouden of koppelen</strong>: wil je de partij nu gaan bijhouden, kies dan onder <span class="ui">Nieuwe wedstrijd starten</span> voor <span class="ui">Coach</span> of <span class="ui">Scheidsrechter</span>: de namen staan alvast ingevuld (de thuisspeler is Speler 1) en de uitslag komt na afloop vanzelf in de partij. Hield je de partij al bij? Tik op <span class="ui">Eerder getelde wedstrijd koppelen</span>, kies hem uit Afgeronde wedstrijden en zeg wie onze speler was. De games komen dan vanzelf mee; <span class="ui">Vernieuwen</span> haalt ze opnieuw op als je de uitslag later aanvult.</li>
+          <li><strong>Op de speeldag</strong>: na een scheidsrechter- of coachwedstrijd vraagt de app of hij bij de teamwedstrijd van vandaag hoort en bij welke partij.</li>
           <li><strong>Stand en uitslag</strong>: de app telt de games, de partijen en de rallypunten en bepaalt de winnaar volgens het SBN-reglement (meeste partijen; gelijk: het team met een volledige opstelling; dan de meeste games; dan de meeste rallypunten; dan wie E1 won). Competitiepunten zijn de games plus 3 bonuspunten voor de winnaar, behalve als een team zonder volledige opstelling wint. Gaf een speler op of kwam niet opdagen? Kies dat in de partij: bij een opgave gaan alle resterende punten naar de tegenstander, bij wegblijven wint de ander met 3 keer 11-0.</li>
           <li><strong>Deel verslag</strong>: kies Scorekaart, Verslag of Plaatje, net als bij een wedstrijd, en deel de uitslag met alle partijen in de groepsapp. Het plaatje toont onder de stand per partij wie tegen wie speelde en de games.</li>
-          <li><strong>Live meekijken</strong>: tik onderaan op <span class="ui">Live delen</span>. Je krijgt een kijkerslink voor de groepsapp (<span class="ui">Deel kijkerslink</span>) met de stand van de hele avond en per partij de games, ook punt voor punt. Er gaan alleen teamnamen, voornamen en de stand mee; zonder ingevulde namen staat er de teamnaam met de partij erachter (bijvoorbeeld Delft 7 E1). Twee uur na de laatste update worden de gegevens van de live teamwedstrijd van de server verwijderd.</li>
-          <li><strong>Teamgenoten laten meedoen</strong>: tik op <span class="ui">Nodig teamgenoten uit</span> en stuur de link of code door. Een teamgenoot opent de link (of tikt bij Competitie op <span class="ui">Deelnemen met link of code</span>), kiest welk team van hem is en zet een partij erop. De app werkt de gekozen partij bij; <span class="ui">Vernieuwen</span> haalt de partijen van de anderen op. Spreek onderling af wie welke partij bijhoudt.</li>
-          <li><strong>Bij een nieuwe wedstrijd</strong>: start je een coach- of scheidsrechterwedstrijd en hoort die bij een teamwedstrijd, zet dan <span class="ui">Onderdeel van een teamwedstrijd</span> aan, kies de partij en wie onze speler is. Is de teamwedstrijd live, dan gaat de stand van die partij punt voor punt mee naar de teampagina.</li>
-          <li><strong>In mijn team</strong>: bij <span class="ui">Spelers</span> zet je bij een speler de schakelaar <span class="ui">In mijn team</span> aan. Die spelers staan bovenaan als je een partij invult. Teamwedstrijden en deze keuze zitten ook in de back-up.</li>
+          <li><strong>Delen met team en supporters</strong>: is de teamwedstrijd nog niet gedeeld, tik dan onderaan op <span class="ui">Deel met mijn team</span>. Daarna opent <span class="ui">Deel met team en supporters</span> het deelscherm met twee groepen: <em>Voor supporters</em> (<span class="ui">Deel kijkerslink</span>: alleen kijken, in de browser, met de stand van de hele avond en per partij de games, ook punt voor punt) en <em>Voor teamleden</em> (<span class="ui">Nodig teamleden uit</span>: een link en code om mee te doen). Er gaan alleen teamnamen, voornamen en de stand mee; zonder ingevulde namen staat er de teamnaam met de partij erachter (bijvoorbeeld Delft 7 E1). Twee uur na de laatste update worden de gegevens van de live teamwedstrijd van de server verwijderd. Wie de livepagina startte kan hem met <span class="ui">Live stoppen</span> beëindigen; een teamgenoot ziet <span class="ui">Live verlaten</span>.</li>
+          <li><strong>Meedoen als teamgenoot</strong>: open de uitnodiging (of tik bij Competitie op <span class="ui">Deelnemen met link of code</span>), kies welk team van jou is en zet een partij erop. De app werkt de gekozen partij bij; <span class="ui">Vernieuwen</span> haalt de partijen van de anderen op. Heb je dezelfde avond al zelf aangemaakt, dan komt de livepagina bij je eigen teamwedstrijd; had je daar al partijen ingevuld, dan kies je <span class="ui">Partijen van mijn teamgenoot overnemen</span> of <span class="ui">Annuleren</span>. Spreek onderling af wie welke partij bijhoudt.</li>
+          <li><strong>Bij een nieuwe wedstrijd</strong>: start je een scheidsrechter- of coachwedstrijd en hoort die bij een teamwedstrijd, zet dan <span class="ui">Onderdeel van een teamwedstrijd</span> aan, kies de partij en wie onze speler is. Is de teamwedstrijd gedeeld, dan gaat de stand van die partij punt voor punt mee naar de teampagina.</li>
+          <li><strong>In mijn team</strong>: bij <span class="ui">Spelers</span> zet je bij een speler de schakelaar <span class="ui">In mijn team</span> aan. Die spelers staan bovenaan als je een partij invult. Met een teamlink in Mijn team komen de spelers van je team vanzelf in de lijst met dit vinkje. Teamwedstrijden en deze keuze zitten ook in de back-up.</li>
         </ul>
       </div>
     </section>
@@ -253,8 +273,8 @@
         <p>Open de badges van een speler en tik bovenaan op <span class="ui">Profiel</span>. Je ziet het aantal wedstrijden en het winstpercentage, de <strong>vorm</strong> (de laatste tien uitslagen), <strong>winners en unforced errors per game</strong> als lijn over de wedstrijden (vanaf vier coachwedstrijden met "van … naar …"), de <strong>slagen</strong> waarmee de speler het vaakst scoort en de meest gemaakte fout, de <strong>baan</strong> (waar punten gewonnen en verloren worden), het <strong>tempo</strong> (gemiddelde rallyduur) en de <strong>tegenstanders</strong> met de onderlinge stand. Kies bovenaan de laatste 10, de laatste 25 of alle wedstrijden. Alleen wedstrijden waarin je de speler via <span class="ui">Kies speler</span> koos tellen mee; scheidsrechterwedstrijden geven alleen de uitslag, de rest komt uit coachwedstrijden.</p>
       </div>
       <div class="shots">
-        <figure><span class="beta-tag">Bèta</span><img src="img/android/spelers.jpg?v=4" alt="Spelerslijst" loading="lazy"><figcaption>Spelers</figcaption></figure>
-        <figure><span class="beta-tag">Bèta</span><img src="img/android/speler-bewerken.jpg?v=4" alt="Speler toevoegen" loading="lazy"><figcaption>Speler toevoegen</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/spelers.jpg?v=18" alt="Spelerslijst" loading="lazy"><figcaption>Spelers</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/speler-bewerken.jpg?v=18" alt="Speler toevoegen" loading="lazy"><figcaption>Speler toevoegen</figcaption></figure>
       </div>
     </section>
 
@@ -266,7 +286,7 @@
         <p>Badges verdien je automatisch tijdens wedstrijden, maar <strong>alleen met spelers die je via Kies speler hebt gekozen</strong>. De lijst is ingedeeld in <em>In één game</em>, <em>In één wedstrijd</em> en <em>Over al je wedstrijden</em>. Het label <strong>COACH</strong> betekent dat de badge alleen in de coachmodus te verdienen is; <strong>EÉN KEER</strong> dat je hem maar één keer krijgt.</p>
       </div>
       <div class="shots">
-        <figure><span class="beta-tag">Bèta</span><img src="img/android/badges.jpg?v=4" alt="Alle badges" loading="lazy"><figcaption>Alle badges</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/badges.jpg?v=18" alt="Alle badges" loading="lazy"><figcaption>Alle badges</figcaption></figure>
       </div>
     </section>
 
@@ -277,10 +297,10 @@
         <p class="where">Tandwiel rechtsboven op het beginscherm</p>
         <ul>
           <li><strong>Handleiding</strong>: opent deze pagina.</li>
-          <li><strong>Weergave</strong>: <span class="ui">Systeem</span> (volgt je telefoon), <span class="ui">Licht</span> of <span class="ui">Donker</span> (standaard). De keuze geldt meteen voor de hele app; een uitslag die je als plaatje deelt, blijft donker.</li>
+          <li><strong>Weergave</strong>: <span class="ui">Systeem</span> (volgt je telefoon), <span class="ui">Licht</span> of <span class="ui">Donker</span> (standaard). De keuze geldt meteen voor de hele app; een uitslag die je als plaatje deelt, blijft donker, net als het app-icoon.</li>
           <li><strong>Baanindeling</strong>: kies <span class="ui">6 vakken</span> (standaard) of <span class="ui">9 vakken</span> met een middenkolom.</li>
           <li><strong>Mijn team</strong>: plak je teamlink van sbn.toernooi.nl en tik op <span class="ui">Bewaar teamlink</span>; <span class="ui">Verwijder</span> haalt hem weg.</li>
-          <li><strong>Live meekijken</strong>: de knop <span class="ui">LIVE</span> bij Coach en Scheidsrechter, en <span class="ui">Foto's van de spelers meesturen</span>. Beide staan standaard aan.</li>
+          <li><strong>Live meekijken</strong>: de knop <span class="ui">LIVE</span> bij Scheidsrechter en Coach, en <span class="ui">Foto's van de spelers meesturen</span>. Beide staan standaard aan.</li>
           <li><strong>AI Coach</strong>: vul je eigen OpenAI API-sleutel in en tik op <span class="ui">Bewaar API key</span>. De sleutel wordt versleuteld op je toestel bewaard. De kosten worden door OpenAI berekend en hangen af van het gekozen model en het gebruik. Met <span class="ui">Verwijder key</span> haal je hem weg.</li>
           <li><strong>Back-up</strong>:
             <ul>
@@ -294,7 +314,7 @@
         <div class="note">Ook scheidsrechterwedstrijden zitten in de back-up (de uitslag per game).</div>
       </div>
       <div class="shots">
-        <figure><span class="beta-tag">Bèta</span><img src="img/android/instellingen.jpg?v=4" alt="Instellingen" loading="lazy"><figcaption>Instellingen</figcaption></figure>
+        <figure><span class="beta-tag">Bèta</span><img src="img/android/instellingen.jpg?v=18" alt="Instellingen" loading="lazy"><figcaption>Instellingen</figcaption></figure>
       </div>
     </section>
 

@@ -164,7 +164,7 @@ public struct SharedSettingsView: View {
                 .font(SharedFonts.system(16, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             Toggle(isOn: $liveSharing) {
-                Text("Knop LIVE bij Coach en Scheidsrechter")
+                Text("Knop LIVE bij Scheidsrechter en Coach")
                     .font(SharedFonts.system(14))
                     .foregroundColor(SharedColors.textPrimary)
             }

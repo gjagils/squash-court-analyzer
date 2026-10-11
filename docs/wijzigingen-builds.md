@@ -10,6 +10,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Website en handleiding klaar voor 3.0 build 3 (12 oktober 2026, nog niet gepubliceerd)**:
+  handleiding iPhone en Android bijgewerkt (rondleiding, Analyse, Coachkaart, notitie, service en
+  return, Competitie zoals in build 2, weergave), alle schermafbeeldingen opnieuw (donker, 9:41),
+  nieuwe afbeeldingen voor Coachkaart en rondleiding; homepage met nieuwsblok voor 3.0 en nieuwe
+  hero-afbeeldingen (`website/screenshots/`, buiten git, staan in de hoofdmap klaar); testpagina
+  bijgewerkt; iconenlettertype van de website nu omtrek (FILL 0). In de app: de uitleg over de
+  winnaar van een teamwedstrijd volgt nu het reglement (meeste partijen eerst), en Afgeronde
+  wedstrijden en Instellingen noemen Scheidsrechter vóór Coach.
 - **Iconen als omtrek, overal (12 oktober 2026)**: alle iconen in de app zijn nu lijniconen, zoals
   op de sticker, op iPhone en Android, licht en donker (`AppSymbol`: op Apple het symbool zonder
   ".fill", op Android Material "Outlined"). *Analyse* heeft overal het vergrootglas, *Coachkaart*

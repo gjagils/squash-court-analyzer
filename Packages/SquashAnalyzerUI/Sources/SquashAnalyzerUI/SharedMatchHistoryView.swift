@@ -86,16 +86,16 @@ public struct SharedMatchHistoryView: View {
                                 .foregroundColor(SharedColors.textSecondary)
                                 .padding(.top, 24)
                         }
-                        if !coachEntries.isEmpty {
-                            sectionHeader("COACH", icon: "list.bullet.clipboard")
-                            ForEach(coachEntries) { entry in
-                                coachCard(entry)
-                            }
-                        }
                         if !refereeEntries.isEmpty {
                             sectionHeader("SCHEIDSRECHTER", icon: "whistle")
                             ForEach(refereeEntries) { entry in
                                 refereeCard(entry)
+                            }
+                        }
+                        if !coachEntries.isEmpty {
+                            sectionHeader("COACH", icon: "list.bullet.clipboard")
+                            ForEach(coachEntries) { entry in
+                                coachCard(entry)
                             }
                         }
                     }
@@ -153,8 +153,8 @@ public struct SharedMatchHistoryView: View {
         VStack(spacing: 10) {
             HStack(spacing: 8) {
                 filterChip("Alles", "alles")
-                filterChip("Coach", "coach")
                 filterChip("Scheidsrechter", "referee")
+                filterChip("Coach", "coach")
             }
             Button { choosingPlayer = true } label: {
                 HStack {

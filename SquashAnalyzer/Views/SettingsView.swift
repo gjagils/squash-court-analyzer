@@ -203,7 +203,7 @@ struct SettingsView: View {
                 Text("Live meekijken").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary)
             }
             Toggle(isOn: $liveSharing) {
-                Text("Knop LIVE bij Coach en Scheidsrechter")
+                Text("Knop LIVE bij Scheidsrechter en Coach")
                     .font(AppFonts.label(14))
                     .foregroundColor(AppColors.textPrimary)
             }

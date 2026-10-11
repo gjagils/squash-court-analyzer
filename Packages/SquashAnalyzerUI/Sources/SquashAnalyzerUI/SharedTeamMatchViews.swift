@@ -530,7 +530,7 @@ public struct SharedTeamMatchView: View {
                 .foregroundColor(score.isComplete ? SharedColors.gold : SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             if score.isComplete {
-                Text("Winnaar: meeste games; gelijk → meeste partijen; nog gelijk → meeste rallypunten. Competitiepunten: games + 3 bonus voor de winnaar.")
+                Text("Winnaar: meeste partijen; gelijk → het volledige team; dan meeste games, meeste rallypunten, winnaar E1. Competitiepunten: games + 3 bonus voor de winnaar.")
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
                     .fixedSize(horizontal: false, vertical: true)

@@ -121,7 +121,7 @@ public struct SharedPlayerBadgesView: View {
                             }
                         }
                         section("DELEN") {
-                            ActionButton("DEEL KAART", icon: "square.and.arrow.up", style: .filled, color: SharedColors.gold) {
+                            ActionButton("DEEL KAART", icon: "square.and.arrow.up", style: .filled, color: SharedColors.accent) {
                                 Task { await shareCard() }
                             }
                             .accessibilityLabel("Deel kaart")

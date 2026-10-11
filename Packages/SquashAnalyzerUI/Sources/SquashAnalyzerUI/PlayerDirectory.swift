@@ -56,7 +56,7 @@ public struct PlayerProfileFields: View {
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
                                 .foregroundColor(selected ? SharedColors.onAccent : SharedColors.textPrimary)
-                                .background(selected ? SharedColors.gold : SharedColors.tint(0.08))
+                                .background(selected ? SharedColors.accent : SharedColors.tint(0.08))
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)
@@ -82,7 +82,7 @@ public struct PlayerProfileFields: View {
 
     private func caption(_ title: String) -> some View {
         Text(title).font(SharedFonts.system(11, weight: .semibold, design: .rounded))
-            .tracking(1).foregroundColor(SharedColors.gold)
+            .tracking(1).foregroundColor(SharedColors.accent)
     }
 }
 
@@ -153,7 +153,7 @@ public struct PlayerDirectoryView: View {
                         Button { showingTeamImport = true } label: {
                             // AppSymbol: Skip's Label(systemImage:) draws a warning triangle for this symbol
                             HStack(spacing: 6) {
-                                AppSymbol("square.and.arrow.down", size: 18, color: SharedColors.gold)
+                                AppSymbol("square.and.arrow.down", size: 18, color: SharedColors.accent)
                                 Text("Team").lineLimit(1)
                             }
                         }
@@ -167,7 +167,7 @@ public struct PlayerDirectoryView: View {
                     .accessibilityLabel("Speler toevoegen")
                     .disabled(isLoading || isDeleting || loadFailed)
                 }
-                .foregroundColor(SharedColors.gold)
+                .foregroundColor(SharedColors.accent)
                 .padding(.horizontal, 24)
                 .padding(.top, 12)
 
@@ -180,7 +180,7 @@ public struct PlayerDirectoryView: View {
                     Text("Spelers konden niet worden geladen.")
                         .foregroundColor(SharedColors.textSecondary)
                     Button("Opnieuw laden") { Task { await reload() } }
-                        .tint(SharedColors.gold)
+                        .tint(SharedColors.accent)
                     Spacer()
                 } else if players.isEmpty {
                     Spacer()
@@ -435,7 +435,7 @@ struct PlayerProfileEditor: View {
                             }
                         }
                         .buttonStyle(.borderedProminent)
-                        .tint(SharedColors.gold)
+                        .tint(SharedColors.accent)
                         .disabled(!player.isValid || isSaving)
                     }
                 }

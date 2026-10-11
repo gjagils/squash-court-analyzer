@@ -43,13 +43,13 @@ struct SharedTeamImportView: View {
                     .padding(12)
                     .background(SharedColors.tint(0.06)).clipShape(RoundedRectangle(cornerRadius: 12))
                     .disabled(isImporting)
-                ActionButton(isImporting ? "Bezig met importeren…" : "IMPORTEREN", style: .filled, color: SharedColors.gold,
+                ActionButton(isImporting ? "Bezig met importeren…" : "IMPORTEREN", style: .filled, color: SharedColors.accent,
                              disabled: isImporting || link.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, action: start)
                 if filePicker != nil {
                     Text("Of kies een team-zip van je telefoon.")
                         .font(SharedFonts.system(14))
                         .foregroundColor(SharedColors.textSecondary)
-                    ActionButton("KIES ZIP-BESTAND", color: SharedColors.gold, disabled: isImporting, action: pickZip)
+                    ActionButton("KIES ZIP-BESTAND", color: SharedColors.accent, disabled: isImporting, action: pickZip)
                 }
                 if let resultText {
                     Text(resultText)

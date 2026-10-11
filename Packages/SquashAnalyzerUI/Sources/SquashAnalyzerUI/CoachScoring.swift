@@ -545,7 +545,7 @@ public struct CoachScoringView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(SharedColors.gold)
+            .background(SharedColors.accent)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)

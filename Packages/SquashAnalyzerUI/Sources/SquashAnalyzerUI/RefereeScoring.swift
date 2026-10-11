@@ -160,7 +160,7 @@ public struct RefereeScoringView: View {
             Spacer()
             if shareText != nil {
                 Button { sharingNow = true } label: {
-                    AppSymbol("square.and.arrow.up", size: 20, color: SharedColors.gold)
+                    AppSymbol("square.and.arrow.up", size: 20, color: SharedColors.accent)
                         .frame(width: 74, height: 32, alignment: .trailing)
                 }
                 .buttonStyle(.plain)

@@ -126,12 +126,12 @@ public struct MatchResultOverlay: View {
                 if !secondary.isEmpty {
                     HStack(spacing: 8) {
                         ForEach(0..<min(2, secondary.count), id: \.self) { index in
-                            goldButton(secondary[index])
+                            accentButton(secondary[index])
                         }
                     }
                     if secondary.count > 2 {
                         ForEach(2..<secondary.count, id: \.self) { index in
-                            goldButton(secondary[index])
+                            accentButton(secondary[index])
                         }
                     }
                 }
@@ -232,9 +232,9 @@ public struct MatchResultOverlay: View {
         ActionButton(button.title.uppercased(), color: SharedColors.textSecondary, action: button.action)
     }
 
-    /// Outlined gold button with an icon; two of them share a row
-    private func goldButton(_ button: ResultButton) -> some View {
-        ActionButton(button.title.uppercased(), icon: button.icon, color: SharedColors.gold, action: button.action)
+    /// Outlined accent button with an icon; two of them share a row (gold is for badges and winners)
+    private func accentButton(_ button: ResultButton) -> some View {
+        ActionButton(button.title.uppercased(), icon: button.icon, color: SharedColors.accent, action: button.action)
     }
 
     /// "Undo laatste punt", so a mis-tap on the final point can still be corrected

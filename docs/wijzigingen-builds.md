@@ -10,6 +10,9 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 2)
 
+- **Knoppen oranje, goud alleen voor badges en winnaars (12 oktober 2026)**: Analyse, Coachkaart
+  en Deel score na een game, START GAME, de knoppen bij Spelers en bij het importeren van een team
+  en Deel kaart waren goud; nu in de nadrukkleur, zoals de rest van de app.
 - **Website en handleiding klaar voor 3.0 build 3 (12 oktober 2026, nog niet gepubliceerd)**:
   handleiding iPhone en Android bijgewerkt (rondleiding, Analyse, Coachkaart, notitie, service en
   return, Competitie zoals in build 2, weergave), alle schermafbeeldingen opnieuw (donker, 9:41),

@@ -130,8 +130,8 @@ public struct MatchSetupView: View {
                 List {
                     Button { editing = PlayerProfile() } label: {
                         HStack(spacing: 10) {
-                            AppSymbol("plus", size: 16, color: SharedColors.gold)
-                            Text("Nieuwe speler").foregroundColor(SharedColors.gold)
+                            AppSymbol("plus", size: 16, color: SharedColors.accent)
+                            Text("Nieuwe speler").foregroundColor(SharedColors.accent)
                         }
                     }
                     ForEach(players) { player in
@@ -167,7 +167,7 @@ public struct MatchSetupView: View {
             HStack {
                 Spacer()
                 Button { pickingSlot = 0 } label: {
-                    AppSymbol("person.2.circle", size: 22, color: SharedColors.gold)
+                    AppSymbol("person.2.circle", size: 22, color: SharedColors.accent)
                         .frame(width: 44, height: 32)
                 }
                 .buttonStyle(.plain)
@@ -275,7 +275,7 @@ public struct MatchSetupView: View {
                 Text("GAMES GEWONNEN")
                     .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                     .tracking(1)
-                    .foregroundColor(SharedColors.gold)
+                    .foregroundColor(SharedColors.accent)
                 gamesRow(name1, color: SharedColors.accent, value: gamesBefore1, onMinus: { gamesBefore1 = max(0, gamesBefore1 - 1) }, onPlus: { gamesBefore1 = min(2, gamesBefore1 + 1) })
                 gamesRow(name2, color: SharedColors.steelBlue, value: gamesBefore2, onMinus: { gamesBefore2 = max(0, gamesBefore2 - 1) }, onPlus: { gamesBefore2 = min(2, gamesBefore2 + 1) })
                 if !headStartIsValid {

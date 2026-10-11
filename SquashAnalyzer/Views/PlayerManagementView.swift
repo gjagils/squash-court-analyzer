@@ -85,11 +85,11 @@ struct PlayerManagementView: View {
                             } label: {
                                 if importingTeam {
                                     ProgressView()
-                                        .tint(AppColors.accentGold)
+                                        .tint(AppColors.warmOrange)
                                 } else {
                                     Image(systemName: "square.and.arrow.down")
                                         .font(SharedFonts.system(20))
-                                        .foregroundColor(AppColors.accentGold)
+                                        .foregroundColor(AppColors.warmOrange)
                                 }
                             }
                             .disabled(importingTeam)
@@ -98,7 +98,7 @@ struct PlayerManagementView: View {
                             Button(action: { showingAddPlayer = true }) {
                                 Image(systemName: "plus.circle")
                                     .font(SharedFonts.system(22))
-                                    .foregroundColor(AppColors.accentGold)
+                                    .foregroundColor(AppColors.warmOrange)
                             }
                         }
                     }
@@ -321,7 +321,7 @@ struct PlayerRowView: View {
                 Button(action: onSelect) {
                     Image(systemName: "chevron.right.circle")
                         .font(SharedFonts.system(24))
-                        .foregroundColor(AppColors.accentGold)
+                        .foregroundColor(AppColors.warmOrange)
                 }
             } else {
                 HStack(spacing: 18) {
@@ -484,7 +484,7 @@ struct PlayerEditSheet: View {
                                 .foregroundColor(AppColors.backgroundDark)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
-                                .background(RoundedRectangle(cornerRadius: 10).fill(AppColors.accentGold))
+                                .background(RoundedRectangle(cornerRadius: 10).fill(AppColors.warmOrange))
                         }
                         .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                     }

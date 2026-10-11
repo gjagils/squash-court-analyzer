@@ -33,7 +33,7 @@ public struct HomeMenuHeader: View {
                 Image(AppTheme.shared.isLight ? "home-logo-light" : "home-logo", bundle: .module)
                     .resizable().scaledToFit().frame(width: HomeMenuHeader.logoSize, height: HomeMenuHeader.logoSize)
                     .accessibilityHidden(true)
-                VStack(alignment: .center, spacing: 4) {
+                VStack(alignment: .center, spacing: 0) {
                     // Wordmark as on the sticker: "Analyzer" in brand orange.
                     HStack(spacing: 0) {
                         Text("Squash").foregroundColor(SharedColors.textPrimary)
@@ -48,7 +48,9 @@ public struct HomeMenuHeader: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
-                    // The line from the stickers and the website
+                        .padding(.top, 1)
+                    // The line from the stickers and the website, with room
+                    // above it so it does not stick to the sentence
                     Text("SCHEIDSEN · COACHEN · DELEN")
                         .font(SharedFonts.system(11, weight: .bold, design: .rounded))
                         .tracking(1.4)
@@ -56,6 +58,7 @@ public struct HomeMenuHeader: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .accessibilityLabel("Scheidsen, coachen, delen")
+                        .padding(.top, 9)
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: HomeMenuHeader.logoSize)

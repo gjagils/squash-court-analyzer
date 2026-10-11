@@ -137,6 +137,8 @@ Vóór de upload:
 
 ## Wat nu door Gerd-Jan te testen is (stand 11 oktober, iPhone 3.0 (2.5))
 
+Afgehandeld: Gerd-Jan heeft dit alles op zijn telefoon bekeken in 3.0 build 3.
+
 - **Lichte modus**: alle schermen langs, ook analyse na een coachwedstrijd,
   profiel, badges, Competitie en een teamwedstrijd; wisselen tijdens een
   wedstrijd; Systeem met de telefoon op licht en op donker.

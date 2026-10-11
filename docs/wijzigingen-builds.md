@@ -105,7 +105,7 @@ vernieuwd; het oude concept 2.2 in App Store Connect heet nu 3.0 (nog niet inged
   (Android, en op iOS vanuit Coach/Scheidsrechter) zijn de systeemknoppen vervangen door
   `ActionButton`; de AI Coach-knop en het pictogram zijn op iOS oranje zoals de andere blokken
   in plaats van goud.
-- **Scherm blijft aan tijdens een wedstrijd (11 oktober 2026, in build 3)**: coach- en scheidsrechterscherm zetten de schermvergrendeling uit
+- **Scherm blijft aan tijdens een wedstrijd (11 oktober 2026; in build 3, door Gerd-Jan bekeken)**: coach- en scheidsrechterscherm zetten de schermvergrendeling uit
   zolang ze open zijn (`ScreenAwake`, via SkipUI ook op Android). Backlog voor de volgende
   test en de launch: `docs/backlog-personas-2026-10-11.md`.
 - **Lichte modus bijgewerkt na de eerste test (11 oktober 2026)**: de serveerder (de
@@ -114,7 +114,7 @@ vernieuwd; het oude concept 2.2 in App Store Connect heet nu 3.0 (nog niet inged
   van de app (`home-logo-light`). Het app-icoon zelf blijft altijd donker (besluit Gerd-Jan,
   11 oktober; een lichte iOS-variant is geprobeerd en weer weggehaald). Tagline van de stickers *Scheidsen · Coachen · Delen*
   bovenin de app en in de hero van de website.
-- **Lichte modus in de apps, rondleiding, delen en feedback (11 oktober 2026, in build 3)**: Instellingen →
+- **Lichte modus in de apps, rondleiding, delen en feedback (11 oktober 2026; in build 3, door Gerd-Jan bekeken)**: Instellingen →
   *Weergave* (Systeem / Licht / Donker, standaard Donker; `AppAppearance`, `AppTheme`).
   Elke kleur in `SharedColors` heeft een donkere waarde (ongewijzigd) en een warme lichte
   (`docs/style/tokens.json` → `themes.light`); functionele kleuren hebben donkerdere lichte
@@ -142,7 +142,7 @@ vernieuwd; het oude concept 2.2 in App Store Connect heet nu 3.0 (nog niet inged
   (4,6:1) en liverood #C62A2F (wit label 5,6:1). Livepagina's gaan mee met de push naar
   `main`; de website is nog niet gepubliceerd. De apps volgen apart.
 
-- **Spelersprofiel (9 oktober 2026, in build 3)**: op
+- **Spelersprofiel (9 oktober 2026; in build 3, door Gerd-Jan bekeken)**: op
   het badgescherm van een speler staat bovenaan *Profiel* (iOS en Android, gedeeld scherm
   `SharedPlayerTrendView`, berekening in Core `PlayerTrend`). Kaarten: Vorm (laatste 10
   uitslagen), Winners en fouten per game als lijnen met "van … naar …" vanaf 4
@@ -209,8 +209,8 @@ vernieuwd; het oude concept 2.2 in App Store Connect heet nu 3.0 (nog niet inged
 
 ## 3.0 build 2 (geüpload 8 oktober 2026)
 
-- **Teamwedstrijd: eigen of gedeeld, en delen op één plek (8 oktober 2026,
-  in build 3)**: zie
+- **Teamwedstrijd: eigen of gedeeld, en delen op één plek (8 oktober 2026;
+  in build 3, door Gerd-Jan bekeken)**: zie
   `docs/plan-teamwedstrijd-eenvoudiger-bouw.md`. Iedere teamwedstrijd draagt
   het label GEDEELD (oranje, heeft een livepagina) of EIGEN (grijs, alleen deze
   telefoon): in de lijst van Competitie (met de kopjes "Gedeeld met mijn team"

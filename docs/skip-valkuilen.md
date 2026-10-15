@@ -43,6 +43,10 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
   en locale.
 - **Bytes in Core**: geen `Data([0xFF…])`, `data[0]` of `Data(repeating:)`; werk via
   base64. `Data.write(to:options:)` vraagt het volle type: `Data.WritingOptions.atomic`.
+- **Een functie met alleen een optionele aanroep** (`func f() { hook?(x) }`) wordt in Kotlin
+  een expressie-body die `Unit?` teruggeeft en compileert niet ("expected 'Unit', actual
+  'Unit?'", 15 oktober, `LiveShareSync.endLocal`). Schrijf `guard let hook else { return }`
+  en dan `hook(x)`.
 - **Async-code in tests**: wacht op het eindresultaat, niet op een tussenstap
   (poll met een korte slaap en een limiet).
 

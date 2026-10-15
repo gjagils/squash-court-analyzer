@@ -54,6 +54,7 @@ import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.outlined.VerticalAlignBottom
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.ScreenLockPortrait
 import androidx.compose.material3.Icon
 import androidx.compose.ui.unit.dp
 #endif
@@ -184,6 +185,7 @@ struct AppSymbol: View {
         case "arrow.left": return Icons.AutoMirrored.Outlined.ArrowBack
         case "play.fill": return Icons.Outlined.PlayArrow
         case "magnifyingglass": return Icons.Outlined.Search
+        case "lock.iphone": return Icons.Outlined.ScreenLockPortrait
         default: return nil
         }
     }

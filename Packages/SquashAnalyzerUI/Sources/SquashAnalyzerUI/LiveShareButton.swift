@@ -123,8 +123,16 @@ public struct LiveShareButton: View {
 /// screens call this where they save the match). The final state deletes the
 /// session at once. Nothing happens when the match is not live.
 public enum LiveShareSync {
+    /// Platform hook for "Stand op vergrendelscherm": the score of the match
+    /// this phone is scoring, with the start of the match timer when known
+    /// (iOS: a Live Activity updated locally; nil on Android for now)
+    @MainActor public static var localActivity: ((UUID, LiveSnapshot, Date?) -> Void)? = nil
+    /// The scoring screen closed: take the match off the lock screen
+    @MainActor public static var localActivityEnded: ((UUID) -> Void)? = nil
+
     @MainActor
-    public static func send(matchId: UUID, snapshot: LiveSnapshot) {
+    public static func send(matchId: UUID, snapshot: LiveSnapshot, startedAt: Date? = nil) {
+        localActivity?(matchId, snapshot, startedAt)
         // A match played for a partij of a live team match also goes to the team page
         TeamLive.shared.forward(matchId: matchId, snapshot: snapshot)
         let live = LiveShare.shared
@@ -134,5 +142,12 @@ public enum LiveShareSync {
         } else {
             live.update(matchId: matchId, snapshot: snapshot)
         }
+    }
+
+    /// The scoring screen of `matchId` closed (finished, saved for later or
+    /// dropped): the lock screen no longer shows it
+    @MainActor
+    public static func endLocal(matchId: UUID) {
+        localActivityEnded?(matchId)
     }
 }

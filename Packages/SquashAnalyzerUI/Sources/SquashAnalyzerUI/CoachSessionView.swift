@@ -116,6 +116,8 @@ public struct CoachSessionView: View {
         .onDisappear {
             saver.onExit = {}
             ScreenAwake.set(false)
+            // "Stand op vergrendelscherm" ends with the scoring screen
+            if let match { LiveShareSync.endLocal(matchId: match.id) }
         }
         .sheet(isPresented: $showingHistory) {
             if let historyStore {

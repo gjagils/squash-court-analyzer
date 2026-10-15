@@ -23,6 +23,7 @@ struct SettingsView: View {
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     @AppStorage(LiveShare.enabledKey) private var liveSharing = true
     @AppStorage(LiveShare.photosKey) private var livePhotos = true
+    @AppStorage(LiveFollow.ownMatchKey) private var lockScreenScore = true
 
     var body: some View {
         ZStack {
@@ -216,6 +217,16 @@ struct SettingsView: View {
             .tint(AppColors.warmOrange)
             .disabled(!liveSharing)
             Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.")
+                .font(AppFonts.caption(11))
+                .foregroundColor(AppColors.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+            Toggle(isOn: $lockScreenScore) {
+                Text("Stand op vergrendelscherm")
+                    .font(AppFonts.label(14))
+                    .foregroundColor(AppColors.textPrimary)
+            }
+            .tint(AppColors.warmOrange)
+            Text("Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen op het beginscherm.")
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)

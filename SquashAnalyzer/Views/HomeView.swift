@@ -13,6 +13,8 @@ struct HomeView: View {
     var onReferee: () -> Void
     var onViewHistory: () -> Void
     var onOpenSettings: () -> Void
+    /// Wedstrijd volgen (live score op het vergrendelscherm)
+    var onLiveFollow: () -> Void
 
     @State private var showingPlayerManagement = false
     @State private var showingBadgeCatalog = false
@@ -34,7 +36,8 @@ struct HomeView: View {
                         onHistory: onViewHistory,
                         onPlayers: { showingPlayerManagement = true },
                         onBadges: { showingBadgeCatalog = true },
-                        onCompetition: { showingCompetition = true }
+                        onCompetition: { showingCompetition = true },
+                        onLiveFollow: onLiveFollow
                     )
                 }
                 .padding(.top, 8)

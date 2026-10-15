@@ -47,6 +47,7 @@ final class LiveFollowTests: XCTestCase {
         XCTAssertEqual(presenter.started.count, 1)
         XCTAssertEqual(presenter.started.first?.p1, "Jan")
         XCTAssertTrue(follow.isFollowing(target))
+        XCTAssertEqual(follow.title(of: target), "Jan – Piet")
         XCTAssertEqual(transport.requests.first?.method, "GET")
         XCTAssertEqual(transport.requests.first?.url, "https://live.squashanalyzer.com/api/live/abcdefgh2345")
 
@@ -65,6 +66,25 @@ final class LiveFollowTests: XCTestCase {
     }
 
     @MainActor
+    func testRestoreFollowsAgainWithoutAskingTheServer() async {
+        let transport = FakeFollowTransport()
+        let follow = LiveFollow(transport: transport)
+        follow.presenter = FakeFollowPresenter()
+        let target = LiveFollowTarget(id: "abcdefgh2345", server: LiveFollowLink.defaultServer)
+        follow.restore(target, title: "Jan – Piet")
+        follow.restore(target)
+        XCTAssertEqual(follow.following, [target])
+        XCTAssertEqual(follow.title(of: target), "Jan – Piet")
+        XCTAssertTrue(transport.requests.isEmpty)
+        await follow.tokenChanged("tok2", for: target)
+        XCTAssertEqual(transport.requests.count, 1)
+        XCTAssertEqual(transport.requests.first?.method, "POST")
+        follow.forget(target)
+        XCTAssertFalse(follow.isFollowing(target))
+        XCTAssertNil(follow.title(of: target))
+    }
+
+    @MainActor
     func testAFinishedMatchCannotBeFollowed() async {
         let transport = FakeFollowTransport()
         transport.getStatus = 404
@@ -75,6 +95,7 @@ final class LiveFollowTests: XCTestCase {
             XCTFail("a finished match throws")
         } catch {
             XCTAssertEqual(error as? LiveFollowError, LiveFollowError.notFound)
+            XCTAssertEqual(LiveFollowError.notFound.message, "Deze wedstrijd is afgelopen of de link klopt niet.")
         }
     }
 
@@ -90,6 +111,9 @@ final class LiveFollowTests: XCTestCase {
         await follow.tokenChanged("tok1", for: target)
         XCTAssertFalse(follow.isFollowing(target))
         XCTAssertEqual(presenter.stopped, [target])
+        XCTAssertEqual(follow.lastError, LiveFollowError.pushUnavailable)
+        try await follow.follow(target)
+        XCTAssertNil(follow.lastError, "a new attempt starts clean")
     }
 }
 

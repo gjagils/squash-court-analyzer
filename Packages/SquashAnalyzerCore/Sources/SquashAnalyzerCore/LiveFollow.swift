@@ -161,6 +161,24 @@ public enum LiveFollowError: Error, Equatable {
     /// The phone does not allow it (Live Activities or notifications off)
     case notAllowed
     case refused(status: Int)
+
+    /// What the app tells the user (iOS and Android)
+    public var message: String {
+        switch self {
+        case .noTransport, .noPresenter:
+            return "Deze versie van de app kan de stand nog niet op het vergrendelscherm zetten."
+        case .noConnection:
+            return "Geen verbinding met de live-server. Controleer de internetverbinding en probeer het opnieuw."
+        case .notFound:
+            return "Deze wedstrijd is afgelopen of de link klopt niet."
+        case .pushUnavailable:
+            return "Deze server kan de stand nog niet naar je telefoon sturen."
+        case .notAllowed:
+            return "Je telefoon staat het niet toe. Zet Live Activities (iPhone) of meldingen (Android) aan voor SquashAnalyzer in de instellingen van je telefoon."
+        case .refused:
+            return "Volgen lukte niet. Probeer het later opnieuw."
+        }
+    }
 }
 
 /// The platform part: shows the match on the lock screen. iOS: a Live
@@ -186,11 +204,20 @@ public protocol LiveFollowPresenter: AnyObject {
 public final class LiveFollow {
     public static let shared = LiveFollow()
 
+    /// Instellingen: "Stand op vergrendelscherm" for the match this phone is
+    /// scoring (on by default)
+    public static let ownMatchKey = "liveLockScreenOwnMatch"
+
     public var transport: (any LiveTransport)? = nil
     public var presenter: (any LiveFollowPresenter)? = nil
     public private(set) var following: [LiveFollowTarget] = []
+    /// Why the last followed match came off the lock screen again (the server
+    /// refused its push token), for the screen that started following it
+    public private(set) var lastError: LiveFollowError? = nil
     /// The last token sent per match id, so the same one is not sent twice
     private var tokens: [String: String] = [:]
+    /// "Jan – Piet" per match id, for the list of followed matches
+    private var titles: [String: String] = [:]
 
     public init(transport: (any LiveTransport)? = nil) {
         self.transport = transport
@@ -198,8 +225,12 @@ public final class LiveFollow {
 
     public func isFollowing(_ target: LiveFollowTarget) -> Bool { following.contains(target) }
 
+    /// "Jan – Piet", once the state was read (or restored with a title)
+    public func title(of target: LiveFollowTarget) -> String? { titles[target.id] }
+
     /// Reads the current state and puts the match on the lock screen
     public func follow(_ target: LiveFollowTarget) async throws {
+        lastError = nil
         guard let transport else { throw LiveFollowError.noTransport }
         guard let presenter else { throw LiveFollowError.noPresenter }
         guard let url = URL(string: target.server + "/api/live/" + target.id) else { throw LiveFollowError.notFound }
@@ -214,6 +245,7 @@ public final class LiveFollow {
             throw LiveFollowError.refused(status: response.status)
         }
         try await presenter.start(target, snapshot: state.snapshot)
+        titles[target.id] = state.snapshot.p1 + " – " + state.snapshot.p2
         if !following.contains(target) { following.append(target) }
     }
 
@@ -226,6 +258,7 @@ public final class LiveFollow {
             tokens[target.id] = token
         } catch {
             // Without pushes the lock screen would show a stand that never changes
+            lastError = (error as? LiveFollowError) ?? LiveFollowError.noConnection
             await stopFollowing(target)
         }
     }
@@ -261,10 +294,19 @@ public final class LiveFollow {
         _ = try? await transport.send(method: "DELETE", url: url, headers: ["Content-Type": "application/json"], body: body)
     }
 
+    /// A match the platform still shows on the lock screen after a restart of
+    /// the app (iOS: a running Live Activity): followed again without asking
+    /// the server; its token comes back through `tokenChanged`
+    public func restore(_ target: LiveFollowTarget, title: String? = nil) {
+        if let title { titles[target.id] = title }
+        if !following.contains(target) { following.append(target) }
+    }
+
     /// The match ended or the user dismissed it on the lock screen: forget it here
     public func forget(_ target: LiveFollowTarget) {
         following.removeAll { item in item == target }
         tokens[target.id] = nil
+        titles[target.id] = nil
     }
 
     private func stopFollowing(_ target: LiveFollowTarget) async {

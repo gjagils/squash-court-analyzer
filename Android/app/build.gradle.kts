@@ -26,6 +26,42 @@ val uploadStorePassword = providers.gradleProperty("SQUASH_UPLOAD_STORE_PASSWORD
 val uploadKeyPassword = providers.gradleProperty("SQUASH_UPLOAD_KEY_PASSWORD").orNull
 val hasUploadKey = uploadStoreFile.exists() && uploadStorePassword != null && uploadKeyPassword != null
 
+// Firebase Cloud Messaging (live score on the lock screen): the project's
+// google-services.json stays out of the public repo, in ~/.android-keys (or
+// -PGOOGLE_SERVICES_JSON / env GOOGLE_SERVICES_JSON). Its four values become
+// BuildConfig fields and the app initialises Firebase itself (FirebaseConfig);
+// without the file the app builds and runs, only without lock screen pushes.
+// No google-services plugin, so nothing else of Firebase is switched on.
+val googleServicesFile = file(
+    providers.gradleProperty("GOOGLE_SERVICES_JSON").orNull
+        ?: System.getenv("GOOGLE_SERVICES_JSON")
+        ?: "${System.getProperty("user.home")}/.android-keys/google-services.json"
+)
+val firebaseValues: Map<String, String> = run {
+    val empty = mapOf("projectId" to "", "appId" to "", "apiKey" to "", "senderId" to "")
+    if (!googleServicesFile.exists()) return@run empty
+    try {
+        @Suppress("UNCHECKED_CAST")
+        val json = groovy.json.JsonSlurper().parse(googleServicesFile) as Map<String, Any?>
+        val project = json["project_info"] as Map<String, Any?>
+        val clients = json["client"] as List<Map<String, Any?>>
+        val client = clients.firstOrNull { client ->
+            val info = (client["client_info"] as Map<String, Any?>)["android_client_info"] as Map<String, Any?>
+            info["package_name"] == "com.squashanalyzer.android"
+        } ?: return@run empty
+        val keys = client["api_key"] as List<Map<String, Any?>>
+        mapOf(
+            "projectId" to project["project_id"].toString(),
+            "appId" to (client["client_info"] as Map<String, Any?>)["mobilesdk_app_id"].toString(),
+            "apiKey" to keys.first()["current_key"].toString(),
+            "senderId" to project["project_number"].toString(),
+        )
+    } catch (e: Exception) {
+        logger.warn("google-services.json not readable, live score pushes off: ${e.message}")
+        empty
+    }
+}
+
 // Room writes the database schema per version into schemas/ (committed), so
 // a future migration (9 -> 10) can be tested with MigrationTestHelper
 ksp {
@@ -45,6 +81,10 @@ android {
         versionCode = squashCode + squashInternal
         versionName = if (squashInternal == 0) "$squashVersion ($squashBuild)" else "$squashVersion ($squashBuild.$squashInternal)"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "FIREBASE_PROJECT_ID", "\"${firebaseValues["projectId"]}\"")
+        buildConfigField("String", "FIREBASE_APP_ID", "\"${firebaseValues["appId"]}\"")
+        buildConfigField("String", "FIREBASE_API_KEY", "\"${firebaseValues["apiKey"]}\"")
+        buildConfigField("String", "FIREBASE_SENDER_ID", "\"${firebaseValues["senderId"]}\"")
     }
 
     signingConfigs {
@@ -86,6 +126,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -109,6 +150,9 @@ dependencies {
     }
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
+    // Live score on the lock screen: pushes from the live server (FirebaseConfig)
+    implementation(platform("com.google.firebase:firebase-bom:35.0.1"))
+    implementation("com.google.firebase:firebase-messaging")
     // Automatic backups write into a folder the user picks (Storage Access Framework)
     implementation("androidx.documentfile:documentfile:1.0.1")
 

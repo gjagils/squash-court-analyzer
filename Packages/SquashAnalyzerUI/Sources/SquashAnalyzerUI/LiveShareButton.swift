@@ -148,6 +148,8 @@ public enum LiveShareSync {
     /// dropped): the lock screen no longer shows it
     @MainActor
     public static func endLocal(matchId: UUID) {
-        localActivityEnded?(matchId)
+        // A single optional call is an expression body in Kotlin (Unit? ≠ Unit)
+        guard let ended = localActivityEnded else { return }
+        ended(matchId)
     }
 }

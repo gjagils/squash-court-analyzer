@@ -242,7 +242,12 @@ async function sendFcm(account, follower, id, server, snapshot, event) {
   const unregistered = status === 'UNREGISTERED' || details.some((d) => d && d.errorCode === 'UNREGISTERED');
   const detail = `fcm ${response.status} ${unregistered ? 'UNREGISTERED' : status}`.trim();
   if (response.status === 404 || unregistered) return { result: 'dead', detail };
-  if (response.status === 400 && status === 'INVALID_ARGUMENT') return { result: 'dead', detail };
+  // Only a token FCM calls invalid is forgotten: an INVALID_ARGUMENT about our
+  // own message must not cost every Android follower
+  const message = body && body.error && typeof body.error.message === 'string' ? body.error.message : '';
+  if (response.status === 400 && status === 'INVALID_ARGUMENT' && /registration token/i.test(message)) {
+    return { result: 'dead', detail };
+  }
   console.error('fcm push failed', response.status, status);
   return { result: 'error', detail };
 }

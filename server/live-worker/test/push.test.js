@@ -18,6 +18,8 @@ const IOS_SANDBOX = 'cd'.repeat(32);
 const IOS_DEAD = 'de'.repeat(32);
 const ANDROID = 'fcm-token:abc_DEF-123.x';
 const ANDROID_GONE = 'gone:token';
+const ANDROID_INVALID = 'invalid:token';
+const ANDROID_OTHER_400 = 'other400:token';
 
 let ipCounter = 0;
 const nextIp = () => `10.4.${Math.floor(ipCounter / 250)}.${(ipCounter++ % 250) + 1}`;
@@ -70,6 +72,10 @@ function fakeFetch(url, init) {
   if (url.startsWith('https://fcm.googleapis.com/')) {
     const token = JSON.parse(init.body).message.token;
     if (token === ANDROID_GONE) return json(404, { error: { code: 404, status: 'NOT_FOUND', details: [{ errorCode: 'UNREGISTERED' }] } });
+    if (token === ANDROID_INVALID) {
+      return json(400, { error: { code: 400, status: 'INVALID_ARGUMENT', message: 'The registration token is not a valid FCM registration token' } });
+    }
+    if (token === ANDROID_OTHER_400) return json(400, { error: { code: 400, status: 'INVALID_ARGUMENT', message: 'Invalid value at message.data' } });
     return json(200, { name: 'projects/squash-test/messages/1' });
   }
   return json(500);
@@ -215,6 +221,16 @@ describe('pushing', () => {
     await runInDurableObject(stub(id), (instance) => instance.pushesDone());
     expect(fcmCalls().length).toBe(2);
     expect((await followers(id)).map((f) => f.token)).toEqual([ANDROID]);
+    await call('DELETE', `/api/live/${id}`, undefined, writeKey);
+  });
+
+  it('an invalid FCM token is forgotten, a 400 about the message is not', async () => {
+    const { id, writeKey } = (await call('POST', '/api/live', snapshot)).json;
+    await follow(id, { platform: 'android', token: ANDROID_INVALID });
+    await follow(id, { platform: 'android', token: ANDROID_OTHER_400 });
+    await call('PUT', `/api/live/${id}`, snapshot, writeKey);
+    await runInDurableObject(stub(id), (instance) => instance.pushesDone());
+    expect((await followers(id)).map((f) => f.token)).toEqual([ANDROID_OTHER_400]);
     await call('DELETE', `/api/live/${id}`, undefined, writeKey);
   });
 

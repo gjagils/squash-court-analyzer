@@ -15,6 +15,7 @@ import squash.analyzer.core.LiveFollow
  */
 class LiveFollowMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
+        if (BuildConfig.DEBUG) android.util.Log.d("LiveFollow", "Push ${message.data["event"]} voor ${message.data["id"]}")
         handle(applicationContext, message.data)
     }
 

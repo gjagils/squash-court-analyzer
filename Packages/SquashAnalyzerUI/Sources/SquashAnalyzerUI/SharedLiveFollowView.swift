@@ -44,7 +44,13 @@ public struct SharedLiveFollowView: View {
                                      disabled: busy || text.trimmingCharacters(in: .whitespaces).isEmpty) {
                             Task { await start() }
                         }
-                        if let message {
+                        // The server can still refuse the phone's push token after the match was put on the lock screen
+                        if let error = follow.lastError, !busy {
+                            Text(error.message)
+                                .font(SharedFonts.system(12))
+                                .foregroundColor(SharedColors.error)
+                                .fixedSize(horizontal: false, vertical: true)
+                        } else if let message {
                             Text(message)
                                 .font(SharedFonts.system(12))
                                 .foregroundColor(failed ? SharedColors.error : SharedColors.textSecondary)

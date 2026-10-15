@@ -211,6 +211,9 @@ public final class LiveFollow {
     public var transport: (any LiveTransport)? = nil
     public var presenter: (any LiveFollowPresenter)? = nil
     public private(set) var following: [LiveFollowTarget] = []
+    /// Why the last followed match came off the lock screen again (the server
+    /// refused its push token), for the screen that started following it
+    public private(set) var lastError: LiveFollowError? = nil
     /// The last token sent per match id, so the same one is not sent twice
     private var tokens: [String: String] = [:]
     /// "Jan – Piet" per match id, for the list of followed matches
@@ -227,6 +230,7 @@ public final class LiveFollow {
 
     /// Reads the current state and puts the match on the lock screen
     public func follow(_ target: LiveFollowTarget) async throws {
+        lastError = nil
         guard let transport else { throw LiveFollowError.noTransport }
         guard let presenter else { throw LiveFollowError.noPresenter }
         guard let url = URL(string: target.server + "/api/live/" + target.id) else { throw LiveFollowError.notFound }
@@ -254,6 +258,7 @@ public final class LiveFollow {
             tokens[target.id] = token
         } catch {
             // Without pushes the lock screen would show a stand that never changes
+            lastError = (error as? LiveFollowError) ?? LiveFollowError.noConnection
             await stopFollowing(target)
         }
     }

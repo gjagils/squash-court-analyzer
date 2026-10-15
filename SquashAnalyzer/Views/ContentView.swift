@@ -32,9 +32,9 @@ struct ContentView: View {
     @State private var showingTeamJoin = false
     /// A link of ours this version cannot open (made by a newer app)
     @State private var showingNewerAppNeeded = false
-    /// Wedstrijd volgen: open, with the live link that opened it (squashanalyzer://volg#…)
-    @State private var showingLiveFollow = false
-    @State private var liveFollowLink = ""
+    /// Wedstrijd volgen on screen, with the live link that opened it (squashanalyzer://volg#…).
+    /// An item, not a flag: a sheet's content closure does not see a link set in the same update.
+    @State private var liveFollow: LiveFollowRequest? = nil
     /// A live link that came in during a match waits for the screen to be free
     @State private var pendingLiveFollow: String? = nil
     @Environment(\.openURL) private var openURL
@@ -56,10 +56,7 @@ struct ContentView: View {
                  onReferee: { showingReferee = true },
                  onViewHistory: { showingHistory = true },
                  onOpenSettings: { showingSettings = true },
-                 onLiveFollow: {
-                     liveFollowLink = ""
-                     showingLiveFollow = true
-                 })
+                 onLiveFollow: { liveFollow = LiveFollowRequest(link: "") })
         .fullScreenCover(isPresented: $showingCoach) {
             let players = SwiftDataPlayerStore(context: modelContext)
             CoachSessionView(store: SwiftDataCoachMatchStore(context: modelContext), playerStore: players, photoStore: players,
@@ -173,9 +170,8 @@ struct ContentView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { presentPendingTeam() }
             }
         }
-        .sheet(isPresented: $showingLiveFollow) {
-            SharedLiveFollowView(initialLink: liveFollowLink) { showingLiveFollow = false }
-                .id(liveFollowLink)
+        .sheet(item: $liveFollow) { request in
+            SharedLiveFollowView(initialLink: request.link) { liveFollow = nil }
         }
         // A link to a live team match (Competitie): join it
         .sheet(isPresented: $showingTeamJoin, onDismiss: { cardInbox.pendingTeam = nil }) {
@@ -209,11 +205,8 @@ struct ContentView: View {
     private func presentPendingLiveFollow() {
         guard let link = pendingLiveFollow, !anyCoverOpen, !showingTeamJoin else { return }
         pendingLiveFollow = nil
-        // Already open: closed first, so the screen starts again with the new link
-        let delay = showingLiveFollow ? 0.6 : 0.0
-        showingLiveFollow = false
-        liveFollowLink = link
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { showingLiveFollow = true }
+        // Already open: a new item replaces the screen, which starts again with the new link
+        liveFollow = LiveFollowRequest(link: link)
     }
 
     /// The join sheet for a pending invitation, as soon as no cover is up
@@ -262,4 +255,10 @@ struct ContentView: View {
         }
     }
     #endif
+}
+
+/// A request to show Wedstrijd volgen, with the live link that opened it (empty from the menu)
+struct LiveFollowRequest: Identifiable {
+    let id = UUID()
+    let link: String
 }

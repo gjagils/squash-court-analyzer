@@ -111,6 +111,9 @@ final class LiveFollowTests: XCTestCase {
         await follow.tokenChanged("tok1", for: target)
         XCTAssertFalse(follow.isFollowing(target))
         XCTAssertEqual(presenter.stopped, [target])
+        XCTAssertEqual(follow.lastError, LiveFollowError.pushUnavailable)
+        try await follow.follow(target)
+        XCTAssertNil(follow.lastError, "a new attempt starts clean")
     }
 }
 

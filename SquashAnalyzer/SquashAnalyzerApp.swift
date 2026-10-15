@@ -11,6 +11,11 @@ struct SquashAnalyzerApp: App {
     init() {
         // Live meekijken: the shared LiveShare sends the state through URLSession (server/live)
         LiveShare.shared.transport = URLSessionLiveTransport()
+        // Live score op het vergrendelscherm: Live Activities (followed matches and the own match)
+        ActivityKitLiveFollowPresenter.shared.install()
+        #if DEBUG
+        LiveActivityDemo.runIfRequested()
+        #endif
         // "Deel als plaatje" in the shared share screen
         IOSShare.installResultImageSharing()
         // The coach's notes per game live next to the team matches (GameNotes)

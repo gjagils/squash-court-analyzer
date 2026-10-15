@@ -54,6 +54,13 @@
 		F8FD9EFD2F5D73C5008892F1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F8FD9EFC2F5D73C5008892F1 /* PrivacyInfo.xcprivacy */; };
 		A40000000000000000000001 /* SquashAnalyzerUI in Frameworks */ = {isa = PBXBuildFile; productRef = A40000000000000000000003 /* SquashAnalyzerUI */; };
 		A40000000000000000000002 /* SquashAnalyzerUI in Frameworks */ = {isa = PBXBuildFile; productRef = A40000000000000000000003 /* SquashAnalyzerUI */; };
+		C1000001 /* LiveScoreAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000001 /* LiveScoreAttributes.swift */; };
+		C1000002 /* LiveScoreAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000001 /* LiveScoreAttributes.swift */; };
+		C1000003 /* SquashLiveActivityBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000002 /* SquashLiveActivityBundle.swift */; };
+		C1000004 /* LiveScoreActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000003 /* LiveScoreActivityWidget.swift */; };
+		C1000005 /* SquashLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C3000001 /* SquashLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeaderOnCopy, ); }; };
+		C1000006 /* ActivityKitLiveFollowPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000005 /* ActivityKitLiveFollowPresenter.swift */; };
+		C1000007 /* LiveScoreAttributesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000006 /* LiveScoreAttributesTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,7 +71,28 @@
 			remoteGlobalIDString = A6000001;
 			remoteInfo = SquashAnalyzer;
 		};
+		C8000010 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A8000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C6000001;
+			remoteInfo = SquashLiveActivity;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C4000020 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				C1000005 /* SquashLiveActivity.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		A2000001 /* SquashAnalyzerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquashAnalyzerApp.swift; sourceTree = "<group>"; };
@@ -113,6 +141,13 @@
 		B3000010 /* SquashAnalyzerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SquashAnalyzerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8FD9EFB2F5D5D94008892F1 /* SquashAnalyzer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SquashAnalyzer.entitlements; sourceTree = "<group>"; };
 		F8FD9EFC2F5D73C5008892F1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		C2000001 /* LiveScoreAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveScoreAttributes.swift; sourceTree = "<group>"; };
+		C2000002 /* SquashLiveActivityBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquashLiveActivityBundle.swift; sourceTree = "<group>"; };
+		C2000003 /* LiveScoreActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveScoreActivityWidget.swift; sourceTree = "<group>"; };
+		C2000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C2000005 /* ActivityKitLiveFollowPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityKitLiveFollowPresenter.swift; sourceTree = "<group>"; };
+		C2000006 /* LiveScoreAttributesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveScoreAttributesTests.swift; sourceTree = "<group>"; };
+		C3000001 /* SquashLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SquashLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +169,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C4000010 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -142,6 +184,8 @@
 			children = (
 				A5000002 /* SquashAnalyzer */,
 				B5000010 /* SquashAnalyzerTests */,
+				C5000001 /* Shared */,
+				C5000002 /* SquashLiveActivity */,
 				F8B8AB9830691B0A0098B973 /* Frameworks */,
 				A5000003 /* Products */,
 			);
@@ -167,6 +211,7 @@
 			children = (
 				A3000001 /* SquashAnalyzer.app */,
 				B3000010 /* SquashAnalyzerTests.xctest */,
+				C3000001 /* SquashLiveActivity.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -215,6 +260,7 @@
 				B2000002 /* MatchRepository.swift */,
 				B2000003 /* PersistenceSchema.swift */,
 				A2000024 /* NetworkTransports.swift */,
+				C2000005 /* ActivityKitLiveFollowPresenter.swift */,
 				A2000025 /* APIKeyManager.swift */,
 				A2000031 /* ExportService.swift */,
 				B2000090 /* AutomaticBackup.swift */,
@@ -234,6 +280,7 @@
 				B2000066 /* BadgeAwardTests.swift */,
 				B2000023 /* MigrationTests.swift */,
 				B2000022 /* TeamImportTests.swift */,
+				C2000006 /* LiveScoreAttributesTests.swift */,
 			);
 			path = SquashAnalyzerTests;
 			sourceTree = "<group>";
@@ -243,6 +290,24 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C5000001 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				C2000001 /* LiveScoreAttributes.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		C5000002 /* SquashLiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				C2000002 /* SquashLiveActivityBundle.swift */,
+				C2000003 /* LiveScoreActivityWidget.swift */,
+				C2000004 /* Info.plist */,
+			);
+			path = SquashLiveActivity;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -255,10 +320,12 @@
 				A4000002 /* Sources */,
 				A4000001 /* Frameworks */,
 				A4000003 /* Resources */,
+				C4000020 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				C8000011 /* PBXTargetDependency */,
 			);
 			name = SquashAnalyzer;
 			packageProductDependencies = (
@@ -291,6 +358,23 @@
 			productReference = B3000010 /* SquashAnalyzerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		C6000001 /* SquashLiveActivity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C7000001 /* Build configuration list for PBXNativeTarget "SquashLiveActivity" */;
+			buildPhases = (
+				C4000011 /* Sources */,
+				C4000010 /* Frameworks */,
+				C4000012 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SquashLiveActivity;
+			productName = SquashLiveActivity;
+			productReference = C3000001 /* SquashLiveActivity.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -307,6 +391,9 @@
 					B6000010 = {
 						CreatedOnToolsVersion = 26.3;
 						TestTargetID = A6000001;
+					};
+					C6000001 = {
+						CreatedOnToolsVersion = 26.3;
 					};
 				};
 			};
@@ -329,6 +416,7 @@
 			targets = (
 				A6000001 /* SquashAnalyzer */,
 				B6000010 /* SquashAnalyzerTests */,
+				C6000001 /* SquashLiveActivity */,
 			);
 		};
 /* End PBXProject section */
@@ -350,6 +438,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C4000012 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -357,6 +452,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1000001 /* LiveScoreAttributes.swift in Sources */,
+				C1000006 /* ActivityKitLiveFollowPresenter.swift in Sources */,
 				A1000001 /* SquashAnalyzerApp.swift in Sources */,
 				A1000002 /* ContentView.swift in Sources */,
 				B1000082 /* HomeView.swift in Sources */,
@@ -398,6 +495,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1000007 /* LiveScoreAttributesTests.swift in Sources */,
 				B1000010 /* ScoringAndPersistenceTests.swift in Sources */,
 				B1000021 /* RefereeMatchTests.swift in Sources */,
 				B1000062 /* BadgeEngineTests.swift in Sources */,
@@ -408,6 +506,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C4000011 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1000002 /* LiveScoreAttributes.swift in Sources */,
+				C1000003 /* SquashLiveActivityBundle.swift in Sources */,
+				C1000004 /* LiveScoreActivityWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -415,6 +523,11 @@
 			isa = PBXTargetDependency;
 			target = A6000001 /* SquashAnalyzer */;
 			targetProxy = B8000010 /* PBXContainerItemProxy */;
+		};
+		C8000011 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C6000001 /* SquashLiveActivity */;
+			targetProxy = C8000010 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -644,6 +757,64 @@
 			};
 			name = Release;
 		};
+		C9000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 65FAHRU88M;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SquashLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SquashAnalyzer;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.squashanalyzer.app.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		C9000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 65FAHRU88M;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SquashLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SquashAnalyzer;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.squashanalyzer.app.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -670,6 +841,15 @@
 			buildConfigurations = (
 				B9000010 /* Debug */,
 				B9000011 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C7000001 /* Build configuration list for PBXNativeTarget "SquashLiveActivity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9000001 /* Debug */,
+				C9000002 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

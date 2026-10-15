@@ -123,6 +123,9 @@ describe('sessions', () => {
     expect(page.text).toMatch(/<title>🔴 Live: Jan – O&#39;Neil<\/title>/);
     expect(page.text).toMatch(/og:url" content="https:\/\/live\.test\/l\/[a-z0-9]{12}"/);
     expect(page.headers.get('content-security-policy')).toMatch(/default-src 'self'/);
+    // The way to the lock screen: the app link, built in the page for this host
+    expect(page.text).toMatch(/Volg op je vergrendelscherm/);
+    expect(page.text).toMatch(/'squashanalyzer:\/\/volg#' \+ id/);
 
     const gone = await call('GET', '/l/abcdefghjkmn');
     expect(gone.text).toMatch(/Deze livewedstrijd is afgelopen/);

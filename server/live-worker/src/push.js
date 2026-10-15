@@ -201,7 +201,7 @@ export function fcmPayload(token, id, server, snapshot, event) {
 
 // ---- Sending --------------------------------------------------------------
 
-/** One APNs push: "ok", "dead" (forget this token) or "error" */
+/** One APNs push: { result: "ok", "dead" (forget this token) or "error", detail for the log } */
 async function sendApns(settings, follower, payload, nowMs) {
   const jwt = await apnsJwt(settings);
   const host = follower.sandbox ? APNS_SANDBOX : APNS_PRODUCTION;
@@ -217,16 +217,17 @@ async function sendApns(settings, follower, payload, nowMs) {
     },
     body: JSON.stringify(payload),
   });
-  if (response.ok) return 'ok';
+  if (response.ok) return { result: 'ok', detail: 'apns 200' };
   const body = await response.json().catch(() => null);
   const reason = body && typeof body.reason === 'string' ? body.reason : '';
-  if (response.status === 410) return 'dead';
-  if (response.status === 400 && (reason === 'BadDeviceToken' || reason === 'DeviceTokenNotForTopic')) return 'dead';
+  const detail = `apns ${response.status} ${reason}`.trim();
+  if (response.status === 410) return { result: 'dead', detail };
+  if (response.status === 400 && (reason === 'BadDeviceToken' || reason === 'DeviceTokenNotForTopic')) return { result: 'dead', detail };
   console.error('apns push failed', response.status, reason);
-  return 'error';
+  return { result: 'error', detail };
 }
 
-/** One FCM push: "ok", "dead" or "error" */
+/** One FCM push: { result, detail } as sendApns */
 async function sendFcm(account, follower, id, server, snapshot, event) {
   const accessToken = await fcmAccessToken(account);
   const response = await pushDeps.fetch(`https://fcm.googleapis.com/v1/projects/${account.project_id}/messages:send`, {
@@ -234,15 +235,16 @@ async function sendFcm(account, follower, id, server, snapshot, event) {
     headers: { authorization: `Bearer ${accessToken}`, 'content-type': 'application/json' },
     body: JSON.stringify(fcmPayload(follower.token, id, server, snapshot, event)),
   });
-  if (response.ok) return 'ok';
+  if (response.ok) return { result: 'ok', detail: 'fcm 200' };
   const body = await response.json().catch(() => null);
   const status = body && body.error && typeof body.error.status === 'string' ? body.error.status : '';
   const details = body && body.error && Array.isArray(body.error.details) ? body.error.details : [];
   const unregistered = status === 'UNREGISTERED' || details.some((d) => d && d.errorCode === 'UNREGISTERED');
-  if (response.status === 404 || unregistered) return 'dead';
-  if (response.status === 400 && status === 'INVALID_ARGUMENT') return 'dead';
+  const detail = `fcm ${response.status} ${unregistered ? 'UNREGISTERED' : status}`.trim();
+  if (response.status === 404 || unregistered) return { result: 'dead', detail };
+  if (response.status === 400 && status === 'INVALID_ARGUMENT') return { result: 'dead', detail };
   console.error('fcm push failed', response.status, status);
-  return 'error';
+  return { result: 'error', detail };
 }
 
 /** Runs `task` over `items` with at most `limit` at once */
@@ -268,16 +270,20 @@ export async function pushToFollowers(env, { id, server, snapshot, event, follow
   const nowMs = pushDeps.now();
   const apnsBody = apnsPayload(snapshot, event, nowMs);
   const dead = [];
+  // What the services answered, counted (no tokens or names): "apns 200": 3
+  const answers = {};
   await eachLimited(followers, PUSH_CONCURRENCY, async (follower) => {
-    let result = 'skip';
+    let outcome = { result: 'skip', detail: `${follower.platform} off` };
     try {
-      if (follower.platform === 'ios' && apns) result = await sendApns(apns, follower, apnsBody, nowMs);
-      else if (follower.platform === 'android' && fcm) result = await sendFcm(fcm, follower, id, server, snapshot, event);
+      if (follower.platform === 'ios' && apns) outcome = await sendApns(apns, follower, apnsBody, nowMs);
+      else if (follower.platform === 'android' && fcm) outcome = await sendFcm(fcm, follower, id, server, snapshot, event);
     } catch (error) {
       console.error(`${follower.platform} push error`, error && error.message);
-      result = 'error';
+      outcome = { result: 'error', detail: `${follower.platform} exception` };
     }
-    if (result === 'dead') dead.push(follower);
+    answers[outcome.detail] = (answers[outcome.detail] || 0) + 1;
+    if (outcome.result === 'dead') dead.push(follower);
   });
+  console.log('push', event, JSON.stringify(answers), 'forgotten', dead.length);
   return dead;
 }

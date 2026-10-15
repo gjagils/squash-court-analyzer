@@ -89,8 +89,10 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
         let states = Task { @MainActor in
             for await state in activity.activityStateUpdates {
                 if state == .dismissed || state == .ended {
-                    // Also tells the server to stop pushing to this token
-                    if LiveFollow.shared.isFollowing(target) { await LiveFollow.shared.unfollow(target) }
+                    // Also tells the server to stop pushing to this token. Not
+                    // `unfollow`: that ends the activity at once, and an ended
+                    // match should keep its result on the lock screen
+                    if LiveFollow.shared.isFollowing(target) { await LiveFollow.shared.ended(target) }
                     ActivityKitLiveFollowPresenter.shared.cancelObservers(activity.id)
                     return
                 }
@@ -110,7 +112,10 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
     private func restoreRunning() {
         for activity in Activity<LiveScoreAttributes>.activities {
             if activity.attributes.isOwnMatch {
-                Task { await activity.end(nil, dismissalPolicy: .immediate) }
+                // A finished own match keeps its result for its half hour
+                if activity.activityState == .active && !activity.content.state.isFinished {
+                    Task { await activity.end(nil, dismissalPolicy: .immediate) }
+                }
                 continue
             }
             guard let target = Self.target(of: activity), activity.activityState == .active else { continue }

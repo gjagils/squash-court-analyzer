@@ -47,6 +47,14 @@ import com.squashanalyzer.android.data.BackgroundTeamMatchStore
 import com.squashanalyzer.android.data.RoomBackupStore
 import com.squashanalyzer.android.aicoach.HttpAICoachTransport
 import com.squashanalyzer.android.live.HttpLiveTransport
+import com.squashanalyzer.android.live.FcmLiveFollowPresenter
+import com.squashanalyzer.android.live.FirebaseConfig
+import squash.analyzer.core.LiveFollow
+import squash.analyzer.core.LiveFollowError
+import squash.analyzer.core.LiveFollowLink
+import squash.analyzer.core.LiveFollowTarget
+import kotlinx.coroutines.CompletableDeferred
+import androidx.activity.result.contract.ActivityResultContracts
 import com.squashanalyzer.android.aicoach.KeystoreAPIKeyStore
 import com.squashanalyzer.android.league.HttpLeaguePageLoader
 import com.squashanalyzer.android.team.RoomTeamImporter
@@ -66,6 +74,10 @@ class SquashApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         ProcessInfo.launch(applicationContext)
+        // Live score on the lock screen: pushes arrive also while no screen is open
+        FirebaseConfig.initialize(this)
+        LiveFollow.shared.transport = HttpLiveTransport()
+        LiveFollow.shared.presenter = FcmLiveFollowPresenter(applicationContext)
     }
 }
 
@@ -73,6 +85,24 @@ class MainActivity : AppCompatActivity() {
     /** Card links opened from WhatsApp, the browser, … wait here for the import screen */
     private val cardInbox = CardInbox()
     private lateinit var autoBackup: AutoBackup
+
+    /** Live score on the lock screen: the notification permission, asked when following (Android 13+) */
+    private var notificationAnswer: CompletableDeferred<Boolean>? = null
+    private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        notificationAnswer?.complete(granted)
+        notificationAnswer = null
+    }
+    private val askNotificationPermission: suspend () -> Boolean = {
+        if (android.os.Build.VERSION.SDK_INT < 33) {
+            false
+        } else {
+            val answer = CompletableDeferred<Boolean>()
+            notificationAnswer?.complete(false)
+            notificationAnswer = answer
+            notificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            answer.await()
+        }
+    }
 
     @OptIn(ExperimentalMaterial3Api::class) // material3TopAppBar options (page title size)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,6 +118,7 @@ class MainActivity : AppCompatActivity() {
         val db = AppDatabase.get(this)
         val badgeAwardStore = BadgeAwardStore(db.badgeAwardDao(), db.playerDao(),
             coachMatchStore, refereeMatchDataStore, badgeInstallId(), transaction = { block -> db.withTransaction { block() } })
+        (LiveFollow.shared.presenter as? FcmLiveFollowPresenter)?.requestNotificationPermission = askNotificationPermission
         // Not again after a rotation: the link was already taken in (or dismissed)
         if (savedInstanceState == null) receiveCardLink(intent)
         val matchStore = RoomCoachMatchStore(coachMatchStore, badgeAwardStore)
@@ -178,6 +209,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         if (ResultImageSharing.share === resultImageShare) ResultImageSharing.share = null
+        val presenter = LiveFollow.shared.presenter as? FcmLiveFollowPresenter
+        if (presenter?.requestNotificationPermission === askNotificationPermission) presenter.requestNotificationPermission = null
         super.onDestroy()
     }
 
@@ -196,6 +229,12 @@ class MainActivity : AppCompatActivity() {
     private fun receiveCardLink(intent: Intent?) {
         if (intent?.action != Intent.ACTION_VIEW) return
         val link = intent.dataString ?: return
+        // A live match to follow on the lock screen (squashanalyzer://volg#<id>)
+        if (link.startsWith("squashanalyzer://volg")) {
+            val target = LiveFollowLink.parse(link)
+            if (target == null) showNewerAppNeeded() else followLive(target)
+            return
+        }
         lifecycleScope.launch {
             // An invitation to a live team match is checked first: it is small and no card
             val invite = withContext(Dispatchers.Default) { CardInbox.invite(from = link) }
@@ -209,6 +248,30 @@ class MainActivity : AppCompatActivity() {
             } else if (CardInbox.needsNewerApp(link)) {
                 showNewerAppNeeded()
             }
+        }
+    }
+
+    /** Live score on the lock screen: follow the match, and say how it went */
+    private fun followLive(target: LiveFollowTarget) {
+        lifecycleScope.launch {
+            val message = try {
+                LiveFollow.shared.follow(target)
+                val score = (LiveFollow.shared.presenter as? FcmLiveFollowPresenter)?.lastStarted
+                if (score == null) "Je volgt de wedstrijd op je vergrendelscherm"
+                else "Je volgt ${score.p1} – ${score.p2} op je vergrendelscherm"
+            } catch (e: LiveFollowError) {
+                when (e) {
+                    is LiveFollowError.NotFoundCase -> "Deze wedstrijd is al afgelopen"
+                    is LiveFollowError.NotAllowedCase -> "Meldingen staan uit voor SquashAnalyzer"
+                    is LiveFollowError.NoConnectionCase -> "Geen verbinding"
+                    is LiveFollowError.PushUnavailableCase -> "Deze server kan (nog) geen meldingen sturen"
+                    else -> "Volgen lukt nu niet"
+                }
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                "Volgen lukt nu niet"
+            }
+            android.widget.Toast.makeText(this@MainActivity, message, android.widget.Toast.LENGTH_LONG).show()
         }
     }
 

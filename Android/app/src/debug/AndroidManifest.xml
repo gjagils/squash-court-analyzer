@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Debug only: sample live score notifications via adb (see LiveScoreSampleReceiver) -->
+        <receiver
+            android:name=".live.LiveScoreSampleReceiver"
+            android:exported="true"
+            tools:ignore="ExportedReceiver"
+            xmlns:tools="http://schemas.android.com/tools">
+            <intent-filter>
+                <action android:name="com.squashanalyzer.android.debug.LIVE_SAMPLE" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

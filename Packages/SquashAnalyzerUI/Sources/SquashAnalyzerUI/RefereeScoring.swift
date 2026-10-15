@@ -137,7 +137,7 @@ public struct RefereeScoringView: View {
     /// Save and send the new state to live viewers
     private func matchChanged() {
         onMatchChanged(match)
-        LiveShareSync.send(matchId: match.id, snapshot: match.liveSnapshot)
+        LiveShareSync.send(matchId: match.id, snapshot: match.liveSnapshot, startedAt: match.matchStartedAt)
     }
 
     /// Sluiten and LIVE on the left, share and Instellingen on the right (the

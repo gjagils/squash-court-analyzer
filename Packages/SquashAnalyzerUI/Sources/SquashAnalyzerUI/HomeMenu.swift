@@ -308,6 +308,8 @@ public struct AndroidHomeView: View {
     /// Competitie: team matches in a JSON file (Android supplies its files directory)
     private let teamMatchStore: (any TeamMatchStore)?
     @State private var showingCompetition = false
+    /// Wedstrijd volgen (live score op het vergrendelscherm), when the app set a presenter
+    @State private var showingLiveFollow = false
 
     public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 historyStore: any MatchHistoryStore,
@@ -394,6 +396,9 @@ public struct AndroidHomeView: View {
                 tourSeen = Onboarding.currentVersion
             }
         }
+        .sheet(isPresented: $showingLiveFollow) {
+            SharedLiveFollowView { showingLiveFollow = false }
+        }
         .sheet(isPresented: Binding(get: { cardInbox.pending != nil },
                                     set: { if !$0 { cardInbox.pending = nil } })) {
             if let snapshot = cardInbox.pending {
@@ -440,7 +445,8 @@ public struct AndroidHomeView: View {
                             onHistory: { showingHistory = true },
                             onPlayers: { showingPlayers = true },
                             onBadges: { showingBadges = true },
-                            onCompetition: teamMatchStore == nil ? nil : { showingCompetition = true }
+                            onCompetition: teamMatchStore == nil ? nil : { showingCompetition = true },
+                            onLiveFollow: LiveFollow.shared.presenter == nil ? nil : { showingLiveFollow = true }
                         )
                     }
                     .padding(.top, 8)

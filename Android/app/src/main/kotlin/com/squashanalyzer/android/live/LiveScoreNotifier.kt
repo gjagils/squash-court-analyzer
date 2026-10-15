@@ -114,14 +114,7 @@ class LiveScoreNotifier(private val context: Context) {
                 Notification.ProgressStyle.Segment(segment.length).setColor(playerColor(segment.player))
             })
             .setProgress(card.progress)
-        // A point at the end of every game keeps the games apart on the bar
-        var end = 0
-        for (segment in card.segments.dropLast(1)) {
-            end += segment.length
-            if (end % card.pointsPerGame == 0) {
-                style.addProgressPoint(Notification.ProgressStyle.Point(end).setColor(OPEN_COLOR))
-            }
-        }
+        // No progress points: the segments already have gaps, the points drew grey blocks between games
         val builder = Notification.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_live_score)
             .setContentTitle(card.title)

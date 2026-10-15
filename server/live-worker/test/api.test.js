@@ -224,6 +224,28 @@ describe('request size', () => {
   });
 });
 
+describe('lock screen followers without push secrets', () => {
+  const iosToken = 'ab'.repeat(32);
+
+  it('no platform is on, registering answers 503 and the rest keeps working', async () => {
+    const push = await call('GET', '/api/push');
+    expect(push.status).toBe(200);
+    expect(push.json).toEqual({ ios: false, android: false });
+
+    const { id, writeKey } = (await call('POST', '/api/live', snapshot)).json;
+    expect((await call('POST', `/api/live/${id}/followers`, { platform: 'ios', token: iosToken })).status).toBe(503);
+    expect((await call('POST', `/api/live/${id}/followers`, { platform: 'android', token: 'abc:def' })).status).toBe(503);
+    // Invalid input is a 400 before anything else
+    expect((await call('POST', `/api/live/${id}/followers`, { platform: 'ios', token: 'xyz' })).status).toBe(400);
+    expect((await call('POST', `/api/live/${id}/followers`)).status).toBe(400);
+    // Forgetting a token that is not there is fine; an unknown session is not
+    expect((await call('DELETE', `/api/live/${id}/followers`, { platform: 'ios', token: iosToken })).status).toBe(204);
+    expect((await call('DELETE', '/api/live/abcdefghjkmn/followers', { platform: 'ios', token: iosToken })).status).toBe(404);
+    expect((await call('PUT', `/api/live/${id}`, { ...snapshot, score: [4, 2] }, writeKey)).status).toBe(204);
+    expect((await call('DELETE', `/api/live/${id}`, undefined, writeKey)).status).toBe(204);
+  });
+});
+
 describe('service', () => {
   it('health check and logo', async () => {
     const health = await call('GET', '/health');

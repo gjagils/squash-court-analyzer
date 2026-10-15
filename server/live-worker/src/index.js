@@ -11,10 +11,14 @@ import {
   validateSnapshot, validateTeamHeader,
 } from './validate.js';
 import { readConfig } from './config.js';
+import { pushAvailability, validateFollower } from './push.js';
 
 export { LiveSession } from './session.js';
 export { LiveLimiter } from './limiter.js';
 export { TeamSession } from './team.js';
+
+/** A follower registration: an FCM token may be up to 4096 characters */
+const FOLLOWER_BODY_BYTES = 8192;
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
@@ -120,6 +124,9 @@ async function handle(request, env) {
   }
   if (parts[0] === 'api' && parts[1] === 'team') return handleTeam(request, env, config, parts, limiter, teamFor);
 
+  // GET /api/push: which platforms this server can push to (lock screen)
+  if (request.method === 'GET' && url.pathname === '/api/push') return send(200, pushAvailability(env));
+
   if (parts[0] !== 'api' || parts[1] !== 'live') return send(404, 'Not found');
   const id = parts[2];
 
@@ -166,6 +173,24 @@ async function handle(request, env) {
   // GET /api/live/:id/events: Server-Sent Events for viewers, served by the session itself
   if (request.method === 'GET' && parts[3] === 'events') {
     return session.fetch(new Request(new URL('/events', request.url), { headers: request.headers, signal: request.signal }));
+  }
+
+  // POST / DELETE /api/live/:id/followers: a phone follows the match on its lock
+  // screen ({ platform, token, sandbox? }). No key: anyone with the link may watch.
+  if (parts[3] === 'followers' && parts.length === 4 && (request.method === 'POST' || request.method === 'DELETE')) {
+    const follower = validateFollower(await readJson(request, FOLLOWER_BODY_BYTES));
+    if (!follower) return send(400, { error: 'Ongeldige pushregistratie' });
+    if (request.method === 'DELETE') {
+      const status = await session.removeFollower(follower);
+      return status === 404 ? send(404, { error: 'Onbekende sessie' }) : send(204);
+    }
+    if (!pushAvailability(env)[follower.platform]) {
+      return send(503, { error: 'Meldingen op het vergrendelscherm staan op deze server uit' });
+    }
+    const status = await session.addFollower(follower, baseUrl(request, config));
+    if (status === 404) return send(404, { error: 'Onbekende sessie' });
+    if (status === 429) return send(429, { error: 'Te veel volgers voor deze wedstrijd' });
+    return send(201, { ok: true });
   }
   if (parts.length !== 3 && !(parts.length === 4 && parts[3] === 'photos')) return send(404, 'Not found');
 

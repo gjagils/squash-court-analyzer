@@ -287,6 +287,21 @@ public final class LiveFollow {
     public func unfollow(_ target: LiveFollowTarget) async {
         let token = tokens[target.id]
         await stopFollowing(target)
+        await forgetOnServer(token, for: target)
+    }
+
+    /// The lock screen ended the match by itself: the server's last push (the
+    /// result, which stays on the lock screen for a while) or the user swiped
+    /// it away. Forgotten here and on the server, but not taken off the lock
+    /// screen: that would remove the result at once.
+    public func ended(_ target: LiveFollowTarget) async {
+        let token = tokens[target.id]
+        forget(target)
+        await forgetOnServer(token, for: target)
+    }
+
+    /// DELETE /api/live/:id/followers, best effort (the session may be gone already)
+    private func forgetOnServer(_ token: String?, for target: LiveFollowTarget) async {
         guard let token, let transport, let presenter,
               let url = URL(string: target.server + "/api/live/" + target.id + "/followers") else { return }
         let registration = LiveFollowerRegistration(platform: presenter.platform, token: token)

@@ -66,6 +66,22 @@ final class LiveFollowTests: XCTestCase {
     }
 
     @MainActor
+    func testAnEndedMatchKeepsItsResultOnTheLockScreen() async throws {
+        let transport = FakeFollowTransport()
+        let presenter = FakeFollowPresenter()
+        let follow = LiveFollow(transport: transport)
+        follow.presenter = presenter
+        let target = LiveFollowTarget(id: "abcdefgh2345", server: LiveFollowLink.defaultServer)
+        try await follow.follow(target)
+        await follow.tokenChanged("tok1", for: target)
+        await follow.ended(target)
+        XCTAssertFalse(follow.isFollowing(target))
+        XCTAssertTrue(presenter.stopped.isEmpty, "the result stays on the lock screen")
+        XCTAssertEqual(transport.requests.last?.method, "DELETE")
+        XCTAssertTrue(transport.requests.last?.body.contains("\"token\":\"tok1\"") == true)
+    }
+
+    @MainActor
     func testRestoreFollowsAgainWithoutAskingTheServer() async {
         let transport = FakeFollowTransport()
         let follow = LiveFollow(transport: transport)

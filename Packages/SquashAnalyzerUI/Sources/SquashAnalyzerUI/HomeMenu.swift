@@ -86,10 +86,13 @@ public struct HomeMenuTiles: View {
     private let onBadges: () -> Void
     /// Competitie (teamwedstrijden); the row only shows when the host wires it
     private let onCompetition: (() -> Void)?
+    /// Wedstrijd volgen (live score op het vergrendelscherm); only where the platform supports it
+    private let onLiveFollow: (() -> Void)?
 
     public init(onCoach: @escaping () -> Void, onReferee: @escaping () -> Void,
                 onHistory: @escaping () -> Void, onPlayers: @escaping () -> Void, onBadges: @escaping () -> Void,
-                onCompetition: (() -> Void)? = nil) {
+                onCompetition: (() -> Void)? = nil, onLiveFollow: (() -> Void)? = nil) {
+        self.onLiveFollow = onLiveFollow
         self.onCoach = onCoach
         self.onReferee = onReferee
         self.onHistory = onHistory
@@ -112,6 +115,10 @@ public struct HomeMenuTiles: View {
                 Divider().overlay(SharedColors.line(0.09))
                 if let onCompetition {
                     menuRow("Competitie", icon: .competition, action: onCompetition)
+                    Divider().overlay(SharedColors.line(0.09))
+                }
+                if let onLiveFollow {
+                    menuRow("Wedstrijd volgen", icon: .liveFollow, action: onLiveFollow)
                     Divider().overlay(SharedColors.line(0.09))
                 }
                 menuRow("Spelers", icon: .players, action: onPlayers)
@@ -231,7 +238,7 @@ private struct HomeMenuTile: View {
 /// whistle (referee), history, a group (players), a medal (badges) and a cup
 /// (competition). The clipboard also marks the coach card, everywhere.
 enum HomeTileIcon {
-    case coach, referee, history, players, badges, competition
+    case coach, referee, history, players, badges, competition, liveFollow
 
     /// The AppSymbol name; all but history are drawn by the app (`OutlineIcon`)
     var symbol: String {
@@ -242,6 +249,7 @@ enum HomeTileIcon {
         case .players: return "person.2"
         case .badges: return "medal"
         case .competition: return "trophy"
+        case .liveFollow: return "lock.iphone"
         }
     }
 }

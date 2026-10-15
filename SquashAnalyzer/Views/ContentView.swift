@@ -32,6 +32,11 @@ struct ContentView: View {
     @State private var showingTeamJoin = false
     /// A link of ours this version cannot open (made by a newer app)
     @State private var showingNewerAppNeeded = false
+    /// Wedstrijd volgen: open, with the live link that opened it (squashanalyzer://volg#…)
+    @State private var showingLiveFollow = false
+    @State private var liveFollowLink = ""
+    /// A live link that came in during a match waits for the screen to be free
+    @State private var pendingLiveFollow: String? = nil
     @Environment(\.openURL) private var openURL
     #if DEBUG
     /// App Store screenshots (scripts/screenshots.sh): a scoring screen in a prepared state
@@ -50,7 +55,11 @@ struct ContentView: View {
         HomeView(onCoach: { showingCoach = true },
                  onReferee: { showingReferee = true },
                  onViewHistory: { showingHistory = true },
-                 onOpenSettings: { showingSettings = true })
+                 onOpenSettings: { showingSettings = true },
+                 onLiveFollow: {
+                     liveFollowLink = ""
+                     showingLiveFollow = true
+                 })
         .fullScreenCover(isPresented: $showingCoach) {
             let players = SwiftDataPlayerStore(context: modelContext)
             CoachSessionView(store: SwiftDataCoachMatchStore(context: modelContext), playerStore: players, photoStore: players,
@@ -140,6 +149,12 @@ struct ContentView: View {
         }
         // A player card link (website or squashanalyzer://kaart#…)
         .onOpenURL { url in
+            // A live link: follow the match on the lock screen
+            if url.absoluteString.hasPrefix("squashanalyzer://volg") {
+                pendingLiveFollow = url.absoluteString
+                presentPendingLiveFollow()
+                return
+            }
             if !cardInbox.receive(url.absoluteString) && CardInbox.needsNewerApp(url.absoluteString) {
                 showingNewerAppNeeded = true
             }
@@ -154,8 +169,13 @@ struct ContentView: View {
         .onChange(of: anyCoverOpen) { _, open in
             if !open {
                 presentPendingCard()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { presentPendingLiveFollow() }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { presentPendingTeam() }
             }
+        }
+        .sheet(isPresented: $showingLiveFollow) {
+            SharedLiveFollowView(initialLink: liveFollowLink) { showingLiveFollow = false }
+                .id(liveFollowLink)
         }
         // A link to a live team match (Competitie): join it
         .sheet(isPresented: $showingTeamJoin, onDismiss: { cardInbox.pendingTeam = nil }) {
@@ -183,6 +203,17 @@ struct ContentView: View {
     /// A full-screen cover is up: a sheet cannot open over it from here
     private var anyCoverOpen: Bool {
         showingCoach || showingReferee || showingHistory || showingSettings || analysedMatch != nil
+    }
+
+    /// Wedstrijd volgen for a live link that was opened, as soon as no cover is up
+    private func presentPendingLiveFollow() {
+        guard let link = pendingLiveFollow, !anyCoverOpen, !showingTeamJoin else { return }
+        pendingLiveFollow = nil
+        // Already open: closed first, so the screen starts again with the new link
+        let delay = showingLiveFollow ? 0.6 : 0.0
+        showingLiveFollow = false
+        liveFollowLink = link
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { showingLiveFollow = true }
     }
 
     /// The join sheet for a pending invitation, as soon as no cover is up

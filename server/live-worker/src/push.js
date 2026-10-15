@@ -55,7 +55,8 @@ export function pushAvailability(env) {
 
 // ---- Followers ------------------------------------------------------------
 
-const IOS_TOKEN = /^[0-9a-f]{32,200}$/;
+// Live Activity tokens can be 128 bytes (256 hex) or more: room up to 512
+const IOS_TOKEN = /^[0-9a-f]{32,512}$/;
 const ANDROID_TOKEN = /^[A-Za-z0-9:_\-.]{1,4096}$/;
 
 /** The body of POST/DELETE /api/live/:id/followers as { platform, token, sandbox }, or null */

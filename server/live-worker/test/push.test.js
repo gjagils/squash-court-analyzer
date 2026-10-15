@@ -105,7 +105,8 @@ describe('registering', () => {
     expect(validateFollower({ platform: 'ios', token: 'AB'.repeat(32) })).toEqual({ platform: 'ios', token: 'ab'.repeat(32), sandbox: false });
     expect(validateFollower({ platform: 'ios', token: IOS, sandbox: true }).sandbox).toBe(true);
     expect(validateFollower({ platform: 'ios', token: 'ab'.repeat(15) })).toBeNull();
-    expect(validateFollower({ platform: 'ios', token: 'a'.repeat(201) })).toBeNull();
+    expect(validateFollower({ platform: 'ios', token: 'a'.repeat(513) })).toBeNull();
+    expect(validateFollower({ platform: 'ios', token: 'a'.repeat(256) })).not.toBeNull();
     expect(validateFollower({ platform: 'ios', token: 'zz'.repeat(32) })).toBeNull();
     expect(validateFollower({ platform: 'android', token: ANDROID })).toEqual({ platform: 'android', token: ANDROID, sandbox: false });
     expect(validateFollower({ platform: 'android', token: 'a'.repeat(4096) })).not.toBeNull();

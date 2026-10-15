@@ -123,6 +123,9 @@ describe('sessions', () => {
     expect(page.text).toMatch(/<title>🔴 Live: Jan – O&#39;Neil<\/title>/);
     expect(page.text).toMatch(/og:url" content="https:\/\/live\.test\/l\/[a-z0-9]{12}"/);
     expect(page.headers.get('content-security-policy')).toMatch(/default-src 'self'/);
+    // The way to the lock screen: the app link, built in the page for this host
+    expect(page.text).toMatch(/Volg op je vergrendelscherm/);
+    expect(page.text).toMatch(/'squashanalyzer:\/\/volg#' \+ id/);
 
     const gone = await call('GET', '/l/abcdefghjkmn');
     expect(gone.text).toMatch(/Deze livewedstrijd is afgelopen/);
@@ -221,6 +224,28 @@ describe('request size', () => {
     expect((await call('GET', `/api/live/${id}`)).json.snapshot.score).toEqual(snapshot.score);
     // Far over even the photo limit
     expect((await call('PUT', `/api/live/${id}/photos`, { p1: 'A'.repeat(300 * 1024) }, writeKey)).status).toBe(413);
+  });
+});
+
+describe('lock screen followers without push secrets', () => {
+  const iosToken = 'ab'.repeat(32);
+
+  it('no platform is on, registering answers 503 and the rest keeps working', async () => {
+    const push = await call('GET', '/api/push');
+    expect(push.status).toBe(200);
+    expect(push.json).toEqual({ ios: false, android: false });
+
+    const { id, writeKey } = (await call('POST', '/api/live', snapshot)).json;
+    expect((await call('POST', `/api/live/${id}/followers`, { platform: 'ios', token: iosToken })).status).toBe(503);
+    expect((await call('POST', `/api/live/${id}/followers`, { platform: 'android', token: 'abc:def' })).status).toBe(503);
+    // Invalid input is a 400 before anything else
+    expect((await call('POST', `/api/live/${id}/followers`, { platform: 'ios', token: 'xyz' })).status).toBe(400);
+    expect((await call('POST', `/api/live/${id}/followers`)).status).toBe(400);
+    // Forgetting a token that is not there is fine; an unknown session is not
+    expect((await call('DELETE', `/api/live/${id}/followers`, { platform: 'ios', token: iosToken })).status).toBe(204);
+    expect((await call('DELETE', '/api/live/abcdefghjkmn/followers', { platform: 'ios', token: iosToken })).status).toBe(404);
+    expect((await call('PUT', `/api/live/${id}`, { ...snapshot, score: [4, 2] }, writeKey)).status).toBe(204);
+    expect((await call('DELETE', `/api/live/${id}`, undefined, writeKey)).status).toBe(204);
   });
 });
 

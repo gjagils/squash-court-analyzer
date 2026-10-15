@@ -86,6 +86,14 @@
   .chip.won2 { color: var(--blue-light); border-color: var(--won2-line); }
   .last { margin-top: 14px; text-align: center; font-size: 13px; color: var(--text-2); min-height: 18px; }
   .updated { margin-top: 14px; text-align: center; font-size: 12px; color: var(--text-3); }
+  /* Volg op je vergrendelscherm: opens the app (flat, outlined, as the referee screen) */
+  .follow { margin-top: 16px; text-align: center; }
+  .follow a { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 16px;
+              border: 1px solid var(--gold); border-radius: 12px; color: var(--gold); text-decoration: none;
+              font-size: 16px; font-weight: 600; background: rgba(242,140,38,0.08); }
+  :root[data-theme="light"] .follow a { background: rgba(169,79,8,0.06); }
+  .follow a:active { opacity: 0.7; }
+  .follow p { margin-top: 8px; font-size: 12px; color: var(--text-3); }
   .notice { margin-top: 16px; text-align: center; font-size: 14px; color: var(--text-2); line-height: 1.5; }
   .notice strong { color: var(--text-1); }
   footer { margin-top: 26px; text-align: center; font-size: 12px; color: var(--text-3); line-height: 1.6; }
@@ -122,6 +130,14 @@
     <div class="updated" id="updated"></div>
   </section>
 
+  <div class="follow" id="follow" hidden>
+    <a id="follow-link" href="#">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10 18h4"/></svg>
+      Volg op je vergrendelscherm
+    </a>
+    <p>Werkt met de SquashAnalyzer-app op iPhone en Android</p>
+  </div>
+
   <p class="notice" id="notice" hidden></p>
 
   <footer>
@@ -139,6 +155,12 @@
   var hadState = false;
   var ended = false;
   var finished = false;
+
+  // The app link: squashanalyzer://volg#<id>, with "@<host>" on another server than the default
+  if (id) {
+    var host = location.host;
+    $('follow-link').href = 'squashanalyzer://volg#' + id + (host === 'live.squashanalyzer.com' ? '' : '@' + host);
+  }
 
   var statusText = {
     warmup: 'Inspelen…',
@@ -204,6 +226,7 @@
     });
     $('last').textContent = s.lastPoint || '';
     lastReceived = Date.now();
+    $('follow').hidden = !live || ended;
     setBadge(live && !ended ? 'live' : 'done');
     tick();
   }
@@ -226,6 +249,7 @@
 
   function showEnded() {
     ended = true;
+    $('follow').hidden = true;
     setBadge('done');
     $('updated').textContent = '';
     var notice = $('notice');

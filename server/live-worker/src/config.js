@@ -18,5 +18,7 @@ export function readConfig(env) {
     globalCreatesPerMinute: number('GLOBAL_CREATES_PER_MINUTE', 60),
     // Viewers (open SSE streams) per session
     maxViewersPerSession: number('MAX_VIEWERS_PER_SESSION', 200),
+    // Phones following a session on the lock screen (push tokens)
+    maxFollowersPerSession: number('MAX_FOLLOWERS_PER_SESSION', 500),
   };
 }

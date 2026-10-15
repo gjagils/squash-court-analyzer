@@ -90,6 +90,17 @@ Gelijk aan de Node-versie (zie `server/live/README.md`): `POST /api/live`,
 `GET /api/live/:id`, `GET /api/live/:id/events`, `GET /api/live/:id/photo/1|2`,
 `GET /l/:id`, `GET /health`.
 
+Live score op het vergrendelscherm (feature/live-activity, nog niet in
+productie): `POST /api/live/:id/followers` en `DELETE /api/live/:id/followers`
+met `{ "platform": "ios"|"android", "token": "...", "sandbox"?: true }` (geen
+sleutel nodig; 201, 204, 400, 404, 429 boven `MAX_FOLLOWERS_PER_SESSION`, 503
+als pushen voor dat platform uit staat) en `GET /api/push` (`{ ios, android }`).
+Na elke stand pusht de sessie (`src/push.js`, op de achtergrond) naar APNs
+(Live Activity) en FCM (databericht); een afgelopen wedstrijd, Live stoppen of
+het alarm geeft één keer een eindbericht. Tokens die APNs of FCM als dood
+melden worden vergeten; de volgers verdwijnen met de sessie. Per verzending
+logt de Worker alleen tellingen (`push update {"apns 200":3}`), geen tokens.
+
 Instellingen in `wrangler.toml` onder `[vars]`: `PUBLIC_URL`, `IDLE_MINUTES`
 (120), `MAX_SESSIONS` (200), `CREATES_PER_MINUTE` (10),
 `GLOBAL_CREATES_PER_MINUTE` (60), `MAX_VIEWERS_PER_SESSION` (200),
@@ -97,3 +108,31 @@ Instellingen in `wrangler.toml` onder `[vars]`: `PUBLIC_URL`, `IDLE_MINUTES`
 beperking, ook in de lokale tests omdat workerd geen jurisdicties kent). Een
 wijziging maakt lopende sessies onvindbaar (ze duren hooguit twee uur): zet
 hem om als `/health` `"sessions": 0` zegt. Staat sinds 6 oktober 2026 op `eu`.
+
+Pushen (vergrendelscherm): `MAX_FOLLOWERS_PER_SESSION` (500) en
+`APNS_BUNDLE_ID` (`com.squashanalyzer.app`) als vars, en als geheimen
+(`npx wrangler secret put NAAM`) `APNS_KEY` (de .p8-tekst), `APNS_KEY_ID`,
+`APNS_TEAM_ID` en `FCM_SERVICE_ACCOUNT` (de JSON van het Firebase-
+serviceaccount). Ontbreken ze, dan staat dat platform uit en werkt de rest
+zoals altijd. De productie-Worker heeft ze nog niet (15 oktober 2026).
+
+## Test-Worker squash-live-dev
+
+Voor feature/live-activity draait een aparte Worker, los van productie:
+`https://squash-live-dev.gerdjanvangils.workers.dev` (`wrangler.dev.toml`:
+eigen naam, `workers_dev`, geen routes, `PUBLIC_URL` leeg zodat links het
+workers.dev-adres krijgen). De app accepteert dit adres via
+`squashanalyzer://volg#<id>@<host>`; de kijkpagina maakt die link zelf.
+
+```bash
+cd server/live-worker
+npx wrangler deploy -c wrangler.dev.toml
+npx wrangler secret put APNS_KEY -c wrangler.dev.toml < ~/.apple-keys/AuthKey_<KEYID>.p8
+npx wrangler tail -c wrangler.dev.toml     # de push-tellingen per stand
+```
+
+Geheimen op deze Worker (alleen de namen): `APNS_KEY`, `APNS_KEY_ID`,
+`APNS_TEAM_ID`, `FCM_SERVICE_ACCOUNT` (Firebase-project `squash-analyzer-18fb3`).
+Op 15 oktober 2026 getest met nep-tokens: APNs (productie en sandbox)
+antwoordde `400 BadDeviceToken` en FCM `404 UNREGISTERED`, dus verbinding en
+aanmelding werken vanuit de Worker en dode tokens worden vergeten.

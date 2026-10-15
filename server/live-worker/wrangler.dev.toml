@@ -1,0 +1,50 @@
+# Test Worker of feature/live-activity (Live score op het vergrendelscherm):
+# squash-live-dev on workers.dev, separate from production (squash-live-beta,
+# wrangler.toml). Its own Durable Objects and its own push secrets (APNS_KEY,
+# APNS_KEY_ID, APNS_TEAM_ID, FCM_SERVICE_ACCOUNT), set with
+# `npx wrangler secret put NAME -c wrangler.dev.toml`.
+# Deploy: npx wrangler deploy -c wrangler.dev.toml (see README.md).
+name = "squash-live-dev"
+main = "src/index.js"
+compatibility_date = "2025-10-01"
+workers_dev = true
+
+[vars]
+# Empty: links are made from the address of the request (the workers.dev host)
+PUBLIC_URL = ""
+IDLE_MINUTES = "120"
+MAX_SESSIONS = "200"
+CREATES_PER_MINUTE = "10"
+GLOBAL_CREATES_PER_MINUTE = "60"
+MAX_VIEWERS_PER_SESSION = "200"
+MAX_FOLLOWERS_PER_SESSION = "500"
+APNS_BUNDLE_ID = "com.squashanalyzer.app"
+LIVE_JURISDICTION = "eu"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+[[durable_objects.bindings]]
+name = "SESSION"
+class_name = "LiveSession"
+
+[[durable_objects.bindings]]
+name = "LIMITER"
+class_name = "LiveLimiter"
+
+[[durable_objects.bindings]]
+name = "TEAM"
+class_name = "TeamSession"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["LiveSession", "LiveLimiter"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["TeamSession"]
+
+[observability]
+enabled = true

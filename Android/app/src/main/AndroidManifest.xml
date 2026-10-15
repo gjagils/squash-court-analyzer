@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Mijn team: the public team pages on sbn.toernooi.nl -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Live score on the lock screen: the notification (asked when following
+         a match) and, on Android 16+, its promotion to a Live Update -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
 
     <application
         android:name=".SquashApplication"
@@ -45,8 +50,35 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="squashanalyzer" android:host="kaart" />
                 <data android:scheme="squashanalyzer" android:host="team" />
+                <!-- Live score on the lock screen: squashanalyzer://volg#<id>[@<host>] -->
+                <data android:scheme="squashanalyzer" android:host="volg" />
             </intent-filter>
         </activity>
+        <!-- Live score pushes (FCM data messages from the live server) -->
+        <service
+            android:name=".live.LiveFollowMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <!-- "Stoppen" on the live score notification, and swiping it away -->
+        <receiver
+            android:name=".live.LiveFollowActionReceiver"
+            android:exported="false" />
+        <!-- Firebase is started by FirebaseConfig with values from the build
+             (no google-services.json in the repo), not by its own provider;
+             no token until a match is followed, no analytics -->
+        <provider
+            android:name="com.google.firebase.provider.FirebaseInitProvider"
+            android:authorities="${applicationId}.firebaseinitprovider"
+            tools:node="remove" />
+        <meta-data
+            android:name="firebase_messaging_auto_init_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_analytics_collection_deactivated"
+            android:value="true" />
         <!-- Shares the badge card picture ("Deel kaart") with other apps -->
         <provider
             android:name="androidx.core.content.FileProvider"

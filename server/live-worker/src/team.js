@@ -98,10 +98,10 @@ export class TeamSession extends ViewerSession {
 
   // ---- Photos -------------------------------------------------------------------
 
-  /** The home and away thumbnail of a slot (Uint8Array or null each): 404, 401, 204 */
+  /** The home and away thumbnail of a slot (Uint8Array or null each), team or owner key: 404, 401, 204 */
   async setPhotos(given, slot, photo1, photo2) {
-    if (!(await this.ctx.storage.get('key'))) return 404;
-    if (!(await this.keyEquals(given))) return 401;
+    const role = await this.role(given);
+    if (role === 404 || role === 401) return role;
     const flags = (await this.ctx.storage.get('photoFlags')) || {};
     const version = ((await this.ctx.storage.get('photoVersion')) || 0) + 1;
     if (photo1) await this.ctx.storage.put(photoKey(slot, 1), photo1); else await this.ctx.storage.delete(photoKey(slot, 1));

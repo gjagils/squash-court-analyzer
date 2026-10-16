@@ -142,6 +142,7 @@ public enum LiveShareSync {
         localActivity?(matchId, snapshot, startedAt)
         // A match played for a partij of a live team match also goes to the team page
         TeamLive.shared.forward(matchId: matchId, snapshot: snapshot)
+        sendTeamPhotos(matchId: matchId, photos: photos)
         let live = LiveShare.shared
         guard live.isLive(matchId) else { return }
         if snapshot.status == LiveStatus.finished {
@@ -149,6 +150,29 @@ public enum LiveShareSync {
         } else {
             live.update(matchId: matchId, snapshot: snapshot)
         }
+    }
+
+    /// The scoring screen of `matchId` appeared: a match played for a partij of
+    /// a live team match puts its first state (warm-up) and the players'
+    /// photos on the team page right away, instead of after the first point
+    @MainActor
+    public static func started(matchId: UUID, snapshot: LiveSnapshot, photos: (() -> [Data?])? = nil) {
+        guard TeamLive.shared.isBound(matchId) else { return }
+        TeamLive.shared.forward(matchId: matchId, snapshot: snapshot)
+        sendTeamPhotos(matchId: matchId, photos: photos)
+    }
+
+    /// The players' photos go to the partij of the team page once per match
+    /// (as thumbnails), when "Foto's meesturen" is on
+    @MainActor
+    static func sendTeamPhotos(matchId: UUID, photos: (() -> [Data?])?) {
+        guard let photos, TeamLive.shared.wantsPhotos(matchId) else { return }
+        let defaults = UserDefaults.standard
+        let allowed = defaults.object(forKey: LiveShare.photosKey) == nil || defaults.bool(forKey: LiveShare.photosKey)
+        guard allowed else { return }
+        let stored = photos()
+        guard stored.count == 2, stored[0] != nil || stored[1] != nil else { return }
+        TeamLive.shared.sendPhotos(matchId: matchId, photos: LivePhotoThumbnail.photos(player1: stored[0], player2: stored[1]))
     }
 
     /// The scoring screen of `matchId` closed (finished, saved for later or

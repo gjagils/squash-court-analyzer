@@ -8,26 +8,36 @@ import Observation
 // server (POST /api/live/:id/followers); after every rally the server pushes
 // the new snapshot through APNs or FCM, so the app itself need not run.
 
-/// A live match on a live server
+/// A live match (or a live team match) on a live server
 public struct LiveFollowTarget: Codable, Equatable, Hashable, Sendable {
     public let id: String
     /// "https://live.squashanalyzer.com", without a trailing slash
     public let server: String
+    /// "team" for a team match (Competitie, /t/<id>); nil for a single match
+    public let kind: String?
 
-    public init(id: String, server: String) {
+    public init(id: String, server: String, kind: String? = nil) {
         self.id = id
         self.server = server
+        self.kind = kind
     }
 
-    /// squashanalyzer://volg#<id>, with "@<host>" for another server than the default
+    public var isTeam: Bool { kind == "team" }
+
+    /// "/api/live/<id>" or "/api/team/<id>"
+    public var apiPath: String { (isTeam ? "/api/team/" : "/api/live/") + id }
+
+    /// squashanalyzer://volg#<id> (team: #team/<id>), with "@<host>" for another server than the default
     public var appLink: String {
-        if server == LiveFollowLink.defaultServer { return "squashanalyzer://volg#" + id }
-        return "squashanalyzer://volg#" + id + "@" + LiveFollowLink.host(of: server)
+        let fragment = (isTeam ? "team/" : "") + id
+        if server == LiveFollowLink.defaultServer { return "squashanalyzer://volg#" + fragment }
+        return "squashanalyzer://volg#" + fragment + "@" + LiveFollowLink.host(of: server)
     }
 }
 
-/// Reads a live link: the viewer page (https://live.squashanalyzer.com/l/<id>),
-/// the app link (squashanalyzer://volg#<id> or #<id>@<host>) or the bare id.
+/// Reads a live link: the viewer page (https://live.squashanalyzer.com/l/<id>,
+/// a team match /t/<id>), the app link (squashanalyzer://volg#<id>, #team/<id>,
+/// each with an optional @<host>) or the bare id.
 /// Only known servers are accepted: the app sends a push token there.
 public enum LiveFollowLink {
     /// The same as `LiveFollowLink.defaultServer` (that one is MainActor-bound)
@@ -86,7 +96,12 @@ public enum LiveFollowLink {
 
     private static func parseWord(_ word: String) -> LiveFollowTarget? {
         if word.hasPrefix("squashanalyzer://volg#") {
-            let rest = String(word.dropFirst(22))
+            var rest = String(word.dropFirst(22))
+            var kind: String? = nil
+            if rest.hasPrefix("team/") {
+                kind = "team"
+                rest = String(rest.dropFirst(5))
+            }
             var id = ""
             var host = ""
             var inHost = false
@@ -100,22 +115,23 @@ public enum LiveFollowLink {
                 }
             }
             guard isValidId(id) else { return nil }
-            if !inHost { return LiveFollowTarget(id: id, server: LiveFollowLink.defaultServer) }
+            if !inHost { return LiveFollowTarget(id: id, server: LiveFollowLink.defaultServer, kind: kind) }
             guard isAllowedHost(host) else { return nil }
-            return LiveFollowTarget(id: id, server: "https://" + host.lowercased())
+            return LiveFollowTarget(id: id, server: "https://" + host.lowercased(), kind: kind)
         }
         if word.hasPrefix("https://") {
             let host = host(of: word)
             guard isAllowedHost(host) else { return nil }
             let path = String(word.dropFirst(8 + host.count))
-            guard path.hasPrefix("/l/") else { return nil }
+            let team = path.hasPrefix("/t/")
+            guard path.hasPrefix("/l/") || team else { return nil }
             var id = ""
             for character in path.dropFirst(3) {
                 if character == "/" || character == "?" || character == "#" { break }
                 id += String(character)
             }
             guard isValidId(id) else { return nil }
-            return LiveFollowTarget(id: id, server: "https://" + host.lowercased())
+            return LiveFollowTarget(id: id, server: "https://" + host.lowercased(), kind: team ? "team" : nil)
         }
         if isValidId(word) { return LiveFollowTarget(id: word, server: LiveFollowLink.defaultServer) }
         return nil
@@ -135,6 +151,113 @@ public struct LiveFollowState: Codable, Sendable {
     public let snapshot: LiveSnapshot
 }
 
+/// One partij on the lock screen of a team match: what the server pushes
+/// (APNs content-state, FCM `team`), home player first. Names may be empty.
+public struct TeamFollowPartij: Codable, Equatable, Hashable, Sendable {
+    public var slot: Int
+    public var p1: String
+    public var p2: String
+    public var bestOf: Int
+    public var gamesWon: [Int]
+    public var score: [Int]
+    public var status: String
+    public var winner: Int?
+    /// "retired" or "walkover"
+    public var end: String?
+
+    public init(slot: Int, p1: String, p2: String, bestOf: Int, gamesWon: [Int], score: [Int], status: String,
+                winner: Int? = nil, end: String? = nil) {
+        self.slot = slot
+        self.p1 = p1
+        self.p2 = p2
+        self.bestOf = bestOf
+        self.gamesWon = gamesWon
+        self.score = score
+        self.status = status
+        self.winner = winner
+        self.end = end
+    }
+
+    /// Decided as the server counts it: a winner, finished, given up or not played
+    public var isDecided: Bool {
+        winner != nil || status == "finished" || end == "retired" || end == "walkover"
+    }
+
+    /// Being played now
+    public var isLive: Bool { !isDecided && (status == "playing" || status == "between") }
+
+    /// 1 home, 2 away, 0 not known
+    public var winnerSide: Int {
+        if let winner { return winner }
+        guard isDecided, gamesWon.count == 2 else { return 0 }
+        if gamesWon[0] > gamesWon[1] { return 1 }
+        if gamesWon[1] > gamesWon[0] { return 2 }
+        return 0
+    }
+}
+
+/// The lock screen stand of a team match (the server's push payload)
+public struct TeamFollowStand: Codable, Equatable, Hashable, Sendable {
+    public var home: String
+    public var away: String
+    /// Only the slots that have a partij, by slot
+    public var partijen: [TeamFollowPartij]
+
+    public init(home: String, away: String, partijen: [TeamFollowPartij]) {
+        self.home = home
+        self.away = away
+        self.partijen = partijen
+    }
+
+    /// The stand as GET /api/team/:id has it
+    public init(state: TeamLiveState) {
+        home = state.team.home
+        away = state.team.away
+        var list: [TeamFollowPartij] = []
+        for slot in 1...4 {
+            guard let partij = state.partijen[String(slot)] else { continue }
+            list.append(TeamFollowPartij(slot: slot, p1: partij.p1, p2: partij.p2, bestOf: partij.bestOf,
+                                         gamesWon: partij.gamesWon, score: partij.score,
+                                         status: partij.status.rawValue, winner: partij.winner, end: partij.end))
+        }
+        partijen = list
+    }
+
+    public func partij(_ slot: Int) -> TeamFollowPartij? {
+        for partij in partijen where partij.slot == slot { return partij }
+        return nil
+    }
+
+    /// Games won by home and away over all partijen, as the team page counts them
+    public var homeGames: Int {
+        var total = 0
+        for partij in partijen where partij.gamesWon.count == 2 { total += partij.gamesWon[0] }
+        return total
+    }
+
+    public var awayGames: Int {
+        var total = 0
+        for partij in partijen where partij.gamesWon.count == 2 { total += partij.gamesWon[1] }
+        return total
+    }
+
+    public var decidedCount: Int {
+        var count = 0
+        for partij in partijen where partij.isDecided { count += 1 }
+        return count
+    }
+
+    /// All four partijen decided
+    public var isFinished: Bool { decidedCount == 4 }
+
+    /// "Delft 8 E2" for a partij without a name
+    public func name(_ partij: TeamFollowPartij, side: Int) -> String {
+        let given = side == 1 ? partij.p1 : partij.p2
+        if !given.isEmpty { return given }
+        return (side == 1 ? home : away) + " E" + String(partij.slot)
+    }
+}
+
 /// The body of POST and DELETE /api/live/:id/followers
 public struct LiveFollowerRegistration: Codable, Equatable, Sendable {
     /// "ios" or "android"
@@ -142,11 +265,14 @@ public struct LiveFollowerRegistration: Codable, Equatable, Sendable {
     public let token: String
     /// iOS: a development build gets its pushes from the APNs sandbox
     public let sandbox: Bool?
+    /// A notification when a game (team match: a partij) is won and at the result
+    public let alerts: Bool?
 
-    public init(platform: String, token: String, sandbox: Bool? = nil) {
+    public init(platform: String, token: String, sandbox: Bool? = nil, alerts: Bool? = nil) {
         self.platform = platform
         self.token = token
         self.sandbox = sandbox
+        self.alerts = alerts
     }
 }
 
@@ -194,6 +320,8 @@ public protocol LiveFollowPresenter: AnyObject {
     /// when the phone does not allow it. The token for the server arrives through
     /// `LiveFollow.shared.tokenChanged(_:for:)` (also when it changes later).
     func start(_ target: LiveFollowTarget, snapshot: LiveSnapshot) async throws
+    /// The same for a team match (`target.isTeam`)
+    func startTeam(_ target: LiveFollowTarget, stand: TeamFollowStand) async throws
     /// Takes the match off the lock screen
     func stop(_ target: LiveFollowTarget) async
 }
@@ -207,6 +335,12 @@ public final class LiveFollow {
     /// Instellingen: "Stand op vergrendelscherm" for the match this phone is
     /// scoring (on by default)
     public static let ownMatchKey = "liveLockScreenOwnMatch"
+    /// Instellingen: "Melding bij elke game" (team match: each partij) and at
+    /// the result, like a goal in a football app; on by default
+    public static let alertsKey = "liveLockScreenAlerts"
+
+    /// Sent with every registration; `setAlerts` changes it for the followed matches too
+    public var alerts: Bool = true
 
     public var transport: (any LiveTransport)? = nil
     public var presenter: (any LiveFollowPresenter)? = nil
@@ -233,7 +367,7 @@ public final class LiveFollow {
         lastError = nil
         guard let transport else { throw LiveFollowError.noTransport }
         guard let presenter else { throw LiveFollowError.noPresenter }
-        guard let url = URL(string: target.server + "/api/live/" + target.id) else { throw LiveFollowError.notFound }
+        guard let url = URL(string: target.server + target.apiPath) else { throw LiveFollowError.notFound }
         let response: AITransportResponse
         do {
             response = try await transport.send(method: "GET", url: url, headers: [:], body: nil)
@@ -241,11 +375,21 @@ public final class LiveFollow {
             throw LiveFollowError.noConnection
         }
         if response.status == 404 { throw LiveFollowError.notFound }
-        guard response.status == 200, let state = try? JSONDecoder().decode(LiveFollowState.self, from: response.body) else {
-            throw LiveFollowError.refused(status: response.status)
+        guard response.status == 200 else { throw LiveFollowError.refused(status: response.status) }
+        if target.isTeam {
+            guard let state = try? JSONDecoder().decode(TeamLiveState.self, from: response.body) else {
+                throw LiveFollowError.refused(status: response.status)
+            }
+            let stand = TeamFollowStand(state: state)
+            try await presenter.startTeam(target, stand: stand)
+            titles[target.id] = stand.home + " – " + stand.away
+        } else {
+            guard let state = try? JSONDecoder().decode(LiveFollowState.self, from: response.body) else {
+                throw LiveFollowError.refused(status: response.status)
+            }
+            try await presenter.start(target, snapshot: state.snapshot)
+            titles[target.id] = state.snapshot.p1 + " – " + state.snapshot.p2
         }
-        try await presenter.start(target, snapshot: state.snapshot)
-        titles[target.id] = state.snapshot.p1 + " – " + state.snapshot.p2
         if !following.contains(target) { following.append(target) }
     }
 
@@ -266,9 +410,10 @@ public final class LiveFollow {
     /// POST /api/live/:id/followers
     public func register(_ token: String, for target: LiveFollowTarget) async throws {
         guard let transport, let presenter else { throw LiveFollowError.noTransport }
-        guard let url = URL(string: target.server + "/api/live/" + target.id + "/followers") else { throw LiveFollowError.notFound }
+        guard let url = URL(string: target.server + target.apiPath + "/followers") else { throw LiveFollowError.notFound }
         let registration = LiveFollowerRegistration(platform: presenter.platform, token: token,
-                                                    sandbox: presenter.platform == "ios" ? presenter.usesSandbox : nil)
+                                                    sandbox: presenter.platform == "ios" ? presenter.usesSandbox : nil,
+                                                    alerts: alerts)
         let body = try JSONEncoder().encode(registration)
         let response: AITransportResponse
         do {
@@ -303,10 +448,20 @@ public final class LiveFollow {
     /// DELETE /api/live/:id/followers, best effort (the session may be gone already)
     private func forgetOnServer(_ token: String?, for target: LiveFollowTarget) async {
         guard let token, let transport, let presenter,
-              let url = URL(string: target.server + "/api/live/" + target.id + "/followers") else { return }
+              let url = URL(string: target.server + target.apiPath + "/followers") else { return }
         let registration = LiveFollowerRegistration(platform: presenter.platform, token: token)
         guard let body = try? JSONEncoder().encode(registration) else { return }
         _ = try? await transport.send(method: "DELETE", url: url, headers: ["Content-Type": "application/json"], body: body)
+    }
+
+    /// "Melding bij elke game" changed: from now on, and for the matches this
+    /// phone follows (the server keeps the setting per registration)
+    public func setAlerts(_ on: Bool) async {
+        alerts = on
+        for target in following {
+            guard let token = tokens[target.id] else { continue }
+            try? await register(token, for: target)
+        }
     }
 
     /// A match the platform still shows on the lock screen after a restart of

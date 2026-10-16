@@ -23,7 +23,7 @@ final class LiveFollowTests: XCTestCase {
         XCTAssertNil(LiveFollowLink.parse("https://evil.example.com/l/abcdefgh2345"))
         XCTAssertNil(LiveFollowLink.parse("squashanalyzer://volg#abcdefgh2345@evil.example.com"))
         XCTAssertNil(LiveFollowLink.parse("squashanalyzer://volg#abcdefgh2345@other.gerdjan.workers.dev"))
-        XCTAssertNil(LiveFollowLink.parse("https://live.squashanalyzer.com/t/abcdefgh2345"))
+        XCTAssertNil(LiveFollowLink.parse("https://live.squashanalyzer.com/x/abcdefgh2345"))
         XCTAssertNil(LiveFollowLink.parse("https://live.squashanalyzer.com/l/ABC"))
         XCTAssertNil(LiveFollowLink.parse("hallo"))
     }
@@ -100,6 +100,49 @@ final class LiveFollowTests: XCTestCase {
         XCTAssertNil(follow.title(of: target))
     }
 
+    func testParsesTeamLinks() {
+        XCTAssertEqual(LiveFollowLink.parse("https://live.squashanalyzer.com/t/abcdefgh2345"),
+                       LiveFollowTarget(id: "abcdefgh2345", server: "https://live.squashanalyzer.com", kind: "team"))
+        let dev = LiveFollowTarget(id: "abcdefgh2345", server: "https://squash-live-dev.gerdjan.workers.dev", kind: "team")
+        XCTAssertEqual(LiveFollowLink.parse("squashanalyzer://volg#team/abcdefgh2345@squash-live-dev.gerdjan.workers.dev"), dev)
+        XCTAssertEqual(dev.appLink, "squashanalyzer://volg#team/abcdefgh2345@squash-live-dev.gerdjan.workers.dev")
+        XCTAssertEqual(LiveFollowLink.parse(dev.appLink), dev)
+        XCTAssertEqual(dev.apiPath, "/api/team/abcdefgh2345")
+        XCTAssertNil(LiveFollowLink.parse("squashanalyzer://volg#team/abc"))
+    }
+
+    @MainActor
+    func testFollowsATeamMatchAndSendsTheAlertsSetting() async throws {
+        let transport = FakeFollowTransport()
+        let presenter = FakeFollowPresenter()
+        let follow = LiveFollow(transport: transport)
+        follow.presenter = presenter
+        follow.alerts = false
+        let target = LiveFollowTarget(id: "abcdefgh2345", server: LiveFollowLink.defaultServer, kind: "team")
+        try await follow.follow(target)
+        XCTAssertEqual(transport.requests.first?.url, "https://live.squashanalyzer.com/api/team/abcdefgh2345")
+        let stand = presenter.teams.first
+        XCTAssertEqual(stand?.homeGames, 4)
+        XCTAssertEqual(stand?.awayGames, 0)
+        XCTAssertEqual(stand?.decidedCount, 1)
+        XCTAssertEqual(stand?.partij(2)?.isLive, true)
+        if let stand, let first = stand.partij(1) {
+            XCTAssertEqual(stand.name(first, side: 2), "Delft 8 E1")
+            XCTAssertEqual(first.winnerSide, 1)
+        } else {
+            XCTFail("no stand")
+        }
+        XCTAssertEqual(follow.title(of: target), "All Inn 8 – Delft 8")
+
+        await follow.tokenChanged("tok1", for: target)
+        let post = transport.requests.last
+        XCTAssertEqual(post?.url, "https://live.squashanalyzer.com/api/team/abcdefgh2345/followers")
+        XCTAssertTrue(post?.body.contains("\"alerts\":false") == true)
+
+        await follow.setAlerts(true)
+        XCTAssertTrue(transport.requests.last?.body.contains("\"alerts\":true") == true)
+    }
+
     @MainActor
     func testAFinishedMatchCannotBeFollowed() async {
         let transport = FakeFollowTransport()
@@ -148,6 +191,10 @@ final class FakeFollowTransport: LiveTransport, @unchecked Sendable {
         var text = ""
         if let body { text = String(data: body, encoding: String.Encoding.utf8) ?? "" }
         requests.append(FollowRequest(method: method, url: url.absoluteString, body: text))
+        if method == "GET" && url.absoluteString.contains("/api/team/") {
+            let json = "{\"team\":{\"home\":\"All Inn 8\",\"away\":\"Delft 8\",\"date\":1760000000000},\"partijen\":{\"1\":{\"p1\":\"Gerd-Jan\",\"p2\":\"\",\"bestOf\":5,\"games\":[[11,8],[11,4],[11,9]],\"score\":[11,9],\"gamesWon\":[3,0],\"server\":1,\"side\":\"R\",\"status\":\"finished\",\"winner\":1},\"2\":{\"p1\":\"Paul\",\"p2\":\"Mark\",\"bestOf\":5,\"games\":[[11,6]],\"score\":[7,5],\"gamesWon\":[1,0],\"server\":2,\"side\":\"L\",\"status\":\"playing\"}},\"updatedAt\":1,\"photos\":{\"1\":[false,false],\"2\":[false,false],\"3\":[false,false],\"4\":[false,false]},\"photoVersion\":0}"
+            return AITransportResponse(status: getStatus, body: json.data(using: String.Encoding.utf8) ?? Data())
+        }
         if method == "GET" {
             let json = "{\"snapshot\":{\"p1\":\"Jan\",\"p2\":\"Piet\",\"bestOf\":5,\"games\":[[11,8]],\"score\":[3,2],\"gamesWon\":[1,0],\"server\":1,\"side\":\"R\",\"status\":\"playing\"},\"updatedAt\":1,\"photos\":[false,false],\"photoVersion\":0}"
             return AITransportResponse(status: getStatus, body: json.data(using: String.Encoding.utf8) ?? Data())
@@ -166,6 +213,12 @@ final class FakeFollowPresenter: LiveFollowPresenter {
 
     func start(_ target: LiveFollowTarget, snapshot: LiveSnapshot) async throws {
         started.append(snapshot)
+    }
+
+    var teams: [TeamFollowStand] = []
+
+    func startTeam(_ target: LiveFollowTarget, stand: TeamFollowStand) async throws {
+        teams.append(stand)
     }
 
     func stop(_ target: LiveFollowTarget) async {

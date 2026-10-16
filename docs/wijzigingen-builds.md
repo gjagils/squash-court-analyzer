@@ -17,6 +17,41 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   gelijk. Ze gelden overal waar die namen staan: rondleiding, beginscherm, kopjes in Afgeronde
   wedstrijden, Coachkaart- en deelknoppen. De verschuiving van het deel-pictogram in de rondleiding
   en de losse Apple-fluit zijn weg.
+- **Live score op je vergrendelscherm (15–16 oktober 2026, bonus voor 3.0, besluit
+  Gerd-Jan)**: wie niet bij de wedstrijd is, tikt op de kijkpagina (`/l/…` of `/t/…`) op
+  *Volg op je vergrendelscherm* of plakt de link bij de nieuwe menurij *Wedstrijd volgen* op
+  het beginscherm (`SharedLiveFollowView`). De live-server stuurt na elke update een push
+  (APNs `liveactivity` of een FCM-databericht, `server/live-worker/src/push.js`), dus de app
+  hoeft niet open. iPhone: Live Activity op het vergrendelscherm en in het Dynamic Island in
+  de stijl van de live-ticker (foto of beginletter, games als getal, gamechips,
+  GAMEBAL/MATCHBAL, pauze en AFGELOPEN). Android 16+: Live Update (chip in de statusbalk,
+  uitgelichte melding met knop Stoppen); Android 9–15: doorlopende melding met de
+  tickerlayout als je hem uitklapt. Teamwedstrijden (Competitie): teamscore in het midden en
+  E1–E4 met foto, lopende stand en beslist partijen. Meldingen met geluid bij een gewonnen
+  game en de uitslag (teamwedstrijd: per beslist partij en de einduitslag), nooit per rally;
+  schakelaar *Melding bij elke game* in Instellingen, standaard aan. Alleen iPhone: de eigen
+  wedstrijd op het vergrendelscherm, schakelaar *Stand op vergrendelscherm*, standaard aan.
+  Foto's alleen als de scorer *Foto's van de spelers meesturen* aan heeft; bij een
+  teamwedstrijd gaan ze nu per partij naar de server (`PUT /api/team/:id/partij/:slot/photos`).
+  Push-token en foto's staan tijdelijk op de live-server (EU-jurisdictie) en gaan weg met de
+  wedstrijd (2 uur na de laatste update). Details, tests en open punten:
+  `docs/plan-live-vergrendelscherm.md`. Voor de upload: privacytekst
+  (`website/privacy.html`, nog niet gepubliceerd) en de formulieren in de stores, zie
+  "Vóór de upload van 3.0 build 4" in `docs/opleveren-en-hosting.md`.
+  Releasenote: "Nieuw: de live score op je vergrendelscherm. Tik op de kijkpagina op Volg op
+  je vergrendelscherm of plak de link bij Wedstrijd volgen; de stand loopt mee, ook met de app
+  dicht, met een melding bij elke game en de uitslag (uit te zetten in Instellingen). Ook voor
+  teamwedstrijden. Samsung: zet de meldingsstijl op het vergrendelscherm op Details."
+- **Android-release met R8 (16 oktober 2026)**: de release-build wordt verkleind en vermomd
+  (`isMinifyEnabled`, `isShrinkResources`, keep-regels in `Android/app/proguard-rules.pro`),
+  naar aanleiding van de Play-melding over codeoptimalisatie. Universele release-APK 81,0 →
+  27,4 MB, .aab 28,8 → 23,0 MB; `scripts/play_upload.py` uploadt de mapping mee. Zie "R8 in
+  de release-build" in `docs/android-port.md`. Releasenote (alleen Android, kort): "De app is
+  ook veel kleiner."
+- **Releasenotes 3.0 build 4 (16 oktober 2026, klaargezet)**: `release-notes/3.0-4.md` en
+  `release-notes/android-3.0-4.md` (490 tekens), met het verhaal van "de bonus" (meneer
+  Steenks aan de bar bij All Inn). Het buildnummer is nog niet opgehoogd en er is niets
+  geüpload.
 
 ## 3.0 build 3 (geüpload 12 oktober 2026)
 

@@ -3,12 +3,15 @@
      team_rows in code. Slot, home avatar and name, the games in boxes with the
      state between them, away name and avatar. Colours cannot be set from code
      per light/dark shade, so the variants (won, greyed, live) are separate
-     views of which code shows one. -->
+     views of which code shows one. The games and the state in the middle
+     have fixed widths, and the end padding matches the slot column, so the
+     middle sits on the same axis as the team score above it. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="26dp"
     android:gravity="center_vertical"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:paddingEnd="20dp">
 
     <TextView
         android:id="@+id/team_slot"
@@ -81,7 +84,7 @@
         android:fontFeatureSettings="tnum"
         android:gravity="center"
         android:includeFontPadding="false"
-        android:minWidth="18dp"
+        android:minWidth="20dp"
         android:paddingLeft="4dp"
         android:paddingTop="1dp"
         android:paddingRight="4dp"
@@ -97,7 +100,7 @@
         android:fontFeatureSettings="tnum"
         android:gravity="center"
         android:includeFontPadding="false"
-        android:minWidth="18dp"
+        android:minWidth="20dp"
         android:paddingLeft="4dp"
         android:paddingTop="1dp"
         android:paddingRight="4dp"
@@ -114,7 +117,7 @@
         android:background="@drawable/team_box0"
         android:gravity="center"
         android:includeFontPadding="false"
-        android:minWidth="18dp"
+        android:minWidth="20dp"
         android:paddingLeft="4dp"
         android:paddingTop="1dp"
         android:paddingRight="4dp"
@@ -131,7 +134,7 @@
         android:fontFeatureSettings="tnum"
         android:gravity="center"
         android:maxLines="1"
-        android:minWidth="46dp"
+        android:minWidth="52dp"
         android:paddingLeft="3dp"
         android:paddingRight="3dp"
         android:textColor="@color/live_text2"
@@ -144,7 +147,7 @@
         android:fontFeatureSettings="tnum"
         android:gravity="center"
         android:maxLines="1"
-        android:minWidth="46dp"
+        android:minWidth="52dp"
         android:paddingLeft="3dp"
         android:paddingRight="3dp"
         android:textColor="@color/live_live"
@@ -161,7 +164,7 @@
         android:fontFeatureSettings="tnum"
         android:gravity="center"
         android:includeFontPadding="false"
-        android:minWidth="18dp"
+        android:minWidth="20dp"
         android:paddingLeft="4dp"
         android:paddingTop="1dp"
         android:paddingRight="4dp"
@@ -177,7 +180,7 @@
         android:fontFeatureSettings="tnum"
         android:gravity="center"
         android:includeFontPadding="false"
-        android:minWidth="18dp"
+        android:minWidth="20dp"
         android:paddingLeft="4dp"
         android:paddingTop="1dp"
         android:paddingRight="4dp"
@@ -194,7 +197,7 @@
         android:background="@drawable/team_box0"
         android:gravity="center"
         android:includeFontPadding="false"
-        android:minWidth="18dp"
+        android:minWidth="20dp"
         android:paddingLeft="4dp"
         android:paddingTop="1dp"
         android:paddingRight="4dp"

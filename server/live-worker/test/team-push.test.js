@@ -3,7 +3,7 @@
 // fetch, MAX_FOLLOWERS_PER_SESSION 3).
 import { SELF, env, runDurableObjectAlarm, runInDurableObject } from 'cloudflare:test';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { apnsPayload, clearPushTokenCaches, fcmPayload, partijDecided, pushDeps, teamAlert, teamContentState } from '../src/push.js';
+import { apnsPayload, clearPushTokenCaches, fcmPayload, partijDecided, pushDeps, teamAlert, teamContentState, teamWinner } from '../src/push.js';
 
 const BASE = 'https://live.test';
 const header = { home: 'All Inn 8', away: 'Delft 8', date: Date.UTC(2026, 9, 30, 19) };
@@ -214,7 +214,16 @@ describe('team payload', () => {
     expect(teamAlert(three, team, all)).toEqual({ title: 'Uitslag: All Inn 8 wint 9–6', body: 'All Inn 8 – Delft 8 · partijen 3–1' });
     expect(teamAlert(all, team, all)).toBeNull();
     const draw = { 1: won('A', 'B', [3, 0], 1), 2: won('C', 'D', [0, 3], 2), 3: won('E', 'F', [3, 2], 1), 4: won('G', 'H', [2, 3], 2) };
-    expect(teamAlert({ 1: draw[1], 2: draw[2], 3: draw[3] }, team, draw).title).toBe('Uitslag: gelijkspel 8–8');
+    // SBN rule: 2–2 in partijen and 8–8 in games, both teams full: the team that won E1
+    expect(teamAlert({ 1: draw[1], 2: draw[2], 3: draw[3] }, team, draw).title).toBe('Uitslag: All Inn 8 wint 8–8');
+    // Most partijen wins, even with fewer games
+    const partijenFirst = { 1: won('A', 'B', [3, 2], 1), 2: won('C', 'D', [3, 2], 1), 3: won('E', 'F', [3, 2], 1), 4: won('G', 'H', [0, 3], 2) };
+    expect(teamWinner(partijenFirst)).toBe(1);
+    const fewerGames = { 1: won('A', 'B', [3, 2], 1), 2: won('C', 'D', [3, 2], 1), 3: won('E', 'F', [0, 3], 2), 4: won('G', 'H', [0, 3], 2) };
+    expect(teamWinner(fewerGames)).toBe(2);
+    // Equal partijen, a team that lost a walkover is not full
+    const walkover = { 1: won('A', 'B', [3, 0], 1), 2: won('C', 'D', [3, 0], 1), 3: won('', 'F', [0, 3], 2, { end: 'walkover' }), 4: won('G', 'H', [0, 3], 2) };
+    expect(teamWinner(walkover)).toBe(2);
     const awayWins = { 1: won('A', 'B', [0, 3], 2), 2: won('C', 'D', [0, 3], 2), 3: won('E', 'F', [3, 2], 1), 4: won('G', 'H', [1, 3], 2) };
     expect(teamAlert({}, team, awayWins)).toEqual({ title: 'Uitslag: Delft 8 wint 11–4', body: 'All Inn 8 – Delft 8 · partijen 1–3' });
   });

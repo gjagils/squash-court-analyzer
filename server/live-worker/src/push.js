@@ -262,9 +262,34 @@ export function teamContentState(team, partijen) {
 /**
  * The notification of a team match change: a partij that is decided now
  * ("E2: Paul wint 3–1"), or the result when all four are ("Uitslag: All Inn 8
- * wint 9–4", by games as on the team page). Never per rally or per game.
+ * wint 9–4", winner by the SBN rule of teamWinner). Never per rally or per game.
  * { title, body } or null.
  */
+/**
+ * The winner of a decided team match by the SBN rule (as TeamMatchScore in
+ * Core, reglement art. 23): most partijen; equal → the team with a full
+ * line-up (a lost walkover = not full); → most games; → most rally points;
+ * → the team that won E1. 1 home, 2 away, 0 a draw.
+ */
+export function teamWinner(partijen) {
+  const won = [0, 0];
+  const full = [true, true];
+  const points = [0, 0];
+  for (const slot of TEAM_SLOTS) {
+    const partij = partijen[slot];
+    const winner = partijWinner(partij);
+    if (winner) won[winner - 1] += 1;
+    if (partij.end === 'walkover' && winner) full[2 - winner] = false;
+    for (const game of partij.games || []) { points[0] += game[0]; points[1] += game[1]; }
+  }
+  if (won[0] !== won[1]) return won[0] > won[1] ? 1 : 2;
+  if (full[0] !== full[1]) return full[0] ? 1 : 2;
+  const [home, away] = teamGames(partijen);
+  if (home !== away) return home > away ? 1 : 2;
+  if (points[0] !== points[1]) return points[0] > points[1] ? 1 : 2;
+  return partijWinner(partijen[1]);
+}
+
 export function teamAlert(previous, team, partijen) {
   const before = previous || {};
   const [home, away] = teamGames(partijen);
@@ -275,9 +300,11 @@ export function teamAlert(previous, team, partijen) {
       const winner = partijWinner(partijen[slot]);
       if (winner) won[winner - 1] += 1;
     }
-    const title = home === away
+    const winner = teamWinner(partijen);
+    // The winner's games first, as the WhatsApp report ("wint met 8–9" can happen)
+    const title = winner === 0
       ? `Uitslag: gelijkspel ${home}–${away}`
-      : `Uitslag: ${home > away ? team.home : team.away} wint ${Math.max(home, away)}–${Math.min(home, away)}`;
+      : `Uitslag: ${winner === 1 ? team.home : team.away} wint ${winner === 1 ? home : away}–${winner === 1 ? away : home}`;
     return { title, body: `${team.home} – ${team.away} · partijen ${won[0]}–${won[1]}` };
   }
   for (const slot of TEAM_SLOTS) {

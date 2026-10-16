@@ -1,13 +1,16 @@
 import ActivityKit
 import Foundation
+import UIKit
 import SquashAnalyzerCore
 import SquashAnalyzerUI
 
 /// Live score op het vergrendelscherm on iOS: Live Activities of
-/// `LiveScoreAttributes` (drawn by the SquashLiveActivity extension).
+/// `LiveScoreAttributes` and `TeamScoreAttributes` (drawn by the
+/// SquashLiveActivity extension).
 ///
 /// - A followed match (`LiveFollow`): requested with a push token; the live
 ///   server sends every new stand through APNs, so the app need not run.
+/// - A followed team match: the same, with the four partijen on one card.
 /// - The match this phone is scoring ("Stand op vergrendelscherm" in
 ///   Instellingen): no pushes, updated from `LiveShareSync` after every rally.
 @MainActor
@@ -35,6 +38,8 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
     func install() {
         LiveFollow.shared.transport = URLSessionLiveTransport()
         LiveFollow.shared.presenter = self
+        // "Melding bij elke game" (Instellingen), sent with every registration
+        LiveFollow.shared.alerts = UserDefaults.standard.object(forKey: LiveFollow.alertsKey) as? Bool ?? true
         LiveShareSync.localActivity = { matchId, snapshot, startedAt in
             ActivityKitLiveFollowPresenter.shared.showOwn(matchId: matchId, snapshot: snapshot, startedAt: startedAt)
         }
@@ -46,6 +51,13 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
         }
         restoreRunning()
         removeUnusedPhotos()
+        refreshTeamPhotos()
+        // Pushes carry no photos: a followed team match gets the partij photos
+        // added since it was followed whenever the app comes to the front
+        NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil,
+                                               queue: .main) { _ in
+            Task { @MainActor in ActivityKitLiveFollowPresenter.shared.refreshTeamPhotos() }
+        }
     }
 
     // MARK: - Followed matches
@@ -71,7 +83,7 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
             LiveScorePhotoStore.remove(matchId: target.id)
             throw LiveFollowError.notAllowed
         }
-        observe(activity, target: target)
+        observe(activity, target: target) { LiveScorePhotoStore.remove(matchId: target.id) }
         if !downloaded {
             Task {
                 _ = await photos.value
@@ -81,6 +93,14 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
     }
 
     func stop(_ target: LiveFollowTarget) async {
+        if target.isTeam {
+            for activity in Activity<TeamScoreAttributes>.activities where Self.target(of: activity) == target {
+                await activity.end(nil, dismissalPolicy: .immediate)
+                cancelObservers(activity.id)
+            }
+            TeamScorePhotoStore.remove(teamId: target.id)
+            return
+        }
         for activity in Activity<LiveScoreAttributes>.activities where Self.target(of: activity) == target {
             await activity.end(nil, dismissalPolicy: .immediate)
             cancelObservers(activity.id)
@@ -132,6 +152,9 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
     private func removeUnusedPhotos() {
         var keep = Set<String>()
         for activity in Activity<LiveScoreAttributes>.activities { keep.insert(activity.attributes.matchId) }
+        for activity in Activity<TeamScoreAttributes>.activities {
+            keep.formUnion(TeamScorePhotoStore.keys(teamId: activity.attributes.teamId))
+        }
         keep.formUnion(ownPhotosStored)
         LiveScorePhotoStore.removeAll(except: keep)
     }
@@ -145,7 +168,8 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
     /// Hands every (new) push token to the server and forgets the match once
     /// the activity ends: the match finished (the server's "end"), or the user
     /// swiped it away on the lock screen
-    private func observe(_ activity: Activity<LiveScoreAttributes>, target: LiveFollowTarget) {
+    private func observe<Attributes: ActivityAttributes>(_ activity: Activity<Attributes>, target: LiveFollowTarget,
+                                                         removePhotos: @escaping @MainActor () -> Void) {
         cancelObservers(activity.id)
         let tokens = Task { @MainActor in
             for await data in activity.pushTokenUpdates {
@@ -161,7 +185,7 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
                     // match should keep its result on the lock screen
                     if LiveFollow.shared.isFollowing(target) { await LiveFollow.shared.ended(target) }
                     // An ended match keeps its result (with photos) on the lock screen; once it is gone the photos go too
-                    if state == .dismissed { LiveScorePhotoStore.remove(matchId: target.id) }
+                    if state == .dismissed { removePhotos() }
                     ActivityKitLiveFollowPresenter.shared.cancelObservers(activity.id)
                     return
                 }
@@ -190,8 +214,97 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
             guard let target = Self.target(of: activity), activity.activityState == .active else { continue }
             let state = activity.content.state
             LiveFollow.shared.restore(target, title: state.p1 + " – " + state.p2)
-            observe(activity, target: target)
+            observe(activity, target: target) { LiveScorePhotoStore.remove(matchId: target.id) }
         }
+        for activity in Activity<TeamScoreAttributes>.activities where activity.activityState == .active {
+            let target = Self.target(of: activity)
+            let state = activity.content.state
+            LiveFollow.shared.restore(target, title: state.home + " – " + state.away)
+            observe(activity, target: target) { TeamScorePhotoStore.remove(teamId: target.id) }
+        }
+    }
+
+    // MARK: - Followed team matches
+
+    func startTeam(_ target: LiveFollowTarget, stand: TeamFollowStand) async throws {
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { throw LiveFollowError.notAllowed }
+        // No stale date: between two partijen nothing may change for a long time
+        let content = ActivityContent(state: Self.teamContentState(stand), staleDate: nil)
+        if let running = followedTeam(target) {
+            await running.update(content)
+            return
+        }
+        // As for a single match: the photos first, letters when that is slow
+        removeUnusedPhotos()
+        let photos = Task { await Self.downloadTeamPhotos(target) }
+        let downloaded = await Self.finished(photos, within: 3)
+        let attributes = TeamScoreAttributes(teamId: target.id, server: target.server)
+        let activity: Activity<TeamScoreAttributes>
+        do {
+            activity = try Activity.request(attributes: attributes, content: content, pushType: .token)
+        } catch {
+            TeamScorePhotoStore.remove(teamId: target.id)
+            throw LiveFollowError.notAllowed
+        }
+        observe(activity, target: target) { TeamScorePhotoStore.remove(teamId: target.id) }
+        if !downloaded {
+            Task {
+                _ = await photos.value
+                await activity.update(activity.content)
+            }
+        }
+    }
+
+    private func followedTeam(_ target: LiveFollowTarget) -> Activity<TeamScoreAttributes>? {
+        Activity<TeamScoreAttributes>.activities.first { activity in
+            Self.target(of: activity) == target && activity.activityState == .active
+        }
+    }
+
+    /// The partij photos of the followed team matches again (app start and
+    /// back to the front): a partij that started since, or a photo added later,
+    /// shows from then on. The activity is redrawn with its current stand.
+    func refreshTeamPhotos() {
+        for activity in Activity<TeamScoreAttributes>.activities where activity.activityState == .active {
+            let target = Self.target(of: activity)
+            Task {
+                guard await Self.downloadTeamPhotos(target) else { return }
+                await activity.update(activity.content)
+            }
+        }
+    }
+
+    /// Which partij photos the team page has (`photos` of GET /api/team/:id)
+    private struct TeamPhotoFlags: Decodable {
+        let photos: [String: [Bool]]?
+    }
+
+    /// GET /api/team/:id for the flags, then GET /api/team/:id/photo/<slot>/<1|2>
+    /// per photo, stored as thumbnails for the widget (home = 1, away = 2).
+    /// False when the team page could not be read (the stored photos stay).
+    nonisolated static func downloadTeamPhotos(_ target: LiveFollowTarget) async -> Bool {
+        guard let url = URL(string: target.server + "/api/team/" + target.id),
+              let (body, response) = try? await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 10)),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let flags = try? JSONDecoder().decode(TeamPhotoFlags.self, from: body) else { return false }
+        for slot in TeamScoreAttributes.ContentState.slots {
+            let key = TeamScorePhotoStore.key(teamId: target.id, slot: slot)
+            let sides = flags.photos?[String(slot)] ?? []
+            for side in [1, 2] {
+                guard side <= sides.count, sides[side - 1],
+                      let photoURL = URL(string: target.server + "/api/team/" + target.id + "/photo/\(slot)/\(side)") else {
+                    LiveScorePhotoStore.store(nil, matchId: key, player: side)
+                    continue
+                }
+                var request = URLRequest(url: photoURL, timeoutInterval: 10)
+                request.setValue("image/jpeg", forHTTPHeaderField: "Accept")
+                if let (data, answer) = try? await URLSession.shared.data(for: request),
+                   (answer as? HTTPURLResponse)?.statusCode == 200 {
+                    LiveScorePhotoStore.store(data, matchId: key, player: side)
+                }
+            }
+        }
+        return true
     }
 
     // MARK: - The match this phone is scoring
@@ -259,6 +372,19 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
         let attributes = activity.attributes
         guard !attributes.isOwnMatch else { return nil }
         return LiveFollowTarget(id: attributes.matchId, server: attributes.server)
+    }
+
+    static func target(of activity: Activity<TeamScoreAttributes>) -> LiveFollowTarget {
+        LiveFollowTarget(id: activity.attributes.teamId, server: activity.attributes.server, kind: "team")
+    }
+
+    /// The server's team push, field by field (the extension has no Core)
+    nonisolated static func teamContentState(_ stand: TeamFollowStand) -> TeamScoreAttributes.ContentState {
+        let partijen = stand.partijen.map { partij in
+            TeamScorePartij(slot: partij.slot, p1: partij.p1, p2: partij.p2, bestOf: partij.bestOf, gamesWon: partij.gamesWon,
+                            score: partij.score, status: partij.status, winner: partij.winner, end: partij.end)
+        }
+        return TeamScoreAttributes.ContentState(home: stand.home, away: stand.away, partijen: partijen)
     }
 
     nonisolated static func contentState(_ snapshot: LiveSnapshot) -> LiveScoreAttributes.ContentState {

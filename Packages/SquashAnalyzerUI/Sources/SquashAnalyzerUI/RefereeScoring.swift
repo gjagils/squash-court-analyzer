@@ -37,6 +37,11 @@ public struct RefereeScoringView: View {
 
     public var body: some View {
         FontScaleCap { screen }
+            // A match played for a partij of a live team match shows on the team page at once, not after the first point
+            .task(id: match.id) {
+                LiveShareSync.started(matchId: match.id, snapshot: match.liveSnapshot,
+                                      photos: { [photo(Player.player1), photo(Player.player2)] })
+            }
     }
 
     private var screen: some View {

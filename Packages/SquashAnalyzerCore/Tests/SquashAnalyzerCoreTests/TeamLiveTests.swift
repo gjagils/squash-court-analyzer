@@ -400,6 +400,69 @@ final class TeamLiveTests: XCTestCase {
     }
 
     @MainActor
+    func testABoundMatchShowsItsPartijBeforeTheFirstPoint() async throws {
+        let transport = FakeTeamTransport()
+        let live = TeamLive(transport: transport)
+        live.baseURL = "https://live.test"
+        let matchId = UUID()
+        live.bind(matchId: matchId, teamId: "abcdefghjkmn", writeKey: "K3yK3yK3yK3yK3yK3yK3yK3y", slot: 3,
+                  homeIsPlayer1: false, homeLabel: "Paul", awayLabel: "Mark")
+        // The scoring screen forwards its first (warm-up) state as it appears
+        live.forward(matchId: matchId, snapshot: snapshot("Mark", "Paul", score: [0, 0], status: LiveStatus.warmup))
+        try await waitUntil { transport.requests.count >= 1 }
+        let first = transport.requests[0]
+        XCTAssertEqual(first.url, "https://live.test/api/team/abcdefghjkmn/partij/3")
+        XCTAssertTrue(first.body.contains("\"status\":\"warmup\""), first.body)
+        XCTAssertTrue(first.body.contains("\"p1\":\"Paul\""), "home first: " + first.body)
+    }
+
+    @MainActor
+    func testTheBoundMatchSendsItsPhotosOncePerBindingHomeFirst() async throws {
+        let transport = FakeTeamTransport()
+        let live = TeamLive(transport: transport)
+        live.baseURL = "https://live.test"
+        let matchId = UUID()
+        let jpeg1 = Data(base64Encoded: "/9j/AAAA") ?? Data()
+        let jpeg2 = Data(base64Encoded: "/9j/BBBB") ?? Data()
+        live.sendPhotos(matchId: matchId, photos: LivePhotos(player1: jpeg1, player2: jpeg2))
+        XCTAssertTrue(transport.requests.isEmpty, "not bound: nothing goes")
+
+        // Player 1 of the tracked match is the away player here
+        live.bind(matchId: matchId, teamId: "abcdefghjkmn", writeKey: "K3yK3yK3yK3yK3yK3yK3yK3y", slot: 2,
+                  homeIsPlayer1: false, homeLabel: "", awayLabel: "")
+        XCTAssertTrue(live.wantsPhotos(matchId))
+        live.sendPhotos(matchId: matchId, photos: LivePhotos(player1: nil, player2: nil))
+        XCTAssertTrue(live.wantsPhotos(matchId), "no photos yet: keep waiting")
+
+        live.sendPhotos(matchId: matchId, photos: LivePhotos(player1: jpeg1, player2: jpeg2))
+        XCTAssertFalse(live.wantsPhotos(matchId))
+        try await waitUntil { transport.requests.count >= 1 }
+        let put = transport.requests[0]
+        XCTAssertEqual(put.method, "PUT")
+        XCTAssertEqual(put.url, "https://live.test/api/team/abcdefghjkmn/partij/2/photos")
+        XCTAssertTrue(put.body.contains("\"p1\":\"\\/9j\\/BBBB\"") || put.body.contains("\"p1\":\"/9j/BBBB\""), put.body)
+
+        // Once per binding
+        live.sendPhotos(matchId: matchId, photos: LivePhotos(player1: jpeg1, player2: jpeg2))
+        try await Task.sleep(nanoseconds: 50_000_000)
+        XCTAssertEqual(transport.requests.count, 1)
+
+        // No network: tried again with the next call
+        live.unbind(matchId: matchId)
+        live.bind(matchId: matchId, teamId: "abcdefghjkmn", writeKey: "K3yK3yK3yK3yK3yK3yK3yK3y", slot: 2,
+                  homeIsPlayer1: true, homeLabel: "", awayLabel: "")
+        transport.offline = true
+        live.sendPhotos(matchId: matchId, photos: LivePhotos(player1: jpeg1, player2: nil))
+        try await waitUntil { live.wantsPhotos(matchId) }
+        transport.offline = false
+        live.sendPhotos(matchId: matchId, photos: LivePhotos(player1: jpeg1, player2: nil))
+        try await waitUntil { transport.requests.count >= 2 }
+        let again = transport.requests[transport.requests.count - 1]
+        XCTAssertTrue(again.body.contains("AAAA"), again.body)
+        XCTAssertFalse(again.body.contains("BBBB"), again.body)
+    }
+
+    @MainActor
     func testAKeyTheServerRefusesIsShownAndForgottenWhenItWorksAgain() async throws {
         let transport = FakeTeamTransport()
         let live = TeamLive(transport: transport)

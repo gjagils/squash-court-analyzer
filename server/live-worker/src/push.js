@@ -204,10 +204,13 @@ export function scoreAlert(previous, snapshot) {
   };
 }
 
-/** The APNs body for a Live Activity: event "update" or "end", with the alert of a game or the result */
-export function apnsPayload(snapshot, event, nowMs, alert = null) {
+/**
+ * The APNs body for a Live Activity: event "update" or "end", with the alert of
+ * a game or the result. An end stays 4 hours when finished (a live match by its
+ * status, a team match says so), else a minute.
+ */
+export function apnsPayload(snapshot, event, nowMs, alert = null, finished = snapshot.status === 'finished') {
   const now = Math.floor(nowMs / 1000);
-  const finished = snapshot.status === 'finished';
   const aps = { timestamp: now, event, 'content-state': snapshot };
   if (event === 'update') aps['stale-date'] = now + 900;
   if (event === 'end') aps['dismissal-date'] = finished ? now + 4 * 3600 : now + 60;
@@ -218,9 +221,13 @@ export function apnsPayload(snapshot, event, nowMs, alert = null) {
   return { aps };
 }
 
-/** The FCM HTTP v1 body: a data message (all values strings); the alert as alertTitle/alertBody */
-export function fcmPayload(token, id, server, snapshot, event, alert = null) {
-  const data = { kind: 'live', id, server, event, snapshot: JSON.stringify(snapshot) };
+/**
+ * The FCM HTTP v1 body: a data message (all values strings); the alert as
+ * alertTitle/alertBody. A live match has its stand in `snapshot`, a team match
+ * in `team`.
+ */
+export function fcmPayload(token, id, server, snapshot, event, alert = null, kind = 'live') {
+  const data = { kind, id, server, event, [kind === 'team' ? 'team' : 'snapshot']: JSON.stringify(snapshot) };
   if (alert) {
     data.alertTitle = alert.title;
     data.alertBody = alert.body;
@@ -263,12 +270,12 @@ async function sendApns(settings, follower, payload, nowMs) {
 }
 
 /** One FCM push: { result, detail } as sendApns */
-async function sendFcm(account, follower, id, server, snapshot, event, alert) {
+async function sendFcm(account, follower, id, server, snapshot, event, alert, kind) {
   const accessToken = await fcmAccessToken(account);
   const response = await pushDeps.fetch(`https://fcm.googleapis.com/v1/projects/${account.project_id}/messages:send`, {
     method: 'POST',
     headers: { authorization: `Bearer ${accessToken}`, 'content-type': 'application/json' },
-    body: JSON.stringify(fcmPayload(follower.token, id, server, snapshot, event, alert)),
+    body: JSON.stringify(fcmPayload(follower.token, id, server, snapshot, event, alert, kind)),
   });
   if (response.ok) return { result: 'ok', detail: 'fcm 200' };
   const body = await response.json().catch(() => null);
@@ -300,17 +307,20 @@ async function eachLimited(items, limit, task) {
 }
 
 /**
- * Sends one event ("update" or "end") with this snapshot to every follower.
- * Platforms without configuration are skipped. Returns the followers whose
- * token is dead, to be forgotten.
+ * Sends one event ("update" or "end") with this snapshot (kind "live") or team
+ * stand (kind "team") to every follower. `finished` (default: the snapshot's
+ * status) keeps an end on the lock screen for 4 hours. Platforms without
+ * configuration are skipped. Returns the followers whose token is dead, to be
+ * forgotten.
  */
-export async function pushToFollowers(env, { id, server, snapshot, event, followers, alert = null }) {
+export async function pushToFollowers(env, { id, server, snapshot, event, followers, alert = null, kind = 'live', finished }) {
   const apns = apnsSettings(env);
   const fcm = fcmServiceAccount(env);
   const nowMs = pushDeps.now();
+  const done = finished === undefined ? snapshot.status === 'finished' : finished;
   // Followers who turned the game alerts off get the same stand without one
-  const apnsWithAlert = apnsPayload(snapshot, event, nowMs, alert);
-  const apnsQuiet = apnsPayload(snapshot, event, nowMs);
+  const apnsWithAlert = apnsPayload(snapshot, event, nowMs, alert, done);
+  const apnsQuiet = apnsPayload(snapshot, event, nowMs, null, done);
   const dead = [];
   // What the services answered, counted (no tokens or names): "apns 200": 3
   const answers = {};
@@ -321,7 +331,7 @@ export async function pushToFollowers(env, { id, server, snapshot, event, follow
       if (follower.platform === 'ios' && apns) {
         outcome = await sendApns(apns, follower, wantsAlert ? apnsWithAlert : apnsQuiet, nowMs);
       } else if (follower.platform === 'android' && fcm) {
-        outcome = await sendFcm(fcm, follower, id, server, snapshot, event, wantsAlert ? alert : null);
+        outcome = await sendFcm(fcm, follower, id, server, snapshot, event, wantsAlert ? alert : null, kind);
       }
     } catch (error) {
       console.error(`${follower.platform} push error`, error && error.message);
@@ -330,6 +340,6 @@ export async function pushToFollowers(env, { id, server, snapshot, event, follow
     answers[outcome.detail] = (answers[outcome.detail] || 0) + 1;
     if (outcome.result === 'dead') dead.push(follower);
   });
-  console.log('push', event, JSON.stringify(answers), 'forgotten', dead.length);
+  console.log('push', kind, event, JSON.stringify(answers), 'forgotten', dead.length);
   return dead;
 }

@@ -4,11 +4,26 @@
 // Server-Sent Events. The subclass says what its state is (`state()`), what the
 // viewers get at the end (`endedPayload()`) and how the limiter knows it
 // (`limiterKey()`).
+//
+// Followers (Live score op het vergrendelscherm) live here too: phones that
+// registered a push token. Each is its own storage entry ("follower:" + SHA-256
+// of platform and token), wiped with the session. The subclass decides when
+// they get a push; the fan-out runs in the background, in order, and forgets
+// dead tokens. At the end of the session (Live stoppen, idle alarm) they get
+// the end once, if the subclass did not send it already (`endPushed`).
 
 import { DurableObject } from 'cloudflare:workers';
 import { readConfig } from './config.js';
+import { pushToFollowers } from './push.js';
 
 export const encoder = new TextEncoder();
+
+const FOLLOWER_PREFIX = 'follower:';
+
+async function followerKey(follower) {
+  const digest = await crypto.subtle.digest('SHA-256', encoder.encode(`${follower.platform}\n${follower.token}`));
+  return FOLLOWER_PREFIX + Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
+}
 
 /** Constant-time comparison of a given key with the stored one */
 export function sameKey(given, expected) {
@@ -61,8 +76,17 @@ export class ViewerSession extends DurableObject {
     await this.ctx.storage.setAlarm(now + this.config.idleMs);
   }
 
+  /**
+   * What the followers get with a push: { kind: "live" | "team", state, finished? },
+   * or null (subclass). `finished` false makes an end go away in a minute.
+   */
+  async pushContent() {
+    return null;
+  }
+
   /** Viewers learn the session ended (with the last state), then everything goes */
   async end(reason) {
+    const finalPush = await this.finalPushJob();
     const payload = await this.endedPayload(reason);
     const id = this.id || (await this.ctx.storage.get('id')) || '';
     this.broadcast('ended', payload);
@@ -78,6 +102,89 @@ export class ViewerSession extends DurableObject {
     } catch { /* expires on its own */ }
     await this.ctx.storage.deleteAlarm();
     await this.ctx.storage.deleteAll();
+    if (finalPush) this.schedulePush(finalPush);
+  }
+
+  // ---- Followers (lock screen pushes) ----------------------------------------
+
+  /** Registers a push token: 404 unknown, 429 full, 201 done (also when it was there already) */
+  async addFollower(follower, server) {
+    if (!(await this.ctx.storage.get('key'))) return 404;
+    const key = await followerKey(follower);
+    if (!(await this.ctx.storage.get(key))) {
+      const count = (await this.ctx.storage.list({ prefix: FOLLOWER_PREFIX })).size;
+      if (count >= this.config.maxFollowersPerSession) return 429;
+    }
+    // The public address of this server goes into the Android pushes
+    await this.ctx.storage.put({ [key]: follower, pushServer: server });
+    return 201;
+  }
+
+  /** Forgets a push token: 404 unknown session, 204 done (also when it was not there) */
+  async removeFollower(follower) {
+    if (!(await this.ctx.storage.get('key'))) return 404;
+    await this.ctx.storage.delete(await followerKey(follower));
+    return 204;
+  }
+
+  /** The registered followers ({ platform, token, sandbox, alerts }) */
+  async followers() {
+    return Array.from((await this.ctx.storage.list({ prefix: FOLLOWER_PREFIX })).values());
+  }
+
+  /**
+   * The event for the followers after a change: "end" once when the session is
+   * done now, null when that end went out already, else "update" (and a later
+   * end may go again, after a correction back to not done).
+   */
+  async followerEvent(done) {
+    if (done) {
+      if (await this.ctx.storage.get('endPushed')) return null;
+      await this.ctx.storage.put('endPushed', true);
+      return 'end';
+    }
+    await this.ctx.storage.delete('endPushed');
+    return 'update';
+  }
+
+  /** A push job for the followers: { id, server, kind, snapshot, finished, event, followers, alert } */
+  async pushJob(event, followers, content, alert = null) {
+    const [server, storedId] = await Promise.all([this.ctx.storage.get('pushServer'), this.ctx.storage.get('id')]);
+    return {
+      id: this.id || storedId || '', server: server || '', kind: content.kind, snapshot: content.state,
+      finished: content.finished, event, followers, alert,
+    };
+  }
+
+  /** The end for the followers when the session goes, unless it went out already */
+  async finalPushJob() {
+    const [followers, endPushed] = await Promise.all([this.followers(), this.ctx.storage.get('endPushed')]);
+    if (followers.length === 0 || endPushed) return null;
+    const content = await this.pushContent();
+    if (!content || !content.state) return null;
+    return this.pushJob('end', followers, content);
+  }
+
+  /**
+   * Sends in the background (the PUT does not wait), one fan-out after the
+   * other so the phones get the stands in order. Dead tokens are forgotten.
+   */
+  schedulePush(job) {
+    const run = async () => {
+      const dead = await pushToFollowers(this.env, job);
+      if (dead.length === 0 || !(await this.ctx.storage.get('key'))) return;
+      await this.ctx.storage.delete(await Promise.all(dead.map(followerKey)));
+    };
+    this.pushChain = (this.pushChain || Promise.resolve()).then(run).catch((error) => {
+      console.error('push fan-out failed', error && error.message);
+    });
+    if (this.ctx.waitUntil) this.ctx.waitUntil(this.pushChain);
+    return this.pushChain;
+  }
+
+  /** For tests: resolves when the pushes queued so far are done */
+  async pushesDone() {
+    await this.pushChain;
   }
 
   /** Nobody updated the session for IDLE_MINUTES: a lost phone, or the evening is long over */

@@ -8,7 +8,18 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.0 build 3)
+## Volgende build (na 3.0 build 4)
+
+Nog niets.
+
+## 3.0 build 4 (geüpload 16 oktober 2026)
+
+TestFlight (groep Squashteam, door Apple meteen goedgekeurd; 3.0 (3) verlopen)
+en Google Play (intern, alpha, Google Group testers; met R8-mapping). App
+Store-screenshots vernieuwd, website (handleiding Wedstrijd volgen,
+privacybeleid) gepubliceerd. Live-server met push-geheimen sinds 16 oktober.
+Gegevensveiligheid in Play bijgewerkt (Apparaat- of andere ID's) en ter
+beoordeling ingediend; het App Store-privacylabel hoefde niet te veranderen.
 
 - **Dezelfde pictogrammen op iPhone en Android (11 oktober 2026)**: de rondleiding en de
   starttegels toonden op de iPhone SF Symbols en op Android Material-iconen, met een andere vorm

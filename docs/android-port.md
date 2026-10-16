@@ -2332,3 +2332,50 @@ hierboven), anders start Gradle niet.
 Diezelfde avond weer verwijderd: Gerd-Jan zette alles op Cloudflare, dus
 `LiveShare.baseURL` is weer één adres en `LiveServer` en de `Picker` zijn
 weg (Core 174, Skip 173/173, iOS 94, Android 65 groen).
+
+## R8 in de release-build (2026-10-16, branch `feature/android-r8`)
+
+Aanleiding: Play Console meldde "DEX-codeoptimalisatie is onder onze
+drempelwaarde — Vermomming (0%)". De release-build stond op
+`isMinifyEnabled = false`, omdat Skip reflectie gebruikt.
+
+- **Aan**: `isMinifyEnabled = true`, `isShrinkResources = true`,
+  `proguard-android-optimize.txt` plus `Android/app/proguard-rules.pro`.
+  Debug-builds worden niet verkleind.
+- **Keep-regels**: dezelfde die Skip in de `proguard-rules.pro` van een nieuw
+  Skip-project zet (te vinden in het `skip`-binary van SkipDrive):
+  `-keeppackagenames **`, `skip.**`, `tools.skip.**`, `kotlin.jvm.functions.**`,
+  JNA, `skip.bridge`-implementaties en `**._ModuleBundleAccessor_*` (die zoekt
+  de resources op via het pakketpad, `assets/squash/analyzer/ui/Resources/…`).
+  Daarbij de getranspileerde app-code heel: `squash.analyzer.**` (Core en UI).
+  Room, Firebase, AndroidX, Compose en OkHttp hebben eigen consumer-regels in
+  hun AAR; die staan er niet nog eens in. Bibliotheken (Compose, de
+  material-icons, AndroidX, OkHttp, Firebase) worden wel verkleind en
+  vermomd; daar zit de winst.
+- **Geen extra regels nodig gebleken**: met alleen bovenstaande liep de
+  testronde zonder crash. Elke wijziging aan de regels vraagt opnieuw zo'n
+  ronde met de release-APK: een ontbrekende regel zie je pas tijdens het
+  draaien (`ClassNotFoundException`, `NoSuchMethodError`, een leeg scherm).
+- **Mapping**: R8 schrijft `app/build/outputs/mapping/release/mapping.txt`
+  (±113 MB, in de .aab ±9 MB gecomprimeerd) en AGP zet dezelfde mapping in de
+  bundle (`BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map`).
+  `scripts/play_upload.py` haalt hem uit de bundle en uploadt hem bij elke
+  upload als deobfuscatiebestand (`edits.deobfuscationfiles.upload`, type
+  proguard), zodat crashrapporten in Play Console leesbaar zijn. Lukt dat
+  niet, dan is het een waarschuwing: Play leest ook de kopie in de bundle.
+- **Grootte** (3.0 build 3): universele release-APK 81,0 → 27,4 MB (dex
+  72,7 → 19,4 MB), .aab 28,8 → 23,0 MB inclusief de mapping (dex in de
+  bundle gecomprimeerd 21,0 → 6,4 MB).
+- **Getest op de emulator met de release-APK** (16 oktober, logcat zonder
+  `AndroidRuntime`/`ClassNotFound`/`NoSuchMethod`/codeerfouten):
+  rondleiding, beginscherm, instellingen, speler toevoegen met foto,
+  scheidsrechterwedstrijd (punten, undo, drie games, badges, delen als
+  scorekaart en plaatje), coachwedstrijd (winner/zone/slag, analyse,
+  coachkaart, notitie per game, opslaan als incompleet), geschiedenis en
+  analyse, spelersprofiel en badges, Competitie (teamwedstrijd zelf
+  invullen, partij koppelen aan een scheidsrechterwedstrijd, na herstart
+  terug), Mijn team (sbn.toernooi.nl), back-up maken (formaat 4) en
+  terugzetten (eigen bestand "Alles vervangen", iOS-back-up "Samenvoegen"),
+  LIVE op live.squashanalyzer.com (sessie met foto's, stand na een punt,
+  Live stoppen wist hem), Wedstrijd volgen op de test-Worker (melding,
+  FCM-update van de stand, Stoppen).

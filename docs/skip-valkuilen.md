@@ -105,3 +105,8 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
   `Android/gradle.properties`.
 - **Room**: bij een nieuwe databaseversie de gegenereerde `schemas/<versie>.json`
   committen; de CI faalt als `git diff Android/app/schemas` niet leeg is.
+- **R8 (release-build) en Skip**: Skip reflecteert op zijn eigen klassen en zoekt
+  resources op via het pakketpad (`_ModuleBundleAccessor_`). Houd de keep-regels uit
+  Skips projectsjabloon (`-keeppackagenames **`, `skip.**`, …) en de getranspileerde
+  pakketten `squash.analyzer.**` in `Android/app/proguard-rules.pro`; test elke
+  wijziging daaraan met de release-APK op de emulator (16 oktober).

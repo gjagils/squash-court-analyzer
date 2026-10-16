@@ -70,6 +70,47 @@ volg-actie (alles zonder Live Activity gaat weg). Beide targets hebben de
 entitlement `com.apple.security.application-groups`
 (`SquashLiveActivity/SquashLiveActivity.entitlements` is nieuw).
 
+### Teamwedstrijd op de iPhone (16 oktober 2026)
+
+Branch `feature/live-activity-team-ios`. Een teamlink (`squashanalyzer://volg#team/<id>`,
+knop op de teampagina, of `https://…/t/<id>` plakken) geeft een tweede Live Activity
+(`TeamScoreAttributes` in `Shared/TeamScoreAttributes.swift`, widget
+`SquashLiveActivity/TeamScoreActivityWidget.swift`). De content-state is precies de
+teampush van de server (`{home, away, partijen}`).
+
+- Kaart: LIVE-pil, "COMPETITIE" en "2 van 4 klaar"; daaronder de teamregel (thuisteam
+  oranje links, de games van beide teams in het midden, uitteam blauw rechts) en vier
+  rijen E1–E4: foto of letter, voornaam, games per speler, in het midden "● 7–5"
+  (rood, partij bezig), "klaar" of "–". Het vakje van de winnaar krijgt zijn kleur;
+  een slot zonder partij staat grijs als "Delft 8 E3". Teamscore en rijmiddens staan
+  op dezelfde middenlijn. Alle vier klaar: grijze pil AFGELOPEN en "Uitslag: All Inn 8
+  wint 9–8" (partijen, dan volledige opstelling, dan games, dan E1; de melding van de
+  server is leidend). Hoogte ongeveer 153 pt.
+- Dynamic Island: compact rode stip + games thuis, games uit; minimaal "5·3";
+  uitgeklapt LIVE en voortgang, de teamregel en de vier rijen.
+- Foto's per partij (`live-photos/<teamId>-<slot>-1|2.jpg` in de App Group): opgehaald
+  bij het volgen (`GET /api/team/:id` voor `photos`, dan `/photo/<slot>/<1|2>`), bij de
+  start van de app en elke keer dat de app weer op de voorgrond komt. Een push draagt
+  geen foto's: een partij of foto die later komt terwijl de app dicht blijft, toont
+  tot dan de beginletter. Bewuste vereenvoudiging.
+- Instellingen (iPhone, en de gedeelde instellingen van Android): **Melding bij elke
+  game**, standaard aan. Wijzigen meldt het opnieuw aan voor de gevolgde wedstrijden
+  (`LiveFollow.setAlerts`); bij de start leest de iPhone-app de keuze in.
+
+Bij het scoren voor een partij van een live teamwedstrijd (alle platforms, Core/UI):
+
+- De partij staat meteen op de teampagina zodra het scorescherm verschijnt (stand
+  "inspelen"), niet pas na het eerste punt (`LiveShareSync.started`).
+- Met **Foto's meesturen** gaan de foto's van beide spelers één keer per koppeling naar
+  `PUT /api/team/:id/partij/:slot/photos` (thuisspeler als `p1`); zonder foto's of zonder
+  netwerk volgt een nieuwe poging bij het volgende punt (`TeamLive.sendPhotos`).
+
+Getest op 16 oktober in de iPhone 17 Pro Max-simulator tegen de test-Worker: volgen met
+foto's voor twee partijen, partij bezig, partij klaar, alle vier klaar, een partij met
+foto's die na het volgen kwam (zichtbaar na terug naar de app), compact en uitgeklapt
+Dynamic Island, en de melding (geluid, uitgeklapt eiland) bij een gewonnen game van
+een losse wedstrijd en bij een beslist partij. Ondertekende build voor een toestel lukt.
+
 ## Hoe het werkt
 
 1. App leest de link (`LiveFollowLink.parse` in Core): `https://live.squashanalyzer.com/l/<id>`,
@@ -186,6 +227,10 @@ op het canvas.
 - **Foto's bij de eigen wedstrijd** zijn gebouwd maar niet in de simulator
   doorlopen (daarvoor is een wedstrijd met spelersfoto's nodig); het volgen met
   foto's wel.
+- **Teamwedstrijd op Android** is nog niet gebouwd (andere branch); de
+  iPhone-versie is alleen in de simulator bekeken.
+- Een volglink openen terwijl het scherm Wedstrijd volgen al open staat, neemt de
+  nieuwe link niet over (eerst Sluiten); gezien op 16 oktober, niet aangepast.
 - **Testen op echte toestellen**: iPhone 16 Pro en de A13 (Android 14, dus de
   doorlopende melding). De tickerstijl is alleen op de emulator bekeken (API 36
   met de debugschakelaar); One UI tekent meldingen net anders, vooral de

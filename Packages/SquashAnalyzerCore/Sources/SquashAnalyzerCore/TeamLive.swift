@@ -448,6 +448,8 @@ public final class TeamLive {
     public func isGone(_ teamId: String) -> Bool { goneTeamIds.contains(teamId) }
 
     private var bindings: [UUID: Binding] = [:]
+    /// Bound matches whose players' photos went to their partij (once per binding)
+    private var photosSent: Set<UUID> = []
     /// The newest state per partij still to send; the channel is "<teamId>/<slot>"
     private let queue = LatestValueSender<TeamLivePartij>()
 
@@ -468,10 +470,44 @@ public final class TeamLive {
         goneTeamIds = goneTeamIds.filter { id in id != teamId }
         bindings[matchId] = Binding(teamId: teamId, key: writeKey, slot: slot, homeIsPlayer1: homeIsPlayer1,
                                     homeLabel: homeLabel, awayLabel: awayLabel)
+        photosSent.remove(matchId)
     }
 
     public func unbind(matchId: UUID) {
         bindings[matchId] = nil
+        photosSent.remove(matchId)
+    }
+
+    /// Whether the players' photos of this bound match still have to go to its partij
+    public func wantsPhotos(_ matchId: UUID) -> Bool {
+        guard let binding = bindings[matchId] else { return false }
+        return !photosSent.contains(matchId) && !goneTeamIds.contains(binding.teamId)
+    }
+
+    /// The players' photos of a bound match (thumbnails, player 1 and player 2
+    /// of the tracked match) go to its partij of the team page, once per
+    /// binding: PUT /api/team/:id/partij/:slot/photos with the home player as
+    /// p1. Without any photo nothing is sent (the photos may still be loading);
+    /// a send that did not get through is tried again with the next call.
+    public func sendPhotos(matchId: UUID, photos: LivePhotos) {
+        guard wantsPhotos(matchId), !photos.isEmpty, let binding = bindings[matchId] else { return }
+        photosSent.insert(matchId)
+        var body = photos
+        if !binding.homeIsPlayer1 {
+            body.p1 = photos.p2
+            body.p2 = photos.p1
+        }
+        Task {
+            let sent = await self.putPhotos(body, binding: binding)
+            if !sent && self.offline { self.photosSent.remove(matchId) }
+        }
+    }
+
+    private func putPhotos(_ photos: LivePhotos, binding: Binding) async -> Bool {
+        guard let transport = activeTransport,
+              let url = URL(string: "\(baseURL)/api/team/\(binding.teamId)/partij/\(binding.slot)/photos"),
+              let body = try? JSONEncoder().encode(photos) else { return false }
+        return await send(body, to: url, teamId: binding.teamId, writeKey: binding.key, transport: transport)
     }
 
     public func isBound(_ matchId: UUID) -> Bool { bindings[matchId] != nil }

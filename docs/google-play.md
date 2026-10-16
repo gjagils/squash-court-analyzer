@@ -30,9 +30,11 @@ gedaan; deel B doet Gerd-Jan in de terminal en de Play Console; deel C
 - **Versies**: `versionCode` (moet bij elke upload omhoog) en `versionName`
   in `app/build.gradle.kts`; nu `1` / `0.1`.
 - **Release-build**: `./gradlew :app:bundleRelease` →
-  `app/build/outputs/bundle/release/app-release.aab` (±19 MB). Geen R8
-  (verkleinen) nog: Skip gebruikt reflectie, dat vraagt eerst eigen
-  keep-regels en een testronde. Release-build gestart op de emulator: werkt.
+  `app/build/outputs/bundle/release/app-release.aab` (±23 MB). Sinds 16
+  oktober 2026 met R8 (verkleinen en vermommen, keep-regels in
+  `app/proguard-rules.pro`; zie "R8 in de release-build" in
+  `docs/android-port.md`). De R8-mapping zit in de bundle en
+  `scripts/play_upload.py` uploadt hem ook apart als deobfuscatiebestand.
 
 ## Deel B — Gerd-Jan
 

@@ -86,6 +86,7 @@ public struct SharedSettingsView: View {
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     @AppStorage(LiveShare.enabledKey) private var liveSharing = true
     @AppStorage(LiveShare.photosKey) private var livePhotos = true
+    @AppStorage(LiveFollow.alertsKey) private var liveAlerts = true
     @State private var draft = ""
     @State private var message: String?
     @State private var messageIsError = false
@@ -219,6 +220,19 @@ public struct SharedSettingsView: View {
             .tint(SharedColors.accent)
             .disabled(!liveSharing)
             Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.")
+                .font(SharedFonts.system(12))
+                .foregroundColor(SharedColors.textMuted)
+            Toggle(isOn: Binding(get: { liveAlerts }, set: { on in
+                liveAlerts = on
+                // The server keeps the choice per followed match: tell it for the ones followed now
+                Task { await LiveFollow.shared.setAlerts(on) }
+            })) {
+                Text("Melding bij elke game")
+                    .font(SharedFonts.system(14))
+                    .foregroundColor(SharedColors.textPrimary)
+            }
+            .tint(SharedColors.accent)
+            Text("Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag.")
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
         }

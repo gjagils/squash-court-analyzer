@@ -41,6 +41,7 @@ struct LiveScoreActivityWidget: Widget {
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     HStack(spacing: 6) {
+                        LiveScoreMark(size: 11)
                         LiveScoreStatusText(text: state.statusLine, size: 11)
                             .layoutPriority(1)
                         Spacer(minLength: 4)
@@ -147,16 +148,20 @@ struct LiveScoreLockScreenView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            if state.isFinished {
-                LiveScorePill(text: "AFGELOPEN", live: false)
-            } else {
-                LiveScorePill(text: "LIVE", live: true)
+            HStack(spacing: 7) {
+                if state.isFinished {
+                    LiveScorePill(text: "AFGELOPEN", live: false)
+                } else {
+                    LiveScorePill(text: "LIVE", live: true)
+                }
+                LiveScoreStatusText(text: state.statusLine, size: 12)
+                if let badge = state.ballBadge {
+                    LiveScoreBadgeView(badge: badge)
+                }
             }
-            LiveScoreStatusText(text: state.statusLine, size: 12)
-            Spacer(minLength: 6)
-            if let badge = state.ballBadge {
-                LiveScoreBadgeView(badge: badge)
-            }
+            .layoutPriority(1)
+            Spacer(minLength: 4)
+            LiveScoreBrand()
         }
         .frame(height: 20)
     }
@@ -198,6 +203,51 @@ struct LiveScoreLockScreenView: View {
             }
         }
         .frame(height: 20)
+    }
+}
+
+/// The app's logo mark as a loose line drawing (Apple: no container, not the
+/// app icon): the magnifying glass with the two eyes, in orange
+struct LiveScoreMark: View {
+    let size: CGFloat
+
+    var body: some View {
+        Canvas { context, canvas in
+            let unit = canvas.width / 24.0
+            var glass = Path()
+            glass.addEllipse(in: CGRect(x: 4.0 * unit, y: 4.0 * unit, width: 13.0 * unit, height: 13.0 * unit))
+            glass.move(to: CGPoint(x: 15.5 * unit, y: 15.5 * unit))
+            glass.addLine(to: CGPoint(x: 20.5 * unit, y: 20.5 * unit))
+            context.stroke(glass, with: .color(LiveScoreColors.accent),
+                           style: StrokeStyle(lineWidth: 2.2 * unit, lineCap: .round))
+            let eye = 1.0 * unit
+            for x in [8.6, 12.4] {
+                context.fill(Path(ellipseIn: CGRect(x: x * unit - eye, y: 9.6 * unit - eye, width: 2 * eye, height: 2 * eye)),
+                             with: .color(LiveScoreColors.accent))
+            }
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
+    }
+}
+
+/// "SquashAnalyzer" with the mark, top right of the card; where the header is
+/// full (MATCHBAL and a long status, a small screen) only the mark stays
+struct LiveScoreBrand: View {
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 4) {
+                LiveScoreMark(size: 13)
+                (Text("Squash").foregroundColor(LiveScoreColors.textPrimary)
+                    + Text("Analyzer").foregroundColor(LiveScoreColors.accent))
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .lineLimit(1)
+                    .fixedSize()
+            }
+            LiveScoreMark(size: 13)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("SquashAnalyzer")
     }
 }
 

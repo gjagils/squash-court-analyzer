@@ -19,7 +19,10 @@ struct TeamScoreActivityWidget: Widget {
             let photos = TeamScorePhotos(teamId: context.attributes.teamId)
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    LiveScorePill(text: state.isFinished ? "AFGELOPEN" : "LIVE", live: !state.isFinished)
+                    HStack(spacing: 5) {
+                        LiveScoreMark(size: 12)
+                        LiveScorePill(text: state.isFinished ? "AFGELOPEN" : "LIVE", live: !state.isFinished)
+                    }
                         .padding(.leading, 6)
                         .frame(maxHeight: .infinity)
                 }
@@ -119,19 +122,23 @@ struct TeamScoreLockScreenView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            if state.isFinished {
-                LiveScorePill(text: "AFGELOPEN", live: false)
-                LiveScoreStatusText(text: state.resultTitle, size: 11)
-            } else {
-                LiveScorePill(text: "LIVE", live: true)
-                LiveScoreStatusText(text: "Competitie", size: 11)
-                Spacer(minLength: 6)
-                Text(state.progressText)
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
-                    .foregroundColor(LiveScoreColors.textSecondary)
-                    .lineLimit(1)
+            HStack(spacing: 7) {
+                if state.isFinished {
+                    LiveScorePill(text: "AFGELOPEN", live: false)
+                    LiveScoreStatusText(text: state.resultTitle, size: 11)
+                } else {
+                    LiveScorePill(text: "LIVE", live: true)
+                    LiveScoreStatusText(text: "Competitie", size: 11)
+                    Text(state.progressText)
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundColor(LiveScoreColors.textSecondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
             }
-            if state.isFinished { Spacer(minLength: 0) }
+            .layoutPriority(1)
+            Spacer(minLength: 4)
+            LiveScoreBrand()
         }
         .frame(height: 16)
     }

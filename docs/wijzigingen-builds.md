@@ -10,7 +10,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 4)
 
-Nog niets.
+- **SquashAnalyzer op de live score (16 oktober 2026, iPhone)**: rechtsboven op de kaart
+  op het vergrendelscherm staat nu het vergrootglas met "SquashAnalyzer", los in de kaart
+  zoals Apple het voor een Live Activity voorschrijft (geen app-icoon, geen kader); bij een
+  volle kopregel (MATCHBAL, een lange status) blijft alleen het vergrootglas staan.
+  GAMEBAL/MATCHBAL staat nu links naast de status. Ook op de teamkaart, en in het
+  uitgeklapte Dynamic Island het vergrootglas klein in de hoek. Android toont de appnaam
+  al zelf boven de melding.
+  - Releasenote: *Op de live score op je vergrendelscherm staat nu rechtsboven SquashAnalyzer, zodat je ziet waar de stand vandaan komt.*
 
 ## 3.0 build 4 (geüpload 16 oktober 2026)
 

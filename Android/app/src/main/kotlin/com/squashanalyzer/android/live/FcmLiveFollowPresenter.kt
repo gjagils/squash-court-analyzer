@@ -62,6 +62,9 @@ class FcmLiveFollowPresenter(private val context: Context) : LiveFollowPresenter
         followed.add(match)
         followed.token = token
         lastStarted = score
+        // Photos of matches no longer followed go; this match's photos come once
+        LivePhotos.deleteAllExcept(context, followed.all())
+        notifier.fetchPhotos(match)
         // Core keeps the token for unfollow(); it is the same, so the server sees it twice
         scope.launch { LiveFollow.shared.tokenChanged(token, for_ = target) }
     }
@@ -70,6 +73,7 @@ class FcmLiveFollowPresenter(private val context: Context) : LiveFollowPresenter
         val match = FollowedMatch.from(target)
         followed.remove(match)
         notifier.cancel(match)
+        LivePhotos.delete(context, match)
     }
 
     companion object {
@@ -90,6 +94,7 @@ class FcmLiveFollowPresenter(private val context: Context) : LiveFollowPresenter
             } else {
                 followed.remove(match)
                 LiveScoreNotifier(context).cancel(match)
+                LivePhotos.delete(context, match)
             }
             // Core sends the DELETE only when it still knows the token
             val token = followed.token ?: return

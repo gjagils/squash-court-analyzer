@@ -46,7 +46,23 @@ class LiveScoreNotifierTest {
         assertTrue(n.flags and Notification.FLAG_ONGOING_EVENT != 0)
         assertEquals(Notification.VISIBILITY_PUBLIC, n.visibility)
         assertEquals("Stoppen", n.actions.single().title.toString())
+        // The ticker: collapsed one line, expanded the whole board
         assertTrue(n.bigContentView != null)
+        assertTrue(n.contentView != null)
+    }
+
+    @Test @Config(sdk = [36])
+    fun debugBuildsCanShowTheTickerOnAndroid16() {
+        val prefs = LiveScoreNotifier.debugPrefs(app)
+        prefs.edit().putBoolean(LiveScoreNotifier.DEBUG_FORCE_ONGOING, true).commit()
+        try {
+            LiveScoreNotifier(app).show(match, score())
+            val n = shown()
+            assertTrue(n.bigContentView != null)
+            assertFalse(n.extras.getBoolean("android.requestPromotedOngoing"))
+        } finally {
+            prefs.edit().clear().commit()
+        }
     }
 
     @Test @Config(sdk = [36])
@@ -59,6 +75,8 @@ class LiveScoreNotifierTest {
         assertTrue(n.flags and Notification.FLAG_ONGOING_EVENT != 0)
         // No custom views: a promoted notification may not have them
         assertTrue(n.bigContentView == null && n.contentView == null)
+        // Both avatars (initials here) as the large icon
+        assertTrue(n.getLargeIcon() != null)
     }
 
     @Test @Config(sdk = [36])

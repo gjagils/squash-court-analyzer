@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Live score ticker: one finished game won by player 2, added to live_history in code -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/live_chip"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="3dp"
+    android:layout_marginRight="3dp"
+    android:background="@drawable/live_chip2"
+    android:fontFeatureSettings="tnum"
+    android:maxLines="1"
+    android:paddingLeft="9dp"
+    android:paddingTop="2dp"
+    android:paddingRight="9dp"
+    android:paddingBottom="2dp"
+    android:textColor="@color/live_p2"
+    android:textSize="13sp" />

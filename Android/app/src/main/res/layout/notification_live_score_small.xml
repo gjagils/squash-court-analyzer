@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Collapsed live score notification before Android 16: the ticker in two
+     short rows (who serves, name, games won in a box, points); the status line
+     and the avatars are in the expanded view (notification_live_score.xml).
+     Two rows rather than "Gerd-Jan 9 – 7 Thomas" on one line: that left no room
+     for the names on a 360dp wide phone. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/live_serve1"
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:layout_marginEnd="7dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/live_serve_dot1"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/live_name1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/live_p1"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/live_games1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/live_games_box1"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:minWidth="20dp"
+            android:paddingLeft="5dp"
+            android:paddingTop="1dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="1dp"
+            android:textColor="@color/live_text2"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/live_points1"
+            style="@style/TextAppearance.Compat.Notification.Title"
+            android:layout_width="34dp"
+            android:layout_height="wrap_content"
+            android:fontFeatureSettings="tnum"
+            android:gravity="end"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/live_serve2"
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:layout_marginEnd="7dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/live_serve_dot2"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/live_name2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/live_p2"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/live_games2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/live_games_box2"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:minWidth="20dp"
+            android:paddingLeft="5dp"
+            android:paddingTop="1dp"
+            android:paddingRight="5dp"
+            android:paddingBottom="1dp"
+            android:textColor="@color/live_text2"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/live_points2"
+            style="@style/TextAppearance.Compat.Notification.Title"
+            android:layout_width="34dp"
+            android:layout_height="wrap_content"
+            android:fontFeatureSettings="tnum"
+            android:gravity="end"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

@@ -8,20 +8,26 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.squashanalyzer.android.BuildConfig
 import com.squashanalyzer.android.MainActivity
 import com.squashanalyzer.android.R
+import kotlinx.coroutines.launch
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Puts a followed live match on the lock screen. Android 16+: a promoted
  * Live Update (status bar chip, lock screen) with a game bar
- * (Notification.ProgressStyle); before that an ongoing notification whose
- * expanded form is a mini scoreboard. One notification per match.
+ * (Notification.ProgressStyle) and both avatars as large icon; before that an
+ * ongoing notification in the style of the website's live ticker. One
+ * notification per match.
  */
 class LiveScoreNotifier(private val context: Context) {
     companion object {
@@ -37,6 +43,14 @@ class LiveScoreNotifier(private val context: Context) {
         const val FINISHED_TIMEOUT_MILLIS = 3L * 60 * 60 * 1000
 
         fun notificationId(target: FollowedMatch): Int = ("live-" + target.id).hashCode()
+
+        /** Debug builds only: the Android 9-15 notification on Android 16+ as well */
+        const val DEBUG_FORCE_ONGOING = "debug-force-ongoing"
+        fun debugPrefs(context: Context): android.content.SharedPreferences =
+            context.getSharedPreferences("squash-live-debug", Context.MODE_PRIVATE)
+
+        /** The last state shown per match, to show again when its photos arrive */
+        private val lastShown = ConcurrentHashMap<String, LiveScore>()
     }
 
     private val manager = context.getSystemService(NotificationManager::class.java)
@@ -67,13 +81,40 @@ class LiveScoreNotifier(private val context: Context) {
         val card = LiveScoreCard(score)
         // Updates are silent; the final score may sound once
         val alert = card.isFinished && !finishedShown(target)
-        val notification = if (Build.VERSION.SDK_INT >= 36) liveUpdate(target, card, alert) else ongoing(target, card, alert)
+        val notification = if (Build.VERSION.SDK_INT >= 36 && usesLiveUpdate()) liveUpdate(target, card, alert) else ongoing(target, card, alert)
         notification.extras.putBoolean(EXTRA_FINISHED, card.isFinished)
         try {
             manager.notify(notificationId(target), notification)
         } catch (e: SecurityException) {
             android.util.Log.w("LiveFollow", "Melding niet getoond", e)
         }
+        lastShown[target.id] = score
+        if (!card.isFinished) fetchPhotos(target)
+    }
+
+    /**
+     * The players' photos for the avatars, once per followed match (the pushes
+     * carry none); shows the last state again when one arrived.
+     */
+    fun fetchPhotos(target: FollowedMatch) {
+        if (!LivePhotos.needsFetch(context, target) || !FollowedMatches(context).contains(target)) return
+        val appContext = context.applicationContext
+        FcmLiveFollowPresenter.scope.launch {
+            if (!LivePhotos.fetch(appContext, target)) return@launch
+            val score = lastShown[target.id] ?: return@launch
+            if (FollowedMatches(appContext).contains(target)) LiveScoreNotifier(appContext).show(target, score)
+        }
+    }
+
+    /**
+     * Android 16+ gets the Live Update (caller checks the version, so lint
+     * sees it). Debug builds can show the older
+     * notification there too, for screenshots of Android 9-15 on a new
+     * emulator (LiveScoreSampleReceiver, `--es style ongoing`).
+     */
+    private fun usesLiveUpdate(): Boolean {
+        if (BuildConfig.DEBUG && debugPrefs(context).getBoolean(DEBUG_FORCE_ONGOING, false)) return false
+        return true
     }
 
     private fun finishedShown(target: FollowedMatch): Boolean = manager.activeNotifications.any { shown ->
@@ -82,6 +123,7 @@ class LiveScoreNotifier(private val context: Context) {
 
     fun cancel(target: FollowedMatch) {
         manager.cancel(notificationId(target))
+        lastShown.remove(target.id)
     }
 
     private fun openApp(): PendingIntent {
@@ -121,6 +163,7 @@ class LiveScoreNotifier(private val context: Context) {
             .setContentText(card.text)
             .setStyle(style)
             .setShortCriticalText(card.chipText)
+            .setLargeIcon(Icon.createWithBitmap(avatarPair(target, card)))
             .setContentIntent(openApp())
             .setDeleteIntent(action(target, LiveFollowActionReceiver.ACTION_DISMISSED))
             .setOnlyAlertOnce(!alert)
@@ -143,13 +186,19 @@ class LiveScoreNotifier(private val context: Context) {
         return builder.build()
     }
 
-    /** Android 9-15: an ongoing notification, expanded a mini scoreboard */
+    /**
+     * Android 9-15: an ongoing notification in the style of the website's live
+     * ticker. Collapsed one line with the names, games and points; expanded the
+     * whole ticker (avatars, who serves, games, points, finished games).
+     */
     private fun ongoing(target: FollowedMatch, card: LiveScoreCard, alert: Boolean): Notification {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_live_score)
+            // Title and text stay for accessibility, the watch and wherever custom views are left out
             .setContentTitle(if (card.isFinished || card.isBetween) card.title else card.scoreLine)
             .setContentText(card.compactText)
-            .setCustomBigContentView(scoreboard(card))
+            .setCustomContentView(collapsedTicker(card))
+            .setCustomBigContentView(ticker(target, card))
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setContentIntent(openApp())
             .setDeleteIntent(action(target, LiveFollowActionReceiver.ACTION_DISMISSED))
@@ -168,30 +217,76 @@ class LiveScoreNotifier(private val context: Context) {
         return builder.build()
     }
 
-    private fun scoreboard(card: LiveScoreCard): RemoteViews {
-        val views = RemoteViews(context.packageName, R.layout.notification_live_score)
-        val score = card.score
-        val serving = score.status == "playing" || score.status == "warmup"
+    /** Collapsed: per player who serves, the name, games won and points */
+    private fun collapsedTicker(card: LiveScoreCard): RemoteViews {
+        val views = RemoteViews(context.packageName, R.layout.notification_live_score_small)
         for (player in 1..2) {
-            val name = if (player == 1) R.id.live_name1 else R.id.live_name2
-            val points = if (player == 1) R.id.live_score1 else R.id.live_score2
-            val pips = if (player == 1) R.id.live_pips1 else R.id.live_pips2
-            val serve = if (player == 1) R.id.live_serve1 else R.id.live_serve2
-            views.setTextViewText(name, card.name(player))
-            views.setTextColor(name, playerColor(player))
-            val (won, needed) = card.pips(player)
-            views.setTextViewText(pips, "●".repeat(won.coerceAtMost(needed)) + "○".repeat((needed - won).coerceAtLeast(0)))
-            views.setTextColor(pips, playerColor(player))
-            val value = when {
-                card.isFinished -> if (player == 1) score.gamesWon.first else score.gamesWon.second
-                card.isBetween -> if (player == 1) score.gamesWon.first else score.gamesWon.second
-                else -> if (player == 1) score.score.first else score.score.second
-            }
-            views.setTextViewText(points, value.toString())
-            views.setViewVisibility(serve, if (serving && score.server == player) View.VISIBLE else View.INVISIBLE)
+            val first = player == 1
+            // Plain names: a cup for the winner would cost the name its room
+            views.setTextViewText(if (first) R.id.live_name1 else R.id.live_name2, card.name(player))
+            views.setTextViewText(if (first) R.id.live_games1 else R.id.live_games2, card.gamesWon(player).toString())
+            views.setTextViewText(if (first) R.id.live_points1 else R.id.live_points2, card.points(player).toString())
+            views.setViewVisibility(if (first) R.id.live_serve1 else R.id.live_serve2,
+                if (card.serveText(player) != null) View.VISIBLE else View.INVISIBLE)
         }
-        views.setTextViewText(R.id.live_footer_games, card.footerGames)
-        views.setTextViewText(R.id.live_footer_status, card.footerStatus)
         return views
+    }
+
+    /** The expanded ticker, as live.html: a row per player, finished games as chips */
+    private fun ticker(target: FollowedMatch, card: LiveScoreCard): RemoteViews {
+        val views = RemoteViews(context.packageName, R.layout.notification_live_score)
+        views.setTextViewText(R.id.live_status, card.tickerStatus)
+        for (player in 1..2) {
+            val first = player == 1
+            val photo = LivePhotos.load(context, target, player)
+            val photoView = if (first) R.id.live_photo1 else R.id.live_photo2
+            val initialView = if (first) R.id.live_initial1 else R.id.live_initial2
+            if (photo != null) {
+                views.setImageViewBitmap(photoView, photo)
+                views.setViewVisibility(photoView, View.VISIBLE)
+                views.setViewVisibility(initialView, View.GONE)
+            } else {
+                views.setTextViewText(initialView, card.initial(player))
+                views.setViewVisibility(photoView, View.GONE)
+                views.setViewVisibility(initialView, View.VISIBLE)
+            }
+            views.setTextViewText(if (first) R.id.live_name1 else R.id.live_name2, card.tickerName(player))
+            val serveView = if (first) R.id.live_serve1 else R.id.live_serve2
+            val serve = card.serveText(player)
+            views.setTextViewText(serveView, serve ?: "")
+            views.setViewVisibility(serveView, if (serve != null) View.VISIBLE else View.GONE)
+            views.setTextViewText(if (first) R.id.live_games1 else R.id.live_games2, card.gamesWon(player).toString())
+            views.setTextViewText(if (first) R.id.live_points1 else R.id.live_points2, card.points(player).toString())
+        }
+        views.removeAllViews(R.id.live_history)
+        views.removeAllViews(R.id.live_history2)
+        val rows = LiveScoreCard.chipRows(card.chips)
+        for ((index, row) in rows.withIndex()) {
+            for (chip in row) {
+                val layout = when (chip.winner) {
+                    1 -> R.layout.notification_live_chip1
+                    2 -> R.layout.notification_live_chip2
+                    else -> R.layout.notification_live_chip0
+                }
+                val chipView = RemoteViews(context.packageName, layout)
+                chipView.setTextViewText(R.id.live_chip, chip.text)
+                views.addView(if (index == 0) R.id.live_history else R.id.live_history2, chipView)
+            }
+        }
+        views.setViewVisibility(R.id.live_history, if (rows.isNotEmpty()) View.VISIBLE else View.GONE)
+        views.setViewVisibility(R.id.live_history2, if (rows.size > 1) View.VISIBLE else View.GONE)
+        val last = card.score.lastPoint
+        views.setTextViewText(R.id.live_last, last ?: "")
+        views.setViewVisibility(R.id.live_last, if (last.isNullOrBlank()) View.GONE else View.VISIBLE)
+        return views
+    }
+
+    /** The Live Update's large icon: both avatars (photo or initial) in one square */
+    private fun avatarPair(target: FollowedMatch, card: LiveScoreCard): Bitmap {
+        val size = LivePhotos.SIZE
+        val avatars = (1..2).map { player ->
+            LivePhotos.avatar(LivePhotos.load(context, target, player), card.initial(player), player, size)
+        }
+        return LivePhotos.pair(avatars[0], avatars[1], size * 3 / 2)
     }
 }

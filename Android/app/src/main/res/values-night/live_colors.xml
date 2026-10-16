@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark shade: the "Clubhuis" colours of live.html -->
+<resources>
+    <color name="live_p1">#F28C26</color>
+    <color name="live_p2">#8094AD</color>
+    <color name="live_p2_ring">#59738C</color>
+    <color name="live_p1_line">#59F28C26</color>
+    <color name="live_p2_line">#738094AD</color>
+    <color name="live_border">#24FFFFFF</color>
+    <color name="live_text2">#B3ADA6</color>
+</resources>

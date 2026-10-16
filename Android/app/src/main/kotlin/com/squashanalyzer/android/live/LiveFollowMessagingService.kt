@@ -38,6 +38,8 @@ class LiveFollowMessagingService : FirebaseMessagingService() {
                 // Ended without a result (the scorer stopped sharing): nothing to show any more
                 if (score.status == "finished") notifier.show(match, score) else notifier.cancel(match)
                 followed.remove(match)
+                // The final score keeps its avatars: a notification holds its own copy of the bitmaps
+                LivePhotos.delete(context, match)
                 FcmLiveFollowPresenter.scope.launch { LiveFollow.shared.forget(match.toTarget()) }
             } else {
                 notifier.show(match, score)

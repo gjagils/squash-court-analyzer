@@ -25,8 +25,9 @@ is reserve.
 - Losse sessies bevatten voornamen, stand en optioneel foto's (max 24 KB per speler).
   Stoppen of het alarm na twee uur sinds de laatste stand-update wist de sessieopslag.
   Reeds ontvangen browserinhoud en kopieën verdwijnen daardoor niet automatisch.
-- `TeamSession` (`src/team.js`) bewaart de teamnamen, vier partijen en de gedeelde
-  schrijfsleutel in persistente Durable Object-opslag, zonder foto's. Een team-
+- `TeamSession` (`src/team.js`) bewaart de teamnamen, vier partijen, de gedeelde
+  schrijfsleutel en (sinds feature/live-activity) per partij optioneel een foto van de
+  thuis- en de uitspeler (max 24 KB elk) in persistente Durable Object-opslag. Een team-
   of partijupdate vernieuwt het alarm. De team-API ontbreekt in de NAS-reserve.
   Twee sleutels: de **uitnodigingssleutel** (in de link of code) schrijft partijen, en
   geeft schrijfrecht op alle partijen, niet alleen de eigen; de **eigenaarssleutel** blijft
@@ -99,7 +100,40 @@ Na elke stand pusht de sessie (`src/push.js`, op de achtergrond) naar APNs
 (Live Activity) en FCM (databericht); een afgelopen wedstrijd, Live stoppen of
 het alarm geeft één keer een eindbericht. Tokens die APNs of FCM als dood
 melden worden vergeten; de volgers verdwijnen met de sessie. Per verzending
-logt de Worker alleen tellingen (`push update {"apns 200":3}`), geen tokens.
+logt de Worker alleen tellingen (`push live update {"apns 200":3}`), geen tokens.
+Een melding (APNs `alert`, FCM `alertTitle`/`alertBody`) gaat alleen mee bij een
+gewonnen game en bij de uitslag, en niet naar volgers met `"alerts": false`.
+
+Teamwedstrijd op het vergrendelscherm (zelfde branch, nog niet in productie):
+
+- `POST` / `DELETE /api/team/:id/followers`: dezelfde body en antwoorden als bij
+  een losse wedstrijd (201, 204, 400, 404, 429, 503).
+- `PUT /api/team/:id/partij/:slot/photos` met `{ "p1": thuis, "p2": uit }`
+  (base64-JPEG van max 24 KB, of `null`; een ongeldige foto telt als geen foto),
+  Bearer uitnodigings- of eigenaarssleutel: 204, 400, 401, 404 (ook bij slot
+  buiten 1–4). Een geleegde partij (`{ "empty": true }`) verliest haar foto's.
+  `GET /api/team/:id/photo/:slot/1|2` geeft de JPEG (zonder cache) of 404.
+  `GET /api/team/:id` (en elke SSE-`state`) heeft nu `photos` met **altijd alle vier**
+  slots (`{ "1": [thuis, uit], ... "4": [false, false] }`) en `photoVersion` (gaat
+  omhoog bij elke fotowijziging, ook bij het legen van een slot met foto's).
+- Na elke `PUT` van een partij of van de teamnamen krijgen de volgers een
+  `update` met de compacte teamstand (APNs `content-state`, FCM-veld `team` als
+  JSON-tekst, `kind: "team"`): `{ home, away, partijen: [{ slot, p1, p2, bestOf,
+  gamesWon, score, status, winner?, end? }] }`, alleen bestaande partijen, op slot;
+  geen games, laatste punt of volgorde.
+- Klaar is een partij met een winnaar, status `finished` of `end` (`retired` of
+  `walkover`); de teampagina telt sindsdien ook zo. Zijn alle vier klaar, dan één
+  keer `end` (blijft 4 uur staan) met de uitslag als melding; wordt een partij
+  daarna teruggezet naar niet klaar, dan komen er weer updates. Live stoppen of het
+  alarm geeft één keer `end` (weg na een minuut) als dat nog niet verstuurd was.
+- Meldingen: een partij die klaar wordt (`E2: Paul wint 3–1`, of `(opgave)` /
+  `(walkover)`, zonder naam `Delft 8 E2`; tekst `All Inn 8 5 – 3 Delft 8` in
+  games), en de uitslag (`Uitslag: All Inn 8 wint 9–4` of `Uitslag: gelijkspel 6–6`,
+  op games zoals de teampagina; tekst `All Inn 8 – Delft 8 · partijen 3–1`). Geen
+  melding per rally of per game.
+- De teampagina heeft de knop "Volg op je vergrendelscherm" naar
+  `squashanalyzer://volg#team/<id>` (met `@<host>` buiten live.squashanalyzer.com),
+  verborgen als alle partijen klaar zijn of de wedstrijd voorbij is.
 
 Instellingen in `wrangler.toml` onder `[vars]`: `PUBLIC_URL`, `IDLE_MINUTES`
 (120), `MAX_SESSIONS` (200), `CREATES_PER_MINUTE` (10),
@@ -136,3 +170,7 @@ Geheimen op deze Worker (alleen de namen): `APNS_KEY`, `APNS_KEY_ID`,
 Op 15 oktober 2026 getest met nep-tokens: APNs (productie en sandbox)
 antwoordde `400 BadDeviceToken` en FCM `404 UNREGISTERED`, dus verbinding en
 aanmelding werken vanuit de Worker en dode tokens worden vergeten.
+Op 16 oktober 2026 ook de teamwedstrijd (commit "teamwedstrijd volgen op het
+vergrendelscherm"): volgers 201, foto per partij 204 en terug te lezen, `push team
+update` en bij vier beslisde partijen `push team end` in `wrangler tail`; de
+nep-tokens (APNs `400 BadDeviceToken`, FCM `400 INVALID_ARGUMENT`) werden vergeten.

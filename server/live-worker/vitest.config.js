@@ -38,7 +38,7 @@ export default defineConfig({
           }),
           TEST_APNS_PUBLIC_KEY: apnsKey.publicKey, TEST_FCM_PUBLIC_KEY: fcmKey.publicKey,
         })],
-        test: { name: 'push', include: ['test/push.test.js'] },
+        test: { name: 'push', include: ['test/push.test.js', 'test/team-push.test.js'] },
       },
     ],
   },

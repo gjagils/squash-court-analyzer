@@ -6,8 +6,18 @@
 // Server-Sent Events. Like LiveSession: state in storage, an alarm removes it
 // `IDLE_MINUTES` after the last update of any partij (so two hours after the
 // last partij), nothing else is kept.
+//
+// Photos: per slot a thumbnail of the home and the away player
+// ("photo:<slot>:1" / ":2"), with flags next to them so a state does not read
+// them. Followers (lock screen, storage in ViewerSession) get the compact team
+// stand after every change, an alert when a partij is decided and the result
+// when all four are (push.js), and the end once.
 
 import { ViewerSession, sameKey } from './viewer-session.js';
+import { teamAlert, teamContentState, teamDecided } from './push.js';
+
+const SLOT_KEYS = ['1', '2', '3', '4'];
+const photoKey = (slot, index) => `photo:${slot}:${index}`;
 
 export class TeamSession extends ViewerSession {
   /** Creates the session; false when this id is already in use */
@@ -21,14 +31,20 @@ export class TeamSession extends ViewerSession {
     return true;
   }
 
-  /** What viewers get: the team match, the partijen by slot and the time of the last update */
+  /**
+   * What viewers get: the team match, the partijen by slot, the time of the last
+   * update, and per slot (all four) whether home and away have a photo, with the
+   * photo version for the image URL
+   */
   async state() {
-    const [key, team, partijen, updatedAt] = await Promise.all([
+    const [key, team, partijen, updatedAt, photoFlags, photoVersion] = await Promise.all([
       this.ctx.storage.get('key'), this.ctx.storage.get('team'), this.ctx.storage.get('partijen'),
-      this.ctx.storage.get('updatedAt'),
+      this.ctx.storage.get('updatedAt'), this.ctx.storage.get('photoFlags'), this.ctx.storage.get('photoVersion'),
     ]);
     if (!key) return null;
-    return { team, partijen: partijen || {}, updatedAt };
+    const photos = {};
+    for (const slot of SLOT_KEYS) photos[slot] = (photoFlags && photoFlags[slot]) || [false, false];
+    return { team, partijen: partijen || {}, updatedAt, photos, photoVersion: photoVersion || 0 };
   }
 
   /** The owner key; a session from before owner keys has none and takes the team key */
@@ -56,18 +72,83 @@ export class TeamSession extends ViewerSession {
   async setTeam(given, team) {
     if (!(await this.ctx.storage.get('key'))) return 404;
     if (!(await this.ownerEquals(given))) return 401;
+    const partijen = (await this.ctx.storage.get('partijen')) || {};
     await this.touch({ team });
+    await this.pushUpdate(team, partijen, partijen);
     return 204;
   }
 
-  /** One slot (1-4) gets this partij, or is cleared (`{ empty: true }`) */
+  /** One slot (1-4) gets this partij, or is cleared (`{ empty: true }`, its photos too) */
   async setPartij(given, slot, partij) {
     if (!(await this.ctx.storage.get('key'))) return 404;
     if (!(await this.keyEquals(given))) return 401;
-    const partijen = (await this.ctx.storage.get('partijen')) || {};
-    if (partij.empty) delete partijen[slot]; else partijen[slot] = partij;
+    const [stored, team] = await Promise.all([this.ctx.storage.get('partijen'), this.ctx.storage.get('team')]);
+    const previous = stored || {};
+    const partijen = { ...previous };
+    if (partij.empty) {
+      delete partijen[slot];
+      await this.clearPhotos(slot);
+    } else {
+      partijen[slot] = partij;
+    }
     await this.touch({ partijen });
+    await this.pushUpdate(team, partijen, previous);
     return 204;
+  }
+
+  // ---- Photos -------------------------------------------------------------------
+
+  /** The home and away thumbnail of a slot (Uint8Array or null each), team or owner key: 404, 401, 204 */
+  async setPhotos(given, slot, photo1, photo2) {
+    const role = await this.role(given);
+    if (role === 404 || role === 401) return role;
+    const flags = (await this.ctx.storage.get('photoFlags')) || {};
+    const version = ((await this.ctx.storage.get('photoVersion')) || 0) + 1;
+    if (photo1) await this.ctx.storage.put(photoKey(slot, 1), photo1); else await this.ctx.storage.delete(photoKey(slot, 1));
+    if (photo2) await this.ctx.storage.put(photoKey(slot, 2), photo2); else await this.ctx.storage.delete(photoKey(slot, 2));
+    flags[slot] = [Boolean(photo1), Boolean(photo2)];
+    await this.ctx.storage.put({ photoFlags: flags, photoVersion: version });
+    this.broadcast('state', await this.state());
+    return 204;
+  }
+
+  /** A cleared slot loses its photos (the version goes up when there were any) */
+  async clearPhotos(slot) {
+    const flags = (await this.ctx.storage.get('photoFlags')) || {};
+    if (!flags[slot] || (!flags[slot][0] && !flags[slot][1])) return;
+    await this.ctx.storage.delete([photoKey(slot, 1), photoKey(slot, 2)]);
+    delete flags[slot];
+    const version = ((await this.ctx.storage.get('photoVersion')) || 0) + 1;
+    await this.ctx.storage.put({ photoFlags: flags, photoVersion: version });
+  }
+
+  /** A thumbnail of slot 1-4, home (1) or away (2), or null */
+  async photo(slot, index) {
+    if (!(await this.ctx.storage.get('key'))) return null;
+    return (await this.ctx.storage.get(photoKey(slot, index))) || null;
+  }
+
+  // ---- Followers (lock screen pushes) ----------------------------------------
+
+  /**
+   * After a change: "update" to the followers, or "end" once when all four
+   * partijen are decided (a correction back to undecided makes updates resume).
+   * The alert: a partij decided now, or the result.
+   */
+  async pushUpdate(team, partijen, previous) {
+    const followers = await this.followers();
+    if (followers.length === 0) return;
+    const done = teamDecided(partijen);
+    const event = await this.followerEvent(done);
+    if (!event) return;
+    const content = { kind: 'team', state: teamContentState(team, partijen), finished: done };
+    this.schedulePush(await this.pushJob(event, followers, content, teamAlert(previous, team, partijen)));
+  }
+
+  /** The stand for the end the followers get when the session goes (Live stoppen, idle): gone in a minute */
+  async pushContent() {
+    const [team, partijen] = await Promise.all([this.ctx.storage.get('team'), this.ctx.storage.get('partijen')]);
+    return team ? { kind: 'team', state: teamContentState(team, partijen || {}), finished: false } : null;
   }
 
   /** The team match is over for good (Live stoppen, owner key): everything goes at once */

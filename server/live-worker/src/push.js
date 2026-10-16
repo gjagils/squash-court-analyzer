@@ -204,10 +204,106 @@ export function scoreAlert(previous, snapshot) {
   };
 }
 
-/** The APNs body for a Live Activity: event "update" or "end", with the alert of a game or the result */
-export function apnsPayload(snapshot, event, nowMs, alert = null) {
+// ---- Team matches -----------------------------------------------------------
+
+const TEAM_SLOTS = [1, 2, 3, 4];
+
+/** A partij is decided (as "klaar" on the team page): a winner, finished, or given up / not played */
+export function partijDecided(partij) {
+  if (!partij) return false;
+  return partij.winner === 1 || partij.winner === 2 || partij.status === 'finished'
+    || partij.end === 'retired' || partij.end === 'walkover';
+}
+
+/** All four partijen of a team match are decided */
+export function teamDecided(partijen) {
+  return TEAM_SLOTS.every((slot) => partijDecided(partijen && partijen[slot]));
+}
+
+/** 1 home, 2 away, 0 unknown: the winner, else whoever has more games */
+function partijWinner(partij) {
+  if (partij.winner === 1 || partij.winner === 2) return partij.winner;
+  const [a, b] = partij.gamesWon;
+  return a > b ? 1 : b > a ? 2 : 0;
+}
+
+/** Games won per team over the partijen, as the team page counts them */
+function teamGames(partijen) {
+  let home = 0;
+  let away = 0;
+  for (const slot of TEAM_SLOTS) {
+    const partij = partijen[slot];
+    if (partij) { home += partij.gamesWon[0]; away += partij.gamesWon[1]; }
+  }
+  return [home, away];
+}
+
+/**
+ * The lock screen stand of a team match (APNs content-state, FCM `team`):
+ * the team names and the partijen that exist, by slot, without games list,
+ * last point or order, so it stays far below the 4 KB of APNs.
+ */
+export function teamContentState(team, partijen) {
+  const list = [];
+  for (const slot of TEAM_SLOTS) {
+    const partij = partijen && partijen[slot];
+    if (!partij) continue;
+    const item = {
+      slot, p1: partij.p1, p2: partij.p2, bestOf: partij.bestOf, gamesWon: partij.gamesWon, score: partij.score,
+      status: partij.status,
+    };
+    if (partij.winner === 1 || partij.winner === 2) item.winner = partij.winner;
+    if (partij.end === 'retired' || partij.end === 'walkover') item.end = partij.end;
+    list.push(item);
+  }
+  return { home: team.home, away: team.away, partijen: list };
+}
+
+/**
+ * The notification of a team match change: a partij that is decided now
+ * ("E2: Paul wint 3–1"), or the result when all four are ("Uitslag: All Inn 8
+ * wint 9–4", by games as on the team page). Never per rally or per game.
+ * { title, body } or null.
+ */
+export function teamAlert(previous, team, partijen) {
+  const before = previous || {};
+  const [home, away] = teamGames(partijen);
+  if (teamDecided(partijen)) {
+    if (teamDecided(before)) return null;
+    const won = [0, 0];
+    for (const slot of TEAM_SLOTS) {
+      const winner = partijWinner(partijen[slot]);
+      if (winner) won[winner - 1] += 1;
+    }
+    const title = home === away
+      ? `Uitslag: gelijkspel ${home}–${away}`
+      : `Uitslag: ${home > away ? team.home : team.away} wint ${Math.max(home, away)}–${Math.min(home, away)}`;
+    return { title, body: `${team.home} – ${team.away} · partijen ${won[0]}–${won[1]}` };
+  }
+  for (const slot of TEAM_SLOTS) {
+    const partij = partijen[slot];
+    if (!partijDecided(partij) || partijDecided(before[slot])) continue;
+    const winner = partijWinner(partij);
+    let line = 'klaar';
+    if (winner) {
+      const name = (winner === 1 ? partij.p1 : partij.p2) || `${winner === 1 ? team.home : team.away} E${slot}`;
+      const [a, b] = partij.gamesWon;
+      const how = partij.end === 'retired' ? '(opgave)' : partij.end === 'walkover' ? '(walkover)'
+        : `${Math.max(a, b)}–${Math.min(a, b)}`;
+      line = `${name} wint ${how}`;
+    }
+    return { title: `E${slot}: ${line}`, body: `${team.home} ${home} – ${away} ${team.away}` };
+  }
+  return null;
+}
+
+/**
+ * The APNs body for a Live Activity: event "update" or "end", with the alert of
+ * a game or the result. An end stays 4 hours when finished (a live match by its
+ * status, a team match says so), else a minute.
+ */
+export function apnsPayload(snapshot, event, nowMs, alert = null, finished = snapshot.status === 'finished') {
   const now = Math.floor(nowMs / 1000);
-  const finished = snapshot.status === 'finished';
   const aps = { timestamp: now, event, 'content-state': snapshot };
   if (event === 'update') aps['stale-date'] = now + 900;
   if (event === 'end') aps['dismissal-date'] = finished ? now + 4 * 3600 : now + 60;
@@ -218,9 +314,13 @@ export function apnsPayload(snapshot, event, nowMs, alert = null) {
   return { aps };
 }
 
-/** The FCM HTTP v1 body: a data message (all values strings); the alert as alertTitle/alertBody */
-export function fcmPayload(token, id, server, snapshot, event, alert = null) {
-  const data = { kind: 'live', id, server, event, snapshot: JSON.stringify(snapshot) };
+/**
+ * The FCM HTTP v1 body: a data message (all values strings); the alert as
+ * alertTitle/alertBody. A live match has its stand in `snapshot`, a team match
+ * in `team`.
+ */
+export function fcmPayload(token, id, server, snapshot, event, alert = null, kind = 'live') {
+  const data = { kind, id, server, event, [kind === 'team' ? 'team' : 'snapshot']: JSON.stringify(snapshot) };
   if (alert) {
     data.alertTitle = alert.title;
     data.alertBody = alert.body;
@@ -263,12 +363,12 @@ async function sendApns(settings, follower, payload, nowMs) {
 }
 
 /** One FCM push: { result, detail } as sendApns */
-async function sendFcm(account, follower, id, server, snapshot, event, alert) {
+async function sendFcm(account, follower, id, server, snapshot, event, alert, kind) {
   const accessToken = await fcmAccessToken(account);
   const response = await pushDeps.fetch(`https://fcm.googleapis.com/v1/projects/${account.project_id}/messages:send`, {
     method: 'POST',
     headers: { authorization: `Bearer ${accessToken}`, 'content-type': 'application/json' },
-    body: JSON.stringify(fcmPayload(follower.token, id, server, snapshot, event, alert)),
+    body: JSON.stringify(fcmPayload(follower.token, id, server, snapshot, event, alert, kind)),
   });
   if (response.ok) return { result: 'ok', detail: 'fcm 200' };
   const body = await response.json().catch(() => null);
@@ -300,17 +400,20 @@ async function eachLimited(items, limit, task) {
 }
 
 /**
- * Sends one event ("update" or "end") with this snapshot to every follower.
- * Platforms without configuration are skipped. Returns the followers whose
- * token is dead, to be forgotten.
+ * Sends one event ("update" or "end") with this snapshot (kind "live") or team
+ * stand (kind "team") to every follower. `finished` (default: the snapshot's
+ * status) keeps an end on the lock screen for 4 hours. Platforms without
+ * configuration are skipped. Returns the followers whose token is dead, to be
+ * forgotten.
  */
-export async function pushToFollowers(env, { id, server, snapshot, event, followers, alert = null }) {
+export async function pushToFollowers(env, { id, server, snapshot, event, followers, alert = null, kind = 'live', finished }) {
   const apns = apnsSettings(env);
   const fcm = fcmServiceAccount(env);
   const nowMs = pushDeps.now();
+  const done = finished === undefined ? snapshot.status === 'finished' : finished;
   // Followers who turned the game alerts off get the same stand without one
-  const apnsWithAlert = apnsPayload(snapshot, event, nowMs, alert);
-  const apnsQuiet = apnsPayload(snapshot, event, nowMs);
+  const apnsWithAlert = apnsPayload(snapshot, event, nowMs, alert, done);
+  const apnsQuiet = apnsPayload(snapshot, event, nowMs, null, done);
   const dead = [];
   // What the services answered, counted (no tokens or names): "apns 200": 3
   const answers = {};
@@ -321,7 +424,7 @@ export async function pushToFollowers(env, { id, server, snapshot, event, follow
       if (follower.platform === 'ios' && apns) {
         outcome = await sendApns(apns, follower, wantsAlert ? apnsWithAlert : apnsQuiet, nowMs);
       } else if (follower.platform === 'android' && fcm) {
-        outcome = await sendFcm(fcm, follower, id, server, snapshot, event, wantsAlert ? alert : null);
+        outcome = await sendFcm(fcm, follower, id, server, snapshot, event, wantsAlert ? alert : null, kind);
       }
     } catch (error) {
       console.error(`${follower.platform} push error`, error && error.message);
@@ -330,6 +433,6 @@ export async function pushToFollowers(env, { id, server, snapshot, event, follow
     answers[outcome.detail] = (answers[outcome.detail] || 0) + 1;
     if (outcome.result === 'dead') dead.push(follower);
   });
-  console.log('push', event, JSON.stringify(answers), 'forgotten', dead.length);
+  console.log('push', kind, event, JSON.stringify(answers), 'forgotten', dead.length);
   return dead;
 }

@@ -81,7 +81,7 @@ class LiveScoreNotifier(private val context: Context) {
         val card = LiveScoreCard(score)
         // Updates are silent; the final score may sound once
         val alert = card.isFinished && !finishedShown(target)
-        val notification = if (usesLiveUpdate()) liveUpdate(target, card, alert) else ongoing(target, card, alert)
+        val notification = if (Build.VERSION.SDK_INT >= 36 && usesLiveUpdate()) liveUpdate(target, card, alert) else ongoing(target, card, alert)
         notification.extras.putBoolean(EXTRA_FINISHED, card.isFinished)
         try {
             manager.notify(notificationId(target), notification)
@@ -107,12 +107,12 @@ class LiveScoreNotifier(private val context: Context) {
     }
 
     /**
-     * Android 16+ gets the Live Update. Debug builds can show the older
+     * Android 16+ gets the Live Update (caller checks the version, so lint
+     * sees it). Debug builds can show the older
      * notification there too, for screenshots of Android 9-15 on a new
      * emulator (LiveScoreSampleReceiver, `--es style ongoing`).
      */
     private fun usesLiveUpdate(): Boolean {
-        if (Build.VERSION.SDK_INT < 36) return false
         if (BuildConfig.DEBUG && debugPrefs(context).getBoolean(DEBUG_FORCE_ONGOING, false)) return false
         return true
     }

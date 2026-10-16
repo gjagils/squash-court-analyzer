@@ -17,9 +17,17 @@ stuurt de live-server een push, dus de app hoeft niet open te staan.
   (compact, minimaal, uitgeklapt). Badges GAMEBAL, MATCHBAL, PAUZE, AFGELOPEN.
   De uitslag blijft na afloop staan (tot 4 uur, iOS-grens).
 - **Android 16+**: Live Update: chip met de stand in de statusbalk, uitgelichte
-  melding met een balk per game in de kleur van de winnaar, knop Stoppen.
-- **Android 9–15**: doorlopende melding met een mini-scorebord als je hem
-  uitklapt.
+  melding met een balk per game in de kleur van de winnaar, knop Stoppen. Als
+  groot pictogram beide avatars (foto of beginletter) schuin over elkaar.
+- **Android 9–15**: doorlopende melding in de stijl van de liveticker op de
+  kijkpagina (`live.html`). Uitgeklapt: oranje statusregel ("GAME 3 · BEST OF
+  5", "PAUZE · GAME 3 BEGINT ZO", "GERD-JAN WINT 3–1"), per speler een ronde
+  avatar met ring in de spelerskleur, de naam (met beker voor de winnaar),
+  "serveert rechts" met stip bij de serveerder, de games in een vakje en de
+  punten; daaronder de gespeelde games als chips in de kleur van de winnaar
+  (meer dan vier: twee rijen) en de laatste rally. Ingeklapt twee rijen met
+  stip, naam, games en punten. Kleuren in `res/values(-night)/live_colors.xml`:
+  licht de "Warm licht"-kleuren, donker die van de kijkpagina.
 - **Eigen wedstrijd (alleen iPhone)**: wie zelf scoort, ziet de eigen stand ook
   op het vergrendelscherm (lokaal bijgewerkt, zonder push). Instelling "Stand op
   vergrendelscherm", standaard aan. Op Android is dit nog niet gebouwd.
@@ -44,6 +52,16 @@ Ontwerp: het canvas "Live score op vergrendelscherm" (claude.ai-artifact).
 Zonder geheimen staat pushen uit (`GET /api/push` → false, aanmelden geeft 503):
 de huidige API blijft dus werken voor de builds van testers.
 
+### Spelersfoto's op Android
+
+De pushes dragen geen foto's. Bij het volgen (en bij een push als het nog niet
+gelukt is) haalt de app ze één keer op: `GET /api/live/:id` (`photos: [true,
+false]`) en daarna `GET /api/live/:id/photo/1|2`. Ze worden rond bijgesneden
+(112 px) en bewaard in `files/live-photos/<id>-1.png`; een marker
+`<id>.checked` voorkomt dat elke rally opnieuw vraagt. Bij Stoppen, wegvegen
+of het einde gaan ze weg (een getoonde uitslag houdt zijn eigen kopie). Code:
+`LivePhotos.kt`.
+
 ## Sleutels (buiten de repo)
 
 | Wat | Waar | Gebruikt door |
@@ -67,12 +85,22 @@ de huidige API blijft dus werken voor de builds van testers.
   `adb -s emulator-5554 shell am broadcast -a com.squashanalyzer.android.debug.LIVE_SAMPLE -n com.squashanalyzer.android/.live.LiveScoreSampleReceiver --es state gamebal`
   (spel, gamebal, matchbal, pauze, uitslag, stop). iOS: opstartargument
   `-LiveActivityDemo gameball` (DEBUG).
+- De melding van Android 9–15 op de API 36-emulator (alleen debug): voeg
+  `--es style ongoing` toe aan die broadcast; dat geldt daarna ook voor echte
+  pushes, tot `--es style live`.
+- Op 16 oktober tegen de test-Worker getest op de emulator (API 36.1, ook
+  360dp breed en licht/donker): volgen met twee, één en geen foto, spel, gamebal,
+  pauze, uitslag met vier en vijf games, sessie wissen (melding en foto's weg),
+  en de Live Update met avatars (blijft uitgelicht).
 
 ## Nog open
 
 - **Testen op echte toestellen**: iPhone 16 Pro en de A13 (Android 14, dus de
-  doorlopende melding). De oudere Android-melding is alleen met Robolectric
-  getest.
+  doorlopende melding). De tickerstijl is alleen op de emulator bekeken (API 36
+  met de debugschakelaar); One UI tekent meldingen net anders, vooral de
+  hoogte van de ingeklapte melding en de kleuren van het lichte paneel.
+- Android: een foto die de coach pas later toevoegt, komt niet meer mee (er
+  wordt één keer per wedstrijd gekeken).
 - **Naar 3.0 (als Gerd-Jan dat kiest)**:
   - de geheimen op de productie-Worker `squash-live-beta` zetten;
   - de branch naar `main`, wat de Worker automatisch uitrolt;

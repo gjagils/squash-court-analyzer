@@ -174,9 +174,6 @@ class LiveScoreCard(val score: LiveScore) {
     val chips: List<GameChip>
         get() = score.games.map { (a, b) -> GameChip("$a–$b", if (a > b) 1 else if (b > a) 2 else 0) }
 
-    /** The collapsed custom view: "9 – 7" between the names */
-    val collapsedScore: String get() = "${score.score.first} – ${score.score.second}"
-
     companion object {
         /** First letter (a whole code point, so an emoji or accented letter stays intact), capitalised; "?" without a name */
         fun initialOf(name: String): String {

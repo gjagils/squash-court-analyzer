@@ -217,15 +217,18 @@ class LiveScoreNotifier(private val context: Context) {
         return builder.build()
     }
 
-    /** "Gerd-Jan [1] 9 – 7 [0] Thomas" and the status line */
+    /** Collapsed: per player who serves, the name, games won and points */
     private fun collapsedTicker(card: LiveScoreCard): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.notification_live_score_small)
-        views.setTextViewText(R.id.live_name1, card.tickerName(1))
-        views.setTextViewText(R.id.live_name2, card.tickerName(2))
-        views.setTextViewText(R.id.live_games1, card.gamesWon(1).toString())
-        views.setTextViewText(R.id.live_games2, card.gamesWon(2).toString())
-        views.setTextViewText(R.id.live_score, card.collapsedScore)
-        views.setTextViewText(R.id.live_status, card.tickerStatus)
+        for (player in 1..2) {
+            val first = player == 1
+            // Plain names: a cup for the winner would cost the name its room
+            views.setTextViewText(if (first) R.id.live_name1 else R.id.live_name2, card.name(player))
+            views.setTextViewText(if (first) R.id.live_games1 else R.id.live_games2, card.gamesWon(player).toString())
+            views.setTextViewText(if (first) R.id.live_points1 else R.id.live_points2, card.points(player).toString())
+            views.setViewVisibility(if (first) R.id.live_serve1 else R.id.live_serve2,
+                if (card.serveText(player) != null) View.VISIBLE else View.INVISIBLE)
+        }
         return views
     }
 
@@ -251,7 +254,7 @@ class LiveScoreNotifier(private val context: Context) {
             val serveView = if (first) R.id.live_serve1 else R.id.live_serve2
             val serve = card.serveText(player)
             views.setTextViewText(serveView, serve ?: "")
-            views.setViewVisibility(serveView, if (serve != null) View.VISIBLE else View.INVISIBLE)
+            views.setViewVisibility(serveView, if (serve != null) View.VISIBLE else View.GONE)
             views.setTextViewText(if (first) R.id.live_games1 else R.id.live_games2, card.gamesWon(player).toString())
             views.setTextViewText(if (first) R.id.live_points1 else R.id.live_points2, card.points(player).toString())
         }

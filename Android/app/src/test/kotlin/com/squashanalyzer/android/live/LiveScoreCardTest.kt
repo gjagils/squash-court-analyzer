@@ -33,7 +33,6 @@ class LiveScoreCardTest {
         assertEquals(null, card.serveText(1))
         assertEquals("serveert links", card.serveText(2))
         assertEquals(listOf(LiveScoreCard.GameChip("11–8", 1)), card.chips)
-        assertEquals("9 – 7", card.collapsedScore)
         assertNull(card.gameBallFor)
     }
 

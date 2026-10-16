@@ -87,7 +87,7 @@
                 android:maxLines="1"
                 android:textColor="@color/live_text2"
                 android:textSize="12sp"
-                android:visibility="invisible" />
+                android:visibility="gone" />
         </LinearLayout>
 
         <TextView
@@ -187,7 +187,7 @@
                 android:maxLines="1"
                 android:textColor="@color/live_text2"
                 android:textSize="12sp"
-                android:visibility="invisible" />
+                android:visibility="gone" />
         </LinearLayout>
 
         <TextView

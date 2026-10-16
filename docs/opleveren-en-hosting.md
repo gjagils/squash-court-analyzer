@@ -213,10 +213,9 @@ Met deze build stuurt de app voor het eerst een push-token naar de live-server
 en gaan er per teampartij foto's mee (`docs/plan-live-vergrendelscherm.md`).
 Wat Gerd-Jan met de hand moet doen, naast de volgorde hierboven:
 
-- [ ] **Productie-Worker**: de geheimen `APNS_KEY`, `APNS_KEY_ID`, `APNS_TEAM_ID`
-      en `FCM_SERVICE_ACCOUNT` op `squash-live-beta` zetten (zie
-      `server/live-worker/README.md`). Zonder geheimen geeft volgen een 503
-      ("Deze server kan de stand nog niet naar je telefoon sturen").
+- [x] **Productie-Worker**: de geheimen `APNS_KEY`, `APNS_KEY_ID`, `APNS_TEAM_ID`
+      en `FCM_SERVICE_ACCOUNT` staan sinds 16 oktober 2026 op `squash-live-beta`
+      (zie `server/live-worker/README.md`); `/api/push` geeft `{"ios":true,"android":true}`.
 - [ ] **App Store Connect, App-privacy (privacylabel)**: controleren dat
       *Naam*, *Foto's of video's* en *Overige gebruikersinhoud* (App-functionaliteit,
       niet gekoppeld aan de identiteit, geen tracking) erin staan, zoals

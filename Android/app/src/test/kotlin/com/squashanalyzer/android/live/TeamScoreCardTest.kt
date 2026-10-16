@@ -101,22 +101,23 @@ class TeamScoreCardTest {
     }
 
     @Test fun theBarHasAPartPerPartijInTheWinnersColour() {
-        val segments = TeamScoreCard(design).segments
-        assertEquals(TeamScoreCard.Segment(100, 1), segments[0])
-        // E2: 1 game of 5 plus 7 of 11 points → about a third, home ahead
-        assertEquals(1, segments[1].player)
-        assertEquals(32, segments[1].length)
-        assertEquals(TeamScoreCard.Segment(68, 0), segments[2])
-        assertEquals(TeamScoreCard.Segment(100, 2), segments[3])
-        assertEquals(TeamScoreCard.Segment(100, 0), segments[4])
-        assertEquals(400, segments.sumOf { it.length })
+        val card = TeamScoreCard(design)
+        assertEquals(
+            listOf(
+                TeamScoreCard.Segment(100, 1),
+                TeamScoreCard.Segment(100, 1, live = true),
+                TeamScoreCard.Segment(100, 2),
+                TeamScoreCard.Segment(100, 0),
+            ),
+            card.segments,
+        )
     }
 
-    @Test fun aLevelPartijUnderWayIsNeutralAndNeverEmpty() {
-        val segments = TeamScoreCard(TeamScore("A", "B", listOf(partij(1, status = "playing")))).segments
-        assertEquals(TeamScoreCard.Segment(10, 3), segments[0])
-        assertEquals(TeamScoreCard.Segment(90, 0), segments[1])
-        assertEquals(400, segments.sumOf { it.length })
+    @Test fun aLevelPartijUnderWayIsNeutral() {
+        val card = TeamScoreCard(TeamScore("A", "B", listOf(partij(1, status = "playing"), partij(2, gamesWon = 0 to 1, status = "between"))))
+        assertEquals(TeamScoreCard.Segment(100, 3, live = true), card.segments[0])
+        assertEquals(TeamScoreCard.Segment(100, 2, live = true), card.segments[1])
+        assertEquals(4, card.segments.size)
     }
 }
 

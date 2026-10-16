@@ -179,7 +179,10 @@ class LiveScoreNotifier(private val context: Context) {
         val style = Notification.ProgressStyle()
             .setStyledByProgress(false)
             .setProgressSegments(card.segments.map { segment ->
-                Notification.ProgressStyle.Segment(segment.length).setColor(teamColor(segment.player))
+                val color = teamColor(segment.player)
+                // Under way: the leader's colour, faded (a progress point or a
+                // second segment would split the part: it read as five partijen)
+                Notification.ProgressStyle.Segment(segment.length).setColor(if (segment.live) faded(color) else color)
             })
             .setProgress(card.progressMax)
         val builder = Notification.Builder(context, CHANNEL_ID)
@@ -234,6 +237,13 @@ class LiveScoreNotifier(private val context: Context) {
 
     /** The bar of a team match: 3 is a partij under way with nobody ahead */
     private fun teamColor(player: Int): Int = if (player == 3) LEVEL_COLOR else playerColor(player)
+
+    /** Half the colour, half grey, opaque (the bar ignores alpha): the partij under way */
+    private fun faded(color: Int): Int {
+        val grey = 0xFF8A8580.toInt()
+        fun mix(shift: Int) = (((color shr shift) and 0xFF) + ((grey shr shift) and 0xFF)) / 2 shl shift
+        return (0xFF shl 24) or mix(16) or mix(8) or mix(0)
+    }
 
     // "Melding bij elke game" (LiveAlerts): its own channel with sound and
     // heads-up, so the score itself stays quiet and the user can switch the

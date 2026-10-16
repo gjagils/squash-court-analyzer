@@ -154,8 +154,10 @@ op het canvas.
   middenkolom van de rijen staan op één as. Ingeklapt: de teamregel en
   "E2 bezig 7–5 · 2 van 4 klaar". Android 16: Live Update met titel
   "All Inn 8 5 – 3 Delft 8", tekst "E2 bezig: Paul 7–5 Mark · 2 van 4 klaar",
-  een balkdeel per partij in de kleur van de winnaar (de lopende partij
-  half gevuld) en chip "5–3". Zijn alle vier klaar: "Uitslag · partijen
+  een balkdeel per partij in de kleur van de winnaar (de lopende partij in
+  een vervaagde kleur van wie voorstaat; niet half gevuld, want een tweede
+  segment of een voortgangspunt splitst het deel met een gat en dan lijken
+  het vijf partijen) en chip "5–3". Zijn alle vier klaar: "Uitslag · partijen
   3–1", niet meer doorlopend, na 3 uur weg. De winnaar zelf staat in de
   melding van de server (SBN-regel), want de push heeft geen punten.
 - **Teamfoto's**: bij het volgen `GET /api/team/:id` (`photos` per slot) en
@@ -182,6 +184,14 @@ op het canvas.
 - Debug: `--es team spel|pauze|uitslag|stop` op de LIVE_SAMPLE-broadcast
   toont een voorbeeldteamwedstrijd, `--es alertTitle … --es alertBody …`
   een melding zoals de server die meestuurt.
+- Getest op 16 oktober tegen de test-Worker op de emulator (API 36.1, licht
+  en donker): teamwedstrijd volgen met foto's (ook een partij die later
+  verscheen), updates, melding bij een beslist partij (de volgende vervangt
+  hem), uitslag (melding en "Uitslag", niet meer doorlopend), sessie wissen
+  (melding, volglijst en foto's weg); de Live Update met chip en de
+  doorlopende melding via de debugschakelaar. Ook een losse wedstrijd met
+  "Game 2 voor Thomas". Unit-tests in `TeamScoreCardTest`, `LiveAlertsTest`,
+  `FollowedMatchesTest` en `LivePhotosTest`.
 
 ## Sleutels (buiten de repo)
 
@@ -215,6 +225,17 @@ op het canvas.
   en de Live Update met avatars (blijft uitgelicht).
 
 ## Nog open
+
+- **Android, meldingen groeperen (16 oktober)**: Android bundelt meldingen
+  van één app zonder eigen groep vanaf 2 (Android 16) of 4 (tot en met 15).
+  De uitgelichte Live Update doet daar niet aan mee, maar de doorlopende
+  melding (debugschakelaar op API 36) en een uitslag met haar melding werden
+  op de emulator samen gebundeld, waardoor de eigen teamlayout pas na
+  uitklappen van de bundel zichtbaar is. Op de A13 (One UI, Android 14) nog
+  niet bekeken; zo nodig een eigen groep met samenvatting per wedstrijd.
+- **Eerste push na volgen**: bij een losse wedstrijd kwam de eerste update
+  (7 s na het volgen) niet aan, de volgende wel. Niet onderzocht (FCM of
+  de aanmelding die nog liep); bij de teamwedstrijd ging het goed.
 
 - **App Group registreren (16 oktober)**: een ondertekende build voor een
   toestel lukt pas als de App Group `group.com.squashanalyzer.app` bij Apple

@@ -108,7 +108,7 @@ data class TeamScore(val home: String, val away: String, val partijen: List<Team
  */
 class TeamScoreCard(val score: TeamScore) {
     /** One stretch of the Live Update's bar; `player` 0 grey (not decided), 3 neutral (level, live) */
-    data class Segment(val length: Int, val player: Int)
+    data class Segment(val length: Int, val player: Int, val live: Boolean = false)
 
     /** One of the four rows E1-E4 */
     data class Row(
@@ -214,35 +214,32 @@ class TeamScoreCard(val score: TeamScore) {
 
     /**
      * The Live Update's bar: one part per partij (E1-E4), in the winner's
-     * colour when decided; the partij under way filled as far as it got
-     * (games played, plus the current game) in the colour of the leader.
+     * colour when decided, grey before the start. A partij under way is its
+     * leader's colour, faded (`live`). Not partly filled: a second segment
+     * or a progress point splits the part with a gap, which read as five
+     * partijen on the emulator.
      */
     val segments: List<Segment>
-        get() {
-            val result = mutableListOf<Segment>()
-            for (slot in 1..4) {
-                val partij = score.partij(slot)
-                when {
-                    partij == null -> result.add(Segment(PART, 0))
-                    partij.isDecided -> result.add(Segment(PART, partij.winnerSide.let { if (it == 0) 3 else it }))
-                    partij.isLive -> {
-                        val (g1, g2) = partij.gamesWon
-                        val (a, b) = if (partij.status == "playing") partij.score else 0 to 0
-                        val played = g1 + g2 + minOf(maxOf(a, b), 11) / 11.0
-                        val filled = (PART * played / partij.bestOf.coerceAtLeast(1)).toInt().coerceIn(PART / 10, PART * 9 / 10)
-                        val leader = when {
-                            g1 != g2 -> if (g1 > g2) 1 else 2
-                            a != b -> if (a > b) 1 else 2
-                            else -> 3
-                        }
-                        result.add(Segment(filled, leader))
-                        result.add(Segment(PART - filled, 0))
-                    }
-                    else -> result.add(Segment(PART, 0))
-                }
+        get() = (1..4).map { slot ->
+            val partij = score.partij(slot)
+            when {
+                partij == null -> Segment(PART, 0)
+                partij.isDecided -> Segment(PART, partij.winnerSide.let { if (it == 0) 3 else it })
+                partij.isLive -> Segment(PART, leader(partij), live = true)
+                else -> Segment(PART, 0)
             }
-            return result
         }
+
+    /** Ahead in games, else in points; 3 level */
+    private fun leader(partij: TeamPartij): Int {
+        val (g1, g2) = partij.gamesWon
+        val (a, b) = if (partij.status == "playing") partij.score else 0 to 0
+        return when {
+            g1 != g2 -> if (g1 > g2) 1 else 2
+            a != b -> if (a > b) 1 else 2
+            else -> 3
+        }
+    }
 
     val progressMax: Int get() = 4 * PART
 

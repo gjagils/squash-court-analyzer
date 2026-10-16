@@ -66,11 +66,11 @@ export function validateFollower(input) {
   if (input.platform === 'ios') {
     const token = input.token.toLowerCase();
     if (!IOS_TOKEN.test(token)) return null;
-    return { platform: 'ios', token, sandbox: input.sandbox === true };
+    return { platform: 'ios', token, sandbox: input.sandbox === true, alerts: input.alerts !== false };
   }
   if (input.platform === 'android') {
     if (!ANDROID_TOKEN.test(input.token)) return null;
-    return { platform: 'android', token: input.token, sandbox: false };
+    return { platform: 'android', token: input.token, sandbox: false, alerts: input.alerts !== false };
   }
   return null;
 }
@@ -177,25 +177,59 @@ export function resultLine(snapshot) {
   return `${name} wint ${Math.max(a, b)}–${Math.min(a, b)}`;
 }
 
-/** The APNs body for a Live Activity: event "update" or "end" */
-export function apnsPayload(snapshot, event, nowMs) {
+/** The game scores as "11–7 · 8–11" */
+function gamesLine(snapshot) {
+  return snapshot.games.map((game) => `${game[0]}–${game[1]}`).join(' · ');
+}
+
+/**
+ * The notification that goes with a change, like a goal in a football app:
+ * only at the end of a game and at the end of the match, never per rally.
+ * { title, body } or null. Older followers (no `alerts`) get it too.
+ */
+export function scoreAlert(previous, snapshot) {
+  if (snapshot.status === 'finished') {
+    const line = resultLine(snapshot);
+    if (!line || (previous && previous.status === 'finished')) return null;
+    return { title: `Uitslag: ${line}`, body: `${snapshot.p1} – ${snapshot.p2} · ${gamesLine(snapshot)}` };
+  }
+  if (!previous || snapshot.games.length <= previous.games.length || snapshot.games.length === 0) return null;
+  const last = snapshot.games[snapshot.games.length - 1];
+  if (last[0] === last[1]) return null;
+  const winner = last[0] > last[1] ? snapshot.p1 : snapshot.p2;
+  const [a, b] = snapshot.gamesWon;
+  return {
+    title: `Game ${snapshot.games.length} voor ${winner}`,
+    body: `${snapshot.p1} – ${snapshot.p2}: ${last[0]}–${last[1]} · games ${a}–${b}`,
+  };
+}
+
+/** The APNs body for a Live Activity: event "update" or "end", with the alert of a game or the result */
+export function apnsPayload(snapshot, event, nowMs, alert = null) {
   const now = Math.floor(nowMs / 1000);
   const finished = snapshot.status === 'finished';
   const aps = { timestamp: now, event, 'content-state': snapshot };
   if (event === 'update') aps['stale-date'] = now + 900;
   if (event === 'end') aps['dismissal-date'] = finished ? now + 4 * 3600 : now + 60;
-  const line = finished ? resultLine(snapshot) : null;
-  if (line) aps.alert = { title: 'Uitslag', body: line };
+  if (alert) {
+    aps.alert = { title: alert.title, body: alert.body };
+    aps.sound = 'default';
+  }
   return { aps };
 }
 
-/** The FCM HTTP v1 body: a data message (all values strings) */
-export function fcmPayload(token, id, server, snapshot, event) {
+/** The FCM HTTP v1 body: a data message (all values strings); the alert as alertTitle/alertBody */
+export function fcmPayload(token, id, server, snapshot, event, alert = null) {
+  const data = { kind: 'live', id, server, event, snapshot: JSON.stringify(snapshot) };
+  if (alert) {
+    data.alertTitle = alert.title;
+    data.alertBody = alert.body;
+  }
   return {
     message: {
       token,
       android: { priority: 'high', ttl: '300s', collapse_key: id },
-      data: { kind: 'live', id, server, event, snapshot: JSON.stringify(snapshot) },
+      data,
     },
   };
 }
@@ -229,12 +263,12 @@ async function sendApns(settings, follower, payload, nowMs) {
 }
 
 /** One FCM push: { result, detail } as sendApns */
-async function sendFcm(account, follower, id, server, snapshot, event) {
+async function sendFcm(account, follower, id, server, snapshot, event, alert) {
   const accessToken = await fcmAccessToken(account);
   const response = await pushDeps.fetch(`https://fcm.googleapis.com/v1/projects/${account.project_id}/messages:send`, {
     method: 'POST',
     headers: { authorization: `Bearer ${accessToken}`, 'content-type': 'application/json' },
-    body: JSON.stringify(fcmPayload(follower.token, id, server, snapshot, event)),
+    body: JSON.stringify(fcmPayload(follower.token, id, server, snapshot, event, alert)),
   });
   if (response.ok) return { result: 'ok', detail: 'fcm 200' };
   const body = await response.json().catch(() => null);
@@ -270,19 +304,25 @@ async function eachLimited(items, limit, task) {
  * Platforms without configuration are skipped. Returns the followers whose
  * token is dead, to be forgotten.
  */
-export async function pushToFollowers(env, { id, server, snapshot, event, followers }) {
+export async function pushToFollowers(env, { id, server, snapshot, event, followers, alert = null }) {
   const apns = apnsSettings(env);
   const fcm = fcmServiceAccount(env);
   const nowMs = pushDeps.now();
-  const apnsBody = apnsPayload(snapshot, event, nowMs);
+  // Followers who turned the game alerts off get the same stand without one
+  const apnsWithAlert = apnsPayload(snapshot, event, nowMs, alert);
+  const apnsQuiet = apnsPayload(snapshot, event, nowMs);
   const dead = [];
   // What the services answered, counted (no tokens or names): "apns 200": 3
   const answers = {};
   await eachLimited(followers, PUSH_CONCURRENCY, async (follower) => {
     let outcome = { result: 'skip', detail: `${follower.platform} off` };
     try {
-      if (follower.platform === 'ios' && apns) outcome = await sendApns(apns, follower, apnsBody, nowMs);
-      else if (follower.platform === 'android' && fcm) outcome = await sendFcm(fcm, follower, id, server, snapshot, event);
+      const wantsAlert = follower.alerts !== false;
+      if (follower.platform === 'ios' && apns) {
+        outcome = await sendApns(apns, follower, wantsAlert ? apnsWithAlert : apnsQuiet, nowMs);
+      } else if (follower.platform === 'android' && fcm) {
+        outcome = await sendFcm(fcm, follower, id, server, snapshot, event, wantsAlert ? alert : null);
+      }
     } catch (error) {
       console.error(`${follower.platform} push error`, error && error.message);
       outcome = { result: 'error', detail: `${follower.platform} exception` };

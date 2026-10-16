@@ -11,7 +11,7 @@
 // ends (Live stoppen, idle alarm).
 
 import { ViewerSession, encoder } from './viewer-session.js';
-import { pushToFollowers } from './push.js';
+import { pushToFollowers, scoreAlert } from './push.js';
 
 const FOLLOWER_PREFIX = 'follower:';
 
@@ -61,10 +61,11 @@ export class LiveSession extends ViewerSession {
     if (!(await this.ctx.storage.get('key'))) return 404;
     if (!(await this.keyEquals(given))) return 401;
     const now = Date.now();
+    const previous = await this.ctx.storage.get('snapshot');
     await this.ctx.storage.put({ snapshot, updatedAt: now });
     await this.scheduleIdleAlarm(now);
     this.broadcast('state', await this.state());
-    await this.pushUpdate(snapshot);
+    await this.pushUpdate(snapshot, previous);
     return 204;
   }
 
@@ -124,7 +125,7 @@ export class LiveSession extends ViewerSession {
   }
 
   /** After an update: "update" to the followers, or "end" once when the match is finished */
-  async pushUpdate(snapshot) {
+  async pushUpdate(snapshot, previous = null) {
     const followers = await this.followers();
     if (followers.length === 0) return;
     let event = 'update';
@@ -137,7 +138,8 @@ export class LiveSession extends ViewerSession {
       await this.ctx.storage.delete('endPushed');
     }
     const id = this.id || (await this.ctx.storage.get('id')) || '';
-    this.schedulePush({ id, server: (await this.ctx.storage.get('pushServer')) || '', snapshot, event, followers });
+    const alert = scoreAlert(previous, snapshot);
+    this.schedulePush({ id, server: (await this.ctx.storage.get('pushServer')) || '', snapshot, event, followers, alert });
   }
 
   /**

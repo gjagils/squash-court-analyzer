@@ -93,6 +93,42 @@ async function teamPage(request, env, config, id, state) {
   return renderPage(request, template, title, description, `${base}/t/${id}`, `${base}/logo.png`, JSON.stringify(id));
 }
 
+/**
+ * POST / DELETE .../followers of a live or team match: { platform, token,
+ * sandbox?, alerts? }. 400 invalid, 503 platform off (POST), 404 unknown,
+ * 429 full, 201 registered, 204 forgotten.
+ */
+async function handleFollowers(request, env, config, session, unknownText) {
+  const follower = validateFollower(await readJson(request, FOLLOWER_BODY_BYTES));
+  if (!follower) return send(400, { error: 'Ongeldige pushregistratie' });
+  if (request.method === 'DELETE') {
+    const status = await session.removeFollower(follower);
+    return status === 404 ? send(404, { error: unknownText }) : send(204);
+  }
+  if (!pushAvailability(env)[follower.platform]) {
+    return send(503, { error: 'Meldingen op het vergrendelscherm staan op deze server uit' });
+  }
+  const status = await session.addFollower(follower, baseUrl(request, config));
+  if (status === 404) return send(404, { error: unknownText });
+  if (status === 429) return send(429, { error: 'Te veel volgers voor deze wedstrijd' });
+  return send(201, { ok: true });
+}
+
+/** A thumbnail as the viewer pages load it: never cached, gone with the session */
+function photoResponse(photo) {
+  if (!photo) return send(404, 'Not found');
+  return new Response(photo, {
+    status: 200,
+    headers: {
+      'Content-Type': 'image/jpeg',
+      'Content-Length': String(photo.byteLength),
+      // Not kept by browsers or Cloudflare: gone with the session
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  });
+}
+
 async function handle(request, env) {
   const config = readConfig(env);
   const url = new URL(request.url);
@@ -155,18 +191,7 @@ async function handle(request, env) {
   // GET /api/live/:id/photo/1 or 2: a player's thumbnail, for the viewer page
   if (request.method === 'GET' && parts[3] === 'photo' && parts.length === 5) {
     const index = parts[4] === '1' ? 1 : parts[4] === '2' ? 2 : 0;
-    const photo = index ? await session.photo(index) : null;
-    if (!photo) return send(404, 'Not found');
-    return new Response(photo, {
-      status: 200,
-      headers: {
-        'Content-Type': 'image/jpeg',
-        'Content-Length': String(photo.byteLength),
-        // Not kept by browsers or Cloudflare: gone with the session
-        'Cache-Control': 'no-store',
-        'X-Content-Type-Options': 'nosniff',
-      },
-    });
+    return photoResponse(index ? await session.photo(index) : null);
   }
   if (parts.length === 5) return send(404, 'Not found');
 
@@ -178,19 +203,7 @@ async function handle(request, env) {
   // POST / DELETE /api/live/:id/followers: a phone follows the match on its lock
   // screen ({ platform, token, sandbox? }). No key: anyone with the link may watch.
   if (parts[3] === 'followers' && parts.length === 4 && (request.method === 'POST' || request.method === 'DELETE')) {
-    const follower = validateFollower(await readJson(request, FOLLOWER_BODY_BYTES));
-    if (!follower) return send(400, { error: 'Ongeldige pushregistratie' });
-    if (request.method === 'DELETE') {
-      const status = await session.removeFollower(follower);
-      return status === 404 ? send(404, { error: 'Onbekende sessie' }) : send(204);
-    }
-    if (!pushAvailability(env)[follower.platform]) {
-      return send(503, { error: 'Meldingen op het vergrendelscherm staan op deze server uit' });
-    }
-    const status = await session.addFollower(follower, baseUrl(request, config));
-    if (status === 404) return send(404, { error: 'Onbekende sessie' });
-    if (status === 429) return send(429, { error: 'Te veel volgers voor deze wedstrijd' });
-    return send(201, { ok: true });
+    return handleFollowers(request, env, config, session, 'Onbekende sessie');
   }
   if (parts.length !== 3 && !(parts.length === 4 && parts[3] === 'photos')) return send(404, 'Not found');
 
@@ -235,7 +248,9 @@ async function handle(request, env) {
  * the invitation, owner key for the starter, viewer link); every phone with the
  * team key PUTs its partij to /api/team/:id/partij/:slot; only the owner key
  * changes the team names (PUT) or ends it (DELETE); GET /verify tells what a key
- * may do; viewers read it or follow /events.
+ * may do; viewers read it or follow /events. Photos per slot (PUT
+ * /partij/:slot/photos, GET /photo/:slot/:n) and lock screen followers
+ * (/followers) as for a live match.
  */
 async function handleTeam(request, env, config, parts, limiter, teamFor) {
   const id = parts[2];
@@ -257,8 +272,20 @@ async function handleTeam(request, env, config, parts, limiter, teamFor) {
     return send(201, { id: newId, writeKey: key, ownerKey, url: `${baseUrl(request, config)}/t/${newId}` });
   }
 
-  if (!id || !ID_PATTERN.test(id) || parts.length > 5) return send(404, 'Not found');
+  if (!id || !ID_PATTERN.test(id) || parts.length > 6) return send(404, 'Not found');
   const session = teamFor(id);
+
+  // GET /api/team/:id/photo/:slot/:n: the home (1) or away (2) player's thumbnail of a slot
+  if (request.method === 'GET' && parts[3] === 'photo' && parts.length === 6) {
+    const slot = Number(parts[4]);
+    const index = parts[5] === '1' ? 1 : parts[5] === '2' ? 2 : 0;
+    return photoResponse(SLOTS.includes(slot) && index ? await session.photo(slot, index) : null);
+  }
+
+  // POST / DELETE /api/team/:id/followers: lock screen, as for a live match
+  if (parts[3] === 'followers' && parts.length === 4 && (request.method === 'POST' || request.method === 'DELETE')) {
+    return handleFollowers(request, env, config, session, 'Onbekende teamwedstrijd');
+  }
 
   // GET /api/team/:id/verify: does this key work, and what may it do ("owner" or "writer")
   if (request.method === 'GET' && parts[3] === 'verify' && parts.length === 4) {
@@ -285,6 +312,17 @@ async function handleTeam(request, env, config, parts, limiter, teamFor) {
     if (status === 401) return send(401, { error: 'Geen toegang' });
     return send(204);
   };
+
+  // PUT /api/team/:id/partij/:slot/photos: the slot's thumbnails ({ p1: home, p2: away },
+  // base64 JPEG or null; a missing or invalid one is no photo)
+  if (request.method === 'PUT' && parts[3] === 'partij' && parts[5] === 'photos' && parts.length === 6) {
+    const slot = Number(parts[4]);
+    if (!SLOTS.includes(slot)) return send(404, 'Not found');
+    const body = await readJson(request, MAX_PHOTO_BYTES * 3);
+    if (!body || typeof body !== 'object') return send(400, { error: "Ongeldige foto's" });
+    return answer(await session.setPhotos(key, slot, cleanPhoto(body.p1), cleanPhoto(body.p2)));
+  }
+  if (parts.length === 6) return send(404, 'Not found');
 
   // PUT /api/team/:id/partij/:slot: one partij of this phone
   if (request.method === 'PUT' && parts[3] === 'partij' && parts.length === 5) {

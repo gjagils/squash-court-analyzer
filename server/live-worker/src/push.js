@@ -204,6 +204,99 @@ export function scoreAlert(previous, snapshot) {
   };
 }
 
+// ---- Team matches -----------------------------------------------------------
+
+const TEAM_SLOTS = [1, 2, 3, 4];
+
+/** A partij is decided (as "klaar" on the team page): a winner, finished, or given up / not played */
+export function partijDecided(partij) {
+  if (!partij) return false;
+  return partij.winner === 1 || partij.winner === 2 || partij.status === 'finished'
+    || partij.end === 'retired' || partij.end === 'walkover';
+}
+
+/** All four partijen of a team match are decided */
+export function teamDecided(partijen) {
+  return TEAM_SLOTS.every((slot) => partijDecided(partijen && partijen[slot]));
+}
+
+/** 1 home, 2 away, 0 unknown: the winner, else whoever has more games */
+function partijWinner(partij) {
+  if (partij.winner === 1 || partij.winner === 2) return partij.winner;
+  const [a, b] = partij.gamesWon;
+  return a > b ? 1 : b > a ? 2 : 0;
+}
+
+/** Games won per team over the partijen, as the team page counts them */
+function teamGames(partijen) {
+  let home = 0;
+  let away = 0;
+  for (const slot of TEAM_SLOTS) {
+    const partij = partijen[slot];
+    if (partij) { home += partij.gamesWon[0]; away += partij.gamesWon[1]; }
+  }
+  return [home, away];
+}
+
+/**
+ * The lock screen stand of a team match (APNs content-state, FCM `team`):
+ * the team names and the partijen that exist, by slot, without games list,
+ * last point or order, so it stays far below the 4 KB of APNs.
+ */
+export function teamContentState(team, partijen) {
+  const list = [];
+  for (const slot of TEAM_SLOTS) {
+    const partij = partijen && partijen[slot];
+    if (!partij) continue;
+    const item = {
+      slot, p1: partij.p1, p2: partij.p2, bestOf: partij.bestOf, gamesWon: partij.gamesWon, score: partij.score,
+      status: partij.status,
+    };
+    if (partij.winner === 1 || partij.winner === 2) item.winner = partij.winner;
+    if (partij.end === 'retired' || partij.end === 'walkover') item.end = partij.end;
+    list.push(item);
+  }
+  return { home: team.home, away: team.away, partijen: list };
+}
+
+/**
+ * The notification of a team match change: a partij that is decided now
+ * ("E2: Paul wint 3–1"), or the result when all four are ("Uitslag: All Inn 8
+ * wint 9–4", by games as on the team page). Never per rally or per game.
+ * { title, body } or null.
+ */
+export function teamAlert(previous, team, partijen) {
+  const before = previous || {};
+  const [home, away] = teamGames(partijen);
+  if (teamDecided(partijen)) {
+    if (teamDecided(before)) return null;
+    const won = [0, 0];
+    for (const slot of TEAM_SLOTS) {
+      const winner = partijWinner(partijen[slot]);
+      if (winner) won[winner - 1] += 1;
+    }
+    const title = home === away
+      ? `Uitslag: gelijkspel ${home}–${away}`
+      : `Uitslag: ${home > away ? team.home : team.away} wint ${Math.max(home, away)}–${Math.min(home, away)}`;
+    return { title, body: `${team.home} – ${team.away} · partijen ${won[0]}–${won[1]}` };
+  }
+  for (const slot of TEAM_SLOTS) {
+    const partij = partijen[slot];
+    if (!partijDecided(partij) || partijDecided(before[slot])) continue;
+    const winner = partijWinner(partij);
+    let line = 'klaar';
+    if (winner) {
+      const name = (winner === 1 ? partij.p1 : partij.p2) || `${winner === 1 ? team.home : team.away} E${slot}`;
+      const [a, b] = partij.gamesWon;
+      const how = partij.end === 'retired' ? '(opgave)' : partij.end === 'walkover' ? '(walkover)'
+        : `${Math.max(a, b)}–${Math.min(a, b)}`;
+      line = `${name} wint ${how}`;
+    }
+    return { title: `E${slot}: ${line}`, body: `${team.home} ${home} – ${away} ${team.away}` };
+  }
+  return null;
+}
+
 /**
  * The APNs body for a Live Activity: event "update" or "end", with the alert of
  * a game or the result. An end stays 4 hours when finished (a live match by its

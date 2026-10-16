@@ -207,6 +207,51 @@ Volgorde bij een externe build:
 8. `docs/wijzigingen-builds.md`: het blok "Volgende build" krijgt de kop met
    het nummer (bijvoorbeeld "3.0 build 1") en "(geüpload)".
 
+### Vóór de upload van 3.0 build 4: live score op je vergrendelscherm (klaargezet 16 oktober 2026)
+
+Met deze build stuurt de app voor het eerst een push-token naar de live-server
+en gaan er per teampartij foto's mee (`docs/plan-live-vergrendelscherm.md`).
+Wat Gerd-Jan met de hand moet doen, naast de volgorde hierboven:
+
+- [ ] **Productie-Worker**: de geheimen `APNS_KEY`, `APNS_KEY_ID`, `APNS_TEAM_ID`
+      en `FCM_SERVICE_ACCOUNT` op `squash-live-beta` zetten (zie
+      `server/live-worker/README.md`). Zonder geheimen geeft volgen een 503
+      ("Deze server kan de stand nog niet naar je telefoon sturen").
+- [ ] **App Store Connect, App-privacy (privacylabel)**: controleren dat
+      *Naam*, *Foto's of video's* en *Overige gebruikersinhoud* (App-functionaliteit,
+      niet gekoppeld aan de identiteit, geen tracking) erin staan, zoals
+      `SquashAnalyzer/PrivacyInfo.xcprivacy` al declareert; foto's gaan nu ook per
+      teampartij mee. Het APNs-pushtoken is geen apparaat-ID in de zin van
+      Apple's lijst (niet gecontroleerd in de Apple-documentatie: twijfel je,
+      kijk dan bij *Identifiers → Device ID*).
+- [ ] **Google Play, Gegevensveiligheid (Data safety)**: *Apparaat- of andere
+      ID's* aanvinken (het FCM-registratietoken van Firebase Cloud Messaging):
+      verzameld, niet gedeeld, doel *App-functionaliteit*, versleuteld verzonden
+      (HTTPS), optioneel (alleen als je een wedstrijd volgt), verwijderbaar
+      (Stoppen; anders weg met de wedstrijd, 2 uur na de laatste stand). Ook
+      *Naam* en *Foto's* (live meekijken, optioneel, App-functionaliteit) als
+      die er nog niet staan.
+- [ ] **Ondertekening iOS**: push (`aps-environment`) en de App Group
+      `group.com.squashanalyzer.app` regelt automatische ondertekening bij het
+      archiveren (`-allowProvisioningUpdates`), maar de App Group en de App ID
+      `com.squashanalyzer.app.LiveActivity` moeten bij Apple bestaan. Vanaf de
+      command line lukte dat op 16 oktober niet (zie "Nog open" in het plan):
+      eenmaal in Xcode inloggen en een build voor de iPhone maken, of beide in
+      het Developer-portaal aanmaken.
+- [ ] **Android-release**: `~/.android-keys/google-services.json` moet er zijn,
+      anders bouwt de app wel, maar zegt Volgen "Deze server kan de stand nog niet
+      naar je telefoon sturen" (`FirebaseConfig.isAvailable` is dan false).
+- [ ] **Privacybeleid** (`website/privacy.html`, bijgewerkt op 16 oktober, nog
+      niet gepubliceerd) en de handleiding (sectie *Wedstrijd volgen*) publiceren
+      met de `wrangler deploy` uit 1.
+- [ ] **Schermafbeeldingen voor de handleiding** (`website/handleiding/img/…`,
+      414 × 900 jpg, staan in git): nog te maken, de sectie *Wedstrijd volgen*
+      heeft er nu geen. Nodig: iPhone `volgen-vergrendelscherm.jpg` (losse
+      wedstrijd, GAMEBAL), `volgen-team.jpg` (teamwedstrijd) en eventueel
+      `volgen-island.jpg`; Android `volgen-melding.jpg` (uitgeklapte melding)
+      en `volgen-team.jpg`. Zonder andere meldingen in beeld (de
+      simulatorshots van 16 oktober tonen nog meldingen van het systeem).
+
 Sleutels en geheimen staan **nooit** in de repo: App Store Connect-sleutel in
 `~/.appstoreconnect/private_keys/` (sleutel- en issuer-id staan als
 standaardwaarde in `scripts/asc_api.py`, te overschrijven met `ASC_KEY_ID`,

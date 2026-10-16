@@ -48,6 +48,7 @@ import com.squashanalyzer.android.data.RoomBackupStore
 import com.squashanalyzer.android.aicoach.HttpAICoachTransport
 import com.squashanalyzer.android.live.HttpLiveTransport
 import com.squashanalyzer.android.live.FcmLiveFollowPresenter
+import com.squashanalyzer.android.live.LiveAlerts
 import com.squashanalyzer.android.live.FirebaseConfig
 import squash.analyzer.core.LiveFollow
 import squash.analyzer.core.LiveFollowError
@@ -78,6 +79,8 @@ class SquashApplication : Application() {
         FirebaseConfig.initialize(this)
         LiveFollow.shared.transport = HttpLiveTransport()
         LiveFollow.shared.presenter = FcmLiveFollowPresenter(applicationContext)
+        // "Melding bij elke game" (shared settings screen): sent with every registration
+        LiveAlerts.start(applicationContext)
     }
 }
 
@@ -259,9 +262,10 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val message = try {
                 LiveFollow.shared.follow(target)
-                val score = (LiveFollow.shared.presenter as? FcmLiveFollowPresenter)?.lastStarted
-                if (score == null) "Je volgt de wedstrijd op je vergrendelscherm"
-                else "Je volgt ${score.p1} – ${score.p2} op je vergrendelscherm"
+                // "Jan – Piet", or the teams of a team match
+                val title = LiveFollow.shared.title(of = target)
+                if (title == null) "Je volgt de wedstrijd op je vergrendelscherm"
+                else "Je volgt $title op je vergrendelscherm"
             } catch (e: LiveFollowError) {
                 when (e) {
                     is LiveFollowError.NotFoundCase -> "Deze wedstrijd is al afgelopen"

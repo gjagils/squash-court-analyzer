@@ -8,4 +8,6 @@
     <color name="live_p2_line">#738094AD</color>
     <color name="live_border">#24FFFFFF</color>
     <color name="live_text2">#B3ADA6</color>
+    <color name="live_live">#FF6B6B</color>
+    <color name="live_dim">#7A746D</color>
 </resources>

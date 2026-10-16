@@ -12,11 +12,12 @@ class LiveFollowActionReceiver : BroadcastReceiver() {
         const val ACTION_DISMISSED = "com.squashanalyzer.android.live.DISMISSED"
         const val EXTRA_ID = "id"
         const val EXTRA_SERVER = "server"
+        const val EXTRA_KIND = "kind"
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != ACTION_STOP && intent.action != ACTION_DISMISSED) return
-        val match = FollowedMatch.validated(intent.getStringExtra(EXTRA_ID), intent.getStringExtra(EXTRA_SERVER)) ?: return
+        val match = FollowedMatch.validated(intent.getStringExtra(EXTRA_ID), intent.getStringExtra(EXTRA_SERVER), intent.getStringExtra(EXTRA_KIND)) ?: return
         // A final score that is swiped away was already forgotten
         if (!FollowedMatches(context).contains(match)) {
             LiveScoreNotifier(context).cancel(match)

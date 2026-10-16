@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Team match notification (Android 9-15): one partij, E1-E4, added to
+     team_rows in code. Slot, home avatar and name, the games in boxes with the
+     state between them, away name and avatar. Colours cannot be set from code
+     per light/dark shade, so the variants (won, greyed, live) are separate
+     views of which code shows one. The games and the state in the middle
+     have fixed widths, and the end padding matches the slot column, so the
+     middle sits on the same axis as the team score above it. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="26dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="0dp"
+    android:paddingEnd="20dp">
+
+    <TextView
+        android:id="@+id/team_slot"
+        android:layout_width="20dp"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textColor="@color/live_text2"
+        android:textSize="11sp"
+        android:textStyle="bold" />
+
+    <FrameLayout
+        android:id="@+id/team_avatar1"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/team_avatar_ring1"
+        android:padding="1.5dp">
+
+        <ImageView
+            android:id="@+id/team_photo1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/team_initial1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:importantForAccessibility="no"
+            android:includeFontPadding="false"
+            android:textColor="@color/live_p1"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/team_home"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/live_p1"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/team_home_dim"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/live_dim"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/team_g1"
+        style="@style/TextAppearance.Compat.Notification.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/team_box0"
+        android:fontFeatureSettings="tnum"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:minWidth="20dp"
+        android:paddingLeft="4dp"
+        android:paddingTop="1dp"
+        android:paddingRight="4dp"
+        android:paddingBottom="1dp"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/team_g1_won"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/team_box1"
+        android:fontFeatureSettings="tnum"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:minWidth="20dp"
+        android:paddingLeft="4dp"
+        android:paddingTop="1dp"
+        android:paddingRight="4dp"
+        android:paddingBottom="1dp"
+        android:textColor="@color/live_p1"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/team_g1_dim"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/team_box0"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:minWidth="20dp"
+        android:paddingLeft="4dp"
+        android:paddingTop="1dp"
+        android:paddingRight="4dp"
+        android:paddingBottom="1dp"
+        android:textColor="@color/live_dim"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/team_mid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFeatureSettings="tnum"
+        android:gravity="center"
+        android:maxLines="1"
+        android:minWidth="46dp"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:textColor="@color/live_text2"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/team_mid_live"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFeatureSettings="tnum"
+        android:gravity="center"
+        android:maxLines="1"
+        android:minWidth="46dp"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:textColor="@color/live_live"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/team_g2"
+        style="@style/TextAppearance.Compat.Notification.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/team_box0"
+        android:fontFeatureSettings="tnum"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:minWidth="20dp"
+        android:paddingLeft="4dp"
+        android:paddingTop="1dp"
+        android:paddingRight="4dp"
+        android:paddingBottom="1dp"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/team_g2_won"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/team_box2"
+        android:fontFeatureSettings="tnum"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:minWidth="20dp"
+        android:paddingLeft="4dp"
+        android:paddingTop="1dp"
+        android:paddingRight="4dp"
+        android:paddingBottom="1dp"
+        android:textColor="@color/live_p2"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/team_g2_dim"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/team_box0"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:minWidth="20dp"
+        android:paddingLeft="4dp"
+        android:paddingTop="1dp"
+        android:paddingRight="4dp"
+        android:paddingBottom="1dp"
+        android:textColor="@color/live_dim"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/team_away"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:gravity="end"
+        android:maxLines="1"
+        android:textColor="@color/live_p2"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/team_away_dim"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:gravity="end"
+        android:maxLines="1"
+        android:textColor="@color/live_dim"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/team_avatar2"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/team_avatar_ring2"
+        android:padding="1.5dp">
+
+        <ImageView
+            android:id="@+id/team_photo2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/team_initial2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:importantForAccessibility="no"
+            android:includeFontPadding="false"
+            android:textColor="@color/live_p2"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+</LinearLayout>

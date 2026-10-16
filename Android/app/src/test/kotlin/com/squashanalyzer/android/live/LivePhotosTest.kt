@@ -73,4 +73,31 @@ class LivePhotosTest {
         assertNotNull(LivePhotos.load(app, match, 1))
         LivePhotos.delete(app, match)
     }
+
+    // A team match: per partij a home and an away photo
+
+    private val team = FollowedMatch("teamabcd2345", "https://live.squashanalyzer.com", FollowedMatch.TEAM)
+
+    @Test fun readsWhichTeamPhotosTheServerHas() {
+        val flags = LivePhotos.teamPhotoFlags(
+            """{"photos":{"1":[true,false],"2":[false,false],"3":[false,true],"4":[false,false]},"photoVersion":3}""")
+        assertEquals(listOf(true, false), flags[1])
+        assertEquals(listOf(false, true), flags[3])
+        assertEquals(4, flags.size)
+        assertTrue(LivePhotos.teamPhotoFlags("""{"photos":[true,false]}""").isEmpty())
+        assertTrue(LivePhotos.teamPhotoFlags("nee").isEmpty())
+    }
+
+    @Test fun eachTeamSlotIsAskedOncePerFollow() {
+        assertEquals(listOf(1, 2), LivePhotos.teamSlotsToFetch(app, team, listOf(1, 2, 7)))
+        dir.mkdirs()
+        File(dir, "${team.id}-s1.checked").writeText("")
+        File(dir, "${team.id}-1-2.png").writeText("x")
+        assertEquals(listOf(2), LivePhotos.teamSlotsToFetch(app, team, listOf(1, 2)))
+        assertNull(LivePhotos.loadTeam(app, team, 2, 1))
+        // Stopping removes the team's photos and markers, so a new follow asks again
+        LivePhotos.delete(app, team)
+        assertEquals(listOf(1, 2), LivePhotos.teamSlotsToFetch(app, team, listOf(1, 2)))
+        assertFalse(File(dir, "${team.id}-1-2.png").exists())
+    }
 }

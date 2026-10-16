@@ -175,6 +175,14 @@ class LiveScoreCard(val score: LiveScore) {
         get() = score.games.map { (a, b) -> GameChip("$a–$b", if (a > b) 1 else if (b > a) 2 else 0) }
 
     companion object {
+        /** Chips per row: four fit a 360dp wide phone, more go over two rows (5 → 3 + 2) */
+        fun chipRows(chips: List<GameChip>): List<List<GameChip>> {
+            if (chips.isEmpty()) return emptyList()
+            if (chips.size <= 4) return listOf(chips)
+            val first = (chips.size + 1) / 2
+            return listOf(chips.take(first), chips.drop(first))
+        }
+
         /** First letter (a whole code point, so an emoji or accented letter stays intact), capitalised; "?" without a name */
         fun initialOf(name: String): String {
             val trimmed = name.trim()

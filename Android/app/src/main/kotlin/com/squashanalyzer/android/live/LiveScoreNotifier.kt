@@ -259,17 +259,22 @@ class LiveScoreNotifier(private val context: Context) {
             views.setTextViewText(if (first) R.id.live_points1 else R.id.live_points2, card.points(player).toString())
         }
         views.removeAllViews(R.id.live_history)
-        for (chip in card.chips) {
-            val layout = when (chip.winner) {
-                1 -> R.layout.notification_live_chip1
-                2 -> R.layout.notification_live_chip2
-                else -> R.layout.notification_live_chip0
+        views.removeAllViews(R.id.live_history2)
+        val rows = LiveScoreCard.chipRows(card.chips)
+        for ((index, row) in rows.withIndex()) {
+            for (chip in row) {
+                val layout = when (chip.winner) {
+                    1 -> R.layout.notification_live_chip1
+                    2 -> R.layout.notification_live_chip2
+                    else -> R.layout.notification_live_chip0
+                }
+                val chipView = RemoteViews(context.packageName, layout)
+                chipView.setTextViewText(R.id.live_chip, chip.text)
+                views.addView(if (index == 0) R.id.live_history else R.id.live_history2, chipView)
             }
-            val chipView = RemoteViews(context.packageName, layout)
-            chipView.setTextViewText(R.id.live_chip, chip.text)
-            views.addView(R.id.live_history, chipView)
         }
-        views.setViewVisibility(R.id.live_history, if (card.chips.isEmpty()) View.GONE else View.VISIBLE)
+        views.setViewVisibility(R.id.live_history, if (rows.isNotEmpty()) View.VISIBLE else View.GONE)
+        views.setViewVisibility(R.id.live_history2, if (rows.size > 1) View.VISIBLE else View.GONE)
         val last = card.score.lastPoint
         views.setTextViewText(R.id.live_last, last ?: "")
         views.setViewVisibility(R.id.live_last, if (last.isNullOrBlank()) View.GONE else View.VISIBLE)

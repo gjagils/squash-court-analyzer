@@ -226,6 +226,16 @@
         android:gravity="center"
         android:orientation="horizontal" />
 
+    <!-- More than four games do not fit one row on a 360dp wide phone -->
+    <LinearLayout
+        android:id="@+id/live_history2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/live_last"
         android:layout_width="match_parent"

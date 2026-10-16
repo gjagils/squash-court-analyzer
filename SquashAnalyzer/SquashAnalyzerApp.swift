@@ -11,11 +11,6 @@ struct SquashAnalyzerApp: App {
     init() {
         // Live meekijken: the shared LiveShare sends the state through URLSession (server/live)
         LiveShare.shared.transport = URLSessionLiveTransport()
-        #if DEBUG
-        // feature/live-activity: debug builds share to the test Worker, which can
-        // push to followers (docs/plan-live-vergrendelscherm.md). Remove before main.
-        LiveShare.shared.baseURL = "https://squash-live-dev.gerdjanvangils.workers.dev"
-        #endif
         // Live score op het vergrendelscherm: Live Activities (followed matches and the own match)
         ActivityKitLiveFollowPresenter.shared.install()
         #if DEBUG

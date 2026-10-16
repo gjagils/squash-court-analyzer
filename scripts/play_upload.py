@@ -30,6 +30,7 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+import zipfile
 
 PACKAGE = "com.squashanalyzer.android"
 API = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/" + PACKAGE
@@ -111,6 +112,22 @@ def check(token: str) -> None:
 
 TRACKS = ["internal", "alpha", "Google Group testers"]
 
+# The release build is shrunk and obfuscated by R8 (Android/app/proguard-rules.pro).
+# AGP puts the R8 mapping of exactly this build inside the bundle; that copy is
+# uploaded as the deobfuscation file, so Play Console shows readable crash and
+# ANR stack traces. Play also picks up that copy from the bundle by itself; the
+# explicit upload makes sure and shows up in the output. Taking it from the
+# bundle (not build/outputs/mapping) means it can never belong to another build.
+BUNDLE_MAPPING = "BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map"
+
+
+def bundle_mapping(aab: str):
+    """The R8 mapping inside the bundle, or None for a build without R8."""
+    with zipfile.ZipFile(aab) as bundle:
+        if BUNDLE_MAPPING not in bundle.namelist():
+            return None
+        return bundle.read(BUNDLE_MAPPING)
+
 
 def upload(token: str, aab: str, notes: str, name: str, tracks: list) -> None:
     edit = call(token, "POST", f"{API}/edits", body={})
@@ -120,6 +137,22 @@ def upload(token: str, aab: str, notes: str, name: str, tracks: list) -> None:
                       data=handle.read(), content_type="application/octet-stream")
     code = bundle["versionCode"]
     print("Geüpload, versionCode", code)
+    mapping = bundle_mapping(aab)
+    if mapping is None:
+        print("Let op: geen R8-mapping in de bundle (R8 uit?), dus geen deobfuscatiebestand geüpload.")
+    else:
+        # Play also reads the copy inside the bundle, so a failure here is a
+        # warning and the release still goes out
+        url = f"{UPLOAD_API}/edits/{edit_id}/apks/{code}/deobfuscationFiles/proguard?uploadType=media"
+        request = urllib.request.Request(url, data=mapping, method="POST", headers={
+            "Authorization": f"Bearer {token}", "Content-Type": "application/octet-stream"})
+        try:
+            with urllib.request.urlopen(request, timeout=600):
+                pass
+            print(f"R8-mapping geüpload als deobfuscatiebestand ({len(mapping) // (1024 * 1024)} MB)")
+        except urllib.error.HTTPError as error:
+            print(f"Let op: R8-mapping niet apart geüpload ({error.code}: {error.read().decode()[:300]}); "
+                  "Play gebruikt de kopie in de bundle.")
     for track in tracks:
         call(token, "PUT", f"{API}/edits/{edit_id}/tracks/{urllib.parse.quote(track)}", body={
             "track": track,

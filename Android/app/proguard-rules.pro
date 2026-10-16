@@ -5,8 +5,9 @@
 #
 # Libraries that ship their own consumer rules inside their AAR are not
 # repeated here: Room (the generated AppDatabase_Impl that Room finds by
-# name), Firebase Messaging, AndroidX, Compose, OkHttp, Coil and kotlinx.
-# R8 applies those automatically.
+# name), Firebase Messaging, AndroidX, Compose and OkHttp. R8 applies those
+# automatically. The release APK passed a full test pass on 16 October 2026
+# with only the rules below; no extra rule turned out to be needed.
 
 # --- Skip runtime ----------------------------------------------------------
 # The same rules Skip writes into the proguard-rules.pro of a new Skip app

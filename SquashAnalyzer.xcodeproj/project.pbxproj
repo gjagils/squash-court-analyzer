@@ -146,6 +146,7 @@
 		C2000003 /* LiveScoreActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveScoreActivityWidget.swift; sourceTree = "<group>"; };
 		C2000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C2000005 /* ActivityKitLiveFollowPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityKitLiveFollowPresenter.swift; sourceTree = "<group>"; };
+		C2000007 /* SquashLiveActivity.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SquashLiveActivity.entitlements; sourceTree = "<group>"; };
 		C2000006 /* LiveScoreAttributesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveScoreAttributesTests.swift; sourceTree = "<group>"; };
 		C3000001 /* SquashLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SquashLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -306,6 +307,7 @@
 				C2000002 /* SquashLiveActivityBundle.swift */,
 				C2000003 /* LiveScoreActivityWidget.swift */,
 				C2000004 /* Info.plist */,
+				C2000007 /* SquashLiveActivity.entitlements */,
 			);
 			path = SquashLiveActivity;
 			sourceTree = "<group>";
@@ -761,6 +763,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = SquashLiveActivity/SquashLiveActivity.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 65FAHRU88M;
@@ -790,6 +793,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = SquashLiveActivity/SquashLiveActivity.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 65FAHRU88M;

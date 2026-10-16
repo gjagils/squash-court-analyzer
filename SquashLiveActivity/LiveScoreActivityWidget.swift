@@ -1,70 +1,70 @@
 import ActivityKit
 import SwiftUI
+import UIKit
 import WidgetKit
 
-/// The Live Activity of a live match: a dark card on the lock screen and the
-/// score in the Dynamic Island. Design approved by Gerd-Jan (October 2026):
-/// the referee screen's colours, player 1 orange, player 2 steel blue.
+/// The Live Activity of a live match: on the lock screen the same ticker as
+/// the viewer page (server/live-worker/public/live.html): a round photo or
+/// first letter per player, the server's side under the name, the games in a
+/// small box and the points; above it a red LIVE pill and the status line,
+/// below it the finished games in the winner's colour. The score again in the
+/// Dynamic Island. Player 1 orange, player 2 steel blue.
 struct LiveScoreActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: LiveScoreAttributes.self) { context in
-            LiveScoreLockScreenView(state: context.state, startedAt: context.attributes.startedAt)
+            LiveScoreLockScreenView(state: context.state, photos: LiveScorePhotos(matchId: context.attributes.matchId),
+                                    startedAt: context.attributes.startedAt)
                 .activityBackgroundTint(LiveScoreColors.card)
                 .activitySystemActionForegroundColor(LiveScoreColors.textPrimary)
         } dynamicIsland: { context in
             let state = context.state
+            let photos = LiveScorePhotos(matchId: context.attributes.matchId)
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    LiveScoreIslandPlayer(state: state, player: 1)
+                    LiveScoreIslandPlayer(state: state, player: 1, photo: photos.player1)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    LiveScoreIslandPlayer(state: state, player: 2)
+                    LiveScoreIslandPlayer(state: state, player: 2, photo: photos.player2)
                 }
                 DynamicIslandExpandedRegion(.center) {
-                    VStack(spacing: 2) {
-                        Text("\(state.shownScore(1))–\(state.shownScore(2))")
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                    VStack(spacing: 3) {
+                        Text("\(state.points(1))–\(state.points(2))")
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
                             .monospacedDigit()
                             .foregroundColor(LiveScoreColors.textPrimary)
                             .lineLimit(1)
-                        if let badge = state.badge {
+                            .minimumScaleFactor(0.7)
+                        if let badge = state.ballBadge {
                             LiveScoreBadgeView(badge: badge)
                         }
                     }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    HStack {
-                        Text(state.islandLine)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                        Spacer(minLength: 8)
-                        if state.isPlaying || state.isWarmup {
-                            Text(state.serviceText).lineLimit(1)
-                        }
+                    HStack(spacing: 6) {
+                        LiveScoreStatusText(text: state.statusLine, size: 11)
+                            .layoutPriority(1)
+                        Spacer(minLength: 4)
+                        LiveScoreChips(chips: state.gameChips, size: 11)
                     }
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundColor(LiveScoreColors.textSecondary)
                     .padding(.horizontal, 6)
+                    .padding(.top, 2)
                 }
             } compactLeading: {
                 HStack(spacing: 5) {
-                    LiveScoreServerDot(visible: state.isServing(1), size: 6)
-                    Text("\(state.shownScore(1))")
+                    LiveScoreAvatar(state: state, player: 1, photo: photos.player1, size: 22, lineWidth: 1.5)
+                    Text("\(state.islandScore(1))")
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .foregroundColor(LiveScoreColors.player1)
                 }
-                .padding(.leading, 2)
             } compactTrailing: {
                 HStack(spacing: 5) {
-                    Text("\(state.shownScore(2))")
+                    Text("\(state.islandScore(2))")
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .monospacedDigit()
-                        .foregroundColor(LiveScoreColors.player2)
-                    LiveScoreServerDot(visible: state.isServing(2), size: 6)
+                        .foregroundColor(LiveScoreColors.player2Text)
+                    LiveScoreAvatar(state: state, player: 2, photo: photos.player2, size: 22, lineWidth: 1.5)
                 }
-                .padding(.trailing, 2)
             } minimal: {
                 Text(state.minimalText)
                     .font(.system(size: 12, weight: .bold, design: .rounded))
@@ -77,160 +77,306 @@ struct LiveScoreActivityWidget: Widget {
     }
 }
 
-/// The referee screen's colours (docs/style/README.md); the extension does
-/// not link SquashAnalyzerUI, so they are repeated here
+/// The viewer page's colours (live.html, docs/style/README.md); the extension
+/// does not link SquashAnalyzerUI, so they are repeated here
 enum LiveScoreColors {
     static let card = Color(red: 0x18 / 255.0, green: 0x0E / 255.0, blue: 0x04 / 255.0)
     static let accent = Color(red: 0xF2 / 255.0, green: 0x8C / 255.0, blue: 0x26 / 255.0)
+    /// --line: the card's border and player 1's boxes
+    static let line = accent.opacity(0.35)
+    /// --border: the divider between the rows and neutral outlines
+    static let border = Color.white.opacity(0.09)
     static let player1 = accent
-    static let player2 = Color(red: 0x80 / 255.0, green: 0x94 / 255.0, blue: 0xAD / 255.0)
-    static let serverDot = Color(red: 0xFF / 255.0, green: 0x99 / 255.0, blue: 0x26 / 255.0)
+    /// --blue: player 2's avatar ring
+    static let player2 = Color(red: 0x59 / 255.0, green: 0x73 / 255.0, blue: 0x8C / 255.0)
+    /// --blue-light: player 2's name, score and serve dot
+    static let player2Text = Color(red: 0x80 / 255.0, green: 0x94 / 255.0, blue: 0xAD / 255.0)
+    static let player2Line = player2Text.opacity(0.45)
+    static let live = Color(red: 0xE5 / 255.0, green: 0x48 / 255.0, blue: 0x4D / 255.0)
     static let gold = Color(red: 0xE6 / 255.0, green: 0xB8 / 255.0, blue: 0x59 / 255.0)
     static let textPrimary = Color(red: 0xF2 / 255.0, green: 0xED / 255.0, blue: 0xE6 / 255.0)
     static let textSecondary = Color(red: 0xB3 / 255.0, green: 0xAD / 255.0, blue: 0xA6 / 255.0)
 
-    static func player(_ number: Int) -> Color { number == 1 ? player1 : player2 }
+    /// Name, serve dot and chip text
+    static func playerText(_ number: Int) -> Color { number == 1 ? player1 : player2Text }
+    /// Avatar ring
+    static func ring(_ number: Int) -> Color { number == 1 ? player1 : player2 }
 }
 
-/// The lock screen card
+/// The thumbnails the app stored for this match (LiveScorePhotoStore)
+struct LiveScorePhotos {
+    let player1: UIImage?
+    let player2: UIImage?
+
+    init(matchId: String) {
+        player1 = LiveScorePhotoStore.image(matchId: matchId, player: 1)
+        player2 = LiveScorePhotoStore.image(matchId: matchId, player: 2)
+    }
+
+    func photo(_ player: Int) -> UIImage? { player == 1 ? player1 : player2 }
+}
+
+/// The lock screen card. Compact: the system clips a Live Activity at about
+/// 160 pt, so avatars are 32 pt and the points 34 pt
 struct LiveScoreLockScreenView: View {
     let state: LiveScoreAttributes.ContentState
+    let photos: LiveScorePhotos
     let startedAt: Date?
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 0) {
             header
-                .padding(.bottom, 2)
+                .padding(.bottom, 4)
             row(1)
+            Rectangle()
+                .fill(LiveScoreColors.border)
+                .frame(height: 1)
             row(2)
-            footer
-                .padding(.top, 2)
+            if !state.gameChips.isEmpty || startedAt != nil {
+                footer
+                    .padding(.top, 5)
+            }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
         .overlay(
             ContainerRelativeShape()
-                .stroke(Color.white.opacity(0.10), lineWidth: 1)
+                .stroke(LiveScoreColors.line, lineWidth: 1)
         )
     }
 
     private var header: some View {
-        HStack(spacing: 6) {
-            LiveScoreGlyph()
-                .frame(width: 14, height: 14)
-            Text(state.headerTitle)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundColor(LiveScoreColors.textSecondary)
-                .lineLimit(1)
-            Spacer(minLength: 8)
-            if let badge = state.badge {
+        HStack(spacing: 8) {
+            if state.isFinished {
+                LiveScorePill(text: "AFGELOPEN", live: false)
+            } else {
+                LiveScorePill(text: "LIVE", live: true)
+            }
+            LiveScoreStatusText(text: state.statusLine, size: 12)
+            Spacer(minLength: 6)
+            if let badge = state.ballBadge {
                 LiveScoreBadgeView(badge: badge)
-            } else if let startedAt {
-                Text(startedAt, style: .timer)
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundColor(LiveScoreColors.textSecondary)
-                    .multilineTextAlignment(.trailing)
-                    .frame(width: 64, alignment: .trailing)
             }
         }
-        .frame(height: 18)
+        .frame(height: 20)
     }
 
     private func row(_ player: Int) -> some View {
-        HStack(spacing: 8) {
-            LiveScoreServerDot(visible: state.isServing(player), size: 8)
-            Text(state.name(player))
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
-                .foregroundColor(LiveScoreColors.player(player))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-            Spacer(minLength: 8)
-            LiveScorePips(filled: state.pips(player), total: state.gamesToWin, color: LiveScoreColors.player(player), size: 9)
-            Text("\(state.shownScore(player))")
-                .font(.system(size: 44, weight: .bold, design: .rounded))
+        HStack(spacing: 10) {
+            LiveScoreAvatar(state: state, player: player, photo: photos.photo(player), size: 32, lineWidth: 2)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(state.name(player) + (state.isFinished && state.winner == player ? " 🏆" : ""))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .foregroundColor(LiveScoreColors.playerText(player))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                LiveScoreServeLine(state: state, player: player, size: 11)
+            }
+            Spacer(minLength: 6)
+            LiveScoreGamesBox(games: state.games(player), size: 15)
+            Text("\(state.points(player))")
+                .font(.system(size: 34, weight: .bold, design: .rounded))
                 .monospacedDigit()
                 .foregroundColor(LiveScoreColors.textPrimary)
                 .lineLimit(1)
-                .frame(minWidth: 58, alignment: .trailing)
+                .frame(width: 46, alignment: .trailing)
         }
         .frame(height: 42)
     }
 
     private var footer: some View {
-        HStack {
-            Text(state.footerLeading)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-            Spacer(minLength: 8)
-            Text(state.footerTrailing)
-                .lineLimit(1)
+        HStack(spacing: 6) {
+            LiveScoreChips(chips: state.gameChips, size: 12)
+            Spacer(minLength: 6)
+            if let startedAt, !state.isFinished {
+                Text(startedAt, style: .timer)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(LiveScoreColors.textSecondary)
+                    .multilineTextAlignment(.trailing)
+                    .frame(width: 56, alignment: .trailing)
+            }
         }
-        .font(.system(size: 12, weight: .medium, design: .rounded))
-        .monospacedDigit()
-        .foregroundColor(LiveScoreColors.textSecondary)
-        .frame(height: 16)
+        .frame(height: 20)
     }
 }
 
-/// Name and pips of one player in the expanded Dynamic Island
+/// The orange status line in capitals ("GAME 3 · BEST OF 5")
+struct LiveScoreStatusText: View {
+    let text: String
+    let size: CGFloat
+
+    var body: some View {
+        Text(text.uppercased())
+            .font(.system(size: size, weight: .semibold, design: .rounded))
+            .tracking(0.8)
+            .foregroundColor(LiveScoreColors.accent)
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+    }
+}
+
+/// The viewer page's badge: a red ● LIVE pill, or a grey outlined one at the end
+struct LiveScorePill: View {
+    let text: String
+    let live: Bool
+
+    var body: some View {
+        HStack(spacing: 4) {
+            if live {
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 5, height: 5)
+            }
+            Text(text)
+                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .tracking(1.0)
+                .foregroundColor(live ? Color.white : LiveScoreColors.textSecondary)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .background(live ? LiveScoreColors.live : Color.clear)
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(live ? LiveScoreColors.live : LiveScoreColors.border, lineWidth: 1))
+        .fixedSize()
+    }
+}
+
+/// A round photo with a ring in the player's colour, or the first letter
+struct LiveScoreAvatar: View {
+    let state: LiveScoreAttributes.ContentState
+    let player: Int
+    let photo: UIImage?
+    let size: CGFloat
+    let lineWidth: CGFloat
+
+    var body: some View {
+        ZStack {
+            if let photo {
+                Image(uiImage: photo)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Text(state.initial(player))
+                    .font(.system(size: size * 0.45, weight: .bold, design: .rounded))
+                    .foregroundColor(LiveScoreColors.playerText(player))
+            }
+        }
+        .frame(width: size, height: size)
+        .background(LiveScoreColors.card)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(LiveScoreColors.ring(player), lineWidth: lineWidth))
+        .accessibilityHidden(true)
+    }
+}
+
+/// "● serveert rechts" under the server's name; keeps its height for the other
+struct LiveScoreServeLine: View {
+    let state: LiveScoreAttributes.ContentState
+    let player: Int
+    let size: CGFloat
+
+    var body: some View {
+        let line = state.serveLine(player)
+        HStack(spacing: 4) {
+            Circle()
+                .fill(LiveScoreColors.playerText(player))
+                .frame(width: size * 0.6, height: size * 0.6)
+            Text(line ?? "serveert")
+                .font(.system(size: size, weight: .regular, design: .rounded))
+                .foregroundColor(LiveScoreColors.textSecondary)
+                .lineLimit(1)
+        }
+        .opacity(line == nil ? 0 : 1)
+        .accessibilityHidden(line == nil)
+    }
+}
+
+/// The games won as a number in a small bordered box
+struct LiveScoreGamesBox: View {
+    let games: Int
+    let size: CGFloat
+
+    var body: some View {
+        Text("\(games)")
+            .font(.system(size: size, weight: .bold, design: .rounded))
+            .monospacedDigit()
+            .foregroundColor(LiveScoreColors.textSecondary)
+            .frame(minWidth: size * 1.1)
+            .padding(.horizontal, size * 0.35)
+            .padding(.vertical, size * 0.18)
+            .overlay(RoundedRectangle(cornerRadius: size * 0.5).stroke(LiveScoreColors.line, lineWidth: 1))
+            .accessibilityLabel("\(games) games")
+    }
+}
+
+/// The finished games, each in the colour of whoever won it
+struct LiveScoreChips: View {
+    let chips: [LiveScoreGameChip]
+    let size: CGFloat
+
+    var body: some View {
+        HStack(spacing: size * 0.45) {
+            ForEach(chips) { chip in
+                Text(chip.text)
+                    .font(.system(size: size, weight: .medium, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(textColor(chip.winner))
+                    .lineLimit(1)
+                    .fixedSize()
+                    .padding(.horizontal, size * 0.6)
+                    .padding(.vertical, size * 0.15)
+                    .overlay(Capsule().stroke(lineColor(chip.winner), lineWidth: 1))
+            }
+        }
+    }
+
+    private func textColor(_ winner: Int) -> Color {
+        winner == 1 || winner == 2 ? LiveScoreColors.playerText(winner) : LiveScoreColors.textSecondary
+    }
+
+    private func lineColor(_ winner: Int) -> Color {
+        switch winner {
+        case 1: return LiveScoreColors.line
+        case 2: return LiveScoreColors.player2Line
+        default: return LiveScoreColors.border
+        }
+    }
+}
+
+/// Avatar, name and games of one player in the expanded Dynamic Island
 struct LiveScoreIslandPlayer: View {
     let state: LiveScoreAttributes.ContentState
     let player: Int
+    let photo: UIImage?
 
     var body: some View {
-        let alignment: HorizontalAlignment = player == 1 ? .leading : .trailing
-        VStack(alignment: alignment, spacing: 6) {
-            HStack(spacing: 5) {
-                if player == 1 { LiveScoreServerDot(visible: state.isServing(1), size: 7) }
-                Text(state.name(player))
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundColor(LiveScoreColors.player(player))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                if player == 2 { LiveScoreServerDot(visible: state.isServing(2), size: 7) }
+        let leading = player == 1
+        VStack(alignment: leading ? .leading : .trailing, spacing: 4) {
+            HStack(spacing: 6) {
+                if leading { LiveScoreAvatar(state: state, player: player, photo: photo, size: 28, lineWidth: 2) }
+                VStack(alignment: leading ? .leading : .trailing, spacing: 0) {
+                    Text(state.name(player))
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(LiveScoreColors.playerText(player))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Circle()
+                        .fill(LiveScoreColors.playerText(player))
+                        .frame(width: 6, height: 6)
+                        .opacity(state.isServing(player) ? 1 : 0)
+                        .padding(.vertical, 2)
+                        .accessibilityLabel("Opslag")
+                        .accessibilityHidden(!state.isServing(player))
+                }
+                if !leading { LiveScoreAvatar(state: state, player: player, photo: photo, size: 28, lineWidth: 2) }
             }
-            LiveScorePips(filled: state.pips(player), total: state.gamesToWin, color: LiveScoreColors.player(player), size: 8)
+            LiveScoreGamesBox(games: state.games(player), size: 13)
         }
-        .frame(maxWidth: .infinity, alignment: player == 1 ? .leading : .trailing)
+        .frame(maxWidth: .infinity, alignment: leading ? .leading : .trailing)
         .padding(.horizontal, 4)
-        .padding(.top, 6)
-    }
-}
-
-/// The orange dot of the server, with a soft glow; keeps its place when hidden
-struct LiveScoreServerDot: View {
-    let visible: Bool
-    let size: CGFloat
-
-    var body: some View {
-        Circle()
-            .fill(LiveScoreColors.serverDot)
-            .frame(width: size, height: size)
-            .shadow(color: LiveScoreColors.serverDot.opacity(0.8), radius: size * 0.6)
-            .opacity(visible ? 1 : 0)
-            .accessibilityHidden(!visible)
-            .accessibilityLabel("Opslag")
-    }
-}
-
-/// One square per game needed to win, filled for the games won
-struct LiveScorePips: View {
-    let filled: Int
-    let total: Int
-    let color: Color
-    let size: CGFloat
-
-    var body: some View {
-        HStack(spacing: 3) {
-            ForEach(0..<total, id: \.self) { index in
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(index < filled ? color : color.opacity(0.18))
-                    .overlay(RoundedRectangle(cornerRadius: 2).stroke(color.opacity(index < filled ? 0 : 0.5), lineWidth: 1))
-                    .frame(width: size, height: size)
-            }
-        }
-        .accessibilityLabel("\(filled) games")
+        .padding(.top, 4)
     }
 }
 
@@ -246,33 +392,14 @@ struct LiveScoreBadgeView: View {
 
     var body: some View {
         Text(badge.title)
-            .font(.system(size: 11, weight: .bold, design: .rounded))
+            .font(.system(size: 10, weight: .bold, design: .rounded))
             .tracking(0.8)
             .foregroundColor(color)
             .padding(.horizontal, 7)
-            .padding(.vertical, 2)
+            .padding(.vertical, 3)
             .background(color.opacity(0.16))
             .clipShape(Capsule())
-    }
-}
-
-/// The app's mark, small: the magnifier ring around a squash ball with two
-/// yellow dots, in orange
-struct LiveScoreGlyph: View {
-    var body: some View {
-        GeometryReader { proxy in
-            let side = min(proxy.size.width, proxy.size.height)
-            ZStack {
-                Circle()
-                    .stroke(LiveScoreColors.accent, lineWidth: side * 0.14)
-                    .padding(side * 0.07)
-                HStack(spacing: side * 0.12) {
-                    Circle().fill(LiveScoreColors.accent).frame(width: side * 0.16, height: side * 0.16)
-                    Circle().fill(LiveScoreColors.accent).frame(width: side * 0.16, height: side * 0.16)
-                }
-            }
-            .frame(width: side, height: side)
-        }
-        .accessibilityHidden(true)
+            .overlay(Capsule().stroke(color.opacity(0.5), lineWidth: 1))
+            .fixedSize()
     }
 }

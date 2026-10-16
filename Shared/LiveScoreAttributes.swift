@@ -1,5 +1,8 @@
 import ActivityKit
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#endif
 
 // Live score op het vergrendelscherm: the Live Activity of a followed match
 // (updated by the live server through APNs) or of the match this phone is
@@ -87,17 +90,6 @@ extension LiveScoreAttributes.ContentState {
         return gamesPlayed + 1
     }
 
-    /// The last finished game, during the break
-    var lastGame: [Int]? { games.last }
-
-    /// The big number per player: the games won once the match is over, the
-    /// result of the last game during the break, otherwise the rally score
-    func shownScore(_ player: Int) -> Int {
-        if isFinished { return value(gamesWon, player) }
-        if isBetween, score == [0, 0], let last = lastGame { return value(last, player) }
-        return value(score, player)
-    }
-
     /// The player who wins the game with the next rally (PAR-11, win by 2)
     var gameBallPlayer: Int? {
         guard isPlaying else { return nil }
@@ -127,53 +119,148 @@ extension LiveScoreAttributes.ContentState {
         (isPlaying || isWarmup) && server == player
     }
 
-    /// "Live · Game 3", "Live · Warming-up", "Uitslag · Jan wint"
-    var headerTitle: String {
+    /// Minimal Dynamic Island: "9·7" (games won during the break and at the end)
+    var minimalText: String { "\(islandScore(1))·\(islandScore(2))" }
+
+    // MARK: - The website ticker's look (live.html)
+
+    /// The orange line above the rows, as on the viewer page (shown in
+    /// capitals): "Game 3 · best of 5", "Inspelen", "Pauze", "Jan wint 3-1"
+    var statusLine: String {
         if isFinished {
-            if let winner, winner == 1 || winner == 2 { return "Uitslag · \(name(winner)) wint" }
-            return "Uitslag"
+            let high = max(value(gamesWon, 1), value(gamesWon, 2))
+            let low = min(value(gamesWon, 1), value(gamesWon, 2))
+            if let winner, winner == 1 || winner == 2 { return "\(name(winner)) wint \(high)-\(low)" }
+            return "Afgelopen"
         }
-        if isWarmup { return "Live · Warming-up" }
-        return "Live · Game \(gameNumber)"
+        if isBetween { return "Pauze" }
+        if isWarmup { return "Inspelen" }
+        return "Game \(gameNumber) · best of \(bestOf)"
     }
 
-    /// "11–8 · 6–11"
-    static func gameList(_ games: [[Int]]) -> String {
-        var parts: [String] = []
-        for game in games where game.count == 2 {
-            parts.append("\(game[0])–\(game[1])")
+    /// GAMEBAL or MATCHBAL next to the status line; the pause and the result
+    /// are in the status line itself
+    var ballBadge: LiveScoreBadge? {
+        guard let badge, badge == .gameBall || badge == .matchBall else { return nil }
+        return badge
+    }
+
+    /// The points per player, as on the viewer page: the rally score (at the
+    /// end the score of the last game)
+    func points(_ player: Int) -> Int { value(score, player) }
+
+    /// Games won per player (head start included), in the bordered box
+    func games(_ player: Int) -> Int { value(gamesWon, player) }
+
+    /// "serveert rechts" under the server's name, while rallies are played
+    func serveLine(_ player: Int) -> String? {
+        guard isServing(player) else { return nil }
+        return side == "L" ? "serveert links" : "serveert rechts"
+    }
+
+    /// The compact Dynamic Island: the rally score while playing, the games
+    /// won during the break and at the end
+    func islandScore(_ player: Int) -> Int {
+        isPlaying || isWarmup ? value(score, player) : value(gamesWon, player)
+    }
+
+    /// The first letter of the name, in the circle when there is no photo
+    func initial(_ player: Int) -> String {
+        let trimmed = name(player).trimmingCharacters(in: .whitespaces)
+        guard let first = trimmed.first else { return "?" }
+        return String(first).uppercased()
+    }
+
+    /// The finished games for the chips: "11-7" and who won it (0: nobody)
+    var gameChips: [LiveScoreGameChip] {
+        var chips: [LiveScoreGameChip] = []
+        for (index, game) in games.enumerated() where game.count == 2 {
+            let winner = game[0] > game[1] ? 1 : (game[1] > game[0] ? 2 : 0)
+            chips.append(LiveScoreGameChip(id: index, text: "\(game[0])-\(game[1])", winner: winner))
         }
-        return parts.joined(separator: " · ")
+        return chips
+    }
+}
+
+/// One finished game under the rows, coloured by its winner
+struct LiveScoreGameChip: Hashable, Identifiable {
+    let id: Int
+    let text: String
+    let winner: Int
+}
+
+/// The players' photos for the Live Activity. Pushes cannot carry images, so
+/// the app stores small thumbnails in the App Group container, named by the
+/// activity's match id, and the widget extension reads them from there.
+enum LiveScorePhotoStore {
+    static let appGroup = "group.com.squashanalyzer.app"
+    /// Pixels per side of a stored thumbnail (32 pt avatars at 3x)
+    static let side: CGFloat = 96
+
+    static var directory: URL? {
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup)?
+            .appendingPathComponent("live-photos", isDirectory: true)
     }
 
-    /// Left in the footer
-    var footerLeading: String {
-        if isFinished { return LiveScoreAttributes.ContentState.gameList(games) }
-        if isBetween { return "Game \(gamesPlayed + 1) begint zo" }
-        if games.isEmpty { return lastPoint ?? "" }
-        return "Games " + LiveScoreAttributes.ContentState.gameList(games)
+    /// live-photos/<matchId>-<player>.jpg
+    static func url(matchId: String, player: Int) -> URL? {
+        let safe = String(matchId.filter { character in character.isLetter || character.isNumber || character == "-" })
+        guard !safe.isEmpty else { return nil }
+        return directory?.appendingPathComponent("\(safe)-\(player).jpg")
     }
 
-    /// Right in the footer: the box the server serves from
-    var footerTrailing: String {
-        guard isPlaying || isWarmup else { return "" }
-        return serviceText
+    #if canImport(UIKit)
+    static func image(matchId: String, player: Int) -> UIImage? {
+        guard let url = url(matchId: matchId, player: player) else { return nil }
+        return UIImage(contentsOfFile: url.path)
     }
 
-    var serviceText: String { side == "L" ? "Opslag links" : "Opslag rechts" }
+    /// Stores a photo as a small square JPEG; no (readable) photo removes it
+    @discardableResult
+    static func store(_ data: Data?, matchId: String, player: Int) -> Bool {
+        guard let url = url(matchId: matchId, player: player), let directory else { return false }
+        guard let data, let image = UIImage(data: data), image.size.width > 0, image.size.height > 0 else {
+            try? FileManager.default.removeItem(at: url)
+            return false
+        }
+        let crop = min(image.size.width, image.size.height)
+        let size = min(side, crop)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = true
+        let square = UIGraphicsImageRenderer(size: CGSize(width: size, height: size), format: format).image { _ in
+            // Centred square crop, scaled to `size`
+            let scale = size / crop
+            let width = image.size.width * scale
+            let height = image.size.height * scale
+            image.draw(in: CGRect(x: (size - width) / 2, y: (size - height) / 2, width: width, height: height))
+        }
+        guard let jpeg = square.jpegData(compressionQuality: 0.8) else { return false }
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            try jpeg.write(to: url, options: .atomic)
+            return true
+        } catch {
+            return false
+        }
+    }
+    #endif
 
-    /// The expanded Dynamic Island's bottom line: "Game 3 · 11–8 · 6–11"
-    var islandLine: String {
-        if isFinished { return LiveScoreAttributes.ContentState.gameList(games) }
-        if isBetween { return "Pauze · game \(gamesPlayed + 1) begint zo" }
-        let list = LiveScoreAttributes.ContentState.gameList(games)
-        let head = isWarmup ? "Warming-up" : "Game \(gameNumber)"
-        return list.isEmpty ? head : head + " · " + list
+    static func remove(matchId: String) {
+        for player in [1, 2] {
+            if let url = url(matchId: matchId, player: player) { try? FileManager.default.removeItem(at: url) }
+        }
     }
 
-    /// Minimal Dynamic Island: "9·7"
-    var minimalText: String { "\(shownScore(1))·\(shownScore(2))" }
-
-    /// Filled pips per player: the games won (head start included)
-    func pips(_ player: Int) -> Int { min(value(gamesWon, player), gamesToWin) }
+    /// Removes the photos of every match not in `keep` (the activities still shown)
+    static func removeAll(except keep: Set<String>) {
+        guard let directory,
+              let files = try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil) else { return }
+        for file in files {
+            let name = file.deletingPathExtension().lastPathComponent
+            // "<matchId>-<player>": the match id is everything before the last dash
+            guard let dash = name.lastIndex(of: "-") else { continue }
+            if !keep.contains(String(name[..<dash])) { try? FileManager.default.removeItem(at: file) }
+        }
+    }
 }

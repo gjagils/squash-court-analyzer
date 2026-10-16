@@ -555,7 +555,8 @@ public struct CoachScoringView: View {
     /// Save (the session's store) and send the new state to live viewers
     private func matchChanged() {
         onMatchChanged(match)
-        LiveShareSync.send(matchId: match.id, snapshot: match.liveSnapshot())
+        LiveShareSync.send(matchId: match.id, snapshot: match.liveSnapshot(),
+                           photos: { [photo(Player.player1), photo(Player.player2)] })
     }
 
     private var cancelButton: some View {

@@ -129,9 +129,16 @@ public enum LiveShareSync {
     @MainActor public static var localActivity: ((UUID, LiveSnapshot, Date?) -> Void)? = nil
     /// The scoring screen closed: take the match off the lock screen
     @MainActor public static var localActivityEnded: ((UUID) -> Void)? = nil
+    /// Both players' photos (as stored) for the lock screen's avatars; the
+    /// platform keeps them once per match (iOS; nil on Android for now)
+    @MainActor public static var localActivityPhotos: ((UUID, [Data?]) -> Void)? = nil
 
+    /// `photos` is only read when the platform shows the own match on the lock screen
     @MainActor
-    public static func send(matchId: UUID, snapshot: LiveSnapshot, startedAt: Date? = nil) {
+    public static func send(matchId: UUID, snapshot: LiveSnapshot, startedAt: Date? = nil, photos: (() -> [Data?])? = nil) {
+        if let photos, let storePhotos = localActivityPhotos {
+            storePhotos(matchId, photos())
+        }
         localActivity?(matchId, snapshot, startedAt)
         // A match played for a partij of a live team match also goes to the team page
         TeamLive.shared.forward(matchId: matchId, snapshot: snapshot)

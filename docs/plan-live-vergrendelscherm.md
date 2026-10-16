@@ -14,7 +14,9 @@ het beginscherm) en krijgt de stand op het vergrendelscherm. Na elke rally
 stuurt de live-server een push, dus de app hoeft niet open te staan.
 
 - **iPhone**: Live Activity op het vergrendelscherm en in het Dynamic Island
-  (compact, minimaal, uitgeklapt). Badges GAMEBAL, MATCHBAL, PAUZE, AFGELOPEN.
+  (compact, minimaal, uitgeklapt), in de stijl van de live-ticker met
+  spelersfoto's (zie hieronder). Badges GAMEBAL en MATCHBAL; pauze en uitslag
+  staan in de statusregel.
   De uitslag blijft na afloop staan (tot 4 uur, iOS-grens).
 - **Android 16+**: Live Update: chip met de stand in de statusbalk, uitgelichte
   melding met een balk per game in de kleur van de winnaar, knop Stoppen.
@@ -25,6 +27,40 @@ stuurt de live-server een push, dus de app hoeft niet open te staan.
   vergrendelscherm", standaard aan. Op Android is dit nog niet gebouwd.
 
 Ontwerp: het canvas "Live score op vergrendelscherm" (claude.ai-artifact).
+
+### iPhone: zelfde uiterlijk als de live-ticker (16 oktober 2026)
+
+Op verzoek van Gerd-Jan lijkt de Live Activity nu op de ticker van de kijkpagina
+(`server/live-worker/public/live.html`), branch `feature/live-activity-ticker-ios`:
+
+- Per speler een ronde foto (of de eerste letter in een cirkel) met een rand in
+  de spelerskleur (speler 1 oranje, speler 2 staalblauw), de naam in die kleur,
+  daaronder "serveert rechts/links" met een stipje (alleen bij de serveerder),
+  de gewonnen games als getal in een omrand vakje en de punten groot.
+- Erboven een rode LIVE-pil (AFGELOPEN, grijs, na afloop) en de statusregel in
+  oranje hoofdletters ("GAME 3 · BEST OF 5", "PAUZE", "ANNA WINT 3-1");
+  GAMEBAL/MATCHBAL als gouden badge rechts. Eronder de gespeelde games als
+  chips in de kleur van de winnaar ("11-7" oranje, "8-11" blauw), bij de eigen
+  wedstrijd met de wedstrijdtijd rechts.
+- De punten zijn, net als op de website, de stand van de lopende game (in de
+  pauze dus 0-0, na afloop de laatste game). Compact Dynamic Island: kleine
+  foto's met de punten, in de pauze en na afloop de games.
+- Hoogte: de kaart is ongeveer 153 pt (iOS knipt rond 160 pt af), getest met
+  vier gamechips.
+
+**Foto's via een App Group.** Een push kan geen afbeelding bevatten. Daarom zet
+de app de foto's klein (96 px, JPEG) in de App Group `group.com.squashanalyzer.app`
+(`live-photos/<matchId>-1.jpg` en `-2.jpg`, `LiveScorePhotoStore` in
+`Shared/LiveScoreAttributes.swift`); de extensie leest ze daar. Bij het volgen
+haalt de app `GET /api/live/:id/photo/1` en `/2` op (maximaal 3 seconden
+wachten; anders eerst letters en de foto's bij de volgende rally). Bij de eigen
+wedstrijd geven het scheidsrechters- en coachscherm de opgeslagen foto's mee
+via `LiveShareSync.send(…, photos:)` (hook `localActivityPhotos`, op Android
+nil). Opruimen: bij Stoppen, bij wegvegen van een lopende wedstrijd, bij het
+sluiten van de eigen wedstrijd en bij elke start van de app of een nieuwe
+volg-actie (alles zonder Live Activity gaat weg). Beide targets hebben de
+entitlement `com.apple.security.application-groups`
+(`SquashLiveActivity/SquashLiveActivity.entitlements` is nieuw).
 
 ## Hoe het werkt
 
@@ -70,6 +106,17 @@ de huidige API blijft dus werken voor de builds van testers.
 
 ## Nog open
 
+- **App Group registreren (16 oktober)**: een ondertekende build voor een
+  toestel lukt pas als de App Group `group.com.squashanalyzer.app` bij Apple
+  bestaat en aan `com.squashanalyzer.app` en `com.squashanalyzer.app.LiveActivity`
+  hangt. Vanaf de command line lukte dat niet: Xcode heeft geen account
+  ("No Accounts") en met de API-sleutel AN4XF9Y8MM gaf Xcode "Authentication
+  failed" voor ontwikkelprofielen. Gerd-Jan: eenmaal in Xcode inloggen en een
+  Debug-build voor de iPhone maken (Automatic signing maakt de groep aan), of
+  de groep in het Developer-portaal aanmaken. De simulator werkt al.
+- **Foto's bij de eigen wedstrijd** zijn gebouwd maar niet in de simulator
+  doorlopen (daarvoor is een wedstrijd met spelersfoto's nodig); het volgen met
+  foto's wel.
 - **Testen op echte toestellen**: iPhone 16 Pro en de A13 (Android 14, dus de
   doorlopende melding). De oudere Android-melding is alleen met Robolectric
   getest.

@@ -25,6 +25,8 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
     private var observers: [String: [Task<Void, Never>]] = [:]
     /// Own match: the last state, so a closing screen can tell a finished match
     private var ownFinished: Set<String> = []
+    /// Own matches whose photos are in the App Group already
+    private var ownPhotosStored: Set<String> = []
 
     private init() {}
 
@@ -39,7 +41,11 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
         LiveShareSync.localActivityEnded = { matchId in
             ActivityKitLiveFollowPresenter.shared.endOwn(matchId: matchId)
         }
+        LiveShareSync.localActivityPhotos = { matchId, photos in
+            ActivityKitLiveFollowPresenter.shared.storeOwnPhotos(matchId: matchId, photos: photos)
+        }
         restoreRunning()
+        removeUnusedPhotos()
     }
 
     // MARK: - Followed matches
@@ -52,14 +58,26 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
             await running.update(content)
             return
         }
+        // The players' photos go to the App Group before the activity appears;
+        // a slow download shows the letters first and the photos with the next rally
+        removeUnusedPhotos()
+        let photos = Task { await Self.downloadPhotos(target) }
+        let downloaded = await Self.finished(photos, within: 3)
         let attributes = LiveScoreAttributes(matchId: target.id, server: target.server, isOwnMatch: false, startedAt: nil)
         let activity: Activity<LiveScoreAttributes>
         do {
             activity = try Activity.request(attributes: attributes, content: content, pushType: .token)
         } catch {
+            LiveScorePhotoStore.remove(matchId: target.id)
             throw LiveFollowError.notAllowed
         }
         observe(activity, target: target)
+        if !downloaded {
+            Task {
+                _ = await photos.value
+                await activity.update(activity.content)
+            }
+        }
     }
 
     func stop(_ target: LiveFollowTarget) async {
@@ -67,6 +85,55 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
             await activity.end(nil, dismissalPolicy: .immediate)
             cancelObservers(activity.id)
         }
+        LiveScorePhotoStore.remove(matchId: target.id)
+    }
+
+    /// GET /api/live/:id/photo/1 and 2 (404: no photo), stored as small
+    /// thumbnails for the widget. Photos are sent once at the start of a
+    /// match, so they are read once when following starts.
+    nonisolated static func downloadPhotos(_ target: LiveFollowTarget) async -> Bool {
+        for player in [1, 2] {
+            guard let url = URL(string: target.server + "/api/live/" + target.id + "/photo/\(player)") else { continue }
+            var request = URLRequest(url: url, timeoutInterval: 10)
+            request.setValue("image/jpeg", forHTTPHeaderField: "Accept")
+            let data: Data?
+            if let (body, response) = try? await URLSession.shared.data(for: request),
+               (response as? HTTPURLResponse)?.statusCode == 200 {
+                data = body
+            } else {
+                data = nil
+            }
+            LiveScorePhotoStore.store(data, matchId: target.id, player: player)
+        }
+        return true
+    }
+
+    /// Whether `task` finished within `seconds` (it runs on either way)
+    static func finished(_ task: Task<Bool, Never>, within seconds: Double) async -> Bool {
+        final class Once { var done = false }
+        let once = Once()
+        return await withCheckedContinuation { continuation in
+            Task { @MainActor in
+                let result = await task.value
+                guard !once.done else { return }
+                once.done = true
+                continuation.resume(returning: result)
+            }
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                guard !once.done else { return }
+                once.done = true
+                continuation.resume(returning: false)
+            }
+        }
+    }
+
+    /// Photos of matches no longer on the lock screen
+    private func removeUnusedPhotos() {
+        var keep = Set<String>()
+        for activity in Activity<LiveScoreAttributes>.activities { keep.insert(activity.attributes.matchId) }
+        keep.formUnion(ownPhotosStored)
+        LiveScorePhotoStore.removeAll(except: keep)
     }
 
     private func followed(_ target: LiveFollowTarget) -> Activity<LiveScoreAttributes>? {
@@ -93,6 +160,8 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
                     // `unfollow`: that ends the activity at once, and an ended
                     // match should keep its result on the lock screen
                     if LiveFollow.shared.isFollowing(target) { await LiveFollow.shared.ended(target) }
+                    // An ended match keeps its result (with photos) on the lock screen; once it is gone the photos go too
+                    if state == .dismissed { LiveScorePhotoStore.remove(matchId: target.id) }
                     ActivityKitLiveFollowPresenter.shared.cancelObservers(activity.id)
                     return
                 }
@@ -158,6 +227,20 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
         _ = try? Activity.request(attributes: attributes, content: content, pushType: nil)
     }
 
+    /// The players' photos of the own match (as stored in the app), once per
+    /// match, before its first activity update
+    func storeOwnPhotos(matchId: UUID, photos: [Data?]) {
+        let id = matchId.uuidString
+        guard !ownPhotosStored.contains(id) else { return }
+        let enabled = UserDefaults.standard.object(forKey: LiveFollow.ownMatchKey) as? Bool ?? true
+        guard enabled else { return }
+        ownPhotosStored.insert(id)
+        removeUnusedPhotos()
+        for player in [1, 2] {
+            LiveScorePhotoStore.store(player <= photos.count ? photos[player - 1] : nil, matchId: id, player: player)
+        }
+    }
+
     /// The scoring screen closed: a match under way leaves the lock screen
     /// (a finished one stays for its half hour)
     func endOwn(matchId: UUID) {
@@ -166,6 +249,8 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
         for activity in Activity<LiveScoreAttributes>.activities where activity.attributes.isOwnMatch && activity.attributes.matchId == id {
             Task { await activity.end(nil, dismissalPolicy: .immediate) }
         }
+        ownPhotosStored.remove(id)
+        LiveScorePhotoStore.remove(matchId: id)
     }
 
     // MARK: - Helpers

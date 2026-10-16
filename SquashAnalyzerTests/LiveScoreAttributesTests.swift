@@ -1,9 +1,10 @@
 import XCTest
+import UIKit
 @testable import SquashAnalyzer
 import SquashAnalyzerCore
 
 /// Live score op het vergrendelscherm: what the Live Activity shows, worked
-/// out from the server's snapshot JSON
+/// out from the server's snapshot JSON (the look of the viewer page's ticker)
 final class LiveScoreAttributesTests: XCTestCase {
     private typealias State = LiveScoreAttributes.ContentState
 
@@ -22,9 +23,9 @@ final class LiveScoreAttributesTests: XCTestCase {
         XCTAssertEqual(decoded.server, 2)
         XCTAssertNil(decoded.winner)
         XCTAssertEqual(decoded.gameNumber, 2)
-        XCTAssertEqual(decoded.headerTitle, "Live · Game 2")
-        XCTAssertEqual(decoded.footerLeading, "Games 11–8")
-        XCTAssertEqual(decoded.footerTrailing, "Opslag links")
+        XCTAssertEqual(decoded.statusLine, "Game 2 · best of 5")
+        XCTAssertNil(decoded.serveLine(1))
+        XCTAssertEqual(decoded.serveLine(2), "serveert links")
     }
 
     func testTheContentStateMatchesTheSnapshotFieldByField() throws {
@@ -39,6 +40,7 @@ final class LiveScoreAttributesTests: XCTestCase {
     func testGameBallAndMatchBall() {
         XCTAssertNil(state(score: [9, 7], gamesWon: [0, 0]).badge)
         XCTAssertEqual(state(score: [10, 7], gamesWon: [0, 0]).badge, .gameBall)
+        XCTAssertEqual(state(score: [10, 7], gamesWon: [0, 0]).ballBadge, .gameBall)
         XCTAssertEqual(state(score: [10, 7], gamesWon: [0, 0]).gameBallPlayer, 1)
         // 10–10: nobody can win with the next rally
         XCTAssertNil(state(score: [10, 10], gamesWon: [1, 1]).badge)
@@ -49,48 +51,83 @@ final class LiveScoreAttributesTests: XCTestCase {
         XCTAssertEqual(state(score: [9, 10], gamesWon: [2, 1]).badge, .gameBall)
     }
 
-    func testBreakShowsTheLastGameAndPause() {
+    func testBreakShowsPauseAndNoServer() {
         let between = state(games: [[11, 8], [6, 11]], score: [0, 0], gamesWon: [1, 1], status: "between")
         XCTAssertEqual(between.badge, .pause)
-        XCTAssertEqual(between.shownScore(1), 6)
-        XCTAssertEqual(between.shownScore(2), 11)
-        XCTAssertEqual(between.gameNumber, 2)
-        XCTAssertEqual(between.footerLeading, "Game 3 begint zo")
-        XCTAssertEqual(between.footerTrailing, "")
+        // The pause is in the status line, not as a badge next to it
+        XCTAssertNil(between.ballBadge)
+        XCTAssertEqual(between.statusLine, "Pauze")
+        XCTAssertEqual(between.points(1), 0)
+        XCTAssertEqual(between.games(2), 1)
+        XCTAssertEqual(between.islandScore(1), 1)
+        XCTAssertEqual(between.minimalText, "1·1")
         XCTAssertFalse(between.isServing(1))
+        XCTAssertNil(between.serveLine(1))
     }
 
-    func testFinishedShowsGamesWonAndTheWinner() {
+    func testFinishedShowsTheWinnerAndTheChips() {
         let done = state(games: [[11, 8], [6, 11], [11, 9], [11, 5]], score: [11, 5], gamesWon: [3, 1],
                          status: "finished", winner: 1)
         XCTAssertEqual(done.badge, .finished)
-        XCTAssertEqual(done.headerTitle, "Uitslag · Jan wint")
-        XCTAssertEqual(done.shownScore(1), 3)
-        XCTAssertEqual(done.shownScore(2), 1)
-        XCTAssertEqual(done.footerLeading, "11–8 · 6–11 · 11–9 · 11–5")
+        XCTAssertNil(done.ballBadge)
+        XCTAssertEqual(done.statusLine, "Jan wint 3-1")
+        XCTAssertEqual(done.points(1), 11)
+        XCTAssertEqual(done.games(1), 3)
         XCTAssertEqual(done.minimalText, "3·1")
-        XCTAssertEqual(done.pips(1), 3)
+        XCTAssertEqual(done.gameChips.map { chip in chip.text }, ["11-8", "6-11", "11-9", "11-5"])
+        XCTAssertEqual(done.gameChips.map { chip in chip.winner }, [1, 2, 1, 1])
+        let shutOut = state(games: [[8, 11], [9, 11]], score: [9, 11], gamesWon: [0, 2], status: "finished", winner: 2, bestOf: 3)
+        XCTAssertEqual(shutOut.statusLine, "Piet wint 2-0")
     }
 
     func testWarmupAndUnknownStatus() {
         let warmup = state(score: [0, 0], gamesWon: [0, 0], status: "warmup", side: "L")
-        XCTAssertEqual(warmup.headerTitle, "Live · Warming-up")
+        XCTAssertEqual(warmup.statusLine, "Inspelen")
         XCTAssertTrue(warmup.isServing(1))
-        XCTAssertEqual(warmup.islandLine, "Warming-up")
+        XCTAssertEqual(warmup.serveLine(1), "serveert links")
         // A status from a newer server reads as playing
         let unknown = state(score: [2, 1], gamesWon: [0, 0], status: "paused")
         XCTAssertTrue(unknown.isPlaying)
-        XCTAssertEqual(unknown.headerTitle, "Live · Game 1")
+        XCTAssertEqual(unknown.statusLine, "Game 1 · best of 5")
     }
 
-    func testIslandLineAndPipsWithHeadStart() {
+    func testScoresAndInitialsWithHeadStart() {
         let playing = state(games: [[11, 8], [6, 11]], score: [9, 7], gamesWon: [1, 1])
-        XCTAssertEqual(playing.islandLine, "Game 3 · 11–8 · 6–11")
         XCTAssertEqual(playing.minimalText, "9·7")
+        XCTAssertEqual(playing.islandScore(2), 7)
+        XCTAssertEqual(playing.serveLine(1), "serveert rechts")
+        XCTAssertEqual(playing.initial(1), "J")
         // A head start counts as games won without a game in the list
         let headStart = state(games: [], score: [4, 2], gamesWon: [1, 0], bestOf: 3)
         XCTAssertEqual(headStart.gameNumber, 2)
-        XCTAssertEqual(headStart.pips(1), 1)
-        XCTAssertEqual(headStart.gamesToWin, 2)
+        XCTAssertEqual(headStart.games(1), 1)
+        XCTAssertTrue(headStart.gameChips.isEmpty)
+        XCTAssertEqual(headStart.statusLine, "Game 2 · best of 3")
+        var nameless = headStart
+        nameless.p2 = "  "
+        XCTAssertEqual(nameless.initial(2), "?")
+    }
+
+    func testPhotoFilesAreNamedByMatchAndCleanedUp() throws {
+        guard LiveScorePhotoStore.directory != nil else { throw XCTSkip("No App Group container") }
+        let id = "test-" + String(UUID().uuidString.prefix(8))
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 300, height: 200))
+        let jpeg = renderer.jpegData(withCompressionQuality: 0.8) { context in
+            UIColor.orange.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 300, height: 200))
+        }
+        XCTAssertTrue(LiveScorePhotoStore.store(jpeg, matchId: id, player: 1))
+        XCTAssertFalse(LiveScorePhotoStore.store(nil, matchId: id, player: 2))
+        let image = try XCTUnwrap(LiveScorePhotoStore.image(matchId: id, player: 1))
+        // A small square for the widget
+        XCTAssertEqual(image.size.width * image.scale, 96)
+        XCTAssertEqual(image.size.height * image.scale, 96)
+        XCTAssertNil(LiveScorePhotoStore.image(matchId: id, player: 2))
+        XCTAssertEqual(LiveScorePhotoStore.url(matchId: id, player: 1)?.lastPathComponent, id + "-1.jpg")
+        // Kept while its activity is shown, removed afterwards
+        LiveScorePhotoStore.removeAll(except: [id])
+        XCTAssertNotNil(LiveScorePhotoStore.image(matchId: id, player: 1))
+        LiveScorePhotoStore.removeAll(except: [])
+        XCTAssertNil(LiveScorePhotoStore.image(matchId: id, player: 1))
     }
 }

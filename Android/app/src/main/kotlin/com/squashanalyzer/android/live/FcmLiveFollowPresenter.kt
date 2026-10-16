@@ -15,6 +15,7 @@ import squash.analyzer.core.LiveFollowError
 import squash.analyzer.core.LiveFollowPresenter
 import squash.analyzer.core.LiveFollowTarget
 import squash.analyzer.core.LiveSnapshot
+import squash.analyzer.core.TeamFollowStand
 
 /**
  * Android's half of "Live score op het vergrendelscherm" (Core's `LiveFollow`):
@@ -33,19 +34,28 @@ class FcmLiveFollowPresenter(private val context: Context) : LiveFollowPresenter
     /** Asks the user for POST_NOTIFICATIONS (Android 13+); set by MainActivity while it is there */
     var requestNotificationPermission: (suspend () -> Boolean)? = null
 
-    /** The names of the match started last, for "Je volgt Jan – Piet op je vergrendelscherm" */
-    var lastStarted: LiveScore? = null
-        private set
-
     override suspend fun start(target: LiveFollowTarget, snapshot: LiveSnapshot) {
+        val match = FollowedMatch.from(target)
+        val score = LiveScoreJson.from(snapshot)
+        begin(target, match, show = { notifier.show(match, score) }, fetchPhotos = { notifier.fetchPhotos(match) })
+    }
+
+    /** A team match (Competitie): the four partijen in one notification */
+    override suspend fun startTeam(target: LiveFollowTarget, stand: TeamFollowStand) {
+        val match = FollowedMatch.from(target)
+        val score = TeamScore.from(stand)
+        val slots = TeamScoreCard(score).slots
+        begin(target, match, show = { notifier.showTeam(match, score) }, fetchPhotos = { notifier.fetchTeamPhotos(match, slots) })
+    }
+
+    /** Permission, the first notification, the token to the server; then the photos */
+    private suspend fun begin(target: LiveFollowTarget, match: FollowedMatch, show: () -> Unit, fetchPhotos: () -> Unit) {
         if (!FirebaseConfig.isAvailable) throw LiveFollowError.pushUnavailable
         if (!notifier.canNotify()) {
             val asked = requestNotificationPermission?.invoke() ?: false
             if (!asked || !notifier.canNotify()) throw LiveFollowError.notAllowed
         }
-        val match = FollowedMatch.from(target)
-        val score = LiveScoreJson.from(snapshot)
-        notifier.show(match, score)
+        show()
         val token = FirebaseConfig.token()
         if (token == null) {
             notifier.cancel(match)
@@ -61,10 +71,9 @@ class FcmLiveFollowPresenter(private val context: Context) : LiveFollowPresenter
         }
         followed.add(match)
         followed.token = token
-        lastStarted = score
         // Photos of matches no longer followed go; this match's photos come once
         LivePhotos.deleteAllExcept(context, followed.all())
-        notifier.fetchPhotos(match)
+        fetchPhotos()
         // Core keeps the token for unfollow(); it is the same, so the server sees it twice
         scope.launch { LiveFollow.shared.tokenChanged(token, for_ = target) }
     }
@@ -73,6 +82,7 @@ class FcmLiveFollowPresenter(private val context: Context) : LiveFollowPresenter
         val match = FollowedMatch.from(target)
         followed.remove(match)
         notifier.cancel(match)
+        notifier.cancelAlert(match)
         LivePhotos.delete(context, match)
     }
 
@@ -94,12 +104,13 @@ class FcmLiveFollowPresenter(private val context: Context) : LiveFollowPresenter
             } else {
                 followed.remove(match)
                 LiveScoreNotifier(context).cancel(match)
+                LiveScoreNotifier(context).cancelAlert(match)
                 LivePhotos.delete(context, match)
             }
             // Core sends the DELETE only when it still knows the token
             val token = followed.token ?: return
             if (known) return
-            val url = URL(string = match.server + "/api/live/" + match.id + "/followers")
+            val url = URL(string = match.apiUrl + "/followers")
             val body = JSONObject().put("platform", "android").put("token", token).toString()
             val headers = Dictionary<String, String>()
             headers["Content-Type"] = "application/json"

@@ -113,10 +113,95 @@ object LivePhotos {
         listOf(false, false)
     }
 
-    /** The follow ended: the photos go with it */
+    /** The follow ended: the photos go with it (a team match's too) */
     fun delete(context: Context, match: FollowedMatch) {
-        for (player in 1..2) file(context, match, player).delete()
-        marker(context, match).delete()
+        dir(context).listFiles()?.forEach { file ->
+            if (file.name.startsWith(match.id + "-") || file.name.startsWith(match.id + ".")) file.delete()
+        }
+    }
+
+    // A team match (Competitie) has up to eight players: per partij (slot 1-4)
+    // a home (1) and an away (2) photo, `live-photos/<id>-<slot>-<side>.png`.
+    // GET /api/team/:id says which exist (`photos: {"1": [true, false], ...}`);
+    // each slot is asked once per follow (marker `<id>-s<slot>.checked`), when
+    // following starts or when a push first shows a partij in that slot.
+
+    private fun teamFile(context: Context, match: FollowedMatch, slot: Int, side: Int) =
+        File(dir(context), "${match.id}-$slot-$side.png")
+
+    private fun teamMarker(context: Context, match: FollowedMatch, slot: Int) = File(dir(context), "${match.id}-s$slot.checked")
+
+    /** The round photo of the home (1) or away (2) player of partij `slot`, or null */
+    fun loadTeam(context: Context, match: FollowedMatch, slot: Int, side: Int): Bitmap? {
+        val file = teamFile(context, match, slot, side)
+        if (!file.exists()) return null
+        return try {
+            BitmapFactory.decodeFile(file.path)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /** The slots of `slots` whose photos were not asked for yet */
+    fun teamSlotsToFetch(context: Context, match: FollowedMatch, slots: Collection<Int>): List<Int> =
+        slots.filter { slot -> slot in 1..4 && !teamMarker(context, match, slot).exists() }
+
+    /**
+     * Downloads the photos of these partijen of a team match, once per slot.
+     * True when at least one photo arrived. No network: false without
+     * markers, so the next push tries again.
+     */
+    suspend fun fetchTeam(context: Context, match: FollowedMatch, slots: Collection<Int>): Boolean {
+        val wanted = teamSlotsToFetch(context, match, slots)
+        if (wanted.isEmpty() || !busy.add(match.id)) return false
+        try {
+            val base = match.server + "/api/team/" + match.id
+            val state = HttpRequest.send("GET", URL(string = base), headers(), null, TIMEOUT_MILLIS)
+            if (state.status != 200) return false
+            val flags = teamPhotoFlags(String(state.body.platformValue))
+            var any = false
+            for (slot in wanted) {
+                val sides = flags[slot] ?: listOf(false, false)
+                for (side in 1..2) {
+                    if (!sides[side - 1]) continue
+                    val photo = HttpRequest.send("GET", URL(string = "$base/photo/$slot/$side"), headers(), null, TIMEOUT_MILLIS)
+                    if (photo.status != 200) continue
+                    any = save(context, photo.body.platformValue, teamFile(context, match, slot, side)) || any
+                }
+                withContext(Dispatchers.IO) {
+                    dir(context).mkdirs()
+                    teamMarker(context, match, slot).writeText("")
+                }
+            }
+            return any
+        } catch (e: Exception) {
+            return false
+        } finally {
+            busy.remove(match.id)
+        }
+    }
+
+    private suspend fun save(context: Context, bytes: ByteArray, file: File): Boolean = withContext(Dispatchers.IO) {
+        val decoded = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: return@withContext false
+        val round = round(decoded, SIZE)
+        dir(context).mkdirs()
+        file.outputStream().use { out -> round.compress(Bitmap.CompressFormat.PNG, 100, out) }
+        true
+    }
+
+    /** `photos: {"1": [true, false], ...}` of a team state, per slot; empty when missing */
+    fun teamPhotoFlags(json: String): Map<Int, List<Boolean>> = try {
+        val photos = JSONObject(json).optJSONObject("photos")
+        val result = mutableMapOf<Int, List<Boolean>>()
+        if (photos != null) {
+            for (slot in 1..4) {
+                val sides = photos.optJSONArray(slot.toString()) ?: continue
+                result[slot] = listOf(sides.optBoolean(0), sides.optBoolean(1))
+            }
+        }
+        result
+    } catch (e: Exception) {
+        emptyMap()
     }
 
     /** Photos of matches no longer followed (an app killed before it could clean up) */

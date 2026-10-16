@@ -10,8 +10,10 @@ import squash.analyzer.core.LiveFollow
 /**
  * The live server's pushes: `data = { kind: "live", id, server, event:
  * "update" | "end", snapshot: "<JSON>" }` after every rally of a followed
- * match. Shows the new state; "end" shows the final score (or removes the
- * notification when there is none) and forgets the match.
+ * match, or `{ kind: "team", ..., team: "<JSON>" }` after every change of a
+ * followed team match; with `alertTitle` / `alertBody` when a game (partij) is
+ * won and at the result. Shows the new state; "end" shows the final score (or
+ * removes the notification when there is none) and forgets the match.
  */
 class LiveFollowMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
@@ -27,22 +29,33 @@ class LiveFollowMessagingService : FirebaseMessagingService() {
     companion object {
         /** Also the entry point of the debug-only sample broadcast */
         fun handle(context: Context, data: Map<String, String>) {
-            if (data["kind"] != "live") return
-            val match = FollowedMatch.validated(data["id"], data["server"]) ?: return
+            val kind = data["kind"]
+            if (kind != "live" && kind != FollowedMatch.TEAM) return
+            val match = FollowedMatch.validated(data["id"], data["server"], kind) ?: return
             val followed = FollowedMatches(context)
             // A push for a match this phone stopped following (the server may not know yet)
             if (!followed.contains(match)) return
-            val score = LiveScoreJson.parse(data["snapshot"] ?: return) ?: return
             val notifier = LiveScoreNotifier(context)
-            if (data["event"] == "end") {
+            val ended = data["event"] == "end"
+            // "Melding bij elke game": a game (partij) won or the result, as a separate heads-up
+            val alert = LiveAlerts.from(data, LiveAlerts.isOn(context))
+            if (match.isTeam) {
+                val stand = TeamScore.parse(data["team"] ?: return) ?: return
+                // Ended before all four partijen were decided (stopped, or the alarm): nothing to show any more
+                if (ended && !TeamScoreCard(stand).isFinished) notifier.cancel(match)
+                else notifier.showTeam(match, stand, quiet = alert != null)
+            } else {
+                val score = LiveScoreJson.parse(data["snapshot"] ?: return) ?: return
                 // Ended without a result (the scorer stopped sharing): nothing to show any more
-                if (score.status == "finished") notifier.show(match, score) else notifier.cancel(match)
+                if (ended && score.status != "finished") notifier.cancel(match)
+                else notifier.show(match, score, quiet = alert != null)
+            }
+            if (alert != null) notifier.alert(match, alert)
+            if (ended) {
                 followed.remove(match)
                 // The final score keeps its avatars: a notification holds its own copy of the bitmaps
                 LivePhotos.delete(context, match)
                 FcmLiveFollowPresenter.scope.launch { LiveFollow.shared.forget(match.toTarget()) }
-            } else {
-                notifier.show(match, score)
             }
         }
     }

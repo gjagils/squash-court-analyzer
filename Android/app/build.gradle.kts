@@ -100,9 +100,14 @@ android {
 
     buildTypes {
         release {
-            // No R8 yet: Skip's runtime reflects on generated classes, so
-            // shrinking needs its own keep rules and a test pass first.
-            isMinifyEnabled = false
+            // R8 shrinks and obfuscates the release build (Play Console asks
+            // for it). Skip's runtime reflects on generated classes: the keep
+            // rules in proguard-rules.pro cover that, and every change there
+            // needs a test pass of the release APK. The mapping (also inside
+            // the .aab) goes to Play with scripts/play_upload.py.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             // Without the upload key a release build is debug-signed, so it can
             // be tried locally; Google Play refuses debug-signed uploads.
             signingConfig = if (hasUploadKey) signingConfigs.getByName("upload") else signingConfigs.getByName("debug")

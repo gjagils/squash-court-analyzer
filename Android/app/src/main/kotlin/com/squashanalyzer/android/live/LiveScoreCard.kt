@@ -132,22 +132,60 @@ class LiveScoreCard(val score: LiveScore) {
     val finishedGamesText: String
         get() = score.games.joinToString(" · ") { (a, b) -> "$a–$b" }
 
-    /** The footer of the mini scoreboard: "Games 11–8 · 6–11" */
-    val footerGames: String
-        get() = if (score.games.isEmpty()) "Best of ${score.bestOf}" else "Games $finishedGamesText"
+    // The ticker of the older Android notification, after the website's viewer
+    // page (server/live-worker/public/live.html): per player an avatar, the name,
+    // who serves, games won in a box and the points; a status line above, the
+    // finished games as chips below.
 
-    /** The footer's right side: "Opslag rechts", or the state between and after games */
-    val footerStatus: String
+    /** One finished game under the ticker: "11–7", in the colour of `winner` (0: level) */
+    data class GameChip(val text: String, val winner: Int)
+
+    /** The orange status line above the ticker (shown in capitals) */
+    val tickerStatus: String
         get() = when {
-            isFinished -> "Afgelopen"
-            isBetween -> "Pauze"
-            isWarmup -> "Inspelen"
-            else -> "Opslag $sideText"
+            isFinished -> {
+                val w = matchWinner
+                val (mine, theirs) = if (w == 1) score.gamesWon else score.gamesWon.second to score.gamesWon.first
+                "${name(w)} wint $mine–$theirs"
+            }
+            isBetween -> "Pauze · game $currentGameNumber begint zo"
+            isWarmup -> "Inspelen · best of ${score.bestOf}"
+            gameBallFor != null -> "Game $currentGameNumber · ${if (isMatchBall) "matchbal" else "gamebal"}"
+            else -> "Game $currentGameNumber · best of ${score.bestOf}"
         }
 
-    /** Games won per player, as pips on the mini scoreboard: (won, needed) */
-    fun pips(player: Int): Pair<Int, Int> =
-        (if (player == 1) score.gamesWon.first else score.gamesWon.second) to gamesToWin
+    /** The name in the ticker, with a cup for the winner of the match */
+    fun tickerName(player: Int): String =
+        if (isFinished && matchWinner == player) name(player) + " 🏆" else name(player)
+
+    /** The first letter of the name, for the avatar without a photo */
+    fun initial(player: Int): String = initialOf(name(player))
+
+    /** "serveert rechts" under the server's name; null for the other player and after the match */
+    fun serveText(player: Int): String? =
+        if (!isFinished && score.server == player) "serveert $sideText" else null
+
+    fun gamesWon(player: Int): Int = if (player == 1) score.gamesWon.first else score.gamesWon.second
+
+    /** The big number: the points of the game under way (or the one just finished) */
+    fun points(player: Int): Int = if (player == 1) score.score.first else score.score.second
+
+    /** The finished games, player 1 first, in the colour of whoever won each */
+    val chips: List<GameChip>
+        get() = score.games.map { (a, b) -> GameChip("$a–$b", if (a > b) 1 else if (b > a) 2 else 0) }
+
+    /** The collapsed custom view: "9 – 7" between the names */
+    val collapsedScore: String get() = "${score.score.first} – ${score.score.second}"
+
+    companion object {
+        /** First letter (a whole code point, so an emoji or accented letter stays intact), capitalised; "?" without a name */
+        fun initialOf(name: String): String {
+            val trimmed = name.trim()
+            if (trimmed.isEmpty()) return "?"
+            val end = trimmed.offsetByCodePoints(0, 1)
+            return trimmed.substring(0, end).uppercase()
+        }
+    }
 
     /** Points in a game on the Live Update's bar */
     val pointsPerGame: Int get() = 11

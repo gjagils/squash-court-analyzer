@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The live score notification's ticker (Android 9-15), in the colours of the
+     website's viewer page (live.html). Light shade: the "Warm licht" tokens
+     (docs/style/README.md), so the player colours keep their contrast on a
+     white notification; values-night has the dark ones. -->
+<resources>
+    <color name="live_p1">#A94F08</color>
+    <color name="live_p2">#405A73</color>
+    <color name="live_p2_ring">#405A73</color>
+    <color name="live_p1_line">#DEC9B4</color>
+    <color name="live_p2_line">#66405A73</color>
+    <color name="live_border">#E4DBD1</color>
+    <color name="live_text2">#71665B</color>
+</resources>

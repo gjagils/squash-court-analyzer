@@ -29,8 +29,11 @@ class LiveScoreCardTest {
         assertEquals("Gerd-Jan 9 – 7 Thomas", card.title)
         assertEquals("Thomas serveert links · games 1–0", card.text)
         assertEquals("Game 2 · games 1–0 · Thomas serveert", card.compactText)
-        assertEquals("Opslag links", card.footerStatus)
-        assertEquals("Games 11–8", card.footerGames)
+        assertEquals("Game 2 · best of 5", card.tickerStatus)
+        assertEquals(null, card.serveText(1))
+        assertEquals("serveert links", card.serveText(2))
+        assertEquals(listOf(LiveScoreCard.GameChip("11–8", 1)), card.chips)
+        assertEquals("9 – 7", card.collapsedScore)
         assertNull(card.gameBallFor)
     }
 
@@ -40,6 +43,7 @@ class LiveScoreCardTest {
         assertFalse(card.isMatchBall)
         assertEquals("Gamebal voor Gerd-Jan · games 0–0", card.text)
         assertEquals("Game 1 · gamebal Gerd-Jan", card.compactText)
+        assertEquals("Game 1 · gamebal", card.tickerStatus)
     }
 
     @Test fun noGameBallAtTenAll() {
@@ -55,6 +59,7 @@ class LiveScoreCardTest {
         assertTrue(card.isMatchBall)
         assertEquals("Matchbal voor Thomas · games 1–2", card.text)
         assertEquals("Game 4 · matchbal Thomas", card.compactText)
+        assertEquals("Game 4 · matchbal", card.tickerStatus)
     }
 
     @Test fun noGameBallOutsidePlay() {
@@ -67,7 +72,10 @@ class LiveScoreCardTest {
         assertEquals("Thomas wint game 2 met 11–6", card.title)
         assertEquals("Games 1–1 · game 3 begint zo", card.text)
         assertEquals(card.text, card.compactText)
-        assertEquals("Pauze", card.footerStatus)
+        assertEquals("Pauze · game 3 begint zo", card.tickerStatus)
+        // The points of the game just finished stay, as on the website
+        assertEquals(6, card.points(1))
+        assertEquals(11, card.points(2))
     }
 
     @Test fun finishedShowsTheWinnerFirst() {
@@ -78,8 +86,24 @@ class LiveScoreCardTest {
         assertEquals("3–1", card.chipText)
         assertEquals("Thomas wint 3–1", card.title)
         assertEquals("11–8 · 6–11 · 9–11 · 8–11", card.text)
-        assertEquals("Afgelopen", card.footerStatus)
+        assertEquals("Thomas wint 3–1", card.tickerStatus)
         assertTrue(card.isFinished)
+        // The winner gets a cup, nobody serves any more
+        assertEquals("Gerd-Jan", card.tickerName(1))
+        assertEquals("Thomas \uD83C\uDFC6", card.tickerName(2))
+        assertNull(card.serveText(1))
+        assertNull(card.serveText(2))
+        assertEquals(
+            listOf(
+                LiveScoreCard.GameChip("11–8", 1),
+                LiveScoreCard.GameChip("6–11", 2),
+                LiveScoreCard.GameChip("9–11", 2),
+                LiveScoreCard.GameChip("8–11", 2),
+            ),
+            card.chips,
+        )
+        assertEquals(1, card.gamesWon(1))
+        assertEquals(3, card.gamesWon(2))
     }
 
     @Test fun finishedWithoutWinnerUsesTheGames() {
@@ -91,15 +115,18 @@ class LiveScoreCardTest {
     @Test fun warmup() {
         val card = score(status = "warmup", bestOf = 3)
         assertEquals("Inspelen · best of 3", card.text)
-        assertEquals("Inspelen", card.footerStatus)
-        assertEquals("Best of 3", card.footerGames)
+        assertEquals("Inspelen · best of 3", card.tickerStatus)
+        assertTrue(card.chips.isEmpty())
+        assertEquals(2, card.gamesToWin)
     }
 
-    @Test fun pipsCountGamesWonAgainstGamesNeeded() {
-        val card = score(gamesWon = 2 to 1)
-        assertEquals(2 to 3, card.pips(1))
-        assertEquals(1 to 3, card.pips(2))
-        assertEquals(2, score(bestOf = 3).gamesToWin)
+    @Test fun initialsAreOneCapitalLetter() {
+        assertEquals("G", LiveScoreCard.initialOf("gerd-Jan"))
+        assertEquals("É", LiveScoreCard.initialOf(" émile"))
+        assertEquals("?", LiveScoreCard.initialOf("  "))
+        // A letter outside the BMP stays whole
+        assertEquals("\uD835\uDC00", LiveScoreCard.initialOf("\uD835\uDC00bc"))
+        assertEquals("T", score().initial(2))
     }
 
     @Test fun gameBarHasOneStretchOfElevenPerGame() {

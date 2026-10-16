@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Live score ticker: the dot before "serveert rechts" of player 1 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/live_p1" />
+    <size
+        android:width="7dp"
+        android:height="7dp" />
+</shape>

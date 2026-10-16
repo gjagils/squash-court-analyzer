@@ -61,6 +61,10 @@
 		C1000005 /* SquashLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C3000001 /* SquashLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeaderOnCopy, ); }; };
 		C1000006 /* ActivityKitLiveFollowPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000005 /* ActivityKitLiveFollowPresenter.swift */; };
 		C1000007 /* LiveScoreAttributesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000006 /* LiveScoreAttributesTests.swift */; };
+		C1000008 /* TeamScoreAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000008 /* TeamScoreAttributes.swift */; };
+		C1000009 /* TeamScoreAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000008 /* TeamScoreAttributes.swift */; };
+		C100000A /* TeamScoreActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000A /* TeamScoreActivityWidget.swift */; };
+		C100000B /* TeamScoreAttributesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000B /* TeamScoreAttributesTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -148,6 +152,9 @@
 		C2000005 /* ActivityKitLiveFollowPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityKitLiveFollowPresenter.swift; sourceTree = "<group>"; };
 		C2000007 /* SquashLiveActivity.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SquashLiveActivity.entitlements; sourceTree = "<group>"; };
 		C2000006 /* LiveScoreAttributesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveScoreAttributesTests.swift; sourceTree = "<group>"; };
+		C2000008 /* TeamScoreAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamScoreAttributes.swift; sourceTree = "<group>"; };
+		C200000A /* TeamScoreActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamScoreActivityWidget.swift; sourceTree = "<group>"; };
+		C200000B /* TeamScoreAttributesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamScoreAttributesTests.swift; sourceTree = "<group>"; };
 		C3000001 /* SquashLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SquashLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -282,6 +289,7 @@
 				B2000023 /* MigrationTests.swift */,
 				B2000022 /* TeamImportTests.swift */,
 				C2000006 /* LiveScoreAttributesTests.swift */,
+				C200000B /* TeamScoreAttributesTests.swift */,
 			);
 			path = SquashAnalyzerTests;
 			sourceTree = "<group>";
@@ -297,6 +305,7 @@
 			isa = PBXGroup;
 			children = (
 				C2000001 /* LiveScoreAttributes.swift */,
+				C2000008 /* TeamScoreAttributes.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -306,6 +315,7 @@
 			children = (
 				C2000002 /* SquashLiveActivityBundle.swift */,
 				C2000003 /* LiveScoreActivityWidget.swift */,
+				C200000A /* TeamScoreActivityWidget.swift */,
 				C2000004 /* Info.plist */,
 				C2000007 /* SquashLiveActivity.entitlements */,
 			);
@@ -455,6 +465,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C1000001 /* LiveScoreAttributes.swift in Sources */,
+				C1000008 /* TeamScoreAttributes.swift in Sources */,
 				C1000006 /* ActivityKitLiveFollowPresenter.swift in Sources */,
 				A1000001 /* SquashAnalyzerApp.swift in Sources */,
 				A1000002 /* ContentView.swift in Sources */,
@@ -498,6 +509,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C1000007 /* LiveScoreAttributesTests.swift in Sources */,
+				C100000B /* TeamScoreAttributesTests.swift in Sources */,
 				B1000010 /* ScoringAndPersistenceTests.swift in Sources */,
 				B1000021 /* RefereeMatchTests.swift in Sources */,
 				B1000062 /* BadgeEngineTests.swift in Sources */,
@@ -515,6 +527,8 @@
 				C1000002 /* LiveScoreAttributes.swift in Sources */,
 				C1000003 /* SquashLiveActivityBundle.swift in Sources */,
 				C1000004 /* LiveScoreActivityWidget.swift in Sources */,
+				C1000009 /* TeamScoreAttributes.swift in Sources */,
+				C100000A /* TeamScoreActivityWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -24,6 +24,7 @@ struct SettingsView: View {
     @AppStorage(LiveShare.enabledKey) private var liveSharing = true
     @AppStorage(LiveShare.photosKey) private var livePhotos = true
     @AppStorage(LiveFollow.ownMatchKey) private var lockScreenScore = true
+    @AppStorage(LiveFollow.alertsKey) private var liveAlerts = true
 
     var body: some View {
         ZStack {
@@ -227,6 +228,20 @@ struct SettingsView: View {
             }
             .tint(AppColors.warmOrange)
             Text("Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen op het beginscherm.")
+                .font(AppFonts.caption(11))
+                .foregroundColor(AppColors.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+            Toggle(isOn: Binding(get: { liveAlerts }, set: { on in
+                liveAlerts = on
+                // The server keeps the choice per followed match: tell it for the ones followed now
+                Task { await LiveFollow.shared.setAlerts(on) }
+            })) {
+                Text("Melding bij elke game")
+                    .font(AppFonts.label(14))
+                    .foregroundColor(AppColors.textPrimary)
+            }
+            .tint(AppColors.warmOrange)
+            Text("Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag.")
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)

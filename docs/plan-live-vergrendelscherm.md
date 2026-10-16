@@ -98,6 +98,50 @@ false]`) en daarna `GET /api/live/:id/photo/1|2`. Ze worden rond bijgesneden
 of het einde gaan ze weg (een getoonde uitslag houdt zijn eigen kopie). Code:
 `LivePhotos.kt`.
 
+### Android: teamwedstrijd en "Melding bij elke game" (16 oktober 2026)
+
+Branch `feature/live-activity-team-android`, ontwerp "Teamwedstrijd · Android"
+op het canvas.
+
+- **Teamwedstrijd volgen** (`squashanalyzer://volg#team/<id>`): één melding
+  per teamwedstrijd. Android 9–15 (`TeamScoreViews.kt`, layouts
+  `notification_team_*.xml`): oranje statusregel "COMPETITIE · 2 VAN 4 KLAAR",
+  de teamregel "All Inn 8 [5] – [3] Delft 8" (games over alle partijen) en
+  E1–E4 met avatar, naam, games in een vakje (de winnaar in zijn kleur) en
+  in het midden "● 7–5" (rood, bezig), "klaar", "opgave", "w.o." of "–". Een
+  slot zonder partij staat grijs als "Delft 8 E2". De teamscore en de
+  middenkolom van de rijen staan op één as. Ingeklapt: de teamregel en
+  "E2 bezig 7–5 · 2 van 4 klaar". Android 16: Live Update met titel
+  "All Inn 8 5 – 3 Delft 8", tekst "E2 bezig: Paul 7–5 Mark · 2 van 4 klaar",
+  een balkdeel per partij in de kleur van de winnaar (de lopende partij
+  half gevuld) en chip "5–3". Zijn alle vier klaar: "Uitslag · partijen
+  3–1", niet meer doorlopend, na 3 uur weg. De winnaar zelf staat in de
+  melding van de server (SBN-regel), want de push heeft geen punten.
+- **Teamfoto's**: bij het volgen `GET /api/team/:id` (`photos` per slot) en
+  `GET /api/team/:id/photo/<slot>/<1|2>`, per slot één keer per volgactie
+  (marker `<id>-s<slot>.checked`); een partij die later verschijnt, wordt bij
+  de eerste push met dat slot gevraagd. Bestanden
+  `files/live-photos/<id>-<slot>-<kant>.png`, weg bij Stoppen of het einde.
+- `FollowedMatches` bewaart het soort: `"<id> <server> team"`; oude regels
+  `"<id> <server>"` blijven losse wedstrijden. Stoppen na een herstart stuurt
+  de DELETE naar `/api/team/...`.
+- **Melding bij elke game** (`LiveAlerts.kt`): heeft een push `alertTitle`,
+  dan komt er naast de stand een aparte heads-upmelding op het kanaal
+  "Uitslagen en games" (hoog, met geluid), één per wedstrijd (de volgende
+  vervangt hem), tikken opent de app. De stand zelf blijft dan stil (ook de
+  uitslag, die anders één keer geluid gaf). Bewust een aparte melding: een
+  doorlopende melding opnieuw laten afgaan is op One UI en Android 16 met
+  een Live Update onbetrouwbaar, en zo kan de gebruiker de meldingen per
+  kanaal uitzetten zonder de stand te verliezen. Stoppen haalt ook de
+  laatste melding weg; de uitslag blijft staan.
+- De instelling: Skip bewaart `@AppStorage` in de SharedPreferences
+  `defaults`; `SquashApplication` zet `LiveFollow.shared.alerts` bij de start
+  uit `liveLockScreenAlerts` (standaard aan) en meldt bij een wijziging alle
+  gevolgde wedstrijden opnieuw aan, ook die van voor een herstart.
+- Debug: `--es team spel|pauze|uitslag|stop` op de LIVE_SAMPLE-broadcast
+  toont een voorbeeldteamwedstrijd, `--es alertTitle … --es alertBody …`
+  een melding zoals de server die meestuurt.
+
 ## Sleutels (buiten de repo)
 
 | Wat | Waar | Gebruikt door |

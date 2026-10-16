@@ -120,7 +120,7 @@ class TeamScoreCard(val score: TeamScore) {
         val missing: Boolean,
         val games1: String,
         val games2: String,
-        /** "● 7–5", "klaar", "–" */
+        /** "7–5", "pauze", "klaar", "–" (a live partij gets its dot in the label: "● E2") */
         val middle: String,
         val isLive: Boolean,
         /** 1 or 2 when decided with a winner: that box in the winner's colour */
@@ -201,11 +201,11 @@ class TeamScoreCard(val score: TeamScore) {
                     partij.end == "walkover" -> "w.o."
                     partij.end == "retired" -> "opgave"
                     partij.isDecided -> "klaar"
-                    partij.status == "between" -> "● pauze"
-                    partij.isLive -> "● ${partij.score.first}–${partij.score.second}"
+                    partij.status == "between" -> "pauze"
+                    partij.isLive -> "${partij.score.first}–${partij.score.second}"
                     else -> "–"
                 }
-                Row(slot, "E$slot", name(partij, 1), name(partij, 2), missing = false,
+                Row(slot, if (partij.isLive) "● E$slot" else "E$slot", name(partij, 1), name(partij, 2), missing = false,
                     games1 = if (started) partij.gamesWon.first.toString() else "–",
                     games2 = if (started) partij.gamesWon.second.toString() else "–",
                     middle = middle, isLive = partij.isLive, winner = if (partij.isDecided) partij.winnerSide else 0)

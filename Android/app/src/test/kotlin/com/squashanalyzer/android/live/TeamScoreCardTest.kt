@@ -43,7 +43,7 @@ class TeamScoreCardTest {
         val rows = TeamScoreCard(design).rows
         assertEquals(4, rows.size)
         assertEquals(TeamScoreCard.Row(1, "E1", "Gerd-Jan", "Thomas", false, "3", "0", "klaar", false, 1), rows[0])
-        assertEquals(TeamScoreCard.Row(2, "E2", "Paul", "Mark", false, "1", "0", "● 7–5", true, 0), rows[1])
+        assertEquals(TeamScoreCard.Row(2, "● E2", "Paul", "Mark", false, "1", "0", "7–5", true, 0), rows[1])
         assertEquals(2, rows[2].winner)
         assertEquals(TeamScoreCard.Row(4, "E4", "Anna", "Bram", false, "–", "–", "–", false, 0), rows[3])
     }
@@ -71,7 +71,8 @@ class TeamScoreCardTest {
         )))
         assertEquals("E1 pauze: Paul – Mark, games 1–1 (+1) · 0 van 4 klaar", card.text)
         assertEquals("E1 pauze · E2 bezig 3–4 · 0 van 4 klaar", card.compactText)
-        assertEquals("● pauze", card.rows[0].middle)
+        assertEquals("pauze", card.rows[0].middle)
+        assertEquals("● E1", card.rows[0].label)
     }
 
     @Test fun walkoverAndRetiredAreDecided() {

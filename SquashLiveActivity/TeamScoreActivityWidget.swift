@@ -191,10 +191,16 @@ struct TeamScoreRow: View {
         // Both sides get the same width, so the middle sits on the card's centre line
         HStack(spacing: 5) {
             HStack(spacing: 5) {
-                Text("E\(slot)")
-                    .font(.system(size: boxSize - 1, weight: .semibold, design: .rounded))
-                    .foregroundColor(LiveScoreColors.textSecondary)
-                    .frame(width: boxSize * 1.6, alignment: .leading)
+                // The red live dot leads the row, apart from the serve dots of a single match
+                HStack(spacing: 3) {
+                    Circle()
+                        .fill(isLive ? LiveScoreColors.live : Color.clear)
+                        .frame(width: 5, height: 5)
+                    Text("E\(slot)")
+                        .font(.system(size: boxSize - 1, weight: .semibold, design: .rounded))
+                        .foregroundColor(isLive ? LiveScoreColors.live : LiveScoreColors.textSecondary)
+                }
+                .frame(width: boxSize * 1.6 + 8, alignment: .leading)
                 TeamScoreAvatar(initial: state.initial(slot: slot, side: 1), side: 1, photo: photos.photo(slot: slot, side: 1),
                                 size: avatar, empty: partij == nil)
                 name(1, partij: partij)
@@ -242,21 +248,21 @@ struct TeamScoreRow: View {
         .fixedSize()
     }
 
+    private var isLive: Bool {
+        if case .live = state.middle(slot) { return true }
+        return false
+    }
+
     @ViewBuilder
     private var middle: some View {
         switch state.middle(slot) {
         case .live(let points):
-            HStack(spacing: 3) {
-                Circle()
-                    .fill(LiveScoreColors.live)
-                    .frame(width: 5, height: 5)
-                Text(points)
-                    .font(.system(size: boxSize, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundColor(LiveScoreColors.live)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            }
+            Text(points)
+                .font(.system(size: boxSize, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundColor(LiveScoreColors.live)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         case .decided:
             Text("klaar")
                 .font(.system(size: boxSize - 1, weight: .medium, design: .rounded))

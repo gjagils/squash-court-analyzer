@@ -36,7 +36,7 @@ object TeamScoreViews {
 
     private fun row(context: Context, match: FollowedMatch, row: TeamScoreCard.Row): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.notification_team_row)
-        views.setTextViewText(R.id.team_slot, row.label)
+        show(views, R.id.team_slot, R.id.team_slot_live, if (row.isLive) 2 else 1, row.label)
         // Names: in the team colours, greyed for a slot without a partij
         show(views, R.id.team_home, R.id.team_home_dim, if (row.missing) 2 else 1, row.home)
         show(views, R.id.team_away, R.id.team_away_dim, if (row.missing) 2 else 1, row.away)

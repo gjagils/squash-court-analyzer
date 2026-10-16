@@ -153,6 +153,9 @@ class MainActivity : AppCompatActivity() {
         val aiCoach = AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport()))
         // Live meekijken: the shared LiveShare sends the state through this (server/live)
         LiveShare.shared.transport = HttpLiveTransport()
+        // feature/live-activity: debug builds share to the test Worker, which can
+        // push to followers (docs/plan-live-vergrendelscherm.md). Remove before main.
+        if (BuildConfig.DEBUG) LiveShare.shared.baseURL = "https://squash-live-dev.gerdjanvangils.workers.dev"
         // "Deel als plaatje" in Deel score: the result card as a PNG (ResultImage)
         // The PNG is drawn and written off the main thread; the static hook is
         // cleared in onDestroy so it never keeps an old Activity alive

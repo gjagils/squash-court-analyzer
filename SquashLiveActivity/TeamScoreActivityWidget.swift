@@ -19,25 +19,28 @@ struct TeamScoreActivityWidget: Widget {
             let photos = TeamScorePhotos(teamId: context.attributes.teamId)
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    TeamScoreIslandTeam(state: state, side: 1)
+                    LiveScorePill(text: state.isFinished ? "AFGELOPEN" : "LIVE", live: !state.isFinished)
+                        .padding(.leading, 6)
+                        .frame(maxHeight: .infinity)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    TeamScoreIslandTeam(state: state, side: 2)
-                }
-                DynamicIslandExpandedRegion(.center) {
-                    Text(state.isFinished ? "AFGELOPEN" : state.progressText.uppercased())
-                        .font(.system(size: 10, weight: .semibold, design: .rounded))
-                        .tracking(0.6)
+                    Text(state.progressText)
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
                         .foregroundColor(LiveScoreColors.textSecondary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
-                        .padding(.top, 6)
+                        .padding(.trailing, 6)
+                        .frame(maxHeight: .infinity)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    VStack(spacing: 2) {
+                    // The team line and four short rows: the expanded island is about 160 pt high in all
+                    VStack(spacing: 1) {
+                        TeamScoreTeamLine(state: state, nameSize: 13, boxSize: 13)
+                            .frame(height: 20)
+                            .padding(.bottom, 1)
                         ForEach(TeamScoreAttributes.ContentState.slots, id: \.self) { slot in
-                            TeamScoreRow(state: state, slot: slot, photos: photos, height: 19, avatar: 16, nameSize: 12,
-                                         boxSize: 11)
+                            TeamScoreRow(state: state, slot: slot, photos: photos, height: 18, avatar: 15, nameSize: 12,
+                                         boxSize: 10)
                         }
                     }
                     .padding(.horizontal, 4)
@@ -134,26 +137,41 @@ struct TeamScoreLockScreenView: View {
     }
 
     private var teamLine: some View {
+        TeamScoreTeamLine(state: state, nameSize: 15, boxSize: 15)
+            .frame(height: 22)
+    }
+}
+
+/// Home name left, the games of both teams exactly in the middle (the same
+/// axis as the middle of the partij rows), away name right; long names are cut off
+struct TeamScoreTeamLine: View {
+    let state: TeamScoreAttributes.ContentState
+    let nameSize: CGFloat
+    let boxSize: CGFloat
+
+    var body: some View {
         HStack(spacing: 6) {
             Text(state.home)
-                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .font(.system(size: nameSize, weight: .bold, design: .rounded))
                 .foregroundColor(LiveScoreColors.player1)
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .truncationMode(.tail)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            TeamScoreGamesBox(games: state.games(1), side: 1, won: state.isFinished && state.teamWinner == 1, size: 15)
-            Text("–")
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundColor(LiveScoreColors.textSecondary)
-            TeamScoreGamesBox(games: state.games(2), side: 2, won: state.isFinished && state.teamWinner == 2, size: 15)
+            HStack(spacing: 6) {
+                TeamScoreGamesBox(games: state.games(1), side: 1, won: state.isFinished && state.teamWinner == 1, size: boxSize)
+                Text("–")
+                    .font(.system(size: boxSize - 1, weight: .bold, design: .rounded))
+                    .foregroundColor(LiveScoreColors.textSecondary)
+                TeamScoreGamesBox(games: state.games(2), side: 2, won: state.isFinished && state.teamWinner == 2, size: boxSize)
+            }
+            .fixedSize()
             Text(state.away)
-                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .font(.system(size: nameSize, weight: .bold, design: .rounded))
                 .foregroundColor(LiveScoreColors.player2Text)
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .truncationMode(.tail)
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
-        .frame(height: 22)
     }
 }
 
@@ -170,27 +188,34 @@ struct TeamScoreRow: View {
 
     var body: some View {
         let partij = state.partij(slot)
+        // Both sides get the same width, so the middle sits on the card's centre line
         HStack(spacing: 5) {
-            Text("E\(slot)")
-                .font(.system(size: boxSize - 1, weight: .semibold, design: .rounded))
-                .foregroundColor(LiveScoreColors.textSecondary)
-                .frame(width: boxSize * 1.6, alignment: .leading)
-            TeamScoreAvatar(initial: state.initial(slot: slot, side: 1), side: 1, photo: photos.photo(slot: slot, side: 1),
-                            size: avatar, empty: partij == nil)
-            name(1, partij: partij)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: 5) {
+                Text("E\(slot)")
+                    .font(.system(size: boxSize - 1, weight: .semibold, design: .rounded))
+                    .foregroundColor(LiveScoreColors.textSecondary)
+                    .frame(width: boxSize * 1.6, alignment: .leading)
+                TeamScoreAvatar(initial: state.initial(slot: slot, side: 1), side: 1, photo: photos.photo(slot: slot, side: 1),
+                                size: avatar, empty: partij == nil)
+                name(1, partij: partij)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
             centre(partij)
-            name(2, partij: partij)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-            TeamScoreAvatar(initial: state.initial(slot: slot, side: 2), side: 2, photo: photos.photo(slot: slot, side: 2),
-                            size: avatar, empty: partij == nil)
+            HStack(spacing: 5) {
+                name(2, partij: partij)
+                TeamScoreAvatar(initial: state.initial(slot: slot, side: 2), side: 2, photo: photos.photo(slot: slot, side: 2),
+                                size: avatar, empty: partij == nil)
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .frame(height: height)
     }
 
     private func name(_ side: Int, partij: TeamScorePartij?) -> some View {
         let won = partij?.winnerSide == side
-        let colour = partij == nil ? LiveScoreColors.textSecondary.opacity(0.6) : LiveScoreColors.playerText(side)
+        // No partij yet: grey; a partij without this name ("Delft 8 E2"): the team colour, dimmed
+        let colour = partij == nil ? LiveScoreColors.textSecondary.opacity(0.6)
+            : LiveScoreColors.playerText(side).opacity(state.hasName(slot: slot, side: side) ? 1 : 0.6)
         return Text(state.name(slot: slot, side: side))
             .font(.system(size: nameSize, weight: won ? .bold : .semibold, design: .rounded))
             .foregroundColor(colour)
@@ -260,7 +285,8 @@ struct TeamScoreGamesBox: View {
             .font(.system(size: size, weight: .bold, design: .rounded))
             .monospacedDigit()
             .foregroundColor(won ? colour : (games == nil ? LiveScoreColors.textSecondary.opacity(0.6) : LiveScoreColors.textSecondary))
-            .frame(minWidth: size * 1.1)
+            // Room for two digits, so both boxes stay equally wide around the centre
+            .frame(minWidth: size * 1.3)
             .padding(.horizontal, size * 0.3)
             .padding(.vertical, size * 0.08)
             .background(won ? colour.opacity(0.18) : Color.clear)
@@ -296,29 +322,5 @@ struct TeamScoreAvatar: View {
         .clipShape(Circle())
         .overlay(Circle().stroke(empty ? LiveScoreColors.border : LiveScoreColors.ring(side), lineWidth: 1.5))
         .accessibilityHidden(true)
-    }
-}
-
-/// Team name and games in the expanded Dynamic Island
-struct TeamScoreIslandTeam: View {
-    let state: TeamScoreAttributes.ContentState
-    let side: Int
-
-    var body: some View {
-        let leading = side == 1
-        VStack(alignment: leading ? .leading : .trailing, spacing: 2) {
-            Text(state.teamName(side))
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundColor(LiveScoreColors.playerText(side))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-            Text("\(state.games(side))")
-                .font(.system(size: 26, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .foregroundColor(LiveScoreColors.textPrimary)
-        }
-        .frame(maxWidth: .infinity, alignment: leading ? .leading : .trailing)
-        .padding(.horizontal, 4)
-        .padding(.top, 4)
     }
 }

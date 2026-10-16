@@ -194,16 +194,32 @@ Volgorde bij een externe build:
    bèta-review en laat oude builds vervallen; draai
    `scripts/testflight_expire_old.py` nogmaals na goedkeuring).
 5. Android: `cd Android && ./gradlew :app:bundleRelease`, dan
-   `scripts/play_upload.py --notes <bestand>`
+   `PLAY_KEY_PATH=~/.android-keys/squash-analyzer-954a9b0e1ad9.json scripts/play_upload.py --aab Android/app/build/outputs/bundle/release/app-release.aab --notes <bestand>`
+   (de sleutel expliciet: in `~/.android-keys` staan sinds 16 oktober ook de
+   Firebase-bestanden; het script uploadt ook de R8-mapping)
    (internal, alpha en de Google Group-track tegelijk; `--check` toont de
    tracks). Testers van gesloten tracks zijn alleen in de console te wijzigen.
-6. Schermafbeeldingen vernieuwen: `scripts/screenshots.sh`, bekijk de PNG's,
-   dan `scripts/upload_screenshots.py` (probeer `--dry-run`); Play-listing
+6. Schermafbeeldingen vernieuwen: `scripts/screenshots.sh`, bekijk de PNG's
+   (geen rondleiding erop, het nieuwe beginscherm), dan
+   `scripts/upload_screenshots.py --yes` (probeer eerst `--dry-run`); Play-listing
    met `scripts/play_listing.py` (draai die vanuit de hoofdcheckout: de
    Play-screenshots staan buiten git).
-7. Handleiding op de website bijwerken (`website/handleiding/iphone.html` en
-   `android.html`, per tegel één sectie) en de website publiceren met de
-   `wrangler deploy` uit 1. Daarna in het rapport vermelden wat er veranderd is.
+7. De website bijwerken voor de testers, alles in dezelfde ronde
+   (Gerd-Jan, 16 oktober 2026):
+   - **`website/testen.html`** ("Wat valt er te testen?", waar de
+     Play-releasenote naar linkt): het buildnummer en de datum bovenaan, het
+     blok "Nieuw in deze versie" met de nieuwe features en "Probeer vooral"
+     (de tekst van de releasenotes, uitgebreider), en het blok van de vorige
+     build schuift door naar "Nieuw in build N" / "Uit eerdere versies";
+   - **`website/index.html`**, het nieuwsblok (`#nieuws`): de nieuwe feature
+     bovenaan de lijst;
+   - **de handleiding** (`website/handleiding/iphone.html` en `android.html`,
+     per tegel één sectie) en, als er gegevens bij komen, **`privacy.html`**;
+   - dan publiceren met `npx wrangler deploy -c server/website-worker/wrangler.jsonc`
+     **vanuit de hoofdcheckout** na `git pull --ff-only` (daar staan
+     `website/screenshots/` en `website/teams/`, die buiten git vallen), en
+     controleren op squashanalyzer.com. In het rapport vermelden wat er
+     veranderd is.
 8. `docs/wijzigingen-builds.md`: het blok "Volgende build" krijgt de kop met
    het nummer (bijvoorbeeld "3.0 build 1") en "(geüpload)".
 

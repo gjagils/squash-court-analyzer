@@ -35,7 +35,7 @@ class CardImportStoreTest {
     @After fun after() { db.close(); context.deleteDatabase(filename) }
 
     private fun value(badge: BadgeKind, cardId: UUID = card, deletedAt: Double? = null) = AwardValue(
-        cardId = cardId, badge = badge, matchId = match, earnedAt = Date(timeIntervalSince1970 = 1_790_000_000.0),
+        cardId = cardId, badge = badge, matchId = match, earnedAt = Date(timeIntervalSince1970 = 1_800_000_000.0),
         opponentName = "Jaïr", awardedBy = "other-install", deletedAt = deletedAt?.let { Date(timeIntervalSince1970 = it) })
 
     private fun snapshot(vararg awards: AwardValue) = CardSnapshot(cardId = card, name = "Paul", awards = SwiftArray(awards.toList()))
@@ -50,7 +50,7 @@ class CardImportStoreTest {
         val own = UUID(uuidString = playerId)!!
         db.badgeAwardDao().insertAll(listOf(BadgeAwardEntity(
             id = AwardValue.awardId(cardId = own, badge = badge, matchId = match).uuidString, cardId = playerId,
-            badge = badge.rawValue, matchId = match.uuidString, earnedAt = 1_000L, opponentName = "", awardedBy = "this-install")))
+            badge = badge.rawValue, matchId = match.uuidString, earnedAt = 1_800_000_000_000L, opponentName = "", awardedBy = "this-install")))
     }
 
     @Test fun importingToANewPlayerCreatesThemOnTheCard() = runTest {
@@ -64,7 +64,7 @@ class CardImportStoreTest {
         // The deletion is kept, so it can travel on in this device's links
         assertEquals(1_790_000_100_000L, rows.single { it.badge == BadgeKind.elevenNil.rawValue }.deletedAt)
         assertEquals("other-install", rows.first().awardedBy)
-        assertEquals(1_790_000_000_000L, rows.first().earnedAt)
+        assertEquals(1_800_000_000_000L, rows.first().earnedAt)
     }
 
     @Test fun linkingMovesThePlayersOwnAwardsOntoTheCard() = runTest {

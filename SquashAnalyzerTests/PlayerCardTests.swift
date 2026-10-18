@@ -15,7 +15,7 @@ final class PlayerCardTests: XCTestCase {
     }
 
     private func value(card: UUID, match: UUID = UUID(), deleted: Date? = nil) -> AwardValue {
-        AwardValue(cardId: card, badge: .fiveInARow, matchId: match, earnedAt: Date(timeIntervalSince1970: 1_790_000_000),
+        AwardValue(cardId: card, badge: .fiveInARow, matchId: match, earnedAt: Date(timeIntervalSince1970: 1_800_000_000),
                    opponentName: "Kristian", awardedBy: "coach-a", deletedAt: deleted)
     }
 

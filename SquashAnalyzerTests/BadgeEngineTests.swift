@@ -130,9 +130,11 @@ final class BadgeEngineTests: XCTestCase {
         XCTAssertFalse(engine.badges(for: input([BadgeGame(rallies: Array(fewer), winner: nil)]))[.player1]!.contains(.fullHouse))
     }
 
+    // Career dates lie after any badge reset start (BadgeSeason), so these
+    // tests do not change once the start has passed
     func testCareerBadges() {
         func history(_ wins: [Bool], points: Int = 30) -> [BadgeEngine.CareerMatch] {
-            wins.enumerated().map { .init(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval($0.offset)), won: $0.element, pointsWon: points) }
+            wins.enumerated().map { .init(matchId: UUID(), date: Date(timeIntervalSince1970: 1_800_000_000 + TimeInterval($0.offset)), won: $0.element, pointsWon: points) }
         }
         let first = history([false, true, true, true])
         XCTAssertEqual(engine.careerBadges(in: first[1].matchId, history: first, earnedElsewhere: []), [.offTheMark])
@@ -193,11 +195,11 @@ final class BadgeEngineTests: XCTestCase {
     }
 
     func testNemesisAndVeteran() {
-        let kristian = (0..<5).map { BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval($0)), won: true, pointsWon: 0, opponentKey: "kristian") }
+        let kristian = (0..<5).map { BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: 1_800_000_000 + TimeInterval($0)), won: true, pointsWon: 0, opponentKey: "kristian") }
         XCTAssertTrue(engine.careerBadges(in: kristian[4].matchId, history: kristian, earnedElsewhere: []).contains(.nemesis))
         XCTAssertFalse(engine.careerBadges(in: kristian[3].matchId, history: kristian, earnedElsewhere: []).contains(.nemesis))
 
-        let many = (0..<25).map { BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval($0)), won: false, pointsWon: 0, opponentKey: "x\($0)") }
+        let many = (0..<25).map { BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: 1_800_000_000 + TimeInterval($0)), won: false, pointsWon: 0, opponentKey: "x\($0)") }
         XCTAssertEqual(engine.careerBadges(in: many[24].matchId, history: many, earnedElsewhere: []), [.veteran, .clubicoon], "25 matches against 25 opponents")
     }
 
@@ -273,7 +275,7 @@ final class BadgeEngineTests: XCTestCase {
     func testCareerTiersAndTheNewerCareerBadges() {
         func history(_ count: Int, won: Bool = true, opponent: (Int) -> String) -> [BadgeEngine.CareerMatch] {
             (0..<count).map { i in
-                BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: TimeInterval(i)), won: won, pointsWon: 0, opponentKey: opponent(i))
+                BadgeEngine.CareerMatch(matchId: UUID(), date: Date(timeIntervalSince1970: 1_800_000_000 + TimeInterval(i)), won: won, pointsWon: 0, opponentKey: opponent(i))
             }
         }
         let wins = history(25) { _ in "" }

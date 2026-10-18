@@ -572,7 +572,8 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       de badge Pionier; omschrijving en artwork (klaar) staan in
       `docs/style/badge-prompt-pioneer.md`.
 - [ ] **Testgegevens opruimen bij de eerste start van 3.0** (afgesproken 18
-      oktober, nog niet gebouwd). Eén vraag met een vinkje per groep, alle drie
+      oktober; gebouwd op branch `claude/zealous-turing-fh3h7a`, nog niet op
+      `main` en nog niet getest op de Mac; zie ARCHITECTURE.md). Eén vraag met een vinkje per groep, alle drie
       standaard aan: wedstrijden met de voorbeeldspelers, onvolledige én
       gepauzeerde wedstrijden ("Bewaar en ga later verder"), en
       competitiewedstrijden. Alleen wedstrijden van vóór `seasonStart`, en de

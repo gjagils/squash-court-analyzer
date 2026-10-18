@@ -75,6 +75,9 @@ class RefereeMatchStore(private val dao: RefereeMatchDao) {
 
     suspend fun byId(id: String): RefereeMatchRecord? = dao.matchById(id)?.let { assemble(it) }
 
+    /** Every referee match, in progress included */
+    suspend fun all(): List<RefereeMatchRecord> = dao.allMatches().map { assemble(it) }
+
     suspend fun mostRecentInProgressMatch(): RefereeMatchRecord? =
         dao.mostRecentMatchWithStatus(MatchStatus.IN_PROGRESS)?.let { assemble(it) }
 

@@ -35,6 +35,10 @@ interface RefereeMatchDao {
     @Query("SELECT * FROM referee_matches WHERE status IN ('completed', 'abandoned') ORDER BY updatedAt DESC")
     suspend fun completedAndAbandoned(): List<RefereeMatchEntity>
 
+    /** Every referee match, in progress included (the cleanup after the badge reset) */
+    @Query("SELECT * FROM referee_matches")
+    suspend fun allMatches(): List<RefereeMatchEntity>
+
     @Query("SELECT * FROM referee_games WHERE matchId = :matchId ORDER BY number ASC")
     suspend fun gamesForMatch(matchId: String): List<RefereeGameEntity>
 

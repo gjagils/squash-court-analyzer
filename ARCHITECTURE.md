@@ -73,6 +73,21 @@ niet in "x van 37"): vaste `matchId` en `earnedAt = start`, zodat elk toestel
 hetzelfde award-id maakt. Aanzetten: de datum in `BadgeSeason.start` én dezelfde
 datum (seconden) in `SEASON_START` in `website/kaart/index.html`.
 
+**Testgegevens opruimen** (`TestDataCleanup` in Core, zelfde start). Eén keer
+per installatie, zodra de start voorbij is en alleen als er iets is, vraagt
+`SharedTestDataCleanupView` (iOS: `ContentView`, Android: `AndroidHomeView`) met
+een schakelaar per groep, standaard aan: wedstrijden met Bombardino of Whiskey
+(herkend aan de naam; Bob en Wim niet), onvolledige en gepauzeerde
+wedstrijden (coach: status niet `completed`; scheidsrechter: zonder winnaar of
+nog bezig, op iOS ook het bestand `referee-in-progress.json`) en
+competitiewedstrijden (`TeamMatch.date`). Alleen wat vóór de start begon.
+Eerst een volledige back-up (iOS: iCloud zoals de automatische back-up, anders
+`Application Support/Voor opruimen`; Android: `filesDir/Voor opruimen`); mislukt
+die, dan wordt niets verwijderd. Verwijderen gaat zoals uit de geschiedenis:
+badges van die wedstrijd worden als verwijderd gemarkeerd. "Alles bewaren" of
+klaar zet `testDataCleanupDone`. Implementaties: `SwiftDataTestDataStore` en
+`RoomTestDataStore`, beide via `TestDataCleanup.groups(of:before:)`.
+
 De gedeelde UI toont de catalogus, collectie en verdienmomenten op beide
 platforms. Artwork staat in de resources van SquashAnalyzerUI en in
 `website/badges/`. Zie [de artworkoverdracht](docs/style/badge-artwork-overdracht-claude-code.md).

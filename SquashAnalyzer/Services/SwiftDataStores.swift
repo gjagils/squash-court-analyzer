@@ -567,3 +567,88 @@ extension IOSShare {
         present(items)
     }
 }
+
+// MARK: - Cleaning up the test period
+
+/// The one-time "Testgegevens opruimen" after the badge reset (`TestDataCleanup`)
+@MainActor
+final class SwiftDataTestDataStore: TestDataCleanupStore {
+    private let context: ModelContext
+    private let teamMatches: any TeamMatchStore
+
+    init(context: ModelContext, teamMatches: any TeamMatchStore) {
+        self.context = context
+        self.teamMatches = teamMatches
+    }
+
+    private func value(_ match: SavedMatch) -> TestDataMatch {
+        TestDataMatch(startedAt: match.savedAt, player1Name: match.player1Name, player2Name: match.player2Name,
+                      isUnfinished: match.matchStatus != .completed)
+    }
+
+    private func value(_ match: SavedRefereeMatch) -> TestDataMatch {
+        TestDataMatch(startedAt: match.savedAt, player1Name: match.player1Name, player2Name: match.player2Name,
+                      isUnfinished: match.winnerName == nil)
+    }
+
+    /// The referee match on the board ("later verder"), kept in a file of its own
+    private func value(_ match: RefereeMatch) -> TestDataMatch {
+        TestDataMatch(startedAt: match.matchStartedAt, player1Name: match.player1Name, player2Name: match.player2Name,
+                      isUnfinished: true)
+    }
+
+    func counts(before: Date) async throws -> TestDataCounts {
+        var matches = try context.fetch(FetchDescriptor<SavedMatch>()).map(value)
+        matches += try context.fetch(FetchDescriptor<SavedRefereeMatch>()).map(value)
+        if let current = RefereeInProgressStore.load() { matches.append(value(current)) }
+        let teams = try await teamMatches.loadAll().map(\.date)
+        return TestDataCleanup.counts(matches: matches, teamMatchDates: teams, before: before)
+    }
+
+    /// To iCloud like the automatic backup, or into Application Support when
+    /// there is no iCloud, so there is always a copy from before the cleanup
+    func backUp() async throws {
+        let data = try ExportService.exportFullBackup(
+            players: try context.fetch(FetchDescriptor<SavedPlayer>()),
+            matches: try context.fetch(FetchDescriptor<SavedMatch>()),
+            standaloneGames: try context.fetch(FetchDescriptor<SavedGame>(predicate: #Predicate { $0.match == nil })),
+            badgeAwards: try context.fetch(FetchDescriptor<SavedBadgeAward>()),
+            refereeMatches: try context.fetch(FetchDescriptor<SavedRefereeMatch>())
+        )
+        let local = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Voor opruimen", isDirectory: true)
+        try await Task.detached(priority: .userInitiated) {
+            let directory: URL
+            if let iCloud = ExportService.iCloudDirectory {
+                directory = iCloud
+            } else {
+                try FileManager.default.createDirectory(at: local, withIntermediateDirectories: true)
+                directory = local
+            }
+            _ = try ExportService.writeBackup(data, to: directory)
+        }.value
+    }
+
+    func remove(_ groups: [TestDataGroup], before: Date) async throws {
+        let awarder = BadgeAwarder(context: context)
+        for match in try context.fetch(FetchDescriptor<SavedMatch>())
+        where TestDataCleanup.removes(value(match), chosen: groups, before: before) {
+            try awarder.markAwardsDeleted(forMatch: match.id)
+            context.delete(match)
+        }
+        for match in try context.fetch(FetchDescriptor<SavedRefereeMatch>())
+        where TestDataCleanup.removes(value(match), chosen: groups, before: before) {
+            if let id = match.matchId { try awarder.markAwardsDeleted(forMatch: id) }
+            context.delete(match)
+        }
+        try context.save()
+        if let current = RefereeInProgressStore.load(), TestDataCleanup.removes(value(current), chosen: groups, before: before) {
+            RefereeInProgressStore.clear()
+        }
+        if groups.contains(.competition) {
+            for team in try await teamMatches.loadAll() where team.date < before {
+                try await teamMatches.delete(id: team.id)
+            }
+        }
+    }
+}

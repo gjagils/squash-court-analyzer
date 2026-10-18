@@ -23,6 +23,10 @@ struct ContentView: View {
     @State private var showingSettings = false
     /// The tour version seen; the tour shows by itself until it is current
     @AppStorage(Onboarding.storageKey) private var tourSeen = 0
+    /// "Testgegevens opruimen" was answered (once, after the badge reset)
+    @AppStorage(TestDataCleanup.storageKey) private var testDataCleanupDone = false
+    /// What the cleanup question offers; set when there is something to clean up
+    @State private var testDataCounts: TestDataCounts? = nil
     /// A finished coach match opened for its analysis from Afgeronde wedstrijden
     @State private var analysedMatch: Match? = nil
     @State private var showingStartupPersistenceWarning = false
@@ -132,6 +136,7 @@ struct ContentView: View {
             #endif
             TeamImportService.addSamplePlayersIfNew(context: modelContext)
             _ = try? BadgeAwarder(context: modelContext).grantPioneers()
+            offerTestDataCleanup()
             showingStartupPersistenceWarning = startupPersistenceWarning != nil
         }
         .onChange(of: scenePhase) { _, phase in
@@ -194,10 +199,31 @@ struct ContentView: View {
         } message: {
             Text(CardInbox.newerAppText + " Testers vinden de nieuwe versie in TestFlight.")
         }
+        .sheet(isPresented: Binding(get: { testDataCounts != nil && !anyCoverOpen && !Onboarding.shouldShow(seenVersion: tourSeen) },
+                                    set: { if !$0 { testDataCounts = nil } })) {
+            if let counts = testDataCounts, let start = BadgeSeason.start {
+                SharedTestDataCleanupView(counts: counts, before: start,
+                                          store: SwiftDataTestDataStore(context: modelContext, teamMatches: TeamMatchStorage.store)) {
+                    testDataCleanupDone = true
+                    testDataCounts = nil
+                }
+            }
+        }
         .alert("Veilige tijdelijke opslag actief", isPresented: $showingStartupPersistenceWarning) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(startupPersistenceWarning ?? "")
+        }
+    }
+
+    /// After the badge reset, once: offers to remove the test period's matches
+    /// when there are any; with nothing to remove the question is done at once
+    private func offerTestDataCleanup() {
+        guard TestDataCleanup.shouldOffer(done: testDataCleanupDone), let start = BadgeSeason.start else { return }
+        Task {
+            let store = SwiftDataTestDataStore(context: modelContext, teamMatches: TeamMatchStorage.store)
+            guard let counts = try? await store.counts(before: start) else { return }
+            if counts.isEmpty { testDataCleanupDone = true } else { testDataCounts = counts }
         }
     }
 

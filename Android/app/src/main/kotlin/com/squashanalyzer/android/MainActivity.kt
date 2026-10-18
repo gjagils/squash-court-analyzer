@@ -45,6 +45,7 @@ import com.squashanalyzer.android.backup.ActivityBackupFiles
 import com.squashanalyzer.android.backup.AutoBackup
 import com.squashanalyzer.android.data.BackgroundTeamMatchStore
 import com.squashanalyzer.android.data.RoomBackupStore
+import com.squashanalyzer.android.data.RoomTestDataStore
 import com.squashanalyzer.android.aicoach.HttpAICoachTransport
 import com.squashanalyzer.android.live.HttpLiveTransport
 import com.squashanalyzer.android.live.FcmLiveFollowPresenter
@@ -141,6 +142,9 @@ class MainActivity : AppCompatActivity() {
         val backupStore = RoomBackupStore(db, teamDirectory)
         autoBackup = AutoBackup(this, backupStore, appVersion)
         val backup = BackupContext(store = backupStore, files = ActivityBackupFiles(this), appVersion = appVersion, auto = autoBackup)
+        // "Testgegevens opruimen", once after the badge reset (BadgeSeason)
+        val testDataStore = RoomTestDataStore(coachMatchStore, refereeMatchDataStore, badgeAwardStore, teamMatchStore,
+            backupStore, appVersion, java.io.File(filesDir, "Voor opruimen"))
         val teamImporter = RoomTeamImporter(db)
         // Bob and Wim for everyone, as on iOS (SamplePlayers): once per install,
         // also next to existing players (never changing them), never during instrumented tests
@@ -179,7 +183,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 PresentationRoot(defaultColorScheme = if (light) ColorScheme.light else ColorScheme.dark, context = ComposeContext()) { context ->
                     Box(modifier = context.modifier.fillMaxSize()) {
-                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach, backup = backup, teamImporter = teamImporter, photoStore = playerStore, filePicker = playerFiles, shareCard = { snapshot, text -> shareOffMainThread { CardImage.shareIntent(this@MainActivity, snapshot, text) } }, teamMatchStore = teamMatchStore)
+                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach, backup = backup, teamImporter = teamImporter, photoStore = playerStore, filePicker = playerFiles, shareCard = { snapshot, text -> shareOffMainThread { CardImage.shareIntent(this@MainActivity, snapshot, text) } }, teamMatchStore = teamMatchStore, testDataStore = testDataStore)
                             // Page titles 20 sp semibold on every top bar, as PageTitleStyle on iOS (docs/style/README.md)
                             .material3TopAppBar { options ->
                                 val title = options.title

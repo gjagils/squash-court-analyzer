@@ -42,6 +42,7 @@
 		B1000063 /* SavedBadgeAward.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000063 /* SavedBadgeAward.swift */; };
 		B1000064 /* BadgeAwarder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000064 /* BadgeAwarder.swift */; };
 		B1000066 /* BadgeAwardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000066 /* BadgeAwardTests.swift */; };
+		B1000093 /* TestDataCleanupStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000093 /* TestDataCleanupStoreTests.swift */; };
 		B1000067 /* SavedPlayerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000067 /* SavedPlayerCard.swift */; };
 		B1000069 /* CardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000069 /* CardStore.swift */; };
 		B1000070 /* CardSharingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000070 /* CardSharingViews.swift */; };
@@ -135,6 +136,7 @@
 		B2000063 /* SavedBadgeAward.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBadgeAward.swift; sourceTree = "<group>"; };
 		B2000064 /* BadgeAwarder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeAwarder.swift; sourceTree = "<group>"; };
 		B2000066 /* BadgeAwardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeAwardTests.swift; sourceTree = "<group>"; };
+		B2000093 /* TestDataCleanupStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestDataCleanupStoreTests.swift; sourceTree = "<group>"; };
 		B2000067 /* SavedPlayerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlayerCard.swift; sourceTree = "<group>"; };
 		B2000069 /* CardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStore.swift; sourceTree = "<group>"; };
 		B2000070 /* CardSharingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSharingViews.swift; sourceTree = "<group>"; };
@@ -286,6 +288,7 @@
 				B2000062 /* BadgeEngineTests.swift */,
 				B2000072 /* PlayerCardTests.swift */,
 				B2000066 /* BadgeAwardTests.swift */,
+				B2000093 /* TestDataCleanupStoreTests.swift */,
 				B2000023 /* MigrationTests.swift */,
 				B2000022 /* TeamImportTests.swift */,
 				C2000006 /* LiveScoreAttributesTests.swift */,
@@ -515,6 +518,7 @@
 				B1000062 /* BadgeEngineTests.swift in Sources */,
 				B1000072 /* PlayerCardTests.swift in Sources */,
 				B1000066 /* BadgeAwardTests.swift in Sources */,
+				B1000093 /* TestDataCleanupStoreTests.swift in Sources */,
 				B1000023 /* MigrationTests.swift in Sources */,
 				B1000022 /* TeamImportTests.swift in Sources */,
 			);

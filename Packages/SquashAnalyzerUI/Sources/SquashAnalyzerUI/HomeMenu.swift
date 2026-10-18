@@ -284,6 +284,12 @@ public struct AndroidHomeView: View {
     @State private var team: LeagueTeamSnapshot?
     /// The tour version seen; the tour shows by itself until it is current
     @AppStorage(Onboarding.storageKey) private var tourSeen = 0
+    /// "Testgegevens opruimen" was answered (once, after the badge reset)
+    @AppStorage(TestDataCleanup.storageKey) private var testDataCleanupDone = false
+    /// What the cleanup question offers; set when there is something to clean up
+    @State private var testDataCounts: TestDataCounts? = nil
+    /// The test period's matches (Android supplies Room)
+    private let testDataStore: (any TestDataCleanupStore)?
     private let matchStore: any CoachMatchStore
     private let refereeMatchStore: any RefereeMatchStore
     /// Opens the platform share sheet with a text (a card link); Android's
@@ -319,8 +325,9 @@ public struct AndroidHomeView: View {
                 leagueTeamFetcher: LeagueTeamFetcher, aiCoach: AICoachContext? = nil, backup: BackupContext? = nil,
                 teamImporter: (any TeamLinkImporter)? = nil, photoStore: (any PlayerPhotoStore)? = nil,
                 filePicker: (any PlayerFilePicker)? = nil, shareCard: ((CardSnapshot, String) -> Void)? = nil,
-                teamMatchStore: (any TeamMatchStore)? = nil) {
+                teamMatchStore: (any TeamMatchStore)? = nil, testDataStore: (any TestDataCleanupStore)? = nil) {
         self.teamMatchStore = teamMatchStore
+        self.testDataStore = testDataStore
         self.teamImporter = teamImporter
         self.photoStore = photoStore
         self.filePicker = filePicker
@@ -399,6 +406,16 @@ public struct AndroidHomeView: View {
         .sheet(isPresented: $showingLiveFollow) {
             SharedLiveFollowView { showingLiveFollow = false }
         }
+        .sheet(isPresented: Binding(get: { testDataCounts != nil && !Onboarding.shouldShow(seenVersion: tourSeen) },
+                                    set: { if !$0 { testDataCounts = nil } })) {
+            if let counts = testDataCounts, let start = BadgeSeason.start, let testDataStore {
+                SharedTestDataCleanupView(counts: counts, before: start, store: testDataStore) {
+                    testDataCleanupDone = true
+                    testDataCounts = nil
+                }
+            }
+        }
+        .task { await offerTestDataCleanup() }
         .sheet(isPresented: Binding(get: { cardInbox.pending != nil },
                                     set: { if !$0 { cardInbox.pending = nil } })) {
             if let snapshot = cardInbox.pending {
@@ -423,6 +440,14 @@ public struct AndroidHomeView: View {
             }
         }
         .appAppearance()
+    }
+
+    /// After the badge reset, once: offers to remove the test period's matches
+    /// when there are any; with nothing to remove the question is done at once
+    private func offerTestDataCleanup() async {
+        guard TestDataCleanup.shouldOffer(done: testDataCleanupDone), let start = BadgeSeason.start, let testDataStore else { return }
+        guard let counts = try? await testDataStore.counts(before: start) else { return }
+        if counts.isEmpty { testDataCleanupDone = true } else { testDataCounts = counts }
     }
 
     private var homeContent: some View {

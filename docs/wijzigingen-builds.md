@@ -551,6 +551,16 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
 
 ## Backlog
 
+- [ ] **Badges op 0 bij de productierelease 3.0** (afgesproken 18 oktober, nog
+      niet gebouwd). Een vaste startdatum `seasonStart` in Core. Awards van
+      daarvoor worden verborgen, niet gewist (collectie, tellers, kaart,
+      `website/kaart/`). Carrièrebadges en eenmalige badges tellen alleen
+      wedstrijden en awards vanaf die datum, en een wedstrijd van daarvoor geeft
+      geen nieuwe awards (aanvullen, undo). Kaartlinks en back-ups van oude
+      builds kunnen zo niets terugzetten. De datum zetten we als de indiendatum
+      vaststaat (verwacht vrijdag 23 oktober, nog niet zeker). Testers krijgen
+      de badge Pionier; omschrijving en artworkopdracht staan in
+      `docs/style/badge-prompt-pioneer.md`.
 - [ ] **SquashLevels-profiel bij een speler** (afgesproken 6 oktober,
       nog niet gebouwd; kandidaat voor de definitieve 3.0). Bij Spelers een optioneel
       speler-ID of een profiellink per opgeslagen speler vastleggen (niet in

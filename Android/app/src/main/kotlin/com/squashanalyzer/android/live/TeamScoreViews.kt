@@ -3,7 +3,6 @@ package com.squashanalyzer.android.live
 import android.content.Context
 import android.view.View
 import android.widget.RemoteViews
-import androidx.core.content.ContextCompat
 import com.squashanalyzer.android.R
 
 /**
@@ -22,24 +21,28 @@ object TeamScoreViews {
     fun expanded(context: Context, match: FollowedMatch, card: TeamScoreCard): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.notification_team_score)
         teamLine(views, card)
-        if (card.isFinished) {
-            views.setTextViewText(R.id.team_pill, "AFGELOPEN")
-            views.setInt(R.id.team_pill, "setBackgroundResource", R.drawable.live_pill_done)
-            views.setTextColor(R.id.team_pill, ContextCompat.getColor(context, R.color.live_text2))
-        }
+        views.setViewVisibility(R.id.team_live_dot, if (card.isFinished) View.INVISIBLE else View.VISIBLE)
         views.removeAllViews(R.id.team_rows)
         for (row in card.rows) views.addView(R.id.team_rows, row(context, match, row))
         return views
     }
 
     private fun teamLine(views: RemoteViews, card: TeamScoreCard) {
-        views.setTextViewText(R.id.team_home_name, card.score.home)
-        views.setTextViewText(R.id.team_away_name, card.score.away)
+        // Unbreakable: the text auto-size would otherwise break "All Inn Squash 8"
+        // after a word and clip the rest instead of shrinking it
+        views.setTextViewText(R.id.team_home_name, LiveScoreCard.unbreakable(card.score.home))
+        views.setTextViewText(R.id.team_away_name, LiveScoreCard.unbreakable(card.score.away))
         views.setTextViewText(R.id.team_home_games, card.homeGames.toString())
         views.setTextViewText(R.id.team_away_games, card.awayGames.toString())
     }
 
     private fun row(context: Context, match: FollowedMatch, row: TeamScoreCard.Row): RemoteViews {
+        if (row.missing) {
+            // Nobody plays this slot yet: "nog niet begonnen" instead of the team names
+            val waiting = RemoteViews(context.packageName, R.layout.notification_team_row_wait)
+            waiting.setTextViewText(R.id.team_slot, row.label)
+            return waiting
+        }
         val views = RemoteViews(context.packageName, R.layout.notification_team_row)
         show(views, R.id.team_slot, R.id.team_slot_live, if (row.isLive) 2 else 1, row.label)
         // Names: in the team colours, greyed for a slot without a partij

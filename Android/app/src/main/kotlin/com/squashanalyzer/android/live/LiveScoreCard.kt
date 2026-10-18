@@ -171,6 +171,13 @@ class LiveScoreCard(val score: LiveScore) {
         get() = score.games.map { (a, b) -> GameChip("$a–$b", if (a > b) 1 else if (b > a) 2 else 0) }
 
     companion object {
+        /**
+         * Non-breaking spaces and hyphens, for a name in an auto-sized view: Android
+         * would break "Gerd-Jan" or "All Inn Squash 8" and clip the second line
+         * instead of making the text smaller
+         */
+        fun unbreakable(name: String): String = name.replace(' ', '\u00A0').replace('-', '\u2011')
+
         /** First letter (a whole code point, so an emoji or accented letter stays intact), capitalised; "?" without a name */
         fun initialOf(name: String): String {
             val trimmed = name.trim()

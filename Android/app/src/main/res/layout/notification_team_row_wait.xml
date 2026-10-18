@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Team match notification (Android 9-15): a slot nobody plays yet. The team
+     names are in the bar already, so "nog niet begonnen" instead of
+     "Delft 8 E2" on both sides (proposal B, 18 October 2026). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="26dp">
+
+    <TextView
+        android:id="@+id/team_slot"
+        android:layout_width="28dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|start"
+        android:maxLines="1"
+        android:textColor="@color/live_text2"
+        android:textSize="11sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:maxLines="1"
+        android:text="nog niet begonnen"
+        android:textColor="@color/live_dim"
+        android:textSize="12sp" />
+</FrameLayout>

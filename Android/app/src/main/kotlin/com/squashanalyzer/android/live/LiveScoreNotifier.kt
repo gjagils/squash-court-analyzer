@@ -425,7 +425,7 @@ class LiveScoreNotifier(private val context: Context) {
                 views.setViewVisibility(photoView, View.GONE)
                 views.setViewVisibility(initialView, View.VISIBLE)
             }
-            views.setTextViewText(if (first) R.id.live_name1 else R.id.live_name2, card.name(player))
+            views.setTextViewText(if (first) R.id.live_name1 else R.id.live_name2, LiveScoreCard.unbreakable(card.name(player)))
             val serve = card.serveText(player)
             val serveView = if (first) R.id.live_serve1 else R.id.live_serve2
             views.setViewVisibility(serveView, if (serve != null) View.VISIBLE else View.INVISIBLE)

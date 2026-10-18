@@ -43,6 +43,11 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   toont een Live Update van het systeem; daar mag geen eigen ontwerp in en verandert
   niets. Het Dynamic Island blijft zoals het was. Debug: `-LiveActivityDemo team` en
   `team-finished` tonen een teamwedstrijd op het vergrendelscherm van de simulator.
+  Daarna (18 oktober, voorstel B na Gerd-Jans schermafbeelding met "Squash Delft 8" en
+  "All Inn Squash 8"): in de competitiebalk een rode stip naast het vergrootglas in plaats
+  van de LIVE-pil, zodat lange teamnamen volledig passen (ze mogen iets krimpen), en een
+  partij die nog niet bestaat toont "nog niet begonnen" in plaats van tweemaal de teamnaam.
+  Op Android breken namen niet meer af bij een spatie of streepje (bijvoorbeeld "Gerd-Jan").
   - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 
 ## 3.0 build 4 (geüpload 16 oktober 2026)

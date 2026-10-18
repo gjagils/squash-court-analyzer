@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Live score: the red live dot next to the mark in the team bar -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#E5484D" />
+    <size
+        android:width="7dp"
+        android:height="7dp" />
+</shape>

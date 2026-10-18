@@ -119,7 +119,7 @@
                     android:layout_marginStart="6dp"
                     android:ellipsize="end"
                     android:letterSpacing="0.06"
-                    android:maxWidth="112dp"
+                    android:maxWidth="140dp"
                     android:maxLines="1"
                     android:textAllCaps="true"
                     android:textColor="@color/live_p1"

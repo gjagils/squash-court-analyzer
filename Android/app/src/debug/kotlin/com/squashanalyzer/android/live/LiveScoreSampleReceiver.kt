@@ -94,7 +94,7 @@ class LiveScoreSampleReceiver : BroadcastReceiver() {
                 .put(partij(3, "Luis", "Niels", 1 to 3, 7 to 11, "finished", winner = 2))
                 .put(partij(4, "Anna", "Bram", 0 to 0, 0 to 0, "warmup"))
         }
-        val stand = JSONObject().put("home", "All Inn 8").put("away", "Delft 8").put("partijen", partijen)
+        val stand = JSONObject().put("home", "All Inn Squash 8").put("away", "Squash Delft 8").put("partijen", partijen)
         val data = mutableMapOf(
             "kind" to "team",
             "id" to SAMPLE_TEAM_ID,

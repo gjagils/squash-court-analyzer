@@ -97,8 +97,8 @@ struct TeamScorePhotos {
 
 /// The lock screen card: a row per partij E1–E4 (both players, their games,
 /// the points of a partij under way), and a bar along the bottom with the
-/// mark, the team names and the games per team, and LIVE (design chosen
-/// 18 October 2026, "variant 3b"). The system clips a Live Activity at about
+/// mark with a red live dot, the team names and the games per team (design
+/// "variant 3b" with proposal B, 18 October 2026). The system clips a Live Activity at about
 /// 160 pt: four rows of 25 and the bar of 40 make about 156 with the padding.
 struct TeamScoreLockScreenView: View {
     let state: TeamScoreAttributes.ContentState
@@ -124,9 +124,17 @@ struct TeamScoreLockScreenView: View {
 
     private var bar: some View {
         HStack(spacing: 8) {
-            LiveScoreMark(size: 16)
+            // A red dot instead of the LIVE pill, so long team names keep their room
+            HStack(spacing: 5) {
+                LiveScoreMark(size: 16)
+                Circle()
+                    .fill(LiveScoreColors.live)
+                    .frame(width: 7, height: 7)
+                    .opacity(state.isFinished ? 0 : 1)
+                    .accessibilityLabel("Live")
+                    .accessibilityHidden(state.isFinished)
+            }
             TeamScoreTeamLine(state: state, nameSize: 14, boxSize: 15)
-            LiveScorePill(text: state.isFinished ? "AFGELOPEN" : "LIVE", live: !state.isFinished)
         }
         .padding(.horizontal, 14)
         .frame(height: 40)
@@ -152,6 +160,7 @@ struct TeamScoreTeamLine: View {
                 .font(.system(size: nameSize, weight: .bold, design: .rounded))
                 .foregroundColor(LiveScoreColors.player1)
                 .lineLimit(1)
+                .minimumScaleFactor(0.75)
                 .truncationMode(.tail)
                 .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 6) {
@@ -166,6 +175,7 @@ struct TeamScoreTeamLine: View {
                 .font(.system(size: nameSize, weight: .bold, design: .rounded))
                 .foregroundColor(LiveScoreColors.player2Text)
                 .lineLimit(1)
+                .minimumScaleFactor(0.75)
                 .truncationMode(.tail)
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
@@ -184,9 +194,36 @@ struct TeamScoreRow: View {
     let boxSize: CGFloat
 
     var body: some View {
+        if state.partij(slot) == nil {
+            waiting
+        } else {
+            row
+        }
+    }
+
+    /// A slot nobody plays yet: the team names are in the bar already, so
+    /// "nog niet begonnen" instead of "Delft 8 E2" four times over
+    private var waiting: some View {
+        ZStack {
+            Text("nog niet begonnen")
+                .font(.system(size: nameSize - 2, weight: .medium, design: .rounded))
+                .foregroundColor(LiveScoreColors.textSecondary.opacity(0.7))
+                .lineLimit(1)
+            HStack(spacing: 0) {
+                Text("E\(slot)")
+                    .font(.system(size: boxSize - 1, weight: .semibold, design: .rounded))
+                    .foregroundColor(LiveScoreColors.textSecondary)
+                    .padding(.leading, 8)
+                Spacer(minLength: 0)
+            }
+        }
+        .frame(height: height)
+    }
+
+    private var row: some View {
         let partij = state.partij(slot)
         // Both sides get the same width, so the middle sits on the card's centre line
-        HStack(spacing: 5) {
+        return HStack(spacing: 5) {
             HStack(spacing: 5) {
                 // The red live dot leads the row, apart from the serve dots of a single match
                 HStack(spacing: 3) {

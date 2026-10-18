@@ -117,6 +117,11 @@ class LiveScoreCardTest {
         assertEquals(2, card.gamesToWin)
     }
 
+    @Test fun namesInTheNotificationCannotBreak() {
+        assertEquals("Gerd\u2011Jan", LiveScoreCard.unbreakable("Gerd-Jan"))
+        assertEquals("All\u00A0Inn\u00A0Squash\u00A08", LiveScoreCard.unbreakable("All Inn Squash 8"))
+    }
+
     @Test fun initialsAreOneCapitalLetter() {
         assertEquals("G", LiveScoreCard.initialOf("gerd-Jan"))
         assertEquals("É", LiveScoreCard.initialOf(" émile"))

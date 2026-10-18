@@ -464,7 +464,7 @@ enum LiveActivityDemo {
             partijen[2] = TeamScorePartij(slot: 3, p1: "Paul", p2: "Joris", bestOf: 5, gamesWon: [3, 1], score: [11, 6], status: "finished", winner: 1, end: nil)
             partijen.append(TeamScorePartij(slot: 4, p1: "Niels", p2: "Kees", bestOf: 5, gamesWon: [3, 2], score: [11, 9], status: "finished", winner: 1, end: nil))
         }
-        let state = TeamScoreAttributes.ContentState(home: "Delft 7", away: "Ookmeer 2", partijen: partijen)
+        let state = TeamScoreAttributes.ContentState(home: "Squash Delft 8", away: "All Inn Squash 8", partijen: partijen)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             _ = try? Activity.request(attributes: TeamScoreAttributes(teamId: "demo-team", server: "demo"),
                                       content: ActivityContent(state: state, staleDate: nil), pushType: nil)

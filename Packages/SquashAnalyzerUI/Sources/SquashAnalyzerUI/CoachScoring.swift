@@ -158,11 +158,15 @@ public struct SharedScoreboardView: View {
             Button(action: { onSelectPlayer?(player) }) {
                 VStack(spacing: 4) {
                     PlayerAvatarPlaceholder(color: color, size: 34, active: isServing, photo: photo(for: player))
+                    // Two lines at most in a fixed height, as on the referee screen
                     Text(game.name(for: player))
                         .font(SharedFonts.system(13, weight: .bold, design: .rounded))
                         .foregroundColor(highlight.name)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 34)
+                        .padding(.horizontal, 6)
                 }
                 .frame(maxWidth: .infinity)
             }

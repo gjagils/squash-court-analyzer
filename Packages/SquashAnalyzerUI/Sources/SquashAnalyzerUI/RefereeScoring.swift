@@ -200,16 +200,26 @@ public struct RefereeScoringView: View {
                 .font(SharedFonts.system(10, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textMuted)
                 .tracking(2)
+            // Each name gets half of the room, so the games sit exactly in the
+            // middle (above the timeline) however long the names are
             HStack(spacing: 8) {
                 Text(match.player1Name)
                     .foregroundColor(SharedColors.accent)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
                 Text("\(match.player1GamesWon) – \(match.player2GamesWon)")
                     .font(SharedFonts.system(22, weight: .bold, design: .monospaced))
                     .foregroundColor(SharedColors.textPrimary)
+                    .fixedSize()
                 Text(match.player2Name)
                     .foregroundColor(SharedColors.steelBlue)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             .font(SharedFonts.system(13, weight: .bold, design: .rounded))
+            .padding(.horizontal, 16)
             if !match.completedGames.isEmpty || match.firstGameNumber > 1 {
                 // Plain small text, as on iOS
                 HStack(spacing: 10) {
@@ -250,11 +260,17 @@ public struct RefereeScoringView: View {
         return VStack(spacing: 8) {
             PlayerAvatarPlaceholder(color: color, size: 48, active: isServer,
                                     photo: PlayerPhotos.photo(in: photos, id: player == Player.player1 ? match.player1Id : match.player2Id, name: match.name(for: player)))
+            // Two lines at most in a fixed height: a long name ("Niels van
+            // Sevenhoven") wraps instead of running past the column (Android
+            // ignores minimumScaleFactor), and both score boxes stay level
             Text(match.name(for: player))
                 .font(SharedFonts.system(14, weight: .bold, design: .rounded))
                 .foregroundColor(highlight.name)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity)
+                .frame(height: 36)
+                .padding(.horizontal, 8)
 
             ServiceSideSelector(
                 side: match.serverSide,

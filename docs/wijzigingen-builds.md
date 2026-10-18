@@ -10,6 +10,13 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 4)
 
+- **Lange namen op Scheidsrechter en Coach (18 oktober 2026, gedeeld scherm, gemeld door
+  Gerd-Jan op zijn A13)**: de gamestand bovenin staat nu altijd in het midden (elke naam
+  krijgt de helft van de ruimte en wordt zo nodig afgekapt), en de naam boven een
+  scorekolom breekt over twee regels in een vaste hoogte in plaats van over de rand te
+  lopen (Android negeert `minimumScaleFactor`). Op de live score (iPhone) heeft het
+  games-vakje van speler 2 nu een blauwe rand.
+  - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 - **Badges op 0 bij de release en Pionier (18 oktober 2026, iOS, Android en website/kaart)**:
   vanaf `BadgeSeason.start` (voorlopig vrijdag 23 oktober 2026, 00:00) tellen badges en
   wedstrijden van daarvoor niet meer mee; kaarten met badges van daarvoor krijgen Pionier

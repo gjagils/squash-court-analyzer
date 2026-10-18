@@ -195,11 +195,11 @@ struct LiveScoreLockScreenView: View {
             .lineLimit(1)
             .minimumScaleFactor(0.7)
             HStack(spacing: 5) {
-                LiveScoreGamesBox(games: state.games(1), size: 12)
+                LiveScoreGamesBox(games: state.games(1), player: 1, size: 12)
                 Text("games")
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundColor(LiveScoreColors.textSecondary)
-                LiveScoreGamesBox(games: state.games(2), size: 12)
+                LiveScoreGamesBox(games: state.games(2), player: 2, size: 12)
             }
         }
         .fixedSize(horizontal: true, vertical: false)
@@ -357,9 +357,10 @@ struct LiveScoreAvatar: View {
     }
 }
 
-/// The games won as a number in a small bordered box
+/// The games won as a number in a small box, outlined in the player's colour
 struct LiveScoreGamesBox: View {
     let games: Int
+    let player: Int
     let size: CGFloat
 
     var body: some View {
@@ -370,7 +371,8 @@ struct LiveScoreGamesBox: View {
             .frame(minWidth: size * 1.1)
             .padding(.horizontal, size * 0.35)
             .padding(.vertical, size * 0.18)
-            .overlay(RoundedRectangle(cornerRadius: size * 0.5).stroke(LiveScoreColors.line, lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: size * 0.5)
+                .stroke(player == 2 ? LiveScoreColors.player2Line : LiveScoreColors.line, lineWidth: 1))
             .accessibilityLabel("\(games) games")
     }
 }
@@ -436,7 +438,7 @@ struct LiveScoreIslandPlayer: View {
                 }
                 if !leading { LiveScoreAvatar(state: state, player: player, photo: photo, size: 28, lineWidth: 2) }
             }
-            LiveScoreGamesBox(games: state.games(player), size: 13)
+            LiveScoreGamesBox(games: state.games(player), player: player, size: 13)
         }
         .frame(maxWidth: .infinity, alignment: leading ? .leading : .trailing)
         .padding(.horizontal, 4)

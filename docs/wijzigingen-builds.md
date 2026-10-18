@@ -559,8 +559,26 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       geen nieuwe awards (aanvullen, undo). Kaartlinks en back-ups van oude
       builds kunnen zo niets terugzetten. De datum zetten we als de indiendatum
       vaststaat (verwacht vrijdag 23 oktober, nog niet zeker). Testers krijgen
-      de badge Pionier; omschrijving en artworkopdracht staan in
+      de badge Pionier; omschrijving en artwork (klaar) staan in
       `docs/style/badge-prompt-pioneer.md`.
+- [ ] **Testgegevens opruimen bij de eerste start van 3.0** (afgesproken 18
+      oktober, nog niet gebouwd). Eén vraag met een vinkje per groep, alle drie
+      standaard aan: wedstrijden met de voorbeeldspelers, onvolledige én
+      gepauzeerde wedstrijden ("Bewaar en ga later verder"), en
+      competitiewedstrijden. Alleen wedstrijden van vóór `seasonStart`, en de
+      vraag komt alleen als er iets op te ruimen is. Eerst een volledige
+      back-up. "Bewaren" laat ze in geschiedenis en analyse staan; voor badges
+      tellen ze toch niet meer mee. De voorbeeldspelers zijn alleen aan de naam
+      te herkennen; na een nieuwe naam moet de app de oude namen (Bombardino,
+      Whiskey) ook herkennen.
+- [ ] **Voorbeeldspelers een andere naam en foto geven vóór 3.0** (idee
+      Gerd-Jan, 18 oktober). Bombardino en Whiskey zijn allebei drankjes en de
+      foto's tonen alcohol (een likeurglas en een whiskyfles), terwijl de
+      leeftijdsvragen in App Store Connect en Google Play nu "geen alcohol"
+      zeggen. Nieuwe namen en foto's in `voorbeeldspelers.zip`
+      (SquashAnalyzerUI), plus de handleidingen (`website/handleiding/`) en
+      `docs/team-import/README.md`. Bestaande installaties krijgen ze niet
+      opnieuw (`samplePlayersAdded`).
 - [ ] **SquashLevels-profiel bij een speler** (afgesproken 6 oktober,
       nog niet gebouwd; kandidaat voor de definitieve 3.0). Bij Spelers een optioneel
       speler-ID of een profiellink per opgeslagen speler vastleggen (niet in

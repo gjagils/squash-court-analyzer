@@ -29,8 +29,8 @@ final class TestDataCleanupTests: XCTestCase {
         XCTAssertEqual(TestDataCleanup.groups(of: match("Gerd-Jan", "Whiskey"), before: start), [.samplePlayers])
         XCTAssertEqual(TestDataCleanup.groups(of: match("Gerd-Jan", "Paul", unfinished: true), before: start), [.unfinished])
         XCTAssertEqual(TestDataCleanup.groups(of: match("Bombardino", "Paul", unfinished: true), before: start), [.samplePlayers, .unfinished])
-        XCTAssertEqual(TestDataCleanup.groups(of: match("Gerd-Jan", "Paul"), before: start), [])
-        XCTAssertEqual(TestDataCleanup.groups(of: match("Whiskey", "Paul", unfinished: true, at: 60), before: start), [], "newer matches stay")
+        XCTAssertEqual(TestDataCleanup.groups(of: match("Gerd-Jan", "Paul"), before: start), [TestDataGroup]())
+        XCTAssertEqual(TestDataCleanup.groups(of: match("Whiskey", "Paul", unfinished: true, at: 60), before: start), [TestDataGroup](), "newer matches stay")
     }
 
     func testRemovesWhenEitherGroupIsChosen() {

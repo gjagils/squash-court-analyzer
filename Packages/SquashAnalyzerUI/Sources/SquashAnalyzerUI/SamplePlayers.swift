@@ -1,11 +1,12 @@
 import Foundation
 
-/// Two sample players, Bombardino and Whiskey, delivered with the app so a new
-/// user can try a match with "Kies speler" straight away. They come in as a
-/// team zip (`Resources/voorbeeldspelers.zip`, same format as a team import)
-/// for everyone: once per install, also when there are players already
-/// (an existing player with the same name is updated, not doubled).
-/// Deleted sample players never come back.
+/// Two sample players, Bob and Wim, delivered with the app so a new user can
+/// try a match with "Kies speler" straight away. They come in as a team zip
+/// (`Resources/voorbeeldspelers.zip`, same format as a team import) for
+/// everyone: once per install, also when there are players already. An
+/// existing player with the same name is left alone (not updated, not doubled).
+/// Deleted sample players never come back. Until 3.0 they were called
+/// Bombardino and Whiskey; installs from before then keep those.
 public enum SamplePlayers {
     static let seededKey = "samplePlayersAdded"
 

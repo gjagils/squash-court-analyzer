@@ -55,12 +55,12 @@ Houd lokaal (buiten git) een lijstje bij welke code bij welk team en welke capta
 
 ## Voorbeeldspelers bij installatie
 
-De app levert twee voorbeeldspelers mee, **Bombardino** en **Whiskey** (met foto),
+De app levert twee voorbeeldspelers mee, **Bob** en **Wim** (met foto; tot 3.0 heetten ze Bombardino en Whiskey),
 zodat je meteen een wedstrijd met "Kies speler" kunt proberen. Ze zitten als
 gewone team-zip in `Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/voorbeeldspelers.zip`
 (foto's 512 px) en gaan via dezelfde teamimport erin: iOS
 `TeamImportService.addSamplePlayersIfNew`, Android in `MainActivity`. Dat gebeurt
 één keer per installatie (`SamplePlayers`, UserDefaults-sleutel
 `samplePlayersAdded`), ook naast bestaande spelers, dus iedereen krijgt ze bij
-de update. Een eigen speler met dezelfde naam wordt bijgewerkt, niet verdubbeld. Verwijder je ze, dan komen ze niet terug. Niet tijdens tests en
+de update. Een eigen speler met dezelfde naam blijft zoals hij is (niet bijgewerkt, niet verdubbeld), zodat een echte Wim zijn foto houdt. Verwijder je ze, dan komen ze niet terug. Niet tijdens tests en
 screenshot-scenario's.

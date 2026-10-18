@@ -131,6 +131,24 @@ final class TeamImportTests: XCTestCase {
     }
 
     @MainActor
+    func testSamplePlayersNeverChangeAnExistingPlayerWithTheSameName() throws {
+        let container = try makeContainer()
+        container.mainContext.insert(SavedPlayer(name: "wim", coachingFocusAreas: ["Drop"], coachingNotes: "echt"))
+        try container.mainContext.save()
+
+        let zip = makeZip([("team.json", Data("{\"players\":[{\"name\":\"Bob\"},{\"name\":\"Wim\",\"photo\":\"w.jpg\"}]}".utf8), false),
+                           ("w.jpg", jpeg(width: 50, height: 50), false)])
+        let result = try TeamImportService.importTeam(zipData: zip, context: container.mainContext, addOnly: true)
+
+        XCTAssertEqual(result.added, 1)
+        XCTAssertEqual(result.updated, 0)
+        let players = try container.mainContext.fetch(FetchDescriptor<SavedPlayer>()).sorted { $0.name < $1.name }
+        XCTAssertEqual(players.map(\.name), ["Bob", "wim"])
+        XCTAssertNil(players[1].photoData, "the real Wim keeps his own (missing) photo")
+        XCTAssertEqual(players[1].coachingNotes, "echt")
+    }
+
+    @MainActor
     func testImportRejectsBadFilesBeforeWritingAnything() throws {
         let container = try makeContainer()
         let cases: [(String, [(path: String, data: Data, deflate: Bool)])] = [

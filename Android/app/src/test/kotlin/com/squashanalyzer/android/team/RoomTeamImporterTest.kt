@@ -79,6 +79,17 @@ class RoomTeamImporterTest {
         assertEquals("oud", paul.coachingNotes)
     }
 
+    @Test fun samplePlayersNeverChangeAnExistingPlayerWithTheSameName() = runTest {
+        db.playerDao().insert(PlayerEntity("A1", "wim", "[\"Drop\"]", "echt", 1.0))
+        val json = """{"players":[{"name":"Bob"},{"name":"Wim"}]}"""
+        val result = RoomTeamImporter(db).importZip(zip("team.json" to json.toByteArray()), addOnly = true)
+        assertEquals(1, result.added)
+        assertEquals(0, result.updated)
+        val players = db.playerDao().all().sortedBy { it.name }
+        assertEquals(listOf("Bob", "wim"), players.map { it.name })
+        assertEquals("echt", players[1].coachingNotes)
+    }
+
     @Test fun aBadTeamWritesNothing() = runTest {
         val missingPhoto = zip("team.json" to """{"players":[{"name":"A"},{"name":"B","photo":"nope.jpg"}]}""".toByteArray())
         try {

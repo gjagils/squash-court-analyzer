@@ -10,6 +10,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 4)
 
+- **Voorbeeldspelers heten Bob en Wim (18 oktober 2026, iOS en Android)**: nieuwe namen en
+  foto's in `voorbeeldspelers.zip`; Bombardino en Whiskey waren drankjes met foto's van
+  alcohol, wat niet past bij de leeftijdsvragen in de stores. Alleen nieuwe installaties
+  (en 2.0-gebruikers die updaten) krijgen ze; testers houden Bombardino en Whiskey. De
+  voorbeeldspelers werken een bestaande speler met dezelfde naam niet meer bij
+  (`addOnly`), zodat een echte Bob of Wim zijn eigen foto houdt. Handleidingen bijgewerkt
+  (website nog publiceren).
+  - Releasenote: geen (testers merken het niet).
 - **SquashAnalyzer op de live score (16 oktober 2026, iPhone)**: rechtsboven op de kaart
   op het vergrendelscherm staat nu het vergrootglas met "SquashAnalyzer", los in de kaart
   zoals Apple het voor een Live Activity voorschrijft (geen app-icoon, geen kader); bij een
@@ -571,8 +579,8 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       tellen ze toch niet meer mee. De voorbeeldspelers zijn alleen aan de naam
       te herkennen; na een nieuwe naam moet de app de oude namen (Bombardino,
       Whiskey) ook herkennen.
-- [ ] **Voorbeeldspelers een andere naam en foto geven vóór 3.0** (idee
-      Gerd-Jan, 18 oktober). Bombardino en Whiskey zijn allebei drankjes en de
+- [x] **Voorbeeldspelers een andere naam en foto geven vóór 3.0** (idee
+      Gerd-Jan, 18 oktober; gedaan: Bob en Wim, zie Volgende build). Bombardino en Whiskey zijn allebei drankjes en de
       foto's tonen alcohol (een likeurglas en een whiskyfles), terwijl de
       leeftijdsvragen in App Store Connect en Google Play nu "geen alcohol"
       zeggen. Nieuwe namen en foto's in `voorbeeldspelers.zip`

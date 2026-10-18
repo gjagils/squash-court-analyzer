@@ -42,20 +42,22 @@ enum TeamImportService {
         return try importTeam(zipData: data, context: context)
     }
 
-    /// Bombardino and Whiskey for everyone (SquashAnalyzerUI's SamplePlayers):
-    /// once per install, also next to existing players. Not during tests.
+    /// Bob and Wim for everyone (SquashAnalyzerUI's SamplePlayers): once per
+    /// install, also next to existing players, which they never change (a real
+    /// "Wim" keeps his photo). Not during tests.
     @MainActor
     static func addSamplePlayersIfNew(context: ModelContext) {
         guard SamplePlayers.isPending,
               ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
         defer { SamplePlayers.markDone() }
         guard let data = SamplePlayers.zipData() else { return }
-        _ = try? importTeam(zipData: data, context: context)
+        _ = try? importTeam(zipData: data, context: context, addOnly: true)
     }
 
     /// Validates the whole file before touching the database, then adds or updates players.
+    /// With `addOnly` a player whose name already exists is left as it is.
     @MainActor
-    static func importTeam(zipData: Data, context: ModelContext) throws -> TeamImportResult {
+    static func importTeam(zipData: Data, context: ModelContext, addOnly: Bool = false) throws -> TeamImportResult {
         let archive = try ZipArchive(data: zipData)
         guard let jsonPath = TeamImport.teamJSONPath(in: archive.fileEntries.map(\.path)),
               let jsonEntry = archive.entry(named: jsonPath) else { throw TeamImportError.missingTeamJSON }
@@ -82,6 +84,7 @@ enum TeamImportService {
         var result = TeamImportResult(team: file.team)
         for item in prepared {
             if let index = TeamImport.matchIndex(for: item.entry, in: existing.map(\.name)) {
+                if addOnly { continue }
                 let match = existing[index]
                 if !item.entry.focus.isEmpty { match.coachingFocusAreas = item.entry.focus }
                 if let notes = item.entry.notes { match.coachingNotes = notes }

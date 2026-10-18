@@ -139,13 +139,13 @@ class MainActivity : AppCompatActivity() {
         autoBackup = AutoBackup(this, backupStore, appVersion)
         val backup = BackupContext(store = backupStore, files = ActivityBackupFiles(this), appVersion = appVersion, auto = autoBackup)
         val teamImporter = RoomTeamImporter(db)
-        // Bombardino and Whiskey for everyone, as on iOS (SamplePlayers): once
-        // per install, also next to existing players, never during instrumented tests
+        // Bob and Wim for everyone, as on iOS (SamplePlayers): once per install,
+        // also next to existing players (never changing them), never during instrumented tests
         if (SamplePlayers.isPending && !isInstrumentedTest()) {
             lifecycleScope.launch {
                 try {
                     val zip = SamplePlayers.zipData()
-                    if (zip != null) teamImporter.importTeam(zip = zip)
+                    if (zip != null) teamImporter.importZip(zip.platformValue, addOnly = true)
                 } catch (e: Exception) {
                     android.util.Log.w("SamplePlayers", "Voorbeeldspelers niet toegevoegd", e)
                 }

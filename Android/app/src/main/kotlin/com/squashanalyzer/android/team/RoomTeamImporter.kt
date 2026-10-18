@@ -42,7 +42,8 @@ class RoomTeamImporter(
 
     override suspend fun importTeam(zip: Data): TeamImportResult = importZip(zip.platformValue)
 
-    suspend fun importZip(bytes: ByteArray): TeamImportResult {
+    /** With [addOnly] a player whose name already exists is left as it is (the sample players) */
+    suspend fun importZip(bytes: ByteArray, addOnly: Boolean = false): TeamImportResult {
         val files = unzip(bytes)
         val jsonPath = TeamImport.teamJSONPath(in_ = SwiftArray(files.keys.toList())) ?: throw TeamImportError.missingTeamJSON
         val file = TeamImport.decode(Data(platformValue = files.getValue(jsonPath)))
@@ -63,6 +64,7 @@ class RoomTeamImporter(
             val existing = db.playerDao().all()
             for ((entry, photo) in prepared) {
                 val index = TeamImport.matchIndex(for_ = entry, in_ = SwiftArray(existing.map { it.name }))
+                if (index != null && addOnly) continue
                 if (index != null) {
                     val match = existing[index]
                     db.playerDao().updateFields(

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app's logo mark as a line drawing (the magnifying glass with two eyes), as
+     LiveScoreMark on iOS: in the bar of the live score notification -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M10.5,4a6.5,6.5 0,1 1,0 13a6.5,6.5 0,1 1,0 -13z M15.5,15.5L20.5,20.5"
+        android:strokeWidth="2.2"
+        android:strokeColor="@color/live_p1"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="@color/live_p1"
+        android:pathData="M8.6,8.6a1,1 0,1 1,0 2a1,1 0,1 1,0 -2z M12.4,8.6a1,1 0,1 1,0 2a1,1 0,1 1,0 -2z" />
+</vector>

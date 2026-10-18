@@ -18,14 +18,18 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   (`addOnly`), zodat een echte Bob of Wim zijn eigen foto houdt. Handleidingen bijgewerkt
   (website nog publiceren).
   - Releasenote: geen (testers merken het niet).
-- **SquashAnalyzer op de live score (16 oktober 2026, iPhone)**: rechtsboven op de kaart
-  op het vergrendelscherm staat nu het vergrootglas met "SquashAnalyzer", los in de kaart
-  zoals Apple het voor een Live Activity voorschrijft (geen app-icoon, geen kader); bij een
-  volle kopregel (MATCHBAL, een lange status) blijft alleen het vergrootglas staan.
-  GAMEBAL/MATCHBAL staat nu links naast de status. Ook op de teamkaart, en in het
-  uitgeklapte Dynamic Island het vergrootglas klein in de hoek. Android toont de appnaam
-  al zelf boven de melding.
-  - Releasenote: *Op de live score op je vergrendelscherm staat nu rechtsboven SquashAnalyzer, zodat je ziet waar de stand vandaan komt.*
+- **Live score in een nieuw ontwerp (18 oktober 2026, iPhone en Android 9–15)**: gekozen
+  door Gerd-Jan uit drie varianten naast de LiveScore-kaart. Wedstrijd: de spelers links
+  en rechts (foto of letter met een ring, de stip van wie serveert op de foto, de naam
+  eronder), de stand groot in het midden met LIVE en de status erboven en de games
+  eronder, en een balk onderin met het vergrootglas en "SquashAnalyzer", de gespeelde
+  games en (iPhone) de speeltijd. Competitie: E1–E4 elk op een eigen regel, en in de balk
+  onderin het vergrootglas, de teamnamen met de games per team en LIVE. Vervangt
+  "SquashAnalyzer rechtsboven" van 16 oktober (nooit geüpload). Android 16 en nieuwer
+  toont een Live Update van het systeem; daar mag geen eigen ontwerp in en verandert
+  niets. Het Dynamic Island blijft zoals het was. Debug: `-LiveActivityDemo team` en
+  `team-finished` tonen een teamwedstrijd op het vergrendelscherm van de simulator.
+  - Releasenote: *De live score op je vergrendelscherm heeft een nieuw ontwerp: de stand groot in het midden, de spelers links en rechts, en bij een competitiewedstrijd elke partij op een eigen regel met de teamstand eronder.*
 
 ## 3.0 build 4 (geüpload 16 oktober 2026)
 

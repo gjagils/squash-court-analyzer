@@ -14,4 +14,6 @@
     <!-- Team match: the partij under way, and a slot without a partij -->
     <color name="live_live">#C62828</color>
     <color name="live_dim">#A1968B</color>
+    <!-- The bar along the bottom (design "variant 3", 18 October 2026) -->
+    <color name="live_bar">#14A94F08</color>
 </resources>

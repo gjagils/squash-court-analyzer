@@ -154,9 +154,6 @@ class TeamScoreCard(val score: TeamScore) {
     /** The status bar chip of the Live Update: games "5–3" */
     val chipText: String get() = "$homeGames–$awayGames"
 
-    /** The orange line above the expanded notification (shown in capitals) */
-    val header: String get() = if (isFinished) "Uitslag · $partijenText" else "Competitie · $doneText"
-
     /** The partijen being played, by slot */
     private val live: List<TeamPartij> get() = score.partijen.filter { partij -> partij.isLive }
 

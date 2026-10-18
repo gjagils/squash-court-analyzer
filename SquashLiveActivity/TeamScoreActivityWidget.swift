@@ -3,11 +3,10 @@ import SwiftUI
 import UIKit
 import WidgetKit
 
-/// The Live Activity of a team match (Competitie): one card with the team
-/// names and the games per team, and a row per partij E1–E4 with both players
-/// (photo or first letter), their games and in the middle the points of a
-/// partij under way. Home orange, away steel blue, as on the team page.
-/// Design: canvas "Live score op vergrendelscherm", row "Teamwedstrijd · iPhone".
+/// The Live Activity of a team match (Competitie): a row per partij E1–E4
+/// with both players (photo or first letter), their games and in the middle
+/// the points of a partij under way, and below a bar with the team names and
+/// the games per team. Home orange, away steel blue, as on the team page.
 struct TeamScoreActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TeamScoreAttributes.self) { context in
@@ -96,56 +95,47 @@ struct TeamScorePhotos {
     func photo(slot: Int, side: Int) -> UIImage? { images["\(slot)-\(side)"] }
 }
 
-/// The lock screen card. The system clips a Live Activity at about 160 pt:
-/// header 16, team line 22 and four rows of 24 make about 156 with the padding
+/// The lock screen card: a row per partij E1–E4 (both players, their games,
+/// the points of a partij under way), and a bar along the bottom with the
+/// mark, the team names and the games per team, and LIVE (design chosen
+/// 18 October 2026, "variant 3b"). The system clips a Live Activity at about
+/// 160 pt: four rows of 25 and the bar of 40 make about 156 with the padding.
 struct TeamScoreLockScreenView: View {
     let state: TeamScoreAttributes.ContentState
     let photos: TeamScorePhotos
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-            teamLine
-                .padding(.top, 3)
-                .padding(.bottom, 3)
-            ForEach(TeamScoreAttributes.ContentState.slots, id: \.self) { slot in
-                TeamScoreRow(state: state, slot: slot, photos: photos, height: 24, avatar: 20, nameSize: 14, boxSize: 12)
+            VStack(spacing: 0) {
+                ForEach(TeamScoreAttributes.ContentState.slots, id: \.self) { slot in
+                    TeamScoreRow(state: state, slot: slot, photos: photos, height: 25, avatar: 20, nameSize: 14, boxSize: 12)
+                }
             }
+            .padding(.horizontal, 14)
+            .padding(.top, 7)
+            .padding(.bottom, 5)
+            bar
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
         .overlay(
             ContainerRelativeShape()
                 .stroke(LiveScoreColors.line, lineWidth: 1)
         )
     }
 
-    private var header: some View {
+    private var bar: some View {
         HStack(spacing: 8) {
-            HStack(spacing: 7) {
-                if state.isFinished {
-                    LiveScorePill(text: "AFGELOPEN", live: false)
-                    LiveScoreStatusText(text: state.resultTitle, size: 11)
-                } else {
-                    LiveScorePill(text: "LIVE", live: true)
-                    LiveScoreStatusText(text: "Competitie", size: 11)
-                    Text(state.progressText)
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
-                        .foregroundColor(LiveScoreColors.textSecondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                }
-            }
-            .layoutPriority(1)
-            Spacer(minLength: 4)
-            LiveScoreBrand()
+            LiveScoreMark(size: 16)
+            TeamScoreTeamLine(state: state, nameSize: 14, boxSize: 15)
+            LiveScorePill(text: state.isFinished ? "AFGELOPEN" : "LIVE", live: !state.isFinished)
         }
-        .frame(height: 16)
-    }
-
-    private var teamLine: some View {
-        TeamScoreTeamLine(state: state, nameSize: 15, boxSize: 15)
-            .frame(height: 22)
+        .padding(.horizontal, 14)
+        .frame(height: 40)
+        .background(LiveScoreColors.accent.opacity(0.08))
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(LiveScoreColors.line)
+                .frame(height: 1)
+        }
     }
 }
 

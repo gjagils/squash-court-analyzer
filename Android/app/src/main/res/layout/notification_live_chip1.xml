@@ -9,9 +9,9 @@
     android:background="@drawable/live_chip1"
     android:fontFeatureSettings="tnum"
     android:maxLines="1"
-    android:paddingLeft="9dp"
+    android:paddingLeft="7dp"
     android:paddingTop="2dp"
-    android:paddingRight="9dp"
+    android:paddingRight="7dp"
     android:paddingBottom="2dp"
     android:textColor="@color/live_p1"
-    android:textSize="13sp" />
+    android:textSize="12sp" />

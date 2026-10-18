@@ -88,8 +88,6 @@ class LiveScoreCardTest {
         assertEquals("Thomas wint 3–1", card.tickerStatus)
         assertTrue(card.isFinished)
         // The winner gets a cup, nobody serves any more
-        assertEquals("Gerd-Jan", card.tickerName(1))
-        assertEquals("Thomas \uD83C\uDFC6", card.tickerName(2))
         assertNull(card.serveText(1))
         assertNull(card.serveText(2))
         assertEquals(
@@ -117,14 +115,6 @@ class LiveScoreCardTest {
         assertEquals("Inspelen · best of 3", card.tickerStatus)
         assertTrue(card.chips.isEmpty())
         assertEquals(2, card.gamesToWin)
-    }
-
-    @Test fun moreThanFourChipsGoOverTwoRows() {
-        val chips = (1..7).map { n -> LiveScoreCard.GameChip("11–$n", 1) }
-        assertTrue(LiveScoreCard.chipRows(emptyList()).isEmpty())
-        assertEquals(listOf(4), LiveScoreCard.chipRows(chips.take(4)).map { row -> row.size })
-        assertEquals(listOf(3, 2), LiveScoreCard.chipRows(chips.take(5)).map { row -> row.size })
-        assertEquals(listOf(4, 3), LiveScoreCard.chipRows(chips).map { row -> row.size })
     }
 
     @Test fun initialsAreOneCapitalLetter() {

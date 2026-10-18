@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Expanded live score notification before Android 16: the ticker of the
-     website's viewer page (server/live-worker/public/live.html). A status line,
-     a row per player, the finished games as chips (added in code) and the last
-     rally. Colours in live_colors.xml (light and night); the points follow the
-     notification's own title colour. -->
+<!-- Expanded live score notification before Android 16, laid out like a
+     sports score (design "variant 3", 18 October 2026, as the iOS lock screen):
+     both players left and right (photo or letter with a ring, the server's dot
+     on it, the name below), the points large in the middle with the status
+     above and the games below, and a bar with SquashAnalyzer and the finished
+     games (added in code). Colours in live_colors.xml (light and night); the
+     points follow the notification's own title colour. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -11,240 +13,323 @@
     android:paddingTop="2dp"
     android:paddingBottom="6dp">
 
-    <TextView
-        android:id="@+id/live_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:gravity="center"
-        android:letterSpacing="0.08"
-        android:maxLines="1"
-        android:textAllCaps="true"
-        android:textColor="@color/live_p1"
-        android:textSize="12sp"
-        android:textStyle="bold" />
-
-    <!-- Player 1: avatar, name with who serves, games won, points -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp">
+        android:paddingBottom="8dp">
 
-        <FrameLayout
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/live_avatar_ring1"
-            android:padding="2dp">
-
-            <ImageView
-                android:id="@+id/live_photo1"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:importantForAccessibility="no"
-                android:scaleType="centerCrop"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/live_initial1"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:importantForAccessibility="no"
-                android:textColor="@color/live_p1"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-        </FrameLayout>
-
+        <!-- Player 1 -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="8dp"
             android:layout_weight="1"
+            android:gravity="center_horizontal"
             android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp">
+
+                <FrameLayout
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/live_avatar_ring1"
+                    android:padding="2dp">
+
+                    <ImageView
+                        android:id="@+id/live_photo1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/live_initial1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"
+                        android:textColor="@color/live_p1"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
+
+                <ImageView
+                    android:id="@+id/live_serve1"
+                    android:layout_width="11dp"
+                    android:layout_height="11dp"
+                    android:layout_gravity="bottom|end"
+                    android:contentDescription="Opslag"
+                    android:src="@drawable/live_serve_badge1"
+                    android:visibility="invisible" />
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/live_name1"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
+                android:layout_height="20dp"
+                android:layout_marginTop="2dp"
+                android:autoSizeMaxTextSize="15sp"
+                android:autoSizeMinTextSize="9sp"
+                android:autoSizeTextType="uniform"
+                android:gravity="center"
                 android:maxLines="1"
                 android:textColor="@color/live_p1"
-                android:textSize="17sp"
+                android:textSize="15sp"
                 android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/live_serve1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
-                android:drawableStart="@drawable/live_serve_dot1"
-                android:drawablePadding="6dp"
-                android:gravity="center_vertical"
-                android:maxLines="1"
-                android:textColor="@color/live_text2"
-                android:textSize="12sp"
-                android:visibility="gone" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/live_games1"
+        <!-- The middle: status, points, games -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/live_games_box1"
-            android:gravity="center"
-            android:minWidth="28dp"
-            android:paddingLeft="6dp"
-            android:paddingTop="3dp"
-            android:paddingRight="6dp"
-            android:paddingBottom="3dp"
-            android:textColor="@color/live_text2"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/live_points1"
-            style="@style/TextAppearance.Compat.Notification.Title"
-            android:layout_width="56dp"
-            android:layout_height="wrap_content"
-            android:fontFeatureSettings="tnum"
-            android:gravity="end"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:textSize="34sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/live_border"
-        android:importantForAccessibility="no" />
+                <TextView
+                    android:id="@+id/live_pill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/live_pill"
+                    android:letterSpacing="0.1"
+                    android:maxLines="1"
+                    android:paddingLeft="7dp"
+                    android:paddingTop="1dp"
+                    android:paddingRight="7dp"
+                    android:paddingBottom="1dp"
+                    android:text="● LIVE"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
 
-    <!-- Player 2: avatar, name with who serves, games won, points -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp">
+                <TextView
+                    android:id="@+id/live_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:ellipsize="end"
+                    android:letterSpacing="0.06"
+                    android:maxWidth="112dp"
+                    android:maxLines="1"
+                    android:textAllCaps="true"
+                    android:textColor="@color/live_p1"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-        <FrameLayout
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/live_avatar_ring2"
-            android:padding="2dp">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/live_photo2"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:importantForAccessibility="no"
-                android:scaleType="centerCrop"
-                android:visibility="gone" />
+                <TextView
+                    android:id="@+id/live_points1"
+                    style="@style/TextAppearance.Compat.Notification.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFeatureSettings="tnum"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/live_initial2"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:importantForAccessibility="no"
-                android:textColor="@color/live_p2"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-        </FrameLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:importantForAccessibility="no"
+                    android:text="–"
+                    android:textColor="@color/live_text2"
+                    android:textSize="26sp"
+                    android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/live_points2"
+                    style="@style/TextAppearance.Compat.Notification.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFeatureSettings="tnum"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/live_games1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/live_games_box1"
+                    android:gravity="center"
+                    android:minWidth="22dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:textColor="@color/live_text2"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:text="games"
+                    android:textColor="@color/live_text2"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/live_games2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/live_games_box2"
+                    android:gravity="center"
+                    android:minWidth="22dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:textColor="@color/live_text2"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Player 2 -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="8dp"
             android:layout_weight="1"
+            android:gravity="center_horizontal"
             android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp">
+
+                <FrameLayout
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/live_avatar_ring2"
+                    android:padding="2dp">
+
+                    <ImageView
+                        android:id="@+id/live_photo2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/live_initial2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"
+                        android:textColor="@color/live_p2"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
+
+                <ImageView
+                    android:id="@+id/live_serve2"
+                    android:layout_width="11dp"
+                    android:layout_height="11dp"
+                    android:layout_gravity="bottom|end"
+                    android:contentDescription="Opslag"
+                    android:src="@drawable/live_serve_badge2"
+                    android:visibility="invisible" />
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/live_name2"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
+                android:layout_height="20dp"
+                android:layout_marginTop="2dp"
+                android:autoSizeMaxTextSize="15sp"
+                android:autoSizeMinTextSize="9sp"
+                android:autoSizeTextType="uniform"
+                android:gravity="center"
                 android:maxLines="1"
                 android:textColor="@color/live_p2"
-                android:textSize="17sp"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- The bar: SquashAnalyzer and the finished games -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/live_p1_line"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:background="@color/live_bar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="10dp"
+        android:paddingRight="6dp">
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/live_mark" />
+
+        <!-- Hidden in code from four games on (only the mark stays, as on iOS) -->
+        <LinearLayout
+            android:id="@+id/live_brand"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/TextAppearance.Compat.Notification.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="Squash"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/live_serve2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
-                android:drawableStart="@drawable/live_serve_dot2"
-                android:drawablePadding="6dp"
-                android:gravity="center_vertical"
                 android:maxLines="1"
-                android:textColor="@color/live_text2"
+                android:text="Analyzer"
+                android:textColor="@color/live_p1"
                 android:textSize="12sp"
-                android:visibility="gone" />
+                android:textStyle="bold" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/live_games2"
+        <LinearLayout
+            android:id="@+id/live_history"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/live_games_box2"
-            android:gravity="center"
-            android:minWidth="28dp"
-            android:paddingLeft="6dp"
-            android:paddingTop="3dp"
-            android:paddingRight="6dp"
-            android:paddingBottom="3dp"
-            android:textColor="@color/live_text2"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/live_points2"
-            style="@style/TextAppearance.Compat.Notification.Title"
-            android:layout_width="56dp"
-            android:layout_height="wrap_content"
-            android:fontFeatureSettings="tnum"
-            android:gravity="end"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:textSize="34sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical|end"
+            android:orientation="horizontal" />
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/live_history"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:gravity="center"
-        android:orientation="horizontal" />
-
-    <!-- More than four games do not fit one row on a 360dp wide phone -->
-    <LinearLayout
-        android:id="@+id/live_history2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/live_last"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:ellipsize="end"
-        android:gravity="center"
-        android:maxLines="1"
-        android:textColor="@color/live_text2"
-        android:textSize="12sp"
-        android:visibility="gone" />
 </LinearLayout>

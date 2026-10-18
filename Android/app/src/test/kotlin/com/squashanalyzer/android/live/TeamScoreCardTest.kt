@@ -32,7 +32,6 @@ class TeamScoreCardTest {
         val card = TeamScoreCard(design)
         assertEquals("All Inn 8 5 – 3 Delft 8", card.title)
         assertEquals("5–3", card.chipText)
-        assertEquals("Competitie · 2 van 4 klaar", card.header)
         assertEquals("E2 bezig: Paul 7–5 Mark · 2 van 4 klaar", card.text)
         assertEquals("E2 bezig 7–5 · 2 van 4 klaar", card.compactText)
         assertFalse(card.isFinished)
@@ -96,7 +95,6 @@ class TeamScoreCardTest {
         assertTrue(card.isFinished)
         assertEquals(3 to 1, card.partijenWon)
         assertEquals("All Inn 8 10 – 6 Delft 8", card.title)
-        assertEquals("Uitslag · partijen 3–1", card.header)
         assertEquals("Uitslag · partijen 3–1", card.text)
         assertEquals("Uitslag · partijen 3–1", card.compactText)
     }

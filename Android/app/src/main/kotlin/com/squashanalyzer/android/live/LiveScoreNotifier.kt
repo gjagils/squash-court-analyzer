@@ -395,10 +395,22 @@ class LiveScoreNotifier(private val context: Context) {
         return views
     }
 
-    /** The expanded ticker, as live.html: a row per player, finished games as chips */
+    /**
+     * The expanded notification, as the iOS lock screen (design "variant 3"):
+     * the players left and right with the server's dot on the avatar, the
+     * points large in the middle, and a bar with SquashAnalyzer and the
+     * finished games as chips
+     */
     private fun ticker(target: FollowedMatch, card: LiveScoreCard): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.notification_live_score)
         views.setTextViewText(R.id.live_status, card.tickerStatus)
+        if (card.isFinished) {
+            views.setTextViewText(R.id.live_pill, "AFGELOPEN")
+            views.setInt(R.id.live_pill, "setBackgroundResource", R.drawable.live_pill_done)
+            views.setTextColor(R.id.live_pill, ContextCompat.getColor(context, R.color.live_text2))
+            // "Gerd-Jan wint 3–1" gets the room; it already names the winner, so no cup by the name
+            views.setInt(R.id.live_status, "setMaxWidth", (170 * context.resources.displayMetrics.density).toInt())
+        }
         for (player in 1..2) {
             val first = player == 1
             val photo = LivePhotos.load(context, target, player)
@@ -413,34 +425,26 @@ class LiveScoreNotifier(private val context: Context) {
                 views.setViewVisibility(photoView, View.GONE)
                 views.setViewVisibility(initialView, View.VISIBLE)
             }
-            views.setTextViewText(if (first) R.id.live_name1 else R.id.live_name2, card.tickerName(player))
-            val serveView = if (first) R.id.live_serve1 else R.id.live_serve2
+            views.setTextViewText(if (first) R.id.live_name1 else R.id.live_name2, card.name(player))
             val serve = card.serveText(player)
-            views.setTextViewText(serveView, serve ?: "")
-            views.setViewVisibility(serveView, if (serve != null) View.VISIBLE else View.GONE)
+            val serveView = if (first) R.id.live_serve1 else R.id.live_serve2
+            views.setViewVisibility(serveView, if (serve != null) View.VISIBLE else View.INVISIBLE)
+            views.setContentDescription(serveView, serve ?: "")
             views.setTextViewText(if (first) R.id.live_games1 else R.id.live_games2, card.gamesWon(player).toString())
             views.setTextViewText(if (first) R.id.live_points1 else R.id.live_points2, card.points(player).toString())
         }
         views.removeAllViews(R.id.live_history)
-        views.removeAllViews(R.id.live_history2)
-        val rows = LiveScoreCard.chipRows(card.chips)
-        for ((index, row) in rows.withIndex()) {
-            for (chip in row) {
-                val layout = when (chip.winner) {
-                    1 -> R.layout.notification_live_chip1
-                    2 -> R.layout.notification_live_chip2
-                    else -> R.layout.notification_live_chip0
-                }
-                val chipView = RemoteViews(context.packageName, layout)
-                chipView.setTextViewText(R.id.live_chip, chip.text)
-                views.addView(if (index == 0) R.id.live_history else R.id.live_history2, chipView)
+        views.setViewVisibility(R.id.live_brand, if (card.chips.size >= 4) View.INVISIBLE else View.VISIBLE)
+        for (chip in card.chips) {
+            val layout = when (chip.winner) {
+                1 -> R.layout.notification_live_chip1
+                2 -> R.layout.notification_live_chip2
+                else -> R.layout.notification_live_chip0
             }
+            val chipView = RemoteViews(context.packageName, layout)
+            chipView.setTextViewText(R.id.live_chip, chip.text)
+            views.addView(R.id.live_history, chipView)
         }
-        views.setViewVisibility(R.id.live_history, if (rows.isNotEmpty()) View.VISIBLE else View.GONE)
-        views.setViewVisibility(R.id.live_history2, if (rows.size > 1) View.VISIBLE else View.GONE)
-        val last = card.score.lastPoint
-        views.setTextViewText(R.id.live_last, last ?: "")
-        views.setViewVisibility(R.id.live_last, if (last.isNullOrBlank()) View.GONE else View.VISIBLE)
         return views
     }
 

@@ -3,12 +3,13 @@ package com.squashanalyzer.android.live
 import android.content.Context
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat
 import com.squashanalyzer.android.R
 
 /**
- * The custom views of a followed team match on Android 9-15 (design
- * "Teamwedstrijd · Android"): collapsed the teams with their games and one
- * line of state, expanded also the four partijen E1-E4.
+ * The custom views of a followed team match on Android 9-15: collapsed the
+ * teams with their games and one line of state, expanded the four partijen
+ * E1-E4 above a bar with the teams and their games (design "variant 3b").
  */
 object TeamScoreViews {
     fun collapsed(context: Context, card: TeamScoreCard): RemoteViews {
@@ -20,8 +21,12 @@ object TeamScoreViews {
 
     fun expanded(context: Context, match: FollowedMatch, card: TeamScoreCard): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.notification_team_score)
-        views.setTextViewText(R.id.team_header, card.header)
         teamLine(views, card)
+        if (card.isFinished) {
+            views.setTextViewText(R.id.team_pill, "AFGELOPEN")
+            views.setInt(R.id.team_pill, "setBackgroundResource", R.drawable.live_pill_done)
+            views.setTextColor(R.id.team_pill, ContextCompat.getColor(context, R.color.live_text2))
+        }
         views.removeAllViews(R.id.team_rows)
         for (row in card.rows) views.addView(R.id.team_rows, row(context, match, row))
         return views

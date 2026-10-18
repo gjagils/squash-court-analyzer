@@ -58,6 +58,21 @@ Awards worden opnieuw berekend bij opslaan en undo. Verwijderde awards hebben
 een tombstone: bij samenvoegen wint `deletedAt`, zodat een verwijderde award
 niet terugkomt door een oudere kaart te importeren. Awards gaan mee in back-ups.
 
+**Badgereset bij de productierelease** (`BadgeSeason` in Core, gebouwd 18 oktober
+2026, staat nog uit). `BadgeSeason.start` is een vaste datum, gelijk op elk
+toestel; zolang die `nil` is of nog niet voorbij, verandert er niets. Daarna:
+awards met `earnedAt` vóór de start blijven bewaard (ook in kaartlinks en
+back-ups) maar tonen en tellen niet (`isShown` op `SavedBadgeAward`, `AwardValue`
+en in Android's `BadgeAwardStore`); `careerBadges` laat oudere wedstrijden weg;
+eenmalige badges kijken alleen naar getoonde awards; en een wedstrijd met
+`BadgeMatchInput.startedAt` vóór de start krijgt geen nieuwe awards en houdt wat
+hij had (`syncAwards` stopt meteen). Elke kaart met een actieve award van vóór
+de start krijgt bij het openen van de app één keer **Pionier**
+(`BadgeKind.pioneer`, categorie Speciaal, niet in `BadgeKind.collection`, dus
+niet in "x van 37"): vaste `matchId` en `earnedAt = start`, zodat elk toestel
+hetzelfde award-id maakt. Aanzetten: de datum in `BadgeSeason.start` én dezelfde
+datum (seconden) in `SEASON_START` in `website/kaart/index.html`.
+
 De gedeelde UI toont de catalogus, collectie en verdienmomenten op beide
 platforms. Artwork staat in de resources van SquashAnalyzerUI en in
 `website/badges/`. Zie [de artworkoverdracht](docs/style/badge-artwork-overdracht-claude-code.md).

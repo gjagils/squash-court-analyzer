@@ -559,8 +559,10 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
 
 ## Backlog
 
-- [ ] **Badges op 0 bij de productierelease 3.0** (afgesproken 18 oktober, nog
-      niet gebouwd). Een vaste startdatum `seasonStart` in Core. Awards van
+- [ ] **Badges op 0 bij de productierelease 3.0** (afgesproken 18 oktober;
+      gebouwd op branch `claude/zealous-turing-fh3h7a`, nog niet op `main` en nog
+      niet getest op de Mac; de datum staat nog uit, zie ARCHITECTURE.md
+      "Badgereset"). Een vaste startdatum `BadgeSeason.start` in Core. Awards van
       daarvoor worden verborgen, niet gewist (collectie, tellers, kaart,
       `website/kaart/`). Carrièrebadges en eenmalige badges tellen alleen
       wedstrijden en awards vanaf die datum, en een wedstrijd van daarvoor geeft

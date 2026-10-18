@@ -560,20 +560,21 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
 ## Backlog
 
 - [ ] **Badges op 0 bij de productierelease 3.0** (afgesproken 18 oktober;
-      gebouwd op branch `claude/zealous-turing-fh3h7a`, nog niet op `main` en nog
-      niet getest op de Mac; de datum staat nog uit, zie ARCHITECTURE.md
-      "Badgereset"). Een vaste startdatum `BadgeSeason.start` in Core. Awards van
+      op `main` sinds 18 oktober, getest op de Mac (suites, ook met een start in
+      het verleden, en op simulator en emulator); startdatum voorlopig vrijdag
+      23 oktober 2026, 00:00, zie ARCHITECTURE.md "Badgereset"). Een vaste startdatum `BadgeSeason.start` in Core. Awards van
       daarvoor worden verborgen, niet gewist (collectie, tellers, kaart,
       `website/kaart/`). Carrièrebadges en eenmalige badges tellen alleen
       wedstrijden en awards vanaf die datum, en een wedstrijd van daarvoor geeft
       geen nieuwe awards (aanvullen, undo). Kaartlinks en back-ups van oude
-      builds kunnen zo niets terugzetten. De datum zetten we als de indiendatum
-      vaststaat (verwacht vrijdag 23 oktober, nog niet zeker). Testers krijgen
+      builds kunnen zo niets terugzetten. Gerd-Jan zette de datum op 18 oktober
+      voorlopig op vrijdag 23 oktober; schuift de release, dan de datum vóór de
+      volgende upload aanpassen (app én `website/kaart/`, en de website publiceren). Testers krijgen
       de badge Pionier; omschrijving en artwork (klaar) staan in
       `docs/style/badge-prompt-pioneer.md`.
 - [ ] **Testgegevens opruimen bij de eerste start van 3.0** (afgesproken 18
-      oktober; gebouwd op branch `claude/zealous-turing-fh3h7a`, nog niet op
-      `main` en nog niet getest op de Mac; zie ARCHITECTURE.md). Eén vraag met een vinkje per groep, alle drie
+      oktober; op `main` sinds 18 oktober en getest op simulator en emulator;
+      zie ARCHITECTURE.md). Eén vraag met een vinkje per groep, alle drie
       standaard aan: wedstrijden met de voorbeeldspelers, onvolledige én
       gepauzeerde wedstrijden ("Bewaar en ga later verder"), en
       competitiewedstrijden. Alleen wedstrijden van vóór `seasonStart`, en de

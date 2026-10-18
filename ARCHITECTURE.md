@@ -59,7 +59,7 @@ een tombstone: bij samenvoegen wint `deletedAt`, zodat een verwijderde award
 niet terugkomt door een oudere kaart te importeren. Awards gaan mee in back-ups.
 
 **Badgereset bij de productierelease** (`BadgeSeason` in Core, gebouwd 18 oktober
-2026, staat nog uit). `BadgeSeason.start` is een vaste datum, gelijk op elk
+2026; startdatum voorlopig vrijdag 23 oktober 2026, 00:00 Nederlandse tijd). `BadgeSeason.start` is een vaste datum, gelijk op elk
 toestel; zolang die `nil` is of nog niet voorbij, verandert er niets. Daarna:
 awards met `earnedAt` vóór de start blijven bewaard (ook in kaartlinks en
 back-ups) maar tonen en tellen niet (`isShown` op `SavedBadgeAward`, `AwardValue`
@@ -71,7 +71,10 @@ de start krijgt bij het openen van de app één keer **Pionier**
 (`BadgeKind.pioneer`, categorie Speciaal, niet in `BadgeKind.collection`, dus
 niet in "x van 37"): vaste `matchId` en `earnedAt = start`, zodat elk toestel
 hetzelfde award-id maakt. Aanzetten: de datum in `BadgeSeason.start` én dezelfde
-datum (seconden) in `SEASON_START` in `website/kaart/index.html`.
+datum (seconden) in `SEASON_START` in `website/kaart/index.html`. Een build
+met een datum erin reset op die datum, ook als de release later komt: verschuif
+de datum dus vóór een upload, niet erna. Tests met badgedatums gebruiken
+datums na de start (2027), anders vallen ze om zodra de start voorbij is.
 
 **Testgegevens opruimen** (`TestDataCleanup` in Core, zelfde start). Eén keer
 per installatie, zodra de start voorbij is en alleen als er iets is, vraagt

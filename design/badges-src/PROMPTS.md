@@ -351,3 +351,7 @@ Use case: stylized-concept. Create ONE new 1024x1024 PNG SquashAnalyzer achievem
 Basisontwerp/stijlreferentie: badge-drop-it.png.
 
 Use case: stylized-concept. Create ONE new 1024x1024 PNG SquashAnalyzer achievement medal, transparent outside the circle. Input is STYLE REFERENCE ONLY. Match its low-poly faceted illustration, royal-blue circular field, orange/gold angular accents, thin gold #E8B547 rim, crisp simple readable composition. Subject: A hand intercepting a black squash ball, orange/gold motion accents. Large bold cream-white numeral 5. Every badge includes a faceted BLACK SQUASH BALL with EXACTLY TWO YELLOW DOTS. Circle nearly fills square, full rim visible, genuinely transparent corners. No words or names, no lettering besides requested numeral. Match visual weight and flat faceted style of existing badge precisely, no photorealism or 3D bevel excess. Output badge-hand-out-held.png.
+
+## badge-pioneer.png
+
+Toegevoegd 18 oktober 2026, aangeleverd door Gerd-Jan (1254 × 1254, transparant) op basis van de voorbeeldprompt in `docs/style/badge-prompt-pioneer.md`. Verkleind naar 1024, 240 en 180 pixels met behoud van alpha.

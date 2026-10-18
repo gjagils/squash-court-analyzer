@@ -239,6 +239,10 @@
 
 ## Controle-overzichten en generatieprompts
 
+- [design/badges-src/badge-pioneer.png](badge-pioneer.png)
+- [Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-pioneer.imageset/badge-pioneer.png](../../Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-pioneer.imageset/badge-pioneer.png)
+- [website/badges/pioneer.png](../../website/badges/pioneer.png)
+- [Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-pioneer.imageset/Contents.json](../../Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-pioneer.imageset/Contents.json)
 - [design/badges-src/overzicht-treden-1-56px.png](overzicht-treden-1-56px.png)
 - [design/badges-src/overzicht-treden-2-56px.png](overzicht-treden-2-56px.png)
 - [design/badges-src/overzicht-nieuw-56px.png](overzicht-nieuw-56px.png)

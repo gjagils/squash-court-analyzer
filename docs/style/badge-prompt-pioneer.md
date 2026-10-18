@@ -1,7 +1,9 @@
 # Testbadge "Pionier": omschrijving en artworkopdracht
 
-> **Open opdracht (18 oktober 2026).** Het artwork is nog niet gemaakt en de
-> logica nog niet gebouwd. Kopieer voor het artwork alles onder de lijn.
+> **Artwork klaar (18 oktober 2026)**, aangeleverd door Gerd-Jan en in de drie
+> formaten op de plek gezet (zie de tabel onder Bestanden). De logica is nog
+> niet gebouwd: `BadgeKind.pioneer` bestaat nog niet, dus de app en de website
+> tonen hem nog niet.
 
 ## Waarom deze badge
 

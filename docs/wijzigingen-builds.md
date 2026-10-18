@@ -10,6 +10,13 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 4)
 
+- **Badges op 0 bij de release en Pionier (18 oktober 2026, iOS, Android en website/kaart)**:
+  vanaf `BadgeSeason.start` (voorlopig vrijdag 23 oktober 2026, 00:00) tellen badges en
+  wedstrijden van daarvoor niet meer mee; kaarten met badges van daarvoor krijgen Pionier
+  (Speciaal, niet in de 37). Eenmalige vraag "Testgegevens opruimen" met een schakelaar
+  per groep, na een volledige back-up. Handleidingen bijgewerkt (website nog publiceren).
+  Zie de backlog en ARCHITECTURE.md.
+  - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 - **Voorbeeldspelers heten Bob en Wim (18 oktober 2026, iOS en Android)**: nieuwe namen en
   foto's in `voorbeeldspelers.zip`; Bombardino en Whiskey waren drankjes met foto's van
   alcohol, wat niet past bij de leeftijdsvragen in de stores. Alleen nieuwe installaties
@@ -29,7 +36,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   toont een Live Update van het systeem; daar mag geen eigen ontwerp in en verandert
   niets. Het Dynamic Island blijft zoals het was. Debug: `-LiveActivityDemo team` en
   `team-finished` tonen een teamwedstrijd op het vergrendelscherm van de simulator.
-  - Releasenote: *De live score op je vergrendelscherm heeft een nieuw ontwerp: de stand groot in het midden, de spelers links en rechts, en bij een competitiewedstrijd elke partij op een eigen regel met de teamstand eronder.*
+  - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 
 ## 3.0 build 4 (geüpload 16 oktober 2026)
 

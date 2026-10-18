@@ -32,7 +32,9 @@ final class TestDataCleanupStoreTests: XCTestCase {
 
         let start = Date()
         let old = start.addingTimeInterval(-86_400)
-        let context = try makeContainer().mainContext
+        // Keep the container: a context whose container is gone crashes SwiftData
+        let container = try makeContainer()
+        let context = container.mainContext
         context.insert(SavedMatch(player1Name: "Gerd-Jan", player2Name: "Whiskey", matchStartingServer: .player1, savedAt: old))
         context.insert(SavedMatch(player1Name: "Gerd-Jan", player2Name: "Paul", matchStartingServer: .player1, savedAt: old, status: .abandoned))
         let kept = SavedMatch(player1Name: "Gerd-Jan", player2Name: "Paul", matchStartingServer: .player1, savedAt: old)

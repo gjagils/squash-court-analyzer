@@ -103,6 +103,8 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
     case clubicoon = "clubicoon"
     case rivalen = "rivalen"
     case handOutHeld = "hand-out-held"
+    /// Not earned in a match: for the cards that had badges before the reset (`BadgeSeason`)
+    case pioneer = "pioneer"
 
     public var id: String { rawValue }
 
@@ -198,6 +200,13 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
     /// `allCases` would depend on Kotlin's companion initialisation order)
     public static var families: [BadgeKind] { BadgeKind.allCases.filter { kind in kind.family == kind } }
 
+    /// The families everyone can collect (the "x van y" and the grid), without
+    /// a special badge such as Pionier, which shows only when earned
+    public static var collection: [BadgeKind] { BadgeKind.families.filter { kind in !kind.isSpecial } }
+
+    /// Given rather than earned in a match (Pionier)
+    public var isSpecial: Bool { self == BadgeKind.pioneer }
+
     /// Per series the highest tier among `kinds`, in catalogue order (badges
     /// without tiers as they are), for a strip or card that shows one medallion per badge
     public static func highestTiers(among kinds: Set<BadgeKind>) -> [BadgeKind] {
@@ -259,6 +268,7 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .clubicoon: return "Clubicoon"
         case .rivalen: return "Rivalen"
         case .handOutHeld: return "Hand-out held"
+        case .pioneer: return "Pionier"
         default: return rawValue
         }
     }
@@ -310,6 +320,7 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .clubicoon: return "Speel tegen 10 verschillende tegenstanders"
         case .rivalen: return "Speel 10 wedstrijden tegen dezelfde tegenstander"
         case .handOutHeld: return "Win 5 rally's achter elkaar op de service van de ander"
+        case .pioneer: return "Testte SquashAnalyzer mee vóór de release"
         default: return rawValue
         }
     }
@@ -361,6 +372,7 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case game = "In één game"
         case match = "In één wedstrijd"
         case career = "Over al je wedstrijden"
+        case special = "Speciaal"
     }
 
     public var category: Category {
@@ -368,6 +380,7 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .goingTheDistance, .cleanSweep, .houdini, .doubleTrouble, .fullHouse, .photoFinish, .ironMan,
              .rockSolid, .vetteWinst: return .match
         case .hatTrick, .offTheMark, .centurion, .tenOutOfTen, .nemesis, .veteran, .clubicoon, .rivalen: return .career
+        case .pioneer: return .special
         default: return .game
         }
     }
@@ -436,10 +449,13 @@ public struct BadgeMatchInput: Equatable {
     public var recordsPointTypes: Bool
     /// Whole match, first serve to last rally
     public var duration: TimeInterval
+    /// When the match began (its first rally); a match from before the badge
+    /// reset earns nothing (`BadgeSeason`). Nil when unknown.
+    public var startedAt: Date?
 
     public init(games: [BadgeGame], player1GamesBefore: Int = 0, player2GamesBefore: Int = 0,
                 player1GamesWon: Int = 0, player2GamesWon: Int = 0, matchWinner: Player? = nil,
-                gamesToWin: Int = 3, recordsPointTypes: Bool = false, duration: TimeInterval = 0) {
+                gamesToWin: Int = 3, recordsPointTypes: Bool = false, duration: TimeInterval = 0, startedAt: Date? = nil) {
         self.games = games
         self.player1GamesBefore = player1GamesBefore
         self.player2GamesBefore = player2GamesBefore
@@ -449,6 +465,7 @@ public struct BadgeMatchInput: Equatable {
         self.gamesToWin = gamesToWin
         self.recordsPointTypes = recordsPointTypes
         self.duration = duration
+        self.startedAt = startedAt
     }
 
     public func gamesBefore(_ player: Player) -> Int { player == .player1 ? player1GamesBefore : player2GamesBefore }
@@ -655,7 +672,8 @@ public struct BadgeEngine {
     /// this device. `earnedElsewhere` are once-only badges already on the card for
     /// another match, which are not awarded a second time.
     public func careerBadges(in matchId: UUID, history: [CareerMatch], earnedElsewhere: Set<BadgeKind>) -> Set<BadgeKind> {
-        let ordered = history.sorted { a, b in a.date < b.date }
+        // Matches from before the badge reset no longer count (BadgeSeason)
+        let ordered = history.filter { entry in BadgeSeason.counts(entry.date) }.sorted { a, b in a.date < b.date }
         guard let index = ordered.firstIndex(where: { entry in entry.matchId == matchId }) else { return [] }
         let match = ordered[index]
         let before = Array(ordered[..<index])
@@ -753,6 +771,8 @@ extension MatchBadgeEarning {
     /// typed-in players (no id) and players without a badge are left out
     public static func earnings(player1Id: UUID?, player1Name: String, player2Id: UUID?, player2Name: String,
                                 badgeInput: BadgeMatchInput) -> [MatchBadgeEarning] {
+        // A match from before the badge reset earns nothing (BadgeSeason)
+        if let startedAt = badgeInput.startedAt, !BadgeSeason.counts(startedAt) { return [] }
         let earnedByPlayer = BadgeEngine().badges(for: badgeInput)
         var result: [MatchBadgeEarning] = []
         if let id = player1Id, let earned = earnedByPlayer[Player.player1], !earned.isEmpty {

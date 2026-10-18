@@ -18,7 +18,8 @@ public extension Match {
             matchWinner: matchWinner,
             gamesToWin: gamesToWin,
             recordsPointTypes: true,
-            duration: totalMatchDuration()
+            duration: totalMatchDuration(),
+            startedAt: allPoints.min { a, b in a.timestamp < b.timestamp }?.timestamp
         )
     }
 
@@ -66,7 +67,8 @@ public extension RefereeMatch {
             player2GamesWon: player2TotalGames,
             matchWinner: matchWinner,
             gamesToWin: gamesToWin,
-            duration: matchDuration
+            duration: matchDuration,
+            startedAt: matchStartedAt
         )
     }
 

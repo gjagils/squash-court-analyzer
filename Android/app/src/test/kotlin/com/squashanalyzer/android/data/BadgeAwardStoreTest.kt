@@ -65,6 +65,35 @@ class BadgeAwardStoreTest {
         assertEquals("test-install", award.awardedBy)
     }
 
+    @Test fun pioneerOnceForACardWithBadgesFromBeforeTheReset() = runTest {
+        val startSeconds = 1_800_000_000.0
+        val start = skip.foundation.Date(timeIntervalSince1970 = startSeconds)
+        fun at(offset: Double) = skip.foundation.Date(timeIntervalSince1970 = startSeconds + offset)
+        val card = UUID().uuidString
+        val newcomer = UUID().uuidString
+        db.badgeAwardDao().insertAll(listOf(
+            BadgeAwardEntity(id = UUID().uuidString, cardId = card, badge = BadgeKind.fiveInARow.rawValue, matchId = UUID().uuidString,
+                earnedAt = ((startSeconds - 3_600) * 1000).toLong(), opponentName = "Paul", awardedBy = "x"),
+            BadgeAwardEntity(id = UUID().uuidString, cardId = newcomer, badge = BadgeKind.fiveInARow.rawValue, matchId = UUID().uuidString,
+                earnedAt = ((startSeconds + 60) * 1000).toLong(), opponentName = "Paul", awardedBy = "x"),
+        ))
+
+        assertEquals("not before the start", 0, badgeStore.grantPioneers(start, at(-1.0)))
+        assertEquals(1, badgeStore.grantPioneers(start, at(120.0)))
+        assertEquals("never twice", 0, badgeStore.grantPioneers(start, at(240.0)))
+
+        val pioneer = db.badgeAwardDao().all().single { it.badge == BadgeKind.pioneer.rawValue }
+        assertEquals(card, pioneer.cardId)
+        assertEquals((startSeconds * 1000).toLong(), pioneer.earnedAt)
+        assertEquals(BadgeSeason.pioneerMatchId.uuidString, pioneer.matchId)
+        // The same id as iOS makes for this card
+        assertEquals(BadgeSeason.pioneerAward(cardId = UUID(uuidString = card)!!, awardedBy = "y", start = start).id.uuidString, pioneer.id)
+
+        // Deleted by the user: it does not come back
+        db.badgeAwardDao().markDeleted(pioneer.id, ((startSeconds + 300) * 1000).toLong())
+        assertEquals(0, badgeStore.grantPioneers(start, at(600.0)))
+    }
+
     @Test fun awardsLandOnTheLinkedCardWhenThePlayerHasOne() = runTest {
         val card = UUID()
         val playerId = player(cardId = card.uuidString)

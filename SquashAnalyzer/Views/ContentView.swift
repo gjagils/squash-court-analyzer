@@ -131,6 +131,7 @@ struct ContentView: View {
             }
             #endif
             TeamImportService.addSamplePlayersIfNew(context: modelContext)
+            _ = try? BadgeAwarder(context: modelContext).grantPioneers()
             showingStartupPersistenceWarning = startupPersistenceWarning != nil
         }
         .onChange(of: scenePhase) { _, phase in
@@ -139,6 +140,8 @@ struct ContentView: View {
             }
             // A link that arrived during a cold start, before there was a window
             if phase == .active {
+                // Also for a card from before the badge reset imported since
+                _ = try? BadgeAwarder(context: modelContext).grantPioneers()
                 presentPendingCard()
                 presentPendingTeam()
                 // A live final score that could not be sent (no network) goes now

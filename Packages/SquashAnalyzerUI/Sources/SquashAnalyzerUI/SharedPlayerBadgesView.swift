@@ -72,7 +72,7 @@ public struct SharedPlayerBadgesView: View {
 
     private var earnedFamilies: Int {
         var result = 0
-        for family in BadgeKind.families where familyCount(family) > 0 {
+        for family in BadgeKind.collection where familyCount(family) > 0 {
             result += 1
         }
         return result
@@ -111,11 +111,11 @@ public struct SharedPlayerBadgesView: View {
                             .buttonStyle(.plain)
                             .accessibilityLabel("Profiel van \(playerName)")
                         }
-                        section("BADGES · \(earnedFamilies) VAN \(BadgeKind.families.count)") {
+                        section("BADGES · \(earnedFamilies) VAN \(BadgeKind.collection.count)") {
                             // Rows of three, not a LazyVGrid: on Android that becomes a
                             // scroll area of its own inside the page
                             VStack(spacing: 18) {
-                                ForEach(0..<Self.rowCount, id: \.self) { row in
+                                ForEach(0..<rowCount, id: \.self) { row in
                                     badgeRow(row)
                                 }
                             }
@@ -141,7 +141,12 @@ public struct SharedPlayerBadgesView: View {
         .task(id: cardInbox.importCount) { await load() }
     }
 
-    private static var rowCount: Int { (BadgeKind.families.count + 2) / 3 }
+    /// The collection, plus a special badge (Pionier) once the player has it
+    private var gridFamilies: [BadgeKind] {
+        BadgeKind.families.filter { family in !family.isSpecial || familyCount(family) > 0 }
+    }
+
+    private var rowCount: Int { (gridFamilies.count + 2) / 3 }
 
     private func badgeRow(_ row: Int) -> some View {
         HStack(alignment: .top, spacing: 8) {
@@ -153,8 +158,9 @@ public struct SharedPlayerBadgesView: View {
 
     @ViewBuilder
     private func gridCell(_ index: Int) -> some View {
-        if index < BadgeKind.families.count {
-            let family = BadgeKind.families[index]
+        let families = gridFamilies
+        if index < families.count {
+            let family = families[index]
             NavigationLink {
                 SharedBadgeMomentsView(family: family, moments: moments(of: family)) { moment in remove(moment) }
             } label: {
@@ -334,6 +340,7 @@ struct SharedBadgeMomentsView: View {
 
     /// "Goud · Tegen Kristian", "Tegen Kristian" or "Wedstrijd"
     static func momentTitle(_ moment: BadgeMoment) -> String {
+        if moment.badge == BadgeKind.pioneer { return "Testperiode" }
         let against = moment.opponentName.isEmpty ? "Wedstrijd" : "Tegen \(moment.opponentName)"
         guard let tier = moment.badge.tier else { return against }
         return tier.title + " · " + against

@@ -88,6 +88,8 @@ class MainActivity : AppCompatActivity() {
     /** Card links opened from WhatsApp, the browser, … wait here for the import screen */
     private val cardInbox = CardInbox()
     private lateinit var autoBackup: AutoBackup
+    /** For Pionier at every resume (BadgeSeason); set in onCreate */
+    private var badges: BadgeAwardStore? = null
 
     /** Live score on the lock screen: the notification permission, asked when following (Android 13+) */
     private var notificationAnswer: CompletableDeferred<Boolean>? = null
@@ -121,6 +123,7 @@ class MainActivity : AppCompatActivity() {
         val db = AppDatabase.get(this)
         val badgeAwardStore = BadgeAwardStore(db.badgeAwardDao(), db.playerDao(),
             coachMatchStore, refereeMatchDataStore, badgeInstallId(), transaction = { block -> db.withTransaction { block() } })
+        badges = badgeAwardStore
         (LiveFollow.shared.presenter as? FcmLiveFollowPresenter)?.requestNotificationPermission = askNotificationPermission
         // Not again after a rotation: the link was already taken in (or dismissed)
         if (savedInstanceState == null) receiveCardLink(intent)
@@ -198,6 +201,8 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         lifecycleScope.launch { LiveShare.shared.retryPending() }
         lifecycleScope.launch { TeamLive.shared.retryPending() }
+        // Pionier after the badge reset, also for a card from before it imported since
+        badges?.let { store -> lifecycleScope.launch { runCatching { store.grantPioneers() } } }
     }
 
     private val resultImageShare: (ResultCard) -> Unit = { card -> shareOffMainThread { ResultImage.shareIntent(this, card) } }

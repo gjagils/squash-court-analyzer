@@ -37,6 +37,8 @@ final class SavedBadgeAward {
 
     var badgeKind: BadgeKind? { BadgeKind(rawValue: badge) }
     var isActive: Bool { deletedAt == nil }
+    /// Active and not from before the badge reset (`BadgeSeason`): what the screens show and count
+    var isShown: Bool { BadgeSeason.shows(earnedAt: earnedAt, deletedAt: deletedAt) }
 
     /// Deterministic id, shared with Android (see `AwardValue.awardId` in SquashAnalyzerCore)
     static func awardId(cardId: UUID, badge: BadgeKind, matchId: UUID) -> UUID {

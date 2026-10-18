@@ -17,7 +17,7 @@ struct PlayerManagementView: View {
     /// Badges with tiers count once, like Android's `badgeCounts` and the
     /// "x van 37" on the player screen
     private func badgeFamilyCount(for player: SavedPlayer) -> Int {
-        Set(activeAwards.filter { $0.cardId == player.badgeCardId }
+        Set(activeAwards.filter { $0.cardId == player.badgeCardId && $0.isShown }
             .compactMap { BadgeKind(rawValue: $0.badge)?.family }).count
     }
 

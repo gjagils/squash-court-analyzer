@@ -220,8 +220,9 @@ final class BadgeEngineTests: XCTestCase {
         XCTAssertEqual(BadgeKind.dropItSilver.detail, "6 drops in één game")
         XCTAssertEqual(BadgeKind.rockSolid.imageName, "badge-rock-solid")
         XCTAssertNil(BadgeKind.rockSolid.tier)
-        XCTAssertEqual(BadgeKind.families.count, 37)
-        XCTAssertEqual(BadgeKind.allCases.count, 71)
+        XCTAssertEqual(BadgeKind.families.count, 38)
+        XCTAssertEqual(BadgeKind.collection.count, 37, "Pionier is not part of the collection")
+        XCTAssertEqual(BadgeKind.allCases.count, 72)
     }
 
     func testBackWallBossHandOutsAndSneltrein() {

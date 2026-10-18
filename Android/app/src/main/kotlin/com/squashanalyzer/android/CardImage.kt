@@ -48,7 +48,7 @@ object CardImage {
      * every silver or gold), like the shared badge screen
      */
     private fun earned(snapshot: CardSnapshot): List<Pair<BadgeKind, Int>> {
-        val active = snapshot.awards.toList().filter { it.deletedAt == null }
+        val active = snapshot.awards.toList().filter { it.isShown }
         return BadgeKind.families.toList().mapNotNull { family ->
             val tiers = family.series.toList()
             val counts = tiers.map { tier -> active.count { it.badge == tier } }
@@ -86,7 +86,7 @@ object CardImage {
         text.typeface = Typeface.DEFAULT
         text.textSize = 34f
         text.color = Color.rgb(179, 175, 168)
-        canvas.drawText("${items.size} van ${BadgeKind.families.count} badges", PADDING.toFloat(), PADDING + 185f, text)
+        canvas.drawText("${items.count { !it.first.isSpecial }} van ${BadgeKind.collection.count} badges", PADDING.toFloat(), PADDING + 185f, text)
 
         val top = PADDING + 240
         if (items.isEmpty()) {

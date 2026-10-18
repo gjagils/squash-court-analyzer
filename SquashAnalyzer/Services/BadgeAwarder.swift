@@ -26,6 +26,8 @@ struct BadgeAwarder {
                     playerNames: [Player: String],
                     input: BadgeMatchInput,
                     earnedAt: Date = Date()) throws {
+        // A match from before the badge reset earns nothing and keeps what it has
+        if let startedAt = input.startedAt, !BadgeSeason.counts(startedAt) { return }
         let earned = engine.badges(for: input)
         var expected: [UUID: (cardId: UUID, badge: BadgeKind, player: Player)] = [:]
         for (player, playerId) in playerIds {
@@ -99,7 +101,29 @@ struct BadgeAwarder {
     /// Once-only badges the card already has from another match
     private func onceBadges(onCard cardId: UUID, except matchId: UUID) throws -> Set<BadgeKind> {
         let awards = try context.fetch(FetchDescriptor<SavedBadgeAward>(predicate: #Predicate { $0.cardId == cardId }))
-        return Set(awards.filter { $0.matchId != matchId && $0.isActive }.compactMap(\.badgeKind).filter(\.isOnce))
+        return Set(awards.filter { $0.matchId != matchId && $0.isShown }.compactMap(\.badgeKind).filter(\.isOnce))
+    }
+
+    /// Pionier for every card that had badges before the badge reset, once the
+    /// start has passed. The award id is fixed per card, so it is never doubled
+    /// and a deleted one stays deleted. Saves; returns how many were added.
+    @discardableResult
+    func grantPioneers(start: Date? = BadgeSeason.start, now: Date = Date()) throws -> Int {
+        guard let start = BadgeSeason.activeStart(start: start, now: now) else { return 0 }
+        let awards = try context.fetch(FetchDescriptor<SavedBadgeAward>()).compactMap(AwardValue.init)
+        var added = 0
+        for cardId in BadgeSeason.pioneerCards(among: awards, start: start, now: now) {
+            let value = BadgeSeason.pioneerAward(cardId: cardId, awardedBy: Self.installId, start: start)
+            let id = value.id
+            var descriptor = FetchDescriptor<SavedBadgeAward>(predicate: #Predicate { $0.id == id })
+            descriptor.fetchLimit = 1
+            guard try context.fetch(descriptor).isEmpty else { continue }
+            context.insert(SavedBadgeAward(cardId: cardId, badge: .pioneer, matchId: value.matchId, earnedAt: start,
+                                           opponentName: "", awardedBy: value.awardedBy))
+            added += 1
+        }
+        if added > 0 { try context.save() }
+        return added
     }
 
     private func cardId(forPlayer playerId: UUID) throws -> UUID? {

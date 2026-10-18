@@ -28,6 +28,9 @@ public struct AwardValue: Equatable, Sendable {
 
     public var id: UUID { AwardValue.awardId(cardId: cardId, badge: badge, matchId: matchId) }
 
+    /// Shows and counts: not deleted and not from before the badge reset (`BadgeSeason`)
+    public var isShown: Bool { BadgeSeason.shows(earnedAt: earnedAt, deletedAt: deletedAt) }
+
     /// The same award on another card (when a player is linked to a shared card)
     public func onCard(_ cardId: UUID) -> AwardValue {
         AwardValue(cardId: cardId, badge: badge, matchId: matchId, earnedAt: earnedAt,

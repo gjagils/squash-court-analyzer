@@ -10,6 +10,7 @@ import squash.analyzer.core.BadgeEngine.CareerMatch
 import squash.analyzer.core.BadgeKind
 import squash.analyzer.core.BadgeMatchInput
 import squash.analyzer.core.BadgeMoment
+import squash.analyzer.core.BadgeSeason
 import squash.analyzer.core.CardImportPlayer
 import squash.analyzer.core.CardImportPreview
 import squash.analyzer.core.CardImportStore
@@ -45,16 +46,16 @@ class BadgeAwardStore(
     /** Runs `block` as one database transaction: a match and its badges are saved together or not at all */
     suspend fun inTransaction(block: suspend () -> Unit) = transaction(block)
 
-    /** Matches with at least one badge that was not deleted (medal on a history card) */
+    /** Matches with at least one badge that shows (medal on a history card) */
     suspend fun matchIdsWithBadges(): Set<String> =
-        dao.all().filter { it.deletedAt == null }.map { it.matchId }.toSet()
+        dao.all().filter(::shown).map { it.matchId }.toSet()
 
     /** The card a player's awards live on: `players.cardId ?: players.id`, like iOS' `badgeCardId` */
     suspend fun cardId(playerId: String): String? = playerDao.byId(playerId)?.let { it.cardId ?: it.id }
 
     suspend fun activeAwards(playerId: String): List<BadgeAwardRecord> {
         val cardId = cardId(playerId) ?: return emptyList()
-        return dao.activeForCard(cardId).map(::record)
+        return dao.activeForCard(cardId).filter(::shown).map(::record)
     }
 
     override suspend fun badges(forPlayer: String): SwiftArray<BadgeKind> =
@@ -65,7 +66,7 @@ class BadgeAwardStore(
         val wanted = forPlayers.toSet()
         val cards = playerDao.all().filter { it.id in wanted }.associate { it.id to (it.cardId ?: it.id) }
         // A badge with tiers counts once, whichever tiers are there
-        val kindsPerCard = dao.allActive().groupBy { it.cardId }.mapValues { (_, rows) ->
+        val kindsPerCard = dao.allActive().filter(::shown).groupBy { it.cardId }.mapValues { (_, rows) ->
             rows.mapNotNull { BadgeKind.init(rawValue = it.badge) }.map { it.family }.distinct().size
         }
         val result = Dictionary<String, Int>()
@@ -108,8 +109,9 @@ class BadgeAwardStore(
         for (value in values) {
             val existing = dao.byId(value.id.uuidString)
             if (existing != null) {
-                if (existing.deletedAt == null && value.deletedAt != null) deleted++
-            } else if (value.deletedAt == null) {
+                // Only badges that show: one from before the badge reset is stored but changes nothing
+                if (shown(existing) && value.deletedAt != null) deleted++
+            } else if (value.isShown) {
                 new++
             }
         }
@@ -117,7 +119,7 @@ class BadgeAwardStore(
         val cardId = snapshot.cardId.uuidString
         val linked = players.firstOrNull { (it.cardId ?: it.id) == cardId }
         return CardImportPreview(
-            activeBadges = values.count { it.deletedAt == null },
+            activeBadges = values.count { it.isShown },
             newBadges = new, deletedBadges = deleted,
             linkedPlayer = linked?.let { CardImportPlayer(id = it.id, name = it.name) },
             players = SwiftArray(players.map { CardImportPlayer(id = it.id, name = it.name) }),
@@ -179,6 +181,8 @@ class BadgeAwardStore(
      */
     suspend fun syncAwards(matchId: String, players: List<Pair<String, Player>>, names: Map<Player, String>, input: BadgeMatchInput) {
         val matchUuid = UUID(uuidString = matchId) ?: return
+        // A match from before the badge reset earns nothing and keeps what it has
+        input.startedAt?.let { if (!BadgeSeason.counts(it)) return }
         val engine = BadgeEngine()
         val earnedByPlayer = engine.badges(input)
         val now = System.currentTimeMillis()
@@ -219,7 +223,7 @@ class BadgeAwardStore(
     /** Once-only badges the card already has from another match */
     private suspend fun onceBadges(cardId: String, exceptMatchId: String): List<BadgeKind> =
         dao.forCard(cardId)
-            .filter { it.matchId != exceptMatchId && it.deletedAt == null }
+            .filter { it.matchId != exceptMatchId && shown(it) }
             .mapNotNull { BadgeKind.init(rawValue = it.badge) }
             .filter { it.isOnce }
             .distinct()
@@ -273,6 +277,33 @@ class BadgeAwardStore(
         return CareerMatch(matchId = matchId, date = Date(timeIntervalSince1970 = savedAt.toDouble() / 1000.0),
             won = winner == slot, pointsWon = points, opponentKey = opponent.lowercase())
     }
+
+    /**
+     * Pionier for every card that had badges before the badge reset, once the
+     * start has passed, like iOS' `BadgeAwarder.grantPioneers`. The award id is
+     * fixed per card, so it is never doubled and a deleted one stays deleted.
+     */
+    suspend fun grantPioneers(seasonStart: Date? = BadgeSeason.start, now: Date = Date()): Int {
+        val start = BadgeSeason.activeStart(start = seasonStart, now = now) ?: return 0
+        val values = dao.all().mapNotNull { row ->
+            val badge = BadgeKind.init(rawValue = row.badge) ?: return@mapNotNull null
+            val card = UUID(uuidString = row.cardId) ?: return@mapNotNull null
+            val match = UUID(uuidString = row.matchId) ?: return@mapNotNull null
+            AwardValue(cardId = card, badge = badge, matchId = match, earnedAt = date(row.earnedAt),
+                opponentName = row.opponentName, awardedBy = row.awardedBy, deletedAt = row.deletedAt?.let(::date))
+        }
+        val pioneers = BadgeSeason.pioneerCards(among = SwiftArray(values), start = start, now = now).toList()
+            .map { BadgeSeason.pioneerAward(cardId = it, awardedBy = installId, start = start) }
+            .filter { dao.byId(it.id.uuidString) == null }
+        if (pioneers.isNotEmpty()) dao.insertAll(pioneers.map(::entity))
+        return pioneers.size
+    }
+
+    /** Shows and counts: not deleted and not from before the badge reset (`BadgeSeason`) */
+    private fun shown(row: BadgeAwardEntity): Boolean =
+        BadgeSeason.shows(earnedAt = date(row.earnedAt), deletedAt = row.deletedAt?.let(::date))
+
+    private fun date(millis: Long) = Date(timeIntervalSince1970 = millis / 1000.0)
 
     private fun record(it: BadgeAwardEntity) =
         BadgeAwardRecord(it.id, it.cardId, it.badge, it.matchId, it.earnedAt, it.opponentName, it.awardedBy, it.deletedAt)

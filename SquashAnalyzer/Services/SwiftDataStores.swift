@@ -352,7 +352,7 @@ final class SwiftDataMatchHistoryStore: MatchHistoryStore {
 
     func loadHistory() async throws -> [MatchHistorySummary] {
         let withBadges = Set(try context.fetch(FetchDescriptor<SavedBadgeAward>())
-            .filter { $0.deletedAt == nil }.map { $0.matchId })
+            .filter(\.isShown).map { $0.matchId })
         let inProgress = MatchStatus.inProgress.rawValue
         let coach = try context.fetch(FetchDescriptor<SavedMatch>(predicate: #Predicate { $0.status != inProgress }))
             .map { saved -> MatchHistorySummary in
@@ -510,6 +510,7 @@ final class SwiftDataBadgeSummaryStore: PlayerBadgeSummaryStore, @unchecked Send
     private func activeAwards(_ playerId: String) throws -> [SavedBadgeAward] {
         guard let card = try player(playerId)?.badgeCardId else { return [] }
         return try context.fetch(FetchDescriptor<SavedBadgeAward>(predicate: #Predicate { $0.cardId == card && $0.deletedAt == nil }))
+            .filter(\.isShown)
     }
 
     nonisolated func badges(forPlayer playerId: String) async throws -> [BadgeKind] {

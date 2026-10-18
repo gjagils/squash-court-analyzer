@@ -107,7 +107,13 @@
       {"id": "clubicoon", "title": "Clubicoon", "detail": "Speel tegen 10 verschillende tegenstanders"},
       {"id": "rivalen", "title": "Rivalen", "detail": "Speel 10 wedstrijden tegen dezelfde tegenstander"},
       {"id": "hand-out-held", "title": "Hand-out held", "detail": "Win 5 rally's achter elkaar op de service van de ander"},
+      {"id": "pioneer", "title": "Pionier", "detail": "Testte SquashAnalyzer mee vóór de release", "special": true},
     ];
+    // The badge reset at the production release, the same date as BadgeSeason.start
+    // in the app (seconds since 1970); null while the date is not fixed. Once it has
+    // passed, awards from before it no longer show.
+    const SEASON_START = null;
+    const seasonActive = SEASON_START != null && Date.now() / 1000 >= SEASON_START;
     // Every badge id → its badge and tier (null for a badge without tiers)
     const KIND = {};
     for (const badge of BADGES) {
@@ -155,7 +161,7 @@
       box.replaceChildren();
       box.append(el("div", "card-label", "Badgekaart"), el("div", "card-name", card.n));
 
-      const active = (card.a || []).filter(a => a.d == null && KIND[a.b]);
+      const active = (card.a || []).filter(a => a.d == null && KIND[a.b] && (!seasonActive || a.t >= SEASON_START));
       const badges = el("div", "badges");
       for (const badge of BADGES) {
         // A badge with tiers: the highest tier earned, counted by the tier with
@@ -165,6 +171,8 @@
         let best = -1;
         counts.forEach((n, index) => { if (n > 0) best = index; });
         const count = Math.max(...counts);
+        // A special badge (Pionier) only when earned
+        if (badge.special && count === 0) continue;
         const item = el("div", count > 0 ? "badge" : "badge locked");
         const medal = el("div", "medal");
         const img = document.createElement("img");
@@ -186,7 +194,8 @@
         for (const award of active.sort((x, y) => y.t - x.t)) {
           const row = el("div", "moment");
           const kind = KIND[award.b];
-          const what = kind.badge.title + (kind.tier == null ? "" : " · " + TIER_NAMES[kind.tier]) + (typeof award.o === "string" && award.o ? " · tegen " + award.o : "");
+          const what = kind.badge.special ? kind.badge.title + " · testperiode"
+            : kind.badge.title + (kind.tier == null ? "" : " · " + TIER_NAMES[kind.tier]) + (typeof award.o === "string" && award.o ? " · tegen " + award.o : "");
           row.append(el("span", null, what), el("span", null, formatter.format(new Date(award.t * 1000))));
           moments.append(row);
         }

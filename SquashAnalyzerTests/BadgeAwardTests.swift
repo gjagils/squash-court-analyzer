@@ -95,6 +95,34 @@ final class BadgeAwardTests: XCTestCase {
     }
 
     @MainActor
+    func testPioneerOnceForACardWithBadgesFromBeforeTheReset() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let start = Date(timeIntervalSince1970: 1_800_000_000)
+        let card = UUID(), newcomer = UUID()
+        context.insert(SavedBadgeAward(cardId: card, badge: .fiveInARow, matchId: UUID(), earnedAt: start.addingTimeInterval(-3_600),
+                                       opponentName: "Paul", awardedBy: "x"))
+        context.insert(SavedBadgeAward(cardId: newcomer, badge: .fiveInARow, matchId: UUID(), earnedAt: start.addingTimeInterval(60),
+                                       opponentName: "Paul", awardedBy: "x"))
+        try context.save()
+        let awarder = BadgeAwarder(context: context)
+
+        XCTAssertEqual(try awarder.grantPioneers(start: start, now: start.addingTimeInterval(-1)), 0, "not before the start")
+        XCTAssertEqual(try awarder.grantPioneers(start: start, now: start.addingTimeInterval(120)), 1)
+        XCTAssertEqual(try awarder.grantPioneers(start: start, now: start.addingTimeInterval(240)), 0, "never twice")
+
+        let pioneer = try XCTUnwrap(try awards(in: context).first { $0.badgeKind == .pioneer })
+        XCTAssertEqual(pioneer.cardId, card)
+        XCTAssertEqual(pioneer.earnedAt, start)
+        XCTAssertEqual(pioneer.matchId, BadgeSeason.pioneerMatchId)
+
+        // Deleted by the user: it does not come back
+        pioneer.deletedAt = start.addingTimeInterval(300)
+        try context.save()
+        XCTAssertEqual(try awarder.grantPioneers(start: start, now: start.addingTimeInterval(600)), 0)
+    }
+
+    @MainActor
     func testDiscardingAMatchRemovesItsAwards() throws {
         let container = try makeContainer()
         let context = container.mainContext

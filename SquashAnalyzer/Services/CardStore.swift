@@ -47,7 +47,8 @@ struct CardStore {
         return changed
     }
 
-    /// What a merge would add: new badges and new deletions
+    /// What a merge would add: new badges and new deletions (of badges that
+    /// show; one from before the badge reset is stored but changes nothing)
     func preview(_ values: [AwardValue]) throws -> (new: Int, deleted: Int) {
         var new = 0, deleted = 0
         for value in values {
@@ -55,8 +56,8 @@ struct CardStore {
             var descriptor = FetchDescriptor<SavedBadgeAward>(predicate: #Predicate { $0.id == id })
             descriptor.fetchLimit = 1
             if let existing = try context.fetch(descriptor).first {
-                if existing.deletedAt == nil, value.deletedAt != nil { deleted += 1 }
-            } else if value.deletedAt == nil {
+                if existing.isShown, value.deletedAt != nil { deleted += 1 }
+            } else if value.isShown {
                 new += 1
             }
         }

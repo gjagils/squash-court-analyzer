@@ -14,7 +14,7 @@ struct PlayerCardImage: View {
     /// tier earned, counted by the tier with the most moments (bronze comes
     /// with every silver or gold), like the shared badge screen
     private var earned: [(kind: BadgeKind, count: Int)] {
-        let active = snapshot.awards.filter { $0.deletedAt == nil }
+        let active = snapshot.awards.filter(\.isShown)
         return BadgeKind.families.compactMap { family in
             var best: BadgeKind? = nil
             var count = 0
@@ -48,7 +48,7 @@ struct PlayerCardImage: View {
                 Text(snapshot.name)
                     .font(AppFonts.title(24))
                     .foregroundColor(AppColors.textPrimary)
-                Text("\(earned.count) van \(BadgeKind.families.count) badges")
+                Text("\(earned.filter { !$0.kind.isSpecial }.count) van \(BadgeKind.collection.count) badges")
                     .font(AppFonts.caption(12))
                     .foregroundColor(AppColors.textSecondary)
             }
@@ -182,7 +182,7 @@ struct CardImportSheet: View {
     /// Same wording as Android, from `CardImportPreview.summary`
     private var summary: String {
         let preview = preview
-        return CardImportPreview(activeBadges: snapshot.awards.filter { $0.deletedAt == nil }.count,
+        return CardImportPreview(activeBadges: snapshot.awards.filter(\.isShown).count,
                                  newBadges: preview.new, deletedBadges: preview.deleted,
                                  linkedPlayer: linkedPlayer.map { CardImportPlayer(id: $0.id.uuidString, name: $0.name) },
                                  players: []).summary

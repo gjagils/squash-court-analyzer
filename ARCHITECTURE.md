@@ -59,7 +59,7 @@ een tombstone: bij samenvoegen wint `deletedAt`, zodat een verwijderde award
 niet terugkomt door een oudere kaart te importeren. Awards gaan mee in back-ups.
 
 **Badgereset bij de productierelease** (`BadgeSeason` in Core, gebouwd 18 oktober
-2026; startdatum voorlopig vrijdag 23 oktober 2026, 00:00 Nederlandse tijd). `BadgeSeason.start` is een vaste datum, gelijk op elk
+2026; startdatum voorlopig woensdag 28 oktober 2026, 00:00 Nederlandse tijd; op 19 oktober verschoven van vrijdag 23 oktober). `BadgeSeason.start` is een vaste datum, gelijk op elk
 toestel; zolang die `nil` is of nog niet voorbij, verandert er niets. Daarna:
 awards met `earnedAt` vóór de start blijven bewaard (ook in kaartlinks en
 back-ups) maar tonen en tellen niet (`isShown` op `SavedBadgeAward`, `AwardValue`

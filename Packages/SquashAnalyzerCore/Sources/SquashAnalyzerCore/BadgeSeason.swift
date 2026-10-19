@@ -9,10 +9,10 @@ import Foundation
 /// See docs/wijzigingen-builds.md (backlog, 18 October 2026).
 public enum BadgeSeason {
     /// The first moment that counts; nil while the release date is not fixed
-    /// (then nothing changes). Friday 23 October 2026, 00:00 in the
-    /// Netherlands (provisional, Gerd-Jan, 18 October 2026); the same seconds
+    /// (then nothing changes). Wednesday 28 October 2026, 00:00 in the
+    /// Netherlands (provisional, Gerd-Jan, 19 October 2026); the same seconds
     /// as SEASON_START in website/kaart/index.html.
-    public static let start: Date? = Date(timeIntervalSince1970: 1_792_706_400)
+    public static let start: Date? = Date(timeIntervalSince1970: 1_793_142_000)
 
     /// The fixed "match" Pionier is stored under, so every device that grants
     /// it to a card makes the same award id

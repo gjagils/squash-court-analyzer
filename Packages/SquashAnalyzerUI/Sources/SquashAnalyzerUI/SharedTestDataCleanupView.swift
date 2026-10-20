@@ -3,8 +3,9 @@ import SquashAnalyzerCore
 
 // MARK: - Testgegevens opruimen
 
-/// The one-time question after the badge reset (`TestDataCleanup`): a switch
-/// per group, all on, first a full backup. "Bewaren" keeps everything in the
+/// The one-time sheet after the badge reset (`TestDataCleanup`): the message
+/// that badges start again (with Pionier) when the device had badges, and the
+/// question with a switch per group, all on, first a full backup. "Bewaren" keeps everything in the
 /// history; for badges it no longer counts anyway. iOS and Android alike.
 public struct SharedTestDataCleanupView: View {
     let counts: TestDataCounts
@@ -37,53 +38,93 @@ public struct SharedTestDataCleanupView: View {
             SharedColors.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    Text("Testgegevens opruimen")
-                        .font(SharedFonts.system(22, weight: .bold, design: .rounded))
-                        .foregroundColor(SharedColors.textPrimary)
-                    Text("De testperiode is voorbij en iedereen begint opnieuw met badges. Wil je ook de wedstrijden uit de testperiode opruimen? Alleen wedstrijden van vóór de release; eerst wordt een volledige back-up gemaakt.")
-                        .font(SharedFonts.system(13))
-                        .foregroundColor(SharedColors.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    VStack(alignment: .leading, spacing: 10) {
-                        ForEach(counts.groups, id: \.self) { group in
-                            Toggle(isOn: binding(group)) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(group.title)
-                                        .font(SharedFonts.system(14, weight: .medium, design: .rounded))
-                                        .foregroundColor(SharedColors.textPrimary)
-                                    Text(counts.count(group) == 1 ? "1 wedstrijd" : "\(counts.count(group)) wedstrijden")
-                                        .font(SharedFonts.system(11))
-                                        .foregroundColor(SharedColors.textMuted)
-                                }
-                            }
-                            .tint(SharedColors.accent)
-                            .disabled(busy)
-                        }
+                    if counts.earlierBadges > 0 {
+                        badgeReset
                     }
-                    .padding(14)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(SharedColors.tint(0.04))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    Text("Wat je bewaart, blijft in de geschiedenis en de analyse staan. Voor badges telt het niet meer mee.")
-                        .font(SharedFonts.system(11))
-                        .foregroundColor(SharedColors.textMuted)
-                        .fixedSize(horizontal: false, vertical: true)
-                    if let failure {
-                        Text(failure)
-                            .font(SharedFonts.system(12, weight: .medium))
-                            .foregroundColor(SharedColors.error)
-                            .fixedSize(horizontal: false, vertical: true)
+                    if !counts.isEmpty {
+                        cleanup
+                    } else {
+                        ActionButton("BEGREPEN", style: .filled) { onDone() }
                     }
-                    ActionButton(busy ? "BEZIG…" : "OPRUIMEN", icon: "trash", style: .filled, disabled: busy || chosen.isEmpty) {
-                        Task { await cleanUp() }
-                    }
-                    ActionButton("ALLES BEWAREN", disabled: busy) { onDone() }
                 }
                 .padding(20)
                 .padding(.bottom, 40)
             }
         }
         .preferredColorScheme(SharedColors.preferredScheme)
+    }
+
+    /// The badge reset, for a device with badges from before it
+    private var badgeReset: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Badges beginnen opnieuw")
+                .font(SharedFonts.system(22, weight: .bold, design: .rounded))
+                .foregroundColor(SharedColors.textPrimary)
+            Text("Vanaf de release begint iedereen opnieuw met badges. Je badges uit de testperiode worden niet gewist, maar tellen niet meer mee.")
+                .font(SharedFonts.system(13))
+                .foregroundColor(SharedColors.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(alignment: .top, spacing: 12) {
+                AppSymbol("medal", size: 20, color: SharedColors.accent, weight: .medium)
+                Text("Als dank voor het testen krijgen je spelers de badge Pionier. Je vindt hem bij je spelers en in de lijst onder Speciaal.")
+                    .font(SharedFonts.system(13, weight: .medium))
+                    .foregroundColor(SharedColors.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(SharedColors.tint(0.10))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+    }
+
+    /// The question itself: a switch per group, first a full backup
+    private var cleanup: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text("Testgegevens opruimen")
+                .font(SharedFonts.system(counts.earlierBadges > 0 ? 18.0 : 22.0, weight: .bold, design: .rounded))
+                .foregroundColor(SharedColors.textPrimary)
+            Text(counts.earlierBadges > 0
+                 ? "Wil je ook de wedstrijden uit de testperiode opruimen? Alleen wedstrijden van vóór de release; eerst wordt een volledige back-up gemaakt."
+                 : "De testperiode is voorbij en iedereen begint opnieuw met badges. Wil je ook de wedstrijden uit de testperiode opruimen? Alleen wedstrijden van vóór de release; eerst wordt een volledige back-up gemaakt.")
+                .font(SharedFonts.system(13))
+                .foregroundColor(SharedColors.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(counts.groups, id: \.self) { group in
+                    Toggle(isOn: binding(group)) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(group.title)
+                                .font(SharedFonts.system(14, weight: .medium, design: .rounded))
+                                .foregroundColor(SharedColors.textPrimary)
+                            Text(counts.count(group) == 1 ? "1 wedstrijd" : "\(counts.count(group)) wedstrijden")
+                                .font(SharedFonts.system(11))
+                                .foregroundColor(SharedColors.textMuted)
+                        }
+                    }
+                    .tint(SharedColors.accent)
+                    .disabled(busy)
+                }
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(SharedColors.tint(0.04))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            Text("Wat je bewaart, blijft in de geschiedenis en de analyse staan. Voor badges telt het niet meer mee.")
+                .font(SharedFonts.system(11))
+                .foregroundColor(SharedColors.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+            if let failure {
+                Text(failure)
+                    .font(SharedFonts.system(12, weight: .medium))
+                    .foregroundColor(SharedColors.error)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            ActionButton(busy ? "BEZIG…" : "OPRUIMEN", icon: "trash", style: .filled, disabled: busy || chosen.isEmpty) {
+                Task { await cleanUp() }
+            }
+            ActionButton("ALLES BEWAREN", disabled: busy) { onDone() }
+        }
     }
 
     private func cleanUp() async {

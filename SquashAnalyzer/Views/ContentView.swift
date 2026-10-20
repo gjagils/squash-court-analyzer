@@ -23,6 +23,8 @@ struct ContentView: View {
     @State private var showingSettings = false
     /// The tour version seen; the tour shows by itself until it is current
     @AppStorage(Onboarding.storageKey) private var tourSeen = 0
+    /// The "Nieuw in 3.0" version seen; it comes first, with the tour as a choice
+    @AppStorage(WhatsNew.storageKey) private var whatsNewSeen = 0
     /// "Testgegevens opruimen" was answered (once, after the badge reset)
     @AppStorage(TestDataCleanup.storageKey) private var testDataCleanupDone = false
     /// What the cleanup question offers; set when there is something to clean up
@@ -91,14 +93,13 @@ struct ContentView: View {
                 }
             }
         }
-        .fullScreenCover(isPresented: Binding(get: { Onboarding.shouldShow(seenVersion: tourSeen) && !showingSettings },
-                                              set: { if !$0 { tourSeen = Onboarding.currentVersion } })) {
-            SharedOnboardingView(manual: UserManual.iPhone, onTeamLink: {
-                tourSeen = Onboarding.currentVersion
-                // Instellingen opens once the tour has gone
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { showingSettings = true }
-            }) {
-                tourSeen = Onboarding.currentVersion
+        // "Nieuw in 3.0" (with the tour as a choice), or the tour alone once it is raised
+        .fullScreenCover(isPresented: Binding(get: { welcomeNeeded && !showingSettings },
+                                              set: { if !$0 { welcomeSeen() } })) {
+            if WhatsNew.shouldShow(seenVersion: whatsNewSeen) {
+                SharedWhatsNewView(manual: UserManual.iPhone, onTeamLink: openTeamLinkFromTour) { welcomeSeen() }
+            } else {
+                SharedOnboardingView(manual: UserManual.iPhone, onTeamLink: openTeamLinkFromTour) { welcomeSeen() }
             }
         }
         .fullScreenCover(isPresented: $showingSettings) {
@@ -130,6 +131,7 @@ struct ContentView: View {
             if let scenario = ScreenshotScenario.current {
                 // A screenshot shows the screen itself, never the welcome tour (a freshly erased simulator)
                 tourSeen = Onboarding.currentVersion
+                whatsNewSeen = WhatsNew.currentVersion
                 applyScreenshotScenario(scenario)
                 return
             }
@@ -199,7 +201,7 @@ struct ContentView: View {
         } message: {
             Text(CardInbox.newerAppText + " Testers vinden de nieuwe versie in TestFlight.")
         }
-        .sheet(isPresented: Binding(get: { testDataCounts != nil && !anyCoverOpen && !Onboarding.shouldShow(seenVersion: tourSeen) },
+        .sheet(isPresented: Binding(get: { testDataCounts != nil && !anyCoverOpen && !welcomeNeeded },
                                     set: { if !$0 { testDataCounts = nil } })) {
             if let counts = testDataCounts, let start = BadgeSeason.start {
                 SharedTestDataCleanupView(counts: counts, before: start,
@@ -223,8 +225,25 @@ struct ContentView: View {
         Task {
             let store = SwiftDataTestDataStore(context: modelContext, teamMatches: TeamMatchStorage.store)
             guard let counts = try? await store.counts(before: start) else { return }
-            if counts.isEmpty { testDataCleanupDone = true } else { testDataCounts = counts }
+            if counts.needsSheet { testDataCounts = counts } else { testDataCleanupDone = true }
         }
+    }
+
+    /// "Nieuw in 3.0" or the tour still has to show
+    private var welcomeNeeded: Bool {
+        WhatsNew.shouldShow(seenVersion: whatsNewSeen) || Onboarding.shouldShow(seenVersion: tourSeen)
+    }
+
+    /// Both seen, whether the tour was chosen or skipped: neither comes back by itself
+    private func welcomeSeen() {
+        whatsNewSeen = WhatsNew.currentVersion
+        tourSeen = Onboarding.currentVersion
+    }
+
+    /// "Teamlink invullen" in the tour: Instellingen opens once the cover has gone
+    private func openTeamLinkFromTour() {
+        welcomeSeen()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { showingSettings = true }
     }
 
     /// A full-screen cover is up: a sheet cannot open over it from here

@@ -10,6 +10,17 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 4)
 
+- **"Nieuw in 3.0" en de badgereset-melding (20 oktober 2026, iOS en Android, keuze
+  Gerd-Jan)**: bij de eerste start van 3.0 krijgt iedereen (nieuw, 2.0 en testers) één
+  blad met vijf nieuwe dingen (`WhatsNew` in Core, `SharedWhatsNewView`). "Aan de slag"
+  slaat de rondleiding over, "Rondleiding" toont hem in hetzelfde scherm; daarna is geen
+  van beide nog vanzelf te zien. Daarna, vanaf de badgereset, één blad: "Badges beginnen
+  opnieuw" met Pionier voor wie badges van vóór de start had (`TestDataCounts.earlierBadges`),
+  en de opruimvraag als er iets op te ruimen is (anders alleen BEGREPEN). Rondleiding:
+  Competitie noemt de teamwedstrijd E1–E4, Delen het vergrendelscherm. Getest op iPhone
+  17 Pro Max (simulator) en de Android-emulator; de badgereset-melding alleen in unit tests
+  (geen gegevens van vóór de start op die toestellen).
+  - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 - **Lange namen op Scheidsrechter en Coach (18 oktober 2026, gedeeld scherm, gemeld door
   Gerd-Jan op zijn A13)**: de gamestand bovenin staat nu altijd in het midden (elke naam
   krijgt de helft van de ruimte en wordt zo nodig afgekapt), en de naam boven een

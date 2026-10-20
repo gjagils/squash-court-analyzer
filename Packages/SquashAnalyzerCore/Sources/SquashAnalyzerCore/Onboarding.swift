@@ -47,9 +47,40 @@ public enum Onboarding {
         Page(symbol: "person.2", title: "Kies speler",
              text: "Sla spelers op en kies ze bij het starten via Kies speler. Alleen dan verdienen ze badges en groeit hun profiel over de wedstrijden."),
         Page(symbol: "trophy", title: "Competitie",
-             text: "Speel je bij SBN? Vul je teamlink in, dan zie je je programma en de stand. Die deel je met je team, bijvoorbeeld via WhatsApp."),
+             text: "Speel je bij SBN? Vul je teamlink in, dan zie je je programma en de stand. Op de wedstrijdavond houd je de teamwedstrijd bij, van E1 tot E4."),
         Page(symbol: "square.and.arrow.up", title: "Delen",
-             text: "Houd je teamgenoten en supporters op de hoogte van de wedstrijden en de competitie. Met LIVE kijken ze mee via een link. Alles staat op je eigen telefoon: maak af en toe een back-up in Instellingen."),
+             text: "Houd je teamgenoten en supporters op de hoogte van de wedstrijden en de competitie. Met LIVE kijken ze mee via een link of op hun vergrendelscherm. Alles staat op je eigen telefoon: maak af en toe een back-up in Instellingen."),
+    ]
+}
+
+/// "Nieuw in 3.0": one sheet at the first start of a new version, for
+/// everyone (choice Gerd-Jan, 20 October 2026). "Rondleiding" opens the tour
+/// from there, "Aan de slag" skips it; either way the badge reset and the
+/// cleanup question follow.
+public enum WhatsNew {
+    /// The what's-new version this device has seen (0 = none)
+    public static let storageKey = "whatsNewVersion"
+    /// 1 = 3.0; raise it with new items for a later version
+    public static let currentVersion = 1
+    public static let title = "Nieuw in 3.0"
+    public static let intro = "Squash Analyzer is flink gegroeid. Dit zijn de grootste veranderingen."
+
+    public static func shouldShow(seenVersion: Int) -> Bool {
+        seenVersion < currentVersion
+    }
+
+    /// The symbols are the home screen's outline icons (AppSymbol names)
+    public static let items: [Onboarding.Page] = [
+        Onboarding.Page(symbol: "trophy", title: "Competitie",
+                        text: "Houd een hele teamwedstrijd bij, van E1 tot E4, met de puntentelling van de SBN."),
+        Onboarding.Page(symbol: "square.and.arrow.up", title: "Live meekijken",
+                        text: "Je team en supporters volgen de stand via een link of op hun vergrendelscherm."),
+        Onboarding.Page(symbol: "medal", title: "Badges",
+                        text: "Verdien badges in brons, zilver en goud. Vanaf 23 oktober begint iedereen opnieuw."),
+        Onboarding.Page(symbol: "list.bullet.clipboard", title: "Coachen",
+                        text: "Leg per rally de slag en de plek op de baan vast. Na afloop is er een coachkaart."),
+        Onboarding.Page(symbol: "person.2", title: "Mijn team",
+                        text: "Stand en programma van je SBN-team, om te delen in de teamapp."),
     ]
 }
 

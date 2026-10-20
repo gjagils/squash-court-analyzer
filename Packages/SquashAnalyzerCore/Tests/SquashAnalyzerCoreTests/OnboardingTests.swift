@@ -19,6 +19,16 @@ final class OnboardingTests: XCTestCase {
         }
     }
 
+    func testWhatsNewShowsOnceForEveryone() {
+        XCTAssertTrue(WhatsNew.shouldShow(seenVersion: 0), "a new install, a 2.0 user and a tester alike")
+        XCTAssertFalse(WhatsNew.shouldShow(seenVersion: WhatsNew.currentVersion))
+        XCTAssertEqual(WhatsNew.items.count, 5)
+        for item in WhatsNew.items {
+            XCTAssertFalse(item.title.isEmpty)
+            XCTAssertFalse(item.text.isEmpty)
+        }
+    }
+
     func testShareTextHasBothStores() {
         XCTAssertTrue(AppLinks.shareText.contains("play.google.com/store/apps/details?id=com.squashanalyzer.android"))
         XCTAssertTrue(AppLinks.shareText.contains("apps.apple.com/app/squash-analyzer/id6758676921"))

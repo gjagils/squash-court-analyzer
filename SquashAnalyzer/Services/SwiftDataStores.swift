@@ -602,7 +602,10 @@ final class SwiftDataTestDataStore: TestDataCleanupStore {
         matches += try context.fetch(FetchDescriptor<SavedRefereeMatch>()).map(value)
         if let current = RefereeInProgressStore.load() { matches.append(value(current)) }
         let teams = try await teamMatches.loadAll().map(\.date)
-        return TestDataCleanup.counts(matches: matches, teamMatchDates: teams, before: before)
+        let pioneer = BadgeKind.pioneer.rawValue
+        let badges = try context.fetchCount(FetchDescriptor<SavedBadgeAward>(
+            predicate: #Predicate { $0.deletedAt == nil && $0.earnedAt < before && $0.badge != pioneer }))
+        return TestDataCleanup.counts(matches: matches, teamMatchDates: teams, before: before, earlierBadges: badges)
     }
 
     /// To iCloud like the automatic backup, or into Application Support when

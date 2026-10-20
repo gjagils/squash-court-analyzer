@@ -50,4 +50,14 @@ final class TestDataCleanupTests: XCTestCase {
         XCTAssertFalse(counts.isEmpty)
         XCTAssertTrue(TestDataCounts().isEmpty)
     }
+
+    /// Badges from before the reset bring the sheet (the message), but nothing to remove
+    func testEarlierBadgesShowTheSheetWithoutGroups() {
+        let counts = TestDataCleanup.counts(matches: [TestDataMatch](), teamMatchDates: [Date](), before: start, earlierBadges: 3)
+        XCTAssertTrue(counts.isEmpty)
+        XCTAssertTrue(counts.groups.isEmpty)
+        XCTAssertTrue(counts.needsSheet)
+        XCTAssertFalse(TestDataCounts().needsSheet, "a new install: no sheet at all")
+        XCTAssertTrue(TestDataCounts(unfinished: 1).needsSheet)
+    }
 }

@@ -44,7 +44,8 @@ class RoomTestDataStore(
     override suspend fun counts(before: Date): TestDataCounts {
         val all = matches.all().map { value(it) } + refereeMatches.all().map { value(it) }
         val teams = teamMatches.loadAll().toList().map { it.date }
-        return TestDataCleanup.counts(matches = SwiftArray(all), teamMatchDates = SwiftArray(teams), before = before)
+        return TestDataCleanup.counts(matches = SwiftArray(all), teamMatchDates = SwiftArray(teams), before = before,
+            earlierBadges = badges.countEarnedBefore(before))
     }
 
     override suspend fun backUp() {

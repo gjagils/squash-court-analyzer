@@ -284,6 +284,8 @@ public struct AndroidHomeView: View {
     @State private var team: LeagueTeamSnapshot?
     /// The tour version seen; the tour shows by itself until it is current
     @AppStorage(Onboarding.storageKey) private var tourSeen = 0
+    /// The "Nieuw in 3.0" version seen; it comes first, with the tour as a choice
+    @AppStorage(WhatsNew.storageKey) private var whatsNewSeen = 0
     /// "Testgegevens opruimen" was answered (once, after the badge reset)
     @AppStorage(TestDataCleanup.storageKey) private var testDataCleanupDone = false
     /// What the cleanup question offers; set when there is something to clean up
@@ -394,19 +396,25 @@ public struct AndroidHomeView: View {
                     }
                 }
         }
-        .trackedCover(isPresented: Binding(get: { Onboarding.shouldShow(seenVersion: tourSeen) },
-                                           set: { if !$0 { tourSeen = Onboarding.currentVersion } })) {
-            SharedOnboardingView(manual: UserManual.android, onTeamLink: {
-                tourSeen = Onboarding.currentVersion
-                showingSettings = true
-            }) {
-                tourSeen = Onboarding.currentVersion
+        // "Nieuw in 3.0" (with the tour as a choice), or the tour alone once it is raised
+        .trackedCover(isPresented: Binding(get: { welcomeNeeded },
+                                           set: { if !$0 { welcomeSeen() } })) {
+            if WhatsNew.shouldShow(seenVersion: whatsNewSeen) {
+                SharedWhatsNewView(manual: UserManual.android, onTeamLink: {
+                    welcomeSeen()
+                    showingSettings = true
+                }) { welcomeSeen() }
+            } else {
+                SharedOnboardingView(manual: UserManual.android, onTeamLink: {
+                    welcomeSeen()
+                    showingSettings = true
+                }) { welcomeSeen() }
             }
         }
         .sheet(isPresented: $showingLiveFollow) {
             SharedLiveFollowView { showingLiveFollow = false }
         }
-        .sheet(isPresented: Binding(get: { testDataCounts != nil && !Onboarding.shouldShow(seenVersion: tourSeen) },
+        .sheet(isPresented: Binding(get: { testDataCounts != nil && !welcomeNeeded },
                                     set: { if !$0 { testDataCounts = nil } })) {
             if let counts = testDataCounts, let start = BadgeSeason.start, let testDataStore {
                 SharedTestDataCleanupView(counts: counts, before: start, store: testDataStore) {
@@ -447,7 +455,18 @@ public struct AndroidHomeView: View {
     private func offerTestDataCleanup() async {
         guard TestDataCleanup.shouldOffer(done: testDataCleanupDone), let start = BadgeSeason.start, let testDataStore else { return }
         guard let counts = try? await testDataStore.counts(before: start) else { return }
-        if counts.isEmpty { testDataCleanupDone = true } else { testDataCounts = counts }
+        if counts.needsSheet { testDataCounts = counts } else { testDataCleanupDone = true }
+    }
+
+    /// "Nieuw in 3.0" or the tour still has to show
+    private var welcomeNeeded: Bool {
+        WhatsNew.shouldShow(seenVersion: whatsNewSeen) || Onboarding.shouldShow(seenVersion: tourSeen)
+    }
+
+    /// Both seen, whether the tour was chosen or skipped: neither comes back by itself
+    private func welcomeSeen() {
+        whatsNewSeen = WhatsNew.currentVersion
+        tourSeen = Onboarding.currentVersion
     }
 
     private var homeContent: some View {

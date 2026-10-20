@@ -278,6 +278,12 @@ class BadgeAwardStore(
             won = winner == slot, pointsWon = points, opponentKey = opponent.lowercase())
     }
 
+    /** Badges that are not deleted and were earned before `before`, Pionier left out (the badge reset sheet) */
+    suspend fun countEarnedBefore(before: Date): Int {
+        val limit = (before.timeIntervalSince1970 * 1000).toLong()
+        return dao.allActive().count { it.earnedAt < limit && it.badge != BadgeKind.pioneer.rawValue }
+    }
+
     /**
      * Pionier for every card that had badges before the badge reset, once the
      * start has passed, like iOS' `BadgeAwarder.grantPioneers`. The award id is

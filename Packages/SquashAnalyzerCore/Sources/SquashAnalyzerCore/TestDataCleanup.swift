@@ -23,11 +23,15 @@ public struct TestDataCounts: Equatable, Sendable {
     public var samplePlayers: Int
     public var unfinished: Int
     public var competition: Int
+    /// Badges earned before the reset (not Pionier): they stop counting, so the
+    /// sheet tells about the reset. Not a group: nothing of them is removed.
+    public var earlierBadges: Int
 
-    public init(samplePlayers: Int = 0, unfinished: Int = 0, competition: Int = 0) {
+    public init(samplePlayers: Int = 0, unfinished: Int = 0, competition: Int = 0, earlierBadges: Int = 0) {
         self.samplePlayers = samplePlayers
         self.unfinished = unfinished
         self.competition = competition
+        self.earlierBadges = earlierBadges
     }
 
     public func count(_ group: TestDataGroup) -> Int {
@@ -38,7 +42,11 @@ public struct TestDataCounts: Equatable, Sendable {
         }
     }
 
+    /// Nothing to remove
     public var isEmpty: Bool { samplePlayers + unfinished + competition == 0 }
+
+    /// Whether the sheet shows at all: something to remove, or badges that stop counting
+    public var needsSheet: Bool { !isEmpty || earlierBadges > 0 }
 
     /// The groups with something in them, in a fixed order
     public var groups: [TestDataGroup] { TestDataGroup.allCases.filter { group in count(group) > 0 } }
@@ -108,9 +116,10 @@ public enum TestDataCleanup {
         TestDataCleanup.groups(of: match, before: before).contains { group in chosen.contains(group) }
     }
 
-    /// Adds up what `matches` and the team match dates give per group
-    public static func counts(matches: [TestDataMatch], teamMatchDates: [Date], before: Date) -> TestDataCounts {
-        var counts = TestDataCounts()
+    /// Adds up what `matches` and the team match dates give per group; the
+    /// badges earned before the reset come along for the sheet's message
+    public static func counts(matches: [TestDataMatch], teamMatchDates: [Date], before: Date, earlierBadges: Int = 0) -> TestDataCounts {
+        var counts = TestDataCounts(earlierBadges: earlierBadges)
         for match in matches {
             let found = TestDataCleanup.groups(of: match, before: before)
             if found.contains(TestDataGroup.samplePlayers) { counts.samplePlayers += 1 }

@@ -28,7 +28,7 @@ default Donker), independent of the system.
 - iOS: **terminate the app first** (`xcrun simctl terminate <udid> com.squashanalyzer.app`, wait 1 s):
   a running app writes its settings back on exit and undoes the change. Then
   `xcrun simctl spawn <udid> defaults write com.squashanalyzer.app appearance light` (or `dark`)
-  and `defaults write … onboardingVersion -int 1` to skip the tour (`0` to show it).
+  and `defaults write … onboardingVersion -int 1` plus `defaults write … whatsNewVersion -int 1` to skip "Nieuw in 3.0" and the tour (`0` to show them).
 - iOS scenario data mixes with what is already on the simulator (for example "Wedstrijd
   hervatten?" on setup): uninstall and install the app for a clean run.
 - Android: open Instellingen (gear, content description "Instellingen") and tap
@@ -66,6 +66,7 @@ whatever data the emulator has.
 | 12 | Competitie | from home: "Competitie" | tap "Competitie" | no |
 | 13 | Coach card | dashboard → "COACHKAART" | dashboard → "COACHKAART" | yes |
 | 14 | Tour | `onboardingVersion -int 0`, launch | Instellingen → "Rondleiding opnieuw bekijken" | no |
+| 15 | Nieuw in 3.0 | `whatsNewVersion -int 0`, launch | a fresh install shows it first | no |
 
 On iOS, screens without a scenario need taps: use the iOS Simulator control tool
 (`mcp__Claude_Code_iOS_Simulator__control`, points = pixels / 3 on this device).

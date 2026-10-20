@@ -1,6 +1,6 @@
 # Cloudflare Pages headers (the old nginx on the NAS ignored them; it is reserve only). The deep-link files
 # have no extension or must be JSON on both hosts; the badge and handleiding
-# images may be cached; the team zips stay out of search engines.
+# images may be cached; the team zips and the /beta/ preview stay out of search engines.
 /.well-known/apple-app-site-association
   Content-Type: application/json
   Cache-Control: public, max-age=3600
@@ -10,6 +10,8 @@
 /teams/*
   X-Robots-Tag: noindex
   Cache-Control: no-store
+/beta/*
+  X-Robots-Tag: noindex
 /badges/*
   Cache-Control: public, max-age=86400
 /handleiding/img/*

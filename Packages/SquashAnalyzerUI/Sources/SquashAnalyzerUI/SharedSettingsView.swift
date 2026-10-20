@@ -115,6 +115,9 @@ public struct SharedSettingsView: View {
             SharedColors.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
+                    // The team link first: what people come here for most (Gerd-Jan, 20 October 2026)
+                    teamSection
+                        .padding(.bottom, 20)
                     manualSection
                         .padding(.bottom, 20)
                     AppearancePicker()
@@ -123,40 +126,6 @@ public struct SharedSettingsView: View {
                         .padding(.bottom, 20)
                     liveSection
                         .padding(.bottom, 20)
-                    HStack(spacing: 8) {
-                        HomeTileIconView(icon: .players, color: SharedColors.accent, size: 20)
-                        Text("Mijn team")
-                            .font(SharedFonts.system(16, weight: .semibold))
-                            .foregroundColor(SharedColors.textPrimary)
-                    }
-                    Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
-                        .font(SharedFonts.system(13))
-                        .foregroundColor(SharedColors.textSecondary)
-                    Link(destination: UserManual.androidTeamLink) {
-                        Text("Waar vind ik mijn teamlink?")
-                            .font(SharedFonts.system(13, weight: .semibold))
-                            .foregroundColor(SharedColors.accent)
-                    }
-                    TextField("https://sbn.toernooi.nl/league/.../team/...", text: $draft)
-                        .accessibilityLabel("Teamlink")
-                        // No autocapitalization/URL-keyboard modifiers: this package also builds
-                        // for macOS; the link check is case-insensitive where it matters
-                        .autocorrectionDisabled()
-                        .foregroundColor(SharedColors.textPrimary)
-                        .padding()
-                        .background(SharedColors.tint(0.08)).clipShape(RoundedRectangle(cornerRadius: 10))
-                    HStack(spacing: 12) {
-                        // ActionButton as everywhere else: a system button turned white on grey in the light theme
-                        ActionButton("BEWAAR TEAMLINK", style: .filled, color: SharedColors.accent) { save() }
-                        if !teamURL.isEmpty {
-                            ActionButton("VERWIJDER", style: .outlined, color: SharedColors.textSecondary) { remove() }
-                        }
-                    }
-                    if let message {
-                        Text(message)
-                            .font(SharedFonts.system(12))
-                            .foregroundColor(messageIsError ? SharedColors.error : SharedColors.positive)
-                    }
                     // Same order as iOS: back-up, then AI Coach and what it is
                     if backup != nil {
                         backupSection
@@ -180,6 +149,46 @@ public struct SharedSettingsView: View {
         .onAppear {
             draft = teamURL
             hasKey = aiCoach?.keyStore.hasOpenAIKey == true
+        }
+    }
+
+    /// Mijn team: the sbn.toernooi.nl link, saved or removed here
+    private var teamSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                HomeTileIconView(icon: .players, color: SharedColors.accent, size: 20)
+                Text("Mijn team")
+                    .font(SharedFonts.system(16, weight: .semibold))
+                    .foregroundColor(SharedColors.textPrimary)
+            }
+            Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
+                .font(SharedFonts.system(13))
+                .foregroundColor(SharedColors.textSecondary)
+            Link(destination: UserManual.androidTeamLink) {
+                Text("Waar vind ik mijn teamlink?")
+                    .font(SharedFonts.system(13, weight: .semibold))
+                    .foregroundColor(SharedColors.accent)
+            }
+            TextField("https://sbn.toernooi.nl/league/.../team/...", text: $draft)
+                .accessibilityLabel("Teamlink")
+                // No autocapitalization/URL-keyboard modifiers: this package also builds
+                // for macOS; the link check is case-insensitive where it matters
+                .autocorrectionDisabled()
+                .foregroundColor(SharedColors.textPrimary)
+                .padding()
+                .background(SharedColors.tint(0.08)).clipShape(RoundedRectangle(cornerRadius: 10))
+            HStack(spacing: 12) {
+                // ActionButton as everywhere else: a system button turned white on grey in the light theme
+                ActionButton("BEWAAR TEAMLINK", style: .filled, color: SharedColors.accent) { save() }
+                if !teamURL.isEmpty {
+                    ActionButton("VERWIJDER", style: .outlined, color: SharedColors.textSecondary) { remove() }
+                }
+            }
+            if let message {
+                Text(message)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(messageIsError ? SharedColors.error : SharedColors.positive)
+            }
         }
     }
 

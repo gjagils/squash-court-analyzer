@@ -36,6 +36,9 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
+                        // The team link first: what people come here for most (Gerd-Jan, 20 October 2026)
+                        teamSection
+
                         manualSection
 
                         AppearancePicker()
@@ -46,8 +49,6 @@ struct SettingsView: View {
                         courtSection
 
                         liveSection
-
-                        teamSection
 
                         backupSection
 

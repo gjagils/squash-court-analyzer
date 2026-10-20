@@ -18,7 +18,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   games-vakje van speler 2 nu een blauwe rand.
   - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 - **Badges op 0 bij de release en Pionier (18 oktober 2026, iOS, Android en website/kaart)**:
-  vanaf `BadgeSeason.start` (voorlopig woensdag 28 oktober 2026, 00:00) tellen badges en
+  vanaf `BadgeSeason.start` (vrijdag 23 oktober 2026, 00:00) tellen badges en
   wedstrijden van daarvoor niet meer mee; kaarten met badges van daarvoor krijgen Pionier
   (Speciaal, niet in de 37). Eenmalige vraag "Testgegevens opruimen" met een schakelaar
   per groep, na een volledige back-up. Handleidingen bijgewerkt (website nog publiceren).
@@ -584,15 +584,16 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
 
 - [ ] **Badges op 0 bij de productierelease 3.0** (afgesproken 18 oktober;
       op `main` sinds 18 oktober, getest op de Mac (suites, ook met een start in
-      het verleden, en op simulator en emulator); startdatum voorlopig woensdag
-      28 oktober 2026, 00:00, zie ARCHITECTURE.md "Badgereset"). Een vaste startdatum `BadgeSeason.start` in Core. Awards van
+      het verleden, en op simulator en emulator); startdatum vrijdag
+      23 oktober 2026, 00:00, zie ARCHITECTURE.md "Badgereset"). Een vaste startdatum `BadgeSeason.start` in Core. Awards van
       daarvoor worden verborgen, niet gewist (collectie, tellers, kaart,
       `website/kaart/`). Carrièrebadges en eenmalige badges tellen alleen
       wedstrijden en awards vanaf die datum, en een wedstrijd van daarvoor geeft
       geen nieuwe awards (aanvullen, undo). Kaartlinks en back-ups van oude
       builds kunnen zo niets terugzetten. Gerd-Jan zette de datum op 18 oktober
       voorlopig op vrijdag 23 oktober en schoof hem op 19 oktober naar woensdag
-      28 oktober (de Play-productieaanvraag duurt tot 7 dagen); schuift de release, dan de datum vóór de
+      28 oktober (de Play-productieaanvraag duurt tot 7 dagen); op 20 oktober keurde Play
+      productie goed en ging hij terug naar vrijdag 23 oktober; schuift de release, dan de datum vóór de
       volgende upload aanpassen (app én `website/kaart/`, en de website publiceren). Testers krijgen
       de badge Pionier; omschrijving en artwork (klaar) staan in
       `docs/style/badge-prompt-pioneer.md`.

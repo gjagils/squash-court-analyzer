@@ -112,7 +112,7 @@
     // The badge reset at the production release, the same date as BadgeSeason.start
     // in the app (seconds since 1970); null while the date is not fixed. Once it has
     // passed, awards from before it no longer show.
-    const SEASON_START = 1793142000; // woensdag 28 oktober 2026, 00:00 (Nederlandse tijd)
+    const SEASON_START = 1792706400; // vrijdag 23 oktober 2026, 00:00 (Nederlandse tijd)
     const seasonActive = SEASON_START != null && Date.now() / 1000 >= SEASON_START;
     // Every badge id → its badge and tier (null for a badge without tiers)
     const KIND = {};

@@ -63,6 +63,7 @@
   .team .tgames { font-size: 52px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 4px; }
   .dash { font-size: 30px; color: var(--text-3); font-weight: 700; }
   .caption { text-align: center; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-3); margin-top: 2px; }
+  .games { text-align: center; margin-top: 6px; font-size: 14px; color: var(--text-2); font-variant-numeric: tabular-nums; }
   .summary { text-align: center; margin-top: 12px; font-size: 14px; font-weight: 600; color: var(--gold); min-height: 20px; }
   .partijen { margin-top: 14px; display: grid; gap: 10px; }
   .partij { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; }
@@ -118,7 +119,8 @@
       <div class="dash">–</div>
       <div class="team away"><div class="tname" id="away"></div><div class="tgames" id="awayGames">0</div></div>
     </div>
-    <div class="caption">games</div>
+    <div class="caption">partijen</div>
+    <div class="games" id="games"></div>
     <div class="summary" id="summary"></div>
   </section>
 
@@ -160,6 +162,36 @@
   /** Klaar: a winner, finished, or given up / not played (the server's rule for the lock screen too) */
   function isDecided(p) {
     return p.winner === 1 || p.winner === 2 || p.status === 'finished' || p.end === 'retired' || p.end === 'walkover';
+  }
+
+  /** 1 home, 2 away, 0 unknown: the winner, else whoever has more games (as src/push.js) */
+  function partijWinner(p) {
+    if (p.winner === 1 || p.winner === 2) return p.winner;
+    return p.gamesWon[0] > p.gamesWon[1] ? 1 : p.gamesWon[1] > p.gamesWon[0] ? 2 : 0;
+  }
+
+  /**
+   * The winner of a decided team match by the SBN rule, the same as teamWinner
+   * in src/push.js and TeamMatchScore in Core: most partijen; equal → a full
+   * line-up (a lost walkover is not); → most games; → most rally points; → E1.
+   * 1 home, 2 away, 0 a draw.
+   */
+  function teamWinner(partijen) {
+    var won = [0, 0], full = [true, true], games = [0, 0], points = [0, 0];
+    for (var slot = 1; slot <= 4; slot++) {
+      var p = partijen[slot];
+      var w = partijWinner(p);
+      if (w) won[w - 1]++;
+      if (p.end === 'walkover' && w) full[2 - w] = false;
+      games[0] += p.gamesWon[0];
+      games[1] += p.gamesWon[1];
+      (p.games || []).forEach(function (g) { points[0] += g[0]; points[1] += g[1]; });
+    }
+    if (won[0] !== won[1]) return won[0] > won[1] ? 1 : 2;
+    if (full[0] !== full[1]) return full[0] ? 1 : 2;
+    if (games[0] !== games[1]) return games[0] > games[1] ? 1 : 2;
+    if (points[0] !== points[1]) return points[0] > points[1] ? 1 : 2;
+    return partijWinner(partijen[1]);
   }
 
   function el(tag, cls, text) {
@@ -223,20 +255,27 @@
     $('day').textContent = dayText(team.date);
     $('home').textContent = team.home;
     $('away').textContent = team.away;
-    var home = 0, away = 0, played = 0, decided = 0;
+    var home = 0, away = 0, played = 0, decided = 0, won = [0, 0];
     for (var slot = 1; slot <= 4; slot++) {
       var p = partijen[slot];
       if (!p) continue;
       played++;
       home += p.gamesWon[0];
       away += p.gamesWon[1];
-      if (isDecided(p)) decided++;
+      if (isDecided(p)) {
+        decided++;
+        var w = partijWinner(p);
+        if (w) won[w - 1]++;
+      }
     }
-    $('homeGames').textContent = home;
-    $('awayGames').textContent = away;
+    // Partijen first (they decide the evening), games below them
+    $('homeGames').textContent = won[0];
+    $('awayGames').textContent = won[1];
+    $('games').textContent = played ? 'games ' + home + '–' + away : '';
     var summary = '';
     if (decided === 4) {
-      summary = home === away ? 'Gelijkspel' : (home > away ? team.home : team.away) + ' wint ' + Math.max(home, away) + '-' + Math.min(home, away);
+      var winner = teamWinner(partijen);
+      summary = winner === 0 ? 'Gelijkspel' : (winner === 1 ? team.home : team.away) + ' wint';
     } else if (played) {
       summary = decided + ' van 4 partijen klaar';
     } else {

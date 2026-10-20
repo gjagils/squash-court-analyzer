@@ -80,7 +80,7 @@ public enum WhatsNew {
         Onboarding.Page(symbol: "list.bullet.clipboard", title: "Coachen",
                         text: "Leg per rally de slag en de plek op de baan vast. Na afloop is er een coachkaart."),
         Onboarding.Page(symbol: "person.2", title: "Mijn team",
-                        text: "Stand en programma van je SBN-team, om te delen in de teamapp."),
+                        text: "Stand en programma van je SBN-team. Je teamgenoten staan klaar om te kiezen als je gaat scheidsen of coachen."),
     ]
 }
 

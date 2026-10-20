@@ -29,10 +29,21 @@
     .btn-soon:hover { background: var(--btn); }
     .appstore-placeholder.btn-soon:hover { background: var(--bg-card); }
     .store-buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
-    .platform-label {
-      text-align: center; font-size: 12px; font-weight: 600; letter-spacing: 1px;
-      text-transform: uppercase; color: var(--gold); margin: 32px 0 -24px;
+    .hero .hero-buttons { margin-top: 4px; margin-bottom: 20px; }
+    .hero-links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 16px; font-size: 15px; font-weight: 600; }
+    .hero-links a { color: var(--gold); text-decoration: none; }
+    .hero-links a:hover { text-decoration: underline; }
+    .platform-switch {
+      display: flex; justify-content: center; gap: 4px; width: max-content; margin: 24px auto -24px;
+      padding: 4px; border-radius: 999px; border: 1px solid var(--border);
     }
+    .platform-switch button {
+      font: inherit; font-size: 14px; font-weight: 600; padding: 6px 18px; border-radius: 999px;
+      border: 0; background: transparent; color: var(--text-2, inherit); cursor: pointer;
+    }
+    .platform-switch button[aria-selected="true"] { background: var(--btn); color: var(--on-btn); }
+    .platform-switch button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .mockup-strip[hidden] { display: none; }
     @media (max-width: 760px) {
       .mockup-strip { gap: 10px; padding: 40px 12px; }
       .mockup-phone { width: 29vw; border-radius: 22px; }
@@ -57,7 +68,7 @@
 
   <!-- ── Hero ─────────────────────────────────────────────── -->
   <section class="hero">
-    <div class="hero-badge">iPhone · Android</div>
+    <div class="hero-badge">Nu ook op Android</div>
     <div class="hero-brand">
       <img src="/logo.png?v=4" alt="">
       <h1>Squash<span class="brand-accent">Analyzer</span></h1>
@@ -68,7 +79,6 @@
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg>Coachen</li>
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M7.5 7.5L12 3l4.5 4.5M5 11v9h14v-9"/></svg>Delen</li>
     </ul>
-    <p>De app om te scheidsen, te coachen en te delen, op iPhone en Android. Houd de score en de service bij zoals een scheidsrechter, registreer als coach elke rally in detail en laat je speler tussen de games de Coachkaart zien. Speel competitie met je team, deel de stand live met teamgenoten en supporters, en verdien badges.</p>
     <div class="hero-buttons" id="download">
       <a class="btn-primary" href="https://apps.apple.com/app/squash-analyzer/id6758676921" target="_blank" rel="noopener">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -83,14 +93,20 @@
         </svg>
         Download op Google Play
       </a>
-      <a class="btn-secondary" href="#functies">Ontdek de functies</a>
-      <a class="btn-secondary" href="#handleiding">Handleiding</a>
+    </div>
+    <p>De app om te scheidsen, te coachen en te delen, op iPhone en Android. Houd de score en de service bij zoals een scheidsrechter, registreer als coach elke rally in detail en laat je speler tussen de games de Coachkaart zien. Speel competitie met je team, deel de stand live met teamgenoten en supporters, en verdien badges.</p>
+    <div class="hero-links">
+      <a href="#functies">Ontdek de functies</a>
+      <a href="#handleiding">Handleiding</a>
     </div>
   </section>
 
-  <!-- ── Phone mockup strips: iPhone and Android ─────────────── -->
-  <p class="platform-label">iPhone</p>
-  <div class="mockup-strip">
+  <!-- ── Phone mockups: iPhone or Android (switch; Android phones start on Android) ── -->
+  <div class="platform-switch" role="tablist" aria-label="Screenshots van">
+    <button type="button" role="tab" id="tab-iphone" aria-controls="shots-iphone" aria-selected="true">iPhone</button>
+    <button type="button" role="tab" id="tab-android" aria-controls="shots-android" aria-selected="false">Android</button>
+  </div>
+  <div class="mockup-strip" id="shots-iphone" role="tabpanel" aria-labelledby="tab-iphone">
     <div class="mockup-phone">
       <img src="/screenshots/referee.png?v=4" alt="iPhone: scheidsrechter modus met rally-voor-rally scorelijn">
     </div>
@@ -101,9 +117,7 @@
       <img src="/screenshots/dashboard.png?v=4" alt="iPhone: analyse met puntverdeling en tactisch advies">
     </div>
   </div>
-
-  <p class="platform-label">Android</p>
-  <div class="mockup-strip">
+  <div class="mockup-strip" id="shots-android" role="tabpanel" aria-labelledby="tab-android" hidden>
     <div class="mockup-phone">
       <img src="/screenshots/android-referee.png?v=1" alt="Android: scheidsrechter modus met rally-voor-rally scorelijn" loading="lazy">
     </div>
@@ -114,42 +128,21 @@
       <img src="/screenshots/android-dashboard.png?v=1" alt="Android: analyse met heatmap, slagen en puntverdeling" loading="lazy">
     </div>
   </div>
-
-  <!-- ── Nieuw in 3.0 ─────────────────────────────────────── -->
-  <section class="section" id="nieuws">
-    <div class="section-label">Nieuw</div>
-    <h2>Versie 3.0: nu op iPhone én Android</h2>
-    <div class="mode-grid">
-      <div class="mode-card gold">
-        <div class="mode-icon"><span class="ms" aria-hidden="true">new_releases</span></div>
-        <h3>Nieuw in versie 3.0</h3>
-        <ul class="feature-list">
-          <li><span><strong>Live score op je vergrendelscherm:</strong> volg een wedstrijd of teamwedstrijd waar je niet bij bent. De stand loopt mee op je vergrendelscherm (iPhone: ook in het Dynamic Island), met een melding bij elke game en bij de uitslag</span></li>
-          <li>Competitie: teamwedstrijden van de SBN-competitie met vier partijen, winnaar en bonuspunten volgens het reglement, en een live teampagina voor teamgenoten en supporters</li>
-          <li>Coachkaart: één scherm om je speler tussen de games te laten zien, met de heatmap, de drie belangrijkste coachpunten en wat er sinds de vorige game veranderde</li>
-          <li>Notitie per game in de Analyse, getypt of gedicteerd</li>
-          <li>Service en return: hoeveel rally's je speler wint op eigen service en op die van de tegenstander</li>
-          <li>Spelersprofiel: vorm, winners en fouten, slagen, baan, tempo en tegenstanders over de wedstrijden</li>
-          <li>Badges in brons, zilver en goud: zeventien badges met drie treden, samen 37</li>
-          <li>Lichte weergave naast donker (Instellingen → Weergave)</li>
-          <li>Een korte rondleiding bij de eerste start, en de app delen of feedback sturen vanuit Instellingen</li>
-          <li>Nieuwe iconen en stijl, zoals op de sticker: Scheidsen · Coachen · Delen</li>
-        </ul>
-        <p>Met versie 3.0 begint iedereen opnieuw met badges. Wie in de testperiode badges verdiende, krijgt als dank de badge Pionier.</p>
-      </div>
-      <div class="mode-card orange">
-        <div class="mode-icon"><span class="ms" aria-hidden="true">android</span></div>
-        <h3>Nu ook op Android</h3>
-        <p>SquashAnalyzer staat nu ook in Google Play, met dezelfde schermen als op de iPhone: scheidsrechter en coach, Competitie, live meekijken en de stand op je vergrendelscherm, badges en Mijn team.</p>
-        <p>Een nieuwe telefoon? Back-ups kun je tussen iPhone en Android uitwisselen, dus je spelers en wedstrijden gaan gewoon mee.</p>
-        <div class="home-links">
-          <!-- TODO Play-link na livegang -->
-          <a class="btn-primary btn-soon" href="#" aria-disabled="true" onclick="return false" title="De link naar Google Play volgt bij de livegang">Download op Google Play</a>
-          <a class="btn-secondary" href="/handleiding/android.html">Handleiding Android</a>
-        </div>
-      </div>
-    </div>
-  </section>
+  <script>
+    (function () {
+      var tabs = { iphone: document.getElementById('tab-iphone'), android: document.getElementById('tab-android') };
+      var panels = { iphone: document.getElementById('shots-iphone'), android: document.getElementById('shots-android') };
+      function show(which) {
+        for (var k in tabs) {
+          tabs[k].setAttribute('aria-selected', k === which ? 'true' : 'false');
+          panels[k].hidden = k !== which;
+        }
+      }
+      tabs.iphone.addEventListener('click', function () { show('iphone'); });
+      tabs.android.addEventListener('click', function () { show('android'); });
+      if (/Android/i.test(navigator.userAgent)) show('android');
+    })();
+  </script>
 
   <!-- ── Modes ──────────────────────────────────────────────── -->
   <section class="section" id="functies">

@@ -155,17 +155,19 @@ describe('team photos', () => {
 });
 
 describe('team payload', () => {
-  it('only slots with a partij, sorted, without games, last point or order; end when given', () => {
+  it('only slots with a partij, sorted, without games, last point or order; end when given; server in a rally', () => {
     const partijen = {
       3: won('Paul', '', [3, 1], 1),
-      1: playing,
+      1: { ...playing, server: 2 },
+      2: { ...playing, status: 'between' },
       4: won('', 'Kees', [0, 3], 2, { end: 'walkover', endAfter: 0 }),
     };
     const state = teamContentState(team, partijen);
     expect(state).toEqual({
       home: 'All Inn 8', away: 'Delft 8',
       partijen: [
-        { slot: 1, p1: 'Gerd-Jan', p2: 'Thomas', bestOf: 5, gamesWon: [1, 0], score: [3, 2], status: 'playing' },
+        { slot: 1, p1: 'Gerd-Jan', p2: 'Thomas', bestOf: 5, gamesWon: [1, 0], score: [3, 2], status: 'playing', server: 2 },
+        { slot: 2, p1: 'Gerd-Jan', p2: 'Thomas', bestOf: 5, gamesWon: [1, 0], score: [3, 2], status: 'between' },
         { slot: 3, p1: 'Paul', p2: '', bestOf: 5, gamesWon: [3, 1], score: [0, 0], status: 'finished', winner: 1 },
         { slot: 4, p1: '', p2: 'Kees', bestOf: 5, gamesWon: [0, 3], score: [0, 0], status: 'finished', winner: 2, end: 'walkover' },
       ],
@@ -245,7 +247,7 @@ describe('team pushes', () => {
     expect(aps.alert).toBeUndefined();
     const expected = {
       home: 'All Inn 8', away: 'Delft 8',
-      partijen: [{ slot: 1, p1: 'Gerd-Jan', p2: 'Thomas', bestOf: 5, gamesWon: [1, 0], score: [3, 2], status: 'playing' }],
+      partijen: [{ slot: 1, p1: 'Gerd-Jan', p2: 'Thomas', bestOf: 5, gamesWon: [1, 0], score: [3, 2], status: 'playing', server: 1 }],
     };
     expect(aps['content-state']).toEqual(expected);
     const apnsRequest = sent.find((r) => r.url.includes('push.apple.com'));

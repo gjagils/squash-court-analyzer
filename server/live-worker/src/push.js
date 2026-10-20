@@ -241,7 +241,8 @@ function teamGames(partijen) {
 /**
  * The lock screen stand of a team match (APNs content-state, FCM `team`):
  * the team names and the partijen that exist, by slot, without games list,
- * last point or order, so it stays far below the 4 KB of APNs.
+ * last point or order, so it stays far below the 4 KB of APNs. `server`
+ * only for a partij in a rally.
  */
 export function teamContentState(team, partijen) {
   const list = [];
@@ -254,6 +255,11 @@ export function teamContentState(team, partijen) {
     };
     if (partij.winner === 1 || partij.winner === 2) item.winner = partij.winner;
     if (partij.end === 'retired' || partij.end === 'walkover') item.end = partij.end;
+    // Who serves (1 home, 2 away), only in a rally: the serve dot on the lock
+    // screen. Apps before 3.0 build 5 ignore the extra field.
+    if (partij.status === 'playing' && (partij.server === 1 || partij.server === 2) && !item.winner && !item.end) {
+      item.server = partij.server;
+    }
     list.push(item);
   }
   return { home: team.home, away: team.away, partijen: list };

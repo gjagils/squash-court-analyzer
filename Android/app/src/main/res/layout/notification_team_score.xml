@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Expanded team match notification before Android 16, as the iOS lock
-     screen (design "variant 3b" with proposal B, 18 October 2026): E1-E4 as
-     rows (notification_team_row.xml, added in code), then a bar with the mark
-     and a red live dot, and the teams with their games in boxes. Same colours as the single match
-     (live_colors.xml, light and night). -->
+     screen (design B, 20 October 2026). At the top (team_top, filled in
+     code): the partij under way large (notification_team_focus.xml), two at
+     once as rows (notification_team_row.xml), or the next partij; then the
+     strip E1-E4 (team_strip, notification_team_tile.xml). All four decided:
+     the four rows and no strip. Along the bottom a bar with the mark, a red
+     live dot and the teams with their partijen in boxes, "partijen" under
+     them. Same colours as the single match (live_colors.xml, light and night). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -16,7 +19,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="6dp" />
+        android:paddingBottom="4dp" />
+
+    <LinearLayout
+        android:id="@+id/team_strip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="-3dp"
+        android:layout_marginEnd="-3dp"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp" />
 
     <ImageView
         android:layout_width="match_parent"
@@ -26,7 +38,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="44dp"
         android:background="@color/live_bar"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -65,48 +77,109 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/team_home_games"
-            style="@style/TextAppearance.Compat.Notification.Title"
+        <!-- The partijen per team (SBN: partijen first), "partijen" under
+             them; at the end the winner's box filled (the _won variants) -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/live_games_box1"
-            android:fontFeatureSettings="tnum"
-            android:gravity="center"
-            android:includeFontPadding="false"
-            android:minWidth="30dp"
-            android:paddingLeft="6dp"
-            android:paddingTop="2dp"
-            android:paddingRight="6dp"
-            android:paddingBottom="2dp"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="6dp"
-            android:paddingRight="6dp"
-            android:text="–"
-            android:textColor="@color/live_text2"
-            android:textSize="15sp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/team_away_games"
-            style="@style/TextAppearance.Compat.Notification.Title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/live_games_box2"
-            android:fontFeatureSettings="tnum"
-            android:gravity="center"
-            android:includeFontPadding="false"
-            android:minWidth="30dp"
-            android:paddingLeft="6dp"
-            android:paddingTop="2dp"
-            android:paddingRight="6dp"
-            android:paddingBottom="2dp"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/team_home_games"
+                    style="@style/TextAppearance.Compat.Notification.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/live_games_box1"
+                    android:fontFeatureSettings="tnum"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:minWidth="30dp"
+                    android:paddingLeft="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingRight="6dp"
+                    android:paddingBottom="2dp"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/team_home_games_won"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/team_tile1"
+                    android:fontFeatureSettings="tnum"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:minWidth="30dp"
+                    android:paddingLeft="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingRight="6dp"
+                    android:paddingBottom="2dp"
+                    android:textColor="@color/live_p1"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp"
+                    android:text="–"
+                    android:textColor="@color/live_text2"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/team_away_games"
+                    style="@style/TextAppearance.Compat.Notification.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/live_games_box2"
+                    android:fontFeatureSettings="tnum"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:minWidth="30dp"
+                    android:paddingLeft="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingRight="6dp"
+                    android:paddingBottom="2dp"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/team_away_games_won"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/team_tile2"
+                    android:fontFeatureSettings="tnum"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:minWidth="30dp"
+                    android:paddingLeft="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingRight="6dp"
+                    android:paddingBottom="2dp"
+                    android:textColor="@color/live_p2"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="partijen"
+                android:textColor="@color/live_text2"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/team_away_name"

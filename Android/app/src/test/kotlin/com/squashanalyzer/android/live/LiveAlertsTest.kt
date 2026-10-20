@@ -120,7 +120,7 @@ class LiveAlertsTest {
         FollowedMatches(app).add(team)
         LiveFollowMessagingService.handle(app, teamPush(alertTitle = "E1: Paul wint 3–0"))
         val n = manager.activeNotifications.single { it.id == LiveScoreNotifier.notificationId(team) }.notification
-        assertEquals("All Inn 8 3 – 0 Delft 8", n.extras.getString(Notification.EXTRA_TITLE))
+        assertEquals("All Inn 8 1 – 0 Delft 8", n.extras.getString(Notification.EXTRA_TITLE))
         assertEquals("E2 bezig 4–2 · 1 van 4 klaar", n.extras.getString(Notification.EXTRA_TEXT))
         assertTrue(n.flags and Notification.FLAG_ONGOING_EVENT != 0)
         assertTrue(n.bigContentView != null && n.contentView != null)
@@ -134,9 +134,9 @@ class LiveAlertsTest {
         FollowedMatches(app).add(team)
         LiveFollowMessagingService.handle(app, teamPush())
         val n = manager.activeNotifications.single().notification
-        assertEquals("All Inn 8 3 – 0 Delft 8", n.extras.getString(Notification.EXTRA_TITLE))
-        assertEquals("E2 bezig: Paul 4–2 Mark · 1 van 4 klaar", n.extras.getString(Notification.EXTRA_TEXT))
-        assertEquals("3–0", n.shortCriticalText)
+        assertEquals("All Inn 8 1 – 0 Delft 8", n.extras.getString(Notification.EXTRA_TITLE))
+        assertEquals("E2 bezig: Paul 4–2 Mark (0–0) · games 3–0", n.extras.getString(Notification.EXTRA_TEXT))
+        assertEquals("1–0", n.shortCriticalText)
         assertTrue(n.extras.getBoolean("android.requestPromotedOngoing"))
         assertTrue(n.bigContentView == null && n.contentView == null)
     }

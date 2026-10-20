@@ -3,10 +3,12 @@ import SwiftUI
 import UIKit
 import WidgetKit
 
-/// The Live Activity of a team match (Competitie): a row per partij E1–E4
-/// with both players (photo or first letter), their games and in the middle
-/// the points of a partij under way, and below a bar with the team names and
-/// the games per team. Home orange, away steel blue, as on the team page.
+/// The Live Activity of a team match (Competitie), design B (20 October
+/// 2026): at the top the partij under way, large (two courts: two compact
+/// rows), below it a strip E1–E4 with the result of each partij, and a bar
+/// with the team names and the partijen per team (SBN: partijen first,
+/// games second). All four decided: the four results as rows. Home orange,
+/// away steel blue, as on the team page.
 struct TeamScoreActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TeamScoreAttributes.self) { context in
@@ -26,23 +28,28 @@ struct TeamScoreActivityWidget: Widget {
                         .frame(maxHeight: .infinity)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(state.progressText)
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
-                        .foregroundColor(LiveScoreColors.textSecondary)
+                    Text(state.islandStatus)
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(state.livePartijen.isEmpty ? LiveScoreColors.textSecondary : LiveScoreColors.live)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .padding(.trailing, 6)
                         .frame(maxHeight: .infinity)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    // The team line and four short rows: the expanded island is about 160 pt high in all
-                    VStack(spacing: 1) {
-                        TeamScoreTeamLine(state: state, nameSize: 13, boxSize: 13)
+                    // The team line with the partijen, then the partij(en) under way, or the strip E1–E4
+                    VStack(spacing: 4) {
+                        TeamScoreTeamLine(state: state, nameSize: 13, boxSize: 13, caption: false)
                             .frame(height: 20)
-                            .padding(.bottom, 1)
-                        ForEach(TeamScoreAttributes.ContentState.slots, id: \.self) { slot in
-                            TeamScoreRow(state: state, slot: slot, photos: photos, height: 18, avatar: 15, nameSize: 12,
-                                         boxSize: 10)
+                        let live = state.livePartijen.prefix(2)
+                        if live.isEmpty {
+                            TeamScoreStrip(state: state, height: 20, size: 10)
+                        } else {
+                            ForEach(Array(live), id: \.slot) { partij in
+                                TeamScoreRow(state: state, slot: partij.slot, photos: photos, height: 20, avatar: 16, nameSize: 12,
+                                             boxSize: 11)
+                            }
                         }
                     }
                     .padding(.horizontal, 4)
@@ -54,13 +61,13 @@ struct TeamScoreActivityWidget: Widget {
                             .fill(LiveScoreColors.live)
                             .frame(width: 6, height: 6)
                     }
-                    Text("\(state.games(1))")
+                    Text("\(state.partijenWon(1))")
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .foregroundColor(LiveScoreColors.player1)
                 }
             } compactTrailing: {
-                Text("\(state.games(2))")
+                Text("\(state.partijenWon(2))")
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .monospacedDigit()
                     .foregroundColor(LiveScoreColors.player2Text)
@@ -95,31 +102,63 @@ struct TeamScorePhotos {
     func photo(slot: Int, side: Int) -> UIImage? { images["\(slot)-\(side)"] }
 }
 
-/// The lock screen card: a row per partij E1–E4 (both players, their games,
-/// the points of a partij under way), and a bar along the bottom with the
-/// mark with a red live dot, the team names and the games per team (design
-/// "variant 3b" with proposal B, 18 October 2026). The system clips a Live Activity at about
-/// 160 pt: four rows of 25 and the bar of 40 make about 156 with the padding.
+/// The lock screen card (design B). During the evening: the partij under way
+/// large (heading, both players, the points in the middle), or two compact
+/// rows when two courts play at once, or the next partij; then the strip
+/// E1–E4. All four decided: a row per partij with the games. Along the
+/// bottom the bar with the mark, a red live dot and the partijen per team.
+/// The system clips a Live Activity at about 160 pt: top 66 + strip 30 + bar 44.
 struct TeamScoreLockScreenView: View {
     let state: TeamScoreAttributes.ContentState
     let photos: TeamScorePhotos
 
     var body: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 0) {
-                ForEach(TeamScoreAttributes.ContentState.slots, id: \.self) { slot in
-                    TeamScoreRow(state: state, slot: slot, photos: photos, height: 25, avatar: 20, nameSize: 14, boxSize: 12)
+            switch state.focus {
+            case .finished:
+                VStack(spacing: 0) {
+                    ForEach(TeamScoreAttributes.ContentState.slots, id: \.self) { slot in
+                        TeamScoreRow(state: state, slot: slot, photos: photos, height: 25, avatar: 20, nameSize: 14, boxSize: 12)
+                    }
                 }
+                .padding(.horizontal, 14)
+                .padding(.top, 7)
+                .padding(.bottom, 5)
+            case .live(let live) where live.count > 1:
+                VStack(spacing: 2) {
+                    ForEach(Array(live.prefix(2)), id: \.slot) { partij in
+                        TeamScoreRow(state: state, slot: partij.slot, photos: photos, height: 28, avatar: 22, nameSize: 14,
+                                     boxSize: 13, pointsSize: 18)
+                    }
+                }
+                .frame(height: 62)
+                .padding(.horizontal, 14)
+                .padding(.top, 6)
+                strip
+            case .live(let live):
+                TeamScoreFocusView(state: state, slot: live[0].slot, photos: photos)
+                    .padding(.horizontal, 14)
+                    .padding(.top, 8)
+                strip
+            case .next(let slot):
+                TeamScoreFocusView(state: state, slot: slot, photos: photos)
+                    .padding(.horizontal, 14)
+                    .padding(.top, 8)
+                strip
             }
-            .padding(.horizontal, 14)
-            .padding(.top, 7)
-            .padding(.bottom, 5)
             bar
         }
         .overlay(
             ContainerRelativeShape()
                 .stroke(LiveScoreColors.line, lineWidth: 1)
         )
+    }
+
+    private var strip: some View {
+        TeamScoreStrip(state: state, height: 22, size: 12)
+            .padding(.horizontal, 14)
+            .padding(.top, 4)
+            .padding(.bottom, 8)
     }
 
     private var bar: some View {
@@ -134,10 +173,10 @@ struct TeamScoreLockScreenView: View {
                     .accessibilityLabel("Live")
                     .accessibilityHidden(state.isFinished)
             }
-            TeamScoreTeamLine(state: state, nameSize: 14, boxSize: 15)
+            TeamScoreTeamLine(state: state, nameSize: 14, boxSize: 15, caption: true)
         }
         .padding(.horizontal, 14)
-        .frame(height: 40)
+        .frame(height: 44)
         .background(LiveScoreColors.accent.opacity(0.08))
         .overlay(alignment: .top) {
             Rectangle()
@@ -147,12 +186,177 @@ struct TeamScoreLockScreenView: View {
     }
 }
 
-/// Home name left, the games of both teams exactly in the middle (the same
-/// axis as the middle of the partij rows), away name right; long names are cut off
+/// The partij at the top: "● E3 · bezig" with "games 1–1" on the right, and
+/// below it the home player (photo, name), the points large in the middle
+/// ("pauze" between games) and the away player. The serve dot (gold) only
+/// when the push says who serves.
+struct TeamScoreFocusView: View {
+    let state: TeamScoreAttributes.ContentState
+    let slot: Int
+    let photos: TeamScorePhotos
+
+    private var partij: TeamScorePartij? { state.partij(slot) }
+    private var isLive: Bool { partij?.isLive == true }
+    private var isPause: Bool { partij?.isPause == true }
+
+    var body: some View {
+        VStack(spacing: 4) {
+            HStack(spacing: 5) {
+                if isLive {
+                    Circle()
+                        .fill(isPause ? LiveScoreColors.textSecondary : LiveScoreColors.live)
+                        .frame(width: 6, height: 6)
+                }
+                Text(state.focusHeading(slot))
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(isLive && !isPause ? LiveScoreColors.live : LiveScoreColors.textSecondary)
+                    .lineLimit(1)
+                Spacer(minLength: 6)
+                Text(isLive ? state.gamesText(slot) : state.progressText)
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(LiveScoreColors.textSecondary)
+                    .lineLimit(1)
+            }
+            .frame(height: 16)
+            if partij == nil {
+                Text("spelers nog niet bekend")
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundColor(LiveScoreColors.textSecondary.opacity(0.7))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 40)
+            } else {
+                HStack(spacing: 8) {
+                    player(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    centre
+                        .fixedSize()
+                    player(2)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+                .frame(height: 40)
+            }
+        }
+    }
+
+    private func player(_ side: Int) -> some View {
+        let avatar = ZStack(alignment: side == 1 ? .bottomTrailing : .bottomLeading) {
+            TeamScoreAvatar(initial: state.initial(slot: slot, side: side), side: side, photo: photos.photo(slot: slot, side: side),
+                            size: 32, empty: false)
+            Circle()
+                .fill(LiveScoreColors.gold)
+                .frame(width: 10, height: 10)
+                .overlay(Circle().stroke(LiveScoreColors.card, lineWidth: 2))
+                .offset(x: side == 1 ? 2 : -2, y: 2)
+                .opacity(partij?.isServing(side) == true ? 1 : 0)
+                .accessibilityHidden(true)
+        }
+        let name = Text(state.name(slot: slot, side: side))
+            .font(.system(size: 15, weight: .bold, design: .rounded))
+            .foregroundColor(LiveScoreColors.playerText(side).opacity(state.hasName(slot: slot, side: side) ? 1 : 0.6))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+        return HStack(spacing: 7) {
+            if side == 1 {
+                avatar
+                name
+            } else {
+                name
+                avatar
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(state.name(slot: slot, side: side) + (partij?.isServing(side) == true ? ", serveert" : ""))
+    }
+
+    @ViewBuilder
+    private var centre: some View {
+        if let partij, partij.isPause {
+            Text("pauze")
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .foregroundColor(LiveScoreColors.textSecondary)
+        } else if let partij, partij.isLive {
+            Text(state.pointsText(partij))
+                .font(.system(size: 32, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundColor(LiveScoreColors.live)
+                .lineLimit(1)
+        } else {
+            Text("–")
+                .font(.system(size: 26, weight: .bold, design: .rounded))
+                .foregroundColor(LiveScoreColors.textSecondary)
+        }
+    }
+}
+
+/// Four boxes E1–E4: a decided partij filled in the winner's colour with its
+/// games ("3–0", home first) or "w.o." / "opgave"; one under way outlined red
+/// with "bezig"; one not started grey with "–"
+struct TeamScoreStrip: View {
+    let state: TeamScoreAttributes.ContentState
+    let height: CGFloat
+    let size: CGFloat
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(TeamScoreAttributes.ContentState.slots, id: \.self) { slot in
+                tile(slot)
+            }
+        }
+    }
+
+    private func tile(_ slot: Int) -> some View {
+        let tile = state.tile(slot)
+        let colour: Color
+        let fill: Color
+        let line: Color
+        let text: String
+        switch tile {
+        case .decided(let winner, let result):
+            colour = winner == 0 ? LiveScoreColors.textSecondary : LiveScoreColors.playerText(winner)
+            fill = winner == 0 ? Color.clear : colour.opacity(0.2)
+            line = winner == 0 ? LiveScoreColors.border : colour
+            text = result
+        case .live:
+            colour = LiveScoreColors.live
+            fill = LiveScoreColors.live.opacity(0.1)
+            line = LiveScoreColors.live
+            text = "bezig"
+        case .waiting:
+            colour = LiveScoreColors.textSecondary.opacity(0.7)
+            fill = Color.clear
+            line = LiveScoreColors.border
+            text = "–"
+        }
+        return HStack(spacing: 4) {
+            Text("E\(slot)")
+                .font(.system(size: size - 2, weight: .semibold, design: .rounded))
+                .foregroundColor(LiveScoreColors.textSecondary)
+            Text(text)
+                .font(.system(size: size, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundColor(colour)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.7)
+        .frame(maxWidth: .infinity)
+        .frame(height: height)
+        .background(fill)
+        .clipShape(RoundedRectangle(cornerRadius: height * 0.3))
+        .overlay(RoundedRectangle(cornerRadius: height * 0.3).stroke(line, lineWidth: 1))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("E\(slot): " + text)
+    }
+}
+
+/// Home name left, the partijen of both teams exactly in the middle (with
+/// "partijen" under them on the lock screen), away name right; long names
+/// shrink, then are cut off. The winner's box is filled at the end.
 struct TeamScoreTeamLine: View {
     let state: TeamScoreAttributes.ContentState
     let nameSize: CGFloat
     let boxSize: CGFloat
+    let caption: Bool
 
     var body: some View {
         HStack(spacing: 6) {
@@ -163,12 +367,22 @@ struct TeamScoreTeamLine: View {
                 .minimumScaleFactor(0.75)
                 .truncationMode(.tail)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            HStack(spacing: 6) {
-                TeamScoreGamesBox(games: state.games(1), side: 1, won: state.isFinished && state.teamWinner == 1, size: boxSize)
-                Text("–")
-                    .font(.system(size: boxSize - 1, weight: .bold, design: .rounded))
-                    .foregroundColor(LiveScoreColors.textSecondary)
-                TeamScoreGamesBox(games: state.games(2), side: 2, won: state.isFinished && state.teamWinner == 2, size: boxSize)
+            VStack(spacing: 1) {
+                HStack(spacing: 6) {
+                    TeamScoreGamesBox(games: state.partijenWon(1), side: 1, won: state.isFinished && state.teamWinner == 1,
+                                      size: boxSize, unit: "partijen")
+                    Text("–")
+                        .font(.system(size: boxSize - 1, weight: .bold, design: .rounded))
+                        .foregroundColor(LiveScoreColors.textSecondary)
+                    TeamScoreGamesBox(games: state.partijenWon(2), side: 2, won: state.isFinished && state.teamWinner == 2,
+                                      size: boxSize, unit: "partijen")
+                }
+                if caption {
+                    Text("partijen")
+                        .font(.system(size: 9, weight: .semibold, design: .rounded))
+                        .foregroundColor(LiveScoreColors.textSecondary)
+                        .accessibilityHidden(true)
+                }
             }
             .fixedSize()
             Text(state.away)
@@ -184,6 +398,8 @@ struct TeamScoreTeamLine: View {
 
 /// One partij: "E1", home avatar and name, the games with the middle text,
 /// the away name and avatar. A slot without a partij is greyed with "–".
+/// Used for the results at the end, for two partijen at once and in the
+/// expanded Dynamic Island.
 struct TeamScoreRow: View {
     let state: TeamScoreAttributes.ContentState
     let slot: Int
@@ -192,6 +408,8 @@ struct TeamScoreRow: View {
     let avatar: CGFloat
     let nameSize: CGFloat
     let boxSize: CGFloat
+    /// The size of the live points; the box size when nil
+    var pointsSize: CGFloat? = nil
 
     var body: some View {
         if state.partij(slot) == nil {
@@ -225,7 +443,7 @@ struct TeamScoreRow: View {
         // Both sides get the same width, so the middle sits on the card's centre line
         return HStack(spacing: 5) {
             HStack(spacing: 5) {
-                // The red live dot leads the row, apart from the serve dots of a single match
+                // The red live dot leads the row
                 HStack(spacing: 3) {
                     Circle()
                         .fill(isLive ? LiveScoreColors.live : Color.clear)
@@ -272,7 +490,7 @@ struct TeamScoreRow: View {
                 TeamScoreGamesBox(games: nil, side: 1, won: false, size: boxSize)
             }
             middle
-                .frame(width: boxSize * 3.6)
+                .frame(width: max(boxSize * 3.6, (pointsSize ?? boxSize) * 2.8))
             if let partij {
                 TeamScoreGamesBox(games: partij.games(2), side: 2, won: partij.winnerSide == 2, size: boxSize)
             } else {
@@ -283,8 +501,10 @@ struct TeamScoreRow: View {
     }
 
     private var isLive: Bool {
-        if case .live = state.middle(slot) { return true }
-        return false
+        switch state.middle(slot) {
+        case .live, .pause: return true
+        default: return false
+        }
     }
 
     @ViewBuilder
@@ -292,14 +512,19 @@ struct TeamScoreRow: View {
         switch state.middle(slot) {
         case .live(let points):
             Text(points)
-                .font(.system(size: boxSize, weight: .bold, design: .rounded))
+                .font(.system(size: pointsSize ?? boxSize, weight: .bold, design: .rounded))
                 .monospacedDigit()
                 .foregroundColor(LiveScoreColors.live)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-        case .decided:
-            Text("klaar")
-                .font(.system(size: boxSize - 1, weight: .medium, design: .rounded))
+        case .pause:
+            Text("pauze")
+                .font(.system(size: boxSize - 1, weight: .semibold, design: .rounded))
+                .foregroundColor(LiveScoreColors.textSecondary)
+                .lineLimit(1)
+        case .decided(let end):
+            Text(end ?? "–")
+                .font(.system(size: boxSize - 1, weight: end == nil ? .bold : .semibold, design: .rounded))
                 .foregroundColor(LiveScoreColors.textSecondary)
                 .lineLimit(1)
         case .none:
@@ -310,13 +535,15 @@ struct TeamScoreRow: View {
     }
 }
 
-/// Games in a small box: home orange, away blue; the winner's box is filled
-/// in its colour. No games (no partij yet): "–", greyed.
+/// A number in a small box: home orange, away blue; the winner's box is
+/// filled in its colour. No number (no partij yet): "–", greyed.
 struct TeamScoreGamesBox: View {
     let games: Int?
     let side: Int
     let won: Bool
     let size: CGFloat
+    /// What the number counts, for VoiceOver
+    var unit: String = "games"
 
     var body: some View {
         let colour = LiveScoreColors.playerText(side)
@@ -333,7 +560,7 @@ struct TeamScoreGamesBox: View {
             .clipShape(RoundedRectangle(cornerRadius: size * 0.45))
             .overlay(RoundedRectangle(cornerRadius: size * 0.45)
                 .stroke(won ? colour : (games == nil ? LiveScoreColors.border : line), lineWidth: 1))
-            .accessibilityLabel(games.map { value in "\(value) games" } ?? "nog niet begonnen")
+            .accessibilityLabel(games.map { value in "\(value) \(unit)" } ?? "nog niet begonnen")
     }
 }
 

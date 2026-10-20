@@ -78,7 +78,29 @@ knop op de teampagina, of `https://…/t/<id>` plakken) geeft een tweede Live Ac
 `SquashLiveActivity/TeamScoreActivityWidget.swift`). De content-state is precies de
 teampush van de server (`{home, away, partijen}`).
 
-- Kaart: LIVE-pil, "COMPETITIE" en "2 van 4 klaar"; daaronder de teamregel (thuisteam
+- **Bijgewerkt 20 oktober 2026: ontwerp B** (branch `claude/teamscore-lockscreen-b`,
+  nog niet op `main`). De beschrijving hieronder (vier rijen met games, compact
+  "5·3") is daarmee verouderd. Nu: bovenaan groot de partij die bezig is (kop "● E3 ·
+  bezig" met "games 1–1", spelers met foto, punten in het midden, gouden opslagstip
+  als de push `server` heeft; tussen games "pauze"), twee banen tegelijk als twee
+  regels, tussen partijen de volgende partij ("E3 · inspelen" of "Volgende partij ·
+  E3", met "2 van 4 klaar"). Daaronder een strook E1–E4 (uitslag in de kleur van de
+  winnaar, "bezig" rood omrand, "w.o."/"opgave", grijs "–"). Na afloop vier rijen met
+  de games per partij (het "klaar" in het midden is weg). De balk onderin toont de
+  **partijen** per team met "partijen" eronder, na afloop het vakje van de winnaar
+  gevuld (SBN-regel). Dynamic Island: compact en minimaal partijen ("1·1"); uitgeklapt
+  LIVE, rechts "E3 7–5", de teamregel met partijen en de lopende partij(en) als regel
+  (anders de strook). Logica in `TeamScoreAttributes` (`focus`, `tile`,
+  `focusHeading`, `islandStatus`) en `TeamScoreCard` (`focus`, `tiles`, `teamWinner`),
+  getest in `TeamScoreAttributesTests` en `TeamScoreCardTest`. Android 9–15: layouts
+  `notification_team_focus.xml` en `notification_team_tile.xml`; Android 16: titel en
+  chip met partijen, tekst "E3 bezig: Bas 7–5 Tim (1–1) · games 6–4". Server: de
+  teampush (`teamContentState`) heeft `server` (1 thuis, 2 uit) alleen bij status
+  `playing`; de eerste stand uit Core (`TeamFollowStand`) heeft het niet, dus de stip
+  verschijnt pas bij de eerste push. Beelden zonder simulator: ImageRenderer
+  (Mac Catalyst) voor iOS en `TeamScoreRenderTest` (Robolectric, `TEAM_RENDER_DIR`)
+  voor Android.
+- Kaart (stand 16–18 oktober): LIVE-pil, "COMPETITIE" en "2 van 4 klaar"; daaronder de teamregel (thuisteam
   oranje links, de games van beide teams in het midden, uitteam blauw rechts) en vier
   rijen E1–E4: foto of letter, voornaam, games per speler, in het midden "● 7–5"
   (rood, partij bezig), "klaar" of "–". Het vakje van de winnaar krijgt zijn kleur;

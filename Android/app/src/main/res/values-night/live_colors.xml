@@ -11,4 +11,8 @@
     <color name="live_live">#FF6B6B</color>
     <color name="live_dim">#7A746D</color>
     <color name="live_bar">#14F28C26</color>
+    <color name="live_gold">#E6B859</color>
+    <color name="live_p1_fill">#33F28C26</color>
+    <color name="live_p2_fill">#338094AD</color>
+    <color name="live_live_fill">#1FFF6B6B</color>
 </resources>

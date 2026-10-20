@@ -15,7 +15,7 @@ import org.json.JSONObject
  *     -n com.squashanalyzer.android/.live.LiveScoreSampleReceiver --es state gamebal
  *
  * state: spel (default), gamebal, matchbal, pauze, uitslag, stop.
- * `--es team spel|pauze|uitslag|stop` shows a team match instead;
+ * `--es team spel|pauze|twee|tussen|uitslag|stop` shows a team match instead;
  * `--es alertTitle "…" --es alertBody "…"` adds an alert as the server does.
  *
  * `--es style ongoing` shows the Android 9-15 notification (the ticker with
@@ -66,7 +66,7 @@ class LiveScoreSampleReceiver : BroadcastReceiver() {
     }
 
     /**
-     * `--es team spel|pauze|uitslag|stop`: a team match, All Inn 8 – Delft 8
+     * `--es team spel|pauze|twee|tussen|uitslag|stop`: a team match, All Inn 8 – Delft 8
      * (E1 and E3 decided, E2 under way, E4 not started; uitslag: all four).
      */
     private fun team(context: Context, intent: Intent, state: String) {
@@ -89,8 +89,14 @@ class LiveScoreSampleReceiver : BroadcastReceiver() {
             "pauze" -> partijen
                 .put(partij(2, "Paul", "Mark", 1 to 1, 9 to 11, "between"))
                 .put(partij(3, "Luis", "Niels", 1 to 3, 7 to 11, "finished", winner = 2))
+            "twee" -> partijen
+                .put(partij(2, "Paul", "Mark", 1 to 0, 7 to 5, "playing", server = 1))
+                .put(partij(3, "Luis", "Niels", 0 to 1, 4 to 6, "playing", server = 2))
+            "tussen" -> partijen
+                .put(partij(2, "Paul", "Mark", 1 to 3, 7 to 11, "finished", winner = 2))
+                .put(partij(3, "Luis", "Niels", 0 to 0, 0 to 0, "warmup"))
             else -> partijen
-                .put(partij(2, "Paul", "Mark", 1 to 0, 7 to 5, "playing"))
+                .put(partij(2, "Paul", "Mark", 1 to 0, 7 to 5, "playing", server = 1))
                 .put(partij(3, "Luis", "Niels", 1 to 3, 7 to 11, "finished", winner = 2))
                 .put(partij(4, "Anna", "Bram", 0 to 0, 0 to 0, "warmup"))
         }
@@ -108,7 +114,7 @@ class LiveScoreSampleReceiver : BroadcastReceiver() {
 
     private fun partij(
         slot: Int, p1: String, p2: String, gamesWon: Pair<Int, Int>, score: Pair<Int, Int>, status: String,
-        winner: Int? = null, end: String? = null,
+        winner: Int? = null, end: String? = null, server: Int? = null,
     ): JSONObject {
         val o = JSONObject()
             .put("slot", slot).put("p1", p1).put("p2", p2).put("bestOf", 5)
@@ -117,6 +123,7 @@ class LiveScoreSampleReceiver : BroadcastReceiver() {
             .put("status", status)
         if (winner != null) o.put("winner", winner)
         if (end != null) o.put("end", end)
+        if (server != null) o.put("server", server)
         return o
     }
 

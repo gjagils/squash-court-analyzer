@@ -412,7 +412,7 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
 #if DEBUG
 /// Screenshots and simulator checks: `-LiveActivityDemo <state>` puts a made-up
 /// own match on the lock screen (playing, gameball, matchball, between, finished),
-/// or a team match (team, team-finished)
+/// or a team match (team, team-pause, team-two, team-next, team-finished)
 enum LiveActivityDemo {
     @MainActor
     static func runIfRequested() {
@@ -423,8 +423,8 @@ enum LiveActivityDemo {
         for activity in Activity<TeamScoreAttributes>.activities {
             Task { await activity.end(nil, dismissalPolicy: .immediate) }
         }
-        if name == "team" || name == "team-finished" {
-            showTeamDemo(finished: name == "team-finished")
+        if name.hasPrefix("team") {
+            showTeamDemo(name)
             return
         }
         let snapshot = demoSnapshot(name)
@@ -449,20 +449,33 @@ enum LiveActivityDemo {
     }
 
     /// A team match with E1 and E2 decided, E3 under way and E4 not started
-    /// (`-LiveActivityDemo team`), or all four decided (`team-finished`)
+    /// (`-LiveActivityDemo team`), E3 between games (`team-pause`), E2 and E3
+    /// at once (`team-two`), E3 warming up (`team-next`), or all four decided
+    /// (`team-finished`, E4 a walkover)
     @MainActor
-    private static func showTeamDemo(finished: Bool) {
+    private static func showTeamDemo(_ name: String) {
         for activity in Activity<LiveScoreAttributes>.activities {
             Task { await activity.end(nil, dismissalPolicy: .immediate) }
         }
         var partijen = [
             TeamScorePartij(slot: 1, p1: "Gerard", p2: "Thé", bestOf: 5, gamesWon: [3, 0], score: [11, 4], status: "finished", winner: 1, end: nil),
             TeamScorePartij(slot: 2, p1: "Sanne", p2: "Mila", bestOf: 5, gamesWon: [1, 3], score: [8, 11], status: "finished", winner: 2, end: nil),
-            TeamScorePartij(slot: 3, p1: "Paul", p2: "Joris", bestOf: 5, gamesWon: [1, 0], score: [7, 5], status: "playing", winner: nil, end: nil),
+            TeamScorePartij(slot: 3, p1: "Paul", p2: "Joris", bestOf: 5, gamesWon: [1, 1], score: [7, 5], status: "playing", winner: nil, end: nil,
+                            server: 1),
         ]
-        if finished {
+        switch name {
+        case "team-finished":
             partijen[2] = TeamScorePartij(slot: 3, p1: "Paul", p2: "Joris", bestOf: 5, gamesWon: [3, 1], score: [11, 6], status: "finished", winner: 1, end: nil)
-            partijen.append(TeamScorePartij(slot: 4, p1: "Niels", p2: "Kees", bestOf: 5, gamesWon: [3, 2], score: [11, 9], status: "finished", winner: 1, end: nil))
+            partijen.append(TeamScorePartij(slot: 4, p1: "Niels", p2: "", bestOf: 5, gamesWon: [3, 0], score: [0, 0], status: "finished", winner: 1, end: "walkover"))
+        case "team-pause":
+            partijen[2] = TeamScorePartij(slot: 3, p1: "Paul", p2: "Joris", bestOf: 5, gamesWon: [1, 1], score: [9, 11], status: "between", winner: nil, end: nil)
+        case "team-two":
+            partijen[1] = TeamScorePartij(slot: 2, p1: "Sanne", p2: "Mila", bestOf: 5, gamesWon: [1, 0], score: [4, 6], status: "playing", winner: nil, end: nil,
+                                          server: 2)
+        case "team-next":
+            partijen[2] = TeamScorePartij(slot: 3, p1: "Paul", p2: "Joris", bestOf: 5, gamesWon: [0, 0], score: [0, 0], status: "warmup", winner: nil, end: nil)
+        default:
+            break
         }
         let state = TeamScoreAttributes.ContentState(home: "Squash Delft 8", away: "All Inn Squash 8", partijen: partijen)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {

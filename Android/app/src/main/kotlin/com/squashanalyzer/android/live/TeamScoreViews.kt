@@ -6,9 +6,11 @@ import android.widget.RemoteViews
 import com.squashanalyzer.android.R
 
 /**
- * The custom views of a followed team match on Android 9-15: collapsed the
- * teams with their games and one line of state, expanded the four partijen
- * E1-E4 above a bar with the teams and their games (design "variant 3b").
+ * The custom views of a followed team match on Android 9-15 (design B, 20
+ * October 2026): collapsed the teams with their partijen and one line of
+ * state; expanded the partij under way large (two at once as rows, or the
+ * next partij), the strip E1-E4 and a bar with the teams and their partijen.
+ * All four decided: the four results as rows above the bar.
  */
 object TeamScoreViews {
     fun collapsed(context: Context, card: TeamScoreCard): RemoteViews {
@@ -21,9 +23,29 @@ object TeamScoreViews {
     fun expanded(context: Context, match: FollowedMatch, card: TeamScoreCard): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.notification_team_score)
         teamLine(views, card)
+        // At the end the winner's box filled (SBN rule, as far as the push knows it)
+        val winner = if (card.isFinished) card.teamWinner else 0
+        show(views, R.id.team_home_games, R.id.team_home_games_won, if (winner == 1) 2 else 1, card.partijenWon.first.toString())
+        show(views, R.id.team_away_games, R.id.team_away_games_won, if (winner == 2) 2 else 1, card.partijenWon.second.toString())
         views.setViewVisibility(R.id.team_live_dot, if (card.isFinished) View.INVISIBLE else View.VISIBLE)
         views.removeAllViews(R.id.team_rows)
-        for (row in card.rows) views.addView(R.id.team_rows, row(context, match, row))
+        views.removeAllViews(R.id.team_strip)
+        when (val top = card.focus) {
+            is TeamScoreCard.Focus.Finished -> for (row in card.rows) views.addView(R.id.team_rows, row(context, match, row))
+            is TeamScoreCard.Focus.Live ->
+                if (top.partijen.size > 1) {
+                    for (partij in top.partijen.take(2)) views.addView(R.id.team_rows, row(context, match, card.rows[partij.slot - 1]))
+                } else {
+                    views.addView(R.id.team_rows, focus(context, match, card, top.partijen.first().slot))
+                }
+            is TeamScoreCard.Focus.Next -> views.addView(R.id.team_rows, focus(context, match, card, top.slot))
+        }
+        if (card.isFinished) {
+            views.setViewVisibility(R.id.team_strip, View.GONE)
+        } else {
+            views.setViewVisibility(R.id.team_strip, View.VISIBLE)
+            for (tile in card.tiles) views.addView(R.id.team_strip, tile(context, tile))
+        }
         return views
     }
 
@@ -32,8 +54,66 @@ object TeamScoreViews {
         // after a word and clip the rest instead of shrinking it
         views.setTextViewText(R.id.team_home_name, LiveScoreCard.unbreakable(card.score.home))
         views.setTextViewText(R.id.team_away_name, LiveScoreCard.unbreakable(card.score.away))
-        views.setTextViewText(R.id.team_home_games, card.homeGames.toString())
-        views.setTextViewText(R.id.team_away_games, card.awayGames.toString())
+        views.setTextViewText(R.id.team_home_games, card.partijenWon.first.toString())
+        views.setTextViewText(R.id.team_away_games, card.partijenWon.second.toString())
+    }
+
+    /** The partij at the top: heading, both players with the points large in the middle */
+    private fun focus(context: Context, match: FollowedMatch, card: TeamScoreCard, slot: Int): RemoteViews {
+        val views = RemoteViews(context.packageName, R.layout.notification_team_focus)
+        val partij = card.score.partij(slot)
+        val live = partij?.isLive == true
+        val pause = partij?.isPause == true
+        show(views, R.id.focus_heading_live, R.id.focus_heading, if (live && !pause) 1 else 2, card.focusHeading(slot))
+        views.setViewVisibility(R.id.focus_dot, if (live && !pause) View.VISIBLE else View.GONE)
+        views.setTextViewText(R.id.focus_games, if (live && partij != null) card.gamesText(partij) else "${card.decidedCount} van 4 klaar")
+        if (partij == null) {
+            views.setViewVisibility(R.id.focus_players, View.GONE)
+            views.setViewVisibility(R.id.focus_unknown, View.VISIBLE)
+            return views
+        }
+        when {
+            pause -> show(views, R.id.focus_points, R.id.focus_pause, 2, "pauze")
+            live -> show(views, R.id.focus_points, R.id.focus_pause, 1, card.pointsText(partij))
+            else -> show(views, R.id.focus_points, R.id.focus_pause, 2, "–")
+        }
+        for (side in 1..2) {
+            val name = card.name(partij, side)
+            views.setTextViewText(if (side == 1) R.id.focus_name1 else R.id.focus_name2, LiveScoreCard.unbreakable(name))
+            views.setViewVisibility(if (side == 1) R.id.focus_serve1 else R.id.focus_serve2,
+                if (partij.isServing(side)) View.VISIBLE else View.INVISIBLE)
+            avatar(context, match, views, slot, side, name,
+                if (side == 1) R.id.focus_photo1 else R.id.focus_photo2, if (side == 1) R.id.focus_initial1 else R.id.focus_initial2)
+        }
+        return views
+    }
+
+    /** One box of the strip E1-E4 */
+    private fun tile(context: Context, tile: TeamScoreCard.Tile): RemoteViews {
+        val views = RemoteViews(context.packageName, R.layout.notification_team_tile)
+        val shown = when (tile.kind) {
+            1 -> R.id.tile_won1
+            2 -> R.id.tile_won2
+            4 -> R.id.tile_live
+            else -> R.id.tile_plain
+        }
+        views.setTextViewText(shown, tile.text)
+        views.setViewVisibility(shown, View.VISIBLE)
+        return views
+    }
+
+    /** The photo when there is one, else the first letter */
+    private fun avatar(context: Context, match: FollowedMatch, views: RemoteViews, slot: Int, side: Int, name: String, photoView: Int, initialView: Int) {
+        val photo = LivePhotos.loadTeam(context, match, slot, side)
+        if (photo != null) {
+            views.setImageViewBitmap(photoView, photo)
+            views.setViewVisibility(photoView, View.VISIBLE)
+            views.setViewVisibility(initialView, View.GONE)
+        } else {
+            views.setTextViewText(initialView, LiveScoreCard.initialOf(name))
+            views.setViewVisibility(photoView, View.GONE)
+            views.setViewVisibility(initialView, View.VISIBLE)
+        }
     }
 
     private fun row(context: Context, match: FollowedMatch, row: TeamScoreCard.Row): RemoteViews {
@@ -54,7 +134,8 @@ object TeamScoreViews {
             when { notStarted -> 3; row.winner == 1 -> 2; else -> 1 })
         games(views, R.id.team_g2, R.id.team_g2_won, R.id.team_g2_dim, row.games2,
             when { notStarted -> 3; row.winner == 2 -> 2; else -> 1 })
-        show(views, R.id.team_mid, R.id.team_mid_live, if (row.isLive) 2 else 1, row.middle)
+        // The points red; "pauze" grey
+        show(views, R.id.team_mid, R.id.team_mid_live, if (row.isLive && row.middle != "pauze") 2 else 1, row.middle)
         // Avatars: the photo when there is one, else the first letter; none for an empty slot
         for (side in 1..2) {
             val frame = if (side == 1) R.id.team_avatar1 else R.id.team_avatar2
@@ -62,18 +143,8 @@ object TeamScoreViews {
                 views.setViewVisibility(frame, View.INVISIBLE)
                 continue
             }
-            val photoView = if (side == 1) R.id.team_photo1 else R.id.team_photo2
-            val initialView = if (side == 1) R.id.team_initial1 else R.id.team_initial2
-            val photo = LivePhotos.loadTeam(context, match, row.slot, side)
-            if (photo != null) {
-                views.setImageViewBitmap(photoView, photo)
-                views.setViewVisibility(photoView, View.VISIBLE)
-                views.setViewVisibility(initialView, View.GONE)
-            } else {
-                views.setTextViewText(initialView, LiveScoreCard.initialOf(if (side == 1) row.home else row.away))
-                views.setViewVisibility(photoView, View.GONE)
-                views.setViewVisibility(initialView, View.VISIBLE)
-            }
+            avatar(context, match, views, row.slot, side, if (side == 1) row.home else row.away,
+                if (side == 1) R.id.team_photo1 else R.id.team_photo2, if (side == 1) R.id.team_initial1 else R.id.team_initial2)
         }
         return views
     }

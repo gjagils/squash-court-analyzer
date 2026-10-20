@@ -30,9 +30,9 @@ class TeamScoreCardTest {
 
     @Test fun theDesignsTexts() {
         val card = TeamScoreCard(design)
-        assertEquals("All Inn 8 5 – 3 Delft 8", card.title)
-        assertEquals("5–3", card.chipText)
-        assertEquals("E2 bezig: Paul 7–5 Mark · 2 van 4 klaar", card.text)
+        assertEquals("All Inn 8 1 – 1 Delft 8", card.title)
+        assertEquals("1–1", card.chipText)
+        assertEquals("E2 bezig: Paul 7–5 Mark (1–0) · games 5–3", card.text)
         assertEquals("E2 bezig 7–5 · 2 van 4 klaar", card.compactText)
         assertFalse(card.isFinished)
         assertEquals(listOf(1, 2, 3, 4), card.slots)
@@ -41,7 +41,7 @@ class TeamScoreCardTest {
     @Test fun theRows() {
         val rows = TeamScoreCard(design).rows
         assertEquals(4, rows.size)
-        assertEquals(TeamScoreCard.Row(1, "E1", "Gerd-Jan", "Thomas", false, "3", "0", "klaar", false, 1), rows[0])
+        assertEquals(TeamScoreCard.Row(1, "E1", "Gerd-Jan", "Thomas", false, "3", "0", "–", false, 1), rows[0])
         assertEquals(TeamScoreCard.Row(2, "● E2", "Paul", "Mark", false, "1", "0", "7–5", true, 0), rows[1])
         assertEquals(2, rows[2].winner)
         assertEquals(TeamScoreCard.Row(4, "E4", "Anna", "Bram", false, "–", "–", "–", false, 0), rows[3])
@@ -60,7 +60,7 @@ class TeamScoreCardTest {
     @Test fun aPartijWithoutNamesUsesTheTeamAndSlot() {
         val card = TeamScoreCard(TeamScore("All Inn 8", "Delft 8", listOf(partij(3, p1 = "", p2 = "", status = "playing", score = 2 to 1))))
         assertEquals("All Inn 8 E3", card.rows[2].home)
-        assertEquals("E3 bezig: All Inn 8 E3 2–1 Delft 8 E3 · 0 van 4 klaar", card.text)
+        assertEquals("E3 bezig: All Inn 8 E3 2–1 Delft 8 E3 (0–0) · games 0–0", card.text)
     }
 
     @Test fun betweenGamesAndTwoPartijenAtOnce() {
@@ -68,7 +68,7 @@ class TeamScoreCardTest {
             partij(1, "Paul", "Mark", 1 to 1, 9 to 11, "between"),
             partij(2, "Anna", "Bram", 0 to 0, 3 to 4, "playing"),
         )))
-        assertEquals("E1 pauze: Paul – Mark, games 1–1 (+1) · 0 van 4 klaar", card.text)
+        assertEquals("E1 pauze: Paul – Mark (1–1) (+1) · games 1–1", card.text)
         assertEquals("E1 pauze · E2 bezig 3–4 · 0 van 4 klaar", card.compactText)
         assertEquals("pauze", card.rows[0].middle)
         assertEquals("● E1", card.rows[0].label)
@@ -94,9 +94,9 @@ class TeamScoreCardTest {
         )))
         assertTrue(card.isFinished)
         assertEquals(3 to 1, card.partijenWon)
-        assertEquals("All Inn 8 10 – 6 Delft 8", card.title)
-        assertEquals("Uitslag · partijen 3–1", card.text)
-        assertEquals("Uitslag · partijen 3–1", card.compactText)
+        assertEquals("All Inn 8 3 – 1 Delft 8", card.title)
+        assertEquals("Uitslag · partijen 3–1 · games 10–6", card.text)
+        assertEquals("Uitslag · partijen 3–1 · games 10–6", card.compactText)
     }
 
     @Test fun theBarHasAPartPerPartijInTheWinnersColour() {
@@ -118,6 +118,83 @@ class TeamScoreCardTest {
         assertEquals(TeamScoreCard.Segment(100, 2, live = true), card.segments[1])
         assertEquals(4, card.segments.size)
     }
+
+    // Design B (20 October 2026)
+
+    @Test fun onePartijUnderWayIsTheFocusWithTheStrip() {
+        val card = TeamScoreCard(TeamScore("All Inn 8", "Delft 8", listOf(
+            partij(1, gamesWon = 3 to 0, status = "finished", winner = 1),
+            partij(2, gamesWon = 1 to 3, status = "finished", winner = 2),
+            TeamPartij(3, "Bas", "Tim", 5, 1 to 1, 7 to 5, "playing", server = 2),
+        )))
+        assertEquals(TeamScoreCard.Focus.Live(listOf(card.score.partij(3)!!)), card.focus)
+        assertEquals("E3 · bezig", card.focusHeading(3))
+        assertEquals("games 1–1", card.gamesText(card.score.partij(3)!!))
+        assertTrue(card.score.partij(3)!!.isServing(2))
+        assertFalse(card.score.partij(3)!!.isServing(1))
+        assertEquals("All Inn 8 1 – 1 Delft 8", card.title)
+        assertEquals("E3 bezig: Bas 7–5 Tim (1–1) · games 5–4", card.text)
+        assertEquals(
+            listOf(
+                TeamScoreCard.Tile(1, 1, "E1  3–0"),
+                TeamScoreCard.Tile(2, 2, "E2  1–3"),
+                TeamScoreCard.Tile(3, 4, "E3  bezig"),
+                TeamScoreCard.Tile(4, 0, "E4  –"),
+            ),
+            card.tiles,
+        )
+    }
+
+    @Test fun aPauseHasNoServeDot() {
+        val paused = TeamPartij(3, "Bas", "Tim", 5, 1 to 1, 9 to 11, "between", server = 1)
+        val card = TeamScoreCard(TeamScore("A", "B", listOf(paused)))
+        assertEquals("E3 · pauze", card.focusHeading(3))
+        assertFalse(paused.isServing(1))
+        assertEquals("pauze", card.rows[2].middle)
+    }
+
+    @Test fun twoCourtsAtOnceAreTwoRows() {
+        val card = TeamScoreCard(TeamScore("A", "B", listOf(
+            partij(2, gamesWon = 1 to 0, score = 7 to 5, status = "playing"),
+            partij(3, gamesWon = 0 to 1, score = 4 to 6, status = "playing"),
+        )))
+        val focus = card.focus as TeamScoreCard.Focus.Live
+        assertEquals(listOf(2, 3), focus.partijen.map { it.slot })
+    }
+
+    @Test fun betweenPartijenTheNextOne() {
+        var card = TeamScoreCard(TeamScore("A", "B", listOf(
+            partij(1, gamesWon = 3 to 0, status = "finished", winner = 1),
+            partij(4, status = "warmup"),
+        )))
+        assertEquals(TeamScoreCard.Focus.Next(4), card.focus)
+        assertEquals("E4 · inspelen", card.focusHeading(4))
+        assertEquals("1 van 4 klaar · games 3–0", card.text)
+        card = TeamScoreCard(TeamScore("A", "B", listOf(partij(1, gamesWon = 3 to 0, status = "finished", winner = 1))))
+        assertEquals(TeamScoreCard.Focus.Next(2), card.focus)
+        assertEquals("Volgende partij · E2", card.focusHeading(2))
+    }
+
+    @Test fun theResultAndItsWinnerByTheSbnRule() {
+        // 2–2 in partijen: the away team lost a walkover, so home wins despite fewer games
+        val card = TeamScoreCard(TeamScore("A", "B", listOf(
+            partij(1, gamesWon = 3 to 0, status = "finished", winner = 1, end = "walkover"),
+            partij(2, gamesWon = 0 to 3, status = "finished", winner = 2),
+            partij(3, gamesWon = 0 to 3, status = "finished", winner = 2),
+            partij(4, gamesWon = 3 to 2, status = "finished", winner = 1),
+        )))
+        assertEquals(TeamScoreCard.Focus.Finished, card.focus)
+        assertEquals(1, card.teamWinner)
+        assertEquals("w.o.", card.rows[0].middle)
+        assertEquals("–", card.rows[1].middle)
+        assertEquals(TeamScoreCard.Tile(1, 1, "E1  w.o."), card.tiles[0])
+        // Equal partijen and line-up: most games
+        val games = TeamScoreCard(TeamScore("A", "B", listOf(
+            partij(1, gamesWon = 3 to 2, status = "finished", winner = 1),
+            partij(2, gamesWon = 0 to 3, status = "finished", winner = 2),
+        )))
+        assertEquals(2, games.teamWinner)
+    }
 }
 
 /** org.json is part of Android: Robolectric */
@@ -126,7 +203,7 @@ class TeamScoreCardTest {
 class TeamScoreJsonTest {
     @Test fun parsesTheServersPush() {
         val json = """{"home":"All Inn 8","away":"Delft 8","partijen":[
-            {"slot":2,"p1":"Paul","p2":"Mark","bestOf":5,"gamesWon":[1,0],"score":[7,5],"status":"playing"},
+            {"slot":2,"p1":"Paul","p2":"Mark","bestOf":5,"gamesWon":[1,0],"score":[7,5],"status":"playing","server":2},
             {"slot":1,"p1":"Gerd-Jan","p2":"","bestOf":3,"gamesWon":[2,0],"score":[11,3],"status":"finished","winner":1},
             {"slot":4,"p1":"","p2":"","bestOf":5,"gamesWon":[0,3],"score":[0,0],"status":"finished","end":"walkover","winner":2},
             {"slot":9,"p1":"X","p2":"Y"}]}"""
@@ -135,6 +212,8 @@ class TeamScoreJsonTest {
         assertEquals(listOf(1, 2, 4), score.partijen.map { it.slot })
         assertEquals(TeamPartij(1, "Gerd-Jan", "", 3, 2 to 0, 11 to 3, "finished", 1, null), score.partij(1))
         assertEquals("walkover", score.partij(4)!!.end)
+        assertEquals(2, score.partij(2)!!.server)
+        assertNull(score.partij(1)!!.server)
         assertNull(score.partij(3))
         assertNull(TeamScore.parse("geen json"))
     }

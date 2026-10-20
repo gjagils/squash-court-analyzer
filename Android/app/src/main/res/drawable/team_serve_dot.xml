@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Team match: the gold serve dot on the avatar of whoever serves (design B) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/live_gold" />
+    <size
+        android:width="9dp"
+        android:height="9dp" />
+</shape>

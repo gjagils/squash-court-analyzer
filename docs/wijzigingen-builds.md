@@ -60,6 +60,22 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   partij die nog niet bestaat toont "nog niet begonnen" in plaats van tweemaal de teamnaam.
   Op Android breken namen niet meer af bij een spatie of streepje (bijvoorbeeld "Gerd-Jan").
   - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
+- **Competitiewedstrijd op het vergrendelscherm, ontwerp B (20 oktober 2026, branch
+  `claude/teamscore-lockscreen-b`, nog NIET op `main`; Gerd-Jan beoordeelt eerst)**:
+  iPhone en Android 9–15. Tijdens de avond bovenaan groot de partij die nu bezig is
+  ("● E3 · bezig", "games 1–1", de spelers met foto en de punten in het midden, een
+  gouden stip bij wie serveert; tussen games "pauze"), twee banen tegelijk als twee
+  regels, en tussen partijen de volgende partij ("E3 · inspelen" met de spelers, of
+  "Volgende partij · E3"). Daaronder een strook E1–E4 (uitslag in de kleur van de
+  winnaar, "bezig", "w.o."/"opgave", grijs "–"). Na afloop de vier uitslagen als regels.
+  De balk onderin, het Dynamic Island (compact en minimaal) en de Android-titel en -chip
+  tonen nu **partijen** in plaats van games (SBN: partijen eerst); Android 16: "E3 bezig:
+  Bas 7–5 Tim (1–1) · games 6–4", na afloop "Uitslag · partijen 3–1 · games 9–6". De
+  live-server stuurt in de teampush nu ook `server` mee voor een partij in een rally
+  (achterwaarts compatibel; oudere apps negeren het). Debug: `-LiveActivityDemo team`,
+  `team-pause`, `team-two`, `team-next`, `team-finished`; Android `--es team
+  spel|pauze|twee|tussen|uitslag`.
+  - Releasenote: nog te schrijven als Gerd-Jan het ontwerp kiest.
 
 ## 3.0 build 4 (geüpload 16 oktober 2026)
 

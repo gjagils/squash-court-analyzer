@@ -16,4 +16,9 @@
     <color name="live_dim">#A1968B</color>
     <!-- The bar along the bottom (design "variant 3", 18 October 2026) -->
     <color name="live_bar">#14A94F08</color>
+    <!-- Team match, design B (20 October 2026): the serve dot, and the strip E1-E4 filled for the winner -->
+    <color name="live_gold">#C9962A</color>
+    <color name="live_p1_fill">#26A94F08</color>
+    <color name="live_p2_fill">#26405A73</color>
+    <color name="live_live_fill">#14C62828</color>
 </resources>

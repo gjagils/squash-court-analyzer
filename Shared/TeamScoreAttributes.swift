@@ -9,7 +9,7 @@ import Foundation
 
 struct TeamScoreAttributes: ActivityAttributes {
     /// Exactly the team push of the live server (`aps.content-state`):
-    /// {home, away, partijen:[{slot,p1,p2,bestOf,gamesWon,score,status,winner?,end?}]}.
+    /// {home, away, partijen:[{slot,p1,p2,bestOf,gamesWon,score,status,winner?,end?,server?}]}.
     /// Only the slots that have a partij, by slot. Property names must stay identical.
     struct ContentState: Codable, Hashable {
         var home: String
@@ -38,6 +38,9 @@ struct TeamScorePartij: Codable, Hashable {
     var winner: Int?
     /// "retired" or "walkover"
     var end: String?
+    /// Who serves (1 home, 2 away) in a partij being played; older servers
+    /// and the first stand from Core leave it out (no serve dot then)
+    var server: Int? = nil
 
     func value(_ list: [Int], _ side: Int) -> Int {
         let index = side - 1
@@ -55,6 +58,12 @@ struct TeamScorePartij: Codable, Hashable {
     /// Being played now (the red current points)
     var isLive: Bool { !isDecided && (status == "playing" || status == "between") }
 
+    /// Between two games of a partij under way
+    var isPause: Bool { isLive && status == "between" }
+
+    /// The serve dot: only in a rally, when the push says who serves
+    func isServing(_ side: Int) -> Bool { isLive && status == "playing" && server == side }
+
     /// 1 home, 2 away, 0 not known: the winner, else whoever has more games
     var winnerSide: Int {
         if let winner, winner == 1 || winner == 2 { return winner }
@@ -69,10 +78,33 @@ struct TeamScorePartij: Codable, Hashable {
 enum TeamScoreRowMiddle: Equatable {
     /// "● 7–5": the points of the game under way
     case live(String)
-    /// "klaar"
-    case decided
+    /// "pauze": between two games
+    case pause
+    /// Decided: only the games boxes, or "w.o." / "opgave" between them
+    case decided(String?)
     /// "–": not started, or no partij yet
     case none
+}
+
+/// One of the four boxes E1–E4 in the strip of the lock screen (design B)
+enum TeamScoreTile: Equatable {
+    /// Decided: the winner's colour (0 none) with "3–0" (home–away), "w.o." or "opgave"
+    case decided(winner: Int, text: String)
+    /// Being played: red outline, "bezig"
+    case live
+    /// No partij yet, or warming up: grey "–"
+    case waiting
+}
+
+/// The top of the lock screen (design B, 20 October 2026)
+enum TeamScoreFocus: Equatable {
+    /// One partij under way, large; two (two courts, or more) as compact rows
+    case live([TeamScorePartij])
+    /// Nothing under way and not all decided: the next partij (one warming
+    /// up with its players, else the first slot that is not decided)
+    case next(slot: Int)
+    /// All four decided: the four results as rows
+    case finished
 }
 
 /// Everything the lock screen and the Dynamic Island show, worked out from
@@ -144,9 +176,66 @@ extension TeamScoreAttributes.ContentState {
 
     func middle(_ slot: Int) -> TeamScoreRowMiddle {
         guard let partij = partij(slot) else { return .none }
-        if partij.isDecided { return .decided }
-        if partij.isLive { return .live("\(partij.points(1))–\(partij.points(2))") }
+        if partij.isDecided { return .decided(Self.endText(partij)) }
+        if partij.isPause { return .pause }
+        if partij.isLive { return .live(pointsText(partij)) }
         return .none
+    }
+
+    /// "w.o." or "opgave", else nil
+    static func endText(_ partij: TeamScorePartij) -> String? {
+        switch partij.end {
+        case "walkover": return "w.o."
+        case "retired": return "opgave"
+        default: return nil
+        }
+    }
+
+    /// The partijen under way, by slot
+    var livePartijen: [TeamScorePartij] {
+        partijen.filter { partij in partij.isLive }.sorted { first, second in first.slot < second.slot }
+    }
+
+    var focus: TeamScoreFocus {
+        if isFinished { return .finished }
+        let live = livePartijen
+        if !live.isEmpty { return .live(live) }
+        return .next(slot: nextSlot)
+    }
+
+    /// The partij that comes next: one warming up, else the first slot not decided
+    var nextSlot: Int {
+        for slot in Self.slots {
+            if let partij = partij(slot), partij.status == "warmup", !partij.isDecided { return slot }
+        }
+        for slot in Self.slots where partij(slot)?.isDecided != true { return slot }
+        return 1
+    }
+
+    /// "7–5"
+    func pointsText(_ partij: TeamScorePartij) -> String { "\(partij.points(1))–\(partij.points(2))" }
+
+    /// The heading of the partij at the top: "E3 · bezig", "E3 · pauze", "E3 · inspelen", "Volgende partij · E3"
+    func focusHeading(_ slot: Int) -> String {
+        guard let partij = partij(slot) else { return "Volgende partij · E\(slot)" }
+        if partij.isPause { return "E\(slot) · pauze" }
+        if partij.isLive { return "E\(slot) · bezig" }
+        if partij.status == "warmup" && !partij.isDecided { return "E\(slot) · inspelen" }
+        return "Volgende partij · E\(slot)"
+    }
+
+    /// "games 1–1" of one partij, "" without one
+    func gamesText(_ slot: Int) -> String {
+        guard let partij = partij(slot) else { return "" }
+        return "games \(partij.games(1))–\(partij.games(2))"
+    }
+
+    func tile(_ slot: Int) -> TeamScoreTile {
+        guard let partij = partij(slot) else { return .waiting }
+        if partij.isDecided {
+            return .decided(winner: partij.winnerSide, text: Self.endText(partij) ?? "\(partij.games(1))–\(partij.games(2))")
+        }
+        return partij.isLive ? .live : .waiting
     }
 
     /// The winner of the evening by the SBN rule as far as the lock screen
@@ -174,8 +263,22 @@ extension TeamScoreAttributes.ContentState {
         return "Uitslag: \(teamName(winner)) wint \(games(winner))–\(games(3 - winner))"
     }
 
-    /// Compact Dynamic Island and minimal: the games per team
-    var minimalText: String { "\(games(1))·\(games(2))" }
+    /// Compact Dynamic Island and minimal: the partijen per team (SBN: partijen first)
+    var minimalText: String { "\(partijenWon(1))·\(partijenWon(2))" }
+
+    /// The expanded Dynamic Island's top right: "E3 7–5", "E3 pauze", "2 van 4 klaar", "Uitslag"
+    var islandStatus: String {
+        switch focus {
+        case .finished:
+            return "Uitslag"
+        case .next:
+            return progressText
+        case .live(let live):
+            let first = live[0]
+            let text = first.isPause ? "E\(first.slot) pauze" : "E\(first.slot) \(pointsText(first))"
+            return live.count > 1 ? text + " +\(live.count - 1)" : text
+        }
+    }
 }
 
 /// The partij photos of a team match for the Live Activity, in the same App

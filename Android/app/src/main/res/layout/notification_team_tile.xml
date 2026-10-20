@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Team match notification (Android 9-15), design B: one box of the strip
+     E1-E4, added to team_strip in code. Colours cannot be set from code per
+     light/dark shade, so code shows one of the variants: won by home, won by
+     away, decided without a winner or not started (grey), under way (red). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="24dp"
+    android:layout_marginStart="3dp"
+    android:layout_marginEnd="3dp"
+    android:layout_weight="1">
+
+    <TextView
+        android:id="@+id/tile_won1"
+        style="@style/TeamTile"
+        android:background="@drawable/team_tile1"
+        android:textColor="@color/live_p1" />
+
+    <TextView
+        android:id="@+id/tile_won2"
+        style="@style/TeamTile"
+        android:background="@drawable/team_tile2"
+        android:textColor="@color/live_p2" />
+
+    <TextView
+        android:id="@+id/tile_plain"
+        style="@style/TeamTile"
+        android:background="@drawable/team_box0"
+        android:textColor="@color/live_dim" />
+
+    <TextView
+        android:id="@+id/tile_live"
+        style="@style/TeamTile"
+        android:background="@drawable/team_tile_live"
+        android:textColor="@color/live_live" />
+</FrameLayout>

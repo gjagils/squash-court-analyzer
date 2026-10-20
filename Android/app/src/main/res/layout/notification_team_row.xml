@@ -155,6 +155,7 @@
 
     <TextView
         android:id="@+id/team_mid_live"
+        style="@style/TextAppearance.Compat.Notification.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFeatureSettings="tnum"
@@ -163,7 +164,6 @@
         android:minWidth="46dp"
         android:paddingLeft="2dp"
         android:paddingRight="2dp"
-        android:textColor="@color/live_live"
         android:textSize="12sp"
         android:textStyle="bold"
         android:visibility="gone" />

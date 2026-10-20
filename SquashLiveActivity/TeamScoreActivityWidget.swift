@@ -31,7 +31,7 @@ struct TeamScoreActivityWidget: Widget {
                     Text(state.islandStatus)
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .monospacedDigit()
-                        .foregroundColor(state.livePartijen.isEmpty ? LiveScoreColors.textSecondary : LiveScoreColors.live)
+                        .foregroundColor(state.livePartijen.isEmpty ? LiveScoreColors.textSecondary : LiveScoreColors.textPrimary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .padding(.trailing, 6)
@@ -276,11 +276,19 @@ struct TeamScoreFocusView: View {
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .foregroundColor(LiveScoreColors.textSecondary)
         } else if let partij, partij.isLive {
-            Text(state.pointsText(partij))
-                .font(.system(size: 32, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .foregroundColor(LiveScoreColors.live)
-                .lineLimit(1)
+            // The same points as a single match's lock screen: white, the dash grey
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("\(partij.points(1))")
+                Text("–")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(LiveScoreColors.textSecondary)
+                Text("\(partij.points(2))")
+            }
+            .font(.system(size: 40, weight: .heavy, design: .rounded))
+            .monospacedDigit()
+            .foregroundColor(LiveScoreColors.textPrimary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
         } else {
             Text("–")
                 .font(.system(size: 26, weight: .bold, design: .rounded))
@@ -514,7 +522,7 @@ struct TeamScoreRow: View {
             Text(points)
                 .font(.system(size: pointsSize ?? boxSize, weight: .bold, design: .rounded))
                 .monospacedDigit()
-                .foregroundColor(LiveScoreColors.live)
+                .foregroundColor(LiveScoreColors.textPrimary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         case .pause:

@@ -73,9 +73,14 @@ object TeamScoreViews {
             return views
         }
         when {
-            pause -> show(views, R.id.focus_points, R.id.focus_pause, 2, "pauze")
-            live -> show(views, R.id.focus_points, R.id.focus_pause, 1, card.pointsText(partij))
-            else -> show(views, R.id.focus_points, R.id.focus_pause, 2, "–")
+            pause -> showPause(views, "pauze")
+            live -> {
+                views.setTextViewText(R.id.focus_points1, partij.score.first.toString())
+                views.setTextViewText(R.id.focus_points2, partij.score.second.toString())
+                views.setViewVisibility(R.id.focus_points, View.VISIBLE)
+                views.setViewVisibility(R.id.focus_pause, View.GONE)
+            }
+            else -> showPause(views, "–")
         }
         for (side in 1..2) {
             val name = card.name(partij, side)
@@ -150,6 +155,13 @@ object TeamScoreViews {
     }
 
     /** Shows `text` in the first (1) or second (2) of two views, hides the other */
+    /** The grey text in place of the points (focus_points is a row of views, not a text) */
+    private fun showPause(views: RemoteViews, text: String) {
+        views.setTextViewText(R.id.focus_pause, text)
+        views.setViewVisibility(R.id.focus_points, View.GONE)
+        views.setViewVisibility(R.id.focus_pause, View.VISIBLE)
+    }
+
     private fun show(views: RemoteViews, first: Int, second: Int, which: Int, text: String) {
         views.setTextViewText(if (which == 1) first else second, text)
         views.setViewVisibility(first, if (which == 1) View.VISIBLE else View.GONE)

@@ -212,14 +212,14 @@ describe('team sessions', () => {
     events.close();
   });
 
-  it('the page shows the teams and the games in the link preview, and escapes them', async () => {
+  it('the page shows the teams and the partijen in the link preview, and escapes them', async () => {
     const { id, writeKey } = (await call('POST', '/api/team', { home: 'All <Inn> 8', away: 'Delft & Co', date: DAY })).json;
     await call('PUT', `/api/team/${id}/partij/1`, { status: 'finished', gamesWon: [3, 0], winner: 1 }, writeKey);
     await call('PUT', `/api/team/${id}/partij/2`, { status: 'finished', gamesWon: [1, 3], winner: 2 }, writeKey);
     const page = await call('GET', `/t/${id}`);
     expect(page.status).toBe(200);
     expect(page.headers.get('content-type')).toContain('text/html');
-    expect(page.text).toContain(`<title>🔴 Live: All Inn 8 – Delft &amp; Co · 4-3</title>`);
+    expect(page.text).toContain(`<title>🔴 Live: All Inn 8 – Delft &amp; Co · partijen 1-1</title>`);
     expect(page.text).toContain(`var id = "${id}"`);
     expect(page.text).not.toContain('{{');
     // The lock screen button opens the app with the team match

@@ -11,7 +11,7 @@ import {
   validateSnapshot, validateTeamHeader,
 } from './validate.js';
 import { readConfig } from './config.js';
-import { pushAvailability, validateFollower } from './push.js';
+import { partijDecided, partijWinner, pushAvailability, validateFollower } from './push.js';
 
 export { LiveSession } from './session.js';
 export { LiveLimiter } from './limiter.js';
@@ -74,19 +74,19 @@ async function viewerPage(request, env, config, id, state) {
   return renderPage(request, template, title, description, `${base}/l/${id}`, `${base}/logo.png`, JSON.stringify(id));
 }
 
-/** The team match page: "🔴 Live: All Inn Squash 8 – Squash Delft 8 · 5-3" */
+/** The team match page: "🔴 Live: All Inn Squash 8 – Squash Delft 8 · partijen 2-1" (partijen decide the evening) */
 async function teamPage(request, env, config, id, state) {
   const template = await (await env.ASSETS.fetch(new Request(new URL('/team.html', request.url)))).text();
   let title = 'SquashAnalyzer · teamwedstrijd';
   let description = 'Deze teamwedstrijd is afgelopen.';
   if (state) {
-    let home = 0;
-    let away = 0;
+    const won = [0, 0];
     for (const slot of SLOTS) {
       const partij = state.partijen[slot];
-      if (partij) { home += partij.gamesWon[0]; away += partij.gamesWon[1]; }
+      const winner = partij && partijDecided(partij) ? partijWinner(partij) : 0;
+      if (winner) won[winner - 1] += 1;
     }
-    title = `🔴 Live: ${state.team.home} – ${state.team.away} · ${home}-${away}`;
+    title = `🔴 Live: ${state.team.home} – ${state.team.away} · partijen ${won[0]}-${won[1]}`;
     description = 'Volg de teamwedstrijd live in SquashAnalyzer';
   }
   const base = baseUrl(request, config);

@@ -221,7 +221,7 @@ export function teamDecided(partijen) {
 }
 
 /** 1 home, 2 away, 0 unknown: the winner, else whoever has more games */
-function partijWinner(partij) {
+export function partijWinner(partij) {
   if (partij.winner === 1 || partij.winner === 2) return partij.winner;
   const [a, b] = partij.gamesWon;
   return a > b ? 1 : b > a ? 2 : 0;

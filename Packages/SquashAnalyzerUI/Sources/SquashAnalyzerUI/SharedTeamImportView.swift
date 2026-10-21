@@ -22,7 +22,7 @@ struct SharedTeamImportView: View {
             SharedColors.background.ignoresSafeArea()
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text("TEAM IMPORTEREN")
+                    Text("TEAM IMPORTEREN", bundle: .module)
                         .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                         .tracking(2)
                         .foregroundColor(SharedColors.gold)
@@ -33,9 +33,9 @@ struct SharedTeamImportView: View {
                         AppSymbol("xmark", size: 18, color: SharedColors.textPrimary)
                             .frame(width: 44, height: 44)
                     }
-                    .accessibilityLabel("Sluiten")
+                    .accessibilityLabel(loc("Sluiten"))
                 }
-                Text("Plak de teamlink die je hebt gekregen, zoals https://squashanalyzer.com/teams/…/team.zip. Spelers met dezelfde naam worden bijgewerkt, nieuwe worden toegevoegd.")
+                Text("Plak de teamlink die je hebt gekregen, zoals https://squashanalyzer.com/teams/…/team.zip. Spelers met dezelfde naam worden bijgewerkt, nieuwe worden toegevoegd.", bundle: .module)
                     .font(SharedFonts.system(14))
                     .foregroundColor(SharedColors.textSecondary)
                 TextField("https://squashanalyzer.com/teams/…", text: $link)
@@ -43,13 +43,13 @@ struct SharedTeamImportView: View {
                     .padding(12)
                     .background(SharedColors.tint(0.06)).clipShape(RoundedRectangle(cornerRadius: 12))
                     .disabled(isImporting)
-                ActionButton(isImporting ? "Bezig met importeren…" : "IMPORTEREN", style: .filled, color: SharedColors.accent,
+                ActionButton(isImporting ? loc("Bezig met importeren…") : loc("IMPORTEREN"), style: .filled, color: SharedColors.accent,
                              disabled: isImporting || link.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, action: start)
                 if filePicker != nil {
-                    Text("Of kies een team-zip van je telefoon.")
+                    Text("Of kies een team-zip van je telefoon.", bundle: .module)
                         .font(SharedFonts.system(14))
                         .foregroundColor(SharedColors.textSecondary)
-                    ActionButton("KIES ZIP-BESTAND", color: SharedColors.accent, disabled: isImporting, action: pickZip)
+                    ActionButton(loc("KIES ZIP-BESTAND"), color: SharedColors.accent, disabled: isImporting, action: pickZip)
                 }
                 if let resultText {
                     Text(resultText)
@@ -75,7 +75,7 @@ struct SharedTeamImportView: View {
                 resultText = nil
                 errorText = nil
                 let result = try await importer.importTeam(zip: zip)
-                resultText = "Geïmporteerd: \(result.summary)"
+                resultText = loc("Geïmporteerd: \(result.summary)")
                 await onImported()
             } catch let error as TeamImportError {
                 errorText = error.message
@@ -94,7 +94,7 @@ struct SharedTeamImportView: View {
         Task {
             do {
                 let result = try await importer.importTeam(link: text)
-                resultText = "Geïmporteerd: \(result.summary)"
+                resultText = loc("Geïmporteerd: \(result.summary)")
                 await onImported()
             } catch let error as TeamImportError {
                 errorText = error.message

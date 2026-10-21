@@ -29,10 +29,10 @@ public struct SharedOnboardingView: View {
             VStack(spacing: 0) {
                 HStack {
                     Spacer()
-                    Button("Overslaan") { onDone() }
+                    Button(loc("Overslaan")) { onDone() }
                         .font(SharedFonts.system(15, weight: .semibold))
                         .foregroundColor(SharedColors.textSecondary)
-                        .accessibilityLabel("Rondleiding overslaan")
+                        .accessibilityLabel(loc("Rondleiding overslaan"))
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 12)
@@ -56,13 +56,13 @@ public struct SharedOnboardingView: View {
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                     if page == Onboarding.competitionPage, let onTeamLink {
-                        ActionButton("TEAMLINK INVULLEN", icon: "person.2.circle", style: .outlined, color: SharedColors.accent) {
+                        ActionButton(loc("TEAMLINK INVULLEN"), icon: "person.2.circle", style: .outlined, color: SharedColors.accent) {
                             onTeamLink()
                         }
                     }
                     if isLast {
                         Link(destination: manual) {
-                            Text("Lees de handleiding")
+                            Text("Lees de handleiding", bundle: .module)
                                 .font(SharedFonts.system(15, weight: .semibold))
                                 .foregroundColor(SharedColors.accent)
                         }
@@ -77,11 +77,11 @@ public struct SharedOnboardingView: View {
 
                 HStack(spacing: 12) {
                     if page > 0 {
-                        ActionButton("VORIGE", style: .outlined, color: SharedColors.textSecondary) {
+                        ActionButton(loc("VORIGE"), style: .outlined, color: SharedColors.textSecondary) {
                             page -= 1
                         }
                     }
-                    ActionButton(isLast ? "AAN DE SLAG" : "VOLGENDE", style: .filled, color: SharedColors.accent) {
+                    ActionButton(isLast ? loc("AAN DE SLAG") : loc("VOLGENDE"), style: .filled, color: SharedColors.accent) {
                         if isLast { onDone() } else { page += 1 }
                     }
                 }
@@ -102,9 +102,9 @@ public struct SharedOnboardingView: View {
     /// Scheidsen, coachen, delen: the three things the app is for, in the order of the tagline and the sticker
     private var themes: some View {
         HStack(spacing: 14) {
-            theme("whistle", "Scheidsen")
-            theme("list.bullet.clipboard", "Coachen")
-            theme("square.and.arrow.up", "Delen")
+            theme("whistle", loc("Scheidsen"))
+            theme("list.bullet.clipboard", loc("Coachen"))
+            theme("square.and.arrow.up", loc("Delen"))
         }
     }
 
@@ -140,7 +140,7 @@ public struct SharedOnboardingView: View {
                     .frame(width: 8, height: 8)
             }
         }
-        .readAsOne("Stap \(page + 1) van \(Onboarding.pages.count)")
+        .readAsOne(loc("Stap \(page + 1) van \(Onboarding.pages.count)"))
     }
 }
 
@@ -158,18 +158,18 @@ public struct AboutAppSection: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SettingsRow("Rondleiding opnieuw bekijken", icon: "play.fill") { showingTour = true }
+            SettingsRow(loc("Rondleiding opnieuw bekijken"), icon: "play.fill") { showingTour = true }
             SettingsDivider()
             ShareLink(item: AppLinks.shareText, subject: Text("Squash Analyzer")) {
-                SettingsRowLabel("Deel de app", icon: "square.and.arrow.up")
+                SettingsRowLabel(loc("Deel de app"), icon: "square.and.arrow.up")
             }
-            .accessibilityLabel("Deel de app")
+            .accessibilityLabel(loc("Deel de app"))
             SettingsDivider()
             Link(destination: AppLinks.feedbackMail(appVersion: appVersion)) {
-                SettingsRowLabel("Feedback sturen", icon: "lightbulb.fill")
+                SettingsRowLabel(loc("Feedback sturen"), icon: "lightbulb.fill")
             }
-            .accessibilityLabel("Feedback sturen naar \(AppLinks.feedbackAddress)")
-            Text("Feedback gaat per mail naar \(AppLinks.feedbackAddress). Squash Analyzer \(appVersion)")
+            .accessibilityLabel(loc("Feedback sturen naar \(AppLinks.feedbackAddress)"))
+            Text("Feedback gaat per mail naar \(AppLinks.feedbackAddress). Squash Analyzer \(appVersion)", bundle: .module)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
                 .padding(.top, 16)

@@ -30,17 +30,17 @@ public struct SharedLiveFollowView: View {
                 SharedColors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Kun je er niet bij zijn? Plak de live link die in de groep gedeeld is. De stand staat dan op je vergrendelscherm en gaat na elke rally mee, ook als de app dicht is.")
+                        Text("Kun je er niet bij zijn? Plak de live link die in de groep gedeeld is. De stand staat dan op je vergrendelscherm en gaat na elke rally mee, ook als de app dicht is.", bundle: .module)
                             .font(SharedFonts.system(13))
                             .foregroundColor(SharedColors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
-                        TextField("Live link", text: $text)
+                        TextField(loc("Live link"), text: $text)
                             .font(SharedFonts.system(14))
                             .foregroundColor(SharedColors.textPrimary)
                             .padding(10)
                             .background(SharedColors.tint(0.06))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
-                        ActionButton(busy ? "Even geduld…" : "Volgen", style: .filled,
+                        ActionButton(busy ? loc("Even geduld…") : loc("Volgen"), style: .filled,
                                      disabled: busy || text.trimmingCharacters(in: .whitespaces).isEmpty) {
                             Task { await start() }
                         }
@@ -63,10 +63,10 @@ public struct SharedLiveFollowView: View {
                     .padding(24)
                 }
             }
-            .pageTitle("Wedstrijd volgen")
+            .pageTitle(loc("Wedstrijd volgen"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    CloseButton(title: "Sluiten", action: onClose)
+                    CloseButton(title: loc("Sluiten"), action: onClose)
                 }
             }
             .task {
@@ -81,11 +81,11 @@ public struct SharedLiveFollowView: View {
 
     private var followingList: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader("OP JE VERGRENDELSCHERM")
+            SectionHeader(loc("OP JE VERGRENDELSCHERM"))
             ForEach(follow.following, id: \.self) { target in
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(follow.title(of: target) ?? "Live wedstrijd")
+                        Text(follow.title(of: target) ?? loc("Live wedstrijd"))
                             .font(SharedFonts.system(15, weight: .semibold, design: .rounded))
                             .foregroundColor(SharedColors.textPrimary)
                             .lineLimit(1)
@@ -95,13 +95,13 @@ public struct SharedLiveFollowView: View {
                             .lineLimit(1)
                     }
                     Spacer()
-                    Button("Stoppen") {
+                    Button(loc("Stoppen")) {
                         Task { await follow.unfollow(target) }
                     }
                     .font(SharedFonts.system(13, weight: .semibold))
                     .foregroundColor(SharedColors.accent)
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Stoppen met volgen")
+                    .accessibilityLabel(loc("Stoppen met volgen"))
                 }
                 .padding(12)
                 .background(SharedColors.tint(0.04))
@@ -113,7 +113,7 @@ public struct SharedLiveFollowView: View {
     private func start() async {
         guard let target = LiveFollowLink.parse(text) else {
             failed = true
-            message = "Dit is geen live link van SquashAnalyzer. Kopieer de hele link uit het bericht."
+            message = loc("Dit is geen live link van SquashAnalyzer. Kopieer de hele link uit het bericht.")
             return
         }
         busy = true
@@ -121,7 +121,8 @@ public struct SharedLiveFollowView: View {
         do {
             try await follow.follow(target)
             failed = false
-            message = "Je volgt \(follow.title(of: target) ?? "de wedstrijd") op je vergrendelscherm."
+            let name = follow.title(of: target) ?? loc("de wedstrijd")
+            message = loc("Je volgt \(name) op je vergrendelscherm.")
             text = ""
         } catch {
             failed = true

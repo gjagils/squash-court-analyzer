@@ -24,7 +24,7 @@ public struct HomeMenuHeader: View {
                         AppSymbol("gearshape", size: 20, color: SharedColors.textSecondary)
                             .frame(width: 36, height: 36)
                     }
-                    .accessibilityLabel("Instellingen")
+                    .accessibilityLabel(loc("Instellingen"))
                     // Same spot as the gear in the coach and referee headers (20 pt from the edge)
                     .padding(.trailing, -4)
                 }
@@ -44,7 +44,7 @@ public struct HomeMenuHeader: View {
                     .font(SharedFonts.system(26, weight: .bold, design: .rounded))
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
-                    Text("Jouw spel scherp in beeld. Voor jou en je team.")
+                    Text("Jouw spel scherp in beeld. Voor jou en je team.", bundle: .module)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                         .multilineTextAlignment(.center)
@@ -54,13 +54,13 @@ public struct HomeMenuHeader: View {
                     // The line from the stickers and the website; the sentence
                     // sits halfway between the wordmark and this line (the wordmark's
                     // line already has some room under it, hence 2 and 6)
-                    Text("SCHEIDSEN · COACHEN · DELEN")
+                    Text("SCHEIDSEN · COACHEN · DELEN", bundle: .module)
                         .font(SharedFonts.system(11, weight: .bold, design: .rounded))
                         .tracking(1.4)
                         .foregroundColor(SharedColors.accent)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
-                        .accessibilityLabel("Scheidsen, coachen, delen")
+                        .accessibilityLabel(loc("Scheidsen, coachen, delen"))
                         .padding(.top, 6)
                 }
                 .frame(maxWidth: .infinity)
@@ -103,27 +103,27 @@ public struct HomeMenuTiles: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Klaar om te spelen?")
+            Text("Klaar om te spelen?", bundle: .module)
                 .font(SharedFonts.system(14, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             HStack(spacing: 12) {
-                HomeMenuTile(title: "Scheidsrechter", subtitle: "Start met fluiten", icon: .referee, action: onReferee)
-                HomeMenuTile(title: "Coach", subtitle: "Start met coachen", icon: .coach, action: onCoach)
+                HomeMenuTile(title: loc("Scheidsrechter"), subtitle: loc("Start met fluiten"), icon: .referee, action: onReferee)
+                HomeMenuTile(title: loc("Coach"), subtitle: loc("Start met coachen"), icon: .coach, action: onCoach)
             }
             VStack(spacing: 0) {
-                menuRow("Afgeronde wedstrijden", icon: .history, action: onHistory)
+                menuRow(loc("Afgeronde wedstrijden"), icon: .history, action: onHistory)
                 Divider().overlay(SharedColors.line(0.09))
                 if let onCompetition {
-                    menuRow("Competitie", icon: .competition, action: onCompetition)
+                    menuRow(loc("Competitie"), icon: .competition, action: onCompetition)
                     Divider().overlay(SharedColors.line(0.09))
                 }
                 if let onLiveFollow {
-                    menuRow("Wedstrijd volgen", icon: .liveFollow, action: onLiveFollow)
+                    menuRow(loc("Wedstrijd volgen"), icon: .liveFollow, action: onLiveFollow)
                     Divider().overlay(SharedColors.line(0.09))
                 }
-                menuRow("Spelers", icon: .players, action: onPlayers)
+                menuRow(loc("Spelers"), icon: .players, action: onPlayers)
                 Divider().overlay(SharedColors.line(0.09))
-                menuRow("Badges", icon: .badges, action: onBadges)
+                menuRow(loc("Badges"), icon: .badges, action: onBadges)
             }
         }
         .padding(.horizontal, 24)
@@ -157,23 +157,23 @@ public struct HomeTeamSummary: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Jouw team").font(SharedFonts.system(14, weight: .semibold))
+                Text("Jouw team", bundle: .module).font(SharedFonts.system(14, weight: .semibold))
                 Spacer()
-                Text("Competitie").font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
+                Text("Competitie", bundle: .module).font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
             }
             VStack(alignment: .leading, spacing: 10) {
-                Text("MIJN TEAM").font(SharedFonts.system(11, weight: .semibold))
+                Text("MIJN TEAM", bundle: .module).font(SharedFonts.system(11, weight: .semibold))
                     .tracking(1.4).foregroundColor(SharedColors.accent)
                 Text(snapshot.name).font(SharedFonts.system(20, weight: .semibold, design: .rounded))
                     .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 28) {
-                    stat("STAND", snapshot.rank)
-                    stat("GESPEELD", snapshot.played)
-                    stat("PUNTEN", snapshot.points)
+                    stat(loc("STAND"), snapshot.rank)
+                    stat(loc("GESPEELD"), snapshot.played)
+                    stat(loc("PUNTEN"), snapshot.points)
                 }
                 if let next = snapshot.nextFixture() {
                     Divider().overlay(SharedColors.line(0.15))
-                    Text("Volgende · \(LeagueDates.day(next.date)) · \(next.home) – \(next.away)")
+                    Text("Volgende · \(LeagueDates.day(next.date)) · \(next.home) – \(next.away)", bundle: .module)
                         .font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }

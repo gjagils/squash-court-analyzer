@@ -7,8 +7,9 @@ public struct CloseButton: View {
     let title: String
     let action: () -> Void
 
-    public init(title: String = "Sluiten", action: @escaping () -> Void) {
-        self.title = title
+    /// nil gives "Sluiten" (a public default argument cannot call the internal `loc`)
+    public init(title: String? = nil, action: @escaping () -> Void) {
+        self.title = title ?? loc("Sluiten")
         self.action = action
     }
 

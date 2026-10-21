@@ -50,8 +50,8 @@ public struct SharedWhatsNewView: View {
                     .padding(.bottom, 16)
                 }
                 VStack(spacing: 10) {
-                    ActionButton("AAN DE SLAG", style: .filled, color: SharedColors.accent) { onDone() }
-                    ActionButton("RONDLEIDING", icon: "chevron.right", style: .outlined, color: SharedColors.accent) {
+                    ActionButton(loc("AAN DE SLAG"), style: .filled, color: SharedColors.accent) { onDone() }
+                    ActionButton(loc("RONDLEIDING"), icon: "chevron.right", style: .outlined, color: SharedColors.accent) {
                         showingTour = true
                     }
                 }

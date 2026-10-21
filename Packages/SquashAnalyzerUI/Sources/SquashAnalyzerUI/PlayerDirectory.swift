@@ -51,7 +51,7 @@ public struct PlayerProfileFields: View {
                             if selected { focus.removeAll { $0 == tag.rawValue } }
                             else { focus.append(tag.rawValue) }
                         } label: {
-                            Text(tag.rawValue)
+                            Text(tag.title)
                                 .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
@@ -60,7 +60,7 @@ public struct PlayerProfileFields: View {
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel(tag.rawValue)
+                        .accessibilityLabel(tag.title)
                         .accessibilityValue(selected ? loc("Geselecteerd") : loc("Niet geselecteerd"))
                     }
                 }

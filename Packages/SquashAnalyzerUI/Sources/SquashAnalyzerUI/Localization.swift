@@ -1,4 +1,5 @@
 import Foundation
+import SquashAnalyzerCore
 
 // The shared screens in Dutch and English (3.0). Dutch is the source: every
 // key in Resources/Localizable.xcstrings is the Dutch text itself, so a key
@@ -13,8 +14,10 @@ import Foundation
 /// missing language would otherwise fall back to the development language
 /// (Dutch in this package, English in the iOS app) and differ per platform.
 /// Gerd-Jan, 21 October 2026.
+/// The same choice as Core (`AppLanguage.current`), so Core's texts and the
+/// screens never disagree.
 var textLanguage: String {
-    (Locale.preferredLanguages.first ?? "nl").lowercased().hasPrefix("nl") ? "nl" : "en"
+    AppLanguage.current.rawValue
 }
 
 /// The language folder of this module's catalog for `textLanguage`; the

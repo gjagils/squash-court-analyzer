@@ -505,7 +505,7 @@ public struct CoachScoringView: View {
             VStack(spacing: 12) {
                 Spacer(minLength: 0)
                 if let zone = game.selectedZone {
-                    Text(zone.rawValue.uppercased())
+                    Text(zone.title.uppercased())
                         .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                         .tracking(1.5)

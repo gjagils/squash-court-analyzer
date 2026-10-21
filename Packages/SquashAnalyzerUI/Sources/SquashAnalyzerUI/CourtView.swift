@@ -101,7 +101,7 @@ public struct CourtView: View {
                     let yOffset = CGFloat(row) * zoneHeight + zoneHeight / 2
 
                     ZoneTapArea(zone: zone, playerColor: playerColor, onTap: onZoneTapped ?? { _ in })
-                    .accessibilityLabel("Zone \(zone.rawValue)")
+                    .accessibilityLabel(zone.title)
                     .frame(width: zoneWidth - 6, height: zoneHeight - 6)
                     .position(x: xOffset, y: yOffset)
                 }

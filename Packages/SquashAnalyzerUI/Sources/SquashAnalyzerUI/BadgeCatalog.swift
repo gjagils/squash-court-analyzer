@@ -120,7 +120,7 @@ public struct SharedBadgeCatalogView: View {
                         .listRowBackground(SharedColors.tint(0.05))
                     }
                 } header: {
-                    Text(category.rawValue.uppercased())
+                    Text(category.title.uppercased())
                         .font(SharedFonts.system(11, weight: .semibold))
                         .tracking(1.5)
                         .foregroundColor(SharedColors.gold)

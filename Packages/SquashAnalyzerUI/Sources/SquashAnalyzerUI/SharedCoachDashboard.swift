@@ -247,7 +247,7 @@ public struct SharedCoachDashboardView: View {
         return HStack(spacing: 8) {
             stat(loc("Gewonnen"), won.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", SharedColors.positive, icon: "timer")
             stat(loc("Verloren"), lost.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", SharedColors.warmRed, icon: "timer")
-            stat(loc("Beste zone"), game.bestZone(for: player)?.rawValue ?? "-", SharedColors.gold, icon: "mappin")
+            stat(loc("Beste zone"), game.bestZone(for: player)?.title ?? "-", SharedColors.gold, icon: "mappin")
             stat(loc("Beste slag"), game.bestShotType(for: player)?.rawValue ?? "-", SharedColors.accent, icon: "star.fill",
                  shot: game.bestShotType(for: player))
         }

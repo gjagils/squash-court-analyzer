@@ -145,9 +145,9 @@ public enum PlayerTrendPeriod: Int, CaseIterable, Identifiable, Sendable {
 
     public var title: String {
         switch self {
-        case .last10: return "Laatste 10"
-        case .last25: return "Laatste 25"
-        case .all: return "Alles"
+        case .last10: return L10n.text("Laatste 10")
+        case .last25: return L10n.text("Laatste 25")
+        case .all: return L10n.text("Alles")
         }
     }
 }
@@ -332,10 +332,10 @@ public struct PlayerTrendChange: Equatable, Sendable {
     /// "3,1" with a decimal comma
     public static func text(_ value: Double) -> String {
         let tenths = Int((value * 10.0).rounded())
-        return "\(tenths / 10),\(tenths % 10)"
+        return L10n.text("%@,%@", "\(tenths / 10)", "\(tenths % 10)")
     }
 
-    public var text: String { "van \(PlayerTrendChange.text(from)) naar \(PlayerTrendChange.text(to))" }
+    public var text: String { L10n.text("van %@ naar %@", "\(PlayerTrendChange.text(from))", "\(PlayerTrendChange.text(to))") }
 }
 
 extension MatchHistoryStore {

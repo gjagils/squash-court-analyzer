@@ -3,6 +3,12 @@ import Foundation
 @testable import SquashAnalyzerCore
 
 final class TeamImportTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private func file(_ json: String) throws -> TeamImportFile {
         try TeamImport.decode(json.data(using: String.Encoding.utf8)!)
     }

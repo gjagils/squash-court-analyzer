@@ -87,11 +87,15 @@ public struct TeamLiveHeader: Codable, Equatable, Sendable {
     public var away: String
     /// Milliseconds since 1970 (an Int64: a Double is written as 1.79E12 on Android)
     public var date: Int64
+    /// The app's language, "nl" or "en" (`AppLanguage.code`), sent when the
+    /// live page is made; nil (left out) otherwise
+    public var lang: String?
 
-    public init(home: String, away: String, date: Int64) {
+    public init(home: String, away: String, date: Int64, lang: String? = nil) {
         self.home = home
         self.away = away
         self.date = date
+        self.lang = lang
     }
 }
 
@@ -538,7 +542,8 @@ public final class TeamLive {
     public func create(_ match: TeamMatch) async throws -> TeamLiveCreated {
         guard let transport = activeTransport else { throw TeamLiveError.noTransport }
         guard let url = URL(string: "\(baseURL)/api/team") else { throw TeamLiveError.noConnection }
-        let header = TeamLiveHeader(home: match.home, away: match.away, date: Int64(match.date.timeIntervalSince1970 * 1000.0))
+        let header = TeamLiveHeader(home: match.home, away: match.away, date: Int64(match.date.timeIntervalSince1970 * 1000.0),
+                                    lang: AppLanguage.current.code)
         let body = try JSONEncoder().encode(header)
         let response: AITransportResponse
         do {

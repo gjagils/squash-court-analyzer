@@ -4,6 +4,12 @@ import Foundation
 
 /// The players of Mijn team into Spelers, marked "In mijn team", once per team link
 final class TeamRosterSyncTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private final class MemoryStore: PlayerProfileStore, @unchecked Sendable {
         var players: [PlayerProfile]
         init(_ players: [PlayerProfile] = []) { self.players = players }

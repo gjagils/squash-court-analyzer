@@ -18,6 +18,12 @@ import Foundation
 // through Skip) will surface any further such spots, fixed the same way, not
 // guessed at here.
 final class BadgeEngineTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private let engine = BadgeEngine()
 
     func testFiveInARowIsEarnedOnTheFifthRally() {

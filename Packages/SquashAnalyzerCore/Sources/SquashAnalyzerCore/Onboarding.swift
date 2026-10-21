@@ -37,20 +37,20 @@ public enum Onboarding {
     public static let welcomePage = 0
 
     /// The symbols are the home screen's outline icons (AppSymbol names)
-    public static let pages: [Page] = [
-        Page(symbol: "", title: "Welkom bij Squash Analyzer",
-             text: "Jouw spel scherp in beeld. Fluit een wedstrijd, coach je teamgenoot en deel de stand met je team."),
-        Page(symbol: "whistle", title: "Scheidsrechter",
-             text: "Tik op de score van wie de rally wint. LET, STROKE, undo en de servicekant zitten erbij; de app houdt games en tijd bij."),
+    public static var pages: [Page] { [
+        Page(symbol: "", title: L10n.text("Welkom bij Squash Analyzer"),
+             text: L10n.text("Jouw spel scherp in beeld. Fluit een wedstrijd, coach je teamgenoot en deel de stand met je team.")),
+        Page(symbol: "whistle", title: L10n.text("Scheidsrechter"),
+             text: L10n.text("Tik op de score van wie de rally wint. LET, STROKE, undo en de servicekant zitten erbij; de app houdt games en tijd bij.")),
         Page(symbol: "list.bullet.clipboard", title: "Coach",
-             text: "Om je teamgenoot beter te coachen. Leg per punt vast wie scoorde, hoe, waar op de baan en met welke slag. Na elke game zie je de analyse, en de coachkaart laat je speler in één scherm zien waar het om draait."),
-        Page(symbol: "person.2", title: "Kies speler",
-             text: "Sla spelers op en kies ze bij het starten via Kies speler. Alleen dan verdienen ze badges en groeit hun profiel over de wedstrijden."),
-        Page(symbol: "trophy", title: "Competitie",
-             text: "Speel je bij SBN? Vul je teamlink in, dan zie je je programma en de stand. Op de wedstrijdavond houd je de teamwedstrijd bij, van E1 tot E4."),
-        Page(symbol: "square.and.arrow.up", title: "Delen",
-             text: "Houd je teamgenoten en supporters op de hoogte van de wedstrijden en de competitie. Met LIVE kijken ze mee via een link of op hun vergrendelscherm. Alles staat op je eigen telefoon: maak af en toe een back-up in Instellingen."),
-    ]
+             text: L10n.text("Om je teamgenoot beter te coachen. Leg per punt vast wie scoorde, hoe, waar op de baan en met welke slag. Na elke game zie je de analyse, en de coachkaart laat je speler in één scherm zien waar het om draait.")),
+        Page(symbol: "person.2", title: L10n.text("Kies speler"),
+             text: L10n.text("Sla spelers op en kies ze bij het starten via Kies speler. Alleen dan verdienen ze badges en groeit hun profiel over de wedstrijden.")),
+        Page(symbol: "trophy", title: L10n.text("Competitie"),
+             text: L10n.text("Speel je bij SBN? Vul je teamlink in, dan zie je je programma en de stand. Op de wedstrijdavond houd je de teamwedstrijd bij, van E1 tot E4.")),
+        Page(symbol: "square.and.arrow.up", title: L10n.text("Delen"),
+             text: L10n.text("Houd je teamgenoten en supporters op de hoogte van de wedstrijden en de competitie. Met LIVE kijken ze mee via een link of op hun vergrendelscherm. Alles staat op je eigen telefoon: maak af en toe een back-up in Instellingen.")),
+    ] }
 }
 
 /// "Nieuw in 3.0": one sheet at the first start of a new version, for
@@ -62,26 +62,26 @@ public enum WhatsNew {
     public static let storageKey = "whatsNewVersion"
     /// 1 = 3.0; raise it with new items for a later version
     public static let currentVersion = 1
-    public static let title = "Nieuw in 3.0"
-    public static let intro = "Squash Analyzer is flink gegroeid. Dit zijn de grootste veranderingen."
+    public static var title: String { L10n.text("Nieuw in 3.0") }
+    public static var intro: String { L10n.text("Squash Analyzer is flink gegroeid. Dit zijn de grootste veranderingen.") }
 
     public static func shouldShow(seenVersion: Int) -> Bool {
         seenVersion < currentVersion
     }
 
     /// The symbols are the home screen's outline icons (AppSymbol names)
-    public static let items: [Onboarding.Page] = [
-        Onboarding.Page(symbol: "trophy", title: "Competitie",
-                        text: "Houd een hele teamwedstrijd bij, van E1 tot E4, met de puntentelling van de SBN."),
-        Onboarding.Page(symbol: "square.and.arrow.up", title: "Live meekijken",
-                        text: "Je team en supporters volgen de stand via een link of op hun vergrendelscherm."),
+    public static var items: [Onboarding.Page] { [
+        Onboarding.Page(symbol: "trophy", title: L10n.text("Competitie"),
+                        text: L10n.text("Houd een hele teamwedstrijd bij, van E1 tot E4, met de puntentelling van de SBN.")),
+        Onboarding.Page(symbol: "square.and.arrow.up", title: L10n.text("Live meekijken"),
+                        text: L10n.text("Je team en supporters volgen de stand via een link of op hun vergrendelscherm.")),
         Onboarding.Page(symbol: "medal", title: "Badges",
-                        text: "Verdien badges in brons, zilver en goud. Vanaf 23 oktober begint iedereen opnieuw."),
-        Onboarding.Page(symbol: "list.bullet.clipboard", title: "Coachen",
-                        text: "Leg per rally de slag en de plek op de baan vast. Na afloop is er een coachkaart."),
-        Onboarding.Page(symbol: "person.2", title: "Mijn team",
-                        text: "Stand en programma van je SBN-team. Je teamgenoten staan klaar om te kiezen als je gaat scheidsen of coachen."),
-    ]
+                        text: L10n.text("Verdien badges in brons, zilver en goud. Vanaf 23 oktober begint iedereen opnieuw.")),
+        Onboarding.Page(symbol: "list.bullet.clipboard", title: L10n.text("Coachen"),
+                        text: L10n.text("Leg per rally de slag en de plek op de baan vast. Na afloop is er een coachkaart.")),
+        Onboarding.Page(symbol: "person.2", title: L10n.text("Mijn team"),
+                        text: L10n.text("Stand en programma van je SBN-team. Je teamgenoten staan klaar om te kiezen als je gaat scheidsen of coachen.")),
+    ] }
 }
 
 /// The store pages and the feedback address, for "Deel de app" and "Feedback sturen"
@@ -92,7 +92,7 @@ public enum AppLinks {
 
     /// What "Deel de app" sends: both stores, so it works for every phone
     public static var shareText: String {
-        "Squash Analyzer: houd squashwedstrijden bij als coach of scheidsrechter.\n"
+        L10n.text("Squash Analyzer: houd squashwedstrijden bij als coach of scheidsrechter.") + "\n"
             + "Android: \(playStore.absoluteString)\n"
             + "iPhone: \(appStore.absoluteString)"
     }

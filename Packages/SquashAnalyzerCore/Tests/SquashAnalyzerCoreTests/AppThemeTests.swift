@@ -4,6 +4,12 @@ import XCTest
 
 /// Licht of donker: the choice and what it means
 final class AppThemeTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     func testEveryoneStartsDark() {
         XCTAssertEqual(AppAppearance.from(stored: nil), AppAppearance.dark)
         XCTAssertEqual(AppAppearance.from(stored: ""), AppAppearance.dark)

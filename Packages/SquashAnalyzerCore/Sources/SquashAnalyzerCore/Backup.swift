@@ -138,9 +138,9 @@ public enum BackupValidationError: Error, Equatable {
 
     public var message: String {
         switch self {
-        case .unsupportedVersion(let version): return "Deze backupversie (\(version)) wordt niet ondersteund."
-        case .checksumMismatch: return "De backup is beschadigd of onvolledig; de checksum klopt niet."
-        case .unreadable: return "Dit bestand is geen Squash Analyzer-backup."
+        case .unsupportedVersion(let version): return L10n.text("Deze backupversie (%@) wordt niet ondersteund.", "\(version)")
+        case .checksumMismatch: return L10n.text("De backup is beschadigd of onvolledig; de checksum klopt niet.")
+        case .unreadable: return L10n.text("Dit bestand is geen Squash Analyzer-backup.")
         }
     }
 }
@@ -437,8 +437,8 @@ public struct BackupCounts: Equatable, Sendable {
     }
 
     public var summary: String {
-        let base = "\(players) spelers, \(matches) wedstrijden, \(games) games, \(badges) badges"
-        return teamMatches > 0 ? base + ", \(teamMatches) teamwedstrijden" : base
+        let base = L10n.text("%@ spelers, %@ wedstrijden, %@ games, %@ badges", "\(players)", "\(matches)", "\(games)", "\(badges)")
+        return teamMatches > 0 ? base + L10n.text(", %@ teamwedstrijden", "\(teamMatches)") : base
     }
 }
 

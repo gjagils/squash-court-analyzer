@@ -7,6 +7,12 @@ import Foundation
 // Enum types are written out in full where Skip needs them (docs/android-port.md).
 final class ScoringRulesTests: XCTestCase {
 
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
     func testGameEndsAtElevenWithTwoPointLead() {
         let engine = ScoringEngine()
         XCTAssertTrue(engine.isGameOver(SquashScore(player1: 11, player2: 9)))

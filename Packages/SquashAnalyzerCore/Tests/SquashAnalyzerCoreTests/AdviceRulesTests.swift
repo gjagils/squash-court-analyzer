@@ -4,6 +4,12 @@ import Foundation
 
 /// The row/side rules of the local advice and their thresholds (docs/archief/plan-lokaal-advies.md)
 final class AdviceRulesTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private func point(_ scorer: Player, _ type: PointType, _ zone: CourtZone?, _ shot: ShotType? = nil, volley: Bool = false) -> Point {
         Point(scorer: scorer, pointType: type, zone: zone, shotType: shot, server: Player.player1,
               player1Score: 0, player2Score: 0, duration: 10, isVolley: volley)

@@ -39,18 +39,18 @@ enum AdviceRules {
             let count = profile.lost.count(row)
             let tip: String
             switch row {
-            case .front: tip = "\(opponentName) maakt het kort af: sta dichter bij de T en reageer eerder op korte ballen."
-            case .middle: tip = "\(opponentName) neemt de bal vroeg: houd je slagen strakker langs de muur."
-            case .back: tip = "\(opponentName) drukt je naar achteren: werk aan je terugslag uit de achterhoek en speel zelf meer lengte."
+            case .front: tip = L10n.text("%@ maakt het kort af: sta dichter bij de T en reageer eerder op korte ballen.", "\(opponentName)")
+            case .middle: tip = L10n.text("%@ neemt de bal vroeg: houd je slagen strakker langs de muur.", "\(opponentName)")
+            case .back: tip = L10n.text("%@ drukt je naar achteren: werk aan je terugslag uit de achterhoek en speel zelf meer lengte.", "\(opponentName)")
             }
             add(AdviceTopic.lostArea, AdviceTone.warning,
-                "Je verliest de meeste punten \(row.inWords) (\(count) van \(profile.lost.total)). \(tip)",
+                L10n.text("Je verliest de meeste punten %@ (%@ van %@). %@", "\(row.inWords)", "\(count)", "\(profile.lost.total)", "\(tip)"),
                 Double(count), "verloren-\(row.rawValue)")
         }
         if let side = profile.lost.dominantSide {
             let count = profile.lost.count(side)
             add(AdviceTopic.lostArea, AdviceTone.warning,
-                "Je verliest de meeste punten \(side.inWords) (\(count) van \(profile.lost.sideTotal)). Daar is \(opponentName) sterk.",
+                L10n.text("Je verliest de meeste punten %@ (%@ van %@). Daar is %@ sterk.", "\(side.inWords)", "\(count)", "\(profile.lost.sideTotal)", "\(opponentName)"),
                 Double(count), "verloren-\(side.rawValue)")
         }
 
@@ -59,18 +59,18 @@ enum AdviceRules {
             let count = profile.errors.count(row)
             let tip: String
             switch row {
-            case .front: tip = "Speel daar wat hoger en veiliger."
-            case .middle: tip = "Neem de tijd, ook als de bal makkelijk lijkt."
-            case .back: tip = "Kies uit de achterhoek vaker de veilige lengte."
+            case .front: tip = L10n.text("Speel daar wat hoger en veiliger.")
+            case .middle: tip = L10n.text("Neem de tijd, ook als de bal makkelijk lijkt.")
+            case .back: tip = L10n.text("Kies uit de achterhoek vaker de veilige lengte.")
             }
             add(AdviceTopic.errorArea, AdviceTone.warning,
-                "\(count) van je \(profile.errors.total) fouten maak je \(row.inWords). \(tip)",
+                L10n.text("%@ van je %@ fouten maak je %@. %@", "\(count)", "\(profile.errors.total)", "\(row.inWords)", "\(tip)"),
                 Double(count), "fouten-\(row.rawValue)")
         }
         if let side = profile.errors.dominantSide {
             let count = profile.errors.count(side)
             add(AdviceTopic.errorArea, AdviceTone.warning,
-                "Je fouten vallen vooral \(side.inWords) (\(count) van \(profile.errors.sideTotal)). Speel daar wat veiliger.",
+                L10n.text("Je fouten vallen vooral %@ (%@ van %@). Speel daar wat veiliger.", "\(side.inWords)", "\(count)", "\(profile.errors.sideTotal)"),
                 Double(count), "fouten-\(side.rawValue)")
         }
 
@@ -79,18 +79,18 @@ enum AdviceRules {
             let count = opponentErrors.count(row)
             let tip: String
             switch row {
-            case .front: tip = "Dwing \(opponentName) naar voren."
-            case .middle: tip = "Speel strak door het midden, daar gaat \(opponentName) in de fout."
-            case .back: tip = "Speel \(opponentName) naar de achterhoeken."
+            case .front: tip = L10n.text("Dwing %@ naar voren.", "\(opponentName)")
+            case .middle: tip = L10n.text("Speel strak door het midden, daar gaat %@ in de fout.", "\(opponentName)")
+            case .back: tip = L10n.text("Speel %@ naar de achterhoeken.", "\(opponentName)")
             }
             add(AdviceTopic.opening, AdviceTone.success,
-                "\(opponentName) maakt de meeste fouten \(row.inWords) (\(count) van \(opponentErrors.total)). \(tip)",
+                L10n.text("%@ maakt de meeste fouten %@ (%@ van %@). %@", "\(opponentName)", "\(row.inWords)", "\(count)", "\(opponentErrors.total)", "\(tip)"),
                 Double(count), "kans-\(row.rawValue)")
         }
         if let side = opponentErrors.dominantSide {
             let count = opponentErrors.count(side)
             add(AdviceTopic.opening, AdviceTone.success,
-                "\(opponentName) maakt de meeste fouten \(side.inWords) (\(count) van \(opponentErrors.sideTotal)). Speel die kant op.",
+                L10n.text("%@ maakt de meeste fouten %@ (%@ van %@). Speel die kant op.", "\(opponentName)", "\(side.inWords)", "\(count)", "\(opponentErrors.sideTotal)"),
                 Double(count), "kans-\(side.rawValue)")
         }
 
@@ -98,10 +98,10 @@ enum AdviceRules {
         let ownErrors = game.unforcedErrors(by: opponent).count
         let errorRate = game.points.isEmpty ? 0.0 : Double(ownErrors) / Double(game.points.count)
         if ownErrors >= 3 {
-            add(AdviceTopic.ownErrors, AdviceTone.warning, "\(ownErrors) eigen fouten: blijf geconcentreerd en speel rustig.",
+            add(AdviceTopic.ownErrors, AdviceTone.warning, L10n.text("%@ eigen fouten: blijf geconcentreerd en speel rustig.", "\(ownErrors)"),
                 Double(ownErrors), "eigen-fouten")
         } else if ownErrors >= 2 && errorRate > 0.25 {
-            add(AdviceTopic.hurry, AdviceTone.warning, "Minder haast: neem meer tijd voor je slagen.", Double(ownErrors), "haast")
+            add(AdviceTopic.hurry, AdviceTone.warning, L10n.text("Minder haast: neem meer tijd voor je slagen."), Double(ownErrors), "haast")
         }
         // The kind of error that keeps coming back (Down/Out/Service/Grond)
         if let common = mostCommonErrorKind(in: game, madeBy: player) {
@@ -110,19 +110,19 @@ enum AdviceRules {
         }
         let forcedAgainst = game.forcedErrors(by: opponent).count
         if forcedAgainst >= 3 {
-            add(AdviceTopic.forcedErrors, AdviceTone.warning, "\(forcedAgainst) forced errors: heb je racket eerder klaar voor je slag.",
+            add(AdviceTopic.forcedErrors, AdviceTone.warning, L10n.text("%@ forced errors: heb je racket eerder klaar voor je slag.", "\(forcedAgainst)"),
                 Double(forcedAgainst), "forced-errors")
         }
         let letsAgainst = game.letsRequested(by: opponent).count
         let letsFor = game.letsRequested(by: player).count
         if letsAgainst >= 2 {
-            add(AdviceTopic.letsAgainst, AdviceTone.warning, "\(letsAgainst) lets tegen: beweeg na je slag sneller terug naar de T.",
+            add(AdviceTopic.letsAgainst, AdviceTone.warning, L10n.text("%@ lets tegen: beweeg na je slag sneller terug naar de T.", "\(letsAgainst)"),
                 Double(letsAgainst), "lets-tegen")
         }
         let opponentServicePoints = game.servicePoints(by: opponent).count
         if opponentServicePoints >= 2 {
             add(AdviceTopic.opponentServicePoints, AdviceTone.warning,
-                "\(opponentName) scoort \(opponentServicePoints) servicepunten: houd je racket vroeg omhoog bij de return.",
+                L10n.text("%@ scoort %@ servicepunten: houd je racket vroeg omhoog bij de return.", "\(opponentName)", "\(opponentServicePoints)"),
                 Double(opponentServicePoints), "service-tegen")
         }
         if let zone = game.bestZone(for: opponent) {
@@ -132,14 +132,14 @@ enum AdviceRules {
             }
             if count >= minimumPoints {
                 add(AdviceTopic.avoidZone, AdviceTone.warning,
-                    "Vermijd \(zone.rawValue): daar scoort \(opponentName) het meest (\(count) punten).",
+                    L10n.text("Vermijd %@: daar scoort %@ het meest (%@ punten).", "\(zone.title)", "\(opponentName)", "\(count)"),
                     Double(count) * 0.8, "vermijd-\(zone.rawValue)")
             }
         }
         let opponentVolleys = game.volleysWon(by: opponent).count
         if opponentVolleys >= minimumPoints {
             add(AdviceTopic.opponentVolleys, AdviceTone.warning,
-                "\(opponentName) wint \(opponentVolleys) punten uit de lucht. Speel hoger over of strakker langs de muur.",
+                L10n.text("%@ wint %@ punten uit de lucht. Speel hoger over of strakker langs de muur.", "\(opponentName)", "\(opponentVolleys)"),
                 Double(opponentVolleys), "volleys-tegen")
         }
 
@@ -148,46 +148,46 @@ enum AdviceRules {
             let count = profile.won.count(row)
             let tip: String
             switch row {
-            case .front: tip = "Blijf de voorhoeken zoeken."
-            case .middle: tip = "Blijf de T pakken en de bal vroeg nemen."
-            case .back: tip = "Je lengte werkt, blijf druk zetten op de achterwand."
+            case .front: tip = L10n.text("Blijf de voorhoeken zoeken.")
+            case .middle: tip = L10n.text("Blijf de T pakken en de bal vroeg nemen.")
+            case .back: tip = L10n.text("Je lengte werkt, blijf druk zetten op de achterwand.")
             }
             add(AdviceTopic.wonArea, AdviceTone.success,
-                "Je wint je punten vooral \(row.inWords) (\(count) van \(profile.won.total)). \(tip)",
+                L10n.text("Je wint je punten vooral %@ (%@ van %@). %@", "\(row.inWords)", "\(count)", "\(profile.won.total)", "\(tip)"),
                 Double(count) * keepGoingWeight, "gewonnen-\(row.rawValue)")
         }
         if let side = profile.won.dominantSide {
             let count = profile.won.count(side)
             add(AdviceTopic.wonArea, AdviceTone.success,
-                "Je scoort vooral \(side.inWords) (\(count) van \(profile.won.sideTotal)). Speel vaker die kant op.",
+                L10n.text("Je scoort vooral %@ (%@ van %@). Speel vaker die kant op.", "\(side.inWords)", "\(count)", "\(profile.won.sideTotal)"),
                 Double(count) * keepGoingWeight, "gewonnen-\(side.rawValue)")
         }
         let opponentErrorCount = game.unforcedErrors(by: player).count
         if opponentErrorCount >= 3 {
-            add(AdviceTopic.opponentErrors, AdviceTone.success, "\(opponentName) maakt \(opponentErrorCount) fouten: blijf druk zetten.",
+            add(AdviceTopic.opponentErrors, AdviceTone.success, L10n.text("%@ maakt %@ fouten: blijf druk zetten.", "\(opponentName)", "\(opponentErrorCount)"),
                 Double(opponentErrorCount) * keepGoingWeight, "fouten-tegenstander")
         }
         let ownServicePoints = game.servicePoints(by: player).count
         if ownServicePoints >= 2 {
             add(AdviceTopic.ownServicePoints, AdviceTone.success,
-                "Je scoort \(ownServicePoints) servicepunten: je service werkt, blijf zo serveren.",
+                L10n.text("Je scoort %@ servicepunten: je service werkt, blijf zo serveren.", "\(ownServicePoints)"),
                 Double(ownServicePoints) * keepGoingWeight, "service-mee")
         }
         if letsFor >= 2 && letsAgainst < 2 {
-            add(AdviceTopic.letsFor, AdviceTone.success, "\(letsFor) lets mee: je beweegt goed naar de bal.",
+            add(AdviceTopic.letsFor, AdviceTone.success, L10n.text("%@ lets mee: je beweegt goed naar de bal.", "\(letsFor)"),
                 Double(letsFor) * 0.5, "lets-mee")
         }
         let ownVolleys = game.volleysWon(by: player).count
         if ownVolleys >= minimumPoints {
             add(AdviceTopic.volleys, AdviceTone.success,
-                "Je wint \(ownVolleys) punten uit de lucht. Blijf de bal vroeg nemen, dat zet druk.",
+                L10n.text("Je wint %@ punten uit de lucht. Blijf de bal vroeg nemen, dat zet druk.", "\(ownVolleys)"),
                 Double(ownVolleys) * keepGoingWeight, "volleys-mee")
         }
         for row in [CourtRow.front, CourtRow.middle, CourtRow.back] {
             if let best = bestShot(in: game, for: player, row: row) {
-                let place = row == CourtRow.front ? "Voorin" : (row == CourtRow.middle ? "In het midden" : "Achterin")
+                let place = row == CourtRow.front ? L10n.text("Voorin") : (row == CourtRow.middle ? L10n.text("In het midden") : L10n.text("Achterin"))
                 add(AdviceTopic.bestShot, AdviceTone.info,
-                    "\(place) werkt je \(best.name.lowercased()) het best (\(best.count) punten).",
+                    L10n.text("%@ werkt je %@ het best (%@ punten).", "\(place)", "\(best.name.lowercased())", "\(best.count)"),
                     Double(best.count) * 0.5, "slag-\(row.rawValue)-\(best.name)")
             }
         }
@@ -212,10 +212,10 @@ enum AdviceRules {
 
     static func errorKindTip(_ kind: ErrorKind, count: Int) -> String {
         switch kind {
-        case .down: return "\(count)× in de tin: mik iets hoger boven de tin."
-        case .outOfCourt: return "\(count)× out: minder risico, houd de bal onder de outlijn."
-        case .service: return "\(count) servicefouten: neem je tijd en speel een veilige service."
-        case .viaFloor: return "\(count)× via de grond: kom laag en blijf achter de bal."
+        case .down: return L10n.text("%@× in de tin: mik iets hoger boven de tin.", "\(count)")
+        case .outOfCourt: return L10n.text("%@× out: minder risico, houd de bal onder de outlijn.", "\(count)")
+        case .service: return L10n.text("%@ servicefouten: neem je tijd en speel een veilige service.", "\(count)")
+        case .viaFloor: return L10n.text("%@× via de grond: kom laag en blijf achter de bal.", "\(count)")
         }
     }
 
@@ -242,7 +242,7 @@ enum AdviceRules {
             texts.append("\(number)")
         }
         if texts.count <= 1 { return texts.first ?? "" }
-        return texts.dropLast().joined(separator: ", ") + " en " + texts[texts.count - 1]
+        return texts.dropLast().joined(separator: ", ") + " " + L10n.text("en") + " " + texts[texts.count - 1]
     }
 
     static func tempoCandidate(in game: Game, for player: Player) -> AdviceCandidate? {
@@ -267,21 +267,21 @@ enum AdviceRules {
             }
             if shortWin > longWin {
                 return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.speedUp, tone: AdviceTone.success,
-                                                        text: "Versnel het spel: je wint \(Int(shortWin))% van de korte rally's en \(Int(longWin))% van de lange."),
+                                                        text: L10n.text("Versnel het spel: je wint %@% van de korte rally's en %@% van de lange.", "\(Int(shortWin))", "\(Int(longWin))")),
                                        potential: Double(lostLong), key: "tempo-sneller", order: 0)
             }
             return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.slowDown, tone: AdviceTone.success,
-                                                    text: "Vertraag het spel: je wint \(Int(longWin))% van de lange rally's en \(Int(shortWin))% van de korte."),
+                                                    text: L10n.text("Vertraag het spel: je wint %@% van de lange rally's en %@% van de korte.", "\(Int(longWin))", "\(Int(shortWin))")),
                                    potential: Double(lostShort), key: "tempo-trager", order: 0)
         }
         if let won = game.averageDurationWon(by: player), let lost = game.averageDurationLost(by: player), abs(won - lost) > 3 {
-            let durations = "je gewonnen punten duren gemiddeld \(formatDuration(won)), je verloren punten \(formatDuration(lost))."
+            let durations = L10n.text("je gewonnen punten duren gemiddeld %@, je verloren punten %@.", "\(formatDuration(won))", "\(formatDuration(lost))")
             let potential = Double(game.pointsLost(by: player).count) / 2.0
             if won < lost {
-                return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.speedUp, tone: AdviceTone.info, text: "Versnel het spel: " + durations),
+                return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.speedUp, tone: AdviceTone.info, text: L10n.text("Versnel het spel: ") + durations),
                                        potential: potential, key: "tempo-sneller", order: 0)
             }
-            return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.slowDown, tone: AdviceTone.info, text: "Vertraag het spel: " + durations),
+            return AdviceCandidate(item: AdviceItem(topic: AdviceTopic.slowDown, tone: AdviceTone.info, text: L10n.text("Vertraag het spel: ") + durations),
                                    potential: potential, key: "tempo-trager", order: 0)
         }
         return nil

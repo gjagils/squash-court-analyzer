@@ -23,7 +23,7 @@ public enum ErrorKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .down: return "Down"
         case .outOfCourt: return "Out"
         case .service: return "Service"
-        case .viaFloor: return "Grond"
+        case .viaFloor: return L10n.text("Grond")
         }
     }
 
@@ -39,10 +39,10 @@ public enum ErrorKind: String, CaseIterable, Identifiable, Codable, Sendable {
 
     public var description: String {
         switch self {
-        case .down: return "Bal in de tin"
-        case .outOfCourt: return "Bal buiten de baan of boven de outlijn"
-        case .service: return "Servicefout tegenstander"
-        case .viaFloor: return "Bal raakt eerst de vloer voor de frontwand"
+        case .down: return L10n.text("Bal in de tin")
+        case .outOfCourt: return L10n.text("Bal buiten de baan of boven de outlijn")
+        case .service: return L10n.text("Servicefout tegenstander")
+        case .viaFloor: return L10n.text("Bal raakt eerst de vloer voor de frontwand")
         }
     }
 

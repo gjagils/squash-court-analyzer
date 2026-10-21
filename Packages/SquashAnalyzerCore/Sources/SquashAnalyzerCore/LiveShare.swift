@@ -65,6 +65,9 @@ public struct LiveSnapshot: Codable, Equatable, Sendable {
     public var lastPoint: String?
     /// 1 or 2 once the match is decided
     public var winner: Int?
+    /// The app's language, "nl" or "en" (`AppLanguage.code`): only in the
+    /// request that starts the session, nil (left out) in every update
+    public var lang: String? = nil
 
     public init(p1: String, p2: String, bestOf: Int, games: [[Int]], score: [Int], gamesWon: [Int],
                 server: Int, side: String, status: LiveStatus, lastPoint: String? = nil, winner: Int? = nil) {
@@ -358,7 +361,9 @@ public final class LiveShare {
         guard let transport else { throw LiveShareError.noTransport }
         sessionBaseURL = baseURL
         guard let url = URL(string: "\(sessionBaseURL)/api/live") else { throw LiveShareError.noConnection }
-        let body = try JSONEncoder().encode(snapshot)
+        var first = snapshot
+        first.lang = AppLanguage.current.code
+        let body = try JSONEncoder().encode(first)
         let response: AITransportResponse
         do {
             response = try await transport.send(method: "POST", url: url, headers: ["Content-Type": "application/json"], body: body)

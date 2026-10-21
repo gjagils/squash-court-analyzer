@@ -5,6 +5,12 @@ import Foundation
 // Reading a match never changes it, and durations follow an injected clock
 final class MatchStateTests: XCTestCase {
 
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
     /// T11: completing a match that only had an untouched game keeps that game,
     /// and reading `currentGame` afterwards adds nothing
     func testCompletedMatchKeepsOneGameAndReadingAddsNone() {

@@ -6,6 +6,12 @@ import Foundation
 /// real file store: remembered when started, found again when resumed, let
 /// go when thrown away, and filled in at the end (also from the match-day question).
 final class TeamMatchSupportTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private let day = Date(timeIntervalSince1970: 1_793_181_600.0)
 
     private func folder() -> URL {

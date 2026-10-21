@@ -18,17 +18,17 @@ extension Match {
     }
 
     /// Title and explanation of the stop question
-    public static let stopTitle = "Wedstrijd stoppen?"
+    public static var stopTitle: String { L10n.text("Wedstrijd stoppen?") }
 
     public var stopMessage: String {
-        "\(player1Name) – \(player2Name) staat \(player1GamesWon)-\(player2GamesWon) in games en is nog niet afgelopen. "
-            + "Bewaar hem om later verder te gaan, sla hem op als incompleet, vul de winnaars van de gemiste games in, of gooi hem weg."
+        L10n.text("%@ – %@ staat %@-%@ in games en is nog niet afgelopen. Bewaar hem om later verder te gaan, sla hem op als incompleet, vul de winnaars van de gemiste games in, of gooi hem weg.",
+            player1Name, player2Name, String(player1GamesWon), String(player2GamesWon))
     }
 
     /// The resume question when the Coach tile is tapped with an unfinished match
     public var resumeMessage: String {
         "\(player1Name) – \(player2Name), game \(currentGameNumber): \(currentGame.player1Score) – \(currentGame.player2Score). "
-            + "Bij een nieuwe wedstrijd komt deze als incompleet in Afgeronde wedstrijden."
+            + L10n.text("Bij een nieuwe wedstrijd komt deze als incompleet in Afgeronde wedstrijden.")
     }
 }
 
@@ -36,6 +36,6 @@ extension RefereeMatch {
     /// The resume question when the Scheidsrechter tile is tapped with an unfinished match
     public var resumeMessage: String {
         "\(player1Name) – \(player2Name), game \(currentGameNumber): \(player1Score) – \(player2Score). "
-            + "Bij een nieuwe wedstrijd komt deze als incompleet in Afgeronde wedstrijden."
+            + L10n.text("Bij een nieuwe wedstrijd komt deze als incompleet in Afgeronde wedstrijden.")
     }
 }

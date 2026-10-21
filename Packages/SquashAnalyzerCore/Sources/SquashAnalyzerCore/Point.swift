@@ -57,7 +57,7 @@ extension Point {
         var parts = [pointType.title]
         if let errorKind { parts.append(errorKind.title) }
         if let shotType { parts.append(shotType.displayName(isVolley: isVolley)) }
-        if let zone { parts.append(zone.rawValue) }
+        if let zone { parts.append(zone.title) }
         return parts.joined(separator: " · ")
     }
 }

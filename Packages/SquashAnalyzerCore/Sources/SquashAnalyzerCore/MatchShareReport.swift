@@ -111,15 +111,13 @@ public struct MatchShareReport {
 
     // Shared building blocks -------------------------------------------------
 
-    private static let dutch = Locale(identifier: "nl_NL")
-
     /// `DateFormatter` with a fixed pattern, not `Date.FormatStyle`: Skip's
     /// Android runtime (SkipFoundation) has no `Date.FormatStyle` support, and
     /// `DateFormatter` transpiles to `java.text.SimpleDateFormat`.
     private func formattedDate(pattern: String) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = pattern
-        formatter.locale = Self.dutch
+        formatter.locale = AppLanguage.current.locale
         return formatter.string(from: startedAt)
     }
 
@@ -133,13 +131,13 @@ public struct MatchShareReport {
 
     private func minutesText(_ seconds: TimeInterval) -> String {
         let minutes = Int((seconds / 60).rounded())
-        if minutes >= 60 { return "\(minutes / 60) u \(String(format: "%02d", minutes % 60)) min" }
+        if minutes >= 60 { return L10n.text("%@ u %@ min", "\(minutes / 60)", String(format: "%02d", minutes % 60)) }
         return "\(max(minutes, 1)) min"
     }
 
     /// "best of 5", with "· vanaf game 3" when scoring started later
     private var bestOfText: String {
-        firstGameNumber > 1 ? "best of \(bestOf) · vanaf game \(firstGameNumber)" : "best of \(bestOf)"
+        firstGameNumber > 1 ? L10n.text("best of %@ · vanaf game %@", "\(bestOf)", "\(firstGameNumber)") : "best of \(bestOf)"
     }
 
     /// "3 – 1" games score, in player order
@@ -157,14 +155,14 @@ public struct MatchShareReport {
     private var resultLine: String {
         if let winner = matchWinner {
             let score = winner == .player1 ? "\(player1Games)–\(player2Games)" : "\(player2Games)–\(player1Games)"
-            return "🏆 *\(name(for: winner)) wint met \(score)*"
+            return L10n.text("🏆 *%@ wint met %@*", "\(name(for: winner))", "\(score)")
         }
         if player1Games == player2Games {
-            return "Stand: gelijk \(gamesScoreText)"
+            return L10n.text("Stand: gelijk %@", "\(gamesScoreText)")
         }
         let leader: Player = player1Games > player2Games ? .player1 : .player2
         let score = leader == .player1 ? "\(player1Games)–\(player2Games)" : "\(player2Games)–\(player1Games)"
-        return "Stand: \(name(for: leader)) leidt met \(score)"
+        return L10n.text("Stand: %@ leidt met %@", "\(name(for: leader))", "\(score)")
     }
 
     /// "11-13 · 11-4 · 11-3", an unfinished game shown as "5-3…"
@@ -199,7 +197,7 @@ public struct MatchShareReport {
         }
 
         var lines: [String] = []
-        lines.append("🏸 *SQUASH SCOREKAART*")
+        lines.append(L10n.text("🏸 *SQUASH SCOREKAART*"))
         lines.append("\(shortDateText) · \(bestOfText) · ⏱ \(minutesText(duration))")
         lines.append("")
 
@@ -228,7 +226,7 @@ public struct MatchShareReport {
     /// Game-by-game report with durations and match stats
     private var reportShareText: String {
         var lines: [String] = []
-        lines.append("🏸 *SQUASH WEDSTRIJD*")
+        lines.append(L10n.text("🏸 *SQUASH WEDSTRIJD*"))
         lines.append("📅 \(longDateText)")
         lines.append("👥 \(player1Name) – \(player2Name) · \(bestOfText)")
         lines.append("")
@@ -238,7 +236,7 @@ public struct MatchShareReport {
             if let w = g.winner {
                 parts.append("✅ \(name(for: w))")
             } else {
-                parts.append("bezig")
+                parts.append(L10n.text("bezig"))
             }
             if let d = g.duration { parts.append(minutesText(d)) }
             if g.strokes > 0 { parts.append("\(g.strokes) stroke\(g.strokes == 1 ? "" : "s")") }
@@ -251,11 +249,11 @@ public struct MatchShareReport {
         var stats = ["⏱ \(minutesText(duration))", "🎾 \(totalRallies) rallies"]
         if totalStrokes > 0 { stats.append("⚡ \(totalStrokes) stroke\(totalStrokes == 1 ? "" : "s")") }
         if let run = longestRun, run.length >= 3 {
-            stats.append("🔥 langste reeks \(run.length) (\(name(for: run.player)))")
+            stats.append(L10n.text("🔥 langste reeks %@ (%@)", "\(run.length)", "\(name(for: run.player))"))
         }
         lines.append(stats.joined(separator: " · "))
         lines.append("")
-        lines.append("_Gescoord met Squash Analyzer_")
+        lines.append(L10n.text("_Gescoord met Squash Analyzer_"))
         return lines.joined(separator: "\n")
     }
 }
@@ -268,17 +266,17 @@ public enum MatchShareStyle: String, CaseIterable, Identifiable {
 
     public var title: String {
         switch self {
-        case .compact: return "Kort"
-        case .scorecard: return "Scorekaart"
-        case .report: return "Verslag"
+        case .compact: return L10n.text("Kort")
+        case .scorecard: return L10n.text("Scorekaart")
+        case .report: return L10n.text("Verslag")
         }
     }
 
     public var subtitle: String {
         switch self {
-        case .compact: return "Drie regels voor de groepsapp"
-        case .scorecard: return "Tabel met alle games"
-        case .report: return "Per game, met tijden en statistieken"
+        case .compact: return L10n.text("Drie regels voor de groepsapp")
+        case .scorecard: return L10n.text("Tabel met alle games")
+        case .report: return L10n.text("Per game, met tijden en statistieken")
         }
     }
 }
@@ -295,17 +293,17 @@ public enum MatchShareChoice: String, CaseIterable, Identifiable {
 
     public var title: String {
         switch self {
-        case .scorecard: return "Scorekaart"
-        case .report: return "Verslag"
-        case .picture: return "Plaatje"
+        case .scorecard: return L10n.text("Scorekaart")
+        case .report: return L10n.text("Verslag")
+        case .picture: return L10n.text("Plaatje")
         }
     }
 
     public var subtitle: String {
         switch self {
-        case .scorecard: return "Tabel met alle games"
-        case .report: return "Per game, met tijden en statistieken"
-        case .picture: return "De uitslag als afbeelding, met de spelers"
+        case .scorecard: return L10n.text("Tabel met alle games")
+        case .report: return L10n.text("Per game, met tijden en statistieken")
+        case .picture: return L10n.text("De uitslag als afbeelding, met de spelers")
         }
     }
 

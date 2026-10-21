@@ -5,6 +5,12 @@ import Foundation
 /// The badge reset at the production release: runs on Darwin and, via Skip, on
 /// Android, so both apps hide the same awards and grant the same Pionier.
 final class BadgeSeasonTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private let start = Date(timeIntervalSince1970: 1_800_000_000)
     private let card = UUID(uuidString: "6F1C2B3A-4D5E-4F60-8A7B-9C0D1E2F3A4B")!
     private let otherCard = UUID(uuidString: "0A1B2C3D-4E5F-4061-8273-8495A6B7C8D9")!

@@ -30,13 +30,13 @@ public enum ShotType: String, CaseIterable, Identifiable, Codable, Sendable {
     /// Description of the shot
     public var description: String {
         switch self {
-        case .drive: return "Rechte slag langs de muur"
-        case .cross: return "Diagonale slag"
-        case .volley: return "Slag uit de lucht"
-        case .drop: return "Korte bal naar voren (ook cross drop)"
-        case .lob: return "Hoge bal naar achteren"
-        case .boast: return "Slag via de zijmuur"
-        case .kill: return "Hard en laag, sterft snel"
+        case .drive: return L10n.text("Rechte slag langs de muur")
+        case .cross: return L10n.text("Diagonale slag")
+        case .volley: return L10n.text("Slag uit de lucht")
+        case .drop: return L10n.text("Korte bal naar voren (ook cross drop)")
+        case .lob: return L10n.text("Hoge bal naar achteren")
+        case .boast: return L10n.text("Slag via de zijmuur")
+        case .kill: return L10n.text("Hard en laag, sterft snel")
         }
     }
 
@@ -76,7 +76,7 @@ public enum ShotType: String, CaseIterable, Identifiable, Codable, Sendable {
 
     /// "Drop", "Volley drop", or "Volley (oud)" for a point from before the switch
     public func displayName(isVolley: Bool) -> String {
-        if self == ShotType.volley { return "Volley (oud)" }
+        if self == ShotType.volley { return L10n.text("Volley (oud)") }
         return isVolley ? "Volley " + rawValue.lowercased() : rawValue
     }
 }

@@ -4,6 +4,12 @@ import XCTest
 
 /// Competitie: a team match of four partijen with the SBN rules
 final class TeamMatchTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private func partij(_ slot: Int, _ scores: [(Int, Int)]) -> TeamPartij {
         var partij = TeamPartij(slot: slot, ownPlayer: "Wij\(slot)", opponentPlayer: "Zij\(slot)")
         for score in scores {

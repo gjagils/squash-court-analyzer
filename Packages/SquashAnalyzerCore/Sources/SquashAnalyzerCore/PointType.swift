@@ -19,7 +19,7 @@ public enum PointType: String, CaseIterable, Identifiable, Codable {
         case .forcedError: return "Forced error"
         case .unforcedError: return "Unforced error"
         case .stroke: return "Stroke"
-        case .servicePoint: return "Servicepunt"
+        case .servicePoint: return L10n.text("Servicepunt")
         }
     }
 
@@ -35,11 +35,11 @@ public enum PointType: String, CaseIterable, Identifiable, Codable {
 
     public var description: String {
         switch self {
-        case .winner: return "Winnende slag"
-        case .forcedError: return "Fout door jouw druk"
-        case .unforcedError: return "Fout zonder jouw druk"
-        case .stroke: return "Punt na obstructie"
-        case .servicePoint: return "Direct uit de service"
+        case .winner: return L10n.text("Winnende slag")
+        case .forcedError: return L10n.text("Fout door jouw druk")
+        case .unforcedError: return L10n.text("Fout zonder jouw druk")
+        case .stroke: return L10n.text("Punt na obstructie")
+        case .servicePoint: return L10n.text("Direct uit de service")
         }
     }
 

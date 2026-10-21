@@ -32,20 +32,26 @@ public enum TeamMatchReport {
     static func resultLine(_ match: TeamMatch) -> String {
         let current = match.score
         if current.isComplete {
-            if let winner = match.winnerName { return "🏆 *\(winner) wint met \(winnerScore(match))*" }
-            return "🤝 *Gelijkspel \(match.homeGames)–\(match.awayGames)*"
+            if let winner = match.winnerName { return L10n.text("🏆 *%@ wint met %@*", "\(winner)", "\(winnerScore(match))") }
+            return L10n.text("🤝 *Gelijkspel %@–%@*", "\(match.homeGames)", "\(match.awayGames)")
         }
-        if current.partijenPlayed == 0 { return "Nog niet begonnen" }
-        if current.ownGames == current.theirGames { return "Stand: gelijk \(match.homeGames)–\(match.awayGames)" }
+        if current.partijenPlayed == 0 { return L10n.text("Nog niet begonnen") }
+        if current.ownGames == current.theirGames { return L10n.text("Stand: gelijk %@–%@", "\(match.homeGames)", "\(match.awayGames)") }
         let leader = current.ownGames > current.theirGames ? match.ownName : match.opponentName
-        return "Stand: \(leader) leidt met \(winnerScore(match)) · \(current.partijenPlayed) van 4 partijen"
+        return L10n.text("Stand: %@ leidt met %@ · %@ van 4 partijen", "\(leader)", "\(winnerScore(match))", "\(current.partijenPlayed)")
     }
 
     /// "Competitiepunten: All Inn 12 · Delft 8" once the match is decided
     static func pointsLine(_ match: TeamMatch) -> String? {
+        guard let points = points(match) else { return nil }
+        return L10n.text("Competitiepunten: %@", points)
+    }
+
+    /// "All Inn 12 · Delft 8", with the note on bonus points
+    private static func points(_ match: TeamMatch) -> String? {
         guard match.score.isComplete else { return nil }
-        var line = "Competitiepunten: \(match.home) \(match.homeCompetitionPoints) · \(match.away) \(match.awayCompetitionPoints)"
-        if match.score.winnerNotFull { line += " (geen bonuspunten: onvolledig team)" }
+        var line = "\(match.home) \(match.homeCompetitionPoints) · \(match.away) \(match.awayCompetitionPoints)"
+        if match.score.winnerNotFull { line += " " + L10n.text("(geen bonuspunten: onvolledig team)") }
         return line
     }
 
@@ -100,14 +106,14 @@ public enum TeamMatchReport {
 
     private static func compact(_ match: TeamMatch) -> String {
         var lines: [String] = []
-        lines.append("🏆 *Teamwedstrijd · \(shortDay(match.date))*")
+        lines.append(L10n.text("🏆 *Teamwedstrijd · %@*", "\(shortDay(match.date))"))
         let homeLeads = match.homeGames > match.awayGames
         let awayLeads = match.awayGames > match.homeGames
         let home = homeLeads ? "*\(match.home)*" : match.home
         let away = awayLeads ? "*\(match.away)*" : match.away
         lines.append("\(home) \(match.homeGames) – \(match.awayGames) \(away)")
-        var detail = "\(match.homePartijen)-\(match.awayPartijen) in partijen"
-        if let points = pointsLine(match) { detail += " · " + points.replacingOccurrences(of: "Competitiepunten: ", with: "punten ") }
+        var detail = L10n.text("%@-%@ in partijen", "\(match.homePartijen)", "\(match.awayPartijen)")
+        if let points = points(match) { detail += " · " + L10n.text("punten %@", points) }
         lines.append(detail)
         return lines.joined(separator: "\n")
     }
@@ -127,7 +133,7 @@ public enum TeamMatchReport {
             return right ? fill + t : t + fill
         }
         var lines: [String] = []
-        lines.append("🏆 *TEAM SCOREKAART*")
+        lines.append(L10n.text("🏆 *TEAM SCOREKAART*"))
         lines.append("\(shortDay(match.date)) · \(match.home) – \(match.away)")
         lines.append("")
         lines.append("```")
@@ -165,7 +171,7 @@ public enum TeamMatchReport {
 
     private static func report(_ match: TeamMatch) -> String {
         var lines: [String] = []
-        lines.append("🏆 *TEAMWEDSTRIJD*")
+        lines.append(L10n.text("🏆 *TEAMWEDSTRIJD*"))
         lines.append("📅 \(longDay(match.date))")
         lines.append("👥 \(match.home) – \(match.away)")
         lines.append("")
@@ -175,7 +181,7 @@ public enum TeamMatchReport {
             let bare = partij.ownPlayer.isEmpty && partij.opponentPlayer.isEmpty
             let prefix = bare ? "" : "*\(partij.label)* "
             if !partij.hasEntry {
-                lines.append(bare ? "*\(partij.label)* nog niet gespeeld" : "\(prefix)\(who): nog niet gespeeld")
+                lines.append(bare ? L10n.text("*%@* nog niet gespeeld", "\(partij.label)") : L10n.text("%@%@: nog niet gespeeld", "\(prefix)", "\(who)"))
             } else {
                 var line = "\(prefix)\(who) · \(standText(partij, match: match)) (\(gamesWithEnd(partij, match: match)))"
                 if let won = partij.ownWon {
@@ -188,14 +194,14 @@ public enum TeamMatchReport {
         lines.append("")
         lines.append(resultLine(match))
         let current = match.score
-        var stats = ["🎯 \(match.homePartijen)-\(match.awayPartijen) in partijen"]
+        var stats = [L10n.text("🎯 %@-%@ in partijen", "\(match.homePartijen)", "\(match.awayPartijen)")]
         if current.pointsKnown && current.partijenPlayed > 0 {
-            stats.append("🎾 rallypunten \(match.ownSide == TeamSide.home ? current.ownPoints : current.theirPoints)-\(match.ownSide == TeamSide.home ? current.theirPoints : current.ownPoints)")
+            stats.append(L10n.text("🎾 rallypunten %@-%@", "\(match.ownSide == TeamSide.home ? current.ownPoints : current.theirPoints)", "\(match.ownSide == TeamSide.home ? current.theirPoints : current.ownPoints)"))
         }
         lines.append(stats.joined(separator: " · "))
         if let points = pointsLine(match) { lines.append(points) }
         lines.append("")
-        lines.append("_Gescoord met Squash Analyzer_")
+        lines.append(L10n.text("_Gescoord met Squash Analyzer_"))
         return lines.joined(separator: "\n")
     }
 
@@ -203,7 +209,7 @@ public enum TeamMatchReport {
 
     private static func format(_ date: Date, _ pattern: String) -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "nl_NL")
+        formatter.locale = AppLanguage.current.locale
         formatter.timeZone = TimeZone(identifier: "Europe/Amsterdam")
         formatter.dateFormat = pattern
         return formatter.string(from: date)
@@ -223,21 +229,21 @@ extension ResultCard {
         let current = match.score
         var winner: Player? = nil
         var text: String? = nil
-        var title = "TUSSENSTAND"
+        var title = L10n.text("TUSSENSTAND")
         if current.isComplete {
-            title = "TEAMWEDSTRIJD KLAAR"
+            title = L10n.text("TEAMWEDSTRIJD KLAAR")
             if let ownWon = current.ownWon {
                 let homeWon = ownWon == (match.ownSide == TeamSide.home)
                 winner = homeWon ? Player.player1 : Player.player2
-                text = "\(match.winnerName ?? "") wint de teamwedstrijd"
+                text = L10n.text("%@ wint de teamwedstrijd", "\(match.winnerName ?? "")")
             } else {
-                text = "Gelijkspel"
+                text = L10n.text("Gelijkspel")
             }
         } else if current.partijenPlayed == 0 {
-            title = "TEAMWEDSTRIJD"
+            title = L10n.text("TEAMWEDSTRIJD")
         } else if match.homeGames != match.awayGames {
             winner = match.homeGames > match.awayGames ? Player.player1 : Player.player2
-            text = "\(match.homeGames > match.awayGames ? match.home : match.away) leidt \(max(match.homeGames, match.awayGames))-\(min(match.homeGames, match.awayGames))"
+            text = L10n.text("%@ leidt %@-%@", "\(match.homeGames > match.awayGames ? match.home : match.away)", "\(max(match.homeGames, match.awayGames))", "\(min(match.homeGames, match.awayGames))")
         }
         var card = ResultCard(title: title, player1Name: match.home, player2Name: match.away,
                               player1Score: match.homeGames, player2Score: match.awayGames,

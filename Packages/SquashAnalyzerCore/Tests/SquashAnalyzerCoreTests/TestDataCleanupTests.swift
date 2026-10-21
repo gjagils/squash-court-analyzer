@@ -5,6 +5,12 @@ import Foundation
 /// The one-time cleanup of the test period: runs on Darwin and, via Skip, on
 /// Android, so both apps offer and remove the same matches.
 final class TestDataCleanupTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private let start = Date(timeIntervalSince1970: 1_800_000_000)
 
     private func match(_ p1: String, _ p2: String, unfinished: Bool = false, at seconds: Double = -3_600) -> TestDataMatch {

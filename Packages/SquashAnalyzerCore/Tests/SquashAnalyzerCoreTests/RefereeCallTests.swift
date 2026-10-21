@@ -6,6 +6,12 @@ import Foundation
 // in the iOS tests before, so never through Skip.
 final class RefereeCallTests: XCTestCase {
 
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
     func testStrokeShowsTheBannerWithTheName() {
         let match = RefereeMatch(player1Name: "Jan", player2Name: "Piet", bestOf: 5, startingServer: Player.player1)
         match.callStroke(to: Player.player2)

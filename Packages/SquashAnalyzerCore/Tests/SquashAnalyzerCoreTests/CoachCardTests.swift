@@ -4,6 +4,12 @@ import XCTest
 
 /// De coachkaart: three points per game, related to the game before
 final class CoachCardTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     /// One game: player 1's own errors at the front, player 2's errors at the
     /// front (a chance for player 1), then winners until the game is over
     private func play(_ match: Match, ownErrors: Int, opponentErrors: Int, winner: Player = Player.player2) {
@@ -78,6 +84,12 @@ final class CoachCardTests: XCTestCase {
 
 /// Whose coach card opens first, and service/return over the match
 final class CoachCardFocusTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     func testTheCardOpensOnThePlayerFromTheTeam() {
         let jan = UUID()
         let piet = UUID()

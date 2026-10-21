@@ -42,10 +42,10 @@ public struct CardImportPreview: Equatable, Sendable {
 
     /// Same wording as iOS' `CardImportSheet`
     public var summary: String {
-        var parts = [activeBadges == 1 ? "1 badge op de kaart" : "\(activeBadges) badges op de kaart"]
-        if newBadges > 0 { parts.append(newBadges == 1 ? "1 nieuw voor jou" : "\(newBadges) nieuw voor jou") }
-        if deletedBadges > 0 { parts.append("\(deletedBadges) verwijderd") }
-        if linkedPlayer != nil && newBadges == 0 && deletedBadges == 0 { parts.append("je bent al bij") }
+        var parts = [activeBadges == 1 ? L10n.text("1 badge op de kaart") : L10n.text("%@ badges op de kaart", "\(activeBadges)")]
+        if newBadges > 0 { parts.append(newBadges == 1 ? L10n.text("1 nieuw voor jou") : L10n.text("%@ nieuw voor jou", "\(newBadges)")) }
+        if deletedBadges > 0 { parts.append(L10n.text("%@ verwijderd", "\(deletedBadges)")) }
+        if linkedPlayer != nil && newBadges == 0 && deletedBadges == 0 { parts.append(L10n.text("je bent al bij")) }
         return parts.joined(separator: " · ")
     }
 }
@@ -109,7 +109,7 @@ public final class CardInbox {
     }
 
     /// Shown when a link of ours cannot be opened by this version (Gerd-Jan's wording)
-    public static let newerAppText = "Je hebt een nieuwere (test)versie van SquashAnalyzer nodig."
+    public static var newerAppText: String { L10n.text("Je hebt een nieuwere (test)versie van SquashAnalyzer nodig.") }
     public static let appStoreLink = "https://apps.apple.com/app/squash-analyzer/id6758676921"
     public static let playStoreLink = "https://play.google.com/store/apps/details?id=com.squashanalyzer.android"
 

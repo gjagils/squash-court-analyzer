@@ -6,6 +6,12 @@ import Foundation
 // after every rally, and the session is deleted as soon as the match is over.
 final class LiveShareTests: XCTestCase {
 
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
     // MARK: - Snapshot
 
     func testFirstNameOnly() {
@@ -315,6 +321,12 @@ final class FakeLiveTransport: LiveTransport, @unchecked Sendable {
 
 // The share picture ("Deel als plaatje") follows the result card
 final class ResultCardTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private func report(games: [MatchShareReport.Game], p1: Int, p2: Int, winner: Player?) -> MatchShareReport {
         MatchShareReport(player1Name: "Luis", player2Name: "Niels", bestOf: 5, firstGameNumber: 1,
                          player1Games: p1, player2Games: p2, matchWinner: winner, games: games,

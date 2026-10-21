@@ -6,6 +6,12 @@ import Foundation
 // score" (moved from the UI package so they run on both platforms, T19)
 final class ResultAndShareTextTests: XCTestCase {
 
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
     // MARK: - WhatsApp preview
 
     func testBoldAndItalicPiecesAreSplit() {

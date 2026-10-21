@@ -4,6 +4,12 @@ import XCTest
 
 /// Spelersprofiel: a player's matches over time
 final class PlayerTrendTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private let gerdJan = UUID()
     private let piet = UUID()
     private let klaas = UUID()

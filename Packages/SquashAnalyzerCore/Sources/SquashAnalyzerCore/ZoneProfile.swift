@@ -132,9 +132,9 @@ extension CourtRow {
     /// "voorin", "in het midden", "achterin"
     public var inWords: String {
         switch self {
-        case .front: return "voorin"
-        case .middle: return "in het midden"
-        case .back: return "achterin"
+        case .front: return L10n.text("voorin")
+        case .middle: return L10n.text("in het midden")
+        case .back: return L10n.text("achterin")
         }
     }
 }
@@ -142,6 +142,6 @@ extension CourtRow {
 extension CourtSide {
     /// "aan de linkerkant", "aan de rechterkant"
     public var inWords: String {
-        self == CourtSide.left ? "aan de linkerkant" : "aan de rechterkant"
+        self == CourtSide.left ? L10n.text("aan de linkerkant") : L10n.text("aan de rechterkant")
     }
 }

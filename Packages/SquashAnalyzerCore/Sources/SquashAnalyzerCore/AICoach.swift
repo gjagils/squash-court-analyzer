@@ -32,11 +32,11 @@ public enum AICoachError: Error, Equatable {
 
     public var message: String {
         switch self {
-        case .invalidResponse: return "Ongeldig antwoord van server"
-        case .invalidAPIKey: return "Ongeldige API key. Controleer je instellingen."
-        case .apiError(let code): return "API fout (code: \(code))"
-        case .noContent: return "Geen antwoord ontvangen"
-        case .noConnection: return "Geen verbinding met de AI Coach. Controleer je internetverbinding."
+        case .invalidResponse: return L10n.text("Ongeldig antwoord van server")
+        case .invalidAPIKey: return L10n.text("Ongeldige API key. Controleer je instellingen.")
+        case .apiError(let code): return L10n.text("API fout (code: %@)", "\(code)")
+        case .noContent: return L10n.text("Geen antwoord ontvangen")
+        case .noConnection: return L10n.text("Geen verbinding met de AI Coach. Controleer je internetverbinding.")
         }
     }
 }
@@ -74,7 +74,14 @@ public enum AICoachPrompt {
     public static let endpoint = URL(string: "https://api.openai.com/v1/chat/completions")!
     public static let modelsEndpoint = URL(string: "https://api.openai.com/v1/models")!
 
-    public static let system = """
+    /// The system text in the app's language: the advice comes back in that
+    /// language. The JSON keys stay Dutch in both, they are parsed. The game
+    /// data (`user`) stays Dutch; the model reads it either way.
+    public static var system: String {
+        AppLanguage.current == AppLanguage.english ? systemEnglish : systemDutch
+    }
+
+    public static let systemDutch = """
     Je bent een ervaren squash coach. Analyseer de gegeven game statistieken en geef concreet, actionable advies in het Nederlands.
 
     Antwoord ALLEEN in dit exacte JSON formaat (geen markdown, geen extra tekst):
@@ -84,6 +91,19 @@ public enum AICoachPrompt {
         "werkPunten": ["punt 1", "punt 2"],
         "tactischAdvies": ["advies 1", "advies 2", "advies 3"],
         "focusVolgendeGame": "Één concrete focus voor de volgende game"
+    }
+    """
+
+    public static let systemEnglish = """
+    You are an experienced squash coach. Analyse the given game statistics and give concrete, actionable advice in English. The statistics are in Dutch; write every text value in English.
+
+    Answer ONLY in this exact JSON format (no markdown, no extra text), with these keys unchanged:
+    {
+        "samenvatting": "Short summary of the game in 1-2 sentences",
+        "sterktePunten": ["point 1", "point 2", "point 3"],
+        "werkPunten": ["point 1", "point 2"],
+        "tactischAdvies": ["advice 1", "advice 2", "advice 3"],
+        "focusVolgendeGame": "One concrete focus for the next game"
     }
     """
 
@@ -287,7 +307,7 @@ public struct AICoachClient: Sendable {
             return advice
         }
         return TacticalAdvice(samenvatting: content, sterktePunten: [], werkPunten: [], tactischAdvies: [],
-                              focusVolgendeGame: "Analyseer je tegenstander en pas je tactiek aan")
+                              focusVolgendeGame: L10n.text("Analyseer je tegenstander en pas je tactiek aan"))
     }
 
     public func advice(for game: Game, player: Player, apiKey: String, coachingFocus: [String] = []) async throws -> TacticalAdvice {

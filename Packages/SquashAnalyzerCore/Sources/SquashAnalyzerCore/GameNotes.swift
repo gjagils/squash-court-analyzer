@@ -186,7 +186,7 @@ public struct ServiceReturnStats: Equatable, Sendable {
 
     /// "7 van 10 gewonnen (70%)", or "Geen rally's" without any
     public static func line(_ won: Int, of total: Int) -> String {
-        guard let percentage = percentage(won, of: total) else { return "Geen rally's" }
-        return "\(won) van \(total) gewonnen (\(percentage)%)"
+        guard let percentage = percentage(won, of: total) else { return L10n.text("Geen rally's") }
+        return L10n.text("%@ van %@ gewonnen (%@%)", String(won), String(total), String(percentage))
     }
 }

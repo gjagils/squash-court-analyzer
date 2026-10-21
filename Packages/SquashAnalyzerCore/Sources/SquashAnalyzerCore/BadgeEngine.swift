@@ -6,9 +6,9 @@ public enum BadgeTier: String, CaseIterable, Codable, Sendable {
 
     public var title: String {
         switch self {
-        case .bronze: return "Brons"
-        case .silver: return "Zilver"
-        case .gold: return "Goud"
+        case .bronze: return L10n.text("Brons")
+        case .silver: return L10n.text("Zilver")
+        case .gold: return L10n.text("Goud")
         }
     }
 
@@ -232,7 +232,7 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
     public var title: String {
         switch family {
         case .fiveInARow: return "5 points in a row"
-        case .elevenNil: return "Alles is voor Bassie"
+        case .elevenNil: return L10n.text("Alles is voor Bassie")
         case .dropIt: return "Drop it like it's hot"
         case .krissCross: return "Kriss Kross"
         case .backFromTheDeath: return "Back from the dead"
@@ -263,12 +263,12 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .veteran: return "Veteran"
         case .rockSolid: return "Rock solid"
         case .backWallBoss: return "Back wall boss"
-        case .sneltrein: return "Sneltrein"
-        case .vetteWinst: return "Vette winst"
-        case .clubicoon: return "Clubicoon"
-        case .rivalen: return "Rivalen"
+        case .sneltrein: return L10n.text("Sneltrein")
+        case .vetteWinst: return L10n.text("Vette winst")
+        case .clubicoon: return L10n.text("Clubicoon")
+        case .rivalen: return L10n.text("Rivalen")
         case .handOutHeld: return "Hand-out held"
-        case .pioneer: return "Pionier"
+        case .pioneer: return L10n.text("Pionier")
         default: return rawValue
         }
     }
@@ -283,44 +283,44 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
     public var detail: String {
         let n = threshold ?? 0
         switch family {
-        case .fiveInARow: return "\(n) punten achter elkaar"
-        case .elevenNil: return "Win een game met 11-0"
-        case .dropIt: return "\(n) drops in één game"
-        case .krissCross: return "\(n) crosses in één game"
-        case .backFromTheDeath: return "Win een game na \(n) punten achterstand"
-        case .goingTheDistance: return "Win de wedstrijd na 0-2 in games"
-        case .aceOfPace: return "\(n) servicewinners in één game"
-        case .lobStory: return "\(n) lobwinners in één game"
-        case .volleywood: return "\(n) volleywinners in één game"
-        case .cleanSweep: return "Win de wedstrijd met 3-0"
-        case .coolUnderPressure: return "Win een game na 10-10"
-        case .driveMeCrazy: return "\(n) drivewinners in één game"
-        case .boastBuster: return "\(n) boastwinners in één game"
-        case .fullHouse: return "Scoor met alle 6 slagtypes in één wedstrijd"
-        case .hatTrick: return "Win \(n) wedstrijden op rij"
-        case .houdini: return "Werk 3 matchpoints weg en win de wedstrijd"
-        case .marathonMan: return "Win een game met minstens 20 punten"
-        case .offTheMark: return "Win je eerste wedstrijd"
-        case .centurion: return "Scoor in totaal \(n) punten"
-        case .doubleTrouble: return "Win 2 games na 10-10 in één wedstrijd"
-        case .tenOutOfTen: return "Win in totaal \(n) wedstrijden"
-        case .brickWall: return "Win een game zonder unforced errors"
-        case .frontRowKing: return "\(n) winners vanuit de voorste zones in één game"
-        case .endurance: return "Win een rally van minstens \(n) seconden"
-        case .unbreakable: return "Win een game zonder ooit achter te staan"
-        case .photoFinish: return "Win een wedstrijd met 3-2"
-        case .strokeOfGenius: return "Krijg 3 strokes toegekend in één game"
-        case .ironMan: return "Speel een wedstrijd van minstens \(n) minuten uit"
-        case .nemesis: return "Win \(n) keer van dezelfde tegenstander"
-        case .veteran: return "Speel \(n) wedstrijden, gewonnen of niet"
-        case .rockSolid: return "Win de wedstrijd zonder één unforced error"
-        case .backWallBoss: return "5 winners vanuit de achterste zones in één game"
-        case .sneltrein: return "Win een game in minder dan 6 minuten"
-        case .vetteWinst: return "Win de wedstrijd zonder dat de tegenstander in een game boven de 5 komt"
-        case .clubicoon: return "Speel tegen 10 verschillende tegenstanders"
-        case .rivalen: return "Speel 10 wedstrijden tegen dezelfde tegenstander"
-        case .handOutHeld: return "Win 5 rally's achter elkaar op de service van de ander"
-        case .pioneer: return "Testte SquashAnalyzer mee vóór de release"
+        case .fiveInARow: return L10n.text("%@ punten achter elkaar", String(n))
+        case .elevenNil: return L10n.text("Win een game met 11-0")
+        case .dropIt: return L10n.text("%@ drops in één game", String(n))
+        case .krissCross: return L10n.text("%@ crosses in één game", String(n))
+        case .backFromTheDeath: return L10n.text("Win een game na %@ punten achterstand", String(n))
+        case .goingTheDistance: return L10n.text("Win de wedstrijd na 0-2 in games")
+        case .aceOfPace: return L10n.text("%@ servicewinners in één game", String(n))
+        case .lobStory: return L10n.text("%@ lobwinners in één game", String(n))
+        case .volleywood: return L10n.text("%@ volleywinners in één game", String(n))
+        case .cleanSweep: return L10n.text("Win de wedstrijd met 3-0")
+        case .coolUnderPressure: return L10n.text("Win een game na 10-10")
+        case .driveMeCrazy: return L10n.text("%@ drivewinners in één game", String(n))
+        case .boastBuster: return L10n.text("%@ boastwinners in één game", String(n))
+        case .fullHouse: return L10n.text("Scoor met alle 6 slagtypes in één wedstrijd")
+        case .hatTrick: return L10n.text("Win %@ wedstrijden op rij", String(n))
+        case .houdini: return L10n.text("Werk 3 matchpoints weg en win de wedstrijd")
+        case .marathonMan: return L10n.text("Win een game met minstens 20 punten")
+        case .offTheMark: return L10n.text("Win je eerste wedstrijd")
+        case .centurion: return L10n.text("Scoor in totaal %@ punten", String(n))
+        case .doubleTrouble: return L10n.text("Win 2 games na 10-10 in één wedstrijd")
+        case .tenOutOfTen: return L10n.text("Win in totaal %@ wedstrijden", String(n))
+        case .brickWall: return L10n.text("Win een game zonder unforced errors")
+        case .frontRowKing: return L10n.text("%@ winners vanuit de voorste zones in één game", String(n))
+        case .endurance: return L10n.text("Win een rally van minstens %@ seconden", String(n))
+        case .unbreakable: return L10n.text("Win een game zonder ooit achter te staan")
+        case .photoFinish: return L10n.text("Win een wedstrijd met 3-2")
+        case .strokeOfGenius: return L10n.text("Krijg 3 strokes toegekend in één game")
+        case .ironMan: return L10n.text("Speel een wedstrijd van minstens %@ minuten uit", String(n))
+        case .nemesis: return L10n.text("Win %@ keer van dezelfde tegenstander", String(n))
+        case .veteran: return L10n.text("Speel %@ wedstrijden, gewonnen of niet", String(n))
+        case .rockSolid: return L10n.text("Win de wedstrijd zonder één unforced error")
+        case .backWallBoss: return L10n.text("5 winners vanuit de achterste zones in één game")
+        case .sneltrein: return L10n.text("Win een game in minder dan 6 minuten")
+        case .vetteWinst: return L10n.text("Win de wedstrijd zonder dat de tegenstander in een game boven de 5 komt")
+        case .clubicoon: return L10n.text("Speel tegen 10 verschillende tegenstanders")
+        case .rivalen: return L10n.text("Speel 10 wedstrijden tegen dezelfde tegenstander")
+        case .handOutHeld: return L10n.text("Win 5 rally's achter elkaar op de service van de ander")
+        case .pioneer: return L10n.text("Testte SquashAnalyzer mee vóór de release")
         default: return rawValue
         }
     }
@@ -373,6 +373,9 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case match = "In één wedstrijd"
         case career = "Over al je wedstrijden"
         case special = "Speciaal"
+
+        /// The heading in the badge catalogue (the raw value is the Dutch text)
+        public var title: String { L10n.text(rawValue) }
     }
 
     public var category: Category {

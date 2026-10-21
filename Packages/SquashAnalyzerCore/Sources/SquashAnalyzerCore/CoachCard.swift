@@ -22,9 +22,9 @@ public enum CoachCardMark: Equatable, Sendable {
     public var label: String? {
         switch self {
         case .new: return nil
-        case .stillThere: return "Nog steeds"
-        case .improved: return "Verbeterd!"
-        case .pickUpAgain(let game): return "Pak dit op zoals je in game \(game) deed"
+        case .stillThere: return L10n.text("Nog steeds")
+        case .improved: return L10n.text("Verbeterd!")
+        case .pickUpAgain(let game): return L10n.text("Pak dit op zoals je in game %@ deed", "\(game)")
         }
     }
 }

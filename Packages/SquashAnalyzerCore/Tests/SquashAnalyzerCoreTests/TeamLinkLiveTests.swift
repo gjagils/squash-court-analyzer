@@ -12,6 +12,12 @@ import Foundation
 /// Checks the whole path of "Mijn team": cookie wall, parser, and the players
 /// landing in Spelers with the mark "In mijn team".
 final class TeamLinkLiveTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     static let defaultLink = "https://sbn.toernooi.nl/league/E035D752-EA4C-446D-82CF-0016EFF20E6C/team/94"
 
     private struct Loader: LeaguePageLoader {

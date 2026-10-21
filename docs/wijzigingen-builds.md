@@ -848,6 +848,9 @@ Vroege ideeën, nog niet uitgewerkt en zonder build (7 oktober overgenomen uit
 - [ ] Trainingsmodus.
 - [ ] Clubranglijst.
 
+Notities van Gerd-Jan van 21 oktober (namen aanpassen in een lopende wedstrijd,
+geavanceerde coachmodus, businessmodel): `backlog-2026-10-21.md`.
+
 ## iOS 2.2 build 17 en Android 0.4 (4), 3 oktober 2026 (geüpload)
 
 Vergeleken met iOS 2.2 (16) en Android 0.3 (3), beide 1 oktober 2026. Stand: `main` (`b694cf5`), 3 oktober.

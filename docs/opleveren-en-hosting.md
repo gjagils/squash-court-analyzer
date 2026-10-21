@@ -280,6 +280,8 @@ GitHub-secrets.
 - **Feature freeze sinds 11 oktober 2026**: geen nieuwe features meer, alleen bugfixes, fouten en
   afronding richting de productie-uitrol van 3.0 (besluit Gerd-Jan). Iets nieuws alleen op zijn
   expliciete vraag; ideeën gaan op de backlog.
+- Notities van Gerd-Jan van 21 oktober 2026 (namen aanpassen in een wedstrijd vóór de release;
+  geavanceerde coachmodus en businessmodel na de release): `docs/backlog-2026-10-21.md`.
 - **Google Play productie**: op 11 oktober 2026 meldt de Play Console dat 12 testers 6 dagen
   aaneengesloten in de gesloten test zitten; de eis is 14 dagen. Op zijn vroegst op 19 oktober 2026
   kan "Toegang tot productie aanvragen" (Dashboard → Productie), mits niemand afhaakt. De

@@ -1,0 +1,312 @@
+/*
+ English texts of SquashAnalyzerCore (docs/i18n.md).
+ The key is the Dutch text exactly as it is in the code; %@ is a value filled
+ in by L10n.text (in order, or %1$@ / %2$@ by position). A key that is missing
+ here shows in Dutch. Keep the glossary of docs/i18n.md.
+*/
+
+/* MARK: Badges (BadgeEngine.swift) */
+"Brons" = "Bronze";
+"Zilver" = "Silver";
+"Goud" = "Gold";
+"Alles is voor Bassie" = "Bagel";
+"Sneltrein" = "Express train";
+"Vette winst" = "Big win";
+"Clubicoon" = "Club icon";
+"Rivalen" = "Rivals";
+"Pionier" = "Pioneer";
+"%@ punten achter elkaar" = "%@ points in a row";
+"Win een game met 11-0" = "Win a game 11-0";
+"%@ drops in één game" = "%@ drops in one game";
+"%@ crosses in één game" = "%@ cross-courts in one game";
+"Win een game na %@ punten achterstand" = "Win a game after trailing by %@ points";
+"Win de wedstrijd na 0-2 in games" = "Win the match from 0-2 down in games";
+"%@ servicewinners in één game" = "%@ service winners in one game";
+"%@ lobwinners in één game" = "%@ lob winners in one game";
+"%@ volleywinners in één game" = "%@ volley winners in one game";
+"Win de wedstrijd met 3-0" = "Win the match 3-0";
+"Win een game na 10-10" = "Win a game from 10-all";
+"%@ drivewinners in één game" = "%@ drive winners in one game";
+"%@ boastwinners in één game" = "%@ boast winners in one game";
+"Scoor met alle 6 slagtypes in één wedstrijd" = "Score with all 6 shot types in one match";
+"Win %@ wedstrijden op rij" = "Win %@ matches in a row";
+"Werk 3 matchpoints weg en win de wedstrijd" = "Save 3 match balls and win the match";
+"Win een game met minstens 20 punten" = "Win a game with at least 20 points";
+"Win je eerste wedstrijd" = "Win your first match";
+"Scoor in totaal %@ punten" = "Score %@ points in total";
+"Win 2 games na 10-10 in één wedstrijd" = "Win 2 games from 10-all in one match";
+"Win in totaal %@ wedstrijden" = "Win %@ matches in total";
+"Win een game zonder unforced errors" = "Win a game without unforced errors";
+"%@ winners vanuit de voorste zones in één game" = "%@ winners from the front zones in one game";
+"Win een rally van minstens %@ seconden" = "Win a rally of at least %@ seconds";
+"Win een game zonder ooit achter te staan" = "Win a game without ever being behind";
+"Win een wedstrijd met 3-2" = "Win a match 3-2";
+"Krijg 3 strokes toegekend in één game" = "Be awarded 3 strokes in one game";
+"Speel een wedstrijd van minstens %@ minuten uit" = "Play out a match of at least %@ minutes";
+"Win %@ keer van dezelfde tegenstander" = "Beat the same opponent %@ times";
+"Speel %@ wedstrijden, gewonnen of niet" = "Play %@ matches, won or lost";
+"Win de wedstrijd zonder één unforced error" = "Win the match without a single unforced error";
+"5 winners vanuit de achterste zones in één game" = "5 winners from the back zones in one game";
+"Win een game in minder dan 6 minuten" = "Win a game in under 6 minutes";
+"Win de wedstrijd zonder dat de tegenstander in een game boven de 5 komt" = "Win the match without your opponent getting past 5 in any game";
+"Speel tegen 10 verschillende tegenstanders" = "Play 10 different opponents";
+"Speel 10 wedstrijden tegen dezelfde tegenstander" = "Play 10 matches against the same opponent";
+"Win 5 rally's achter elkaar op de service van de ander" = "Win 5 rallies in a row on your opponent's serve";
+"Testte SquashAnalyzer mee vóór de release" = "Tested SquashAnalyzer before its release";
+"In één game" = "In one game";
+"In één wedstrijd" = "In one match";
+"Over al je wedstrijden" = "Across all your matches";
+"Speciaal" = "Special";
+
+/* MARK: Appearance, shots, points, errors, zones */
+"Systeem" = "System";
+"Licht" = "Light";
+"Donker" = "Dark";
+"Rechte slag langs de muur" = "Straight shot along the wall";
+"Diagonale slag" = "Diagonal shot";
+"Slag uit de lucht" = "Shot out of the air";
+"Korte bal naar voren (ook cross drop)" = "Short ball to the front (cross drop too)";
+"Hoge bal naar achteren" = "High ball to the back";
+"Slag via de zijmuur" = "Shot off the side wall";
+"Hard en laag, sterft snel" = "Hard and low, dies quickly";
+"Volley (oud)" = "Volley (old)";
+"Servicepunt" = "Service point";
+"Winnende slag" = "Winning shot";
+"Fout door jouw druk" = "Error under your pressure";
+"Fout zonder jouw druk" = "Error without your pressure";
+"Punt na obstructie" = "Point after obstruction";
+"Direct uit de service" = "Straight from the serve";
+"Grond" = "Floor";
+"Bal in de tin" = "Ball in the tin";
+"Bal buiten de baan of boven de outlijn" = "Ball out of court or above the out line";
+"Servicefout tegenstander" = "Opponent's service fault";
+"Bal raakt eerst de vloer voor de frontwand" = "Ball hits the floor before the front wall";
+"Voor Links" = "Front left";
+"Voor Midden" = "Front centre";
+"Voor Rechts" = "Front right";
+"Midden Links" = "Mid left";
+"Midden Midden" = "Centre";
+"Midden Rechts" = "Mid right";
+"Achter Links" = "Back left";
+"Achter Midden" = "Back centre";
+"Achter Rechts" = "Back right";
+
+/* MARK: Game summary, stop question, coach card, notes */
+"Gelijkspel" = "Draw";
+"🏸 SQUASH GAME ANALYSE" = "🏸 SQUASH GAME ANALYSIS";
+"Eindstand: %@-%@ (%@ wint)" = "Final score: %@-%@ (%@ wins)";
+"Soort fouten: %@" = "Kinds of errors: %@";
+"Beste zone: %@" = "Best zone: %@";
+"📲 Gedeeld via Squash Analyzer" = "📲 Shared via Squash Analyzer";
+"Gewonnen: %@ punten" = "Won: %@ points";
+"Winners: %@ | Forced errors: %@ | Eigen fouten: %@" = "Winners: %@ | Forced errors: %@ | Unforced errors: %@";
+"Servicepunten: %@ | Strokes: %@" = "Service points: %@ | Strokes: %@";
+"Wedstrijd stoppen?" = "Stop match?";
+"%@ – %@ staat %@-%@ in games en is nog niet afgelopen. Bewaar hem om later verder te gaan, sla hem op als incompleet, vul de winnaars van de gemiste games in, of gooi hem weg." = "%@ – %@ stands at %@-%@ in games and is not finished yet. Keep it to carry on later, save it as incomplete, fill in the winners of the missed games, or throw it away.";
+"Bij een nieuwe wedstrijd komt deze als incompleet in Afgeronde wedstrijden." = "If you start a new match, this one goes into Finished matches as incomplete.";
+"Nog steeds" = "Still there";
+"Verbeterd!" = "Improved!";
+"Pak dit op zoals je in game %@ deed" = "Pick this up as you did in game %@";
+"Geen rally's" = "No rallies";
+"%@ van %@ gewonnen (%@%)" = "%@ of %@ won (%@%)";
+
+/* MARK: Coach advice (AdviceRules.swift, CoachAdvice.swift, ZoneProfile.swift) */
+"voorin" = "at the front";
+"in het midden" = "in the middle";
+"achterin" = "at the back";
+"aan de linkerkant" = "on the left";
+"aan de rechterkant" = "on the right";
+"Voorin" = "At the front";
+"In het midden" = "In the middle";
+"Achterin" = "At the back";
+"en" = "and";
+"oud" = "old";
+"Net als in game %@." = "Just like in game %@.";
+"%@ maakt het kort af: sta dichter bij de T en reageer eerder op korte ballen." = "%@ finishes short: stand closer to the T and react earlier to short balls.";
+"%@ neemt de bal vroeg: houd je slagen strakker langs de muur." = "%@ takes the ball early: keep your shots tighter to the wall.";
+"%@ drukt je naar achteren: werk aan je terugslag uit de achterhoek en speel zelf meer lengte." = "%@ pushes you to the back: work on your return from the back corners and play more length yourself.";
+"Je verliest de meeste punten %@ (%@ van %@). %@" = "You lose most points %@ (%@ of %@). %@";
+"Je verliest de meeste punten %@ (%@ van %@). Daar is %@ sterk." = "You lose most points %@ (%@ of %@). That's where %@ is strong.";
+"Speel daar wat hoger en veiliger." = "Play a little higher and safer there.";
+"Neem de tijd, ook als de bal makkelijk lijkt." = "Take your time, even when the ball looks easy.";
+"Kies uit de achterhoek vaker de veilige lengte." = "From the back corners, go for safe length more often.";
+"%@ van je %@ fouten maak je %@. %@" = "You make %1$@ of your %2$@ errors %3$@. %4$@";
+"Je fouten vallen vooral %@ (%@ van %@). Speel daar wat veiliger." = "Your errors come mostly %@ (%@ of %@). Play a little safer there.";
+"Dwing %@ naar voren." = "Force %@ to the front.";
+"Speel strak door het midden, daar gaat %@ in de fout." = "Play tight through the middle, that's where %@ makes errors.";
+"Speel %@ naar de achterhoeken." = "Play %@ into the back corners.";
+"%@ maakt de meeste fouten %@ (%@ van %@). %@" = "%@ makes most errors %@ (%@ of %@). %@";
+"%@ maakt de meeste fouten %@ (%@ van %@). Speel die kant op." = "%@ makes most errors %@ (%@ of %@). Play to that side.";
+"%@ eigen fouten: blijf geconcentreerd en speel rustig." = "%@ unforced errors: stay focused and play calmly.";
+"Minder haast: neem meer tijd voor je slagen." = "Less hurry: take more time over your shots.";
+"%@ forced errors: heb je racket eerder klaar voor je slag." = "%@ forced errors: get your racket ready earlier for your shot.";
+"%@ lets tegen: beweeg na je slag sneller terug naar de T." = "%@ lets against: get back to the T faster after your shot.";
+"%@ scoort %@ servicepunten: houd je racket vroeg omhoog bij de return." = "%@ scores %@ service points: get your racket up early for the return.";
+"Vermijd %@: daar scoort %@ het meest (%@ punten)." = "Avoid %@: that's where %@ scores most (%@ points).";
+"%@ wint %@ punten uit de lucht. Speel hoger over of strakker langs de muur." = "%@ wins %@ points on the volley. Play higher over them or tighter to the wall.";
+"Blijf de voorhoeken zoeken." = "Keep looking for the front corners.";
+"Blijf de T pakken en de bal vroeg nemen." = "Keep taking the T and the ball early.";
+"Je lengte werkt, blijf druk zetten op de achterwand." = "Your length is working, keep the pressure on the back wall.";
+"Je wint je punten vooral %@ (%@ van %@). %@" = "You win your points mostly %@ (%@ of %@). %@";
+"Je scoort vooral %@ (%@ van %@). Speel vaker die kant op." = "You score mostly %@ (%@ of %@). Play to that side more often.";
+"%@ maakt %@ fouten: blijf druk zetten." = "%@ makes %@ errors: keep up the pressure.";
+"Je scoort %@ servicepunten: je service werkt, blijf zo serveren." = "You score %@ service points: your serve is working, keep serving like that.";
+"%@ lets mee: je beweegt goed naar de bal." = "%@ lets for you: you move well to the ball.";
+"Je wint %@ punten uit de lucht. Blijf de bal vroeg nemen, dat zet druk." = "You win %@ points on the volley. Keep taking the ball early, it puts on pressure.";
+"%@ werkt je %@ het best (%@ punten)." = "%@ your %@ works best (%@ points).";
+"%@× in de tin: mik iets hoger boven de tin." = "%@× in the tin: aim a little higher above the tin.";
+"%@× out: minder risico, houd de bal onder de outlijn." = "%@× out: take less risk, keep the ball below the out line.";
+"%@ servicefouten: neem je tijd en speel een veilige service." = "%@ service faults: take your time and play a safe serve.";
+"%@× via de grond: kom laag en blijf achter de bal." = "%@× off the floor: get low and stay behind the ball.";
+"Versnel het spel: je wint %@% van de korte rally's en %@% van de lange." = "Speed up the game: you win %@% of the short rallies and %@% of the long ones.";
+"Vertraag het spel: je wint %@% van de lange rally's en %@% van de korte." = "Slow down the game: you win %@% of the long rallies and %@% of the short ones.";
+"je gewonnen punten duren gemiddeld %@, je verloren punten %@." = "your points won last %@ on average, your points lost %@.";
+"Versnel het spel: " = "Speed up the game: ";
+"Vertraag het spel: " = "Slow down the game: ";
+
+/* MARK: AI Coach (AICoach.swift) */
+"Ongeldig antwoord van server" = "Invalid response from the server";
+"Ongeldige API key. Controleer je instellingen." = "Invalid API key. Check your settings.";
+"API fout (code: %@)" = "API error (code: %@)";
+"Geen antwoord ontvangen" = "No answer received";
+"Geen verbinding met de AI Coach. Controleer je internetverbinding." = "No connection to the AI Coach. Check your internet connection.";
+"Analyseer je tegenstander en pas je tactiek aan" = "Analyse your opponent and adjust your tactics";
+
+/* MARK: Result screens and cards (MatchResult.swift, ResultCard.swift) */
+"GAME %@ KLAAR" = "GAME %@ DONE";
+"%@ wint game %@" = "%@ wins game %@";
+"WEDSTRIJD KLAAR" = "MATCH DONE";
+"🏆 %@ wint de wedstrijd" = "🏆 %@ wins the match";
+"%@ wint de wedstrijd" = "%@ wins the match";
+"Wedstrijd automatisch opgeslagen" = "Match saved automatically";
+"Game automatisch opgeslagen" = "Game saved automatically";
+"Gelijk %@ – %@" = "Level %@ – %@";
+"%@ leidt %@ – %@" = "%@ leads %@ – %@";
+"%@ leidt %@-%@" = "%@ leads %@-%@";
+"TUSSENSTAND" = "SCORE SO FAR";
+
+/* MARK: Player trend, focus tags, test data (PlayerTrend.swift, PlayerProfile.swift, TestDataCleanup.swift) */
+"Laatste 10" = "Last 10";
+"Laatste 25" = "Last 25";
+"Alles" = "All";
+"van %@ naar %@" = "from %@ to %@";
+"%@,%@" = "%@.%@";
+"Conditie" = "Fitness";
+"Voorhand" = "Forehand";
+"Beweging" = "Movement";
+"Achterwand" = "Back wall";
+"Mentaal" = "Mental";
+"Tactiek" = "Tactics";
+"Snelheid" = "Speed";
+"Wedstrijden met Bombardino of Whiskey" = "Matches with Bombardino or Whiskey";
+"Onvolledige en gepauzeerde wedstrijden" = "Incomplete and paused matches";
+"Competitiewedstrijden" = "League matches";
+
+/* MARK: Tour, What's new, share text (Onboarding.swift) */
+"Welkom bij Squash Analyzer" = "Welcome to Squash Analyzer";
+"Jouw spel scherp in beeld. Fluit een wedstrijd, coach je teamgenoot en deel de stand met je team." = "Your game in sharp focus. Referee a match, coach your teammate and share the score with your team.";
+"Scheidsrechter" = "Referee";
+"Tik op de score van wie de rally wint. LET, STROKE, undo en de servicekant zitten erbij; de app houdt games en tijd bij." = "Tap the score of whoever wins the rally. LET, STROKE, undo and the service side are all there; the app keeps track of games and time.";
+"Om je teamgenoot beter te coachen. Leg per punt vast wie scoorde, hoe, waar op de baan en met welke slag. Na elke game zie je de analyse, en de coachkaart laat je speler in één scherm zien waar het om draait." = "To coach your teammate better. For every point, record who scored, how, where on court and with which shot. After each game you see the analysis, and the coach card shows your player what matters on one screen.";
+"Kies speler" = "Choose player";
+"Sla spelers op en kies ze bij het starten via Kies speler. Alleen dan verdienen ze badges en groeit hun profiel over de wedstrijden." = "Save players and pick them at the start with Choose player. Only then do they earn badges and does their profile grow over the matches.";
+"Competitie" = "League";
+"Speel je bij SBN? Vul je teamlink in, dan zie je je programma en de stand. Op de wedstrijdavond houd je de teamwedstrijd bij, van E1 tot E4." = "Playing in the SBN league? Enter your team link to see your fixtures and the standings. On match night you keep track of the team match, from E1 to E4.";
+"Delen" = "Share";
+"Houd je teamgenoten en supporters op de hoogte van de wedstrijden en de competitie. Met LIVE kijken ze mee via een link of op hun vergrendelscherm. Alles staat op je eigen telefoon: maak af en toe een back-up in Instellingen." = "Keep your teammates and supporters up to date on the matches and the league. With LIVE they follow along via a link or on their lock screen. Everything is stored on your own phone: make a backup in Settings now and then.";
+"Houd een hele teamwedstrijd bij, van E1 tot E4, met de puntentelling van de SBN." = "Keep track of a whole team match, from E1 to E4, with the SBN scoring.";
+"Live meekijken" = "Live sharing";
+"Je team en supporters volgen de stand via een link of op hun vergrendelscherm." = "Your team and supporters follow the score via a link or on their lock screen.";
+"Verdien badges in brons, zilver en goud. Vanaf 23 oktober begint iedereen opnieuw." = "Earn badges in bronze, silver and gold. From 23 October everyone starts again.";
+"Coachen" = "Coaching";
+"Leg per rally de slag en de plek op de baan vast. Na afloop is er een coachkaart." = "Record the shot and the place on court for every rally. Afterwards there's a coach card.";
+"Mijn team" = "My team";
+"Stand en programma van je SBN-team. Je teamgenoten staan klaar om te kiezen als je gaat scheidsen of coachen." = "Standings and fixtures of your SBN team. Your teammates are ready to pick when you referee or coach.";
+"Nieuw in 3.0" = "What's new in 3.0";
+"Squash Analyzer is flink gegroeid. Dit zijn de grootste veranderingen." = "Squash Analyzer has grown a lot. These are the biggest changes.";
+"Squash Analyzer: houd squashwedstrijden bij als coach of scheidsrechter." = "Squash Analyzer: keep track of squash matches as a coach or referee.";
+
+/* MARK: WhatsApp share texts (MatchShareReport.swift) */
+"%@ u %@ min" = "%@ h %@ min";
+"best of %@ · vanaf game %@" = "best of %@ · from game %@";
+"🏆 *%@ wint met %@*" = "🏆 *%@ wins %@*";
+"Stand: gelijk %@" = "Score: level %@";
+"Stand: %@ leidt met %@" = "Score: %@ leads %@";
+"🏸 *SQUASH SCOREKAART*" = "🏸 *SQUASH SCORECARD*";
+"🏸 *SQUASH WEDSTRIJD*" = "🏸 *SQUASH MATCH*";
+"bezig" = "in progress";
+"🔥 langste reeks %@ (%@)" = "🔥 longest run %@ (%@)";
+"_Gescoord met Squash Analyzer_" = "_Scored with Squash Analyzer_";
+"Kort" = "Short";
+"Scorekaart" = "Scorecard";
+"Verslag" = "Report";
+"Drie regels voor de groepsapp" = "Three lines for the group chat";
+"Tabel met alle games" = "Table with all games";
+"Per game, met tijden en statistieken" = "Per game, with times and stats";
+"Plaatje" = "Picture";
+"De uitslag als afbeelding, met de spelers" = "The result as an image, with the players";
+
+/* MARK: Team match report (TeamMatchReport.swift) */
+"🤝 *Gelijkspel %@–%@*" = "🤝 *Draw %@–%@*";
+"Nog niet begonnen" = "Not started";
+"Stand: gelijk %@–%@" = "Score: level %@–%@";
+"Stand: %@ leidt met %@ · %@ van 4 partijen" = "Score: %@ leads %@ · %@ of 4 matches";
+"Competitiepunten: %@" = "League points: %@";
+"(geen bonuspunten: onvolledig team)" = "(no bonus points: incomplete team)";
+"punten %@" = "points %@";
+"🏆 *Teamwedstrijd · %@*" = "🏆 *Team match · %@*";
+"%@-%@ in partijen" = "%@-%@ in matches";
+"🏆 *TEAM SCOREKAART*" = "🏆 *TEAM SCORECARD*";
+"🏆 *TEAMWEDSTRIJD*" = "🏆 *TEAM MATCH*";
+"*%@* nog niet gespeeld" = "*%@* not played yet";
+"%@%@: nog niet gespeeld" = "%@%@: not played yet";
+"🎯 %@-%@ in partijen" = "🎯 %@-%@ in matches";
+"🎾 rallypunten %@-%@" = "🎾 rally points %@-%@";
+"TEAMWEDSTRIJD KLAAR" = "TEAM MATCH DONE";
+"%@ wint de teamwedstrijd" = "%@ wins the team match";
+"TEAMWEDSTRIJD" = "TEAM MATCH";
+
+/* MARK: Team match (TeamMatch.swift) */
+"opgave" = "retired";
+"niet verschenen" = "no-show";
+"%@ wint %@" = "%@ wins %@";
+"Gelijkspel %@" = "Draw %@";
+"Stand %@ · %@ van 4 partijen" = "Score %@ · %@ of 4 matches";
+
+/* MARK: Errors and summaries: My team, team import, cards, backup */
+"Gebruik een HTTPS-teamlink van sbn.toernooi.nl, zoals /league/…/team/113." = "Use an HTTPS team link from sbn.toernooi.nl, such as /league/…/team/113.";
+"De teamgegevens zijn niet herkenbaar. Mogelijk is de website gewijzigd." = "The team details could not be recognised. The website may have changed.";
+"SBN is nu niet bereikbaar. Probeer het later opnieuw." = "SBN can't be reached right now. Please try again later.";
+"Het zip-bestand bevat geen team.json." = "The zip file has no team.json.";
+"team.json kon niet worden gelezen. Controleer of het geldige JSON is met een lijst \"players\"." = "team.json could not be read. Check that it is valid JSON with a \"players\" list.";
+"Speler %@ heeft geen naam." = "Player %@ has no name.";
+"Onbekend aandachtspunt '%@' bij %@. Toegestaan: %@." = "Unknown focus area '%@' for %@. Allowed: %@.";
+"Foto '%@' van %@ zit niet in het zip-bestand." = "Photo '%@' of %@ is not in the zip file.";
+"Foto '%@' van %@ is geen bruikbare afbeelding." = "Photo '%@' of %@ is not a usable image.";
+"Gebruik een teamlink van squashanalyzer.com, zoals https://squashanalyzer.com/teams/…/team.zip." = "Use a team link from squashanalyzer.com, such as https://squashanalyzer.com/teams/…/team.zip.";
+"Het bestand achter de link is geen team-zip." = "The file behind the link is not a team zip.";
+"Het teambestand is te groot (meer dan 25 MB)." = "The team file is too large (more than 25 MB).";
+"Het team kon niet worden opgehaald. Controleer de link en je internetverbinding." = "The team could not be fetched. Check the link and your internet connection.";
+"%@ nieuw" = "%@ new";
+"%@ bijgewerkt" = "%@ updated";
+"%@ foto's" = "%@ photos";
+"1 badge op de kaart" = "1 badge on the card";
+"%@ badges op de kaart" = "%@ badges on the card";
+"1 nieuw voor jou" = "1 new for you";
+"%@ nieuw voor jou" = "%@ new for you";
+"%@ verwijderd" = "%@ removed";
+"je bent al bij" = "you're up to date";
+"Je hebt een nieuwere (test)versie van SquashAnalyzer nodig." = "You need a newer (test) version of SquashAnalyzer.";
+"Deze backupversie (%@) wordt niet ondersteund." = "This backup version (%@) is not supported.";
+"De backup is beschadigd of onvolledig; de checksum klopt niet." = "The backup is damaged or incomplete; the checksum does not match.";
+"Dit bestand is geen Squash Analyzer-backup." = "This file is not a Squash Analyzer backup.";
+"%@ spelers, %@ wedstrijden, %@ games, %@ badges" = "%@ players, %@ matches, %@ games, %@ badges";
+", %@ teamwedstrijden" = ", %@ team matches";
+
+/* MARK: Following a match (LiveFollow.swift) */
+"Deze versie van de app kan de stand nog niet op het vergrendelscherm zetten." = "This version of the app can't put the score on the lock screen yet.";
+"Geen verbinding met de live-server. Controleer de internetverbinding en probeer het opnieuw." = "No connection to the live server. Check the internet connection and try again.";
+"Deze wedstrijd is afgelopen of de link klopt niet." = "This match is over or the link is wrong.";
+"Deze server kan de stand nog niet naar je telefoon sturen." = "This server can't send the score to your phone yet.";
+"Je telefoon staat het niet toe. Zet Live Activities (iPhone) of meldingen (Android) aan voor SquashAnalyzer in de instellingen van je telefoon." = "Your phone doesn't allow it. Turn on Live Activities (iPhone) or notifications (Android) for SquashAnalyzer in your phone's settings.";
+"Volgen lukte niet. Probeer het later opnieuw." = "Following didn't work. Please try again later.";

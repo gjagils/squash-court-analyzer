@@ -11,9 +11,9 @@ public enum TestDataGroup: String, CaseIterable, Sendable {
 
     public var title: String {
         switch self {
-        case .samplePlayers: return "Wedstrijden met Bombardino of Whiskey"
-        case .unfinished: return "Onvolledige en gepauzeerde wedstrijden"
-        case .competition: return "Competitiewedstrijden"
+        case .samplePlayers: return L10n.text("Wedstrijden met Bombardino of Whiskey")
+        case .unfinished: return L10n.text("Onvolledige en gepauzeerde wedstrijden")
+        case .competition: return L10n.text("Competitiewedstrijden")
         }
     }
 }

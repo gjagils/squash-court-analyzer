@@ -13,6 +13,9 @@ public enum CoachingFocusTag: String, CaseIterable {
     case mentaal = "Mentaal"
     case tactiek = "Tactiek"
     case snelheid = "Snelheid"
+
+    /// The tag on screen; the raw value is what is stored (and given to the AI Coach)
+    public var title: String { L10n.text(rawValue) }
 }
 
 /// Editable profile values; platform stores retain photo/card metadata separately.

@@ -6,9 +6,11 @@ import PackageDescription
 // UI/platform-independent rules of the app, with no SwiftUI, SwiftData or
 // CloudKit. This is the module Skip transpiles to Kotlin for Android; the
 // app target links it and no behaviour should change on iOS.
+// Dutch is the source language; Resources/en.lproj holds the English texts
+// (docs/i18n.md).
 let package = Package(
     name: "SquashAnalyzerCore",
-    defaultLocalization: "en",
+    defaultLocalization: "nl",
     platforms: [.iOS(.v17), .macOS(.v14)],
     products: [
         .library(name: "SquashAnalyzerCore", targets: ["SquashAnalyzerCore"]),
@@ -26,7 +28,7 @@ let package = Package(
         .target(name: "SquashAnalyzerCore", dependencies: [
             .product(name: "SkipFoundation", package: "skip-foundation"),
             .product(name: "SkipModel", package: "skip-model"),
-        ], plugins: [.plugin(name: "skipstone", package: "skip")]),
+        ], resources: [.process("Resources")], plugins: [.plugin(name: "skipstone", package: "skip")]),
         .testTarget(name: "SquashAnalyzerCoreTests", dependencies: [
             "SquashAnalyzerCore",
             .product(name: "SkipTest", package: "skip"),

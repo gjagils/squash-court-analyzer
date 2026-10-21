@@ -72,11 +72,11 @@ public struct MatchResult: Equatable {
     public static func refereeGame(_ match: RefereeMatch) -> MatchResult {
         let winner = match.currentGameWinner
         return MatchResult(
-            title: "GAME \(match.currentGameNumber) KLAAR",
+            title: L10n.text("GAME %@ KLAAR", "\(match.currentGameNumber)"),
             player1Name: match.player1Name, player2Name: match.player2Name,
             player1Score: match.player1Score, player2Score: match.player2Score,
             winner: winner,
-            winnerText: winner.map { "\(match.name(for: $0)) wint game \(match.currentGameNumber)" },
+            winnerText: winner.map { L10n.text("%@ wint game %@", "\(match.name(for: $0))", "\(match.currentGameNumber)") },
             games: refereeGames(match), untracked: match.firstGameNumber - 1, showsChips: true,
             captions: [ResultCaptionLine(standText(match)), ResultCaptionLine(gameStatsText(match), showsTimer: true)],
             savedNote: nil, isMatchOver: false
@@ -87,11 +87,11 @@ public struct MatchResult: Equatable {
     public static func refereeMatch(_ match: RefereeMatch) -> MatchResult {
         let winner = match.matchWinner
         return MatchResult(
-            title: "WEDSTRIJD KLAAR",
+            title: L10n.text("WEDSTRIJD KLAAR"),
             player1Name: match.player1Name, player2Name: match.player2Name,
             player1Score: match.player1TotalGames, player2Score: match.player2TotalGames,
             winner: winner,
-            winnerText: winner.map { "🏆 \(match.name(for: $0)) wint de wedstrijd" },
+            winnerText: winner.map { L10n.text("🏆 %@ wint de wedstrijd", "\(match.name(for: $0))") },
             games: refereeGames(match), untracked: match.firstGameNumber - 1, showsChips: true,
             captions: [ResultCaptionLine(matchStatsText(match), showsTimer: true)],
             savedNote: nil, isMatchOver: true
@@ -111,16 +111,17 @@ public struct MatchResult: Equatable {
             }
         }
         return MatchResult(
-            title: over ? "WEDSTRIJD KLAAR" : "GAME \(match.currentGameNumber) KLAAR",
+            title: over ? L10n.text("WEDSTRIJD KLAAR") : L10n.text("GAME %@ KLAAR", "\(match.currentGameNumber)"),
             player1Name: match.player1Name, player2Name: match.player2Name,
             player1Score: over ? match.player1GamesWon : game.player1Score,
             player2Score: over ? match.player2GamesWon : game.player2Score,
             winner: winner,
-            winnerText: winner.map { "\(match.name(for: $0)) wint" + (over ? " de wedstrijd" : " game \(match.currentGameNumber)") },
+            winnerText: winner.map { over ? L10n.text("%@ wint de wedstrijd", match.name(for: $0))
+                                    : L10n.text("%@ wint game %@", match.name(for: $0), "\(match.currentGameNumber)") },
             games: games, untracked: match.firstGameNumber - 1,
             showsChips: games.count > 1 || over || match.firstGameNumber > 1,
             captions: [],
-            savedNote: over ? "Wedstrijd automatisch opgeslagen" : "Game automatisch opgeslagen",
+            savedNote: over ? L10n.text("Wedstrijd automatisch opgeslagen") : L10n.text("Game automatisch opgeslagen"),
             isMatchOver: over
         )
     }
@@ -140,9 +141,9 @@ public struct MatchResult: Equatable {
     static func standText(_ match: RefereeMatch) -> String {
         let p1 = match.player1TotalGames
         let p2 = match.player2TotalGames
-        if p1 == p2 { return "Gelijk \(p1) – \(p2)" }
+        if p1 == p2 { return L10n.text("Gelijk %@ – %@", "\(p1)", "\(p2)") }
         let leader = p1 > p2 ? Player.player1 : Player.player2
-        return "\(match.name(for: leader)) leidt \(max(p1, p2)) – \(min(p1, p2))"
+        return L10n.text("%@ leidt %@ – %@", "\(match.name(for: leader))", "\(max(p1, p2))", "\(min(p1, p2))")
     }
 
     /// "8:42 · 19 rallies · 1 stroke"

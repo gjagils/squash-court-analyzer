@@ -242,7 +242,7 @@ public struct TeamPartij: Codable, Equatable, Sendable {
     /// "opgave" or "niet verschenen" for a partij that was not played out
     public var endText: String? {
         guard let end = endedBy else { return nil }
-        return end == TeamPartijEnd.retired ? "opgave" : "niet verschenen"
+        return end == TeamPartijEnd.retired ? L10n.text("opgave") : L10n.text("niet verschenen")
     }
 
     /// The games of a match seen from our player, in play order: the head
@@ -642,10 +642,10 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     public var statusText: String {
         let current = score
         if current.isComplete {
-            if let winner = winnerName { return "\(winner) wint \(gamesText)" }
-            return "Gelijkspel \(gamesText)"
+            if let winner = winnerName { return L10n.text("%@ wint %@", "\(winner)", "\(gamesText)") }
+            return L10n.text("Gelijkspel %@", "\(gamesText)")
         }
-        if current.partijenPlayed == 0 { return "Nog niet begonnen" }
-        return "Stand \(gamesText) · \(current.partijenPlayed) van 4 partijen"
+        if current.partijenPlayed == 0 { return L10n.text("Nog niet begonnen") }
+        return L10n.text("Stand %@ · %@ van 4 partijen", "\(gamesText)", "\(current.partijenPlayed)")
     }
 }

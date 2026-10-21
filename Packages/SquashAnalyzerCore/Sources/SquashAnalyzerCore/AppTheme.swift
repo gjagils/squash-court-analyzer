@@ -18,9 +18,9 @@ public enum AppAppearance: String, CaseIterable, Identifiable, Sendable {
 
     public var title: String {
         switch self {
-        case .system: return "Systeem"
-        case .light: return "Licht"
-        case .dark: return "Donker"
+        case .system: return L10n.text("Systeem")
+        case .light: return L10n.text("Licht")
+        case .dark: return L10n.text("Donker")
         }
     }
 

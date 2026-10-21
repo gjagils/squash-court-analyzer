@@ -95,23 +95,23 @@ public struct ResultCard: Equatable {
             chips.append(Chip(label: "G\(game.number)", score: "\(game.player1Score)-\(game.player2Score)", winner: game.winner))
         }
         if let winner = report.matchWinner {
-            return ResultCard(title: "WEDSTRIJD KLAAR", player1Name: report.player1Name, player2Name: report.player2Name,
+            return ResultCard(title: L10n.text("WEDSTRIJD KLAAR"), player1Name: report.player1Name, player2Name: report.player2Name,
                               player1Score: report.player1Games, player2Score: report.player2Games,
-                              winner: winner, winnerText: "\(report.name(for: winner)) wint de wedstrijd", chips: chips)
+                              winner: winner, winnerText: L10n.text("%@ wint de wedstrijd", "\(report.name(for: winner))"), chips: chips)
         }
         if let last = report.games.last, let winner = last.winner {
-            return ResultCard(title: "GAME \(last.number) KLAAR", player1Name: report.player1Name, player2Name: report.player2Name,
+            return ResultCard(title: L10n.text("GAME %@ KLAAR", "\(last.number)"), player1Name: report.player1Name, player2Name: report.player2Name,
                               player1Score: last.player1Score, player2Score: last.player2Score,
-                              winner: winner, winnerText: "\(report.name(for: winner)) wint game \(last.number)", chips: chips)
+                              winner: winner, winnerText: L10n.text("%@ wint game %@", "\(report.name(for: winner))", "\(last.number)"), chips: chips)
         }
         var leader: Player? = nil
         if report.player1Games > report.player2Games { leader = Player.player1 }
         if report.player2Games > report.player1Games { leader = Player.player2 }
         var text: String? = nil
         if let leader {
-            text = "\(report.name(for: leader)) leidt \(max(report.player1Games, report.player2Games))-\(min(report.player1Games, report.player2Games))"
+            text = L10n.text("%@ leidt %@-%@", "\(report.name(for: leader))", "\(max(report.player1Games, report.player2Games))", "\(min(report.player1Games, report.player2Games))")
         }
-        return ResultCard(title: "TUSSENSTAND", player1Name: report.player1Name, player2Name: report.player2Name,
+        return ResultCard(title: L10n.text("TUSSENSTAND"), player1Name: report.player1Name, player2Name: report.player2Name,
                           player1Score: report.player1Games, player2Score: report.player2Games,
                           winner: leader, winnerText: text, chips: chips)
     }

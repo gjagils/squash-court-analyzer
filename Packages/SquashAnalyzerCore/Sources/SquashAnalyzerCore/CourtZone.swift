@@ -16,6 +16,9 @@ public enum CourtZone: String, CaseIterable, Identifiable, Codable, Sendable {
 
     public var id: String { rawValue }
 
+    /// The zone's name on screen and in texts (the raw value is the stored Dutch name)
+    public var title: String { L10n.text(rawValue) }
+
     /// Front, middle or back third of the court
     public var row: CourtRow {
         switch self {

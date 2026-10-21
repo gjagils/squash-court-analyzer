@@ -45,9 +45,9 @@ public enum LeagueTeamError: Error, Equatable {
 
     public var message: String {
         switch self {
-        case .invalidLink: return "Gebruik een HTTPS-teamlink van sbn.toernooi.nl, zoals /league/…/team/113."
-        case .changedPage: return "De teamgegevens zijn niet herkenbaar. Mogelijk is de website gewijzigd."
-        case .unavailable: return "SBN is nu niet bereikbaar. Probeer het later opnieuw."
+        case .invalidLink: return L10n.text("Gebruik een HTTPS-teamlink van sbn.toernooi.nl, zoals /league/…/team/113.")
+        case .changedPage: return L10n.text("De teamgegevens zijn niet herkenbaar. Mogelijk is de website gewijzigd.")
+        case .unavailable: return L10n.text("SBN is nu niet bereikbaar. Probeer het later opnieuw.")
         }
     }
 }

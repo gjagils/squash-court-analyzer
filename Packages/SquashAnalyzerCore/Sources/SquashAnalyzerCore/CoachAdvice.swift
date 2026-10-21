@@ -96,7 +96,7 @@ public enum CoachAdvice {
                 if seenIn.isEmpty {
                     updated.append(candidate)
                 } else {
-                    let text = candidate.item.text + " Net als in game " + AdviceRules.list(seenIn) + "."
+                    let text = candidate.item.text + " " + L10n.text("Net als in game %@.", AdviceRules.list(seenIn))
                     updated.append(AdviceCandidate(item: AdviceItem(topic: candidate.item.topic, tone: candidate.item.tone, text: text),
                                                    potential: candidate.potential + extra, key: candidate.key, order: candidate.order))
                 }
@@ -155,7 +155,7 @@ public enum CoachAdvice {
         parts.sort { first, second in first.count > second.count }
         var texts: [String] = []
         for part in parts {
-            texts.append("\(part.count) \(part.shot.isLegacy ? "oud" : part.shot.rawValue.lowercased())")
+            texts.append("\(part.count) \(part.shot.isLegacy ? L10n.text("oud") : part.shot.rawValue.lowercased())")
         }
         return texts.joined(separator: ", ")
     }

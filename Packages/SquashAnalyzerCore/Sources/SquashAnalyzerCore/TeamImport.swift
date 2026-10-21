@@ -55,29 +55,29 @@ public enum TeamImportError: Error, Equatable {
     public var message: String {
         switch self {
         case .missingTeamJSON:
-            return "Het zip-bestand bevat geen team.json."
+            return L10n.text("Het zip-bestand bevat geen team.json.")
         case .invalidTeamJSON:
-            return "team.json kon niet worden gelezen. Controleer of het geldige JSON is met een lijst \"players\"."
+            return L10n.text("team.json kon niet worden gelezen. Controleer of het geldige JSON is met een lijst \"players\".")
         case .emptyName(let index):
-            return "Speler \(index + 1) heeft geen naam."
+            return L10n.text("Speler %@ heeft geen naam.", "\(index + 1)")
         case .unknownFocusTag(let player, let tag):
             var allowed: [String] = []
             for focus in CoachingFocusTag.allCases {
                 allowed.append(focus.rawValue)
             }
-            return "Onbekend aandachtspunt '\(tag)' bij \(player). Toegestaan: \(allowed.joined(separator: ", "))."
+            return L10n.text("Onbekend aandachtspunt '%@' bij %@. Toegestaan: %@.", "\(tag)", "\(player)", "\(allowed.joined(separator: ", "))")
         case .photoNotFound(let player, let path):
-            return "Foto '\(path)' van \(player) zit niet in het zip-bestand."
+            return L10n.text("Foto '%@' van %@ zit niet in het zip-bestand.", "\(path)", "\(player)")
         case .photoUnreadable(let player, let path):
-            return "Foto '\(path)' van \(player) is geen bruikbare afbeelding."
+            return L10n.text("Foto '%@' van %@ is geen bruikbare afbeelding.", "\(path)", "\(player)")
         case .invalidLink:
-            return "Gebruik een teamlink van squashanalyzer.com, zoals https://squashanalyzer.com/teams/…/team.zip."
+            return L10n.text("Gebruik een teamlink van squashanalyzer.com, zoals https://squashanalyzer.com/teams/…/team.zip.")
         case .notAZip:
-            return "Het bestand achter de link is geen team-zip."
+            return L10n.text("Het bestand achter de link is geen team-zip.")
         case .tooLarge:
-            return "Het teambestand is te groot (meer dan 25 MB)."
+            return L10n.text("Het teambestand is te groot (meer dan 25 MB).")
         case .unavailable:
-            return "Het team kon niet worden opgehaald. Controleer de link en je internetverbinding."
+            return L10n.text("Het team kon niet worden opgehaald. Controleer de link en je internetverbinding.")
         }
     }
 }
@@ -106,7 +106,7 @@ public struct TeamImportResult: Equatable, Sendable {
     }
 
     public var summary: String {
-        var parts = ["\(added) nieuw", "\(updated) bijgewerkt", "\(photos) foto's"]
+        var parts = [L10n.text("%@ nieuw", "\(added)"), L10n.text("%@ bijgewerkt", "\(updated)"), L10n.text("%@ foto's", "\(photos)")]
         if let team, !team.isEmpty { parts.insert(team, at: 0) }
         return parts.joined(separator: " · ")
     }

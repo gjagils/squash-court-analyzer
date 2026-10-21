@@ -267,12 +267,16 @@ public struct LiveFollowerRegistration: Codable, Equatable, Sendable {
     public let sandbox: Bool?
     /// A notification when a game (team match: a partij) is won and at the result
     public let alerts: Bool?
+    /// The app's language, "nl" or "en" (`AppLanguage.code`), for the texts of
+    /// the pushes; only when following, not when forgetting
+    public let lang: String?
 
-    public init(platform: String, token: String, sandbox: Bool? = nil, alerts: Bool? = nil) {
+    public init(platform: String, token: String, sandbox: Bool? = nil, alerts: Bool? = nil, lang: String? = nil) {
         self.platform = platform
         self.token = token
         self.sandbox = sandbox
         self.alerts = alerts
+        self.lang = lang
     }
 }
 
@@ -292,17 +296,17 @@ public enum LiveFollowError: Error, Equatable {
     public var message: String {
         switch self {
         case .noTransport, .noPresenter:
-            return "Deze versie van de app kan de stand nog niet op het vergrendelscherm zetten."
+            return L10n.text("Deze versie van de app kan de stand nog niet op het vergrendelscherm zetten.")
         case .noConnection:
-            return "Geen verbinding met de live-server. Controleer de internetverbinding en probeer het opnieuw."
+            return L10n.text("Geen verbinding met de live-server. Controleer de internetverbinding en probeer het opnieuw.")
         case .notFound:
-            return "Deze wedstrijd is afgelopen of de link klopt niet."
+            return L10n.text("Deze wedstrijd is afgelopen of de link klopt niet.")
         case .pushUnavailable:
-            return "Deze server kan de stand nog niet naar je telefoon sturen."
+            return L10n.text("Deze server kan de stand nog niet naar je telefoon sturen.")
         case .notAllowed:
-            return "Je telefoon staat het niet toe. Zet Live Activities (iPhone) of meldingen (Android) aan voor SquashAnalyzer in de instellingen van je telefoon."
+            return L10n.text("Je telefoon staat het niet toe. Zet Live Activities (iPhone) of meldingen (Android) aan voor SquashAnalyzer in de instellingen van je telefoon.")
         case .refused:
-            return "Volgen lukte niet. Probeer het later opnieuw."
+            return L10n.text("Volgen lukte niet. Probeer het later opnieuw.")
         }
     }
 }
@@ -413,7 +417,7 @@ public final class LiveFollow {
         guard let url = URL(string: target.server + target.apiPath + "/followers") else { throw LiveFollowError.notFound }
         let registration = LiveFollowerRegistration(platform: presenter.platform, token: token,
                                                     sandbox: presenter.platform == "ios" ? presenter.usesSandbox : nil,
-                                                    alerts: alerts)
+                                                    alerts: alerts, lang: AppLanguage.current.code)
         let body = try JSONEncoder().encode(registration)
         let response: AITransportResponse
         do {

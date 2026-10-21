@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Appearance before the first paint: Dark unless Light or System was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
+  <meta name="robots" content="noindex" />
+  <title>Page not found – SquashAnalyzer</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/style.css?v=20261021" />
+  <script src="/theme.js?v=20261021" defer></script>
+</head>
+<body>
+  <!-- Served by Cloudflare for missing pages under /en/ (the nearest 404.html) -->
+  <main class="container" style="max-width: 640px; margin: 18vh auto; padding: 0 20px; text-align: center;">
+    <h1>This page does not exist</h1>
+    <p>The link may be out of date or mistyped.</p>
+    <p><a href="/en/">Go to the SquashAnalyzer home page</a></p>
+    <div class="page-foot"><div data-theme-choice-slot></div></div>
+  </main>
+</body>
+</html>

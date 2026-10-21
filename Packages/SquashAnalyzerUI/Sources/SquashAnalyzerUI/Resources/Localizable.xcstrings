@@ -1,0 +1,1213 @@
+{
+  "sourceLanguage": "nl",
+  "strings": {
+    " · laatste %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · last %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · laatste %@"
+          }
+        }
+      }
+    },
+    "%@, dicht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, collapsed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, dicht"
+          }
+        }
+      }
+    },
+    "%@, open": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, expanded"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, open"
+          }
+        }
+      }
+    },
+    "%lld spelers en %lld wedstrijden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld players and %lld matches"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld spelers en %lld wedstrijden"
+          }
+        }
+      }
+    },
+    ", %lld scheidsrechterwedstrijden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", %lld referee matches"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", %lld scheidsrechterwedstrijden"
+          }
+        }
+      }
+    },
+    ", %lld teamwedstrijden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", %lld team matches"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", %lld teamwedstrijden"
+          }
+        }
+      }
+    },
+    "6 vakken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "6 zones"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "6 vakken"
+          }
+        }
+      }
+    },
+    "9 vakken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "9 zones"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "9 vakken"
+          }
+        }
+      }
+    },
+    "AI advies werkt alleen met internetverbinding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI advice only works with an internet connection"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI advies werkt alleen met internetverbinding"
+          }
+        }
+      }
+    },
+    "API key geconfigureerd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key configured"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key geconfigureerd"
+          }
+        }
+      }
+    },
+    "API key opgeslagen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key saved"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key opgeslagen"
+          }
+        }
+      }
+    },
+    "API key verwijderd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key removed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key verwijderd"
+          }
+        }
+      }
+    },
+    "Aan · map “%@”": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On · folder “%@”"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aan · map “%@”"
+          }
+        }
+      }
+    },
+    "Aanzetten en map kiezen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on and choose folder"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aanzetten en map kiezen"
+          }
+        }
+      }
+    },
+    "Alles vervangen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replace everything"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles vervangen"
+          }
+        }
+      }
+    },
+    "Annuleren": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuleren"
+          }
+        }
+      }
+    },
+    "Automatische back-up": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic backup"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatische back-up"
+          }
+        }
+      }
+    },
+    "Automatische back-up aanzetten is niet gelukt.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turning on automatic backup failed."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatische back-up aanzetten is niet gelukt."
+          }
+        }
+      }
+    },
+    "Automatische back-up staat aan; de eerste is gemaakt.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic backup is on; the first one has been made."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatische back-up staat aan; de eerste is gemaakt."
+          }
+        }
+      }
+    },
+    "BEWAAR API KEY": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SAVE API KEY"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BEWAAR API KEY"
+          }
+        }
+      }
+    },
+    "BEWAAR TEAMLINK": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SAVE TEAM LINK"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BEWAAR TEAMLINK"
+          }
+        }
+      }
+    },
+    "Baanindeling": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Court layout"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baanindeling"
+          }
+        }
+      }
+    },
+    "Back-up": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back-up"
+          }
+        }
+      }
+    },
+    "Back-up opgeslagen: %lld spelers, %lld wedstrijden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup saved: %lld players, %lld matches"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back-up opgeslagen: %lld spelers, %lld wedstrijden"
+          }
+        }
+      }
+    },
+    "Back-up terugzetten?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore backup?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back-up terugzetten?"
+          }
+        }
+      }
+    },
+    "Back-up van %@: %@. Samenvoegen voegt toe wat er nog niet is; Alles vervangen wist eerst je spelers, wedstrijden en badges op dit toestel, ook de scheidsrechter- en teamwedstrijden als de back-up die bevat.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup from %@: %@. Merge adds what is not there yet; Replace everything first deletes your players, matches and badges on this device, including the referee and team matches if the backup contains them."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back-up van %@: %@. Samenvoegen voegt toe wat er nog niet is; Alles vervangen wist eerst je spelers, wedstrijden en badges op dit toestel, ook de scheidsrechter- en teamwedstrijden als de back-up die bevat."
+          }
+        }
+      }
+    },
+    "Basis advies werkt altijd, ook zonder API key": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Basic advice always works, even without an API key"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Basis advies werkt altijd, ook zonder API key"
+          }
+        }
+      }
+    },
+    "Bewaar spelers, coach- en scheidsrechterwedstrijden en badges in een bestand, bijvoorbeeld op Google Drive. Een back-up van Android kun je ook op een iPhone terugzetten, en andersom.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save players, coach and referee matches and badges in a file, for example on Google Drive. A backup from Android can also be restored on an iPhone, and the other way round."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewaar spelers, coach- en scheidsrechterwedstrijden en badges in een bestand, bijvoorbeeld op Google Drive. Een back-up van Android kun je ook op een iPhone terugzetten, en andersom."
+          }
+        }
+      }
+    },
+    "Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With 6 zones you choose front, middle or back, left or right; with 9 a middle column is added. The shots you see match the row of the zone."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak."
+          }
+        }
+      }
+    },
+    "Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For a followed match: a notification with sound when a game has finished and for the result. For a team match: per match and for the final result."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag."
+          }
+        }
+      }
+    },
+    "De back-up is niet gelukt.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The backup failed."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De back-up is niet gelukt."
+          }
+        }
+      }
+    },
+    "Dit bestand kon niet worden gelezen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This file could not be read."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit bestand kon niet worden gelezen."
+          }
+        }
+      }
+    },
+    "Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in een map die je kiest (bijvoorbeeld Documenten). De 7 nieuwste blijven bewaard.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Once a week, when you put the app away after use, a backup is saved in a folder you choose (for example Documents). The 7 most recent are kept."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in een map die je kiest (bijvoorbeeld Documenten). De 7 nieuwste blijven bewaard."
+          }
+        }
+      }
+    },
+    "Foto's van de spelers meesturen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include the players' photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto's van de spelers meesturen"
+          }
+        }
+      }
+    },
+    "Geen API key ingesteld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No API key set"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen API key ingesteld"
+          }
+        }
+      }
+    },
+    "Handleiding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User guide"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handleiding"
+          }
+        }
+      }
+    },
+    "Instellingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instellingen"
+          }
+        }
+      }
+    },
+    "Internet vereist": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Internet required"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Internet vereist"
+          }
+        }
+      }
+    },
+    "Je API key wordt versleuteld op dit toestel bewaard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your API key is stored encrypted on this device"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je API key wordt versleuteld op dit toestel bewaard"
+          }
+        }
+      }
+    },
+    "Knop LIVE bij Scheidsrechter en Coach": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LIVE button in Referee and Coach"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Knop LIVE bij Scheidsrechter en Coach"
+          }
+        }
+      }
+    },
+    "Kosten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cost"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kosten"
+          }
+        }
+      }
+    },
+    "Live meekijken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live sharing"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live meekijken"
+          }
+        }
+      }
+    },
+    "Lokaal advies": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local advice"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lokaal advies"
+          }
+        }
+      }
+    },
+    "MAAK BACK-UP": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MAKE BACKUP"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MAAK BACK-UP"
+          }
+        }
+      }
+    },
+    "Melding bij elke game": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notification for every game"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Melding bij elke game"
+          }
+        }
+      }
+    },
+    "Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With LIVE you share a link, for example in the WhatsApp group; anyone who taps it sees the score live in the browser. Only first names, the score and (if you leave it on) a small photo of the players; everything is deleted 2 hours after the match."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist."
+          }
+        }
+      }
+    },
+    "Mijn team": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My team"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn team"
+          }
+        }
+      }
+    },
+    "Open de handleiding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the user guide"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open de handleiding"
+          }
+        }
+      }
+    },
+    "Opslaan is niet gelukt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving failed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opslaan is niet gelukt"
+          }
+        }
+      }
+    },
+    "Over AI Coach": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About AI Coach"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Over AI Coach"
+          }
+        }
+      }
+    },
+    "Per tegel uitgelegd hoe alles werkt, op squashanalyzer.com.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How everything works, explained per tile, on squashanalyzer.com."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per tegel uitgelegd hoe alles werkt, op squashanalyzer.com."
+          }
+        }
+      }
+    },
+    "Samenvoegen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Merge"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samenvoegen"
+          }
+        }
+      }
+    },
+    "Taal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taal"
+          }
+        }
+      }
+    },
+    "Teamlink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Team link"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teamlink"
+          }
+        }
+      }
+    },
+    "Teamlink opgeslagen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Team link saved"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teamlink opgeslagen"
+          }
+        }
+      }
+    },
+    "Teamlink verwijderd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Team link removed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teamlink verwijderd"
+          }
+        }
+      }
+    },
+    "Teruggezet: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restored: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teruggezet: %@"
+          }
+        }
+      }
+    },
+    "Terugzetten is niet gelukt; er is niets veranderd.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore failed; nothing has changed."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terugzetten is niet gelukt; er is niets veranderd."
+          }
+        }
+      }
+    },
+    "Toon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toon"
+          }
+        }
+      }
+    },
+    "Uitzetten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn off"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uitzetten"
+          }
+        }
+      }
+    },
+    "VERWIJDER": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "REMOVE"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VERWIJDER"
+          }
+        }
+      }
+    },
+    "VERWIJDER KEY": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "REMOVE KEY"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VERWIJDER KEY"
+          }
+        }
+      }
+    },
+    "Veilig": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Secure"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veilig"
+          }
+        }
+      }
+    },
+    "Verberg": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verberg"
+          }
+        }
+      }
+    },
+    "Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add your OpenAI API key for personalised tactical advice from the AI Coach."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach."
+          }
+        }
+      }
+    },
+    "Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the public team link from sbn.toernooi.nl. My team then appears on the home screen."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm."
+          }
+        }
+      }
+    },
+    "Waar vind ik mijn teamlink?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where do I find my team link?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waar vind ik mijn teamlink?"
+          }
+        }
+      }
+    },
+    "Weergave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearance"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weergave"
+          }
+        }
+      }
+    },
+    "ZET BACK-UP TERUG": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RESTORE BACKUP"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZET BACK-UP TERUG"
+          }
+        }
+      }
+    },
+    "nl_NL": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "en_GB"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nl_NL"
+          }
+        }
+      }
+    },
+    "~€0.01 per analyse (het goedkoopste beschikbare model)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~€0.01 per analysis (the cheapest available model)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~€0.01 per analyse (het goedkoopste beschikbare model)"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

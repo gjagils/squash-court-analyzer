@@ -315,6 +315,9 @@ public struct AndroidHomeView: View {
     private let shareCard: ((CardSnapshot, String) -> Void)?
     /// Competitie: team matches in a JSON file (Android supplies its files directory)
     private let teamMatchStore: (any TeamMatchStore)?
+    /// Instellingen → Taal: the system's per-app language screen (Android's
+    /// MainActivity supplies it); nil hides the row
+    private let onLanguage: (() -> Void)?
     @State private var showingCompetition = false
     /// Wedstrijd volgen (live score op het vergrendelscherm), when the app set a presenter
     @State private var showingLiveFollow = false
@@ -327,7 +330,9 @@ public struct AndroidHomeView: View {
                 leagueTeamFetcher: LeagueTeamFetcher, aiCoach: AICoachContext? = nil, backup: BackupContext? = nil,
                 teamImporter: (any TeamLinkImporter)? = nil, photoStore: (any PlayerPhotoStore)? = nil,
                 filePicker: (any PlayerFilePicker)? = nil, shareCard: ((CardSnapshot, String) -> Void)? = nil,
-                teamMatchStore: (any TeamMatchStore)? = nil, testDataStore: (any TestDataCleanupStore)? = nil) {
+                teamMatchStore: (any TeamMatchStore)? = nil, testDataStore: (any TestDataCleanupStore)? = nil,
+                onLanguage: (() -> Void)? = nil) {
+        self.onLanguage = onLanguage
         self.teamMatchStore = teamMatchStore
         self.testDataStore = testDataStore
         self.teamImporter = teamImporter
@@ -356,14 +361,14 @@ public struct AndroidHomeView: View {
                 }
                 .navigationDestination(isPresented: $showingCoach) {
                     CoachSessionView(store: matchStore, playerStore: playerStore, photoStore: photoStore, filePicker: filePicker, aiCoach: aiCoach, shareText: shareText,
-                                     historyStore: historyStore, settings: SettingsContext(aiCoach: aiCoach, backup: backup),
+                                     historyStore: historyStore, settings: SettingsContext(aiCoach: aiCoach, backup: backup, onLanguage: onLanguage),
                                      teamMatchStore: teamMatchStore,
                                      onExit: { showingCoach = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingReferee) {
                     RefereeSessionView(store: refereeMatchStore, playerStore: playerStore, photoStore: photoStore, filePicker: filePicker, shareText: shareText,
-                                       settings: SettingsContext(aiCoach: aiCoach, backup: backup),
+                                       settings: SettingsContext(aiCoach: aiCoach, backup: backup, onLanguage: onLanguage),
                                        teamMatchStore: teamMatchStore, onExit: { showingReferee = false })
                         .navigationBarBackButtonHidden(true)
                 }
@@ -378,7 +383,7 @@ public struct AndroidHomeView: View {
                     }
                 }
                 .navigationDestination(isPresented: $showingSettings) {
-                    SharedSettingsView(aiCoach: aiCoach, backup: backup)
+                    SharedSettingsView(aiCoach: aiCoach, backup: backup, onLanguage: onLanguage)
                 }
                 .navigationDestination(isPresented: $showingTeam) {
                     if let team {

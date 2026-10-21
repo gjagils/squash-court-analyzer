@@ -102,14 +102,14 @@ describe('registering', () => {
   });
 
   it('only valid tokens are accepted', () => {
-    expect(validateFollower({ platform: 'ios', token: 'AB'.repeat(32) })).toEqual({ platform: 'ios', token: 'ab'.repeat(32), sandbox: false, alerts: true });
+    expect(validateFollower({ platform: 'ios', token: 'AB'.repeat(32) })).toEqual({ platform: 'ios', token: 'ab'.repeat(32), sandbox: false, alerts: true, lang: 'nl' });
     expect(validateFollower({ platform: 'ios', token: IOS, sandbox: true }).sandbox).toBe(true);
     expect(validateFollower({ platform: 'ios', token: IOS, alerts: false }).alerts).toBe(false);
     expect(validateFollower({ platform: 'ios', token: 'ab'.repeat(15) })).toBeNull();
     expect(validateFollower({ platform: 'ios', token: 'a'.repeat(513) })).toBeNull();
     expect(validateFollower({ platform: 'ios', token: 'a'.repeat(256) })).not.toBeNull();
     expect(validateFollower({ platform: 'ios', token: 'zz'.repeat(32) })).toBeNull();
-    expect(validateFollower({ platform: 'android', token: ANDROID })).toEqual({ platform: 'android', token: ANDROID, sandbox: false, alerts: true });
+    expect(validateFollower({ platform: 'android', token: ANDROID })).toEqual({ platform: 'android', token: ANDROID, sandbox: false, alerts: true, lang: 'nl' });
     expect(validateFollower({ platform: 'android', token: 'a'.repeat(4096) })).not.toBeNull();
     expect(validateFollower({ platform: 'android', token: 'a'.repeat(4097) })).toBeNull();
     expect(validateFollower({ platform: 'android', token: 'a b' })).toBeNull();
@@ -125,7 +125,7 @@ describe('registering', () => {
     const again = await follow(id, { platform: 'ios', token: IOS, sandbox: true });
     expect(again.status).toBe(201);
     expect(again.json).toEqual({ ok: true });
-    expect(await followers(id)).toEqual([{ platform: 'ios', token: IOS, sandbox: true, alerts: true }]);
+    expect(await followers(id)).toEqual([{ platform: 'ios', token: IOS, sandbox: true, alerts: true, lang: 'nl' }]);
     expect((await follow(id, { platform: 'ios', token: 'nothex' })).status).toBe(400);
     expect((await follow(id, { platform: 'android', token: ANDROID })).status).toBe(201);
     // A long FCM token fits in the body limit
@@ -338,11 +338,42 @@ describe('tokens', () => {
     await runInDurableObject(stub(id), (instance) => instance.pushesDone());
   });
 
+  it('a follower gets the alert in the language it registered with; Dutch without one', async () => {
+    expect(validateFollower({ platform: 'ios', token: IOS, lang: 'en' }).lang).toBe('en');
+    expect(validateFollower({ platform: 'android', token: ANDROID, lang: 'EN-gb' }).lang).toBe('en');
+    expect(validateFollower({ platform: 'android', token: ANDROID, lang: 'de' }).lang).toBe('nl');
+    expect(validateFollower({ platform: 'android', token: ANDROID, lang: 42 }).lang).toBe('nl');
+
+    const { id, writeKey } = (await call('POST', '/api/live', snapshot)).json;
+    await follow(id, { platform: 'ios', token: IOS });
+    await follow(id, { platform: 'ios', token: IOS_SANDBOX, sandbox: true, lang: 'en' });
+    await follow(id, { platform: 'android', token: ANDROID, lang: 'en' });
+    const between = { ...snapshot, games: [[11, 8], [7, 11]], score: [7, 11], gamesWon: [1, 1], status: 'between' };
+    await call('PUT', `/api/live/${id}`, between, writeKey);
+    await runInDurableObject(stub(id), (instance) => instance.pushesDone());
+    const alertTo = (token) => JSON.parse(apnsCalls().find((r) => r.url.endsWith(token)).body).aps.alert;
+    expect(alertTo(IOS)).toEqual({ title: 'Game 2 voor Piet', body: 'Jan – Piet: 7–11 · games 1–1' });
+    expect(alertTo(IOS_SANDBOX)).toEqual({ title: 'Game 2 to Piet', body: 'Jan – Piet: 7–11 · games 1–1' });
+    expect(JSON.parse(fcmCalls()[0].body).message.data.alertTitle).toBe('Game 2 to Piet');
+
+    sent = [];
+    await call('PUT', `/api/live/${id}`, finished, writeKey);
+    await runInDurableObject(stub(id), (instance) => instance.pushesDone());
+    expect(alertTo(IOS).title).toBe('Uitslag: Jan wint 3–1');
+    expect(alertTo(IOS_SANDBOX).title).toBe('Result: Jan wins 3–1');
+    // The stand itself is the same for everyone
+    expect(JSON.parse(apnsCalls()[0].body).aps['content-state']).toEqual(JSON.parse(apnsCalls()[1].body).aps['content-state']);
+    await call('DELETE', `/api/live/${id}`, undefined, writeKey);
+    await runInDurableObject(stub(id), (instance) => instance.pushesDone());
+  });
+
   it('only a new game or the result makes an alert', () => {
     expect(scoreAlert(null, snapshot)).toBeNull();
     expect(scoreAlert(snapshot, { ...snapshot, score: [4, 2] })).toBeNull();
     expect(scoreAlert(finished, finished)).toBeNull();
     expect(scoreAlert(snapshot, finished).title).toBe('Uitslag: Jan wint 3–1');
+    expect(scoreAlert(snapshot, finished, 'en')).toEqual({ title: 'Result: Jan wins 3–1', body: 'Jan – Piet · 11–8 · 9–11 · 11–5 · 11–7' });
+    expect(scoreAlert(snapshot, finished, 'xx').title).toBe('Uitslag: Jan wint 3–1');
   });
 
   it('a stand without a winner has no alert', () => {

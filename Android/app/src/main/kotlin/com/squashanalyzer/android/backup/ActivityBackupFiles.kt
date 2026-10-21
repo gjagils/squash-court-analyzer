@@ -1,5 +1,7 @@
 package com.squashanalyzer.android.backup
 
+import com.squashanalyzer.android.R
+import com.squashanalyzer.android.hostText
 import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,7 +35,7 @@ class ActivityBackupFiles(private val activity: ComponentActivity) : BackupFiles
         withContext(Dispatchers.Main) { createLauncher.launch(suggestedName) }
         val uri = result.await() ?: return false
         withContext(Dispatchers.IO) {
-            requireNotNull(activity.contentResolver.openOutputStream(uri, "wt")) { "Kan het bestand niet schrijven" }
+            requireNotNull(activity.contentResolver.openOutputStream(uri, "wt")) { activity.hostText(R.string.file_write_failed) }
                 .use { it.write(data.platformValue) }
         }
         return true
@@ -45,14 +47,14 @@ class ActivityBackupFiles(private val activity: ComponentActivity) : BackupFiles
         withContext(Dispatchers.Main) { openLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }
         val uri = result.await() ?: return null
         val bytes = withContext(Dispatchers.IO) {
-            requireNotNull(activity.contentResolver.openInputStream(uri)) { "Kan het bestand niet lezen" }.use { input ->
+            requireNotNull(activity.contentResolver.openInputStream(uri)) { activity.hostText(R.string.file_read_failed) }.use { input ->
                 val out = java.io.ByteArrayOutputStream()
                 val buffer = ByteArray(64 * 1024)
                 while (true) {
                     val read = input.read(buffer)
                     if (read < 0) break
                     out.write(buffer, 0, read)
-                    require(out.size() <= MAX_BYTES) { "Dit bestand is te groot voor een back-up" }
+                    require(out.size() <= MAX_BYTES) { activity.hostText(R.string.file_too_large_backup) }
                 }
                 out.toByteArray()
             }

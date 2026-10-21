@@ -170,7 +170,7 @@ struct LiveScoreLockScreenView: View {
         VStack(spacing: 2) {
             HStack(spacing: 6) {
                 if state.isFinished {
-                    LiveScorePill(text: "AFGELOPEN", live: false)
+                    LiveScorePill(text: String(localized: "AFGELOPEN"), live: false)
                 } else {
                     LiveScorePill(text: "LIVE", live: true)
                 }

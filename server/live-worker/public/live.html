@@ -108,7 +108,7 @@
 <main>
   <header>
     <a class="brand" href="https://squashanalyzer.com"><img src="/logo.png" alt="">SquashAnalyzer</a>
-    <div class="badge" id="badge">Verbinden…</div>
+    <div class="badge" id="badge" data-en="Connecting…">Verbinden…</div>
   </header>
 
   <section class="card" id="board" hidden>
@@ -133,24 +133,34 @@
   <div class="follow" id="follow" hidden>
     <a id="follow-link" href="#">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10 18h4"/></svg>
-      Volg op je vergrendelscherm
+      <span data-en="Follow on your lock screen">Volg op je vergrendelscherm</span>
     </a>
-    <p>Werkt met de SquashAnalyzer-app op iPhone en Android</p>
+    <p data-en="Works with the SquashAnalyzer app on iPhone and Android">Werkt met de SquashAnalyzer-app op iPhone en Android</p>
   </div>
 
   <p class="notice" id="notice" hidden></p>
 
   <footer>
-    Live gedeeld vanuit <a href="https://squashanalyzer.com">SquashAnalyzer</a>.<br>
-    Alleen voornamen, de stand en eventueel een kleine spelersfoto;<br>2 uur na de wedstrijd wordt alles gewist.
-    <div class="theme-choice"><label for="theme-choice">Weergave</label>
-      <select id="theme-choice"><option value="system">Systeem</option><option value="light">Licht</option><option value="dark" selected>Donker</option></select></div>
+    <span data-en="Shared live from">Live gedeeld vanuit</span> <a href="https://squashanalyzer.com">SquashAnalyzer</a>.<br>
+    <span data-en="Only first names, the score and possibly a small player photo;">Alleen voornamen, de stand en eventueel een kleine spelersfoto;</span><br><span data-en="everything is deleted 2 hours after the match.">2 uur na de wedstrijd wordt alles gewist.</span>
+    <div class="theme-choice"><label for="theme-choice" data-en="Appearance">Weergave</label>
+      <select id="theme-choice"><option value="system" data-en="System">Systeem</option><option value="light" data-en="Light">Licht</option><option value="dark" selected data-en="Dark">Donker</option></select></div>
   </footer>
 </main>
 <script>
 (function () {
   var id = {{ID_JSON}};
   var $ = function (x) { return document.getElementById(x); };
+  // Language: English when the browser is not set to Dutch, Dutch stays the
+  // default. Static texts carry their English in data-en.
+  var EN = !!navigator.language && !/^nl/i.test(navigator.language);
+  function T(nl, en) { return EN ? en : nl; }
+  if (EN) {
+    document.documentElement.lang = 'en';
+    var marked = document.querySelectorAll('[data-en]');
+    for (var m = 0; m < marked.length; m++) marked[m].textContent = marked[m].getAttribute('data-en');
+  }
+
   var lastReceived = 0;
   var hadState = false;
   var ended = false;
@@ -163,10 +173,10 @@
   }
 
   var statusText = {
-    warmup: 'Inspelen…',
+    warmup: T('Inspelen…', 'Warm-up…'),
     playing: null,
-    between: 'Pauze tussen de games',
-    finished: 'Afgelopen'
+    between: T('Pauze tussen de games', 'Break between games'),
+    finished: T('Afgelopen', 'Finished')
   };
 
   /** The players' thumbnails when the coach shares them, otherwise the first letter */
@@ -201,18 +211,20 @@
     finished = !live;
     if (finished && !ended) {
       $('notice').hidden = false;
-      $('notice').innerHTML = '<strong>Eindstand.</strong> Deze pagina blijft nog 2 uur na de wedstrijd te zien.';
+      $('notice').innerHTML = T('<strong>Eindstand.</strong> Deze pagina blijft nog 2 uur na de wedstrijd te zien.',
+        '<strong>Final score.</strong> This page stays visible for 2 hours after the match.');
     }
     $('row1').classList.toggle('serving', live && s.server === 1);
     $('row2').classList.toggle('serving', live && s.server === 2);
-    $('side1').textContent = 'serveert ' + (s.side === 'L' ? 'links' : 'rechts');
-    $('side2').textContent = 'serveert ' + (s.side === 'L' ? 'links' : 'rechts');
+    var serving = s.side === 'L' ? T('serveert links', 'serving left') : T('serveert rechts', 'serving right');
+    $('side1').textContent = serving;
+    $('side2').textContent = serving;
     $('row1').classList.toggle('winner', s.winner === 1);
     $('row2').classList.toggle('winner', s.winner === 2);
     var gameNumber = s.gamesWon[0] + s.gamesWon[1] + (s.status === 'playing' || s.status === 'warmup' ? 1 : 0);
     var text = statusText[s.status];
     if (s.status === 'playing') text = 'Game ' + gameNumber + ' · best of ' + s.bestOf;
-    if (s.status === 'finished' && s.winner) text = (s.winner === 1 ? s.p1 : s.p2) + ' wint ' +
+    if (s.status === 'finished' && s.winner) text = (s.winner === 1 ? s.p1 : s.p2) + T(' wint ', ' wins ') +
       Math.max(s.gamesWon[0], s.gamesWon[1]) + '-' + Math.min(s.gamesWon[0], s.gamesWon[1]);
     $('status').textContent = text || '';
     var history = $('history');
@@ -234,15 +246,17 @@
   function setBadge(kind) {
     var badge = $('badge');
     badge.className = 'badge' + (kind === 'live' ? ' live' : '');
-    badge.textContent = kind === 'live' ? 'Live' : kind === 'done' ? 'Afgelopen' : kind === 'lost' ? 'Geen verbinding' : 'Verbinden…';
+    badge.textContent = kind === 'live' ? 'Live' : kind === 'done' ? T('Afgelopen', 'Finished')
+      : kind === 'lost' ? T('Geen verbinding', 'No connection') : T('Verbinden…', 'Connecting…');
   }
 
   function tick() {
     if (!lastReceived || ended || finished) { $('updated').textContent = ''; return; }
     var seconds = Math.round((Date.now() - lastReceived) / 1000);
-    var text = seconds < 5 ? 'Zojuist bijgewerkt' : seconds < 60 ? seconds + ' s geleden bijgewerkt'
-      : Math.round(seconds / 60) + ' min geleden bijgewerkt';
-    if (seconds > 300) text += ' · geen nieuws van de baan';
+    var text = seconds < 5 ? T('Zojuist bijgewerkt', 'Just updated')
+      : seconds < 60 ? T(seconds + ' s geleden bijgewerkt', 'Updated ' + seconds + ' s ago')
+      : T(Math.round(seconds / 60) + ' min geleden bijgewerkt', 'Updated ' + Math.round(seconds / 60) + ' min ago');
+    if (seconds > 300) text += T(' · geen nieuws van de baan', ' · no news from the court');
     $('updated').textContent = text;
   }
   setInterval(tick, 1000);
@@ -255,13 +269,15 @@
     var notice = $('notice');
     notice.hidden = false;
     notice.innerHTML = hadState
-      ? '<strong>De wedstrijd is afgelopen.</strong> Dit was de laatste stand; de livesessie is gewist.'
-      : '<strong>Deze livewedstrijd is afgelopen</strong> of de link klopt niet.';
+      ? T('<strong>De wedstrijd is afgelopen.</strong> Dit was de laatste stand; de livesessie is gewist.',
+        '<strong>The match has ended.</strong> This was the final score; the live session has been deleted.')
+      : T('<strong>Deze livewedstrijd is afgelopen</strong> of de link klopt niet.',
+        '<strong>This live match has ended</strong> or the link is wrong.');
   }
 
   if (!window.EventSource) {
     $('notice').hidden = false;
-    $('notice').textContent = 'Deze browser kan de stand niet live volgen.';
+    $('notice').textContent = T('Deze browser kan de stand niet live volgen.', 'This browser cannot follow the score live.');
     return;
   }
   var source = new EventSource('/api/live/' + encodeURIComponent(id) + '/events');

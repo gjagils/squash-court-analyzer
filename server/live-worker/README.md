@@ -104,6 +104,21 @@ logt de Worker alleen tellingen (`push live update {"apns 200":3}`), geen tokens
 Een melding (APNs `alert`, FCM `alertTitle`/`alertBody`) gaat alleen mee bij een
 gewonnen game en bij de uitslag, en niet naar volgers met `"alerts": false`.
 
+Taal (versie 3.0, optioneel en achterwaarts compatibel): de app mag `"lang":
+"nl"|"en"` meesturen bij `POST /api/live` (naast de stand), `POST /api/team`
+(naast de teamkop) en `POST .../followers` (naast het token); ook `?lang=en` in
+de URL van de twee POST's werkt. Alles behalve `en` (ook ontbreken, oudere
+builds) is Nederlands. Een volger krijgt de meldingen in zijn eigen `lang`
+("Game 2 to Piet", "Result: Jan wins 3–1", "E2: Paul wins 3–1", "· matches
+3–1"); de stand zelf (content-state, FCM `snapshot`/`team`) is voor iedereen
+gelijk en wordt nooit vertaald. De `lang` van de starter wordt bij de sessie
+bewaard en bepaalt alleen de teksten van het linkvoorbeeld (`og:description`,
+"· matches 1-0" in de titel van een teamwedstrijd): een crawler als die van
+WhatsApp stuurt geen bruikbare `Accept-Language`, en de ontvanger spreekt
+meestal de taal van wie deelt. De pagina's `/l/:id` en `/t/:id` kiezen zelf
+Engels in de browser als `navigator.language` niet met `nl` begint. Foutteksten
+van de API blijven Nederlands.
+
 Teamwedstrijd op het vergrendelscherm (zelfde branch, nog niet in productie):
 
 - `POST` / `DELETE /api/team/:id/followers`: dezelfde body en antwoorden als bij

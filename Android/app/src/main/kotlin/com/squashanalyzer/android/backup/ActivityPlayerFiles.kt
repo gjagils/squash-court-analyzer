@@ -1,5 +1,7 @@
 package com.squashanalyzer.android.backup
 
+import com.squashanalyzer.android.R
+import com.squashanalyzer.android.hostText
 import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.result.PickVisualMediaRequest
@@ -42,14 +44,14 @@ class ActivityPlayerFiles(private val activity: ComponentActivity) : PlayerFileP
     }
 
     private suspend fun read(uri: Uri): Data = withContext(Dispatchers.IO) {
-        val bytes = requireNotNull(activity.contentResolver.openInputStream(uri)) { "Kan het bestand niet lezen" }.use { input ->
+        val bytes = requireNotNull(activity.contentResolver.openInputStream(uri)) { activity.hostText(R.string.file_read_failed) }.use { input ->
             val out = java.io.ByteArrayOutputStream()
             val buffer = ByteArray(64 * 1024)
             while (true) {
                 val read = input.read(buffer)
                 if (read < 0) break
                 out.write(buffer, 0, read)
-                require(out.size() <= MAX_BYTES) { "Dit bestand is te groot" }
+                require(out.size() <= MAX_BYTES) { activity.hostText(R.string.file_too_large) }
             }
             out.toByteArray()
         }

@@ -58,6 +58,7 @@ object CardImage {
     }
 
     fun render(context: Context, snapshot: CardSnapshot): Bitmap {
+        val texts = HostLocale.texts(context)
         val items = earned(snapshot)
         val rows = (items.size + PER_ROW - 1) / PER_ROW
         val height = PADDING * 2 + 220 + maxOf(rows, 1) * CELL_HEIGHT
@@ -71,7 +72,7 @@ object CardImage {
         text.textSize = 34f
         text.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         text.letterSpacing = 0.15f
-        canvas.drawText("BADGEKAART", PADDING.toFloat(), PADDING + 30f, text)
+        canvas.drawText(texts.getString(R.string.card_heading), PADDING.toFloat(), PADDING + 30f, text)
         text.letterSpacing = 0f
         text.typeface = Typeface.DEFAULT
         text.color = Color.rgb(128, 124, 117)
@@ -86,11 +87,12 @@ object CardImage {
         text.typeface = Typeface.DEFAULT
         text.textSize = 34f
         text.color = Color.rgb(179, 175, 168)
-        canvas.drawText("${items.count { !it.first.isSpecial }} van ${BadgeKind.collection.count} badges", PADDING.toFloat(), PADDING + 185f, text)
+        val counted = texts.getString(R.string.card_badge_count, items.count { !it.first.isSpecial }, BadgeKind.collection.count)
+        canvas.drawText(counted, PADDING.toFloat(), PADDING + 185f, text)
 
         val top = PADDING + 240
         if (items.isEmpty()) {
-            canvas.drawText("Nog geen badges verdiend", PADDING.toFloat(), top + 60f, text)
+            canvas.drawText(texts.getString(R.string.card_no_badges), PADDING.toFloat(), top + 60f, text)
         }
         val cell = (WIDTH - PADDING * 2) / PER_ROW
         items.forEachIndexed { index, (kind, count) ->

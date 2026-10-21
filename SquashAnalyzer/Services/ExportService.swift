@@ -332,7 +332,7 @@ enum ExportService {
     enum iCloudError: LocalizedError {
         case unavailable
         var errorDescription: String? {
-            "iCloud Drive is niet beschikbaar. Controleer of je bent ingelogd bij iCloud en iCloud Drive is ingeschakeld in Instellingen → Squash Analyzer."
+            String(localized: "iCloud Drive is niet beschikbaar. Controleer of je bent ingelogd bij iCloud en iCloud Drive is ingeschakeld in Instellingen → Squash Analyzer.")
         }
     }
 

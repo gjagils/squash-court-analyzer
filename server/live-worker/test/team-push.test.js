@@ -77,7 +77,7 @@ describe('team followers', () => {
     const again = await follow(id, { platform: 'ios', token: IOS, sandbox: true });
     expect(again.status).toBe(201);
     expect(again.json).toEqual({ ok: true });
-    expect(await followers(id)).toEqual([{ platform: 'ios', token: IOS, sandbox: true, alerts: true }]);
+    expect(await followers(id)).toEqual([{ platform: 'ios', token: IOS, sandbox: true, alerts: true, lang: 'nl' }]);
     expect((await follow(id, { platform: 'ios', token: 'nothex' })).status).toBe(400);
     expect((await follow(id, { platform: 'android', token: ANDROID, alerts: false })).status).toBe(201);
     expect((await follow(id, { platform: 'android', token: 'third' })).status).toBe(201);
@@ -228,6 +228,29 @@ describe('team payload', () => {
     expect(teamWinner(walkover)).toBe(2);
     const awayWins = { 1: won('A', 'B', [0, 3], 2), 2: won('C', 'D', [0, 3], 2), 3: won('E', 'F', [3, 2], 1), 4: won('G', 'H', [1, 3], 2) };
     expect(teamAlert({}, team, awayWins)).toEqual({ title: 'Uitslag: Delft 8 wint 11–4', body: 'All Inn 8 – Delft 8 · partijen 1–3' });
+  });
+
+  it('alerts in English: the same names and scores, English words', () => {
+    const two = { 1: playing, 2: won('Paul', 'Jan', [3, 1], 1) };
+    expect(teamAlert({ 1: playing }, team, two, 'en')).toEqual({ title: 'E2: Paul wins 3–1', body: 'All Inn 8 4 – 1 Delft 8' });
+    expect(teamAlert({}, team, { 3: won('Paul', 'Jan', [1, 0], 2, { end: 'retired' }) }, 'en').title).toBe('E3: Jan wins (retired)');
+    expect(teamAlert({}, team, { 4: won('', 'Kees', [0, 3], 2, { end: 'walkover' }) }, 'en').title).toBe('E4: Kees wins (walkover)');
+    expect(teamAlert({}, team, { 1: { ...playing, gamesWon: [1, 1], status: 'finished' } }, 'en').title).toBe('E1: done');
+    const three = { 1: won('A', 'B', [3, 0], 1), 2: won('C', 'D', [3, 1], 1), 3: won('E', 'F', [3, 2], 1) };
+    const all = { ...three, 4: won('G', 'H', [0, 3], 2) };
+    expect(teamAlert(three, team, all, 'en')).toEqual({ title: 'Result: All Inn 8 wins 9–6', body: 'All Inn 8 – Delft 8 · matches 3–1' });
+  });
+
+  it('each follower gets the team alert in its own language', async () => {
+    const { id, writeKey } = await newTeam();
+    await follow(id, { platform: 'ios', token: IOS, lang: 'nl' });
+    await follow(id, { platform: 'android', token: ANDROID, lang: 'en' });
+    await call('PUT', `/api/team/${id}/partij/2`, won('Paul', 'Jan', [3, 1], 1), writeKey);
+    await pushesDone(id);
+    expect(apnsBodies()[0].alert.title).toBe('E2: Paul wint 3–1');
+    expect(fcmData()[0].data.alertTitle).toBe('E2: Paul wins 3–1');
+    // The stand is the same for both
+    expect(JSON.parse(fcmData()[0].data.team)).toEqual(apnsBodies()[0]['content-state']);
   });
 });
 

@@ -8,7 +8,8 @@ import UIKit
 // (updated by the live server through APNs) or of the match this phone is
 // scoring (updated locally). Compiled into both the app and the widget
 // extension SquashLiveActivity, which does not link SquashAnalyzerCore: the
-// content state mirrors Core's `LiveSnapshot` field by field.
+// content state mirrors Core's `LiveSnapshot` field by field. The texts shown
+// go through String(localized:) (Dutch keys, English in the String Catalogs).
 
 struct LiveScoreAttributes: ActivityAttributes {
     /// Exactly the snapshot JSON of the live server (`aps.content-state` of a
@@ -54,10 +55,10 @@ enum LiveScoreBadge: Equatable {
 
     var title: String {
         switch self {
-        case .gameBall: return "GAMEBAL"
-        case .matchBall: return "MATCHBAL"
-        case .pause: return "PAUZE"
-        case .finished: return "AFGELOPEN"
+        case .gameBall: return String(localized: "GAMEBAL")
+        case .matchBall: return String(localized: "MATCHBAL")
+        case .pause: return String(localized: "PAUZE")
+        case .finished: return String(localized: "AFGELOPEN")
         }
     }
 }
@@ -130,12 +131,12 @@ extension LiveScoreAttributes.ContentState {
         if isFinished {
             let high = max(value(gamesWon, 1), value(gamesWon, 2))
             let low = min(value(gamesWon, 1), value(gamesWon, 2))
-            if let winner, winner == 1 || winner == 2 { return "\(name(winner)) wint \(high)-\(low)" }
-            return "Afgelopen"
+            if let winner, winner == 1 || winner == 2 { return String(localized: "\(name(winner)) wint \(high)-\(low)") }
+            return String(localized: "Afgelopen")
         }
-        if isBetween { return "Pauze" }
-        if isWarmup { return "Inspelen" }
-        return "Game \(gameNumber) · best of \(bestOf)"
+        if isBetween { return String(localized: "Pauze") }
+        if isWarmup { return String(localized: "Inspelen") }
+        return String(localized: "Game \(gameNumber) · best of \(bestOf)")
     }
 
     /// GAMEBAL or MATCHBAL next to the status line; the pause and the result
@@ -155,7 +156,7 @@ extension LiveScoreAttributes.ContentState {
     /// "serveert rechts" under the server's name, while rallies are played
     func serveLine(_ player: Int) -> String? {
         guard isServing(player) else { return nil }
-        return side == "L" ? "serveert links" : "serveert rechts"
+        return side == "L" ? String(localized: "serveert links") : String(localized: "serveert rechts")
     }
 
     /// The compact Dynamic Island: the rally score while playing, the games

@@ -172,10 +172,11 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/team_matches_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:includeFontPadding="false"
-                android:text="partijen"
+                android:text="@string/team_matches"
                 android:textColor="@color/live_text2"
                 android:textSize="9sp"
                 android:textStyle="bold" />

@@ -1,5 +1,9 @@
 package com.squashanalyzer.android.live
 
+import android.content.Context
+import com.squashanalyzer.android.HostLocale
+import com.squashanalyzer.android.R
+
 /**
  * One live score as the lock screen shows it: plain Kotlin values, so the
  * texts can be tested on the JVM. Comes from Core's `LiveSnapshot` (the
@@ -30,9 +34,12 @@ data class LiveScore(
 /**
  * The texts and the game bar of the live score notification (Live Update on
  * Android 16+, an ongoing notification with a mini scoreboard before that).
- * PAR-11: a game goes to 11 with two clear points.
+ * PAR-11: a game goes to 11 with two clear points. The texts come from the
+ * resources, in the app's language (HostLocale).
  */
-class LiveScoreCard(val score: LiveScore) {
+class LiveScoreCard(val score: LiveScore, context: Context) {
+    private val texts = HostLocale.texts(context)
+
     /** One stretch of the Live Update's game bar: `player` 0 is not played yet */
     data class Segment(val length: Int, val player: Int)
 
@@ -69,7 +76,7 @@ class LiveScoreCard(val score: LiveScore) {
         }
 
     private val gamesText: String get() = "${score.gamesWon.first}–${score.gamesWon.second}"
-    private val sideText: String get() = if (score.side == "L") "links" else "rechts"
+    private val sideText: String get() = texts.getString(if (score.side == "L") R.string.live_side_left else R.string.live_side_right)
 
     /** The winner of the match (or the leader in games when the server left it out) */
     private val matchWinner: Int
@@ -82,7 +89,7 @@ class LiveScoreCard(val score: LiveScore) {
                 val w = matchWinner
                 if (w == 1) gamesText else "${score.gamesWon.second}–${score.gamesWon.first}"
             }
-            isBetween -> "Pauze"
+            isBetween -> texts.getString(R.string.live_chip_break)
             else -> "${score.score.first}–${score.score.second}"
         }
 
@@ -92,12 +99,12 @@ class LiveScoreCard(val score: LiveScore) {
             isFinished -> {
                 val w = matchWinner
                 val (mine, theirs) = if (w == 1) score.gamesWon else score.gamesWon.second to score.gamesWon.first
-                "${name(w)} wint $mine–$theirs"
+                texts.getString(R.string.live_wins, name(w), mine, theirs)
             }
             isBetween && score.games.isNotEmpty() -> {
                 val (a, b) = score.games.last()
                 val w = if (a > b) 1 else 2
-                "${name(w)} wint game ${score.games.size} met ${maxOf(a, b)}–${minOf(a, b)}"
+                texts.getString(R.string.live_wins_game, name(w), score.games.size, maxOf(a, b), minOf(a, b))
             }
             else -> scoreLine
         }
@@ -109,14 +116,14 @@ class LiveScoreCard(val score: LiveScore) {
     val text: String
         get() {
             if (isFinished) return finishedGamesText
-            if (isBetween) return "Games $gamesText · game $currentGameNumber begint zo"
-            if (isWarmup) return "Inspelen · best of ${score.bestOf}"
+            if (isBetween) return texts.getString(R.string.live_text_between, gamesText, currentGameNumber)
+            if (isWarmup) return texts.getString(R.string.live_text_warmup, score.bestOf)
             val ball = gameBallFor
             if (ball != null) {
-                val kind = if (isMatchBall) "Matchbal" else "Gamebal"
-                return "$kind voor ${name(ball)} · games $gamesText"
+                val kind = if (isMatchBall) R.string.live_text_match_ball else R.string.live_text_game_ball
+                return texts.getString(kind, name(ball), gamesText)
             }
-            return "${name(score.server)} serveert $sideText · games $gamesText"
+            return texts.getString(R.string.live_text_serving, name(score.server), sideText, gamesText)
         }
 
     /** The collapsed text of the ongoing notification (Android 9-15) */
@@ -124,8 +131,11 @@ class LiveScoreCard(val score: LiveScore) {
         get() {
             if (isFinished || isBetween || isWarmup) return text
             val ball = gameBallFor
-            if (ball != null) return "Game $currentGameNumber · ${if (isMatchBall) "matchbal" else "gamebal"} ${name(ball)}"
-            return "Game $currentGameNumber · games $gamesText · ${name(score.server)} serveert"
+            if (ball != null) {
+                return texts.getString(if (isMatchBall) R.string.live_compact_match_ball else R.string.live_compact_game_ball,
+                    currentGameNumber, name(ball))
+            }
+            return texts.getString(R.string.live_compact_serving, currentGameNumber, gamesText, name(score.server))
         }
 
     /** "11–8 · 6–11 · 11–7", player 1 first */
@@ -146,12 +156,13 @@ class LiveScoreCard(val score: LiveScore) {
             isFinished -> {
                 val w = matchWinner
                 val (mine, theirs) = if (w == 1) score.gamesWon else score.gamesWon.second to score.gamesWon.first
-                "${name(w)} wint $mine–$theirs"
+                texts.getString(R.string.live_wins, name(w), mine, theirs)
             }
-            isBetween -> "Pauze · game $currentGameNumber begint zo"
-            isWarmup -> "Inspelen · best of ${score.bestOf}"
-            gameBallFor != null -> "Game $currentGameNumber · ${if (isMatchBall) "matchbal" else "gamebal"}"
-            else -> "Game $currentGameNumber · best of ${score.bestOf}"
+            isBetween -> texts.getString(R.string.live_ticker_between, currentGameNumber)
+            isWarmup -> texts.getString(R.string.live_text_warmup, score.bestOf)
+            gameBallFor != null ->
+                texts.getString(if (isMatchBall) R.string.live_ticker_match_ball else R.string.live_ticker_game_ball, currentGameNumber)
+            else -> texts.getString(R.string.live_ticker_game, currentGameNumber, score.bestOf)
         }
 
     /** The first letter of the name, for the avatar without a photo */
@@ -159,7 +170,7 @@ class LiveScoreCard(val score: LiveScore) {
 
     /** "serveert rechts" under the server's name; null for the other player and after the match */
     fun serveText(player: Int): String? =
-        if (!isFinished && score.server == player) "serveert $sideText" else null
+        if (!isFinished && score.server == player) texts.getString(R.string.live_serves, sideText) else null
 
     fun gamesWon(player: Int): Int = if (player == 1) score.gamesWon.first else score.gamesWon.second
 

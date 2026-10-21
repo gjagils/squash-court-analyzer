@@ -8,6 +8,19 @@ export const LAST_POINT_MAX = 80;
 export const MAX_BODY_BYTES = 4096;
 export const MAX_PHOTO_BYTES = 24 * 1024;
 
+/** The languages of the alerts and link previews; "nl" is the default */
+export const LANGS = ['nl', 'en'];
+
+/**
+ * The `lang` an app (3.0 and later) sends: "en" or "nl", also as "en-GB" or
+ * "EN". Anything else, or none (older apps), is Dutch.
+ */
+export function cleanLang(value) {
+  if (typeof value !== 'string') return 'nl';
+  const base = value.trim().toLowerCase().split(/[-_]/)[0];
+  return LANGS.includes(base) ? base : 'nl';
+}
+
 /**
  * First name only, letters/hyphen/apostrophe, as LiveSnapshot.firstName in the
  * app; a first name may carry one or two surname letters when two players share

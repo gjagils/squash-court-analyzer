@@ -109,7 +109,7 @@ struct SportsPanel<Content: View>: View {
 /// `CloseButton` top left in a navigation bar, without the glass capsule
 /// iOS 26 puts around toolbar buttons, so it looks like the one on Spelers
 struct CloseToolbarItem: ToolbarContent {
-    var title: String = "Sluiten"
+    var title: String = String(localized: "Sluiten")
     let action: () -> Void
 
     var body: some ToolbarContent {

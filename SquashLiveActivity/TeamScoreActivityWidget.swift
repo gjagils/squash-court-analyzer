@@ -22,7 +22,7 @@ struct TeamScoreActivityWidget: Widget {
                 DynamicIslandExpandedRegion(.leading) {
                     HStack(spacing: 5) {
                         LiveScoreMark(size: 12)
-                        LiveScorePill(text: state.isFinished ? "AFGELOPEN" : "LIVE", live: !state.isFinished)
+                        LiveScorePill(text: state.isFinished ? String(localized: "AFGELOPEN") : "LIVE", live: !state.isFinished)
                     }
                         .padding(.leading, 6)
                         .frame(maxHeight: .infinity)
@@ -266,7 +266,7 @@ struct TeamScoreFocusView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(state.name(slot: slot, side: side) + (partij?.isServing(side) == true ? ", serveert" : ""))
+        .accessibilityLabel(state.name(slot: slot, side: side) + (partij?.isServing(side) == true ? String(localized: ", serveert") : ""))
     }
 
     @ViewBuilder
@@ -329,7 +329,7 @@ struct TeamScoreStrip: View {
             colour = LiveScoreColors.live
             fill = LiveScoreColors.live.opacity(0.1)
             line = LiveScoreColors.live
-            text = "bezig"
+            text = String(localized: "bezig")
         case .waiting:
             colour = LiveScoreColors.textSecondary.opacity(0.7)
             fill = Color.clear
@@ -378,12 +378,12 @@ struct TeamScoreTeamLine: View {
             VStack(spacing: 1) {
                 HStack(spacing: 6) {
                     TeamScoreGamesBox(games: state.partijenWon(1), side: 1, won: state.isFinished && state.teamWinner == 1,
-                                      size: boxSize, unit: "partijen")
+                                      size: boxSize, unit: String(localized: "partijen"))
                     Text("–")
                         .font(.system(size: boxSize - 1, weight: .bold, design: .rounded))
                         .foregroundColor(LiveScoreColors.textSecondary)
                     TeamScoreGamesBox(games: state.partijenWon(2), side: 2, won: state.isFinished && state.teamWinner == 2,
-                                      size: boxSize, unit: "partijen")
+                                      size: boxSize, unit: String(localized: "partijen"))
                 }
                 if caption {
                     Text("partijen")
@@ -568,7 +568,7 @@ struct TeamScoreGamesBox: View {
             .clipShape(RoundedRectangle(cornerRadius: size * 0.45))
             .overlay(RoundedRectangle(cornerRadius: size * 0.45)
                 .stroke(won ? colour : (games == nil ? LiveScoreColors.border : line), lineWidth: 1))
-            .accessibilityLabel(games.map { value in "\(value) \(unit)" } ?? "nog niet begonnen")
+            .accessibilityLabel(games.map { value in "\(value) \(unit)" } ?? String(localized: "nog niet begonnen"))
     }
 }
 

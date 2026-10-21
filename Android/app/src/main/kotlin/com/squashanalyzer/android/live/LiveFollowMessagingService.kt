@@ -40,9 +40,9 @@ class LiveFollowMessagingService : FirebaseMessagingService() {
             // "Melding bij elke game": a game (partij) won or the result, as a separate heads-up
             val alert = LiveAlerts.from(data, LiveAlerts.isOn(context))
             if (match.isTeam) {
-                val stand = TeamScore.parse(data["team"] ?: return) ?: return
+                val stand = TeamScore.parse(data["team"] ?: return, context) ?: return
                 // Ended before all four partijen were decided (stopped, or the alarm): nothing to show any more
-                if (ended && !TeamScoreCard(stand).isFinished) notifier.cancel(match)
+                if (ended && !TeamScoreCard(stand, context).isFinished) notifier.cancel(match)
                 else notifier.showTeam(match, stand, quiet = alert != null)
             } else {
                 val score = LiveScoreJson.parse(data["snapshot"] ?: return) ?: return

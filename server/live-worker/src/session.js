@@ -10,15 +10,17 @@
 
 import { ViewerSession } from './viewer-session.js';
 import { scoreAlert } from './push.js';
+import { LANGS } from './validate.js';
 
 export class LiveSession extends ViewerSession {
   /** Creates the session; false when this id is already in use */
-  async create(key, snapshot, id) {
+  async create(key, snapshot, id, lang = 'nl') {
     if (await this.ctx.storage.get('key')) return false;
     const now = Date.now();
     // The id is kept in storage too: the limiter is released by it, and the
-    // name of a jurisdiction object id must not be what that depends on
-    await this.ctx.storage.put({ key, snapshot, id, updatedAt: now, photoVersion: 0 });
+    // name of a jurisdiction object id must not be what that depends on.
+    // `lang` is the starter's language, for the link preview.
+    await this.ctx.storage.put({ key, snapshot, id, updatedAt: now, photoVersion: 0, lang });
     await this.scheduleIdleAlarm(now);
     return true;
   }
@@ -98,7 +100,9 @@ export class LiveSession extends ViewerSession {
     const event = await this.followerEvent(snapshot.status === 'finished');
     if (!event) return;
     const content = { kind: 'live', state: snapshot };
-    this.schedulePush(await this.pushJob(event, followers, content, scoreAlert(previous, snapshot)));
+    // The alert in every language; each follower gets its own
+    const alert = Object.fromEntries(LANGS.map((lang) => [lang, scoreAlert(previous, snapshot, lang)]));
+    this.schedulePush(await this.pushJob(event, followers, content, alert.nl ? alert : null));
   }
 
   /** The last stand, for the end the followers get when the session goes */

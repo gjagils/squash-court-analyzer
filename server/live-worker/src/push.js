@@ -7,6 +7,8 @@
 //
 // `pushDeps.fetch` and `pushDeps.now` can be replaced in tests.
 
+import { cleanLang, LANGS } from './validate.js';
+
 export const pushDeps = {
   fetch: (...args) => fetch(...args),
   now: () => Date.now(),
@@ -66,11 +68,11 @@ export function validateFollower(input) {
   if (input.platform === 'ios') {
     const token = input.token.toLowerCase();
     if (!IOS_TOKEN.test(token)) return null;
-    return { platform: 'ios', token, sandbox: input.sandbox === true, alerts: input.alerts !== false };
+    return { platform: 'ios', token, sandbox: input.sandbox === true, alerts: input.alerts !== false, lang: cleanLang(input.lang) };
   }
   if (input.platform === 'android') {
     if (!ANDROID_TOKEN.test(input.token)) return null;
-    return { platform: 'android', token: input.token, sandbox: false, alerts: input.alerts !== false };
+    return { platform: 'android', token: input.token, sandbox: false, alerts: input.alerts !== false, lang: cleanLang(input.lang) };
   }
   return null;
 }
@@ -169,12 +171,30 @@ export function clearPushTokenCaches() {
 
 // ---- Payloads -------------------------------------------------------------
 
-/** "Jan wint 3–1", or null when the snapshot has no winner */
-export function resultLine(snapshot) {
+/**
+ * The words of the alerts per language ("nl" is the default; a follower from
+ * before 3.0 has no `lang` and gets Dutch). Names, scores and "E1"-"E4" are
+ * the same in both.
+ */
+const ALERT_WORDS = {
+  nl: {
+    wins: 'wint', result: 'Uitslag', gameFor: 'voor', draw: 'gelijkspel', partijen: 'partijen', done: 'klaar',
+    retired: 'opgave', walkover: 'walkover',
+  },
+  en: {
+    wins: 'wins', result: 'Result', gameFor: 'to', draw: 'draw', partijen: 'matches', done: 'done',
+    retired: 'retired', walkover: 'walkover',
+  },
+};
+
+const wordsFor = (lang) => ALERT_WORDS[lang] || ALERT_WORDS.nl;
+
+/** "Jan wint 3–1" ("Jan wins 3–1" in English), or null when the snapshot has no winner */
+export function resultLine(snapshot, lang = 'nl') {
   if (snapshot.winner !== 1 && snapshot.winner !== 2) return null;
   const name = snapshot.winner === 1 ? snapshot.p1 : snapshot.p2;
   const [a, b] = snapshot.gamesWon;
-  return `${name} wint ${Math.max(a, b)}–${Math.min(a, b)}`;
+  return `${name} ${wordsFor(lang).wins} ${Math.max(a, b)}–${Math.min(a, b)}`;
 }
 
 /** The game scores as "11–7 · 8–11" */
@@ -187,11 +207,12 @@ function gamesLine(snapshot) {
  * only at the end of a game and at the end of the match, never per rally.
  * { title, body } or null. Older followers (no `alerts`) get it too.
  */
-export function scoreAlert(previous, snapshot) {
+export function scoreAlert(previous, snapshot, lang = 'nl') {
+  const words = wordsFor(lang);
   if (snapshot.status === 'finished') {
-    const line = resultLine(snapshot);
+    const line = resultLine(snapshot, lang);
     if (!line || (previous && previous.status === 'finished')) return null;
-    return { title: `Uitslag: ${line}`, body: `${snapshot.p1} – ${snapshot.p2} · ${gamesLine(snapshot)}` };
+    return { title: `${words.result}: ${line}`, body: `${snapshot.p1} – ${snapshot.p2} · ${gamesLine(snapshot)}` };
   }
   if (!previous || snapshot.games.length <= previous.games.length || snapshot.games.length === 0) return null;
   const last = snapshot.games[snapshot.games.length - 1];
@@ -199,7 +220,7 @@ export function scoreAlert(previous, snapshot) {
   const winner = last[0] > last[1] ? snapshot.p1 : snapshot.p2;
   const [a, b] = snapshot.gamesWon;
   return {
-    title: `Game ${snapshot.games.length} voor ${winner}`,
+    title: `Game ${snapshot.games.length} ${words.gameFor} ${winner}`,
     body: `${snapshot.p1} – ${snapshot.p2}: ${last[0]}–${last[1]} · games ${a}–${b}`,
   };
 }
@@ -296,7 +317,8 @@ export function teamWinner(partijen) {
   return partijWinner(partijen[1]);
 }
 
-export function teamAlert(previous, team, partijen) {
+export function teamAlert(previous, team, partijen, lang = 'nl') {
+  const words = wordsFor(lang);
   const before = previous || {};
   const [home, away] = teamGames(partijen);
   if (teamDecided(partijen)) {
@@ -309,21 +331,21 @@ export function teamAlert(previous, team, partijen) {
     const winner = teamWinner(partijen);
     // The winner's games first, as the WhatsApp report ("wint met 8–9" can happen)
     const title = winner === 0
-      ? `Uitslag: gelijkspel ${home}–${away}`
-      : `Uitslag: ${winner === 1 ? team.home : team.away} wint ${winner === 1 ? home : away}–${winner === 1 ? away : home}`;
-    return { title, body: `${team.home} – ${team.away} · partijen ${won[0]}–${won[1]}` };
+      ? `${words.result}: ${words.draw} ${home}–${away}`
+      : `${words.result}: ${winner === 1 ? team.home : team.away} ${words.wins} ${winner === 1 ? home : away}–${winner === 1 ? away : home}`;
+    return { title, body: `${team.home} – ${team.away} · ${words.partijen} ${won[0]}–${won[1]}` };
   }
   for (const slot of TEAM_SLOTS) {
     const partij = partijen[slot];
     if (!partijDecided(partij) || partijDecided(before[slot])) continue;
     const winner = partijWinner(partij);
-    let line = 'klaar';
+    let line = words.done;
     if (winner) {
       const name = (winner === 1 ? partij.p1 : partij.p2) || `${winner === 1 ? team.home : team.away} E${slot}`;
       const [a, b] = partij.gamesWon;
-      const how = partij.end === 'retired' ? '(opgave)' : partij.end === 'walkover' ? '(walkover)'
+      const how = partij.end === 'retired' ? `(${words.retired})` : partij.end === 'walkover' ? `(${words.walkover})`
         : `${Math.max(a, b)}–${Math.min(a, b)}`;
-      line = `${name} wint ${how}`;
+      line = `${name} ${words.wins} ${how}`;
     }
     return { title: `E${slot}: ${line}`, body: `${team.home} ${home} – ${away} ${team.away}` };
   }
@@ -420,6 +442,16 @@ async function sendFcm(account, follower, id, server, snapshot, event, alert, ki
   return { result: 'error', detail };
 }
 
+/**
+ * The alert of a push in one language: `alert` is { title, body } (the same
+ * for everyone), { nl, en } (one per language, each may be null) or null
+ */
+export function alertIn(alert, lang) {
+  if (!alert) return null;
+  if (typeof alert.title === 'string') return alert;
+  return alert[lang] || alert.nl || null;
+}
+
 /** Runs `task` over `items` with at most `limit` at once */
 async function eachLimited(items, limit, task) {
   let next = 0;
@@ -439,14 +471,20 @@ async function eachLimited(items, limit, task) {
  * configuration are skipped. Returns the followers whose token is dead, to be
  * forgotten.
  */
+/**
+ * `alert`: see alertIn. A follower gets it in the `lang` it registered with
+ * (Dutch when it has none).
+ */
 export async function pushToFollowers(env, { id, server, snapshot, event, followers, alert = null, kind = 'live', finished }) {
   const apns = apnsSettings(env);
   const fcm = fcmServiceAccount(env);
   const nowMs = pushDeps.now();
   const done = finished === undefined ? snapshot.status === 'finished' : finished;
-  // Followers who turned the game alerts off get the same stand without one
-  const apnsWithAlert = apnsPayload(snapshot, event, nowMs, alert, done);
+  // Followers who turned the game alerts off get the same stand without one;
+  // the others get it in their language
   const apnsQuiet = apnsPayload(snapshot, event, nowMs, null, done);
+  const apnsWithAlert = {};
+  for (const lang of LANGS) apnsWithAlert[lang] = apnsPayload(snapshot, event, nowMs, alertIn(alert, lang), done);
   const dead = [];
   // What the services answered, counted (no tokens or names): "apns 200": 3
   const answers = {};
@@ -454,10 +492,11 @@ export async function pushToFollowers(env, { id, server, snapshot, event, follow
     let outcome = { result: 'skip', detail: `${follower.platform} off` };
     try {
       const wantsAlert = follower.alerts !== false;
+      const lang = cleanLang(follower.lang);
       if (follower.platform === 'ios' && apns) {
-        outcome = await sendApns(apns, follower, wantsAlert ? apnsWithAlert : apnsQuiet, nowMs);
+        outcome = await sendApns(apns, follower, wantsAlert ? apnsWithAlert[lang] : apnsQuiet, nowMs);
       } else if (follower.platform === 'android' && fcm) {
-        outcome = await sendFcm(fcm, follower, id, server, snapshot, event, wantsAlert ? alert : null, kind);
+        outcome = await sendFcm(fcm, follower, id, server, snapshot, event, wantsAlert ? alertIn(alert, lang) : null, kind);
       }
     } catch (error) {
       console.error(`${follower.platform} push error`, error && error.message);

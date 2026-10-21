@@ -1,5 +1,7 @@
 package com.squashanalyzer.android.backup
 
+import com.squashanalyzer.android.R
+import com.squashanalyzer.android.hostText
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -42,7 +44,7 @@ class AutoBackup(
 
     private fun folder(): DocumentFile? = folderUri()?.let { DocumentFile.fromTreeUri(activity, it) }
 
-    override fun folderName(): String? = folderUri()?.let { folder()?.name ?: "gekozen map" }
+    override fun folderName(): String? = folderUri()?.let { folder()?.name ?: activity.hostText(R.string.backup_folder_chosen) }
 
     override fun lastBackupDate(): Date? =
         prefs.getLong(KEY_LAST, 0L).takeIf { it > 0 }?.let { Date(timeIntervalSince1970 = it / 1000.0) }
@@ -84,7 +86,7 @@ class AutoBackup(
     }
 
     private suspend fun backUp() {
-        val target = requireNotNull(folder()) { "De back-upmap is niet meer bereikbaar" }
+        val target = requireNotNull(folder()) { activity.hostText(R.string.backup_folder_gone) }
         val data = BackupCodec.encode(store.makeBackup(), appVersion = appVersion, createdAt = Date())
         withContext(Dispatchers.IO) { writeAndRotate(activity, target, data.platformValue, AutoBackupPlan.fileName(at = Date())) }
         prefs.edit().putLong(KEY_LAST, System.currentTimeMillis()).apply()
@@ -101,9 +103,9 @@ class AutoBackup(
          */
         fun writeAndRotate(context: Context, folder: DocumentFile, bytes: ByteArray, name: String) {
             val base = name.removeSuffix(".json")
-            val file = requireNotNull(folder.createFile("application/json", base)) { "Kan geen bestand maken in de back-upmap" }
+            val file = requireNotNull(folder.createFile("application/json", base)) { context.hostText(R.string.backup_file_create_failed) }
             if (file.name?.endsWith(".json") != true) file.renameTo("$base.json")
-            requireNotNull(context.contentResolver.openOutputStream(file.uri, "wt")) { "Kan het back-upbestand niet schrijven" }
+            requireNotNull(context.contentResolver.openOutputStream(file.uri, "wt")) { context.hostText(R.string.backup_file_write_failed) }
                 .use { it.write(bytes) }
             val files = folder.listFiles().filter { it.isFile }
             val names = files.mapNotNull { it.name }

@@ -2,6 +2,7 @@
   "sourceLanguage" : "nl",
   "strings" : {
     " Laatste: %@." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -12,6 +13,7 @@
       }
     },
     " Testers vinden de nieuwe versie in TestFlight." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -22,6 +24,7 @@
       }
     },
     "%@ verwijderen?" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -32,6 +35,7 @@
       }
     },
     "%@ wint %lld-%lld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -42,6 +46,7 @@
       }
     },
     "%lld badges" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -52,6 +57,7 @@
       }
     },
     "%lld spelers, %lld wedstrijden, %lld losse games." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -62,6 +68,7 @@
       }
     },
     "%lld van %lld badges" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -72,6 +79,7 @@
       }
     },
     "%lld van 4 klaar" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -82,6 +90,7 @@
       }
     },
     "'%@' gebruikt een niet-ondersteunde compressie." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -92,6 +101,7 @@
       }
     },
     "'%@' in het zip-bestand is beschadigd." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -102,6 +112,7 @@
       }
     },
     "'%@' staat in iCloud Drive, in de Bestanden-app onder iCloud Drive → Squash Analyzer." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -112,6 +123,7 @@
       }
     },
     "6 vakken" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -122,6 +134,7 @@
       }
     },
     "9 vakken" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -132,6 +145,7 @@
       }
     },
     "AFGELOPEN" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -142,6 +156,7 @@
       }
     },
     "AI Coach" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -152,6 +167,7 @@
       }
     },
     "AI advies werkt alleen met internetverbinding" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -162,6 +178,7 @@
       }
     },
     "API key geconfigureerd" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -172,6 +189,7 @@
       }
     },
     "API key niet opgeslagen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -182,6 +200,7 @@
       }
     },
     "Afgelopen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -192,6 +211,7 @@
       }
     },
     "Alle badges" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -202,6 +222,7 @@
       }
     },
     "Alles vervangen?" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -212,6 +233,7 @@
       }
     },
     "Annuleren" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -222,6 +244,7 @@
       }
     },
     "BADGEKAART" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -232,6 +255,7 @@
       }
     },
     "BEWAAR API KEY" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -242,6 +266,7 @@
       }
     },
     "BEWAAR TEAMLINK" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -252,6 +277,7 @@
       }
     },
     "Baanindeling" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -262,6 +288,7 @@
       }
     },
     "Back-up" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -272,6 +299,7 @@
       }
     },
     "Back-up hersteld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -282,6 +310,7 @@
       }
     },
     "Back-up mislukt" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -292,6 +321,7 @@
       }
     },
     "Back-up opgeslagen!" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -302,6 +332,7 @@
       }
     },
     "Back-up toegevoegd" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -312,6 +343,7 @@
       }
     },
     "Badge %@, nog niet verdiend" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -322,6 +354,7 @@
       }
     },
     "Badges" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -332,6 +365,7 @@
       }
     },
     "Basis advies werkt altijd, ook zonder API key" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -342,6 +376,7 @@
       }
     },
     "Bewerken" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -352,6 +387,7 @@
       }
     },
     "Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak: voorin Drop, Boast en Kill, in het midden Kill, Drive, Cross en Boast, achterin Drive, Cross en Lob." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -362,6 +398,7 @@
       }
     },
     "Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -372,6 +409,7 @@
       }
     },
     "Bijwerken bij %@" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -382,6 +420,7 @@
       }
     },
     "DELEN" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -392,6 +431,7 @@
       }
     },
     "De lokale database kon niet worden geopend. De originele bestanden zijn behouden in %@. Deze sessie gebruikt tijdelijke opslag; exporteer geen vervangende backup voordat de database is hersteld." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -402,6 +442,7 @@
       }
     },
     "De sleutel kon niet in de iPhone-sleutelhanger worden bewaard. Probeer het opnieuw." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -412,6 +453,7 @@
       }
     },
     "De wedstrijd is geïmporteerd." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -422,6 +464,7 @@
       }
     },
     "De wedstrijd kon niet worden opgeslagen: %@" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -432,6 +475,7 @@
       }
     },
     "Dit bestand is geen zip-bestand." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -442,6 +486,7 @@
       }
     },
     "E%lld pauze" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -452,6 +497,7 @@
       }
     },
     "E%lld · bezig" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -462,6 +508,7 @@
       }
     },
     "E%lld · inspelen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -472,6 +519,7 @@
       }
     },
     "E%lld · pauze" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -482,6 +530,7 @@
       }
     },
     "Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in iCloud Drive (Bestanden → iCloud Drive → Squash Analyzer). De 7 nieuwste blijven bewaard. Ook terug te zetten op Android." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -492,6 +541,7 @@
       }
     },
     "Foto verwijderen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -502,6 +552,7 @@
       }
     },
     "Foto's van de spelers meesturen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -512,6 +563,7 @@
       }
     },
     "GAMEBAL" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -522,6 +574,7 @@
       }
     },
     "Game %lld · best of %lld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -532,6 +585,7 @@
       }
     },
     "Geen API key ingesteld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -542,6 +596,7 @@
       }
     },
     "Geen toegang tot bestand" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -552,6 +607,7 @@
       }
     },
     "Gespeelde wedstrijden blijven bewaard." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -562,6 +618,7 @@
       }
     },
     "Geïmporteerd: %@" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -572,6 +629,7 @@
       }
     },
     "Import gelukt!" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -582,6 +640,7 @@
       }
     },
     "Import mislukt" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -592,6 +651,7 @@
       }
     },
     "Importeer team" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -602,6 +662,7 @@
       }
     },
     "Importeren" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -612,6 +673,7 @@
       }
     },
     "Inspelen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -622,6 +684,7 @@
       }
     },
     "Instellingen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -632,6 +695,7 @@
       }
     },
     "Internet vereist" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -642,6 +706,7 @@
       }
     },
     "Je API key wordt veilig opgeslagen in de Keychain" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -652,6 +717,7 @@
       }
     },
     "Kies speler" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -662,6 +728,7 @@
       }
     },
     "Knop LIVE bij Scheidsrechter en Coach" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -672,6 +739,7 @@
       }
     },
     "Koppel aan" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -682,6 +750,7 @@
       }
     },
     "Koppelen mislukt" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -692,6 +761,7 @@
       }
     },
     "Kosten" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -702,6 +772,7 @@
       }
     },
     "Later" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -712,6 +783,7 @@
       }
     },
     "Link niet te openen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -722,6 +794,7 @@
       }
     },
     "Live meekijken" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -732,6 +805,7 @@
       }
     },
     "Lokaal advies" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -742,6 +816,7 @@
       }
     },
     "MATCHBAL" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -752,6 +827,7 @@
       }
     },
     "Melding bij elke game" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -762,6 +838,7 @@
       }
     },
     "Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -772,6 +849,7 @@
       }
     },
     "Mijn team" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -782,6 +860,7 @@
       }
     },
     "NU NAAR ICLOUD" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -792,6 +871,7 @@
       }
     },
     "Naar de App Store" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -802,6 +882,7 @@
       }
     },
     "Nieuwe speler %@" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -812,6 +893,7 @@
       }
     },
     "Nog geen badges verdiend" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -822,6 +904,7 @@
       }
     },
     "Nog geen spelers opgeslagen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -832,6 +915,7 @@
       }
     },
     "OK" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -842,6 +926,7 @@
       }
     },
     "OPENAI API KEY" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -852,6 +937,7 @@
       }
     },
     "OPGESLAGEN!" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -862,6 +948,7 @@
       }
     },
     "Opslaan" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -872,6 +959,7 @@
       }
     },
     "Over AI Coach" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -882,6 +970,7 @@
       }
     },
     "PARTIJEN" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -892,6 +981,7 @@
       }
     },
     "PAUZE" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -902,6 +992,7 @@
       }
     },
     "Pauze" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -912,6 +1003,7 @@
       }
     },
     "Plak de teamlink die je hebt gekregen." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -922,6 +1014,7 @@
       }
     },
     "SPELER BEWERKEN" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -932,6 +1025,7 @@
       }
     },
     "SPELER TOEVOEGEN" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -942,6 +1036,7 @@
       }
     },
     "Sluiten" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -952,6 +1047,7 @@
       }
     },
     "Spelers" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -962,6 +1058,7 @@
       }
     },
     "Spelerskaart" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -972,6 +1069,7 @@
       }
     },
     "Stand op vergrendelscherm" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -982,6 +1080,7 @@
       }
     },
     "TEAM" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -992,6 +1091,7 @@
       }
     },
     "TERUGZETTEN" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1002,6 +1102,7 @@
       }
     },
     "Taal" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1012,6 +1113,7 @@
       }
     },
     "Team importeren" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1022,6 +1124,7 @@
       }
     },
     "Team via link" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1032,6 +1135,7 @@
       }
     },
     "Teamlink opgeslagen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1042,6 +1146,7 @@
       }
     },
     "Teamlink verwijderd" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1052,6 +1157,7 @@
       }
     },
     "Terug" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1062,6 +1168,7 @@
       }
     },
     "Terugzetten mislukt" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1072,6 +1179,7 @@
       }
     },
     "Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen op het beginscherm." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1082,6 +1190,7 @@
       }
     },
     "Tik op + om een speler toe te voegen,\nof importeer een team (zip met team.json en foto's)" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1092,6 +1201,7 @@
       }
     },
     "Uit bestand (zip)" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1102,6 +1212,7 @@
       }
     },
     "Uitslag" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1112,6 +1223,7 @@
       }
     },
     "Uitslag: %@ wint %lld–%lld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1122,6 +1234,7 @@
       }
     },
     "Uitslag: gelijkspel %lld–%lld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1132,6 +1245,7 @@
       }
     },
     "VERWIJDER" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1142,6 +1256,7 @@
       }
     },
     "Veilig" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1152,6 +1267,7 @@
       }
     },
     "Veilige tijdelijke opslag actief" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1162,6 +1278,7 @@
       }
     },
     "Vervang alles" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1172,6 +1289,7 @@
       }
     },
     "Verwijder %@" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1182,6 +1300,7 @@
       }
     },
     "Verwijderen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1192,6 +1311,7 @@
       }
     },
     "Via link" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1202,6 +1322,7 @@
       }
     },
     "Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1212,6 +1333,7 @@
       }
     },
     "Voeg toe" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1222,6 +1344,7 @@
       }
     },
     "Volgende partij · E%lld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1232,6 +1355,7 @@
       }
     },
     "Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1242,6 +1366,7 @@
       }
     },
     "WEDSTRIJD IMPORTEREN" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1252,6 +1377,7 @@
       }
     },
     "Waar vind ik mijn teamlink?" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1262,6 +1388,7 @@
       }
     },
     "Weergave" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1272,6 +1399,7 @@
       }
     },
     "Wekelijkse back-up naar iCloud" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1282,6 +1410,7 @@
       }
     },
     "Wil je alle bestaande data verwijderen en vervangen door de back-up, of de back-up toevoegen aan wat er al is?" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1292,6 +1421,7 @@
       }
     },
     "de Application Support-map" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1302,6 +1432,7 @@
       }
     },
     "games %lld–%lld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1312,6 +1443,7 @@
       }
     },
     "iCloud Drive is niet beschikbaar. Controleer of je bent ingelogd bij iCloud en iCloud Drive is ingeschakeld in Instellingen → Squash Analyzer." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1322,6 +1454,7 @@
       }
     },
     "opgave" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1332,6 +1465,7 @@
       }
     },
     "serveert links" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1342,6 +1476,7 @@
       }
     },
     "serveert rechts" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1352,6 +1487,7 @@
       }
     },
     "w.o." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1362,6 +1498,7 @@
       }
     },
     "zelfde naam" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1372,6 +1509,7 @@
       }
     },
     "~€0.01 per analyse (het goedkoopste beschikbare model)" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {

@@ -2,6 +2,7 @@
   "sourceLanguage" : "nl",
   "strings" : {
     "%@ wint %lld-%lld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -12,6 +13,7 @@
       }
     },
     "%lld games" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -22,6 +24,7 @@
       }
     },
     "%lld van 4 klaar" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -32,6 +35,7 @@
       }
     },
     ", serveert" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -42,6 +46,7 @@
       }
     },
     "AFGELOPEN" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -52,6 +57,7 @@
       }
     },
     "Afgelopen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -62,6 +68,7 @@
       }
     },
     "E%lld pauze" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -72,6 +79,7 @@
       }
     },
     "E%lld · bezig" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -82,6 +90,7 @@
       }
     },
     "E%lld · inspelen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -92,6 +101,7 @@
       }
     },
     "E%lld · pauze" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -102,6 +112,7 @@
       }
     },
     "GAMEBAL" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -112,6 +123,7 @@
       }
     },
     "Game %lld · best of %lld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -122,6 +134,7 @@
       }
     },
     "Inspelen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -132,6 +145,7 @@
       }
     },
     "MATCHBAL" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -142,6 +156,7 @@
       }
     },
     "Opslag" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -152,6 +167,7 @@
       }
     },
     "PAUZE" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -162,6 +178,7 @@
       }
     },
     "Pauze" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -172,6 +189,7 @@
       }
     },
     "Uitslag" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -182,6 +200,7 @@
       }
     },
     "Uitslag: %@ wint %lld–%lld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -192,6 +211,7 @@
       }
     },
     "Uitslag: gelijkspel %lld–%lld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -202,6 +222,7 @@
       }
     },
     "Volgende partij · E%lld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -212,6 +233,7 @@
       }
     },
     "bezig" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -222,6 +244,7 @@
       }
     },
     "games" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -232,6 +255,7 @@
       }
     },
     "games %lld–%lld" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -242,6 +266,7 @@
       }
     },
     "nog niet begonnen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -252,6 +277,7 @@
       }
     },
     "opgave" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -262,6 +288,7 @@
       }
     },
     "partijen" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -272,6 +299,7 @@
       }
     },
     "pauze" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -282,6 +310,7 @@
       }
     },
     "serveert links" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -292,6 +321,7 @@
       }
     },
     "serveert rechts" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -302,6 +332,7 @@
       }
     },
     "spelers nog niet bekend" : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -312,6 +343,7 @@
       }
     },
     "w.o." : {
+      "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {

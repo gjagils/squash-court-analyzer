@@ -185,22 +185,31 @@ de actuele test- en releaseprocedure. Oudere fasen zijn geen open backlog.
 
 De zichtbare deelopties zijn **Scorekaart, Verslag en Plaatje** (`MatchShareChoice`). `MatchShareReport` levert de gedeelde tekstgegevens voor coach- en scheidsrechtermodus. `MatchShareStyle` bevat intern ook nog Kort; dat is geen vierde zichtbare deeloptie. De gedeelde UI verzorgt tekst en afbeelding op beide platforms.
 
-## Taal (besluit T24, 3 oktober 2026)
+## Taal (Nederlands en Engels, 21 oktober 2026)
 
-De app is alleen Nederlands: de spelers en testers zijn Nederlandse en Belgische
-squashers, en een tweede taal betekent elke tekst twee keer bijhouden (ook in de
-handleiding, de releasenotes en de website). Er komt dus geen
-`Localizable.xcstrings`; teksten staan gewoon in de code.
+Nederlands is de brontaal en leest precies als voorheen; een telefoon die niet op
+Nederlands staat (ook Duits of Frans) krijgt Engels. In Instellingen → Taal kies
+je Telefoon, Nederlands of English voor de hele app, het vergrendelscherm en de
+meldingen. (Het besluit T24 van 3 oktober, alleen Nederlands, is hiermee op 21
+oktober teruggedraaid.) De werking, de regels en de woordenlijst staan in
+`docs/i18n.md`; kort:
 
-- `defaultLocalization: "nl"` in `Packages/SquashAnalyzerUI/Package.swift` blijft:
-  het zegt alleen in welke taal de teksten staan (systeemknoppen zoals "Annuleren"
-  in sheets en de datum-/getalnotatie volgen het toestel). De Core heeft geen
-  teksten als resource; daar maakt `"en"` niets uit.
+- `AppLanguage.current` (Core) is de ene taalkeuze: de keuze in Instellingen
+  (`appLanguage` in UserDefaults), anders de eerste taal van de telefoon.
+- Core: `L10n.text("Nederlandse tekst", …)` zoekt in
+  `Resources/en.lproj/Localizable.strings` (`.strings`, zodat SwiftPM, Linux en
+  Skip hetzelfde doen); `check-strings.py` bewaakt de dekking.
+- UI-package, iPhone-app en widget: `Localizable.xcstrings` met de Nederlandse
+  tekst als sleutel en een nl- én en-waarde; `Text("…", bundle: textBundle)` /
+  `loc()` in het package, `appText()` in de app, `widgetText()` in de widget.
+- Android: de app zet zijn eigen taal (`AppCompatDelegate.setApplicationLocales`);
+  hostteksten in `values/` en `values-en/` via `HostLocale`.
+- Nooit vertalen wat opgeslagen, vergeleken of verstuurd wordt (raw values,
+  JSON-velden, SBN-gegevens, teamnamen); toon zo'n waarde via een `title`.
 - Squashtermen blijven zoals spelers ze zeggen: Winner, Let, Stroke, Undo, rally,
-  Heatmap, best of 5, Down/Out. Een Nederlandse vertaling ("ongedwongen fout"
-  voor Unforced error) staat er alleen als uitleg onder.
-- Mocht er ooit een Engelse versie komen: Skip ondersteunt één `.xcstrings` in
-  het UI-package voor iOS en Android tegelijk; begin daar, niet in de iOS-app.
+  Heatmap, best of 5, Down/Out.
+- De live-server krijgt `lang` mee (alertteksten, linkvoorbeeld); de website
+  heeft `/en/` met Engelse handleidingen.
 
 ## Tests
 

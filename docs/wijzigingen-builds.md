@@ -10,6 +10,21 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 4)
 
+- **Engelse variant en Instellingen → Taal (21 oktober 2026, iOS, Android, live-server en
+  website, Gerd-Jan)**: Nederlands blijft de brontaal en leest precies als voorheen; een
+  telefoon die niet op Nederlands staat (ook Duits of Frans) krijgt Engels. In Instellingen
+  staat een rij **Taal** met Telefoon / Nederlands / English voor de hele app, het
+  vergrendelscherm en de meldingen (sleutel `appLanguage`; op Android zet de app ook zijn
+  eigen taal via `AppCompatDelegate.setApplicationLocales`). Mechanisme: Core via `L10n`
+  met `en.lproj` (de Nederlandse tekst is de sleutel), UI-package, iPhone-app en widget via
+  `Localizable.xcstrings` met een nl- én en-waarde per sleutel, Android-hostteksten via
+  `values/` en `values-en/` (`HostLocale`). De live-server krijgt `lang` mee voor de
+  alertteksten en het linkvoorbeeld; de website heeft `/en/` met Engelse handleidingen.
+  Uitleg en woordenlijst in `docs/i18n.md`. Daarna op 21 oktober: iPhone-alerts, menu's en
+  knoppen volgen ook de keuze (via `appText`), Android-meldingen vóór Android 13 ook
+  (`HostLocale` leest de keuze), en de iOS-testsuites zetten Nederlands vast zodat ze ook
+  op een Engelse simulator groen zijn.
+  - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 - **Dubbele voornamen in een teamwedstrijd (21 oktober 2026, iOS, Android en server,
   Gerd-Jan)**: live, op het vergrendelscherm en in de meldingen blijft het de voornaam,
   maar heeft een andere bekende speler dezelfde voornaam (in de teamwedstrijd of in Mijn

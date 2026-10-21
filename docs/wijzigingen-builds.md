@@ -8,7 +8,32 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.0 build 4)
+## Volgende build (na 3.0 build 5)
+
+- **Competitiewedstrijd op het vergrendelscherm, ontwerp B (20 oktober 2026, branch
+  `claude/teamscore-lockscreen-b`, nog NIET op `main`; Gerd-Jan beoordeelt eerst)**:
+  iPhone en Android 9–15. Tijdens de avond bovenaan groot de partij die nu bezig is
+  ("● E3 · bezig", "games 1–1", de spelers met foto en de punten in het midden, een
+  gouden stip bij wie serveert; tussen games "pauze"), twee banen tegelijk als twee
+  regels, en tussen partijen de volgende partij ("E3 · inspelen" met de spelers, of
+  "Volgende partij · E3"). Daaronder een strook E1–E4 (uitslag in de kleur van de
+  winnaar, "bezig", "w.o."/"opgave", grijs "–"). Na afloop de vier uitslagen als regels.
+  De balk onderin, het Dynamic Island (compact en minimaal) en de Android-titel en -chip
+  tonen nu **partijen** in plaats van games (SBN: partijen eerst); Android 16: "E3 bezig:
+  Bas 7–5 Tim (1–1) · games 6–4", na afloop "Uitslag · partijen 3–1 · games 9–6". De
+  live-server stuurt in de teampush nu ook `server` mee voor een partij in een rally
+  (achterwaarts compatibel; oudere apps negeren het). Debug: `-LiveActivityDemo team`,
+  `team-pause`, `team-two`, `team-next`, `team-finished`; Android `--es team
+  spel|pauze|twee|tussen|uitslag`.
+  - Releasenote: nog te schrijven als Gerd-Jan het ontwerp kiest.
+
+## 3.0 build 5 (geüpload 21 oktober 2026)
+
+TestFlight (groep Squashteam, bètareview ingediend) en Google Play (internal,
+alpha, Google Group testers; met R8-mapping). UI-check vooraf gedraaid (één
+bevinding, hersteld: "Player 1" in de Engelse wedstrijdopzet). Website
+(handleidingen, testen.html, nieuws) gepubliceerd. Releasenotes:
+`release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 
 - **Engelse variant en Instellingen → Taal (21 oktober 2026, iOS, Android, live-server en
   website, Gerd-Jan)**: Nederlands blijft de brontaal en leest precies als voorheen; een
@@ -24,7 +49,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   knoppen volgen ook de keuze (via `appText`), Android-meldingen vóór Android 13 ook
   (`HostLocale` leest de keuze), en de iOS-testsuites zetten Nederlands vast zodat ze ook
   op een Engelse simulator groen zijn.
-  - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
+  - Releasenote: in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 - **Dubbele voornamen in een teamwedstrijd (21 oktober 2026, iOS, Android en server,
   Gerd-Jan)**: live, op het vergrendelscherm en in de meldingen blijft het de voornaam,
   maar heeft een andere bekende speler dezelfde voornaam (in de teamwedstrijd of in Mijn
@@ -47,21 +72,21 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   Competitie noemt de teamwedstrijd E1–E4, Delen het vergrendelscherm. Getest op iPhone
   17 Pro Max (simulator) en de Android-emulator; de badgereset-melding alleen in unit tests
   (geen gegevens van vóór de start op die toestellen).
-  - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
+  - Releasenote: in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 - **Lange namen op Scheidsrechter en Coach (18 oktober 2026, gedeeld scherm, gemeld door
   Gerd-Jan op zijn A13)**: de gamestand bovenin staat nu altijd in het midden (elke naam
   krijgt de helft van de ruimte en wordt zo nodig afgekapt), en de naam boven een
   scorekolom breekt over twee regels in een vaste hoogte in plaats van over de rand te
   lopen (Android negeert `minimumScaleFactor`). Op de live score (iPhone) heeft het
   games-vakje van speler 2 nu een blauwe rand.
-  - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
+  - Releasenote: in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 - **Badges op 0 bij de release en Pionier (18 oktober 2026, iOS, Android en website/kaart)**:
   vanaf `BadgeSeason.start` (vrijdag 23 oktober 2026, 00:00) tellen badges en
   wedstrijden van daarvoor niet meer mee; kaarten met badges van daarvoor krijgen Pionier
   (Speciaal, niet in de 37). Eenmalige vraag "Testgegevens opruimen" met een schakelaar
   per groep, na een volledige back-up. Handleidingen bijgewerkt (website nog publiceren).
   Zie de backlog en ARCHITECTURE.md.
-  - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
+  - Releasenote: in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 - **Voorbeeldspelers heten Bob en Wim (18 oktober 2026, iOS en Android)**: nieuwe namen en
   foto's in `voorbeeldspelers.zip`; Bombardino en Whiskey waren drankjes met foto's van
   alcohol, wat niet past bij de leeftijdsvragen in de stores. Alleen nieuwe installaties
@@ -86,24 +111,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   van de LIVE-pil, zodat lange teamnamen volledig passen (ze mogen iets krimpen), en een
   partij die nog niet bestaat toont "nog niet begonnen" in plaats van tweemaal de teamnaam.
   Op Android breken namen niet meer af bij een spatie of streepje (bijvoorbeeld "Gerd-Jan").
-  - Releasenote: voorlopig in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
-- **Competitiewedstrijd op het vergrendelscherm, ontwerp B (20 oktober 2026, branch
-  `claude/teamscore-lockscreen-b`, nog NIET op `main`; Gerd-Jan beoordeelt eerst)**:
-  iPhone en Android 9–15. Tijdens de avond bovenaan groot de partij die nu bezig is
-  ("● E3 · bezig", "games 1–1", de spelers met foto en de punten in het midden, een
-  gouden stip bij wie serveert; tussen games "pauze"), twee banen tegelijk als twee
-  regels, en tussen partijen de volgende partij ("E3 · inspelen" met de spelers, of
-  "Volgende partij · E3"). Daaronder een strook E1–E4 (uitslag in de kleur van de
-  winnaar, "bezig", "w.o."/"opgave", grijs "–"). Na afloop de vier uitslagen als regels.
-  De balk onderin, het Dynamic Island (compact en minimaal) en de Android-titel en -chip
-  tonen nu **partijen** in plaats van games (SBN: partijen eerst); Android 16: "E3 bezig:
-  Bas 7–5 Tim (1–1) · games 6–4", na afloop "Uitslag · partijen 3–1 · games 9–6". De
-  live-server stuurt in de teampush nu ook `server` mee voor een partij in een rally
-  (achterwaarts compatibel; oudere apps negeren het). Debug: `-LiveActivityDemo team`,
-  `team-pause`, `team-two`, `team-next`, `team-finished`; Android `--es team
-  spel|pauze|twee|tussen|uitslag`.
-  - Releasenote: nog te schrijven als Gerd-Jan het ontwerp kiest.
-
+  - Releasenote: in `release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
 ## 3.0 build 4 (geüpload 16 oktober 2026)
 
 TestFlight (groep Squashteam, door Apple meteen goedgekeurd; 3.0 (3) verlopen)

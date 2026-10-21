@@ -55,4 +55,6 @@ leest precies als voorheen.
 - Taal-optie in iOS-Instellingen bij de app.
 - `./gradlew :app:testDebugUnitTest assembleDebug`; meldingen op de emulator in
   nl, en en de (Android 9–16, Live Update); taalscherm per app op Android 13+.
-- Past "matches" (9 sp) op de plek van "partijen" in de teammelding.
+
+"matches" past op de plek van "partijen" in de teammelding (Gerd-Jan, 21 oktober).
+Overdracht voor de samenvoeging: `docs/overdracht-i18n-sprint3.md`.

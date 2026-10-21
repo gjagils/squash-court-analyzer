@@ -6,6 +6,12 @@ import Foundation
 // en de push-token registratie bij de live-server.
 final class LiveFollowTests: XCTestCase {
 
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
     func testParsesViewerPageAppLinkAndBareId() {
         XCTAssertEqual(LiveFollowLink.parse("https://live.squashanalyzer.com/l/abcdefgh2345"),
                        LiveFollowTarget(id: "abcdefgh2345", server: "https://live.squashanalyzer.com"))

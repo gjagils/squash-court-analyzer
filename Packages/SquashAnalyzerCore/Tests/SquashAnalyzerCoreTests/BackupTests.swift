@@ -5,6 +5,12 @@ import Foundation
 /// The backup file must read the same on iPhone and Android: the checksum of
 /// the sample below was computed on Darwin, and these tests also run on Android.
 final class BackupTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     static func sample() -> FullBackup {
         let date = Date(timeIntervalSince1970: 1_790_000_000)
         let points = [

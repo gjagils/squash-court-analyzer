@@ -8,6 +8,12 @@ import Foundation
 // Enum types are written out in full where Skip needs them (docs/android-port.md).
 final class ErrorKindAndStartTests: XCTestCase {
 
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
     // MARK: - Kind of unforced error
 
     func testUnforcedErrorRecordsItsKindWithoutAZone() {

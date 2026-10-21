@@ -41,6 +41,12 @@ final class FakeTeamTransport: LiveTransport, @unchecked Sendable {
 
 /// Live teams matches (Competitie): the payload per partij, the invitation, the live service
 final class TeamLiveTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private let day = Date(timeIntervalSince1970: 1_793_181_600.0)
 
     private func team(ownSide: TeamSide = .home) -> TeamMatch {

@@ -5,6 +5,12 @@ import Foundation
 /// 6 or 9 zones, shots per zone row, the volley switch and Kill (the trainer's
 /// plan, docs/archief/plan-6-vakken-slagen.md), on Darwin and Android
 final class ZoneAndShotTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     func testLayouts() {
         XCTAssertEqual(CourtLayout.six.zones, [CourtZone.frontLeft, CourtZone.frontRight, CourtZone.middleLeft,
                                                CourtZone.middleRight, CourtZone.backLeft, CourtZone.backRight])

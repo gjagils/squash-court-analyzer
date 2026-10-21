@@ -4,6 +4,12 @@ import Foundation
 
 /// The dashboard's local advice and AI Coach, on Darwin and Android
 final class CoachAdviceTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     /// Hugo wins 5 winners (drive, front left) in 3 s each; Jaïr wins 3
     /// points on Hugo's unforced errors in 20 s each
     private func game() -> Game {

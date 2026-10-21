@@ -4,6 +4,12 @@ import XCTest
 
 /// Notitie per game (C3) and service/return (C4)
 final class GameNotesTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private func folder() -> URL {
         FileManager.default.temporaryDirectory.appendingPathComponent("gamenotes-\(UUID().uuidString)")
     }

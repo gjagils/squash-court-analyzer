@@ -4,6 +4,12 @@ import XCTest
 
 /// The player names of a team match on the live page and the lock screen
 final class LiveNamesTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     let team = ["Paul Steenks", "Paul van Rijn", "Niels de Groot", "Niels Sevenhoven",
                 "Gerd-Jan van Gils", "Gerd-Jan Pieterse", "Bas Jansen"]
 

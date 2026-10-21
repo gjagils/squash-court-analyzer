@@ -4,6 +4,12 @@ import Foundation
 
 /// "Eigen" or "gedeeld" on a team match, and putting it on the live page in one go
 final class TeamShareTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private let day = Date(timeIntervalSince1970: 1_793_181_600.0)
 
     private func team() -> TeamMatch {

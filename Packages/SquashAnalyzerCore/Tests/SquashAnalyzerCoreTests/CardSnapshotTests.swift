@@ -8,6 +8,12 @@ import Foundation
 /// and the SHA-256 award id); these tests run on Darwin and, via Skip, on
 /// Android, so both platforms are held to the exact same links and ids.
 final class CardSnapshotTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private let card = UUID(uuidString: "6F1C2B3A-4D5E-4F60-8A7B-9C0D1E2F3A4B")!
     private let match1 = UUID(uuidString: "11111111-2222-4333-8444-555555555555")!
     private let match2 = UUID(uuidString: "AAAAAAAA-BBBB-4CCC-8DDD-EEEEEEEEEEEE")!

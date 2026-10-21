@@ -3,6 +3,12 @@ import Foundation
 @testable import SquashAnalyzerCore
 
 final class CardImportTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     /// Made by the iOS app, see `CardSnapshotTests`
     private let iosPayload = "XY9BasMwEEWvUmbtD5alOI53smQvsgq0u5KF2ijFVJEhcZxF8IG66iFysU6IA0kfCIb_Z3joTJ9UUt4Ik1VSQ9lZDdXkKQo9r7AwqRV11kitKkpooFIkFPlg5Y7h5bW__Pj4feDGUfl-po6bpbv87jn54HnbDh5thMO-O3G240xMIGOgpJQolFKYPcCrPavmi_RGQie-bOOhdyFA05jcXG_-y1_DuPF3pQ9-8BGxDZNPT6BioIwxKKy1qB948uX_fdefb-614Deuxz8"
 

@@ -27,6 +27,12 @@ enum SessionSaverTestError: Error {
 // change wins, and finishing waits for a save that is still on its way.
 final class SessionSaverTests: XCTestCase {
 
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
     @MainActor
     func testAChangeDuringASaveIsSavedRightAfterWithTheNewestState() async throws {
         let store = RecordingWrites()

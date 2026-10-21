@@ -5,6 +5,12 @@ import Foundation
 /// Pages are hand-written in the shape the parser expects from sbn.toernooi.nl
 /// (the markers it looks for), so these run offline on Darwin and Android.
 final class LeagueTeamTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     private let league = "0A3C7E1D-2B44-4F10-9C3A-5D6E7F8091A2"
     private var teamURL: String { "https://sbn.toernooi.nl/league/\(league)/team/113" }
 

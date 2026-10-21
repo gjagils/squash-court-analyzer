@@ -4,6 +4,12 @@ import Foundation
 
 /// iOS keeps an unfinished referee match as this snapshot, so "Sluiten" can be resumed
 final class RefereeMatchSnapshotTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     func testAMatchInTheSecondGameComesBackAsItWas() throws {
         let match = RefereeMatch(player1Name: "Gerard", player2Name: "Thé", bestOf: 5, startingServer: Player.player2)
         match.player1Id = UUID()

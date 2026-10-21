@@ -6,6 +6,12 @@ import Foundation
 // the hour notation, what Stop does, and which OpenAI model is tried.
 final class ShareTextTests: XCTestCase {
 
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
     private func report(duration: TimeInterval, winner: Player? = Player.player1) -> MatchShareReport {
         let games = [
             MatchShareReport.Game(number: 1, player1Score: 11, player2Score: 7, winner: Player.player1,
@@ -49,6 +55,12 @@ final class ShareTextTests: XCTestCase {
 
 final class CoachStopTests: XCTestCase {
 
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
     private func match() -> Match {
         let match = Match()
         match.setupMatch(player1: "Jan", player2: "Piet", startingServer: Player.player1)
@@ -80,6 +92,12 @@ final class CoachStopTests: XCTestCase {
 }
 
 final class AIModelChoiceTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
 
     func testWithoutAModelListThePreferredOnesAreTriedInOrder() {
         XCTAssertEqual(AIModelChoice.fallback(except: []), AIModelChoice.preferred.first)

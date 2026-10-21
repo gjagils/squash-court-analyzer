@@ -4,6 +4,12 @@ import XCTest
 
 /// The tour and the links of "Over de app"
 final class OnboardingTests: XCTestCase {
+
+    /// These tests check the Dutch texts, whatever language the test machine has
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
     func testTheTourShowsOnceUntilItIsRaised() {
         XCTAssertTrue(Onboarding.shouldShow(seenVersion: 0), "a new install, and the testers who had the app")
         XCTAssertFalse(Onboarding.shouldShow(seenVersion: Onboarding.currentVersion))

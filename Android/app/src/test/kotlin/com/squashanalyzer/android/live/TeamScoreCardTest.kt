@@ -225,4 +225,19 @@ class TeamScoreJsonTest {
         assertNull(score.partij(3))
         assertNull(TeamScore.parse("geen json"))
     }
+
+    /** Gerd-Jan's pool (21 October 2026): in full up to 16 characters, else short, as iOS */
+    @Test fun teamNamesOnTheLockScreen() {
+        assertEquals("All Inn Squash 8", TeamNames.short("All Inn Squash 8"))
+        assertEquals("All Inn Squash 9", TeamNames.short("All Inn Squash 9"))
+        assertEquals("Squash Delft 5", TeamNames.short("Squash Delft 5"))
+        assertEquals("Squash Delft 7", TeamNames.short("Squash Delft 7"))
+        assertEquals("Squash Delft 8", TeamNames.short("Squash Delft 8"))
+        assertEquals("Sluipers 1", TeamNames.short("Sluipers, RLT & SV De 1"))
+        assertEquals("Leiden 4", TeamNames.short("Sportcity Leiden 4"))
+        assertEquals("Utrecht 11", TeamNames.short("Squash Utrecht 11"))
+        assertEquals("Woerden 1", TeamNames.short("Sportcity Woerden 1"))
+        assertEquals("Gouda 1", TeamNames.short("Sportcity Gouda 1"))
+        assertEquals("Squash Squash Squash 1", TeamNames.short("Squash Squash Squash 1"))
+    }
 }

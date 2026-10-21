@@ -88,8 +88,8 @@ data class TeamScore(val home: String, val away: String, val partijen: List<Team
                 )
             }
             TeamScore(
-                home = o.optString("home").trim().ifEmpty { "Thuis" },
-                away = o.optString("away").trim().ifEmpty { "Uit" },
+                home = TeamNames.short(o.optString("home").trim().ifEmpty { "Thuis" }),
+                away = TeamNames.short(o.optString("away").trim().ifEmpty { "Uit" }),
                 partijen = partijen.sortedBy { partij -> partij.slot },
             )
         } catch (e: Exception) {
@@ -113,7 +113,8 @@ data class TeamScore(val home: String, val away: String, val partijen: List<Team
                     ),
                 )
             }
-            return TeamScore(stand.home.trim().ifEmpty { "Thuis" }, stand.away.trim().ifEmpty { "Uit" }, partijen.sortedBy { it.slot })
+            return TeamScore(TeamNames.short(stand.home.trim().ifEmpty { "Thuis" }), TeamNames.short(stand.away.trim().ifEmpty { "Uit" }),
+                partijen.sortedBy { it.slot })
         }
     }
 }
@@ -354,5 +355,32 @@ class TeamScoreCard(val score: TeamScore) {
 
         /** The order an SBN team match is played in (shown always as E1-E4), as iOS' TeamScoreAttributes.playOrder */
         val PLAY_ORDER = listOf(4, 2, 1, 3)
+    }
+}
+
+/**
+ * A team name for the narrow lock screen, as iOS' TeamNameShortener: in full up
+ * to 16 characters; longer without the club words ("Squash Utrecht 11" ->
+ * "Utrecht 11"), and a name with a comma or & keeps its first part and the team
+ * number ("Sluipers, RLT & SV De 1" -> "Sluipers 1"). Never just a number.
+ */
+object TeamNames {
+    const val LIMIT = 16
+    private val clubWords = setOf("squash", "sportcity")
+
+    fun short(name: String): String {
+        val full = name.trim()
+        if (full.length <= LIMIT) return full
+        val words = full.split(" ").filter { it.isNotEmpty() }
+        val number = words.lastOrNull()?.takeIf { it.toIntOrNull() != null }
+        var result = words.filter { it.lowercase() !in clubWords }.joinToString(" ")
+        val cut = result.indexOfFirst { it == ',' || it == '&' }
+        if (cut >= 0) {
+            val head = result.substring(0, cut).trim()
+            result = if (number != null) "$head $number" else head
+        }
+        val left = result.split(" ").filter { it.isNotEmpty() }
+        if (left.isEmpty() || (left.size == 1 && left[0].toIntOrNull() != null)) return full
+        return result
     }
 }

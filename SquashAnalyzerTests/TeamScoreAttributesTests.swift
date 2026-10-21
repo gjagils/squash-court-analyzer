@@ -167,4 +167,23 @@ final class TeamScoreAttributesTests: XCTestCase {
         XCTAssertNil(state.partij(1)?.server)
         XCTAssertEqual(state.partij(1)?.isServing(1), false)
     }
+
+    /// Gerd-Jan's pool (21 October 2026): in full up to 16 characters, else short
+    func testTeamNamesOnTheLockScreen() {
+        XCTAssertEqual(TeamNameShortener.short("All Inn Squash 8"), "All Inn Squash 8")
+        XCTAssertEqual(TeamNameShortener.short("All Inn Squash 9"), "All Inn Squash 9")
+        XCTAssertEqual(TeamNameShortener.short("Squash Delft 5"), "Squash Delft 5")
+        XCTAssertEqual(TeamNameShortener.short("Squash Delft 7"), "Squash Delft 7")
+        XCTAssertEqual(TeamNameShortener.short("Squash Delft 8"), "Squash Delft 8")
+        XCTAssertEqual(TeamNameShortener.short("Sluipers, RLT & SV De 1"), "Sluipers 1")
+        XCTAssertEqual(TeamNameShortener.short("Sportcity Leiden 4"), "Leiden 4")
+        XCTAssertEqual(TeamNameShortener.short("Squash Utrecht 11"), "Utrecht 11")
+        XCTAssertEqual(TeamNameShortener.short("Sportcity Woerden 1"), "Woerden 1")
+        XCTAssertEqual(TeamNameShortener.short("Sportcity Gouda 1"), "Gouda 1")
+        // Never only a number: then the full name stays
+        XCTAssertEqual(TeamNameShortener.short("Squash Squash Squash 1"), "Squash Squash Squash 1")
+        let state = State(home: "Squash Utrecht 11", away: "Sportcity Woerden 1", partijen: [])
+        XCTAssertEqual(state.teamName(1), "Utrecht 11")
+        XCTAssertEqual(state.name(slot: 2, side: 2), "Woerden 1 E2")
+    }
 }

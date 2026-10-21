@@ -153,7 +153,8 @@ extension TeamScoreAttributes.ContentState {
     /// "2 van 4 klaar"
     var progressText: String { "\(decidedCount) van 4 klaar" }
 
-    func teamName(_ side: Int) -> String { side == 1 ? home : away }
+    /// The team name as the lock screen shows it (`TeamNameShortener`)
+    func teamName(_ side: Int) -> String { TeamNameShortener.short(side == 1 ? home : away) }
 
     /// The player's name in a row: the first name, or "Delft 8 E2" without one
     func name(slot: Int, side: Int) -> String {
@@ -297,5 +298,31 @@ enum TeamScorePhotoStore {
 
     static func remove(teamId: String) {
         for key in keys(teamId: teamId) { LiveScorePhotoStore.remove(matchId: key) }
+    }
+}
+
+/// A team name for the narrow lock screen (Gerd-Jan, 21 October 2026): in full
+/// up to 16 characters ("All Inn Squash 8", "Squash Delft 8"); longer without
+/// the club words ("Squash Utrecht 11" → "Utrecht 11", "Sportcity Gouda 1" →
+/// "Gouda 1"), and a name with a comma or & keeps its first part and the team
+/// number ("Sluipers, RLT & SV De 1" → "Sluipers 1"). Never just a number.
+/// Android has the same rule in TeamScore.kt (TeamNames).
+enum TeamNameShortener {
+    static let limit = 16
+    static let clubWords: Set<String> = ["squash", "sportcity"]
+
+    static func short(_ name: String) -> String {
+        let full = name.trimmingCharacters(in: .whitespaces)
+        guard full.count > limit else { return full }
+        let words = full.split(separator: " ").map { String($0) }
+        let number = words.last.flatMap { last in Int(last) != nil ? last : nil }
+        var result = words.filter { word in !clubWords.contains(word.lowercased()) }.joined(separator: " ")
+        if let cut = result.firstIndex(where: { character in character == "," || character == "&" }) {
+            let head = result[..<cut].trimmingCharacters(in: .whitespaces)
+            result = number.map { head + " " + $0 } ?? head
+        }
+        let left = result.split(separator: " ")
+        if left.isEmpty || (left.count == 1 && Int(left[0]) != nil) { return full }
+        return result
     }
 }

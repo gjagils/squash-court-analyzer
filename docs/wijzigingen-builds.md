@@ -10,6 +10,12 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 4)
 
+- **Competitie op het vergrendelscherm: teamnamen en speelvolgorde (21 oktober 2026, iOS en
+  Android, Gerd-Jan)**: een teamnaam staat er volledig tot en met 16 tekens; langer zonder
+  Squash/Sportcity ("Squash Utrecht 11" → "Utrecht 11"), en met komma of & het eerste deel
+  plus teamnummer ("Sluipers, RLT & SV De 1" → "Sluipers 1"); `TeamNameShortener` (iOS) en
+  `TeamNames` (Android). De volgende partij volgt de SBN-speelvolgorde E4, E2, E1, E3; de
+  strook en de regels blijven E1–E4. De supporterspagina zet "Volgende partij" bij dezelfde.
 - **"Nieuw in 3.0" en de badgereset-melding (20 oktober 2026, iOS en Android, keuze
   Gerd-Jan)**: bij de eerste start van 3.0 krijgt iedereen (nieuw, 2.0 en testers) één
   blad met vijf nieuwe dingen (`WhatsNew` in Core, `SharedWhatsNewView`). "Aan de slag"

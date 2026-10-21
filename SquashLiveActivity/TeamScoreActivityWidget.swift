@@ -368,7 +368,7 @@ struct TeamScoreTeamLine: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Text(state.home)
+            Text(state.teamName(1))
                 .font(.system(size: nameSize, weight: .bold, design: .rounded))
                 .foregroundColor(LiveScoreColors.player1)
                 .lineLimit(1)
@@ -393,7 +393,7 @@ struct TeamScoreTeamLine: View {
                 }
             }
             .fixedSize()
-            Text(state.away)
+            Text(state.teamName(2))
                 .font(.system(size: nameSize, weight: .bold, design: .rounded))
                 .foregroundColor(LiveScoreColors.player2Text)
                 .lineLimit(1)

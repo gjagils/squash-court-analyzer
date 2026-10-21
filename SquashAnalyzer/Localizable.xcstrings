@@ -1,0 +1,1386 @@
+{
+  "sourceLanguage" : "nl",
+  "strings" : {
+    " Laatste: %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Last: %@."
+          }
+        }
+      }
+    },
+    " Testers vinden de nieuwe versie in TestFlight." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Testers find the new version in TestFlight."
+          }
+        }
+      }
+    },
+    "%@ verwijderen?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %@?"
+          }
+        }
+      }
+    },
+    "%@ wint %lld-%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ wins %lld-%lld"
+          }
+        }
+      }
+    },
+    "%lld badges" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld badges"
+          }
+        }
+      }
+    },
+    "%lld spelers, %lld wedstrijden, %lld losse games." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld players, %lld matches, %lld separate games."
+          }
+        }
+      }
+    },
+    "%lld van %lld badges" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld of %lld badges"
+          }
+        }
+      }
+    },
+    "%lld van 4 klaar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld of 4 done"
+          }
+        }
+      }
+    },
+    "'%@' gebruikt een niet-ondersteunde compressie." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@' uses an unsupported compression."
+          }
+        }
+      }
+    },
+    "'%@' in het zip-bestand is beschadigd." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@' in the zip file is damaged."
+          }
+        }
+      }
+    },
+    "'%@' staat in iCloud Drive, in de Bestanden-app onder iCloud Drive → Squash Analyzer." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@' is in iCloud Drive, in the Files app under iCloud Drive → Squash Analyzer."
+          }
+        }
+      }
+    },
+    "6 vakken" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6 zones"
+          }
+        }
+      }
+    },
+    "9 vakken" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "9 zones"
+          }
+        }
+      }
+    },
+    "AFGELOPEN" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FINISHED"
+          }
+        }
+      }
+    },
+    "AI Coach" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI Coach"
+          }
+        }
+      }
+    },
+    "AI advies werkt alleen met internetverbinding" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI advice only works with an internet connection"
+          }
+        }
+      }
+    },
+    "API key geconfigureerd" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API key configured"
+          }
+        }
+      }
+    },
+    "API key niet opgeslagen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API key not saved"
+          }
+        }
+      }
+    },
+    "Afgelopen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finished"
+          }
+        }
+      }
+    },
+    "Alle badges" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All badges"
+          }
+        }
+      }
+    },
+    "Alles vervangen?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace everything?"
+          }
+        }
+      }
+    },
+    "Annuleren" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "BADGEKAART" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BADGE CARD"
+          }
+        }
+      }
+    },
+    "BEWAAR API KEY" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SAVE API KEY"
+          }
+        }
+      }
+    },
+    "BEWAAR TEAMLINK" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SAVE TEAM LINK"
+          }
+        }
+      }
+    },
+    "Baanindeling" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Court layout"
+          }
+        }
+      }
+    },
+    "Back-up" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup"
+          }
+        }
+      }
+    },
+    "Back-up hersteld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup restored"
+          }
+        }
+      }
+    },
+    "Back-up mislukt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup failed"
+          }
+        }
+      }
+    },
+    "Back-up opgeslagen!" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup saved!"
+          }
+        }
+      }
+    },
+    "Back-up toegevoegd" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup added"
+          }
+        }
+      }
+    },
+    "Badge %@, nog niet verdiend" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Badge %@, not earned yet"
+          }
+        }
+      }
+    },
+    "Badges" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Badges"
+          }
+        }
+      }
+    },
+    "Basis advies werkt altijd, ook zonder API key" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basic advice always works, even without an API key"
+          }
+        }
+      }
+    },
+    "Bewerken" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        }
+      }
+    },
+    "Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak: voorin Drop, Boast en Kill, in het midden Kill, Drive, Cross en Boast, achterin Drive, Cross en Lob." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With 6 zones you choose front, middle or back, left or right; with 9 a middle column is added. The shots you see match the zone's row: at the front Drop, Boast and Kill, in the middle Kill, Drive, Cross and Boast, at the back Drive, Cross and Lob."
+          }
+        }
+      }
+    },
+    "Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For a followed match: an alert with sound when a game has been played out and at the result. For a team match: per match and at the final result."
+          }
+        }
+      }
+    },
+    "Bijwerken bij %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update %@"
+          }
+        }
+      }
+    },
+    "DELEN" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SHARE"
+          }
+        }
+      }
+    },
+    "De lokale database kon niet worden geopend. De originele bestanden zijn behouden in %@. Deze sessie gebruikt tijdelijke opslag; exporteer geen vervangende backup voordat de database is hersteld." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The local database could not be opened. The original files have been kept in %@. This session uses temporary storage; do not export a replacement backup until the database has been restored."
+          }
+        }
+      }
+    },
+    "De sleutel kon niet in de iPhone-sleutelhanger worden bewaard. Probeer het opnieuw." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The key could not be stored in the iPhone keychain. Please try again."
+          }
+        }
+      }
+    },
+    "De wedstrijd is geïmporteerd." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The match has been imported."
+          }
+        }
+      }
+    },
+    "De wedstrijd kon niet worden opgeslagen: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The match could not be saved: %@"
+          }
+        }
+      }
+    },
+    "Dit bestand is geen zip-bestand." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This file is not a zip file."
+          }
+        }
+      }
+    },
+    "E%lld pauze" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld break"
+          }
+        }
+      }
+    },
+    "E%lld · bezig" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld · in play"
+          }
+        }
+      }
+    },
+    "E%lld · inspelen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld · warm-up"
+          }
+        }
+      }
+    },
+    "E%lld · pauze" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld · break"
+          }
+        }
+      }
+    },
+    "Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in iCloud Drive (Bestanden → iCloud Drive → Squash Analyzer). De 7 nieuwste blijven bewaard. Ook terug te zetten op Android." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once a week, when you put the app away after use, a backup goes to iCloud Drive (Files → iCloud Drive → Squash Analyzer). The 7 most recent are kept. Can also be restored on Android."
+          }
+        }
+      }
+    },
+    "Foto verwijderen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove photo"
+          }
+        }
+      }
+    },
+    "Foto's van de spelers meesturen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send the players' photos along"
+          }
+        }
+      }
+    },
+    "GAMEBAL" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GAME BALL"
+          }
+        }
+      }
+    },
+    "Game %lld · best of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Game %lld · best of %lld"
+          }
+        }
+      }
+    },
+    "Geen API key ingesteld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No API key set"
+          }
+        }
+      }
+    },
+    "Geen toegang tot bestand" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No access to the file"
+          }
+        }
+      }
+    },
+    "Gespeelde wedstrijden blijven bewaard." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Played matches are kept."
+          }
+        }
+      }
+    },
+    "Geïmporteerd: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imported: %@"
+          }
+        }
+      }
+    },
+    "Import gelukt!" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import succeeded!"
+          }
+        }
+      }
+    },
+    "Import mislukt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import failed"
+          }
+        }
+      }
+    },
+    "Importeer team" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import team"
+          }
+        }
+      }
+    },
+    "Importeren" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import"
+          }
+        }
+      }
+    },
+    "Inspelen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warm-up"
+          }
+        }
+      }
+    },
+    "Instellingen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
+    },
+    "Internet vereist" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Internet required"
+          }
+        }
+      }
+    },
+    "Je API key wordt veilig opgeslagen in de Keychain" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your API key is stored securely in the Keychain"
+          }
+        }
+      }
+    },
+    "Kies speler" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose player"
+          }
+        }
+      }
+    },
+    "Knop LIVE bij Scheidsrechter en Coach" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LIVE button in Referee and Coach"
+          }
+        }
+      }
+    },
+    "Koppel aan" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link to"
+          }
+        }
+      }
+    },
+    "Koppelen mislukt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linking failed"
+          }
+        }
+      }
+    },
+    "Kosten" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cost"
+          }
+        }
+      }
+    },
+    "Later" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Later"
+          }
+        }
+      }
+    },
+    "Link niet te openen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link cannot be opened"
+          }
+        }
+      }
+    },
+    "Live meekijken" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live sharing"
+          }
+        }
+      }
+    },
+    "Lokaal advies" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local advice"
+          }
+        }
+      }
+    },
+    "MATCHBAL" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MATCH BALL"
+          }
+        }
+      }
+    },
+    "Melding bij elke game" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alert after every game"
+          }
+        }
+      }
+    },
+    "Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With LIVE you share a link, for example in the WhatsApp group; whoever taps it sees the score live in the browser. Only first names, the score and (if you leave it on) a small photo of the players; everything is deleted 2 hours after the match."
+          }
+        }
+      }
+    },
+    "Mijn team" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My team"
+          }
+        }
+      }
+    },
+    "NU NAAR ICLOUD" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TO ICLOUD NOW"
+          }
+        }
+      }
+    },
+    "Naar de App Store" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go to the App Store"
+          }
+        }
+      }
+    },
+    "Nieuwe speler %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New player %@"
+          }
+        }
+      }
+    },
+    "Nog geen badges verdiend" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No badges earned yet"
+          }
+        }
+      }
+    },
+    "Nog geen spelers opgeslagen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No players saved yet"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "OPENAI API KEY" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OPENAI API KEY"
+          }
+        }
+      }
+    },
+    "OPGESLAGEN!" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SAVED!"
+          }
+        }
+      }
+    },
+    "Opslaan" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        }
+      }
+    },
+    "Over AI Coach" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About AI Coach"
+          }
+        }
+      }
+    },
+    "PARTIJEN" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MATCHES"
+          }
+        }
+      }
+    },
+    "PAUZE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BREAK"
+          }
+        }
+      }
+    },
+    "Pauze" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Break"
+          }
+        }
+      }
+    },
+    "Plak de teamlink die je hebt gekregen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paste the team link you were given."
+          }
+        }
+      }
+    },
+    "SPELER BEWERKEN" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EDIT PLAYER"
+          }
+        }
+      }
+    },
+    "SPELER TOEVOEGEN" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ADD PLAYER"
+          }
+        }
+      }
+    },
+    "Sluiten" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        }
+      }
+    },
+    "Spelers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Players"
+          }
+        }
+      }
+    },
+    "Spelerskaart" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Player card"
+          }
+        }
+      }
+    },
+    "Stand op vergrendelscherm" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score on the lock screen"
+          }
+        }
+      }
+    },
+    "TEAM" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TEAM"
+          }
+        }
+      }
+    },
+    "TERUGZETTEN" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RESTORE"
+          }
+        }
+      }
+    },
+    "Taal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language"
+          }
+        }
+      }
+    },
+    "Team importeren" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import team"
+          }
+        }
+      }
+    },
+    "Team via link" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Team via link"
+          }
+        }
+      }
+    },
+    "Teamlink opgeslagen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Team link saved"
+          }
+        }
+      }
+    },
+    "Teamlink verwijderd" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Team link removed"
+          }
+        }
+      }
+    },
+    "Terug" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        }
+      }
+    },
+    "Terugzetten mislukt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore failed"
+          }
+        }
+      }
+    },
+    "Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen op het beginscherm." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "While you score, the score of your match is on the lock screen and in the Dynamic Island. You follow someone else's match with Follow a match on the home screen."
+          }
+        }
+      }
+    },
+    "Tik op + om een speler toe te voegen,\nof importeer een team (zip met team.json en foto's)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap + to add a player,\nor import a team (zip with team.json and photos)"
+          }
+        }
+      }
+    },
+    "Uit bestand (zip)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From file (zip)"
+          }
+        }
+      }
+    },
+    "Uitslag" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Result"
+          }
+        }
+      }
+    },
+    "Uitslag: %@ wint %lld–%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Result: %@ wins %lld–%lld"
+          }
+        }
+      }
+    },
+    "Uitslag: gelijkspel %lld–%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Result: draw %lld–%lld"
+          }
+        }
+      }
+    },
+    "VERWIJDER" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "REMOVE"
+          }
+        }
+      }
+    },
+    "Veilig" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secure"
+          }
+        }
+      }
+    },
+    "Veilige tijdelijke opslag actief" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Safe temporary storage active"
+          }
+        }
+      }
+    },
+    "Vervang alles" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace all"
+          }
+        }
+      }
+    },
+    "Verwijder %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %@"
+          }
+        }
+      }
+    },
+    "Verwijderen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        }
+      }
+    },
+    "Via link" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Via link"
+          }
+        }
+      }
+    },
+    "Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add your OpenAI API key for personalised tactical advice from the AI Coach."
+          }
+        }
+      }
+    },
+    "Voeg toe" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add"
+          }
+        }
+      }
+    },
+    "Volgende partij · E%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next match · E%lld"
+          }
+        }
+      }
+    },
+    "Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter the public team link from sbn.toernooi.nl. My team will then appear on the home screen."
+          }
+        }
+      }
+    },
+    "WEDSTRIJD IMPORTEREN" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IMPORT MATCH"
+          }
+        }
+      }
+    },
+    "Waar vind ik mijn teamlink?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where do I find my team link?"
+          }
+        }
+      }
+    },
+    "Weergave" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
+          }
+        }
+      }
+    },
+    "Wekelijkse back-up naar iCloud" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weekly backup to iCloud"
+          }
+        }
+      }
+    },
+    "Wil je alle bestaande data verwijderen en vervangen door de back-up, of de back-up toevoegen aan wat er al is?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do you want to delete all existing data and replace it with the backup, or add the backup to what is already there?"
+          }
+        }
+      }
+    },
+    "de Application Support-map" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "the Application Support folder"
+          }
+        }
+      }
+    },
+    "games %lld–%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "games %lld–%lld"
+          }
+        }
+      }
+    },
+    "iCloud Drive is niet beschikbaar. Controleer of je bent ingelogd bij iCloud en iCloud Drive is ingeschakeld in Instellingen → Squash Analyzer." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud Drive is not available. Check that you are signed in to iCloud and that iCloud Drive is turned on in Settings → Squash Analyzer."
+          }
+        }
+      }
+    },
+    "opgave" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "retired"
+          }
+        }
+      }
+    },
+    "serveert links" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "serves left"
+          }
+        }
+      }
+    },
+    "serveert rechts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "serves right"
+          }
+        }
+      }
+    },
+    "w.o." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "w/o"
+          }
+        }
+      }
+    },
+    "zelfde naam" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "same name"
+          }
+        }
+      }
+    },
+    "~€0.01 per analyse (het goedkoopste beschikbare model)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~€0.01 per analysis (the cheapest model available)"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

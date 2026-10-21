@@ -433,7 +433,7 @@ struct LiveScoreIslandPlayer: View {
                         .frame(width: 6, height: 6)
                         .opacity(state.isServing(player) ? 1 : 0)
                         .padding(.vertical, 2)
-                        .accessibilityLabel("Opslag")
+                        .accessibilityLabel(widgetText("Opslag"))
                         .accessibilityHidden(!state.isServing(player))
                 }
                 if !leading { LiveScoreAvatar(state: state, player: player, photo: photo, size: 28, lineWidth: 2) }

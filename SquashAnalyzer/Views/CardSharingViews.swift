@@ -129,17 +129,17 @@ struct CardImportSheet: View {
                         Button {
                             link(to: linkedPlayer)
                         } label: {
-                            Label("Bijwerken bij \(linkedPlayer.name)", systemImage: "arrow.triangle.2.circlepath")
+                            Label(appText("Bijwerken bij \(linkedPlayer.name)"), systemImage: "arrow.triangle.2.circlepath")
                                 .foregroundColor(AppColors.accentGold)
                         }
                         .listRowBackground(SharedColors.tint(0.05))
                     }
                 } else {
-                    Section("Koppel aan") {
+                    Section(appText("Koppel aan")) {
                         Button {
                             link(to: nil)
                         } label: {
-                            Label("Nieuwe speler \(snapshot.name)", systemImage: "person.badge.plus")
+                            Label(appText("Nieuwe speler \(snapshot.name)"), systemImage: "person.badge.plus")
                                 .foregroundColor(AppColors.accentGold)
                         }
                         .listRowBackground(SharedColors.tint(0.05))
@@ -170,7 +170,7 @@ struct CardImportSheet: View {
             .toolbar {
                 CloseToolbarItem(title: appText("Annuleren")) { close() }
             }
-            .alert("Koppelen mislukt", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            .alert(Text(appText("Koppelen mislukt")), isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(errorMessage ?? "")

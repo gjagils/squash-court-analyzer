@@ -90,7 +90,7 @@ struct SettingsView: View {
             apiKey = APIKeyManager.shared.openAIAPIKey ?? ""
             teamDraft = teamURL
         }
-        .alert("API key niet opgeslagen", isPresented: $keySaveFailed) {
+        .alert(Text(appText("API key niet opgeslagen")), isPresented: $keySaveFailed) {
             Button("OK") {}
         } message: {
             Text(appText("De sleutel kon niet in de iPhone-sleutelhanger worden bewaard. Probeer het opnieuw."))
@@ -179,7 +179,7 @@ struct SettingsView: View {
     // MARK: - Court Section
     private var courtSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Picker("Baanindeling", selection: $courtLayout) {
+            Picker(appText("Baanindeling"), selection: $courtLayout) {
                 Text(appText("6 vakken")).tag(CourtLayout.six.rawValue)
                 Text(appText("9 vakken")).tag(CourtLayout.nine.rawValue)
             }
@@ -342,26 +342,26 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 InfoRow(
                     icon: "lock.shield",
-                    title: "Veilig",
-                    description: "Je API key wordt veilig opgeslagen in de Keychain"
+                    title: appText("Veilig"),
+                    description: appText("Je API key wordt veilig opgeslagen in de Keychain")
                 )
 
                 InfoRow(
                     icon: "dollarsign.circle",
-                    title: "Kosten",
-                    description: "~€0.01 per analyse (het goedkoopste beschikbare model)"
+                    title: appText("Kosten"),
+                    description: appText("~€0.01 per analyse (het goedkoopste beschikbare model)")
                 )
 
                 InfoRow(
                     icon: "wifi",
-                    title: "Internet vereist",
-                    description: "AI advies werkt alleen met internetverbinding"
+                    title: appText("Internet vereist"),
+                    description: appText("AI advies werkt alleen met internetverbinding")
                 )
 
                 InfoRow(
                     icon: "cpu",
-                    title: "Lokaal advies",
-                    description: "Basis advies werkt altijd, ook zonder API key"
+                    title: appText("Lokaal advies"),
+                    description: appText("Basis advies werkt altijd, ook zonder API key")
                 )
             }
         }
@@ -384,8 +384,9 @@ struct SettingsView: View {
 // MARK: - Info Row
 struct InfoRow: View {
     let icon: String
-    let title: LocalizedStringKey
-    let description: LocalizedStringKey
+    /// Already in the app's language (appText)
+    let title: String
+    let description: String
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -454,9 +455,9 @@ struct BackupActionsView: View {
                 }
             }
         }
-        .alert("Alles vervangen?", isPresented: $showingReplaceConfirm) {
-            Button("Vervang alles", role: .destructive) { restore(replacing: true) }
-            Button("Voeg toe", role: .cancel) { restore(replacing: false) }
+        .alert(Text(appText("Alles vervangen?")), isPresented: $showingReplaceConfirm) {
+            Button(appText("Vervang alles"), role: .destructive) { restore(replacing: true) }
+            Button(appText("Voeg toe"), role: .cancel) { restore(replacing: false) }
         } message: {
             Text(appText("Wil je alle bestaande data verwijderen en vervangen door de back-up, of de back-up toevoegen aan wat er al is?"))
         }

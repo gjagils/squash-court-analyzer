@@ -193,11 +193,11 @@ struct ContentView: View {
                 } onCancel: { showingTeamJoin = false }
             }
         }
-        .alert("Link niet te openen", isPresented: $showingNewerAppNeeded) {
-            Button("Naar de App Store") {
+        .alert(Text(appText("Link niet te openen")), isPresented: $showingNewerAppNeeded) {
+            Button(appText("Naar de App Store")) {
                 if let url = URL(string: CardInbox.appStoreLink) { openURL(url) }
             }
-            Button("Later", role: .cancel) { }
+            Button(appText("Later"), role: .cancel) { }
         } message: {
             Text(CardInbox.newerAppText + appText(" Testers vinden de nieuwe versie in TestFlight."))
         }
@@ -211,7 +211,7 @@ struct ContentView: View {
                 }
             }
         }
-        .alert("Veilige tijdelijke opslag actief", isPresented: $showingStartupPersistenceWarning) {
+        .alert(Text(appText("Veilige tijdelijke opslag actief")), isPresented: $showingStartupPersistenceWarning) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(startupPersistenceWarning ?? "")

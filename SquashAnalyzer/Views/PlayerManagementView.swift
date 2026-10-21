@@ -73,14 +73,14 @@ struct PlayerManagementView: View {
                                     .font(SharedFonts.system(20))
                                     .foregroundColor(AppColors.accentGold)
                             }
-                            .accessibilityLabel("Alle badges")
+                            .accessibilityLabel(appText("Alle badges"))
 
                             Menu {
                                 Button { showingTeamImporter = true } label: {
-                                    Label("Uit bestand (zip)", systemImage: "doc.zipper")
+                                    Label(appText("Uit bestand (zip)"), systemImage: "doc.zipper")
                                 }
                                 Button { teamLink = ""; showingTeamLink = true } label: {
-                                    Label("Via link", systemImage: "link")
+                                    Label(appText("Via link"), systemImage: "link")
                                 }
                             } label: {
                                 if importingTeam {
@@ -93,7 +93,7 @@ struct PlayerManagementView: View {
                                 }
                             }
                             .disabled(importingTeam)
-                            .accessibilityLabel("Importeer team")
+                            .accessibilityLabel(appText("Importeer team"))
 
                             Button(action: { showingAddPlayer = true }) {
                                 Image(systemName: "plus.circle")
@@ -184,17 +184,17 @@ struct PlayerManagementView: View {
             .fileImporter(isPresented: $showingTeamImporter, allowedContentTypes: [.zip]) { result in
                 importTeam(result)
             }
-            .alert("Team via link", isPresented: $showingTeamLink) {
+            .alert(Text(appText("Team via link")), isPresented: $showingTeamLink) {
                 TextField("https://squashanalyzer.com/teams/…", text: $teamLink)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .keyboardType(.URL)
-                Button("Annuleren", role: .cancel) { }
-                Button("Importeren") { importTeam(link: teamLink) }
+                Button(appText("Annuleren"), role: .cancel) { }
+                Button(appText("Importeren")) { importTeam(link: teamLink) }
             } message: {
                 Text(appText("Plak de teamlink die je hebt gekregen."))
             }
-            .alert("Team importeren", isPresented: $showingTeamImportResult) {
+            .alert(Text(appText("Team importeren")), isPresented: $showingTeamImportResult) {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(teamImportMessage ?? "")
@@ -335,7 +335,7 @@ struct PlayerRowView: View {
                             .font(SharedFonts.system(15))
                             .foregroundColor(AppColors.textMuted)
                     }
-                    .accessibilityLabel("Verwijder \(player.name)")
+                    .accessibilityLabel(appText("Verwijder \(player.name)"))
                 }
                 .buttonStyle(.plain)
             }
@@ -354,19 +354,19 @@ struct PlayerRowView: View {
         .contextMenu {
             if !isPickerMode {
                 Button(action: onShowBadges) {
-                    Label("Badges", systemImage: "medal")
+                    Label(appText("Badges"), systemImage: "medal")
                 }
                 Button(action: onEdit) {
-                    Label("Bewerken", systemImage: "pencil")
+                    Label(appText("Bewerken"), systemImage: "pencil")
                 }
             }
             Button(role: .destructive, action: { showingDeleteConfirm = true }) {
-                Label("Verwijderen", systemImage: "trash")
+                Label(appText("Verwijderen"), systemImage: "trash")
             }
         }
-        .alert("\(player.name) verwijderen?", isPresented: $showingDeleteConfirm) {
-            Button("Annuleren", role: .cancel) { }
-            Button("Verwijderen", role: .destructive, action: onDelete)
+        .alert(Text(appText("\(player.name) verwijderen?")), isPresented: $showingDeleteConfirm) {
+            Button(appText("Annuleren"), role: .cancel) { }
+            Button(appText("Verwijderen"), role: .destructive, action: onDelete)
         } message: {
             Text(appText("Gespeelde wedstrijden blijven bewaard."))
         }

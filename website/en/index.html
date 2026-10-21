@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Appearance before the first paint: Dark unless Light or System was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
+  <title>SquashAnalyzer – Squash Referee & Coach App</title>
+  <meta name="description" content="SquashAnalyzer is the squash app to referee, coach and share, for iPhone and Android. Keep the score and the serve, record every rally with point type, zone and shot, show your player the Coach card, play league matches with your team, follow the score live on your lock screen and earn badges." />
+  <meta property="og:title" content="SquashAnalyzer" />
+  <meta property="og:description" content="Referee · Coach · Share: the squash app for referees, coaches and their team, on iPhone and Android." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.squashanalyzer.com/en/" />
+  <link rel="canonical" href="https://www.squashanalyzer.com/en/" />
+  <link rel="alternate" hreflang="nl" href="https://www.squashanalyzer.com/" />
+  <link rel="alternate" hreflang="en" href="https://www.squashanalyzer.com/en/" />
+  <link rel="alternate" hreflang="x-default" href="https://www.squashanalyzer.com/en/" />
+  <link rel="stylesheet" href="/style.css?v=20261021" />
+  <script src="/theme.js?v=20261021" defer></script>
+  <!-- Icons of the site -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=5" />
+  <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=5" />
+  <link rel="apple-touch-icon" href="/logo.png?v=4" />
+  <style>
+    /* As on the Dutch release homepage (beta/index.html): the Google Play button
+       without a link yet, and a screenshot row per platform. */
+    .btn-soon { cursor: default; }
+    .btn-soon:hover { background: var(--btn); }
+    .appstore-placeholder.btn-soon:hover { background: var(--bg-card); }
+    /* Two store buttons of the same size, side by side (stacked on a phone) */
+    .store-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 300px)); gap: 12px; justify-content: center; }
+    .store-buttons .appstore-placeholder { justify-content: center; white-space: nowrap; padding-left: 18px; padding-right: 18px; }
+    .nav-stores { display: flex; gap: 8px; }
+    @media (max-width: 560px) {
+      .store-buttons { grid-template-columns: minmax(0, 320px); }
+      .nav-stores .nav-cta { padding: 8px 12px; }
+      .nav-stores .nav-cta span { display: none; }
+    }
+    .hero .hero-buttons { margin-top: 4px; margin-bottom: 20px; }
+    .hero-links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 16px; font-size: 15px; font-weight: 600; }
+    .hero-links a { color: var(--gold); text-decoration: none; }
+    .hero-links a:hover { text-decoration: underline; }
+    .platform-switch {
+      display: flex; justify-content: center; gap: 4px; width: max-content; margin: 24px auto -24px;
+      padding: 4px; border-radius: 999px; border: 1px solid var(--border);
+    }
+    .platform-switch button {
+      font: inherit; font-size: 14px; font-weight: 600; padding: 6px 18px; border-radius: 999px;
+      border: 0; background: transparent; color: var(--text-2, inherit); cursor: pointer;
+    }
+    .platform-switch button[aria-selected="true"] { background: var(--btn); color: var(--on-btn); }
+    .platform-switch button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .mockup-strip[hidden] { display: none; }
+    @media (max-width: 760px) {
+      .mockup-strip { gap: 10px; padding: 40px 12px; }
+      .mockup-phone { width: 29vw; border-radius: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navigation ───────────────────────────────────────── -->
+  <nav>
+    <div class="nav-inner">
+      <span class="nav-logo">
+        <img src="/logo.png?v=4" alt="" class="nav-logo-icon">
+        SquashAnalyzer
+      </span>
+      <div class="nav-right">
+      <span class="lang-switch"><a href="/" hreflang="nl" lang="nl">NL</a> | <span aria-current="page">EN</span></span>
+      <div class="nav-stores">
+        <a class="nav-cta" href="https://apps.apple.com/app/squash-analyzer/id6758676921" target="_blank" rel="noopener" aria-label="Download on the App Store">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          <span>App Store</span>
+        </a>
+        <!-- TODO Play-link na livegang -->
+        <a class="nav-cta btn-soon" href="#" aria-disabled="true" onclick="return false" title="The Google Play link follows at launch" aria-label="Get it on Google Play">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24a11.43 11.43 0 0 0-8.94 0L5.65 5.67c-.19-.29-.58-.38-.87-.2-.28.18-.37.54-.22.83L6.4 9.48A10.78 10.78 0 0 0 1 18h22a10.78 10.78 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></svg>
+          <span>Google Play</span>
+        </a>
+      </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ─────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-badge">Now on Android too</div>
+    <div class="hero-brand">
+      <img src="/logo.png?v=4" alt="">
+      <h1>Squash<span class="brand-accent">Analyzer</span></h1>
+    </div>
+    <p class="hero-tagline">Your game in sharp focus. For you and your team.</p>
+    <ul class="hero-pillars" aria-label="Referee, coach, share">
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="14" r="5"/><path d="M12 10h9v5h-6"/><circle cx="8" cy="14" r="1.6" fill="currentColor" stroke="none"/><path d="M5 9l-2-3"/></svg>Referee</li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg>Coach</li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M7.5 7.5L12 3l4.5 4.5M5 11v9h14v-9"/></svg>Share</li>
+    </ul>
+    <div class="hero-buttons" id="download">
+      <a class="btn-primary" href="https://apps.apple.com/app/squash-analyzer/id6758676921" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+        </svg>
+        Download on the App Store
+      </a>
+      <!-- TODO Play-link na livegang -->
+      <a class="btn-primary btn-soon" href="#" aria-disabled="true" onclick="return false" title="The Google Play link follows at launch">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24a11.43 11.43 0 0 0-8.94 0L5.65 5.67c-.19-.29-.58-.38-.87-.2-.28.18-.37.54-.22.83L6.4 9.48A10.78 10.78 0 0 0 1 18h22a10.78 10.78 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></svg>
+        Get it on Google Play
+      </a>
+    </div>
+    <p>The app to referee, coach and share, on iPhone and Android. Keep the score and the serve like a referee, record every rally in detail as a coach and show your player the Coach card between games. Play league matches with your team, share the score live with teammates and supporters, and earn badges.</p>
+    <div class="hero-links">
+      <a href="#features">Discover the features</a>
+      <a href="#guide">User guide</a>
+    </div>
+  </section>
+
+  <!-- ── Phone mockups: iPhone or Android (switch; Android phones start on Android) ── -->
+  <div class="platform-switch" role="tablist" aria-label="Screenshots of">
+    <button type="button" role="tab" id="tab-iphone" aria-controls="shots-iphone" aria-selected="true">iPhone</button>
+    <button type="button" role="tab" id="tab-android" aria-controls="shots-android" aria-selected="false">Android</button>
+  </div>
+  <div class="mockup-strip" id="shots-iphone" role="tabpanel" aria-labelledby="tab-iphone">
+    <div class="mockup-phone">
+      <img src="/screenshots/referee.png?v=4" alt="iPhone: Referee mode with a rally-by-rally score line">
+    </div>
+    <div class="mockup-phone center">
+      <img src="/screenshots/coach.png?v=5" alt="iPhone: Coach mode, tap the court where the point ended">
+    </div>
+    <div class="mockup-phone">
+      <img src="/screenshots/dashboard.png?v=4" alt="iPhone: Analysis with point breakdown and tactical advice">
+    </div>
+  </div>
+  <div class="mockup-strip" id="shots-android" role="tabpanel" aria-labelledby="tab-android" hidden>
+    <div class="mockup-phone">
+      <img src="/screenshots/android-referee.png?v=1" alt="Android: Referee mode with a rally-by-rally score line" loading="lazy">
+    </div>
+    <div class="mockup-phone center">
+      <img src="/screenshots/android-coach.png?v=1" alt="Android: Coach mode, game finished with Analysis and score sharing" loading="lazy">
+    </div>
+    <div class="mockup-phone">
+      <img src="/screenshots/android-dashboard.png?v=1" alt="Android: Analysis with heatmap, shots and point breakdown" loading="lazy">
+    </div>
+  </div>
+  <script>
+    (function () {
+      var tabs = { iphone: document.getElementById('tab-iphone'), android: document.getElementById('tab-android') };
+      var panels = { iphone: document.getElementById('shots-iphone'), android: document.getElementById('shots-android') };
+      function show(which) {
+        for (var k in tabs) {
+          tabs[k].setAttribute('aria-selected', k === which ? 'true' : 'false');
+          panels[k].hidden = k !== which;
+        }
+      }
+      tabs.iphone.addEventListener('click', function () { show('iphone'); });
+      tabs.android.addEventListener('click', function () { show('android'); });
+      if (/Android/i.test(navigator.userAgent)) show('android');
+    })();
+  </script>
+
+  <!-- ── Modes ──────────────────────────────────────────────── -->
+  <section class="section" id="features">
+    <div class="section-label">Two modes, one app</div>
+    <h2>For every role on the squash court</h2>
+    <p class="lead">SquashAnalyzer has a separate mode for referees who want to score quickly and by the rules, and for coaches who want to record every rally.</p>
+
+    <div class="mode-grid">
+      <!-- Referee -->
+      <div class="mode-card gold">
+        <div class="mode-icon"><span class="ms" aria-hidden="true">sports</span></div>
+        <h3>Referee Mode</h3>
+        <p>Fast, professional scoring with the official serving rules. Best of 5, with let calls, strokes and a score line that shows every rally.</p>
+        <ul class="feature-list">
+          <li>Service box switches automatically after every rally won</li>
+          <li>Lock Left/Right per player (e.g. left-handed)</li>
+          <li>Let call &amp; stroke recording</li>
+          <li>Live sharing with a link, including player photos</li>
+          <li>Your own match on your lock screen too</li>
+          <li>Rally-by-rally score line between the players</li>
+          <li>Match and game timer, undo last point</li>
+          <li>Share the result via WhatsApp: Scorecard, Report or Image</li>
+        </ul>
+      </div>
+
+      <!-- Coach -->
+      <div class="mode-card orange">
+        <div class="mode-icon"><span class="ms" aria-hidden="true">assignment</span></div>
+        <h3>Coach Mode</h3>
+        <p>Record every rally in detail: tap the score of whoever wins the point, choose the point type, the zone on the court and the shot. The app keeps track of who serves and from which box. After the game you get the Analysis and the Coach card to show your player what matters.</p>
+        <ul class="feature-list">
+          <li>Winner, forced error, unforced error, stroke or service point</li>
+          <li>For an unforced error, also the kind of error: down, out, serve or floor</li>
+          <li>START GAME at the first serve</li>
+          <li>Court in 6 zones, or 9 if you prefer</li>
+          <li>Per zone only the shots that fit, including Kill</li>
+          <li>"On the volley" switch for volleys</li>
+          <li>Analysis per game: heatmap, shots, point breakdown, serve and return, and tactical advice</li>
+          <li>Coach card between games: three coaching points and what changed</li>
+          <li>A note per game, typed or dictated</li>
+          <li>AI coaching advice with your own OpenAI key</li>
+          <li>Let call, rally timer and undo</li>
+          <li>Share the score as a scorecard, report or image</li>
+          <li>Live sharing: share a link and your team follows the score in the browser or on the lock screen</li>
+          <li>Save, resume and review matches, including the Coach card</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Feature strip ──────────────────────────────────────── -->
+  <div class="feature-strip">
+    <div class="feature-strip-inner">
+      <div class="feat">
+        <div class="feat-icon"><span class="ms" aria-hidden="true">emoji_events</span></div>
+        <h4>League</h4>
+        <p>Team matches with four matches, winner and bonus points under the Dutch squash federation (SBN) rules, and a live team page</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon"><span class="ms" aria-hidden="true">sensors</span></div>
+        <h4>Live sharing</h4>
+        <p>Send a link and your teammates follow the score live from the bench, with the player photos</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon"><span class="ms" aria-hidden="true">install_mobile</span></div>
+        <h4>On your lock screen</h4>
+        <p>Follow a match or team match on your lock screen, even with the app closed, with a notification for every game and the result</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon"><span class="ms" aria-hidden="true">psychology</span></div>
+        <h4>AI Coaching</h4>
+        <p>Tactical advice from OpenAI based on the numbers of your game, never with names</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon"><span class="ms" aria-hidden="true">backup</span></div>
+        <h4>Weekly backup</h4>
+        <p>A backup every week: on iPhone in iCloud Drive, on Android in a folder you choose. You can restore on both platforms</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon"><span class="ms" aria-hidden="true">groups</span></div>
+        <h4>Players and profile</h4>
+        <p>Save players with a photo and focus points, or import your whole team. The profile shows how they do across matches</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon"><span class="ms" aria-hidden="true">history</span></div>
+        <h4>Match history</h4>
+        <p>Look back at all saved matches, with the Analysis and the Coach card</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon"><span class="ms" aria-hidden="true">fast_forward</span></div>
+        <h4>Join later</h4>
+        <p>Start at game 2, 3 or 4 with the score so far, in both modes</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon"><span class="ms" aria-hidden="true">military_tech</span></div>
+        <h4>Badges</h4>
+        <p>37 badges to earn, and a player card you share with a link</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon"><span class="ms" aria-hidden="true">leaderboard</span></div>
+        <h4>My team</h4>
+        <p>The standings, matches and players of your league team from sbn.toernooi.nl</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon"><span class="ms" aria-hidden="true">settings</span></div>
+        <h4>Light or dark</h4>
+        <p>Choose a light or dark appearance in the app and on this website, or let your phone decide</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon"><span class="ms" aria-hidden="true">lock</span></div>
+        <h4>Privacy</h4>
+        <p>Your players and matches are stored on your phone. Online features use the internet: AI Coach receives statistics without names, My team fetches SBN data, and you can import teams or share data. Live data is deleted from the server 2 hours after the last score update.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── User guide & badges ───────────────────────────────── -->
+  <section class="section" id="guide">
+    <div class="section-label">Get started</div>
+    <h2>User guide and badges</h2>
+    <p class="lead">Read how the app works, screen by screen, and discover which badges your players can earn.</p>
+
+    <div class="mode-grid">
+      <div class="mode-card gold">
+        <div class="mode-icon"><span class="ms" aria-hidden="true">menu_book</span></div>
+        <h3>User guide</h3>
+        <p>Every part of the app explained: refereeing, coaching a match with zone and shot, Analysis and Coach card, reviewing matches, League, players and badges, and settings. With a separate version for iPhone and Android.</p>
+        <div class="home-links">
+          <a class="btn-primary" href="/en/guide/iphone.html">User guide iPhone</a>
+          <a class="btn-secondary" href="/en/guide/android.html">User guide Android</a>
+        </div>
+      </div>
+
+      <div class="mode-card orange">
+        <div class="badge-row">
+          <img src="/badges/five-in-a-row.png" alt="Badge Five in a row" width="64" height="64" loading="lazy">
+          <img src="/badges/volleywood.png" alt="Badge Volleywood" width="64" height="64" loading="lazy">
+          <img src="/badges/full-house.png" alt="Badge Full house" width="64" height="64" loading="lazy">
+          <img src="/badges/centurion.png" alt="Badge Centurion" width="64" height="64" loading="lazy">
+        </div>
+        <h3>Badges</h3>
+        <p>Players you pick with "Choose player" earn badges automatically during matches: in a single game, in a single match and across all their matches. There are 37, from 5 points in a row to a two-minute rally; seventeen badges have a bronze, silver and gold tier. Share the player card with a link.</p>
+        <div class="home-links">
+          <a class="btn-primary" href="/badges/" hreflang="nl">See all badges (in Dutch)</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Voluntary donation ────────────────────────────────── -->
+  <section class="section" id="steun">
+    <div class="mode-card gold donate-card">
+      <div class="mode-icon"><span class="ms" aria-hidden="true">local_cafe</span></div>
+      <h3>Buy me a coffee</h3>
+      <p>SquashAnalyzer is a hobby project: free, without ads and without an account. Do you find the app useful and want to give something back? A voluntary contribution helps with the costs of the server, the App Store and the Play Store. You choose the amount.</p>
+      <div class="home-links">
+        <a class="btn-primary" href="https://bunq.me/squashanalyzer" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">local_cafe</span> Buy me a coffee via bunq</a>
+      </div>
+      <p class="where">Entirely voluntary: the app stays free for now.</p>
+    </div>
+  </section>
+
+  <!-- ── Download CTA ───────────────────────────────────────── -->
+  <section class="cta-section">
+    <h2>Ready to start?</h2>
+    <p>SquashAnalyzer is free to download on the App Store for iPhone and iPad, and on Google Play for Android.</p>
+
+    <div class="store-buttons">
+      <a class="appstore-placeholder" href="https://apps.apple.com/app/squash-analyzer/id6758676921" target="_blank" rel="noopener">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Download on the App Store
+      </a>
+      <!-- TODO Play-link na livegang -->
+      <a class="appstore-placeholder btn-soon" href="#" aria-disabled="true" onclick="return false" title="The Google Play link follows at launch">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24a11.43 11.43 0 0 0-8.94 0L5.65 5.67c-.19-.29-.58-.38-.87-.2-.28.18-.37.54-.22.83L6.4 9.48A10.78 10.78 0 0 0 1 18h22a10.78 10.78 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></svg>
+        Get it on Google Play
+      </a>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ── Footer ─────────────────────────────────────────────── -->
+  <footer>
+    <span class="footer-logo">© 2026 SquashAnalyzer</span>
+    <div class="footer-links">
+      <a href="/en/privacy.html">Privacy policy</a>
+      <a href="/en/guide/">User guide</a>
+      <a href="mailto:info@squashanalyzer.com">Contact</a>
+      <a href="https://bunq.me/squashanalyzer" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">local_cafe</span> Buy me a coffee</a>
+    </div>
+    <div data-theme-choice-slot></div>
+  </footer>
+
+</body>
+</html>

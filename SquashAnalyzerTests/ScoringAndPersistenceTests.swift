@@ -6,6 +6,17 @@ import SquashAnalyzerUI
 import UIKit
 
 final class ScoringAndPersistenceTests: XCTestCase {
+    // The assertions are in Dutch; Core's texts follow the phone's language (docs/i18n.md)
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
+    override func tearDown() {
+        AppLanguageOverride.shared.language = nil
+        super.tearDown()
+    }
+
     func testGameEndsAtElevenWithTwoPointLead() {
         let engine = ScoringEngine()
         XCTAssertTrue(engine.isGameOver(SquashScore(player1: 11, player2: 9)))

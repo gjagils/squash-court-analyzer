@@ -3,6 +3,17 @@ import XCTest
 import SquashAnalyzerCore
 
 final class RefereeMatchTests: XCTestCase {
+    // The assertions are in Dutch; Core's texts follow the phone's language (docs/i18n.md)
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
+    override func tearDown() {
+        AppLanguageOverride.shared.language = nil
+        super.tearDown()
+    }
+
     private func makeMatch(startingServer: Player = .player1) -> RefereeMatch {
         RefereeMatch(player1Name: "A", player2Name: "B", bestOf: 5, startingServer: startingServer)
     }

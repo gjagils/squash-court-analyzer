@@ -3,6 +3,17 @@ import XCTest
 import SquashAnalyzerCore
 
 final class BadgeEngineTests: XCTestCase {
+    // The assertions are in Dutch; Core's texts follow the phone's language (docs/i18n.md)
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
+    override func tearDown() {
+        AppLanguageOverride.shared.language = nil
+        super.tearDown()
+    }
+
     private let engine = BadgeEngine()
 
     func testFiveInARowIsEarnedOnTheFifthRally() {

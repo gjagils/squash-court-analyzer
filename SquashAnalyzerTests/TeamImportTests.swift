@@ -6,6 +6,17 @@ import SquashAnalyzerCore
 @testable import SquashAnalyzer
 
 final class TeamImportTests: XCTestCase {
+    // The assertions are in Dutch; Core's texts follow the phone's language (docs/i18n.md)
+    override func setUp() {
+        super.setUp()
+        AppLanguageOverride.shared.language = AppLanguage.dutch
+    }
+
+    override func tearDown() {
+        AppLanguageOverride.shared.language = nil
+        super.tearDown()
+    }
+
     // MARK: - Helpers
 
     /// Builds a zip in memory (stored or deflated entries). CRCs are left 0; the reader does not verify them.

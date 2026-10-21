@@ -5,7 +5,16 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import android.app.Application
+import android.content.Context
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
+/** The texts come from the resources (Dutch: values/), so Robolectric */
+@RunWith(RobolectricTestRunner::class)
+@Config(application = Application::class, qualifiers = "nl")
 class LiveScoreCardTest {
     private fun score(
         score: Pair<Int, Int> = 0 to 0,
@@ -16,11 +25,13 @@ class LiveScoreCardTest {
         side: String = "R",
         bestOf: Int = 5,
         winner: Int? = null,
+        context: Context = RuntimeEnvironment.getApplication(),
     ) = LiveScoreCard(
         LiveScore(
             p1 = "Gerd-Jan", p2 = "Thomas", bestOf = bestOf, games = games, score = score,
             gamesWon = gamesWon, server = server, side = side, status = status, winner = winner,
         ),
+        context,
     )
 
     @Test fun playingShowsTheScoreAndWhoServes() {
@@ -174,5 +185,22 @@ class LiveScoreCardTest {
             card.segments,
         )
         assertEquals(22, card.progress)
+    }
+
+    /** Any phone whose first language is not Dutch gets English (HostLocale), a German one too */
+    @Test @Config(qualifiers = "en")
+    fun englishOnAnEnglishPhone() {
+        val card = score(9 to 7, games = listOf(11 to 8), gamesWon = 1 to 0, server = 2, side = "L")
+        assertEquals("Thomas serves from the left · games 1–0", card.text)
+        assertEquals("Game 2 · games 1–0 · Thomas serves", card.compactText)
+        assertEquals("Break", score(6 to 11, games = listOf(11 to 8, 6 to 11), gamesWon = 1 to 1, status = "between").chipText)
+        assertEquals("Warm-up · best of 3", score(status = "warmup", bestOf = 3).text)
+    }
+
+    @Test @Config(qualifiers = "de")
+    fun englishOnAGermanPhone() {
+        val card = score(11 to 4, games = listOf(11 to 2, 11 to 3, 11 to 4), gamesWon = 3 to 0, status = "finished")
+        assertEquals("Gerd-Jan wins 3–0", card.title)
+        assertEquals("Match ball for Gerd-Jan · games 2–0", score(10 to 4, games = listOf(11 to 2, 11 to 3), gamesWon = 2 to 0).text)
     }
 }

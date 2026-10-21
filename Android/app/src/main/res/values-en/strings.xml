@@ -1,0 +1,85 @@
+<resources>
+    <!-- English for the host's own texts; Dutch (values/) is the source.
+         HostLocale shows these on every phone whose first language is not Dutch. -->
+
+    <!-- Live score of one match (LiveScoreCard) -->
+    <string name="live_side_left">left</string>
+    <string name="live_side_right">right</string>
+    <string name="live_chip_break">Break</string>
+    <string name="live_wins">%1$s wins %2$d–%3$d</string>
+    <string name="live_wins_game">%1$s wins game %2$d %3$d–%4$d</string>
+    <string name="live_text_between">Games %1$s · game %2$d starts soon</string>
+    <string name="live_text_warmup">Warm-up · best of %1$d</string>
+    <string name="live_text_match_ball">Match ball for %1$s · games %2$s</string>
+    <string name="live_text_game_ball">Game ball for %1$s · games %2$s</string>
+    <string name="live_text_serving">%1$s serves from the %2$s · games %3$s</string>
+    <string name="live_compact_match_ball">Game %1$d · match ball %2$s</string>
+    <string name="live_compact_game_ball">Game %1$d · game ball %2$s</string>
+    <string name="live_compact_serving">Game %1$d · games %2$s · %3$s serves</string>
+    <string name="live_ticker_between">Break · game %1$d starts soon</string>
+    <string name="live_ticker_match_ball">Game %1$d · match ball</string>
+    <string name="live_ticker_game_ball">Game %1$d · game ball</string>
+    <string name="live_ticker_game">Game %1$d · best of %2$d</string>
+    <string name="live_serves">serves from the %1$s</string>
+    <string name="live_pill_finished">FINISHED</string>
+
+    <!-- Live score of a team match (TeamScoreCard, TeamScoreViews) -->
+    <string name="team_home">Home</string>
+    <string name="team_away">Away</string>
+    <string name="team_walkover">w/o</string>
+    <string name="team_retired">retired</string>
+    <string name="team_break">break</string>
+    <string name="team_done">%1$d of 4 done</string>
+    <string name="team_matches_won">matches %1$d–%2$d</string>
+    <string name="team_games">games %1$d–%2$d</string>
+    <string name="team_next_heading">Next match · E%1$d</string>
+    <string name="team_heading_break">E%1$d · break</string>
+    <string name="team_heading_playing">E%1$d · in play</string>
+    <string name="team_heading_warmup">E%1$d · warm-up</string>
+    <string name="team_tile_playing">"E%1$d  in play"</string>
+    <string name="team_live_break">E%1$d break: %2$s – %3$s %4$s</string>
+    <string name="team_live_playing">E%1$d in play: %2$s %3$s %4$s %5$s</string>
+    <string name="team_result">Result · %1$s · %2$s</string>
+    <string name="team_compact_break">E%1$d break</string>
+    <string name="team_compact_playing">E%1$d in play %2$s</string>
+    <string name="team_not_started">not started</string>
+    <string name="team_players_unknown">players not known yet</string>
+    <string name="team_matches">matches</string>
+
+    <!-- Notifications (LiveScoreNotifier) -->
+    <string name="channel_live_name">Live score</string>
+    <string name="channel_live_description">The score of a match you follow, on your lock screen</string>
+    <string name="channel_alerts_name">Results and games</string>
+    <string name="channel_alerts_description">An alert when a game or match is won, and at the result of a match you follow</string>
+    <string name="notification_league">League</string>
+    <string name="notification_stop">Stop</string>
+
+    <!-- Following a match from a link (MainActivity) -->
+    <string name="follow_started">You\'re following the match on your lock screen</string>
+    <string name="follow_started_title">You\'re following %1$s on your lock screen</string>
+    <string name="follow_not_found">This match has already finished</string>
+    <string name="follow_not_allowed">Notifications are off for SquashAnalyzer</string>
+    <string name="follow_no_connection">No connection</string>
+    <string name="follow_push_unavailable">This server can\'t send notifications (yet)</string>
+    <string name="follow_failed">Can\'t follow right now</string>
+    <string name="newer_app_title">Can\'t open link</string>
+    <string name="newer_app_update">%1$s Update the app in Google Play.</string>
+    <string name="newer_app_store">Go to Google Play</string>
+    <string name="newer_app_later">Later</string>
+
+    <!-- Share pictures (CardImage, ResultImage) -->
+    <string name="card_heading">BADGE CARD</string>
+    <string name="card_badge_count">%1$d of %2$d badges</string>
+    <string name="card_no_badges">No badges earned yet</string>
+    <string name="result_matches_heading">MATCHES</string>
+
+    <!-- Backups and files (backup/) -->
+    <string name="file_write_failed">Can\'t write the file</string>
+    <string name="file_read_failed">Can\'t read the file</string>
+    <string name="file_too_large_backup">This file is too large for a backup</string>
+    <string name="file_too_large">This file is too large</string>
+    <string name="backup_folder_chosen">chosen folder</string>
+    <string name="backup_folder_gone">The backup folder can no longer be reached</string>
+    <string name="backup_file_create_failed">Can\'t create a file in the backup folder</string>
+    <string name="backup_file_write_failed">Can\'t write the backup file</string>
+</resources>

@@ -22,7 +22,7 @@ import org.json.JSONObject
 
 /** "Melding bij elke game": which pushes alert, and how (a separate heads-up next to the score) */
 @RunWith(RobolectricTestRunner::class)
-@Config(application = Application::class)
+@Config(application = Application::class, qualifiers = "nl")
 class LiveAlertsTest {
     private val app: Application = ApplicationProvider.getApplicationContext()
     private val manager get() = app.getSystemService(NotificationManager::class.java)

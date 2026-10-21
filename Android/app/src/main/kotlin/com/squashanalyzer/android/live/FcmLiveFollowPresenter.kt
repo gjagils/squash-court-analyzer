@@ -43,8 +43,8 @@ class FcmLiveFollowPresenter(private val context: Context) : LiveFollowPresenter
     /** A team match (Competitie): the four partijen in one notification */
     override suspend fun startTeam(target: LiveFollowTarget, stand: TeamFollowStand) {
         val match = FollowedMatch.from(target)
-        val score = TeamScore.from(stand)
-        val slots = TeamScoreCard(score).slots
+        val score = TeamScore.from(stand, context)
+        val slots = TeamScoreCard(score, context).slots
         begin(target, match, show = { notifier.showTeam(match, score) }, fetchPhotos = { notifier.fetchTeamPhotos(match, slots) })
     }
 

@@ -24,7 +24,7 @@ import org.robolectric.annotation.GraphicsMode
  *   TEAM_RENDER_DIR=/tmp/team ./gradlew testDebugUnitTest --tests '*TeamScoreRenderTest*'
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(application = Application::class, sdk = [34], qualifiers = "w392dp-h850dp-xxhdpi")
+@Config(application = Application::class, sdk = [34], qualifiers = "nl-w392dp-h850dp-xxhdpi")
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class TeamScoreRenderTest {
     private fun partij(
@@ -60,7 +60,7 @@ class TeamScoreRenderTest {
             RuntimeEnvironment.setQualifiers(if (night) "+night" else "+notnight")
             val context: Context = RuntimeEnvironment.getApplication()
             for ((name, score) in states) {
-                val card = TeamScoreCard(score)
+                val card = TeamScoreCard(score, context)
                 val shade = if (night) "donker" else "licht"
                 save(context, TeamScoreViews.expanded(context, match, card), File(out, "android-$name-$shade.png"), night)
                 save(context, TeamScoreViews.collapsed(context, card), File(out, "android-$name-$shade-ingeklapt.png"), night)

@@ -1,5 +1,8 @@
 package com.squashanalyzer.android.live
 
+import android.content.Context
+import com.squashanalyzer.android.HostLocale
+import com.squashanalyzer.android.R
 import org.json.JSONArray
 import org.json.JSONObject
 import squash.analyzer.core.TeamFollowStand
@@ -37,14 +40,6 @@ data class TeamPartij(
     /** The serve dot: only in a rally, when the push says who serves */
     fun isServing(side: Int): Boolean = isLive && status == "playing" && server == side
 
-    /** "w.o." or "opgave", else null */
-    val endText: String?
-        get() = when (end) {
-            "walkover" -> "w.o."
-            "retired" -> "opgave"
-            else -> null
-        }
-
     /** 1 home, 2 away, 0 not known */
     val winnerSide: Int
         get() {
@@ -63,8 +58,14 @@ data class TeamScore(val home: String, val away: String, val partijen: List<Team
     fun partij(slot: Int): TeamPartij? = partijen.firstOrNull { partij -> partij.slot == slot }
 
     companion object {
+        /** "Thuis" and "Uit" in the app's language, for a team without a name (shown, never sent) */
+        private fun unnamed(context: Context): Pair<String, String> {
+            val texts = HostLocale.texts(context)
+            return texts.getString(R.string.team_home) to texts.getString(R.string.team_away)
+        }
+
         /** The `team` field of an FCM data message; null when it is not a team stand */
-        fun parse(json: String): TeamScore? = try {
+        fun parse(json: String, context: Context): TeamScore? = try {
             val o = JSONObject(json)
             val list = o.optJSONArray("partijen") ?: JSONArray()
             val partijen = mutableListOf<TeamPartij>()
@@ -87,9 +88,10 @@ data class TeamScore(val home: String, val away: String, val partijen: List<Team
                     ),
                 )
             }
+            val (home, away) = unnamed(context)
             TeamScore(
-                home = TeamNames.short(o.optString("home").trim().ifEmpty { "Thuis" }),
-                away = TeamNames.short(o.optString("away").trim().ifEmpty { "Uit" }),
+                home = TeamNames.short(o.optString("home").trim().ifEmpty { home }),
+                away = TeamNames.short(o.optString("away").trim().ifEmpty { away }),
                 partijen = partijen.sortedBy { partij -> partij.slot },
             )
         } catch (e: Exception) {
@@ -100,7 +102,7 @@ data class TeamScore(val home: String, val away: String, val partijen: List<Team
             if (array == null) 0 to 0 else array.optInt(0) to array.optInt(1)
 
         /** The first stand, from Core (`LiveFollow.follow` read GET /api/team/:id) */
-        fun from(stand: TeamFollowStand): TeamScore {
+        fun from(stand: TeamFollowStand, context: Context): TeamScore {
             val partijen = mutableListOf<TeamPartij>()
             for (partij in stand.partijen) {
                 fun pair(values: skip.lib.Array<Int>): Pair<Int, Int> =
@@ -113,7 +115,8 @@ data class TeamScore(val home: String, val away: String, val partijen: List<Team
                     ),
                 )
             }
-            return TeamScore(TeamNames.short(stand.home.trim().ifEmpty { "Thuis" }), TeamNames.short(stand.away.trim().ifEmpty { "Uit" }),
+            val (home, away) = unnamed(context)
+            return TeamScore(TeamNames.short(stand.home.trim().ifEmpty { home }), TeamNames.short(stand.away.trim().ifEmpty { away }),
                 partijen.sortedBy { it.slot })
         }
     }
@@ -122,9 +125,12 @@ data class TeamScore(val home: String, val away: String, val partijen: List<Team
 /**
  * The texts, rows and bar of a team match on the lock screen (Live Update on
  * Android 16+, an ongoing notification with the four partijen before that),
- * after the design "Teamwedstrijd · Android" on the canvas.
+ * after the design "Teamwedstrijd · Android" on the canvas. The texts come
+ * from the resources, in the app's language (HostLocale).
  */
-class TeamScoreCard(val score: TeamScore) {
+class TeamScoreCard(val score: TeamScore, context: Context) {
+    private val texts = HostLocale.texts(context)
+
     /** One stretch of the Live Update's bar; `player` 0 grey (not decided), 3 neutral (level, live) */
     data class Segment(val length: Int, val player: Int, val live: Boolean = false)
 
@@ -143,6 +149,8 @@ class TeamScoreCard(val score: TeamScore) {
         val isLive: Boolean,
         /** 1 or 2 when decided with a winner: that box in the winner's colour */
         val winner: Int,
+        /** Between two games: `middle` says "pauze", grey */
+        val isPause: Boolean = false,
     )
 
     val homeGames: Int get() = score.partijen.sumOf { partij -> partij.gamesWon.first }
@@ -183,11 +191,28 @@ class TeamScoreCard(val score: TeamScore) {
         return (if (side == 1) score.home else score.away) + " E" + partij.slot
     }
 
-    private val doneText: String get() = "$decidedCount van 4 klaar"
-    private val partijenText: String get() = "partijen ${partijenWon.first}–${partijenWon.second}"
+    /** "w.o." or "opgave", else null */
+    fun endText(partij: TeamPartij): String? = when (partij.end) {
+        "walkover" -> texts.getString(R.string.team_walkover)
+        "retired" -> texts.getString(R.string.team_retired)
+        else -> null
+    }
+
+    /** "2 van 4 klaar" */
+    val doneText: String get() = texts.getString(R.string.team_done, decidedCount)
+    private val partijenText: String get() = texts.getString(R.string.team_matches_won, partijenWon.first, partijenWon.second)
 
     /** "games 9–6" over all partijen (secondary: SBN counts partijen first) */
-    private val teamGamesText: String get() = "games $homeGames–$awayGames"
+    private val teamGamesText: String get() = texts.getString(R.string.team_games, homeGames, awayGames)
+
+    /** "pauze", the grey text between two games */
+    val pauseText: String get() = texts.getString(R.string.team_break)
+
+    /**
+     * A fixed text of the notification layouts in the app's language: the
+     * layouts themselves would follow the phone's locale list, not HostLocale
+     */
+    fun label(id: Int): String = texts.getString(id)
 
     /** "All Inn 8 1 – 1 Delft 8": the partijen won, the title of both notifications */
     val title: String get() = "${score.home} ${partijenWon.first} – ${partijenWon.second} ${score.away}"
@@ -227,17 +252,17 @@ class TeamScoreCard(val score: TeamScore) {
 
     /** "E3 · bezig", "E3 · pauze", "E3 · inspelen", "Volgende partij · E3" */
     fun focusHeading(slot: Int): String {
-        val partij = score.partij(slot) ?: return "Volgende partij · E$slot"
+        val partij = score.partij(slot) ?: return texts.getString(R.string.team_next_heading, slot)
         return when {
-            partij.isPause -> "E$slot · pauze"
-            partij.isLive -> "E$slot · bezig"
-            partij.status == "warmup" && !partij.isDecided -> "E$slot · inspelen"
-            else -> "Volgende partij · E$slot"
+            partij.isPause -> texts.getString(R.string.team_heading_break, slot)
+            partij.isLive -> texts.getString(R.string.team_heading_playing, slot)
+            partij.status == "warmup" && !partij.isDecided -> texts.getString(R.string.team_heading_warmup, slot)
+            else -> texts.getString(R.string.team_next_heading, slot)
         }
     }
 
     /** "games 1–1" of one partij */
-    fun gamesText(partij: TeamPartij): String = "games ${partij.gamesWon.first}–${partij.gamesWon.second}"
+    fun gamesText(partij: TeamPartij): String = texts.getString(R.string.team_games, partij.gamesWon.first, partij.gamesWon.second)
 
     /** "7–5" */
     fun pointsText(partij: TeamPartij): String = "${partij.score.first}–${partij.score.second}"
@@ -251,10 +276,10 @@ class TeamScoreCard(val score: TeamScore) {
             when {
                 partij == null -> Tile(slot, 0, "E$slot  –")
                 partij.isDecided -> {
-                    val result = partij.endText ?: "${partij.gamesWon.first}–${partij.gamesWon.second}"
+                    val result = endText(partij) ?: "${partij.gamesWon.first}–${partij.gamesWon.second}"
                     Tile(slot, partij.winnerSide.let { if (it == 0) 3 else it }, "E$slot  $result")
                 }
-                partij.isLive -> Tile(slot, 4, "E$slot  bezig")
+                partij.isLive -> Tile(slot, 4, texts.getString(R.string.team_tile_playing, slot))
                 else -> Tile(slot, 0, "E$slot  –")
             }
         }
@@ -263,14 +288,14 @@ class TeamScoreCard(val score: TeamScore) {
     private fun liveText(partij: TeamPartij): String {
         val games = "(${partij.gamesWon.first}–${partij.gamesWon.second})"
         return if (partij.isPause) {
-            "E${partij.slot} pauze: ${name(partij, 1)} – ${name(partij, 2)} $games"
+            texts.getString(R.string.team_live_break, partij.slot, name(partij, 1), name(partij, 2), games)
         } else {
-            "E${partij.slot} bezig: ${name(partij, 1)} ${pointsText(partij)} ${name(partij, 2)} $games"
+            texts.getString(R.string.team_live_playing, partij.slot, name(partij, 1), pointsText(partij), name(partij, 2), games)
         }
     }
 
     /** "Uitslag · partijen 3–1 · games 9–6" */
-    private val resultText: String get() = "Uitslag · $partijenText · $teamGamesText"
+    private val resultText: String get() = texts.getString(R.string.team_result, partijenText, teamGamesText)
 
     /** The second line of the Live Update: the partij under way, then the games of the teams */
     val text: String
@@ -287,7 +312,8 @@ class TeamScoreCard(val score: TeamScore) {
         get() {
             if (isFinished) return resultText
             val parts = live.map { partij ->
-                if (partij.isPause) "E${partij.slot} pauze" else "E${partij.slot} bezig ${pointsText(partij)}"
+                if (partij.isPause) texts.getString(R.string.team_compact_break, partij.slot)
+                else texts.getString(R.string.team_compact_playing, partij.slot, pointsText(partij))
             }
             return (parts + doneText).joinToString(" · ")
         }
@@ -303,15 +329,16 @@ class TeamScoreCard(val score: TeamScore) {
                 val started = partij.isDecided || partij.isLive
                 // Decided: the games boxes say it, so only "w.o." or "opgave" between them
                 val middle = when {
-                    partij.isDecided -> partij.endText ?: "–"
-                    partij.isPause -> "pauze"
+                    partij.isDecided -> endText(partij) ?: "–"
+                    partij.isPause -> pauseText
                     partij.isLive -> pointsText(partij)
                     else -> "–"
                 }
                 Row(slot, if (partij.isLive) "● E$slot" else "E$slot", name(partij, 1), name(partij, 2), missing = false,
                     games1 = if (started) partij.gamesWon.first.toString() else "–",
                     games2 = if (started) partij.gamesWon.second.toString() else "–",
-                    middle = middle, isLive = partij.isLive, winner = if (partij.isDecided) partij.winnerSide else 0)
+                    middle = middle, isLive = partij.isLive, winner = if (partij.isDecided) partij.winnerSide else 0,
+                    isPause = !partij.isDecided && partij.isPause)
             }
         }
 

@@ -23,6 +23,7 @@ object TeamScoreViews {
     fun expanded(context: Context, match: FollowedMatch, card: TeamScoreCard): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.notification_team_score)
         teamLine(views, card)
+        views.setTextViewText(R.id.team_matches_label, card.label(R.string.team_matches))
         // At the end the winner's box filled (SBN rule, as far as the push knows it)
         val winner = if (card.isFinished) card.teamWinner else 0
         show(views, R.id.team_home_games, R.id.team_home_games_won, if (winner == 1) 2 else 1, card.partijenWon.first.toString())
@@ -31,10 +32,10 @@ object TeamScoreViews {
         views.removeAllViews(R.id.team_rows)
         views.removeAllViews(R.id.team_strip)
         when (val top = card.focus) {
-            is TeamScoreCard.Focus.Finished -> for (row in card.rows) views.addView(R.id.team_rows, row(context, match, row))
+            is TeamScoreCard.Focus.Finished -> for (row in card.rows) views.addView(R.id.team_rows, row(context, match, card, row))
             is TeamScoreCard.Focus.Live ->
                 if (top.partijen.size > 1) {
-                    for (partij in top.partijen.take(2)) views.addView(R.id.team_rows, row(context, match, card.rows[partij.slot - 1]))
+                    for (partij in top.partijen.take(2)) views.addView(R.id.team_rows, row(context, match, card, card.rows[partij.slot - 1]))
                 } else {
                     views.addView(R.id.team_rows, focus(context, match, card, top.partijen.first().slot))
                 }
@@ -66,14 +67,15 @@ object TeamScoreViews {
         val pause = partij?.isPause == true
         show(views, R.id.focus_heading_live, R.id.focus_heading, if (live && !pause) 1 else 2, card.focusHeading(slot))
         views.setViewVisibility(R.id.focus_dot, if (live && !pause) View.VISIBLE else View.GONE)
-        views.setTextViewText(R.id.focus_games, if (live && partij != null) card.gamesText(partij) else "${card.decidedCount} van 4 klaar")
+        views.setTextViewText(R.id.focus_games, if (live && partij != null) card.gamesText(partij) else card.doneText)
         if (partij == null) {
             views.setViewVisibility(R.id.focus_players, View.GONE)
+            views.setTextViewText(R.id.focus_unknown, card.label(R.string.team_players_unknown))
             views.setViewVisibility(R.id.focus_unknown, View.VISIBLE)
             return views
         }
         when {
-            pause -> showPause(views, "pauze")
+            pause -> showPause(views, card.pauseText)
             live -> {
                 views.setTextViewText(R.id.focus_points1, partij.score.first.toString())
                 views.setTextViewText(R.id.focus_points2, partij.score.second.toString())
@@ -121,11 +123,12 @@ object TeamScoreViews {
         }
     }
 
-    private fun row(context: Context, match: FollowedMatch, row: TeamScoreCard.Row): RemoteViews {
+    private fun row(context: Context, match: FollowedMatch, card: TeamScoreCard, row: TeamScoreCard.Row): RemoteViews {
         if (row.missing) {
             // Nobody plays this slot yet: "nog niet begonnen" instead of the team names
             val waiting = RemoteViews(context.packageName, R.layout.notification_team_row_wait)
             waiting.setTextViewText(R.id.team_slot, row.label)
+            waiting.setTextViewText(R.id.team_wait_text, card.label(R.string.team_not_started))
             return waiting
         }
         val views = RemoteViews(context.packageName, R.layout.notification_team_row)
@@ -140,7 +143,7 @@ object TeamScoreViews {
         games(views, R.id.team_g2, R.id.team_g2_won, R.id.team_g2_dim, row.games2,
             when { notStarted -> 3; row.winner == 2 -> 2; else -> 1 })
         // The points red; "pauze" grey
-        show(views, R.id.team_mid, R.id.team_mid_live, if (row.isLive && row.middle != "pauze") 2 else 1, row.middle)
+        show(views, R.id.team_mid, R.id.team_mid_live, if (row.isLive && !row.isPause) 2 else 1, row.middle)
         // Avatars: the photo when there is one, else the first letter; none for an empty slot
         for (side in 1..2) {
             val frame = if (side == 1) R.id.team_avatar1 else R.id.team_avatar2

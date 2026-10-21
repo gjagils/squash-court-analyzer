@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.squashanalyzer.android.BuildConfig
+import com.squashanalyzer.android.HostLocale
 import com.squashanalyzer.android.MainActivity
 import com.squashanalyzer.android.R
 import kotlinx.coroutines.launch
@@ -64,6 +65,9 @@ class LiveScoreNotifier(private val context: Context) {
 
     private val manager = context.getSystemService(NotificationManager::class.java)
 
+    /** The notification's own texts, in the app's language */
+    private val texts by lazy { HostLocale.texts(context) }
+
     fun canNotify(): Boolean {
         if (Build.VERSION.SDK_INT >= 33 &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
@@ -73,10 +77,16 @@ class LiveScoreNotifier(private val context: Context) {
         return channel == null || channel.importance != NotificationManager.IMPORTANCE_NONE
     }
 
+    /**
+     * Creates the channel, or renames it after a language change (creating an
+     * existing channel only updates its name and description, never what the
+     * user changed)
+     */
     private fun ensureChannel() {
-        if (manager.getNotificationChannel(CHANNEL_ID) != null) return
-        val channel = NotificationChannel(CHANNEL_ID, "Live score", NotificationManager.IMPORTANCE_DEFAULT).apply {
-            description = "De stand van een wedstrijd die je volgt, op je vergrendelscherm"
+        val name = texts.getString(R.string.channel_live_name)
+        if (manager.getNotificationChannel(CHANNEL_ID)?.name?.toString() == name) return
+        val channel = NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT).apply {
+            description = texts.getString(R.string.channel_live_description)
             setShowBadge(false)
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
@@ -90,7 +100,7 @@ class LiveScoreNotifier(private val context: Context) {
     fun show(target: FollowedMatch, score: LiveScore, quiet: Boolean = false) {
         if (!canNotify()) return
         ensureChannel()
-        val card = LiveScoreCard(score)
+        val card = LiveScoreCard(score, context)
         val alert = !quiet && card.isFinished && !finishedShown(target)
         val notification = if (Build.VERSION.SDK_INT >= 36 && usesLiveUpdate()) liveUpdate(target, card, alert) else ongoing(target, card, alert)
         notification.extras.putBoolean(EXTRA_FINISHED, card.isFinished)
@@ -145,7 +155,7 @@ class LiveScoreNotifier(private val context: Context) {
     fun showTeam(target: FollowedMatch, score: TeamScore, quiet: Boolean = false) {
         if (!canNotify()) return
         ensureChannel()
-        val card = TeamScoreCard(score)
+        val card = TeamScoreCard(score, context)
         val alert = !quiet && card.isFinished && !finishedShown(target)
         val notification = if (Build.VERSION.SDK_INT >= 36 && usesLiveUpdate()) teamLiveUpdate(target, card, alert) else teamOngoing(target, card, alert)
         notification.extras.putBoolean(EXTRA_FINISHED, card.isFinished)
@@ -189,7 +199,7 @@ class LiveScoreNotifier(private val context: Context) {
             .setSmallIcon(R.drawable.ic_stat_live_score)
             .setContentTitle(card.title)
             .setContentText(card.text)
-            .setSubText("Competitie")
+            .setSubText(texts.getString(R.string.notification_league))
             .setStyle(style)
             .setShortCriticalText(card.chipText)
             .setContentIntent(openApp())
@@ -203,7 +213,7 @@ class LiveScoreNotifier(private val context: Context) {
             builder.setOngoing(false).setAutoCancel(true).setTimeoutAfter(FINISHED_TIMEOUT_MILLIS)
         } else {
             builder.setOngoing(true)
-                .addAction(Notification.Action.Builder(null, "Stoppen", action(target, LiveFollowActionReceiver.ACTION_STOP)).build())
+                .addAction(Notification.Action.Builder(null, texts.getString(R.string.notification_stop), action(target, LiveFollowActionReceiver.ACTION_STOP)).build())
             builder.extras.putBoolean("android.requestPromotedOngoing", true)
         }
         return builder.build()
@@ -230,7 +240,7 @@ class LiveScoreNotifier(private val context: Context) {
             builder.setOngoing(false).setAutoCancel(true).setTimeoutAfter(FINISHED_TIMEOUT_MILLIS)
         } else {
             builder.setOngoing(true)
-                .addAction(0, "Stoppen", action(target, LiveFollowActionReceiver.ACTION_STOP))
+                .addAction(0, texts.getString(R.string.notification_stop), action(target, LiveFollowActionReceiver.ACTION_STOP))
         }
         return builder.build()
     }
@@ -250,9 +260,10 @@ class LiveScoreNotifier(private val context: Context) {
     // alerts off in the phone's settings without losing the score.
 
     private fun ensureAlertChannel() {
-        if (manager.getNotificationChannel(ALERT_CHANNEL_ID) != null) return
-        val channel = NotificationChannel(ALERT_CHANNEL_ID, "Uitslagen en games", NotificationManager.IMPORTANCE_HIGH).apply {
-            description = "Een melding als een game of partij gewonnen is en bij de uitslag van een wedstrijd die je volgt"
+        val name = texts.getString(R.string.channel_alerts_name)
+        if (manager.getNotificationChannel(ALERT_CHANNEL_ID)?.name?.toString() == name) return
+        val channel = NotificationChannel(ALERT_CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH).apply {
+            description = texts.getString(R.string.channel_alerts_description)
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
         manager.createNotificationChannel(channel)
@@ -342,7 +353,7 @@ class LiveScoreNotifier(private val context: Context) {
             builder.setOngoing(false).setAutoCancel(true).setTimeoutAfter(FINISHED_TIMEOUT_MILLIS)
         } else {
             builder.setOngoing(true)
-                .addAction(Notification.Action.Builder(null, "Stoppen", action(target, LiveFollowActionReceiver.ACTION_STOP)).build())
+                .addAction(Notification.Action.Builder(null, texts.getString(R.string.notification_stop), action(target, LiveFollowActionReceiver.ACTION_STOP)).build())
             // setRequestPromotedOngoing is API 36.1; the extra works from 36 on
             builder.extras.putBoolean("android.requestPromotedOngoing", true)
         }
@@ -375,7 +386,7 @@ class LiveScoreNotifier(private val context: Context) {
             builder.setOngoing(false).setAutoCancel(true).setTimeoutAfter(FINISHED_TIMEOUT_MILLIS)
         } else {
             builder.setOngoing(true)
-                .addAction(0, "Stoppen", action(target, LiveFollowActionReceiver.ACTION_STOP))
+                .addAction(0, texts.getString(R.string.notification_stop), action(target, LiveFollowActionReceiver.ACTION_STOP))
         }
         return builder.build()
     }
@@ -405,7 +416,7 @@ class LiveScoreNotifier(private val context: Context) {
         val views = RemoteViews(context.packageName, R.layout.notification_live_score)
         views.setTextViewText(R.id.live_status, card.tickerStatus)
         if (card.isFinished) {
-            views.setTextViewText(R.id.live_pill, "AFGELOPEN")
+            views.setTextViewText(R.id.live_pill, texts.getString(R.string.live_pill_finished))
             views.setInt(R.id.live_pill, "setBackgroundResource", R.drawable.live_pill_done)
             views.setTextColor(R.id.live_pill, ContextCompat.getColor(context, R.color.live_text2))
             // "Gerd-Jan wint 3–1" gets the room; it already names the winner, so no cup by the name

@@ -80,44 +80,66 @@ public enum L10n {
     /// Whether the English table has a translation for `key` (for tests)
     public static func hasEnglish(_ key: String) -> Bool {
         guard let bundle = L10n.englishBundle else { return false }
-        let missing = "\u{1}missing\u{1}"
+        let missing = "__L10n_missing__"
         return bundle.localizedString(forKey: key, value: missing, table: nil) != missing
     }
 
+    static let digitCharacters: [String] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
     /// Replaces `%@` (in order) and `%1$@`... (by position) with `arguments`,
-    /// in one pass so an argument that itself contains "%@" stays as it is
+    /// in one pass so an argument that itself contains "%@" stays as it is.
+    /// Plain loop over characters as text, so Skip transpiles it as is.
     static func fill(_ template: String, _ arguments: [String]) -> String {
         if arguments.isEmpty { return template }
-        let chars = Array(template)
         var result = ""
+        // What was read of a possible placeholder: "%", "%2" or "%2$"
+        var pending = ""
+        var digits = ""
+        var sawDollar = false
         var next = 0
-        var index = 0
-        while index < chars.count {
-            let char = chars[index]
-            if char == "%" && index + 1 < chars.count {
-                if chars[index + 1] == "@" {
-                    result += next < arguments.count ? arguments[next] : ""
-                    next += 1
-                    index += 2
-                    continue
-                }
-                // "%2$@": digits, a dollar sign and an at sign
-                var end = index + 1
-                var digits = ""
-                while end < chars.count && chars[end] >= "0" && chars[end] <= "9" {
-                    digits += String(chars[end])
-                    end += 1
-                }
-                if !digits.isEmpty && end + 1 < chars.count && chars[end] == "$" && chars[end + 1] == "@",
-                   let position = Int(digits) {
-                    result += position >= 1 && position <= arguments.count ? arguments[position - 1] : ""
-                    index = end + 2
-                    continue
-                }
+        for character in template {
+            let text = String(character)
+            if pending.isEmpty {
+                if text == "%" { pending = text } else { result += text }
+                continue
             }
-            result += String(char)
-            index += 1
+            if text == "@" && digits.isEmpty {
+                // "%@": the next argument in order
+                result += next < arguments.count ? arguments[next] : ""
+                next += 1
+                pending = ""
+                continue
+            }
+            if text == "@" && sawDollar {
+                // "%2$@": the argument at that position
+                if let position = Int(digits) {
+                    result += position >= 1 && position <= arguments.count ? arguments[position - 1] : ""
+                } else {
+                    result += pending + text
+                }
+                pending = ""
+                digits = ""
+                sawDollar = false
+                continue
+            }
+            if !sawDollar && L10n.digitCharacters.contains(text) {
+                pending += text
+                digits += text
+                continue
+            }
+            if !sawDollar && !digits.isEmpty && text == "$" {
+                pending += text
+                sawDollar = true
+                continue
+            }
+            // Not a placeholder after all: keep what was read as it is
+            result += pending
+            pending = ""
+            digits = ""
+            sawDollar = false
+            if text == "%" { pending = text } else { result += text }
         }
+        result += pending
         return result
     }
 }

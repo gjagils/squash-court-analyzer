@@ -30,6 +30,15 @@ final class L10nTests: XCTestCase {
         XCTAssertEqual(L10n.fill("Geen rally's", []), "Geen rally's")
     }
 
+    func testFillPositionalPlaceholders() {
+        XCTAssertEqual(L10n.fill("%1$@ – %2$@ (%1$@)", ["Jan", "Piet"]), "Jan – Piet (Jan)")
+        XCTAssertEqual(L10n.fill("%12$@", ["a"]), "")
+        XCTAssertEqual(L10n.fill("%0$@ en %3$@", ["a", "b"]), " en ")
+        // Something that only starts like a placeholder stays as it is
+        XCTAssertEqual(L10n.fill("100% %5x %1$x %$@ %", ["a"]), "100% %5x %1$x %$@ %")
+        XCTAssertEqual(L10n.fill("%%@ %2%@", ["a", "b"]), "%a %2b")
+    }
+
     func testDutchNeverLooksAnythingUp() {
         AppLanguageOverride.shared.language = AppLanguage.dutch
         XCTAssertEqual(BadgeTier.gold.title, "Goud")

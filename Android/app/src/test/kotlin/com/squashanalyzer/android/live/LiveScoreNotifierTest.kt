@@ -18,7 +18,7 @@ import org.robolectric.annotation.Config
 /** The notification itself: Android 9-15 (ongoing, mini scoreboard) and 16+ (Live Update) */
 @RunWith(RobolectricTestRunner::class)
 // A plain Application: SquashApplication starts Skip, which can only happen once per JVM (two SDKs here)
-@Config(application = Application::class)
+@Config(application = Application::class, qualifiers = "nl")
 class LiveScoreNotifierTest {
     private val app: Application = ApplicationProvider.getApplicationContext()
     private val manager get() = app.getSystemService(NotificationManager::class.java)
@@ -97,6 +97,18 @@ class LiveScoreNotifierTest {
         notifier.show(match, score())
         notifier.cancel(match)
         assertTrue(manager.activeNotifications.isEmpty())
+    }
+
+    /** A phone whose first language is not Dutch: the notification and its channel in English */
+    @Test @Config(sdk = [34], qualifiers = "fr")
+    fun englishOnAnotherLanguage() {
+        LiveScoreNotifier(app).show(match, score())
+        val n = shown()
+        assertEquals("Stop", n.actions.single().title.toString())
+        assertEquals("Game 2 · games 1–0 · Gerd-Jan serves", n.extras.getString(Notification.EXTRA_TEXT))
+        assertEquals("Live score", manager.getNotificationChannel(LiveScoreNotifier.CHANNEL_ID).name)
+        assertEquals("The score of a match you follow, on your lock screen",
+            manager.getNotificationChannel(LiveScoreNotifier.CHANNEL_ID).description)
     }
 
     @Test @Config(sdk = [34])

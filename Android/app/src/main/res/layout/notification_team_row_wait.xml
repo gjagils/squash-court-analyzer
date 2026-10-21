@@ -17,11 +17,12 @@
         android:textStyle="bold" />
 
     <TextView
+        android:id="@+id/team_wait_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:maxLines="1"
-        android:text="nog niet begonnen"
+        android:text="@string/team_not_started"
         android:textColor="@color/live_dim"
         android:textSize="12sp" />
 </FrameLayout>

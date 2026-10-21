@@ -1,3 +1,89 @@
 <resources>
     <string name="app_name">Squash Analyzer</string>
+
+    <!-- The host's own texts. Dutch is the source language (values/), English
+         is values-en/; HostLocale picks one of the two (English on any phone
+         whose first language is not Dutch). Never put stored, sent or parsed
+         values (status codes, keys, team names) in here. -->
+
+    <!-- Live score of one match (LiveScoreCard) -->
+    <string name="live_side_left">links</string>
+    <string name="live_side_right">rechts</string>
+    <string name="live_chip_break">Pauze</string>
+    <string name="live_wins">%1$s wint %2$d–%3$d</string>
+    <string name="live_wins_game">%1$s wint game %2$d met %3$d–%4$d</string>
+    <string name="live_text_between">Games %1$s · game %2$d begint zo</string>
+    <string name="live_text_warmup">Inspelen · best of %1$d</string>
+    <string name="live_text_match_ball">Matchbal voor %1$s · games %2$s</string>
+    <string name="live_text_game_ball">Gamebal voor %1$s · games %2$s</string>
+    <string name="live_text_serving">%1$s serveert %2$s · games %3$s</string>
+    <string name="live_compact_match_ball">Game %1$d · matchbal %2$s</string>
+    <string name="live_compact_game_ball">Game %1$d · gamebal %2$s</string>
+    <string name="live_compact_serving">Game %1$d · games %2$s · %3$s serveert</string>
+    <string name="live_ticker_between">Pauze · game %1$d begint zo</string>
+    <string name="live_ticker_match_ball">Game %1$d · matchbal</string>
+    <string name="live_ticker_game_ball">Game %1$d · gamebal</string>
+    <string name="live_ticker_game">Game %1$d · best of %2$d</string>
+    <string name="live_serves">serveert %1$s</string>
+    <string name="live_pill_finished">AFGELOPEN</string>
+
+    <!-- Live score of a team match (TeamScoreCard, TeamScoreViews) -->
+    <string name="team_home">Thuis</string>
+    <string name="team_away">Uit</string>
+    <string name="team_walkover">w.o.</string>
+    <string name="team_retired">opgave</string>
+    <string name="team_break">pauze</string>
+    <string name="team_done">%1$d van 4 klaar</string>
+    <string name="team_matches_won">partijen %1$d–%2$d</string>
+    <string name="team_games">games %1$d–%2$d</string>
+    <string name="team_next_heading">Volgende partij · E%1$d</string>
+    <string name="team_heading_break">E%1$d · pauze</string>
+    <string name="team_heading_playing">E%1$d · bezig</string>
+    <string name="team_heading_warmup">E%1$d · inspelen</string>
+    <string name="team_tile_playing">"E%1$d  bezig"</string>
+    <string name="team_live_break">E%1$d pauze: %2$s – %3$s %4$s</string>
+    <string name="team_live_playing">E%1$d bezig: %2$s %3$s %4$s %5$s</string>
+    <string name="team_result">Uitslag · %1$s · %2$s</string>
+    <string name="team_compact_break">E%1$d pauze</string>
+    <string name="team_compact_playing">E%1$d bezig %2$s</string>
+    <string name="team_not_started">nog niet begonnen</string>
+    <string name="team_players_unknown">spelers nog niet bekend</string>
+    <string name="team_matches">partijen</string>
+
+    <!-- Notifications (LiveScoreNotifier) -->
+    <string name="channel_live_name">Live score</string>
+    <string name="channel_live_description">De stand van een wedstrijd die je volgt, op je vergrendelscherm</string>
+    <string name="channel_alerts_name">Uitslagen en games</string>
+    <string name="channel_alerts_description">Een melding als een game of partij gewonnen is en bij de uitslag van een wedstrijd die je volgt</string>
+    <string name="notification_league">Competitie</string>
+    <string name="notification_stop">Stoppen</string>
+
+    <!-- Following a match from a link (MainActivity) -->
+    <string name="follow_started">Je volgt de wedstrijd op je vergrendelscherm</string>
+    <string name="follow_started_title">Je volgt %1$s op je vergrendelscherm</string>
+    <string name="follow_not_found">Deze wedstrijd is al afgelopen</string>
+    <string name="follow_not_allowed">Meldingen staan uit voor SquashAnalyzer</string>
+    <string name="follow_no_connection">Geen verbinding</string>
+    <string name="follow_push_unavailable">Deze server kan (nog) geen meldingen sturen</string>
+    <string name="follow_failed">Volgen lukt nu niet</string>
+    <string name="newer_app_title">Link niet te openen</string>
+    <string name="newer_app_update">%1$s Werk de app bij in Google Play.</string>
+    <string name="newer_app_store">Naar Google Play</string>
+    <string name="newer_app_later">Later</string>
+
+    <!-- Share pictures (CardImage, ResultImage) -->
+    <string name="card_heading">BADGEKAART</string>
+    <string name="card_badge_count">%1$d van %2$d badges</string>
+    <string name="card_no_badges">Nog geen badges verdiend</string>
+    <string name="result_matches_heading">PARTIJEN</string>
+
+    <!-- Backups and files (backup/) -->
+    <string name="file_write_failed">Kan het bestand niet schrijven</string>
+    <string name="file_read_failed">Kan het bestand niet lezen</string>
+    <string name="file_too_large_backup">Dit bestand is te groot voor een back-up</string>
+    <string name="file_too_large">Dit bestand is te groot</string>
+    <string name="backup_folder_chosen">gekozen map</string>
+    <string name="backup_folder_gone">De back-upmap is niet meer bereikbaar</string>
+    <string name="backup_file_create_failed">Kan geen bestand maken in de back-upmap</string>
+    <string name="backup_file_write_failed">Kan het back-upbestand niet schrijven</string>
 </resources>

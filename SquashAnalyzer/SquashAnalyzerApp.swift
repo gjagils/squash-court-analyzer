@@ -44,8 +44,8 @@ struct SquashAnalyzerApp: App {
             } catch {
                 fatalError("Ook de veilige tijdelijke opslag kon niet worden gestart: \(error)")
             }
-            let location = recoveryURL?.path ?? "de Application Support-map"
-            persistenceWarning = "De lokale database kon niet worden geopend. De originele bestanden zijn behouden in \(location). Deze sessie gebruikt tijdelijke opslag; exporteer geen vervangende backup voordat de database is hersteld."
+            let location = recoveryURL?.path ?? String(localized: "de Application Support-map")
+            persistenceWarning = String(localized: "De lokale database kon niet worden geopend. De originele bestanden zijn behouden in \(location). Deze sessie gebruikt tijdelijke opslag; exporteer geen vervangende backup voordat de database is hersteld.")
         }
     }
 

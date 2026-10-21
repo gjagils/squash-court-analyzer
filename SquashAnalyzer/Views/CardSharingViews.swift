@@ -166,9 +166,9 @@ struct CardImportSheet: View {
             }
             .scrollContentBackground(.hidden)
             .background(AppBackground())
-            .pageTitle("Spelerskaart")
+            .pageTitle(String(localized: "Spelerskaart"))
             .toolbar {
-                CloseToolbarItem(title: "Annuleren") { close() }
+                CloseToolbarItem(title: String(localized: "Annuleren")) { close() }
             }
             .alert("Koppelen mislukt", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("OK", role: .cancel) { }

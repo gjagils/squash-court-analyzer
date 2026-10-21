@@ -138,6 +138,27 @@ nav {
 .nav-cta:hover { background: var(--btn-hover); text-decoration: none; }
 .nav-cta svg { flex-shrink: 0; }
 
+/* Language switch "NL | EN" next to the nav button(s) */
+.nav-right { display: flex; align-items: center; gap: 14px; }
+.nav-right .nav-cta { white-space: nowrap; }
+.lang-switch { font-size: 13px; font-weight: 700; color: var(--text-3); white-space: nowrap; }
+.lang-switch a { color: var(--text-2); }
+.lang-switch [aria-current] { color: var(--text-1); }
+@media (max-width: 420px) {
+  .nav-inner { padding: 0 14px; gap: 10px; }
+  .nav-right { gap: 10px; }
+  .nav-logo { font-size: 15px; gap: 7px; }
+  .nav-logo-icon { width: 28px; height: 28px; }
+  .nav-right .nav-cta { padding: 8px 12px; }
+}
+@media (max-width: 359px) {
+  .nav-inner { padding: 0 10px; gap: 6px; }
+  .nav-logo { font-size: 14px; gap: 6px; }
+  .nav-logo-icon { width: 26px; height: 26px; }
+  .nav-right { gap: 8px; }
+  .nav-right .nav-cta { padding: 7px 9px; font-size: 12px; }
+}
+
 /* ── Hero ─────────────────────────────────────────────────── */
 .hero {
   max-width: 960px;

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Appearance before the first paint: Dark unless Light or System was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
+  <title>Privacy policy – SquashAnalyzer</title>
+  <meta name="description" content="Privacy policy of the SquashAnalyzer app for iPhone and Android." />
+  <link rel="canonical" href="https://www.squashanalyzer.com/en/privacy" />
+  <link rel="alternate" hreflang="nl" href="https://www.squashanalyzer.com/privacy" />
+  <link rel="alternate" hreflang="en" href="https://www.squashanalyzer.com/en/privacy" />
+  <link rel="alternate" hreflang="x-default" href="https://www.squashanalyzer.com/en/privacy" />
+  <link rel="stylesheet" href="/style.css?v=20261021" />
+  <script src="/theme.js?v=20261021" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=5" />
+  <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=5" />
+  <link rel="apple-touch-icon" href="/logo.png?v=4" />
+</head>
+<body>
+
+  <!-- ── Navigation ───────────────────────────────────────── -->
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="/en/" style="text-decoration:none;">
+        <img src="/logo.png?v=4" alt="" class="nav-logo-icon">
+        SquashAnalyzer
+      </a>
+      <div class="nav-right">
+        <span class="lang-switch"><a href="/privacy.html" hreflang="nl" lang="nl">NL</a> | <span aria-current="page">EN</span></span>
+        <a class="nav-cta" href="/en/">← Back</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Privacy content ──────────────────────────────────── -->
+  <article class="prose">
+    <h1>Privacy policy</h1>
+    <p class="meta">Last updated: 16 October 2026. This is a translation of the <a href="/privacy.html" hreflang="nl" lang="nl">Dutch privacy policy</a>; if the two differ, the Dutch version applies.</p>
+
+    <h2>1. Who are we?</h2>
+    <p>
+      SquashAnalyzer is an app for iPhone and Android, developed by Gerd-Jan van Gils. The app is available on the Apple App Store and as a test version via TestFlight and Google Play, and can be reached at <a href="https://www.squashanalyzer.com/en/">www.squashanalyzer.com</a>.
+    </p>
+    <p>
+      For questions about this privacy policy: <a href="mailto:info@squashanalyzer.com">info@squashanalyzer.com</a>
+    </p>
+
+    <h2>2. What data do we process?</h2>
+    <p>SquashAnalyzer stores the players and matches you enter on your device. When you use online features, data is processed for them as described below:</p>
+    <ul>
+      <li><strong>Player names</strong>: Entered by the user for the match. They are stored on the device and in the backups you choose. With live sharing or when you share a card or result, names are shared too, as described below.</li>
+      <li><strong>Match data</strong>: Scores, point types, zones and shot choices the user records. Stored on the device and, on iPhone, optionally in an iCloud Drive backup.</li>
+      <li><strong>AI coaching requests</strong>: Match statistics without player names and any general coaching focus points you choose are sent to the OpenAI API to generate coaching advice. Player names and free-text coaching notes are not sent.</li>
+      <li><strong>My team</strong>: If you enter a team link from sbn.toernooi.nl in Settings, the app fetches the public team page and standings from sbn.toernooi.nl. Only the request for that public page goes to sbn.toernooi.nl; no players, matches or other data from the app are sent. The standings fetched are stored only on the device.</li>
+      <li><strong>Taking part in the iPhone test (TestFlight)</strong>: The test runs through Apple's TestFlight app; Apple's privacy policy applies to it. Feedback you send in TestFlight, such as a comment or screenshot, reaches us and we use it only to improve the app.</li>
+      <li><strong>Signing up for the Android test</strong>: If you sign up by email, we use your email address only to add you to the test group in Google Play and to email you about the test. After the test, or earlier if you ask, we delete it.</li>
+      <li><strong>Live sharing</strong>: Only when the coach or referee taps LIVE in the app does the app send the first names of the two players and the score during that match to the SquashAnalyzer live service at Cloudflare, so that people with the link can follow along. If a player has a photo in the app, a small version of it is sent too (a 160 × 160 pixel square), shown next to the name on the live page; you can turn this off in Settings with "Send player photos". No surnames, shots or other data are sent. The live service uses temporary, persistent storage at Cloudflare (Durable Objects) so that a session can survive a restart; this storage is in the EU only (Cloudflare jurisdiction EU). An automatic alarm deletes the session content, including any photos, 2 hours after the last score update. Photos come with an instruction not to keep them in a browser cache. A page that is already open may still show the last score it received; viewers can also make a copy themselves. If you choose Stop live in the app, it is deleted immediately. Live team matches (League, since version 3.0) have the same storage and deletion period: the team names, the date, the first names per match (or the team name followed by the match if you enter nothing) and the score go to the same server, on one page for the whole team evening (with "Send player photos" on, also a small photo of both players per match, as above), and teammates with the invitation can add their own match to it. Anyone with the link can follow along, so share it only with people you want to. Only add photos of players who are happy with that. In Settings you can turn off the LIVE button completely.</li>
+      <li><strong>Live score on your lock screen</strong>: If you follow a live match or team match with the app (the "Follow on your lock screen" button on the live page, or "Follow a match" in the app), the app sends a push token from your phone to the live service: a code that lets the server send the score to your phone, together with whether you use iPhone or Android and whether you want a notification for every game. No names, phone number or other data about you are sent. The token is kept with that match in the same temporary storage in the EU and disappears together with the match (2 hours after the last score update, or immediately on Stop live); if you tap Stop or swipe the score away, it is deleted immediately. After each score the server sends the first names and the score to your phone through Apple's push service (Apple Push Notification service) or Google's (Firebase Cloud Messaging); Apple's or Google's privacy policy applies to that. On Android the app only requests a token from Firebase when you start following a match; other Firebase components, such as analytics, are off. The player photos the scorer sends are fetched by the app from the live service and kept small on your phone while you follow the match. Without following, none of this happens. Your own match on the iPhone lock screen ("Score on lock screen") stays on your phone and does not go through the server.</li>
+      <li><strong>Technical request data</strong>: Cloudflare processes network data such as IP addresses to deliver the website and the live service. The live service also uses IP addresses and times of creation requests to limit the number of requests. This technical record is separate from the match content; the 2-hour deletion period above applies to the live session.</li>
+      <li><strong>Teams via a link</strong>: A team (names, photos and any focus points) can be placed on squashanalyzer.com/teams, so that a coach can add it to the app with one link. See "Teams on squashanalyzer.com" below.</li>
+    </ul>
+
+    <h2>3. What do we <em>not</em> process?</h2>
+    <ul>
+      <li>No location data</li>
+      <li>No camera or microphone data</li>
+      <li>No contacts or calendar</li>
+      <li>No advertising tracking (IDFA)</li>
+      <li>No analytics or crash reporting through third parties</li>
+      <li>No account or registration required</li>
+    </ul>
+
+    <h2>4. iCloud Drive backup</h2>
+    <p>
+      The app offers the option to make a backup to your personal iCloud Drive. This backup contains player names and match data. Apple encrypts iCloud Drive data in transit and at rest. We have no access to your iCloud Drive.
+    </p>
+
+    <p>
+      On Android you make backups to a folder you choose yourself. We have no access to that either.
+    </p>
+
+    <h3>Shared player cards (badges)</h3>
+    <p>
+      Players you pick with "Choose player" can earn badges. These are stored only on your own device. With "Share card" you create a link to squashanalyzer.com/kaart with the player card yourself: only the <strong>name</strong> and the <strong>badges earned</strong>, with the date and the opponent's name. Photos, coaching notes and focus points are never included. Only share a card with the player's permission.
+    </p>
+    <p>
+      The card is contained in the link itself (after the # sign); browsers do not send that part to our server, and the page stores or sends nothing. Anyone who opens the link in the app (iPhone or Android) can copy the card to one of their own players; that happens only on that device. There is no automatic synchronisation between devices.
+    </p>
+
+
+    <h3>Teams on squashanalyzer.com</h3>
+    <p>
+      A coach or team captain can ask the administrator of SquashAnalyzer (Gerd-Jan van Gils) to put a team on squashanalyzer.com. Teammates then add that team as players to their own app with one link. There is no upload form: only the administrator puts teams online, and only if the players in the team have given their <strong>consent</strong>. The captain who supplies the team asks for that consent.
+    </p>
+    <ul>
+      <li><strong>What is there</strong>: per player the name, a photo and any general focus points (such as "Backhand"). No coaching notes, matches, scores or badges.</li>
+      <li><strong>Who can see it</strong>: anyone who has the link. The link contains a long random code, is not in the navigation and tells search engines not to index it. That is not access protection, so only share the link within your own team.</li>
+      <li><strong>Where</strong>: as files on the SquashAnalyzer website, hosted at Cloudflare.</li>
+      <li><strong>In the app</strong>: the app fetches the team file from squashanalyzer.com and adds the players only to its own device. Nothing from the app is sent along. As with any website, our server and Cloudflare see the IP address of the request; we do not use it.</li>
+      <li><strong>How long</strong>: as long as the team uses the link. At the request of the captain or of a player, we remove the team or that one player. Players already in someone's app stay on that device until that user deletes them.</li>
+    </ul>
+
+    <h2>5. OpenAI (AI coaching)</h2>
+    <p>
+      The AI coaching feature sends match statistics without player names (percentages, counts per zone/shot type) and any general focus points you choose to the OpenAI API. <strong>No player names, free-text coaching notes or directly identifiable data</strong> are sent. OpenAI processes these requests in line with its own <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">privacy policy</a>.
+    </p>
+    <p>The AI coaching feature requires your own OpenAI API key, which the user enters in the app's Settings.</p>
+
+    <h2>6. Voluntary donation</h2>
+    <p>
+      The website has a button to buy me a coffee voluntarily. It opens a bunq payment page (bunq.me), where you choose the amount and pay yourself, for example with iDEAL. bunq processes the payment and your payment details under the <a href="https://www.bunq.com/en/privacy" target="_blank" rel="noopener">bunq privacy policy</a>. We only see what is visible with an ordinary bank transfer (name, account, amount and description) and do not use it for anything else. The app itself never asks for money.
+    </p>
+
+    <h2>7. Data storage</h2>
+    <p>
+      Players and matches are stored on your device; team matches are kept in a local file. Backups are in the location you choose. Online processing happens with AI Coach, live sharing, the live score on your lock screen and teams the administrator puts on squashanalyzer.com on request, as described above. Shared cards and results also end up with the recipients.
+    </p>
+
+    <h2>8. Your rights</h2>
+    <p>You can delete the local matches and players and your own backups by:</p>
+    <ul>
+      <li>Deleting the matches manually under "Finished matches" in the app</li>
+      <li>Deleting the app together with its local data from your iPhone, iPad or Android device (existing backups and shared copies remain separately)</li>
+      <li>Deleting the backup files manually from iCloud Drive (Files app → iCloud Drive → SquashAnalyzer) or, on Android, from the folder you chose for backups</li>
+    </ul>
+    <p>
+      Are you in a team on squashanalyzer.com with your name or photo? Then you can ask which data about you is there, have it corrected or have it deleted. Send an email to <a href="mailto:info@squashanalyzer.com">info@squashanalyzer.com</a>; we handle it as quickly as possible, and in any case within a month.
+    </p>
+
+    <h2>9. Changes</h2>
+    <p>
+      We reserve the right to change this privacy policy. For substantial changes the date at the top of this document is updated. We recommend checking this policy from time to time.
+    </p>
+
+    <h2>10. Contact</h2>
+    <p>
+      Questions or comments? Send an email to <a href="mailto:info@squashanalyzer.com">info@squashanalyzer.com</a>.
+    </p>
+  </article>
+
+  <hr class="divider" />
+
+  <footer>
+    <span class="footer-logo">© 2026 SquashAnalyzer</span>
+    <div class="footer-links">
+      <a href="/en/">Home</a>
+      <a href="/en/guide/">User guide</a>
+      <a href="mailto:info@squashanalyzer.com">Contact</a>
+      <a href="https://bunq.me/squashanalyzer" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">local_cafe</span> Buy me a coffee</a>
+    </div>
+    <div data-theme-choice-slot></div>
+  </footer>
+
+</body>
+</html>

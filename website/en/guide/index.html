@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Appearance before the first paint: Dark unless Light or System was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
+  <title>User guide – SquashAnalyzer</title>
+  <meta name="description" content="SquashAnalyzer user guide for iPhone and Android: refereeing, coaching, sharing, players, badges and settings, step by step." />
+  <link rel="canonical" href="https://www.squashanalyzer.com/en/guide/" />
+  <link rel="alternate" hreflang="nl" href="https://www.squashanalyzer.com/handleiding/" />
+  <link rel="alternate" hreflang="en" href="https://www.squashanalyzer.com/en/guide/" />
+  <link rel="alternate" hreflang="x-default" href="https://www.squashanalyzer.com/en/guide/" />
+  <link rel="stylesheet" href="/style.css?v=20261021" />
+  <script src="/theme.js?v=20261021" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=5" />
+  <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=5" />
+  <link rel="apple-touch-icon" href="/logo.png?v=4" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="/en/" style="text-decoration:none;">
+        <img src="/logo.png?v=4" alt="" class="nav-logo-icon">
+        SquashAnalyzer
+      </a>
+      <div class="nav-right">
+        <span class="lang-switch"><a href="/handleiding/" hreflang="nl" lang="nl">NL</a> | <span aria-current="page">EN</span></span>
+        <a class="nav-cta" href="/en/">← Back</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="manual">
+    <div class="manual-head">
+      <h1>User <span>guide</span></h1>
+      <p>For every part of the app we explain what you can do with it and how it works: refereeing, coaching and sharing. The guide describes version 3.0. Choose your device: the iPhone and Android apps have the same screens, only the backup works differently.</p>
+    </div>
+
+    <div class="chooser">
+      <a href="/en/guide/iphone.html">
+        <h2>iPhone</h2>
+        <p>Refereeing and coaching, Analysis and Coach card, League with a live team page, players and badges, and a weekly backup in iCloud.</p>
+      </a>
+      <a href="/en/guide/android.html">
+        <h2>Android</h2>
+        <p>Refereeing and coaching, Analysis and Coach card, League with a live team page, players and badges, and backups to a folder you choose.</p>
+      </a>
+    </div>
+  </main>
+
+  <hr class="divider" />
+
+  <footer>
+    <span class="footer-logo">© 2026 SquashAnalyzer</span>
+    <div class="footer-links">
+      <a href="/en/">Home</a>
+      <a href="/en/privacy.html">Privacy policy</a>
+      <a href="mailto:info@squashanalyzer.com">Contact</a>
+      <a href="https://bunq.me/squashanalyzer" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">local_cafe</span> Buy me a coffee</a>
+    </div>
+    <div data-theme-choice-slot></div>
+  </footer>
+
+</body>
+</html>

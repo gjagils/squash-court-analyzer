@@ -97,8 +97,13 @@ public struct MatchSetupView: View {
         self.onStart = onStart
     }
 
+    /// The names the match is started with: "Speler 1"/"Speler 2" when left
+    /// empty, never translated (Player.rawValue, docs/i18n.md)
     private var name1: String { resolvedName(player1Name, fallback: "Speler 1") }
     private var name2: String { resolvedName(player2Name, fallback: "Speler 2") }
+    /// The same names as shown on this screen: the empty case in the app's language
+    private var shownName1: String { resolvedName(player1Name, fallback: loc("Speler 1")) }
+    private var shownName2: String { resolvedName(player2Name, fallback: loc("Speler 2")) }
     private var headStartIsValid: Bool { Match.isValidHeadStart(player1: gamesBefore1, player2: gamesBefore2) }
     /// Games already played count also with "Later instappen" folded, as on iOS
     private var hasHeadStart: Bool { gamesBefore1 + gamesBefore2 > 0 }
@@ -227,8 +232,8 @@ public struct MatchSetupView: View {
                 .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 10) {
-                serverButton(Player.player1, name1, SharedColors.accent)
-                serverButton(Player.player2, name2, SharedColors.steelBlue)
+                serverButton(Player.player1, shownName1, SharedColors.accent)
+                serverButton(Player.player2, shownName2, SharedColors.steelBlue)
             }
         }
     }
@@ -276,8 +281,8 @@ public struct MatchSetupView: View {
                     .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(SharedColors.accent)
-                gamesRow(name1, color: SharedColors.accent, value: gamesBefore1, onMinus: { gamesBefore1 = max(0, gamesBefore1 - 1) }, onPlus: { gamesBefore1 = min(2, gamesBefore1 + 1) })
-                gamesRow(name2, color: SharedColors.steelBlue, value: gamesBefore2, onMinus: { gamesBefore2 = max(0, gamesBefore2 - 1) }, onPlus: { gamesBefore2 = min(2, gamesBefore2 + 1) })
+                gamesRow(shownName1, color: SharedColors.accent, value: gamesBefore1, onMinus: { gamesBefore1 = max(0, gamesBefore1 - 1) }, onPlus: { gamesBefore1 = min(2, gamesBefore1 + 1) })
+                gamesRow(shownName2, color: SharedColors.steelBlue, value: gamesBefore2, onMinus: { gamesBefore2 = max(0, gamesBefore2 - 1) }, onPlus: { gamesBefore2 = min(2, gamesBefore2 + 1) })
                 if !headStartIsValid {
                     Text("Met deze stand is de wedstrijd al beslist", bundle: textBundle)
                         .font(SharedFonts.system(12))
@@ -380,8 +385,8 @@ public struct MatchSetupView: View {
                         .tracking(1)
                         .foregroundColor(SharedColors.textMuted)
                     HStack(spacing: 8) {
-                        ownChoice(name1, isPlayer1: true, color: SharedColors.accent)
-                        ownChoice(name2, isPlayer1: false, color: SharedColors.steelBlue)
+                        ownChoice(shownName1, isPlayer1: true, color: SharedColors.accent)
+                        ownChoice(shownName2, isPlayer1: false, color: SharedColors.steelBlue)
                     }
                     Text("Het resultaat komt na afloop vanzelf in de partij en, als de teamwedstrijd live is, gaat de stand mee naar de teampagina.", bundle: textBundle)
                         .font(SharedFonts.system(11))

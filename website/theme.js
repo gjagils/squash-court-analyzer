@@ -7,7 +7,10 @@
   var KEY = 'sa-theme';
   var root = document.documentElement;
   var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
-  var OPTIONS = [['system', 'Systeem'], ['light', 'Licht'], ['dark', 'Donker']];
+  // English labels on the pages under /en/ (<html lang="en">)
+  var EN = /^en\b/i.test(root.lang || '');
+  var OPTIONS = EN ? [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']]
+                   : [['system', 'Systeem'], ['light', 'Licht'], ['dark', 'Donker']];
 
   function valid(choice) { return choice === 'light' || choice === 'system' ? choice : 'dark'; }
 
@@ -33,7 +36,7 @@
     var id = 'theme-choice-' + index;
     var label = document.createElement('label');
     label.setAttribute('for', id);
-    label.textContent = 'Weergave';
+    label.textContent = EN ? 'Appearance' : 'Weergave';
     var select = document.createElement('select');
     select.id = id;
     OPTIONS.forEach(function (option) {

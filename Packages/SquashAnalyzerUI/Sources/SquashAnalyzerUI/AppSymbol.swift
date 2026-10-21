@@ -3,6 +3,11 @@ import SwiftUI
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.outlined.Backup
+import androidx.compose.material.icons.outlined.Contrast
+import androidx.compose.material.icons.outlined.GridOn
+import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
@@ -160,6 +165,12 @@ struct AppSymbol: View {
         case "hare.fill": return Icons.Outlined.FastForward
         case "tortoise.fill": return Icons.Outlined.HourglassBottom
         case "brain.head.profile", "brain": return Icons.Outlined.Psychology
+        // Instellingen (21 October 2026)
+        case "book": return Icons.AutoMirrored.Outlined.MenuBook
+        case "circle.lefthalf.filled": return Icons.Outlined.Contrast
+        case "square.grid.3x3": return Icons.Outlined.GridOn
+        case "dot.radiowaves.left.and.right": return Icons.Outlined.Sensors
+        case "icloud.and.arrow.up": return Icons.Outlined.Backup
         case "figure.walk": return Icons.AutoMirrored.Outlined.DirectionsWalk
         case "arrow.up.circle": return Icons.Outlined.ArrowCircleUp
         case "exclamationmark.circle": return Icons.Outlined.Error

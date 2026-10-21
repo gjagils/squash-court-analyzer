@@ -56,14 +56,20 @@ extension View {
 /// The choice itself, for Instellingen on iOS and Android
 public struct AppearancePicker: View {
     @AppStorage(AppAppearance.storageKey) private var stored = AppAppearance.standard.rawValue
+    /// false inside the Weergave line of Instellingen, which names it already
+    let showsTitle: Bool
 
-    public init() {}
+    public init(showsTitle: Bool = true) {
+        self.showsTitle = showsTitle
+    }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Weergave")
-                .font(SharedFonts.system(16, weight: .semibold))
-                .foregroundColor(SharedColors.textPrimary)
+            if showsTitle {
+                Text("Weergave")
+                    .font(SharedFonts.system(16, weight: .semibold))
+                    .foregroundColor(SharedColors.textPrimary)
+            }
             Picker("Weergave", selection: $stored) {
                 Text(AppAppearance.system.title).tag(AppAppearance.system.rawValue)
                 Text(AppAppearance.light.title).tag(AppAppearance.light.rawValue)

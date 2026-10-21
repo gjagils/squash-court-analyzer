@@ -157,44 +157,25 @@ public struct AboutAppSection: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Over de app")
-                .font(SharedFonts.system(16, weight: .semibold))
-                .foregroundColor(SharedColors.textPrimary)
-            Button { showingTour = true } label: {
-                row("Rondleiding opnieuw bekijken", icon: "play.fill")
-            }
-            .buttonStyle(.plain)
+        VStack(alignment: .leading, spacing: 0) {
+            SettingsRow("Rondleiding opnieuw bekijken", icon: "play.fill") { showingTour = true }
+            SettingsDivider()
             ShareLink(item: AppLinks.shareText, subject: Text("Squash Analyzer")) {
-                row("Deel de app", icon: "square.and.arrow.up")
+                SettingsRowLabel("Deel de app", icon: "square.and.arrow.up")
             }
             .accessibilityLabel("Deel de app")
+            SettingsDivider()
             Link(destination: AppLinks.feedbackMail(appVersion: appVersion)) {
-                row("Feedback sturen", icon: "lightbulb.fill")
+                SettingsRowLabel("Feedback sturen", icon: "lightbulb.fill")
             }
             .accessibilityLabel("Feedback sturen naar \(AppLinks.feedbackAddress)")
-            Text("Feedback gaat per mail naar \(AppLinks.feedbackAddress), met de versie van de app erbij (\(appVersion)).")
+            Text("Feedback gaat per mail naar \(AppLinks.feedbackAddress). Squash Analyzer \(appVersion)")
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
+                .padding(.top, 16)
         }
         .trackedCover(isPresented: $showingTour) {
             SharedOnboardingView(manual: manual) { showingTour = false }
         }
-    }
-
-    private func row(_ title: String, icon: String) -> some View {
-        HStack(spacing: 10) {
-            AppSymbol(icon, size: 15, color: SharedColors.accent)
-                .frame(width: 22)
-            Text(title)
-                .font(SharedFonts.system(15, weight: .semibold))
-                .foregroundColor(SharedColors.textPrimary)
-            Spacer(minLength: 0)
-            AppSymbol("chevron.right", size: 12, color: SharedColors.textMuted)
-        }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 14)
-        .background(SharedColors.tint(0.05))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

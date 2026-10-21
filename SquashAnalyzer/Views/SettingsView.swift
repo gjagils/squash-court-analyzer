@@ -25,6 +25,12 @@ struct SettingsView: View {
     @AppStorage(LiveShare.photosKey) private var livePhotos = true
     @AppStorage(LiveFollow.ownMatchKey) private var lockScreenScore = true
     @AppStorage(LiveFollow.alertsKey) private var liveAlerts = true
+    /// The part of Instellingen that is open; one at a time
+    @State private var openPart: String? = nil
+
+    private func toggle(_ part: String) {
+        withAnimation(.easeInOut(duration: 0.2)) { openPart = openPart == part ? nil : part }
+    }
 
     var body: some View {
         ZStack {
@@ -35,29 +41,35 @@ struct SettingsView: View {
                 headerView
 
                 ScrollView {
-                    VStack(spacing: 24) {
-                        // The team link first: what people come here for most (Gerd-Jan, 20 October 2026)
-                        teamSection
-
-                        manualSection
-
-                        AppearancePicker()
-                            .padding()
-                            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.03)))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.08), lineWidth: 1))
-
-                        courtSection
-
-                        liveSection
-
-                        backupSection
-
-                        // AI Coach Section
-                        aiCoachSection
-
-                        // Info Section
-                        infoSection
-
+                    VStack(alignment: .leading, spacing: 0) {
+                        // As the home screen (Gerd-Jan, 21 October 2026): the manual in a card,
+                        // then a line per part that opens underneath, one at a time
+                        SettingsManualCard(manual: UserManual.iPhone)
+                            .padding(.bottom, 16)
+                        SettingsRow("Mijn team", icon: "person.2", open: openPart == "team") { toggle("team") }
+                        if openPart == "team" { teamSection.padding(.bottom, 16) }
+                        SettingsDivider()
+                        SettingsRow("Weergave", icon: "circle.lefthalf.filled", open: openPart == "theme") { toggle("theme") }
+                        if openPart == "theme" { AppearancePicker(showsTitle: false).padding(.bottom, 16) }
+                        SettingsDivider()
+                        SettingsRow("Baanindeling", icon: "square.grid.3x3", open: openPart == "court") { toggle("court") }
+                        if openPart == "court" { courtSection.padding(.bottom, 16) }
+                        SettingsDivider()
+                        SettingsRow("Live meekijken", icon: "dot.radiowaves.left.and.right", open: openPart == "live") { toggle("live") }
+                        if openPart == "live" { liveSection.padding(.bottom, 16) }
+                        SettingsDivider()
+                        SettingsRow("Back-up", icon: "icloud.and.arrow.up", open: openPart == "backup") { toggle("backup") }
+                        if openPart == "backup" { backupSection.padding(.bottom, 16) }
+                        SettingsDivider()
+                        SettingsRow("AI Coach", icon: "brain", open: openPart == "ai") { toggle("ai") }
+                        if openPart == "ai" {
+                            VStack(alignment: .leading, spacing: 20) {
+                                aiCoachSection
+                                infoSection
+                            }
+                            .padding(.bottom, 16)
+                        }
+                        SettingsDivider()
                         AboutAppSection(appVersion: Self.appVersion, manual: UserManual.iPhone)
                     }
                     .padding(.horizontal, 24)
@@ -78,7 +90,6 @@ struct SettingsView: View {
 
     private var teamSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack { Image(systemName: "person.3").foregroundColor(AppColors.warmOrange); Text("Mijn team").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary) }
             Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
                 .font(AppFonts.body(13)).foregroundColor(AppColors.textSecondary)
             Link(destination: UserManual.iPhoneTeamLink) {
@@ -108,7 +119,7 @@ struct SettingsView: View {
                 }
             }
             if let teamSaveMessage { Text(teamSaveMessage).font(AppFonts.caption(12)).foregroundColor(teamSaveMessage.hasPrefix("Teamlink") ? AppColors.positive : AppColors.warmRed) }
-        }.padding().background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.line(0.03))).overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.08), lineWidth: 1))
+        }
     }
 
     // MARK: - Header
@@ -153,34 +164,9 @@ struct SettingsView: View {
         return "iPhone \(version) (\(build))"
     }
 
-    private var manualSection: some View {
-        Link(destination: UserManual.iPhone) {
-            HStack(spacing: 12) {
-                Image(systemName: "book").foregroundColor(AppColors.warmOrange)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Handleiding").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary)
-                    Text("Per tegel uitgelegd hoe alles werkt, op squashanalyzer.com")
-                        .font(AppFonts.caption(11))
-                        .foregroundColor(AppColors.textMuted)
-                        .multilineTextAlignment(.leading)
-                }
-                Spacer()
-                Image(systemName: "arrow.up.right").foregroundColor(AppColors.textMuted)
-            }
-            .padding()
-            .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.03)))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.08), lineWidth: 1))
-        }
-        .accessibilityLabel("Open de handleiding")
-    }
-
     // MARK: - Court Section
     private var courtSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "square.grid.3x3").foregroundColor(AppColors.warmOrange)
-                Text("Baanindeling").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary)
-            }
             Picker("Baanindeling", selection: $courtLayout) {
                 Text("6 vakken").tag(CourtLayout.six.rawValue)
                 Text("9 vakken").tag(CourtLayout.nine.rawValue)
@@ -193,18 +179,11 @@ struct SettingsView: View {
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.03)))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.08), lineWidth: 1))
     }
 
     // MARK: - Live Section
     private var liveSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "dot.radiowaves.left.and.right").foregroundColor(AppColors.warmOrange)
-                Text("Live meekijken").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary)
-            }
             Toggle(isOn: $liveSharing) {
                 Text("Knop LIVE bij Scheidsrechter en Coach")
                     .font(AppFonts.label(14))
@@ -247,18 +226,11 @@ struct SettingsView: View {
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.03)))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.08), lineWidth: 1))
     }
 
     // MARK: - Backup Section
     private var backupSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "icloud.and.arrow.up").foregroundColor(AppColors.warmOrange)
-                Text("Back-up").font(AppFonts.label(16)).foregroundColor(AppColors.textPrimary)
-            }
             Toggle(isOn: $automaticBackup) {
                 Text("Wekelijkse back-up naar iCloud")
                     .font(AppFonts.label(14))
@@ -271,9 +243,6 @@ struct SettingsView: View {
                 .fixedSize(horizontal: false, vertical: true)
             BackupActionsView()
         }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(SharedColors.tint(0.03)))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.08), lineWidth: 1))
     }
 
     private var backupFootnote: String {
@@ -287,14 +256,6 @@ struct SettingsView: View {
     // MARK: - AI Coach Section
     private var aiCoachSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Image(systemName: "brain")
-                    .foregroundColor(AppColors.warmOrange)
-                Text("AI Coach")
-                    .font(AppFonts.label(16))
-                    .foregroundColor(AppColors.textPrimary)
-            }
-
             Text("Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach.")
                 .font(AppFonts.body(13))
                 .foregroundColor(AppColors.textSecondary)
@@ -353,15 +314,6 @@ struct SettingsView: View {
                     .foregroundColor(AppColors.textMuted)
             }
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(SharedColors.tint(0.03))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(SharedColors.line(0.08), lineWidth: 1)
-        )
     }
 
     // MARK: - Info Section
@@ -401,15 +353,6 @@ struct SettingsView: View {
                 )
             }
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(SharedColors.tint(0.03))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(SharedColors.line(0.08), lineWidth: 1)
-        )
     }
 
     // MARK: - Actions

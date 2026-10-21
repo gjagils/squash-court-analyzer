@@ -110,35 +110,51 @@ public struct SharedSettingsView: View {
         self.backup = backup
     }
 
+    /// The part that is open; one at a time
+    @State private var openPart: String? = nil
+
+    private func toggle(_ part: String) {
+        withAnimation(.easeInOut(duration: 0.2)) { openPart = openPart == part ? nil : part }
+    }
+
     public var body: some View {
         ZStack {
             SharedColors.background.ignoresSafeArea()
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    // The team link first: what people come here for most (Gerd-Jan, 20 October 2026)
-                    teamSection
-                        .padding(.bottom, 20)
-                    manualSection
-                        .padding(.bottom, 20)
-                    AppearancePicker()
-                        .padding(.bottom, 20)
-                    courtSection
-                        .padding(.bottom, 20)
-                    liveSection
-                        .padding(.bottom, 20)
-                    // Same order as iOS: back-up, then AI Coach and what it is
+                VStack(alignment: .leading, spacing: 0) {
+                    // As the home screen (Gerd-Jan, 21 October 2026): the manual in a card,
+                    // then a line per part that opens underneath, one at a time
+                    SettingsManualCard(manual: UserManual.android)
+                        .padding(.bottom, 16)
+                    SettingsRow("Mijn team", icon: "person.2", open: openPart == "team") { toggle("team") }
+                    if openPart == "team" { teamSection.padding(.bottom, 16) }
+                    SettingsDivider()
+                    SettingsRow("Weergave", icon: "circle.lefthalf.filled", open: openPart == "theme") { toggle("theme") }
+                    if openPart == "theme" { AppearancePicker(showsTitle: false).padding(.bottom, 16) }
+                    SettingsDivider()
+                    SettingsRow("Baanindeling", icon: "square.grid.3x3", open: openPart == "court") { toggle("court") }
+                    if openPart == "court" { courtSection.padding(.bottom, 16) }
+                    SettingsDivider()
+                    SettingsRow("Live meekijken", icon: "dot.radiowaves.left.and.right", open: openPart == "live") { toggle("live") }
+                    if openPart == "live" { liveSection.padding(.bottom, 16) }
+                    SettingsDivider()
                     if backup != nil {
-                        backupSection
-                            .padding(.top, 20)
+                        SettingsRow("Back-up", icon: "icloud.and.arrow.up", open: openPart == "backup") { toggle("backup") }
+                        if openPart == "backup" { backupSection.padding(.bottom, 16) }
+                        SettingsDivider()
                     }
                     if aiCoach != nil {
-                        aiCoachSection
-                            .padding(.top, 20)
-                        aboutAICoachSection
-                            .padding(.top, 20)
+                        SettingsRow("AI Coach", icon: "brain", open: openPart == "ai") { toggle("ai") }
+                        if openPart == "ai" {
+                            VStack(alignment: .leading, spacing: 20) {
+                                aiCoachSection
+                                aboutAICoachSection
+                            }
+                            .padding(.bottom, 16)
+                        }
+                        SettingsDivider()
                     }
                     AboutAppSection(appVersion: backup?.appVersion ?? "Android", manual: UserManual.android)
-                        .padding(.top, 20)
                     // Clear of the system navigation bar
                     Color.clear.frame(height: 40)
                 }
@@ -155,12 +171,6 @@ public struct SharedSettingsView: View {
     /// Mijn team: the sbn.toernooi.nl link, saved or removed here
     private var teamSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                HomeTileIconView(icon: .players, color: SharedColors.accent, size: 20)
-                Text("Mijn team")
-                    .font(SharedFonts.system(16, weight: .semibold))
-                    .foregroundColor(SharedColors.textPrimary)
-            }
             Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
@@ -192,29 +202,8 @@ public struct SharedSettingsView: View {
         }
     }
 
-    /// The Android manual on the website (iOS links to the iPhone page)
-    private var manualSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Handleiding")
-                .font(SharedFonts.system(16, weight: .semibold))
-                .foregroundColor(SharedColors.textPrimary)
-            Text("Per tegel uitgelegd hoe alles werkt, op squashanalyzer.com.")
-                .font(SharedFonts.system(13))
-                .foregroundColor(SharedColors.textSecondary)
-            Link(destination: UserManual.android) {
-                Text("Open de handleiding")
-                    .font(SharedFonts.system(14, weight: .semibold))
-                    .foregroundColor(SharedColors.accent)
-            }
-            .accessibilityLabel("Open de handleiding")
-        }
-    }
-
     private var liveSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Live meekijken")
-                .font(SharedFonts.system(16, weight: .semibold))
-                .foregroundColor(SharedColors.textPrimary)
             Toggle(isOn: $liveSharing) {
                 Text("Knop LIVE bij Scheidsrechter en Coach")
                     .font(SharedFonts.system(14))
@@ -249,9 +238,6 @@ public struct SharedSettingsView: View {
 
     private var courtSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Baanindeling")
-                .font(SharedFonts.system(16, weight: .semibold))
-                .foregroundColor(SharedColors.textPrimary)
             Picker("Baanindeling", selection: $courtLayout) {
                 Text("6 vakken").tag(CourtLayout.six.rawValue)
                 Text("9 vakken").tag(CourtLayout.nine.rawValue)
@@ -265,9 +251,6 @@ public struct SharedSettingsView: View {
 
     private var aiCoachSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("AI Coach")
-                .font(SharedFonts.system(16, weight: .semibold))
-                .foregroundColor(SharedColors.textPrimary)
             Text("Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach.")
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
@@ -331,9 +314,6 @@ public struct SharedSettingsView: View {
 
     private var backupSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Back-up")
-                .font(SharedFonts.system(16, weight: .semibold))
-                .foregroundColor(SharedColors.textPrimary)
             Text("Bewaar spelers, coach- en scheidsrechterwedstrijden en badges in een bestand, bijvoorbeeld op Google Drive. Een back-up van Android kun je ook op een iPhone terugzetten, en andersom.")
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)

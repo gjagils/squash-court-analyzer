@@ -9,6 +9,12 @@
             "state" : "translated",
             "value" : " Last: %@."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Laatste: %@."
+          }
         }
       }
     },
@@ -19,6 +25,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : " Testers find the new version in TestFlight."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Testers vinden de nieuwe versie in TestFlight."
           }
         }
       }
@@ -31,6 +43,12 @@
             "state" : "translated",
             "value" : "Delete %@?"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ verwijderen?"
+          }
         }
       }
     },
@@ -42,6 +60,12 @@
             "state" : "translated",
             "value" : "%@ wins %lld-%lld"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ wint %lld-%lld"
+          }
         }
       }
     },
@@ -49,6 +73,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld badges"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld badges"
@@ -64,6 +94,12 @@
             "state" : "translated",
             "value" : "%lld players, %lld matches, %lld separate games."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld spelers, %lld wedstrijden, %lld losse games."
+          }
         }
       }
     },
@@ -74,6 +110,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld of %lld badges"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld van %lld badges"
           }
         }
       }
@@ -86,6 +128,12 @@
             "state" : "translated",
             "value" : "%lld of 4 done"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld van 4 klaar"
+          }
         }
       }
     },
@@ -96,6 +144,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "'%@' uses an unsupported compression."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@' gebruikt een niet-ondersteunde compressie."
           }
         }
       }
@@ -108,6 +162,12 @@
             "state" : "translated",
             "value" : "'%@' in the zip file is damaged."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@' in het zip-bestand is beschadigd."
+          }
         }
       }
     },
@@ -118,6 +178,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "'%@' is in iCloud Drive, in the Files app under iCloud Drive → Squash Analyzer."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'%@' staat in iCloud Drive, in de Bestanden-app onder iCloud Drive → Squash Analyzer."
           }
         }
       }
@@ -130,6 +196,12 @@
             "state" : "translated",
             "value" : "6 zones"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6 vakken"
+          }
         }
       }
     },
@@ -140,6 +212,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "9 zones"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "9 vakken"
           }
         }
       }
@@ -152,6 +230,12 @@
             "state" : "translated",
             "value" : "FINISHED"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AFGELOPEN"
+          }
         }
       }
     },
@@ -159,6 +243,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI Coach"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "AI Coach"
@@ -174,6 +264,12 @@
             "state" : "translated",
             "value" : "AI advice only works with an internet connection"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI advies werkt alleen met internetverbinding"
+          }
         }
       }
     },
@@ -184,6 +280,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "API key configured"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API key geconfigureerd"
           }
         }
       }
@@ -196,6 +298,12 @@
             "state" : "translated",
             "value" : "API key not saved"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API key niet opgeslagen"
+          }
         }
       }
     },
@@ -206,6 +314,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Finished"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afgelopen"
           }
         }
       }
@@ -218,6 +332,12 @@
             "state" : "translated",
             "value" : "All badges"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle badges"
+          }
         }
       }
     },
@@ -228,6 +348,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Replace everything?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles vervangen?"
           }
         }
       }
@@ -240,6 +366,12 @@
             "state" : "translated",
             "value" : "Cancel"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuleren"
+          }
         }
       }
     },
@@ -250,6 +382,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "BADGE CARD"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BADGEKAART"
           }
         }
       }
@@ -262,6 +400,12 @@
             "state" : "translated",
             "value" : "SAVE API KEY"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BEWAAR API KEY"
+          }
         }
       }
     },
@@ -272,6 +416,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SAVE TEAM LINK"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BEWAAR TEAMLINK"
           }
         }
       }
@@ -284,6 +434,12 @@
             "state" : "translated",
             "value" : "Court layout"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baanindeling"
+          }
         }
       }
     },
@@ -294,6 +450,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Backup"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back-up"
           }
         }
       }
@@ -306,6 +468,12 @@
             "state" : "translated",
             "value" : "Backup restored"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back-up hersteld"
+          }
         }
       }
     },
@@ -316,6 +484,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Backup failed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back-up mislukt"
           }
         }
       }
@@ -328,6 +502,12 @@
             "state" : "translated",
             "value" : "Backup saved!"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back-up opgeslagen!"
+          }
         }
       }
     },
@@ -338,6 +518,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Backup added"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back-up toegevoegd"
           }
         }
       }
@@ -350,6 +536,12 @@
             "state" : "translated",
             "value" : "Badge %@, not earned yet"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Badge %@, nog niet verdiend"
+          }
         }
       }
     },
@@ -357,6 +549,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Badges"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Badges"
@@ -372,6 +570,12 @@
             "state" : "translated",
             "value" : "Basic advice always works, even without an API key"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basis advies werkt altijd, ook zonder API key"
+          }
         }
       }
     },
@@ -382,6 +586,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Edit"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewerken"
           }
         }
       }
@@ -394,6 +604,12 @@
             "state" : "translated",
             "value" : "With 6 zones you choose front, middle or back, left or right; with 9 a middle column is added. The shots you see match the zone's row: at the front Drop, Boast and Kill, in the middle Kill, Drive, Cross and Boast, at the back Drive, Cross and Lob."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak: voorin Drop, Boast en Kill, in het midden Kill, Drive, Cross en Boast, achterin Drive, Cross en Lob."
+          }
         }
       }
     },
@@ -404,6 +620,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "For a followed match: an alert with sound when a game has been played out and at the result. For a team match: per match and at the final result."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag."
           }
         }
       }
@@ -416,6 +638,12 @@
             "state" : "translated",
             "value" : "Update %@"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bijwerken bij %@"
+          }
         }
       }
     },
@@ -426,6 +654,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SHARE"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DELEN"
           }
         }
       }
@@ -438,6 +672,12 @@
             "state" : "translated",
             "value" : "The local database could not be opened. The original files have been kept in %@. This session uses temporary storage; do not export a replacement backup until the database has been restored."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De lokale database kon niet worden geopend. De originele bestanden zijn behouden in %@. Deze sessie gebruikt tijdelijke opslag; exporteer geen vervangende backup voordat de database is hersteld."
+          }
         }
       }
     },
@@ -448,6 +688,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The key could not be stored in the iPhone keychain. Please try again."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De sleutel kon niet in de iPhone-sleutelhanger worden bewaard. Probeer het opnieuw."
           }
         }
       }
@@ -460,6 +706,12 @@
             "state" : "translated",
             "value" : "The match has been imported."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De wedstrijd is geïmporteerd."
+          }
         }
       }
     },
@@ -470,6 +722,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The match could not be saved: %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De wedstrijd kon niet worden opgeslagen: %@"
           }
         }
       }
@@ -482,6 +740,12 @@
             "state" : "translated",
             "value" : "This file is not a zip file."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit bestand is geen zip-bestand."
+          }
         }
       }
     },
@@ -492,6 +756,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "E%lld break"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld pauze"
           }
         }
       }
@@ -504,6 +774,12 @@
             "state" : "translated",
             "value" : "E%lld · in play"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld · bezig"
+          }
         }
       }
     },
@@ -514,6 +790,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "E%lld · warm-up"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld · inspelen"
           }
         }
       }
@@ -526,6 +808,12 @@
             "state" : "translated",
             "value" : "E%lld · break"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld · pauze"
+          }
         }
       }
     },
@@ -536,6 +824,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Once a week, when you put the app away after use, a backup goes to iCloud Drive (Files → iCloud Drive → Squash Analyzer). The 7 most recent are kept. Can also be restored on Android."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in iCloud Drive (Bestanden → iCloud Drive → Squash Analyzer). De 7 nieuwste blijven bewaard. Ook terug te zetten op Android."
           }
         }
       }
@@ -548,6 +842,12 @@
             "state" : "translated",
             "value" : "Remove photo"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto verwijderen"
+          }
         }
       }
     },
@@ -558,6 +858,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Send the players' photos along"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto's van de spelers meesturen"
           }
         }
       }
@@ -570,6 +876,12 @@
             "state" : "translated",
             "value" : "GAME BALL"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GAMEBAL"
+          }
         }
       }
     },
@@ -577,6 +889,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Game %lld · best of %lld"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Game %lld · best of %lld"
@@ -592,6 +910,12 @@
             "state" : "translated",
             "value" : "No API key set"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen API key ingesteld"
+          }
         }
       }
     },
@@ -602,6 +926,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No access to the file"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen toegang tot bestand"
           }
         }
       }
@@ -614,6 +944,12 @@
             "state" : "translated",
             "value" : "Played matches are kept."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gespeelde wedstrijden blijven bewaard."
+          }
         }
       }
     },
@@ -624,6 +960,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Imported: %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geïmporteerd: %@"
           }
         }
       }
@@ -636,6 +978,12 @@
             "state" : "translated",
             "value" : "Import succeeded!"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import gelukt!"
+          }
         }
       }
     },
@@ -646,6 +994,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Import failed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import mislukt"
           }
         }
       }
@@ -658,6 +1012,12 @@
             "state" : "translated",
             "value" : "Import team"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importeer team"
+          }
         }
       }
     },
@@ -668,6 +1028,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Import"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importeren"
           }
         }
       }
@@ -680,6 +1046,12 @@
             "state" : "translated",
             "value" : "Warm-up"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inspelen"
+          }
         }
       }
     },
@@ -690,6 +1062,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Settings"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instellingen"
           }
         }
       }
@@ -702,6 +1080,12 @@
             "state" : "translated",
             "value" : "Internet required"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Internet vereist"
+          }
         }
       }
     },
@@ -712,6 +1096,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your API key is stored securely in the Keychain"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je API key wordt veilig opgeslagen in de Keychain"
           }
         }
       }
@@ -724,6 +1114,12 @@
             "state" : "translated",
             "value" : "Choose player"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies speler"
+          }
         }
       }
     },
@@ -734,6 +1130,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "LIVE button in Referee and Coach"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knop LIVE bij Scheidsrechter en Coach"
           }
         }
       }
@@ -746,6 +1148,12 @@
             "state" : "translated",
             "value" : "Link to"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koppel aan"
+          }
         }
       }
     },
@@ -756,6 +1164,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Linking failed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koppelen mislukt"
           }
         }
       }
@@ -768,6 +1182,12 @@
             "state" : "translated",
             "value" : "Cost"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kosten"
+          }
         }
       }
     },
@@ -775,6 +1195,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Later"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Later"
@@ -790,6 +1216,12 @@
             "state" : "translated",
             "value" : "Link cannot be opened"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link niet te openen"
+          }
         }
       }
     },
@@ -800,6 +1232,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Live sharing"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live meekijken"
           }
         }
       }
@@ -812,6 +1250,12 @@
             "state" : "translated",
             "value" : "Local advice"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lokaal advies"
+          }
         }
       }
     },
@@ -822,6 +1266,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "MATCH BALL"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MATCHBAL"
           }
         }
       }
@@ -834,6 +1284,12 @@
             "state" : "translated",
             "value" : "Alert after every game"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melding bij elke game"
+          }
         }
       }
     },
@@ -844,6 +1300,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "With LIVE you share a link, for example in the WhatsApp group; whoever taps it sees the score live in the browser. Only first names, the score and (if you leave it on) a small photo of the players; everything is deleted 2 hours after the match."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist."
           }
         }
       }
@@ -856,6 +1318,12 @@
             "state" : "translated",
             "value" : "My team"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mijn team"
+          }
         }
       }
     },
@@ -866,6 +1334,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "TO ICLOUD NOW"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NU NAAR ICLOUD"
           }
         }
       }
@@ -878,6 +1352,12 @@
             "state" : "translated",
             "value" : "Go to the App Store"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naar de App Store"
+          }
         }
       }
     },
@@ -888,6 +1368,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "New player %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nieuwe speler %@"
           }
         }
       }
@@ -900,6 +1386,12 @@
             "state" : "translated",
             "value" : "No badges earned yet"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nog geen badges verdiend"
+          }
         }
       }
     },
@@ -911,6 +1403,12 @@
             "state" : "translated",
             "value" : "No players saved yet"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nog geen spelers opgeslagen"
+          }
         }
       }
     },
@@ -918,6 +1416,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
@@ -933,6 +1437,12 @@
             "state" : "translated",
             "value" : "OPENAI API KEY"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OPENAI API KEY"
+          }
         }
       }
     },
@@ -943,6 +1453,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SAVED!"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OPGESLAGEN!"
           }
         }
       }
@@ -955,6 +1471,12 @@
             "state" : "translated",
             "value" : "Save"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opslaan"
+          }
         }
       }
     },
@@ -965,6 +1487,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "About AI Coach"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Over AI Coach"
           }
         }
       }
@@ -977,6 +1505,12 @@
             "state" : "translated",
             "value" : "MATCHES"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PARTIJEN"
+          }
         }
       }
     },
@@ -987,6 +1521,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "BREAK"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PAUZE"
           }
         }
       }
@@ -999,6 +1539,12 @@
             "state" : "translated",
             "value" : "Break"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pauze"
+          }
         }
       }
     },
@@ -1009,6 +1555,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Paste the team link you were given."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plak de teamlink die je hebt gekregen."
           }
         }
       }
@@ -1021,6 +1573,12 @@
             "state" : "translated",
             "value" : "EDIT PLAYER"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SPELER BEWERKEN"
+          }
         }
       }
     },
@@ -1031,6 +1589,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ADD PLAYER"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SPELER TOEVOEGEN"
           }
         }
       }
@@ -1043,6 +1607,12 @@
             "state" : "translated",
             "value" : "Close"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sluiten"
+          }
         }
       }
     },
@@ -1053,6 +1623,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Players"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spelers"
           }
         }
       }
@@ -1065,6 +1641,12 @@
             "state" : "translated",
             "value" : "Player card"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spelerskaart"
+          }
         }
       }
     },
@@ -1076,6 +1658,12 @@
             "state" : "translated",
             "value" : "Score on the lock screen"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stand op vergrendelscherm"
+          }
         }
       }
     },
@@ -1083,6 +1671,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TEAM"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "TEAM"
@@ -1098,6 +1692,12 @@
             "state" : "translated",
             "value" : "RESTORE"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TERUGZETTEN"
+          }
         }
       }
     },
@@ -1108,6 +1708,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Language"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taal"
           }
         }
       }
@@ -1120,6 +1726,12 @@
             "state" : "translated",
             "value" : "Import team"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Team importeren"
+          }
         }
       }
     },
@@ -1127,6 +1739,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Team via link"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Team via link"
@@ -1142,6 +1760,12 @@
             "state" : "translated",
             "value" : "Team link saved"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teamlink opgeslagen"
+          }
         }
       }
     },
@@ -1152,6 +1776,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Team link removed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teamlink verwijderd"
           }
         }
       }
@@ -1164,6 +1794,12 @@
             "state" : "translated",
             "value" : "Back"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terug"
+          }
         }
       }
     },
@@ -1174,6 +1810,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Restore failed"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terugzetten mislukt"
           }
         }
       }
@@ -1186,6 +1828,12 @@
             "state" : "translated",
             "value" : "While you score, the score of your match is on the lock screen and in the Dynamic Island. You follow someone else's match with Follow a match on the home screen."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen op het beginscherm."
+          }
         }
       }
     },
@@ -1196,6 +1844,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap + to add a player,\nor import a team (zip with team.json and photos)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tik op + om een speler toe te voegen,\nof importeer een team (zip met team.json en foto's)"
           }
         }
       }
@@ -1208,6 +1862,12 @@
             "state" : "translated",
             "value" : "From file (zip)"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uit bestand (zip)"
+          }
         }
       }
     },
@@ -1218,6 +1878,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Result"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uitslag"
           }
         }
       }
@@ -1230,6 +1896,12 @@
             "state" : "translated",
             "value" : "Result: %@ wins %lld–%lld"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uitslag: %@ wint %lld–%lld"
+          }
         }
       }
     },
@@ -1240,6 +1912,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Result: draw %lld–%lld"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uitslag: gelijkspel %lld–%lld"
           }
         }
       }
@@ -1252,6 +1930,12 @@
             "state" : "translated",
             "value" : "REMOVE"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VERWIJDER"
+          }
         }
       }
     },
@@ -1262,6 +1946,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Secure"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veilig"
           }
         }
       }
@@ -1274,6 +1964,12 @@
             "state" : "translated",
             "value" : "Safe temporary storage active"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veilige tijdelijke opslag actief"
+          }
         }
       }
     },
@@ -1284,6 +1980,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Replace all"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vervang alles"
           }
         }
       }
@@ -1296,6 +1998,12 @@
             "state" : "translated",
             "value" : "Delete %@"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijder %@"
+          }
         }
       }
     },
@@ -1307,6 +2015,12 @@
             "state" : "translated",
             "value" : "Delete"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen"
+          }
         }
       }
     },
@@ -1314,6 +2028,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Via link"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Via link"
@@ -1329,6 +2049,12 @@
             "state" : "translated",
             "value" : "Add your OpenAI API key for personalised tactical advice from the AI Coach."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach."
+          }
         }
       }
     },
@@ -1339,6 +2065,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Add"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voeg toe"
           }
         }
       }
@@ -1351,6 +2083,12 @@
             "state" : "translated",
             "value" : "Next match · E%lld"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volgende partij · E%lld"
+          }
         }
       }
     },
@@ -1361,6 +2099,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enter the public team link from sbn.toernooi.nl. My team will then appear on the home screen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm."
           }
         }
       }
@@ -1373,6 +2117,12 @@
             "state" : "translated",
             "value" : "IMPORT MATCH"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WEDSTRIJD IMPORTEREN"
+          }
         }
       }
     },
@@ -1383,6 +2133,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Where do I find my team link?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waar vind ik mijn teamlink?"
           }
         }
       }
@@ -1395,6 +2151,12 @@
             "state" : "translated",
             "value" : "Appearance"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weergave"
+          }
         }
       }
     },
@@ -1405,6 +2167,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weekly backup to iCloud"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wekelijkse back-up naar iCloud"
           }
         }
       }
@@ -1417,6 +2185,12 @@
             "state" : "translated",
             "value" : "Do you want to delete all existing data and replace it with the backup, or add the backup to what is already there?"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wil je alle bestaande data verwijderen en vervangen door de back-up, of de back-up toevoegen aan wat er al is?"
+          }
         }
       }
     },
@@ -1428,6 +2202,12 @@
             "state" : "translated",
             "value" : "the Application Support folder"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "de Application Support-map"
+          }
         }
       }
     },
@@ -1435,6 +2215,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "games %lld–%lld"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "games %lld–%lld"
@@ -1450,6 +2236,12 @@
             "state" : "translated",
             "value" : "iCloud Drive is not available. Check that you are signed in to iCloud and that iCloud Drive is turned on in Settings → Squash Analyzer."
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud Drive is niet beschikbaar. Controleer of je bent ingelogd bij iCloud en iCloud Drive is ingeschakeld in Instellingen → Squash Analyzer."
+          }
         }
       }
     },
@@ -1460,6 +2252,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "retired"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "opgave"
           }
         }
       }
@@ -1472,6 +2270,12 @@
             "state" : "translated",
             "value" : "serves left"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "serveert links"
+          }
         }
       }
     },
@@ -1482,6 +2286,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "serves right"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "serveert rechts"
           }
         }
       }
@@ -1494,6 +2304,12 @@
             "state" : "translated",
             "value" : "w/o"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "w.o."
+          }
         }
       }
     },
@@ -1505,6 +2321,12 @@
             "state" : "translated",
             "value" : "same name"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zelfde naam"
+          }
         }
       }
     },
@@ -1515,6 +2337,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "~€0.01 per analysis (the cheapest model available)"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~€0.01 per analyse (het goedkoopste beschikbare model)"
           }
         }
       }

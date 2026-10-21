@@ -9,7 +9,7 @@ import UIKit
 // scoring (updated locally). Compiled into both the app and the widget
 // extension SquashLiveActivity, which does not link SquashAnalyzerCore: the
 // content state mirrors Core's `LiveSnapshot` field by field. The texts shown
-// go through String(localized:) (Dutch keys, English in the String Catalogs).
+// go through widgetText() (Dutch keys, English in the String Catalogs).
 
 struct LiveScoreAttributes: ActivityAttributes {
     /// Exactly the snapshot JSON of the live server (`aps.content-state` of a
@@ -55,10 +55,10 @@ enum LiveScoreBadge: Equatable {
 
     var title: String {
         switch self {
-        case .gameBall: return String(localized: "GAMEBAL")
-        case .matchBall: return String(localized: "MATCHBAL")
-        case .pause: return String(localized: "PAUZE")
-        case .finished: return String(localized: "AFGELOPEN")
+        case .gameBall: return widgetText("GAMEBAL")
+        case .matchBall: return widgetText("MATCHBAL")
+        case .pause: return widgetText("PAUZE")
+        case .finished: return widgetText("AFGELOPEN")
         }
     }
 }
@@ -131,12 +131,12 @@ extension LiveScoreAttributes.ContentState {
         if isFinished {
             let high = max(value(gamesWon, 1), value(gamesWon, 2))
             let low = min(value(gamesWon, 1), value(gamesWon, 2))
-            if let winner, winner == 1 || winner == 2 { return String(localized: "\(name(winner)) wint \(high)-\(low)") }
-            return String(localized: "Afgelopen")
+            if let winner, winner == 1 || winner == 2 { return widgetText("\(name(winner)) wint \(high)-\(low)") }
+            return widgetText("Afgelopen")
         }
-        if isBetween { return String(localized: "Pauze") }
-        if isWarmup { return String(localized: "Inspelen") }
-        return String(localized: "Game \(gameNumber) · best of \(bestOf)")
+        if isBetween { return widgetText("Pauze") }
+        if isWarmup { return widgetText("Inspelen") }
+        return widgetText("Game \(gameNumber) · best of \(bestOf)")
     }
 
     /// GAMEBAL or MATCHBAL next to the status line; the pause and the result
@@ -156,7 +156,7 @@ extension LiveScoreAttributes.ContentState {
     /// "serveert rechts" under the server's name, while rallies are played
     func serveLine(_ player: Int) -> String? {
         guard isServing(player) else { return nil }
-        return side == "L" ? String(localized: "serveert links") : String(localized: "serveert rechts")
+        return side == "L" ? widgetText("serveert links") : widgetText("serveert rechts")
     }
 
     /// The compact Dynamic Island: the rally score while playing, the games
@@ -264,4 +264,29 @@ enum LiveScorePhotoStore {
             if !keep.contains(String(name[..<dash])) { try? FileManager.default.removeItem(at: file) }
         }
     }
+}
+
+/// The language of the lock screen texts: the same rule as the app (Core's
+/// `AppLanguage`, which the widget does not link): Dutch when the phone's first
+/// language is Dutch, English for every other language. Tests force Dutch.
+enum WidgetLanguage {
+    static var forced: String? = nil
+
+    static var code: String {
+        if let forced { return forced }
+        return (Locale.preferredLanguages.first ?? "nl").lowercased().hasPrefix("nl") ? "nl" : "en"
+    }
+
+    /// The language folder of the app's or the widget's catalog; the bundle itself when it is missing
+    static var bundle: Bundle {
+        guard let path = Bundle.main.path(forResource: code, ofType: "lproj"), let bundle = Bundle(path: path) else {
+            return Bundle.main
+        }
+        return bundle
+    }
+}
+
+/// A lock screen text (the Dutch is the key) in `WidgetLanguage`
+func widgetText(_ key: String.LocalizationValue) -> String {
+    String(localized: key, bundle: WidgetLanguage.bundle)
 }

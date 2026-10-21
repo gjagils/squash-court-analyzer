@@ -9,6 +9,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
+import squash.analyzer.core.AppLanguage
+import squash.analyzer.core.AppLanguageOverride
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -23,6 +25,10 @@ import java.util.zip.ZipOutputStream
 /** Spelers → Team via link on Android: same rules as iOS' TeamImportService (photos: TeamPhotoImportTest on a device) */
 @RunWith(RobolectricTestRunner::class)
 class RoomTeamImporterTest {
+    // The assertions are in Dutch; Core's texts follow the device language
+    @Before fun dutchTexts() { AppLanguageOverride.shared.language = AppLanguage.dutch }
+    @After fun deviceLanguage() { AppLanguageOverride.shared.language = null }
+
     private val context: Context = ApplicationProvider.getApplicationContext()
     private lateinit var db: AppDatabase
 

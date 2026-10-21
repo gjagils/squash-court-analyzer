@@ -5,6 +5,17 @@ import SquashAnalyzerCore
 /// Live score op het vergrendelscherm for a team match: what the Live
 /// Activity shows, worked out from the server's team push
 final class TeamScoreAttributesTests: XCTestCase {
+    // The assertions are in Dutch; the lock screen follows the phone's language
+    override func setUp() {
+        super.setUp()
+        WidgetLanguage.forced = "nl"
+    }
+
+    override func tearDown() {
+        WidgetLanguage.forced = nil
+        super.tearDown()
+    }
+
     private typealias State = TeamScoreAttributes.ContentState
 
     private func decode(_ json: String) throws -> State {

@@ -6,6 +6,8 @@ import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
+import squash.analyzer.core.AppLanguage
+import squash.analyzer.core.AppLanguageOverride
 import org.junit.Test
 import org.junit.Assert.*
 import org.junit.runner.RunWith
@@ -18,6 +20,10 @@ import squash.analyzer.core.*
 /** Importing a card link must behave like iOS' `CardStore`: link, move own awards, merge, deletion wins. */
 @RunWith(RobolectricTestRunner::class)
 class CardImportStoreTest {
+    // The assertions are in Dutch; Core's texts follow the device language
+    @Before fun dutchTexts() { AppLanguageOverride.shared.language = AppLanguage.dutch }
+    @After fun deviceLanguage() { AppLanguageOverride.shared.language = null }
+
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val filename = "card-import-test.db"
     private lateinit var db: AppDatabase

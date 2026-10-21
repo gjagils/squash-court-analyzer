@@ -6,6 +6,17 @@ import SquashAnalyzerCore
 /// Live score op het vergrendelscherm: what the Live Activity shows, worked
 /// out from the server's snapshot JSON (the look of the viewer page's ticker)
 final class LiveScoreAttributesTests: XCTestCase {
+    // The assertions are in Dutch; the lock screen follows the phone's language
+    override func setUp() {
+        super.setUp()
+        WidgetLanguage.forced = "nl"
+    }
+
+    override func tearDown() {
+        WidgetLanguage.forced = nil
+        super.tearDown()
+    }
+
     private typealias State = LiveScoreAttributes.ContentState
 
     private func state(games: [[Int]] = [], score: [Int], gamesWon: [Int], status: String = "playing",

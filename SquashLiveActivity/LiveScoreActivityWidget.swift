@@ -170,7 +170,7 @@ struct LiveScoreLockScreenView: View {
         VStack(spacing: 2) {
             HStack(spacing: 6) {
                 if state.isFinished {
-                    LiveScorePill(text: String(localized: "AFGELOPEN"), live: false)
+                    LiveScorePill(text: widgetText("AFGELOPEN"), live: false)
                 } else {
                     LiveScorePill(text: "LIVE", live: true)
                 }
@@ -196,7 +196,7 @@ struct LiveScoreLockScreenView: View {
             .minimumScaleFactor(0.7)
             HStack(spacing: 5) {
                 LiveScoreGamesBox(games: state.games(1), player: 1, size: 12)
-                Text("games")
+                Text(widgetText("games"))
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundColor(LiveScoreColors.textSecondary)
                 LiveScoreGamesBox(games: state.games(2), player: 2, size: 12)

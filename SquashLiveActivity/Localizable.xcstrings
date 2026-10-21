@@ -9,6 +9,12 @@
             "state" : "translated",
             "value" : "%@ wins %lld-%lld"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ wint %lld-%lld"
+          }
         }
       }
     },
@@ -16,6 +22,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld games"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld games"
@@ -31,6 +43,12 @@
             "state" : "translated",
             "value" : "%lld of 4 done"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld van 4 klaar"
+          }
         }
       }
     },
@@ -41,6 +59,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ", serves"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ", serveert"
           }
         }
       }
@@ -53,6 +77,12 @@
             "state" : "translated",
             "value" : "FINISHED"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AFGELOPEN"
+          }
         }
       }
     },
@@ -63,6 +93,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Finished"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afgelopen"
           }
         }
       }
@@ -75,6 +111,12 @@
             "state" : "translated",
             "value" : "E%lld break"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld pauze"
+          }
         }
       }
     },
@@ -85,6 +127,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "E%lld · in play"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld · bezig"
           }
         }
       }
@@ -97,6 +145,12 @@
             "state" : "translated",
             "value" : "E%lld · warm-up"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld · inspelen"
+          }
         }
       }
     },
@@ -107,6 +161,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "E%lld · break"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld · pauze"
           }
         }
       }
@@ -119,6 +179,12 @@
             "state" : "translated",
             "value" : "GAME BALL"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GAMEBAL"
+          }
         }
       }
     },
@@ -126,6 +192,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Game %lld · best of %lld"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Game %lld · best of %lld"
@@ -141,6 +213,12 @@
             "state" : "translated",
             "value" : "Warm-up"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inspelen"
+          }
         }
       }
     },
@@ -151,6 +229,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "MATCH BALL"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MATCHBAL"
           }
         }
       }
@@ -163,6 +247,12 @@
             "state" : "translated",
             "value" : "Serve"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opslag"
+          }
         }
       }
     },
@@ -173,6 +263,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "BREAK"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PAUZE"
           }
         }
       }
@@ -185,6 +281,12 @@
             "state" : "translated",
             "value" : "Break"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pauze"
+          }
         }
       }
     },
@@ -195,6 +297,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Result"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uitslag"
           }
         }
       }
@@ -207,6 +315,12 @@
             "state" : "translated",
             "value" : "Result: %@ wins %lld–%lld"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uitslag: %@ wint %lld–%lld"
+          }
         }
       }
     },
@@ -217,6 +331,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Result: draw %lld–%lld"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uitslag: gelijkspel %lld–%lld"
           }
         }
       }
@@ -229,6 +349,12 @@
             "state" : "translated",
             "value" : "Next match · E%lld"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volgende partij · E%lld"
+          }
         }
       }
     },
@@ -240,6 +366,12 @@
             "state" : "translated",
             "value" : "in play"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bezig"
+          }
         }
       }
     },
@@ -247,6 +379,12 @@
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "games"
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "games"
@@ -262,6 +400,12 @@
             "state" : "translated",
             "value" : "games %lld–%lld"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "games %lld–%lld"
+          }
         }
       }
     },
@@ -272,6 +416,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "not started"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nog niet begonnen"
           }
         }
       }
@@ -284,6 +434,12 @@
             "state" : "translated",
             "value" : "retired"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "opgave"
+          }
         }
       }
     },
@@ -294,6 +450,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "matches"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "partijen"
           }
         }
       }
@@ -306,6 +468,12 @@
             "state" : "translated",
             "value" : "break"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pauze"
+          }
         }
       }
     },
@@ -316,6 +484,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "serves left"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "serveert links"
           }
         }
       }
@@ -328,6 +502,12 @@
             "state" : "translated",
             "value" : "serves right"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "serveert rechts"
+          }
         }
       }
     },
@@ -339,6 +519,12 @@
             "state" : "translated",
             "value" : "players not known yet"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "spelers nog niet bekend"
+          }
         }
       }
     },
@@ -349,6 +535,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "w/o"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "w.o."
           }
         }
       }

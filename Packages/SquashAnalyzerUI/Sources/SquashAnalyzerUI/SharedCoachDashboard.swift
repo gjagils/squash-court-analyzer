@@ -123,7 +123,7 @@ public struct SharedCoachDashboardView: View {
             if let shareText {
                 HStack {
                     Button { shareText(GameSummaryText.text(for: game)) } label: {
-                        Text("Deel", bundle: .module)
+                        Text("Deel", bundle: textBundle)
                             .font(SharedFonts.system(13, weight: .semibold))
                             .foregroundColor(SharedColors.gold)
                             .padding(.horizontal, 12)
@@ -147,11 +147,11 @@ public struct SharedCoachDashboardView: View {
 
     private var titleBlock: some View {
         VStack(spacing: 4) {
-            Text("Analyse", bundle: .module)
+            Text("Analyse", bundle: textBundle)
                 .font(PageTitleStyle.font)
                 .foregroundColor(SharedColors.textPrimary)
             if let winner = game.winner {
-                Text("\(game.name(for: winner)) wint!", bundle: .module)
+                Text("\(game.name(for: winner)) wint!", bundle: textBundle)
                     .font(SharedFonts.system(14))
                     .foregroundColor(SharedColors.gold)
             }
@@ -199,7 +199,7 @@ public struct SharedCoachDashboardView: View {
                 ForEach(0..<games.count, id: \.self) { index in
                     let candidate = games[index]
                     Button { chooseGame(index) } label: {
-                        Text("Game \(gameNumber(of: candidate)) (\(candidate.player1Score)-\(candidate.player2Score))", bundle: .module)
+                        Text("Game \(gameNumber(of: candidate)) (\(candidate.player1Score)-\(candidate.player2Score))", bundle: textBundle)
                             .font(SharedFonts.system(11))
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
@@ -286,7 +286,7 @@ public struct SharedCoachDashboardView: View {
         }
         let highest = most
         return VStack(spacing: 6) {
-            Text("Heatmap", bundle: .module)
+            Text("Heatmap", bundle: textBundle)
                 .font(SharedFonts.system(10))
                 .foregroundColor(SharedColors.textMuted)
             VStack(spacing: 2) {
@@ -318,12 +318,12 @@ public struct SharedCoachDashboardView: View {
     private var shots: some View {
         let top = CoachAdvice.topShots(in: game, for: player)
         return VStack(alignment: .leading, spacing: 6) {
-            Text("Slagen", bundle: .module)
+            Text("Slagen", bundle: textBundle)
                 .font(SharedFonts.system(10))
                 .foregroundColor(SharedColors.textMuted)
                 .frame(maxWidth: .infinity)
             if top.isEmpty {
-                Text("Nog geen slagen", bundle: .module)
+                Text("Nog geen slagen", bundle: textBundle)
                     .font(SharedFonts.system(10))
                     .foregroundColor(SharedColors.textMuted)
             }
@@ -381,7 +381,7 @@ public struct SharedCoachDashboardView: View {
             }
             // How the own unforced errors went: "Down 2 · Out 1"
             if let kinds = ErrorKind.summary(game.errorKindCounts(madeBy: player)) {
-                Text("Eigen fouten: \(kinds)", bundle: .module)
+                Text("Eigen fouten: \(kinds)", bundle: textBundle)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textSecondary)
             }
@@ -396,7 +396,7 @@ public struct SharedCoachDashboardView: View {
         return HStack(spacing: 12) {
             AppSymbol("bolt.fill", size: 18, color: SharedColors.gold)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Uit de lucht", bundle: .module)
+                Text("Uit de lucht", bundle: textBundle)
                     .font(SharedFonts.system(12, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                 Text(CoachAdvice.volleyBreakdown(in: game, for: player) ?? loc("Nog geen volleys"))
@@ -448,7 +448,7 @@ public struct SharedCoachDashboardView: View {
             ZoneProfileTable(profile: ZoneProfile.of(game, for: player))
                 .padding(.bottom, 4)
             if items.isEmpty {
-                Text("Nog te weinig punten voor advies.", bundle: .module)
+                Text("Nog te weinig punten voor advies.", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textMuted)
             }
@@ -509,7 +509,7 @@ public struct SharedCoachDashboardView: View {
                 sectionTitle("AI Coach", icon: "brain")
                 Spacer()
                 if !hasKey {
-                    Text("API key vereist", bundle: .module)
+                    Text("API key vereist", bundle: textBundle)
                         .font(SharedFonts.system(10))
                         .foregroundColor(SharedColors.textMuted)
                 }
@@ -525,7 +525,7 @@ public struct SharedCoachDashboardView: View {
             } else if loadingAI {
                 HStack(spacing: 10) {
                     ProgressView()
-                    Text("AI analyseert de game…", bundle: .module)
+                    Text("AI analyseert de game…", bundle: textBundle)
                         .font(SharedFonts.system(13))
                         .foregroundColor(SharedColors.textSecondary)
                 }

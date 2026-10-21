@@ -42,7 +42,7 @@ public struct SharedCardImportView: View {
                             Button { importCard(to: linked.id) } label: {
                                 HStack(spacing: 8) {
                                     AppSymbol("arrow.triangle.2.circlepath", size: 16, color: SharedColors.gold)
-                                    Text("Bijwerken bij \(linked.name)", bundle: .module).foregroundColor(SharedColors.gold)
+                                    Text("Bijwerken bij \(linked.name)", bundle: textBundle).foregroundColor(SharedColors.gold)
                                 }
                             }
                             .disabled(isImporting)
@@ -52,7 +52,7 @@ public struct SharedCardImportView: View {
                             Button { importCard(to: nil) } label: {
                                 HStack(spacing: 8) {
                                     AppSymbol("person.badge.plus", size: 16, color: SharedColors.gold)
-                                    Text("Nieuwe speler \(snapshot.name)", bundle: .module).foregroundColor(SharedColors.gold)
+                                    Text("Nieuwe speler \(snapshot.name)", bundle: textBundle).foregroundColor(SharedColors.gold)
                                 }
                             }
                             .disabled(isImporting)
@@ -63,7 +63,7 @@ public struct SharedCardImportView: View {
                                             .foregroundColor(SharedColors.textPrimary)
                                         Spacer()
                                         if player.name.lowercased() == snapshot.name.lowercased() {
-                                            Text("zelfde naam", bundle: .module)
+                                            Text("zelfde naam", bundle: textBundle)
                                                 .font(SharedFonts.system(11))
                                                 .foregroundColor(SharedColors.textMuted)
                                         }
@@ -84,7 +84,7 @@ public struct SharedCardImportView: View {
             .alert(loc("Koppelen mislukt"), isPresented: $failed) {
                 Button(loc("OK"), role: .cancel) { }
             } message: {
-                Text("De kaart van \(snapshot.name) kon niet worden bewaard.", bundle: .module)
+                Text("De kaart van \(snapshot.name) kon niet worden bewaard.", bundle: textBundle)
             }
         }
         .preferredColorScheme(SharedColors.preferredScheme)

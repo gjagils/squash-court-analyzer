@@ -14,7 +14,7 @@ struct ResumePromptCard: View {
         ZStack {
             SharedColors.background.opacity(0.6).ignoresSafeArea()
             VStack(spacing: 14) {
-                Text("Wedstrijd hervatten?", bundle: .module)
+                Text("Wedstrijd hervatten?", bundle: textBundle)
                     .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
                 Text(message)

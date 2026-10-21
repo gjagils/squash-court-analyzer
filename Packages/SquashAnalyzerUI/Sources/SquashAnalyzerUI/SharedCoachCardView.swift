@@ -37,7 +37,7 @@ public struct SharedCoachCardView: View {
                     }
                     section(loc("COACHPUNTEN · \(game.name(for: player).uppercased())"))
                     if current.points.isEmpty {
-                        Text("Te weinig punten in deze game voor coachpunten. Leg vak en slag vast bij elk punt, dan komen ze hier.", bundle: .module)
+                        Text("Te weinig punten in deze game voor coachpunten. Leg vak en slag vast bij elk punt, dan komen ze hier.", bundle: textBundle)
                             .font(SharedFonts.system(15))
                             .foregroundColor(SharedColors.textSecondary)
                     }
@@ -70,7 +70,7 @@ public struct SharedCoachCardView: View {
     private func header(_ current: CoachCard) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Coachkaart · Game \(current.gameNumber)", bundle: .module)
+                Text("Coachkaart · Game \(current.gameNumber)", bundle: textBundle)
                     .font(SharedFonts.system(24, weight: .bold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
                 Text("\(match.player1Name) \(game.player1Score)-\(game.player2Score) \(match.player2Name)")
@@ -203,7 +203,7 @@ struct ZoneHeatmap: View {
             .padding(6)
             .background(SharedColors.courtSand.opacity(0.3))
             .clipShape(RoundedRectangle(cornerRadius: 8))
-            Text("punten gewonnen", bundle: .module)
+            Text("punten gewonnen", bundle: textBundle)
                 .font(SharedFonts.system(11))
                 .foregroundColor(SharedColors.textMuted)
         }

@@ -15,7 +15,7 @@ struct GameNoteEditor: View {
                 Text(title)
                     .font(SharedFonts.system(20, weight: .bold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
-                Text("Wat viel je op? Alleen voor jou: de notitie staat in de analyse en op de coachkaart, niet in wat je deelt.", bundle: .module)
+                Text("Wat viel je op? Alleen voor jou: de notitie staat in de analyse en op de coachkaart, niet in wat je deelt.", bundle: textBundle)
                     .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -30,7 +30,7 @@ struct GameNoteEditor: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(SharedColors.line(0.12), lineWidth: 1))
                 if GameNotes.shared.saveFailed {
-                    Text("Bewaren lukte niet. Probeer het opnieuw.", bundle: .module)
+                    Text("Bewaren lukte niet. Probeer het opnieuw.", bundle: textBundle)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.error)
                 }
@@ -60,7 +60,7 @@ struct GameNoteCard: View {
         return VStack(alignment: .leading, spacing: 8) {
             HStack {
                 AppSymbol("pencil", size: 13, color: SharedColors.accent)
-                Text("Notitie", bundle: .module)
+                Text("Notitie", bundle: textBundle)
                     .font(SharedFonts.system(13, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                 Spacer()
@@ -101,11 +101,11 @@ struct ServiceReturnCard: View {
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
                 AppSymbol("figure.tennis", size: 13, color: SharedColors.accent)
-                Text("Service en return", bundle: .module)
+                Text("Service en return", bundle: textBundle)
                     .font(SharedFonts.system(13, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                 Spacer()
-                Text("game · wedstrijd", bundle: .module)
+                Text("game · wedstrijd", bundle: textBundle)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
             }

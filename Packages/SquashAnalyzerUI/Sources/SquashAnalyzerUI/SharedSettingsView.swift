@@ -185,11 +185,11 @@ public struct SharedSettingsView: View {
     /// Mijn team: the sbn.toernooi.nl link, saved or removed here
     private var teamSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.", bundle: .module)
+            Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.", bundle: textBundle)
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
             Link(destination: UserManual.androidTeamLink) {
-                Text("Waar vind ik mijn teamlink?", bundle: .module)
+                Text("Waar vind ik mijn teamlink?", bundle: textBundle)
                     .font(SharedFonts.system(13, weight: .semibold))
                     .foregroundColor(SharedColors.accent)
             }
@@ -219,19 +219,19 @@ public struct SharedSettingsView: View {
     private var liveSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Toggle(isOn: $liveSharing) {
-                Text("Knop LIVE bij Scheidsrechter en Coach", bundle: .module)
+                Text("Knop LIVE bij Scheidsrechter en Coach", bundle: textBundle)
                     .font(SharedFonts.system(14))
                     .foregroundColor(SharedColors.textPrimary)
             }
             .tint(SharedColors.accent)
             Toggle(isOn: $livePhotos) {
-                Text("Foto's van de spelers meesturen", bundle: .module)
+                Text("Foto's van de spelers meesturen", bundle: textBundle)
                     .font(SharedFonts.system(14))
                     .foregroundColor(liveSharing ? SharedColors.textPrimary : SharedColors.textMuted)
             }
             .tint(SharedColors.accent)
             .disabled(!liveSharing)
-            Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.", bundle: .module)
+            Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.", bundle: textBundle)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
             Toggle(isOn: Binding(get: { liveAlerts }, set: { on in
@@ -239,12 +239,12 @@ public struct SharedSettingsView: View {
                 // The server keeps the choice per followed match: tell it for the ones followed now
                 Task { await LiveFollow.shared.setAlerts(on) }
             })) {
-                Text("Melding bij elke game", bundle: .module)
+                Text("Melding bij elke game", bundle: textBundle)
                     .font(SharedFonts.system(14))
                     .foregroundColor(SharedColors.textPrimary)
             }
             .tint(SharedColors.accent)
-            Text("Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag.", bundle: .module)
+            Text("Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag.", bundle: textBundle)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
         }
@@ -253,11 +253,11 @@ public struct SharedSettingsView: View {
     private var courtSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Picker(loc("Baanindeling"), selection: $courtLayout) {
-                Text("6 vakken", bundle: .module).tag(CourtLayout.six.rawValue)
-                Text("9 vakken", bundle: .module).tag(CourtLayout.nine.rawValue)
+                Text("6 vakken", bundle: textBundle).tag(CourtLayout.six.rawValue)
+                Text("9 vakken", bundle: textBundle).tag(CourtLayout.nine.rawValue)
             }
             .pickerStyle(.segmented)
-            Text("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak.", bundle: .module)
+            Text("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak.", bundle: textBundle)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
         }
@@ -265,7 +265,7 @@ public struct SharedSettingsView: View {
 
     private var aiCoachSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach.", bundle: .module)
+            Text("Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach.", bundle: textBundle)
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 8) {
@@ -305,7 +305,7 @@ public struct SharedSettingsView: View {
     /// "Over AI Coach", as on iOS
     private var aboutAICoachSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Over AI Coach", bundle: .module)
+            Text("Over AI Coach", bundle: textBundle)
                 .font(SharedFonts.system(16, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             infoRow(loc("Veilig"), loc("Je API key wordt versleuteld op dit toestel bewaard"))
@@ -328,7 +328,7 @@ public struct SharedSettingsView: View {
 
     private var backupSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Bewaar spelers, coach- en scheidsrechterwedstrijden en badges in een bestand, bijvoorbeeld op Google Drive. Een back-up van Android kun je ook op een iPhone terugzetten, en andersom.", bundle: .module)
+            Text("Bewaar spelers, coach- en scheidsrechterwedstrijden en badges in een bestand, bijvoorbeeld op Google Drive. Een back-up van Android kun je ook op een iPhone terugzetten, en andersom.", bundle: textBundle)
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 12) {
@@ -358,7 +358,7 @@ public struct SharedSettingsView: View {
 
     private func autoBackupRow(_ auto: any AutoBackupControl) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Automatische back-up", bundle: .module)
+            Text("Automatische back-up", bundle: textBundle)
                 .font(SharedFonts.system(14, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
                 .padding(.top, 8)
@@ -372,7 +372,7 @@ public struct SharedSettingsView: View {
                 }
                 .foregroundColor(SharedColors.textSecondary)
             } else {
-                Text("Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in een map die je kiest (bijvoorbeeld Documenten). De 7 nieuwste blijven bewaard.", bundle: .module)
+                Text("Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in een map die je kiest (bijvoorbeeld Documenten). De 7 nieuwste blijven bewaard.", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textMuted)
                 Button(loc("Aanzetten en map kiezen")) { turnOnAuto(auto) }

@@ -28,7 +28,7 @@ public struct ErrorKindPicker: View {
                 tile(ErrorKind.viaFloor)
             }
             Button { onSelect(nil) } label: {
-                Text("Weet niet", bundle: .module)
+                Text("Weet niet", bundle: textBundle)
                     .font(SharedFonts.system(13, weight: .medium, design: .rounded))
                     .foregroundColor(color)
                     .padding(.vertical, 6)

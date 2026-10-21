@@ -422,19 +422,19 @@ public struct CoachScoringView: View {
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textSecondary)
                 case .selectPointType:
-                    Text("Hoe werd het punt gewonnen?", bundle: .module)
+                    Text("Hoe werd het punt gewonnen?", bundle: textBundle)
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                 case .selectErrorKind:
-                    Text("Wat voor fout was het?", bundle: .module)
+                    Text("Wat voor fout was het?", bundle: textBundle)
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                 case .selectZone:
-                    Text("Tik op de baan waar het punt viel", bundle: .module)
+                    Text("Tik op de baan waar het punt viel", bundle: textBundle)
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                 case .selectShot:
-                    Text("Kies het type slag", bundle: .module)
+                    Text("Kies het type slag", bundle: textBundle)
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                 }
@@ -573,7 +573,7 @@ public struct CoachScoringView: View {
             game.clearSelection()
             volley = false
         }) {
-            Text("Annuleren", bundle: .module)
+            Text("Annuleren", bundle: textBundle)
                 .font(SharedFonts.system(13, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textMuted)
                 .padding(.vertical, 6)
@@ -678,7 +678,7 @@ public struct CoachScoringView: View {
                     .font(SharedFonts.system(22, weight: .bold, design: .rounded))
                     .tracking(3)
                     .foregroundColor(SharedColors.gold)
-                Text("Wie vraagt de let?", bundle: .module)
+                Text("Wie vraagt de let?", bundle: textBundle)
                     .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textSecondary)
                 HStack(spacing: 16) {
@@ -686,12 +686,12 @@ public struct CoachScoringView: View {
                     letButton(Player.player2, SharedColors.steelBlue)
                 }
                 if game.totalLets > 0 {
-                    Text("Lets deze game: \(game.totalLets)", bundle: .module)
+                    Text("Lets deze game: \(game.totalLets)", bundle: textBundle)
                         .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textMuted)
                 }
                 Button { showingLet = false } label: {
-                    Text("Annuleren", bundle: .module)
+                    Text("Annuleren", bundle: textBundle)
                         .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                         .foregroundColor(SharedColors.textSecondary)
                         .padding(.horizontal, 24)

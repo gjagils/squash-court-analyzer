@@ -155,7 +155,7 @@ public struct RefereeScoringView: View {
             Button(action: close) {
                 HStack(spacing: 6) {
                     AppSymbol("xmark", size: 13, color: SharedColors.textSecondary)
-                    Text("Sluiten", bundle: .module).lineLimit(1)
+                    Text("Sluiten", bundle: textBundle).lineLimit(1)
                 }
                 .font(SharedFonts.system(14, weight: .medium, design: .rounded))
             }
@@ -167,7 +167,7 @@ public struct RefereeScoringView: View {
                     .fixedSize()
             }
             Spacer(minLength: 4)
-            Text("Scheidsrechter", bundle: .module)
+            Text("Scheidsrechter", bundle: textBundle)
                 .font(PageTitleStyle.font)
                 .foregroundColor(SharedColors.textPrimary)
                 .lineLimit(1)
@@ -295,7 +295,7 @@ public struct RefereeScoringView: View {
                     Text("\(score)")
                         .font(SharedFonts.system(76, weight: .bold, design: .rounded))
                         .foregroundColor(highlight.score)
-                    Text("TIK = PUNT", bundle: .module)
+                    Text("TIK = PUNT", bundle: textBundle)
                         .font(SharedFonts.system(9, weight: .medium, design: .rounded))
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)

@@ -89,32 +89,32 @@ public struct SharedLeagueTeamCard: View {
     private var setupPrompt: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top) {
-                Text("Speel je competitie bij SBN?", bundle: .module)
+                Text("Speel je competitie bij SBN?", bundle: textBundle)
                     .font(SharedFonts.system(16, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                 Spacer()
                 Button { promptDismissed = true } label: {
-                    Text("Sluiten", bundle: .module)
+                    Text("Sluiten", bundle: textBundle)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textMuted)
                 }
                 .accessibilityLabel(loc("Sluiten"))
             }
-            Text("Vul de link van je team in en je ziet de stand en het programma, en je teamleden komen vanzelf bij Spelers.", bundle: .module)
+            Text("Vul de link van je team in en je ziet de stand en het programma, en je teamleden komen vanzelf bij Spelers.", bundle: textBundle)
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 16) {
                 if let onSetup {
                     Button { onSetup() } label: {
-                        Text("Teamlink invullen", bundle: .module)
+                        Text("Teamlink invullen", bundle: textBundle)
                             .font(SharedFonts.system(14, weight: .semibold))
                             .foregroundColor(SharedColors.accent)
                     }
                 }
                 if let helpURL {
                     Link(destination: helpURL) {
-                        Text("Waar vind ik die?", bundle: .module)
+                        Text("Waar vind ik die?", bundle: textBundle)
                             .font(SharedFonts.system(14))
                             .foregroundColor(SharedColors.accent)
                     }
@@ -196,7 +196,7 @@ public struct SharedLeagueTeamDetailView: View {
                                     .foregroundColor(own ? SharedColors.accent : SharedColors.textPrimary)
                                     .fontWeight(own ? .bold : .regular)
                                 Spacer()
-                                Text("\(row.points) pt", bundle: .module)
+                                Text("\(row.points) pt", bundle: textBundle)
                                     .foregroundColor(own ? SharedColors.accent : SharedColors.gold)
                                     .fontWeight(own ? .bold : .regular)
                             }

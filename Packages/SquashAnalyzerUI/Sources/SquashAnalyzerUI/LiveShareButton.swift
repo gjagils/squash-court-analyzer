@@ -78,7 +78,7 @@ public struct LiveShareButton: View {
             // No .cancel role: with only a cancel button Skip adds its own "OK" (two OKs on Android)
             Button(loc("OK")) {}
         } message: {
-            Text("Controleer de internetverbinding en probeer het opnieuw.", bundle: .module)
+            Text("Controleer de internetverbinding en probeer het opnieuw.", bundle: textBundle)
         }
     }
 

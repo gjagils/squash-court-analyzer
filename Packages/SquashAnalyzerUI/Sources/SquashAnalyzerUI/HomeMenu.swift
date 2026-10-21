@@ -44,7 +44,7 @@ public struct HomeMenuHeader: View {
                     .font(SharedFonts.system(26, weight: .bold, design: .rounded))
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
-                    Text("Jouw spel scherp in beeld. Voor jou en je team.", bundle: .module)
+                    Text("Jouw spel scherp in beeld. Voor jou en je team.", bundle: textBundle)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                         .multilineTextAlignment(.center)
@@ -54,7 +54,7 @@ public struct HomeMenuHeader: View {
                     // The line from the stickers and the website; the sentence
                     // sits halfway between the wordmark and this line (the wordmark's
                     // line already has some room under it, hence 2 and 6)
-                    Text("SCHEIDSEN · COACHEN · DELEN", bundle: .module)
+                    Text("SCHEIDSEN · COACHEN · DELEN", bundle: textBundle)
                         .font(SharedFonts.system(11, weight: .bold, design: .rounded))
                         .tracking(1.4)
                         .foregroundColor(SharedColors.accent)
@@ -103,7 +103,7 @@ public struct HomeMenuTiles: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Klaar om te spelen?", bundle: .module)
+            Text("Klaar om te spelen?", bundle: textBundle)
                 .font(SharedFonts.system(14, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             HStack(spacing: 12) {
@@ -157,12 +157,12 @@ public struct HomeTeamSummary: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Jouw team", bundle: .module).font(SharedFonts.system(14, weight: .semibold))
+                Text("Jouw team", bundle: textBundle).font(SharedFonts.system(14, weight: .semibold))
                 Spacer()
-                Text("Competitie", bundle: .module).font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
+                Text("Competitie", bundle: textBundle).font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
             }
             VStack(alignment: .leading, spacing: 10) {
-                Text("MIJN TEAM", bundle: .module).font(SharedFonts.system(11, weight: .semibold))
+                Text("MIJN TEAM", bundle: textBundle).font(SharedFonts.system(11, weight: .semibold))
                     .tracking(1.4).foregroundColor(SharedColors.accent)
                 Text(snapshot.name).font(SharedFonts.system(20, weight: .semibold, design: .rounded))
                     .fixedSize(horizontal: false, vertical: true)
@@ -173,7 +173,7 @@ public struct HomeTeamSummary: View {
                 }
                 if let next = snapshot.nextFixture() {
                     Divider().overlay(SharedColors.line(0.15))
-                    Text("Volgende · \(LeagueDates.day(next.date)) · \(next.home) – \(next.away)", bundle: .module)
+                    Text("Volgende · \(LeagueDates.day(next.date)) · \(next.home) – \(next.away)", bundle: textBundle)
                         .font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }

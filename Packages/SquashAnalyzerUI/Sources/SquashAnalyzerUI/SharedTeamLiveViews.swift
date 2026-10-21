@@ -43,7 +43,7 @@ struct TeamLiveCard: View {
                 Spacer()
             }
             if match.isLive {
-                Text("Kijkers volgen de hele teamavond op één pagina. Teamgenoten die de uitnodiging openen, zetten hun eigen partij erop. 2 uur na de laatste update wordt alles gewist.", bundle: .module)
+                Text("Kijkers volgen de hele teamavond op één pagina. Teamgenoten die de uitnodiging openen, zetten hun eigen partij erop. 2 uur na de laatste update wordt alles gewist.", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -62,7 +62,7 @@ struct TeamLiveCard: View {
                                  disabled: busy, action: onStop)
                 }
             } else {
-                Text("Deel deze teamwedstrijd met je team: teamgenoten zetten hun eigen partij erop en supporters volgen de stand van de hele avond, per partij ook punt voor punt. Alleen teamnamen, voornamen en de stand gaan mee.", bundle: .module)
+                Text("Deel deze teamwedstrijd met je team: teamgenoten zetten hun eigen partij erop en supporters volgen de stand van de hele avond, per partij ook punt voor punt. Alleen teamnamen, voornamen en de stand gaan mee.", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -134,7 +134,7 @@ public struct SharedTeamJoinView: View {
                 SharedColors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Een teamgenoot deelde een link of code van de live teamwedstrijd. Plak die hier; je partij komt dan op dezelfde livepagina.", bundle: .module)
+                        Text("Een teamgenoot deelde een link of code van de live teamwedstrijd. Plak die hier; je partij komt dan op dezelfde livepagina.", bundle: textBundle)
                             .font(SharedFonts.system(13))
                             .foregroundColor(SharedColors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -182,11 +182,11 @@ public struct SharedTeamJoinView: View {
                     .font(SharedFonts.system(17, weight: .semibold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("\(TeamMatchReport.dayText(Date(timeIntervalSince1970: Double(state.team.date) / 1000.0))) · \(state.partijen.count) van 4 partijen staan erop", bundle: .module)
+                Text("\(TeamMatchReport.dayText(Date(timeIntervalSince1970: Double(state.team.date) / 1000.0))) · \(state.partijen.count) van 4 partijen staan erop", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
             }
-            Text("Welk team is van jou?", bundle: .module)
+            Text("Welk team is van jou?", bundle: textBundle)
                 .font(SharedFonts.system(13, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             HStack(spacing: 10) {
@@ -194,7 +194,7 @@ public struct SharedTeamJoinView: View {
                 sideButton(state.team.away, side: TeamSide.away)
             }
             if let twin = filledTwin {
-                Text("Je hebt deze teamwedstrijd al op je telefoon, met partijen die je zelf hebt ingevuld. Neem je de partijen van je teamgenoot over, dan gaan jouw ingevulde partijen verloren.", bundle: .module)
+                Text("Je hebt deze teamwedstrijd al op je telefoon, met partijen die je zelf hebt ingevuld. Neem je de partijen van je teamgenoot over, dan gaan jouw ingevulde partijen verloren.", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)

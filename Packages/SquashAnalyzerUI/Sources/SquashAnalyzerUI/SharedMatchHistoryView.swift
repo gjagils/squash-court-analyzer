@@ -60,14 +60,14 @@ public struct SharedMatchHistoryView: View {
                 ProgressView(loc("Wedstrijden laden…")).foregroundColor(SharedColors.textPrimary)
             } else if loadFailed {
                 VStack(spacing: 12) {
-                    Text("Wedstrijden konden niet worden geladen.", bundle: .module).foregroundColor(SharedColors.textSecondary)
+                    Text("Wedstrijden konden niet worden geladen.", bundle: textBundle).foregroundColor(SharedColors.textSecondary)
                     Button(loc("Opnieuw laden")) { Task { await load() } }
                 }
             } else if entries.isEmpty {
                 VStack(spacing: 12) {
                     AppSymbol("clock.arrow.circlepath", size: 48, color: SharedColors.textSecondary)
-                    Text("Nog geen afgeronde wedstrijden", bundle: .module).font(.headline)
-                    Text("Voltooide en afgebroken coach- en scheidsrechterwedstrijden verschijnen hier.", bundle: .module)
+                    Text("Nog geen afgeronde wedstrijden", bundle: textBundle).font(.headline)
+                    Text("Voltooide en afgebroken coach- en scheidsrechterwedstrijden verschijnen hier.", bundle: textBundle)
                         .multilineTextAlignment(.center)
                 }
                 .foregroundColor(SharedColors.textSecondary)
@@ -82,7 +82,7 @@ public struct SharedMatchHistoryView: View {
                                 .foregroundColor(SharedColors.gold)
                         }
                         if shown.isEmpty {
-                            Text("Geen wedstrijden met dit filter", bundle: .module)
+                            Text("Geen wedstrijden met dit filter", bundle: textBundle)
                                 .foregroundColor(SharedColors.textSecondary)
                                 .padding(.top, 24)
                         }
@@ -143,7 +143,7 @@ public struct SharedMatchHistoryView: View {
                 if let entry = deleting { remove(entry) }
             }
         } message: {
-            Text("Deze actie kan niet ongedaan worden gemaakt.", bundle: .module)
+            Text("Deze actie kan niet ongedaan worden gemaakt.", bundle: textBundle)
         }
     }
 
@@ -214,7 +214,7 @@ public struct SharedMatchHistoryView: View {
     }
 
     private var incompleteLabel: some View {
-        Text("INCOMPLEET", bundle: .module)
+        Text("INCOMPLEET", bundle: textBundle)
             .font(SharedFonts.system(9, weight: .semibold, design: .rounded))
             .tracking(1)
             .foregroundColor(SharedColors.warmRed)
@@ -252,7 +252,7 @@ public struct SharedMatchHistoryView: View {
         Button { share(entry) } label: {
             HStack(spacing: 4) {
                 AppSymbol("square.and.arrow.up", size: 12, color: SharedColors.steelBlue)
-                Text("Delen", bundle: .module)
+                Text("Delen", bundle: textBundle)
                     .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.steelBlue)
             }
@@ -311,7 +311,7 @@ public struct SharedMatchHistoryView: View {
                 Button { open(entry, analysis: false) } label: {
                     HStack(spacing: 4) {
                         AppSymbol("flag.checkered", size: 12, color: SharedColors.accent)
-                        Text("Uitslag aanvullen", bundle: .module)
+                        Text("Uitslag aanvullen", bundle: textBundle)
                             .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.accent)
                     }
@@ -326,7 +326,7 @@ public struct SharedMatchHistoryView: View {
                 Button { open(entry, analysis: true) } label: {
                     HStack(spacing: 4) {
                         AppSymbol("magnifyingglass", size: 12, color: SharedColors.accent)
-                        Text("Bekijk analyse", bundle: .module)
+                        Text("Bekijk analyse", bundle: textBundle)
                             .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.accent)
                     }
@@ -387,7 +387,7 @@ public struct SharedMatchHistoryView: View {
                         .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textMuted)
                     if let name = entry.winnerName {
-                        Text("· \(name) wint", bundle: .module)
+                        Text("· \(name) wint", bundle: textBundle)
                             .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.gold.opacity(0.8))
                     } else {

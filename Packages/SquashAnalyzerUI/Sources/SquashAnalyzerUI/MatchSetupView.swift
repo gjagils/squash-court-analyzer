@@ -131,7 +131,7 @@ public struct MatchSetupView: View {
                     Button { editing = PlayerProfile() } label: {
                         HStack(spacing: 10) {
                             AppSymbol("plus", size: 16, color: SharedColors.accent)
-                            Text("Nieuwe speler", bundle: .module).foregroundColor(SharedColors.accent)
+                            Text("Nieuwe speler", bundle: textBundle).foregroundColor(SharedColors.accent)
                         }
                     }
                     ForEach(players) { player in
@@ -223,7 +223,7 @@ public struct MatchSetupView: View {
 
     private var serverPicker: some View {
         VStack(spacing: 10) {
-            Text("Wie serveert eerst?", bundle: .module)
+            Text("Wie serveert eerst?", bundle: textBundle)
                 .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 10) {
@@ -272,14 +272,14 @@ public struct MatchSetupView: View {
             }
             .buttonStyle(.plain)
             if lateStart {
-                Text("GAMES GEWONNEN", bundle: .module)
+                Text("GAMES GEWONNEN", bundle: textBundle)
                     .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(SharedColors.accent)
                 gamesRow(name1, color: SharedColors.accent, value: gamesBefore1, onMinus: { gamesBefore1 = max(0, gamesBefore1 - 1) }, onPlus: { gamesBefore1 = min(2, gamesBefore1 + 1) })
                 gamesRow(name2, color: SharedColors.steelBlue, value: gamesBefore2, onMinus: { gamesBefore2 = max(0, gamesBefore2 - 1) }, onPlus: { gamesBefore2 = min(2, gamesBefore2 + 1) })
                 if !headStartIsValid {
-                    Text("Met deze stand is de wedstrijd al beslist", bundle: .module)
+                    Text("Met deze stand is de wedstrijd al beslist", bundle: textBundle)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                 }
@@ -324,7 +324,7 @@ public struct MatchSetupView: View {
         if !teamCandidates.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 Toggle(isOn: Binding(get: { inTeam }, set: { turnTeamOn($0) })) {
-                    Text("Onderdeel van een teamwedstrijd", bundle: .module)
+                    Text("Onderdeel van een teamwedstrijd", bundle: textBundle)
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textPrimary)
                 }
@@ -357,7 +357,7 @@ public struct MatchSetupView: View {
                             TeamShareBadge(isLive: team.isLive)
                         }
                     }
-                    Text("PARTIJ", bundle: .module)
+                    Text("PARTIJ", bundle: textBundle)
                         .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                         .tracking(1)
                         .foregroundColor(SharedColors.textMuted)
@@ -375,7 +375,7 @@ public struct MatchSetupView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    Text("WIE IS ONZE SPELER?", bundle: .module)
+                    Text("WIE IS ONZE SPELER?", bundle: textBundle)
                         .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                         .tracking(1)
                         .foregroundColor(SharedColors.textMuted)
@@ -383,7 +383,7 @@ public struct MatchSetupView: View {
                         ownChoice(name1, isPlayer1: true, color: SharedColors.accent)
                         ownChoice(name2, isPlayer1: false, color: SharedColors.steelBlue)
                     }
-                    Text("Het resultaat komt na afloop vanzelf in de partij en, als de teamwedstrijd live is, gaat de stand mee naar de teampagina.", bundle: .module)
+                    Text("Het resultaat komt na afloop vanzelf in de partij en, als de teamwedstrijd live is, gaat de stand mee naar de teampagina.", bundle: textBundle)
                         .font(SharedFonts.system(11))
                         .foregroundColor(SharedColors.textMuted)
                         .fixedSize(horizontal: false, vertical: true)

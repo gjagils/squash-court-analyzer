@@ -93,7 +93,7 @@ struct TeamPartijEditor: View {
                 }
                 Button(loc("Annuleren"), role: .cancel) { chosen = nil }
             } message: {
-                Text("De games komen uit die wedstrijd, gezien vanuit onze speler.", bundle: .module)
+                Text("De games komen uit die wedstrijd, gezien vanuit onze speler.", bundle: textBundle)
             }
         }
         .preferredColorScheme(SharedColors.preferredScheme)
@@ -151,11 +151,11 @@ struct TeamPartijEditor: View {
                 }
                 .padding(.top, 8)
             } else {
-                Text("Een wedstrijd die je bijhoudt als coach of scheidsrechter vult de games vanzelf in. Of vul ze hieronder zelf in.", bundle: .module)
+                Text("Een wedstrijd die je bijhoudt als coach of scheidsrechter vult de games vanzelf in. Of vul ze hieronder zelf in.", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("Nieuwe wedstrijd starten", bundle: .module)
+                Text("Nieuwe wedstrijd starten", bundle: textBundle)
                     .font(SharedFonts.system(13, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                     .padding(.top, 8)
@@ -175,12 +175,12 @@ struct TeamPartijEditor: View {
     private var gamesSection: some View {
         section(loc("GAMES")) {
             if partij.games.isEmpty {
-                Text("Nog geen games.", bundle: .module).font(SharedFonts.system(12)).foregroundColor(SharedColors.textMuted)
+                Text("Nog geen games.", bundle: textBundle).font(SharedFonts.system(12)).foregroundColor(SharedColors.textMuted)
             } else {
                 ForEach(0..<partij.games.count, id: \.self) { index in
                     let game = partij.games[index]
                     HStack {
-                        Text("Game \(index + 1)", bundle: .module).font(SharedFonts.system(13)).foregroundColor(SharedColors.textSecondary)
+                        Text("Game \(index + 1)", bundle: textBundle).font(SharedFonts.system(13)).foregroundColor(SharedColors.textSecondary)
                         Spacer()
                         Text(game.text)
                             .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
@@ -193,7 +193,7 @@ struct TeamPartijEditor: View {
                     .padding(.vertical, 4)
                 }
                 HStack {
-                    Text("Stand \(partij.standText)", bundle: .module)
+                    Text("Stand \(partij.standText)", bundle: textBundle)
                         .font(SharedFonts.system(13, weight: .bold, design: .rounded))
                         .foregroundColor(partij.isOver ? SharedColors.gold : SharedColors.textPrimary)
                     Spacer()
@@ -205,7 +205,7 @@ struct TeamPartijEditor: View {
             }
             if partij.canAddGame {
                 Divider().overlay(SharedColors.line(0.09)).padding(.vertical, 6)
-                Text("Game \(partij.games.count + 1) toevoegen", bundle: .module)
+                Text("Game \(partij.games.count + 1) toevoegen", bundle: textBundle)
                     .font(SharedFonts.system(12, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                 HStack(spacing: 10) {
@@ -217,7 +217,7 @@ struct TeamPartijEditor: View {
                 if let scoreError {
                     Text(scoreError).font(SharedFonts.system(11)).foregroundColor(SharedColors.error)
                 }
-                Text("Stand niet bekend? Dan alleen wie won:", bundle: .module)
+                Text("Stand niet bekend? Dan alleen wie won:", bundle: textBundle)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
                     .padding(.top, 4)
@@ -226,7 +226,7 @@ struct TeamPartijEditor: View {
                     winnerButton(loc("Zij wonnen"), own: false, color: SharedColors.steelBlueLight)
                 }
             } else if partij.isOver {
-                Text("Partij beslist.", bundle: .module).font(SharedFonts.system(12)).foregroundColor(SharedColors.textMuted).padding(.top, 4)
+                Text("Partij beslist.", bundle: textBundle).font(SharedFonts.system(12)).foregroundColor(SharedColors.textMuted).padding(.top, 4)
             }
         }
     }
@@ -239,7 +239,7 @@ struct TeamPartijEditor: View {
                 if let text = partij.endText {
                     let winner = partij.ownWon == true ? loc("Wij winnen") : loc("Zij winnen")
                     let reason = text == "opgave" ? loc("de opgave van de tegenstander") : loc("het wegblijven van de tegenstander")
-                    Text("\(winner) deze partij door \(reason): alle resterende punten gaan naar de winnaar.", bundle: .module)
+                    Text("\(winner) deze partij door \(reason): alle resterende punten gaan naar de winnaar.", bundle: textBundle)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -249,11 +249,11 @@ struct TeamPartijEditor: View {
                     }
                     .padding(.top, 6)
                 } else {
-                    Text("Geeft een speler op, dan gaan alle resterende punten naar de tegenstander. Kwam een speler niet opdagen, dan wint de ander met 3 keer 11-0.", bundle: .module)
+                    Text("Geeft een speler op, dan gaan alle resterende punten naar de tegenstander. Kwam een speler niet opdagen, dan wint de ander met 3 keer 11-0.", bundle: textBundle)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("Opgave: stand van de game waarin het gebeurde (optioneel)", bundle: .module)
+                    Text("Opgave: stand van de game waarin het gebeurde (optioneel)", bundle: textBundle)
                         .font(SharedFonts.system(11))
                         .foregroundColor(SharedColors.textMuted)
                         .padding(.top, 4)
@@ -478,9 +478,9 @@ struct TrackedMatchPicker: View {
                         if !loaded {
                             ProgressView().frame(maxWidth: .infinity)
                         } else if entries.isEmpty {
-                            Text("Nog geen bijgehouden wedstrijden.", bundle: .module).font(SharedFonts.system(13)).foregroundColor(SharedColors.textMuted)
+                            Text("Nog geen bijgehouden wedstrijden.", bundle: textBundle).font(SharedFonts.system(13)).foregroundColor(SharedColors.textMuted)
                         } else {
-                            Text("Wedstrijden van de speeldag staan bovenaan.", bundle: .module)
+                            Text("Wedstrijden van de speeldag staan bovenaan.", bundle: textBundle)
                                 .font(SharedFonts.system(12))
                                 .foregroundColor(SharedColors.textMuted)
                             ForEach(sorted) { entry in

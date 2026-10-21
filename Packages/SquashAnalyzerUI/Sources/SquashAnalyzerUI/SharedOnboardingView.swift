@@ -62,7 +62,7 @@ public struct SharedOnboardingView: View {
                     }
                     if isLast {
                         Link(destination: manual) {
-                            Text("Lees de handleiding", bundle: .module)
+                            Text("Lees de handleiding", bundle: textBundle)
                                 .font(SharedFonts.system(15, weight: .semibold))
                                 .foregroundColor(SharedColors.accent)
                         }
@@ -169,7 +169,7 @@ public struct AboutAppSection: View {
                 SettingsRowLabel(loc("Feedback sturen"), icon: "lightbulb.fill")
             }
             .accessibilityLabel(loc("Feedback sturen naar \(AppLinks.feedbackAddress)"))
-            Text("Feedback gaat per mail naar \(AppLinks.feedbackAddress). Squash Analyzer \(appVersion)", bundle: .module)
+            Text("Feedback gaat per mail naar \(AppLinks.feedbackAddress). Squash Analyzer \(appVersion)", bundle: textBundle)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
                 .padding(.top, 16)

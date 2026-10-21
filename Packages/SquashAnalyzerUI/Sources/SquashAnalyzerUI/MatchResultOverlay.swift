@@ -261,7 +261,7 @@ public struct MatchBadgesRow: View {
         return Button(action: onTap) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("BADGES VERDIEND", bundle: .module)
+                    Text("BADGES VERDIEND", bundle: textBundle)
                         .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                         .tracking(1)
                         .foregroundColor(color)
@@ -348,7 +348,7 @@ public struct SharedMatchBadgesSheet: View {
         Button { onClose() } label: {
             HStack(spacing: 4) {
                 Image(systemName: "xmark")
-                Text("Sluiten", bundle: .module)
+                Text("Sluiten", bundle: textBundle)
             }
             .font(SharedFonts.system(14, weight: .medium, design: .rounded))
             .foregroundColor(SharedColors.textSecondary)

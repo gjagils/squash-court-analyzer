@@ -66,7 +66,7 @@ public struct AppearancePicker: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if showsTitle {
-                Text("Weergave", bundle: .module)
+                Text("Weergave", bundle: textBundle)
                     .font(SharedFonts.system(16, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
             }
@@ -78,7 +78,7 @@ public struct AppearancePicker: View {
             .pickerStyle(.segmented)
             // Drawn anew after a change: the segmented control keeps its old colours otherwise
             .id(stored)
-            Text("Systeem volgt de instelling van je telefoon. Een uitslag die je als plaatje deelt, blijft donker.", bundle: .module)
+            Text("Systeem volgt de instelling van je telefoon. Een uitslag die je als plaatje deelt, blijft donker.", bundle: textBundle)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
         }

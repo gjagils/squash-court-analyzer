@@ -30,7 +30,7 @@ public struct SharedLiveFollowView: View {
                 SharedColors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Kun je er niet bij zijn? Plak de live link die in de groep gedeeld is. De stand staat dan op je vergrendelscherm en gaat na elke rally mee, ook als de app dicht is.", bundle: .module)
+                        Text("Kun je er niet bij zijn? Plak de live link die in de groep gedeeld is. De stand staat dan op je vergrendelscherm en gaat na elke rally mee, ook als de app dicht is.", bundle: textBundle)
                             .font(SharedFonts.system(13))
                             .foregroundColor(SharedColors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)

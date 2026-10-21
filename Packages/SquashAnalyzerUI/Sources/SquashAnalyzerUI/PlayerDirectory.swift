@@ -34,10 +34,10 @@ public struct PlayerProfileFields: View {
                     caption("TEAM")
                     Toggle(isOn: Binding(get: { TeamRoster.contains(playerId, in: rosterRaw) },
                                          set: { rosterRaw = TeamRoster.setting(playerId, inTeam: $0, in: rosterRaw) })) {
-                        Text("In mijn team", bundle: .module)
+                        Text("In mijn team", bundle: textBundle)
                     }
                     .tint(SharedColors.accent)
-                    Text("Spelers in je team staan bovenaan als je een partij van een teamwedstrijd invult.", bundle: .module)
+                    Text("Spelers in je team staan bovenaan als je een partij van een teamwedstrijd invult.", bundle: textBundle)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textMuted)
                 }
@@ -177,7 +177,7 @@ public struct PlayerDirectoryView: View {
                     Spacer()
                 } else if loadFailed {
                     Spacer()
-                    Text("Spelers konden niet worden geladen.", bundle: .module)
+                    Text("Spelers konden niet worden geladen.", bundle: textBundle)
                         .foregroundColor(SharedColors.textSecondary)
                     Button(loc("Opnieuw laden")) { Task { await reload() } }
                         .tint(SharedColors.accent)
@@ -186,8 +186,8 @@ public struct PlayerDirectoryView: View {
                     Spacer()
                     VStack(spacing: 12) {
                         AppSymbol("person.crop.circle", size: 48, color: SharedColors.textSecondary)
-                        Text("Nog geen spelers opgeslagen", bundle: .module).font(.headline)
-                        Text("Tik op + om een speler toe te voegen,\nof importeer een team (zip met team.json en foto's)", bundle: .module)
+                        Text("Nog geen spelers opgeslagen", bundle: textBundle).font(.headline)
+                        Text("Tik op + om een speler toe te voegen,\nof importeer een team (zip met team.json en foto's)", bundle: textBundle)
                     }
                     .foregroundColor(SharedColors.textSecondary)
                     .multilineTextAlignment(.center)
@@ -307,7 +307,7 @@ public struct PlayerDirectoryView: View {
                 }
             }
         } message: {
-            Text("\(deleting?.name ?? loc("Deze speler")) wordt verwijderd. Gespeelde wedstrijden blijven bewaard.", bundle: .module)
+            Text("\(deleting?.name ?? loc("Deze speler")) wordt verwijderd. Gespeelde wedstrijden blijven bewaard.", bundle: textBundle)
         }
         .alert(loc("Spelers konden niet worden bijgewerkt"), isPresented: $showingError) {
             Button(loc("Opnieuw proberen")) { Task { await reload() } }
@@ -450,6 +450,6 @@ struct PlayerProfileEditor: View {
         }
         .alert(loc("Opslaan is niet gelukt"), isPresented: $showingError) {
             Button("OK", role: .cancel) {}
-        } message: { Text("Je invoer is bewaard in dit scherm. Probeer opnieuw op te slaan.", bundle: .module) }
+        } message: { Text("Je invoer is bewaard in dit scherm. Probeer opnieuw op te slaan.", bundle: textBundle) }
     }
 }

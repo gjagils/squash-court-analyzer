@@ -83,12 +83,12 @@ struct TeamShareSheet: View {
                 SharedColors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
-                        Text("Kies voor wie het bericht is. Supporters kunnen alleen kijken; teamleden kunnen ook hun eigen partij invullen.", bundle: .module)
+                        Text("Kies voor wie het bericht is. Supporters kunnen alleen kijken; teamleden kunnen ook hun eigen partij invullen.", bundle: textBundle)
                             .font(SharedFonts.system(13))
                             .foregroundColor(SharedColors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                         group(loc("VOOR SUPPORTERS")) {
-                            Text("Een link naar de livepagina met de stand van de hele avond. Kijken kan in de browser, zonder app. Er is niets in te vullen.", bundle: .module)
+                            Text("Een link naar de livepagina met de stand van de hele avond. Kijken kan in de browser, zonder app. Er is niets in te vullen.", bundle: textBundle)
                                 .font(SharedFonts.system(12))
                                 .foregroundColor(SharedColors.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -100,7 +100,7 @@ struct TeamShareSheet: View {
                             }
                         }
                         group(loc("VOOR TEAMLEDEN")) {
-                            Text("Een uitnodiging om mee te doen in dezelfde teamwedstrijd en je eigen partij erop te zetten. Alleen voor mensen uit je team: wie de uitnodiging heeft, kan partijen invullen.", bundle: .module)
+                            Text("Een uitnodiging om mee te doen in dezelfde teamwedstrijd en je eigen partij erop te zetten. Alleen voor mensen uit je team: wie de uitnodiging heeft, kan partijen invullen.", bundle: textBundle)
                                 .font(SharedFonts.system(12))
                                 .foregroundColor(SharedColors.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -112,14 +112,14 @@ struct TeamShareSheet: View {
                             }
                             if let id = match.liveId, let key = match.liveKey {
                                 // Also readable when nothing can be shared: the code teammates paste at Deelnemen
-                                Text("Code om mee te doen: \(TeamInvite(id: id, key: key).code)", bundle: .module)
+                                Text("Code om mee te doen: \(TeamInvite(id: id, key: key).code)", bundle: textBundle)
                                     .font(SharedFonts.system(11))
                                     .foregroundColor(SharedColors.textMuted)
                                     .fixedSize(horizontal: false, vertical: true)
                                     .padding(.top, 4)
                             }
                         }
-                        Text("2 uur na de laatste update wordt alles van de livepagina gewist. Alleen teamnamen, voornamen en de stand gaan mee.", bundle: .module)
+                        Text("2 uur na de laatste update wordt alles van de livepagina gewist. Alleen teamnamen, voornamen en de stand gaan mee.", bundle: textBundle)
                             .font(SharedFonts.system(11))
                             .foregroundColor(SharedColors.textMuted)
                             .fixedSize(horizontal: false, vertical: true)

@@ -89,15 +89,15 @@ public struct SettingsManualCard: View {
                     .clipShape(Circle())
                     .overlay(Circle().stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Handleiding", bundle: .module)
+                    Text("Handleiding", bundle: textBundle)
                         .font(SharedFonts.system(16, weight: .semibold))
                         .foregroundColor(SharedColors.textPrimary)
-                    Text("Per tegel uitgelegd hoe alles werkt, op squashanalyzer.com.", bundle: .module)
+                    Text("Per tegel uitgelegd hoe alles werkt, op squashanalyzer.com.", bundle: textBundle)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("Open de handleiding", bundle: .module)
+                    Text("Open de handleiding", bundle: textBundle)
                         .font(SharedFonts.system(13, weight: .semibold))
                         .foregroundColor(SharedColors.accent)
                 }

@@ -88,7 +88,7 @@ public struct SharedBadgeCatalogView: View {
     public var body: some View {
         List {
             Section {
-                Text("Spelers die je kiest via \"Kies speler\" verdienen badges tijdens een wedstrijd, in coach- en scheidsrechtermodus. Badges met het label Coach vragen om de slagen die alleen coachmodus bijhoudt. Een badge met drie treden verdien je in brons, zilver en goud: de rand laat zien hoe ver je bent.", bundle: .module)
+                Text("Spelers die je kiest via \"Kies speler\" verdienen badges tijdens een wedstrijd, in coach- en scheidsrechtermodus. Badges met het label Coach vragen om de slagen die alleen coachmodus bijhoudt. Een badge met drie treden verdien je in brons, zilver en goud: de rand laat zien hoe ver je bent.", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .listRowBackground(Color.clear)

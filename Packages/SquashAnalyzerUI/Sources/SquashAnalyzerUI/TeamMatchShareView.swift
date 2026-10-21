@@ -61,7 +61,7 @@ struct TeamMatchShareView: View {
 
     private var header: some View {
         ZStack {
-            Text("DEEL VERSLAG", bundle: .module)
+            Text("DEEL VERSLAG", bundle: textBundle)
                 .font(SharedFonts.system(14, weight: .bold, design: .rounded))
                 .tracking(2)
                 .foregroundColor(SharedColors.textPrimary)
@@ -69,7 +69,7 @@ struct TeamMatchShareView: View {
                 Button(action: onClose) {
                     HStack(spacing: 4) {
                         AppSymbol("xmark", size: 14, color: SharedColors.textSecondary)
-                        Text("Sluiten", bundle: .module)
+                        Text("Sluiten", bundle: textBundle)
                             .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.textSecondary)
                     }

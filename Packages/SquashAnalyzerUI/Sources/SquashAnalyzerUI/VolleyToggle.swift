@@ -17,7 +17,7 @@ public struct VolleyToggle: View {
         Button { isOn.toggle() } label: {
             HStack(spacing: 8) {
                 AppSymbol("bolt.fill", size: 14, color: isOn ? SharedColors.onAccent : color)
-                Text("UIT DE LUCHT", bundle: .module)
+                Text("UIT DE LUCHT", bundle: textBundle)
                     .font(SharedFonts.system(12, weight: .bold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(isOn ? SharedColors.onAccent : color)

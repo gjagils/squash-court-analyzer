@@ -82,7 +82,7 @@ public struct RefereeSessionView: View {
                 VStack(spacing: 16) {
                     Text(match == nil ? loc("Wedstrijd kon niet worden geladen") : loc("Opslaan is niet gelukt"))
                         .font(.headline)
-                    Text("Probeer het opnieuw. Je huidige invoer blijft in dit scherm staan.", bundle: .module)
+                    Text("Probeer het opnieuw. Je huidige invoer blijft in dit scherm staan.", bundle: textBundle)
                         .multilineTextAlignment(.center)
                     Button(loc("Opnieuw proberen")) {
                         if let match { persist(match, exit: saver.exitAfterSave) }

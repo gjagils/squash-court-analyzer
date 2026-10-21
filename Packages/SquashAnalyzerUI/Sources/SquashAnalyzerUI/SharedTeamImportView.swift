@@ -22,7 +22,7 @@ struct SharedTeamImportView: View {
             SharedColors.background.ignoresSafeArea()
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text("TEAM IMPORTEREN", bundle: .module)
+                    Text("TEAM IMPORTEREN", bundle: textBundle)
                         .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                         .tracking(2)
                         .foregroundColor(SharedColors.gold)
@@ -35,7 +35,7 @@ struct SharedTeamImportView: View {
                     }
                     .accessibilityLabel(loc("Sluiten"))
                 }
-                Text("Plak de teamlink die je hebt gekregen, zoals https://squashanalyzer.com/teams/…/team.zip. Spelers met dezelfde naam worden bijgewerkt, nieuwe worden toegevoegd.", bundle: .module)
+                Text("Plak de teamlink die je hebt gekregen, zoals https://squashanalyzer.com/teams/…/team.zip. Spelers met dezelfde naam worden bijgewerkt, nieuwe worden toegevoegd.", bundle: textBundle)
                     .font(SharedFonts.system(14))
                     .foregroundColor(SharedColors.textSecondary)
                 TextField("https://squashanalyzer.com/teams/…", text: $link)
@@ -46,7 +46,7 @@ struct SharedTeamImportView: View {
                 ActionButton(isImporting ? loc("Bezig met importeren…") : loc("IMPORTEREN"), style: .filled, color: SharedColors.accent,
                              disabled: isImporting || link.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, action: start)
                 if filePicker != nil {
-                    Text("Of kies een team-zip van je telefoon.", bundle: .module)
+                    Text("Of kies een team-zip van je telefoon.", bundle: textBundle)
                         .font(SharedFonts.system(14))
                         .foregroundColor(SharedColors.textSecondary)
                     ActionButton(loc("KIES ZIP-BESTAND"), color: SharedColors.accent, disabled: isImporting, action: pickZip)

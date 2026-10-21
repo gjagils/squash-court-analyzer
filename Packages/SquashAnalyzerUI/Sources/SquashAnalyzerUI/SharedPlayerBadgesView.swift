@@ -94,10 +94,10 @@ public struct SharedPlayerBadgesView: View {
                                 HStack(spacing: 10) {
                                     AppSymbol("chart.bar.xaxis", size: 16, color: SharedColors.gold)
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("PROFIEL", bundle: .module)
+                                        Text("PROFIEL", bundle: textBundle)
                                             .font(ActionButton.font)
                                             .foregroundColor(SharedColors.gold)
-                                        Text("Vorm, winners en fouten over de wedstrijden", bundle: .module)
+                                        Text("Vorm, winners en fouten over de wedstrijden", bundle: textBundle)
                                             .font(SharedFonts.system(12))
                                             .foregroundColor(SharedColors.textSecondary)
                                     }
@@ -136,7 +136,7 @@ public struct SharedPlayerBadgesView: View {
         .alert(loc("Delen lukt niet"), isPresented: $shareFailed) {
             Button(loc("OK"), role: .cancel) { }
         } message: {
-            Text("De kaart van \(playerName) kon niet worden gemaakt.", bundle: .module)
+            Text("De kaart van \(playerName) kon niet worden gemaakt.", bundle: textBundle)
         }
         .task(id: cardInbox.importCount) { await load() }
     }
@@ -302,11 +302,11 @@ struct SharedBadgeMomentsView: View {
                                     .foregroundColor(SharedColors.textMuted)
                             }
                             if family.coachOnly {
-                                Text("Alleen in coachmodus, waar de slagen worden bijgehouden", bundle: .module)
+                                Text("Alleen in coachmodus, waar de slagen worden bijgehouden", bundle: textBundle)
                                     .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                                     .foregroundColor(SharedColors.textMuted)
                             } else if family.isCareer {
-                                Text("Telt de wedstrijden op dit toestel", bundle: .module)
+                                Text("Telt de wedstrijden op dit toestel", bundle: textBundle)
                                     .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                                     .foregroundColor(SharedColors.textMuted)
                             }

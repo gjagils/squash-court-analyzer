@@ -19,7 +19,7 @@ public struct ZoneProfileTable: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Waar vallen de punten", bundle: .module)
+            Text("Waar vallen de punten", bundle: textBundle)
                 .font(SharedFonts.system(11, weight: .semibold))
                 .foregroundColor(ZoneProfileTable.muted)
             // Explicit rows, not a nested ForEach (see docs/android-port.md)

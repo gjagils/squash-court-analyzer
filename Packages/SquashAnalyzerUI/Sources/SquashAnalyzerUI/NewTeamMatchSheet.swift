@@ -36,7 +36,7 @@ struct NewTeamMatchSheet: View {
                     VStack(alignment: .leading, spacing: 18) {
                         VStack(alignment: .leading, spacing: 6) {
                             Toggle(isOn: $shareWithTeam) {
-                                Text("Deel met mijn team", bundle: .module)
+                                Text("Deel met mijn team", bundle: textBundle)
                                     .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                                     .foregroundColor(SharedColors.textPrimary)
                             }
@@ -90,8 +90,8 @@ struct NewTeamMatchSheet: View {
                                     .padding(10)
                                     .background(SharedColors.tint(0.06)).clipShape(RoundedRectangle(cornerRadius: 10))
                                 Picker(loc("Waar"), selection: $atHome) {
-                                    Text("Thuis", bundle: .module).tag(true)
-                                    Text("Uit", bundle: .module).tag(false)
+                                    Text("Thuis", bundle: textBundle).tag(true)
+                                    Text("Uit", bundle: textBundle).tag(false)
                                 }
                                 .pickerStyle(.segmented)
                                 DatePicker(loc("Datum"), selection: $date, displayedComponents: .date)

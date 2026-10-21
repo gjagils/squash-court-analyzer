@@ -68,7 +68,7 @@ public struct TeamMatchLinkPrompt: View {
                         .font(SharedFonts.system(20, weight: .semibold, design: .rounded))
                         .foregroundColor(SharedColors.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("Hoort \(player1Name) – \(player2Name) bij deze teamwedstrijd? Kies de partij.", bundle: .module)
+                    Text("Hoort \(player1Name) – \(player2Name) bij deze teamwedstrijd? Kies de partij.", bundle: textBundle)
                         .font(SharedFonts.system(14))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -98,7 +98,7 @@ public struct TeamMatchLinkPrompt: View {
                         }
                     }
                     if let slot {
-                        Text("Wie is onze speler (\(team.ownName))?", bundle: .module)
+                        Text("Wie is onze speler (\(team.ownName))?", bundle: textBundle)
                             .font(SharedFonts.system(14, weight: .semibold))
                             .foregroundColor(SharedColors.textPrimary)
                         HStack(spacing: 10) {
@@ -143,7 +143,7 @@ public struct SharedTeamMatchesView: View {
             SharedColors.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Een teamwedstrijd van de SBN-competitie: vier partijen (E1–E4). Koppel de wedstrijden die je bijhield of vul de game-standen in; de app telt de games, de bonuspunten en de winnaar.", bundle: .module)
+                    Text("Een teamwedstrijd van de SBN-competitie: vier partijen (E1–E4). Koppel de wedstrijden die je bijhield of vul de game-standen in; de app telt de games, de bonuspunten en de winnaar.", bundle: textBundle)
                         .font(SharedFonts.system(13))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -152,7 +152,7 @@ public struct SharedTeamMatchesView: View {
                     if isLoading {
                         ProgressView().frame(maxWidth: .infinity)
                     } else if matches.isEmpty {
-                        Text("Nog geen teamwedstrijden.", bundle: .module)
+                        Text("Nog geen teamwedstrijden.", bundle: textBundle)
                             .font(SharedFonts.system(14))
                             .foregroundColor(SharedColors.textMuted)
                             .frame(maxWidth: .infinity)
@@ -275,7 +275,7 @@ struct TeamMatchCard: View {
                         .lineLimit(1)
                     teamSide(match.away, own: match.ownSide == TeamSide.away)
                 }
-                Text("\(match.homePartijen)-\(match.awayPartijen) in partijen · \(match.homeCompetitionPoints)-\(match.awayCompetitionPoints) competitiepunten", bundle: .module)
+                Text("\(match.homePartijen)-\(match.awayPartijen) in partijen · \(match.homeCompetitionPoints)-\(match.awayCompetitionPoints) competitiepunten", bundle: textBundle)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
             }
@@ -416,7 +416,7 @@ public struct SharedTeamMatchView: View {
             Button(loc("Verwijder"), role: .destructive) { Task { await remove() } }
             Button(loc("Annuleren"), role: .cancel) { }
         } message: {
-            Text("De gekoppelde coach- en scheidsrechterwedstrijden blijven in Afgeronde wedstrijden staan.", bundle: .module)
+            Text("De gekoppelde coach- en scheidsrechterwedstrijden blijven in Afgeronde wedstrijden staan.", bundle: textBundle)
         }
     }
 
@@ -516,7 +516,7 @@ public struct SharedTeamMatchView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            Text("games", bundle: .module).font(SharedFonts.system(10)).tracking(1.2).foregroundColor(SharedColors.textMuted).frame(maxWidth: .infinity)
+            Text("games", bundle: textBundle).font(SharedFonts.system(10)).tracking(1.2).foregroundColor(SharedColors.textMuted).frame(maxWidth: .infinity)
             Divider().overlay(SharedColors.line(0.15))
             HStack {
                 statCell(loc("PARTIJEN"), "\(match.homePartijen)-\(match.awayPartijen)")
@@ -530,7 +530,7 @@ public struct SharedTeamMatchView: View {
                 .foregroundColor(score.isComplete ? SharedColors.gold : SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             if score.isComplete {
-                Text("Winnaar: meeste partijen; gelijk → het volledige team; dan meeste games, meeste rallypunten, winnaar E1. Competitiepunten: games + 3 bonus voor de winnaar.", bundle: .module)
+                Text("Winnaar: meeste partijen; gelijk → het volledige team; dan meeste games, meeste rallypunten, winnaar E1. Competitiepunten: games + 3 bonus voor de winnaar.", bundle: textBundle)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
                     .fixedSize(horizontal: false, vertical: true)
@@ -564,7 +564,7 @@ public struct SharedTeamMatchView: View {
                 }
             }
             .background(SharedColors.tint(0.04)).clipShape(RoundedRectangle(cornerRadius: 12))
-            Text("Tik op een partij om spelers en games in te vullen of een bijgehouden wedstrijd te koppelen.", bundle: .module)
+            Text("Tik op een partij om spelers en games in te vullen of een bijgehouden wedstrijd te koppelen.", bundle: textBundle)
                 .font(SharedFonts.system(11))
                 .foregroundColor(SharedColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -606,12 +606,12 @@ public struct SharedTeamMatchView: View {
                             }
                         }
                     } else {
-                        Text("Nog niet ingevuld", bundle: .module)
+                        Text("Nog niet ingevuld", bundle: textBundle)
                             .font(SharedFonts.system(12))
                             .foregroundColor(SharedColors.textMuted)
                     }
                     if let order = partij.playOrder {
-                        Text("Gespeeld als \(teamPlayOrderText(order))", bundle: .module)
+                        Text("Gespeeld als \(teamPlayOrderText(order))", bundle: textBundle)
                             .font(SharedFonts.system(10))
                             .foregroundColor(SharedColors.textMuted)
                     }

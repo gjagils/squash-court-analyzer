@@ -57,16 +57,16 @@ public struct SharedTestDataCleanupView: View {
     /// The badge reset, for a device with badges from before it
     private var badgeReset: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Badges beginnen opnieuw", bundle: .module)
+            Text("Badges beginnen opnieuw", bundle: textBundle)
                 .font(SharedFonts.system(22, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
-            Text("Vanaf de release begint iedereen opnieuw met badges. Je badges uit de testperiode worden niet gewist, maar tellen niet meer mee.", bundle: .module)
+            Text("Vanaf de release begint iedereen opnieuw met badges. Je badges uit de testperiode worden niet gewist, maar tellen niet meer mee.", bundle: textBundle)
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(alignment: .top, spacing: 12) {
                 AppSymbol("medal", size: 20, color: SharedColors.accent, weight: .medium)
-                Text("Als dank voor het testen krijgen je spelers de badge Pionier. Je vindt hem bij je spelers en in de lijst onder Speciaal.", bundle: .module)
+                Text("Als dank voor het testen krijgen je spelers de badge Pionier. Je vindt hem bij je spelers en in de lijst onder Speciaal.", bundle: textBundle)
                     .font(SharedFonts.system(13, weight: .medium))
                     .foregroundColor(SharedColors.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -81,7 +81,7 @@ public struct SharedTestDataCleanupView: View {
     /// The question itself: a switch per group, first a full backup
     private var cleanup: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Testgegevens opruimen", bundle: .module)
+            Text("Testgegevens opruimen", bundle: textBundle)
                 .font(SharedFonts.system(counts.earlierBadges > 0 ? 18.0 : 22.0, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
             Text(counts.earlierBadges > 0
@@ -110,7 +110,7 @@ public struct SharedTestDataCleanupView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(SharedColors.tint(0.04))
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            Text("Wat je bewaart, blijft in de geschiedenis en de analyse staan. Voor badges telt het niet meer mee.", bundle: .module)
+            Text("Wat je bewaart, blijft in de geschiedenis en de analyse staan. Voor badges telt het niet meer mee.", bundle: textBundle)
                 .font(SharedFonts.system(11))
                 .foregroundColor(SharedColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)

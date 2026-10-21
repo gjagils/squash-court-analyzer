@@ -29,19 +29,19 @@ public struct SharedPlayerTrendView: View {
         ZStack {
             SharedColors.background.ignoresSafeArea()
             if isLoading {
-                ProgressView("Profiel laden…").foregroundColor(SharedColors.textPrimary)
+                ProgressView(loc("Profiel laden…")).foregroundColor(SharedColors.textPrimary)
             } else if loadFailed {
                 VStack(spacing: 12) {
-                    Text("De wedstrijden konden niet worden geladen.")
+                    Text("De wedstrijden konden niet worden geladen.", bundle: .module)
                         .foregroundColor(SharedColors.textSecondary)
-                    Button("Opnieuw laden") { Task { await load() } }
+                    Button(loc("Opnieuw laden")) { Task { await load() } }
                         .tint(SharedColors.gold)
                 }
             } else {
                 content(summary)
             }
         }
-        .pageTitle("Profiel")
+        .pageTitle(loc("Profiel"))
         .task { await load() }
     }
 
@@ -50,11 +50,11 @@ public struct SharedPlayerTrendView: View {
             VStack(alignment: .leading, spacing: 20) {
                 header(summary)
                 if matches.isEmpty {
-                    Text("Nog geen wedstrijden van \(playerName). Kies \(playerName) via Kies speler bij een coach- of scheidsrechterwedstrijd, dan komt die hier.")
+                    Text("Nog geen wedstrijden van \(playerName). Kies \(playerName) via Kies speler bij een coach- of scheidsrechterwedstrijd, dan komt die hier.", bundle: .module)
                         .font(SharedFonts.system(14))
                         .foregroundColor(SharedColors.textSecondary)
                 } else {
-                    Picker("Periode", selection: $period) {
+                    Picker(loc("Periode"), selection: $period) {
                         Text(PlayerTrendPeriod.last10.title).tag(PlayerTrendPeriod.last10)
                         Text(PlayerTrendPeriod.last25.title).tag(PlayerTrendPeriod.last25)
                         Text(PlayerTrendPeriod.all.title).tag(PlayerTrendPeriod.all)
@@ -62,8 +62,8 @@ public struct SharedPlayerTrendView: View {
                     .pickerStyle(.segmented)
                     formCard(summary)
                     if summary.coachMatches.isEmpty {
-                        card("COACHWEDSTRIJDEN", icon: "list.bullet.clipboard") {
-                            Text("Winners, slagen, baan en tempo komen uit coachwedstrijden, waar elk punt wordt bijgehouden. In deze periode is er geen.")
+                        card(loc("COACHWEDSTRIJDEN"), icon: "list.bullet.clipboard") {
+                            Text("Winners, slagen, baan en tempo komen uit coachwedstrijden, waar elk punt wordt bijgehouden. In deze periode is er geen.", bundle: .module)
                                 .font(SharedFonts.system(13))
                                 .foregroundColor(SharedColors.textSecondary)
                         }
@@ -101,9 +101,9 @@ public struct SharedPlayerTrendView: View {
     }
 
     private func headerLine(_ summary: PlayerTrendSummary) -> String {
-        let count = summary.played == 1 ? "1 wedstrijd" : "\(summary.played) wedstrijden"
+        let count = summary.played == 1 ? loc("1 wedstrijd") : loc("\(summary.played) wedstrijden")
         guard let percentage = summary.winPercentage else { return count }
-        return "\(count) · \(percentage)% gewonnen"
+        return loc("\(count) · \(percentage)% gewonnen")
     }
 
     // MARK: Kaarten
@@ -126,9 +126,9 @@ public struct SharedPlayerTrendView: View {
     }
 
     private func formCard(_ summary: PlayerTrendSummary) -> some View {
-        card("VORM", icon: "flag.checkered") {
+        card(loc("VORM"), icon: "flag.checkered") {
             if summary.form.isEmpty {
-                Text("Nog geen beslissing in deze periode.")
+                Text("Nog geen beslissing in deze periode.", bundle: .module)
                     .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.textSecondary)
             } else {
@@ -136,7 +136,7 @@ public struct SharedPlayerTrendView: View {
                     ForEach(0..<summary.form.count, id: \.self) { index in
                         let match = summary.form[index]
                         VStack(spacing: 4) {
-                            Text(match.won == true ? "W" : "V")
+                            Text(match.won == true ? loc("W") : loc("V"))
                                 .font(SharedFonts.system(12, weight: .bold, design: .rounded))
                                 .foregroundColor(match.won == true ? SharedColors.background : SharedColors.textSecondary)
                                 .frame(width: 26, height: 26)
@@ -148,10 +148,10 @@ public struct SharedPlayerTrendView: View {
                                 .lineLimit(1)
                         }
                         .frame(maxWidth: .infinity)
-                        .accessibilityLabel("\(match.won == true ? "Gewonnen" : "Verloren") \(match.ownGames)-\(match.theirGames) van \(match.opponentName)")
+                        .accessibilityLabel(match.won == true ? loc("Gewonnen \(match.ownGames)-\(match.theirGames) van \(match.opponentName)") : loc("Verloren \(match.ownGames)-\(match.theirGames) van \(match.opponentName)"))
                     }
                 }
-                Text("Oudste links, nieuwste rechts. Coach- en scheidsrechterwedstrijden tellen mee.")
+                Text("Oudste links, nieuwste rechts. Coach- en scheidsrechterwedstrijden tellen mee.", bundle: .module)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
             }
@@ -161,7 +161,7 @@ public struct SharedPlayerTrendView: View {
     private func linesCard(_ summary: PlayerTrendSummary) -> some View {
         let winners = summary.winnersPerGame
         let errors = summary.errorsPerGame
-        return card("WINNERS EN FOUTEN PER GAME", icon: "chart.bar.xaxis") {
+        return card(loc("WINNERS EN FOUTEN PER GAME"), icon: "chart.bar.xaxis") {
             TrendLines(first: winners, second: errors, firstColor: SharedColors.positive, secondColor: SharedColors.error)
                 .frame(height: 110)
             HStack(spacing: 14) {
@@ -169,13 +169,13 @@ public struct SharedPlayerTrendView: View {
                 legend("Unforced errors", SharedColors.error)
             }
             if let change = PlayerTrendSummary.change(errors) {
-                trendLine("Fouten per game: \(change.text)", better: change.to < change.from)
+                trendLine(loc("Fouten per game: \(change.text)"), better: change.to < change.from)
             }
             if let change = PlayerTrendSummary.change(winners) {
-                trendLine("Winners per game: \(change.text)", better: change.to > change.from)
+                trendLine(loc("Winners per game: \(change.text)"), better: change.to > change.from)
             }
             if winners.count < PlayerTrendSummary.minimumForChange {
-                Text("Vanaf \(PlayerTrendSummary.minimumForChange) coachwedstrijden zie je hier of het beter gaat.")
+                Text("Vanaf \(PlayerTrendSummary.minimumForChange) coachwedstrijden zie je hier of het beter gaat.", bundle: .module)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
             }
@@ -198,9 +198,9 @@ public struct SharedPlayerTrendView: View {
     }
 
     private func shotsCard(_ summary: PlayerTrendSummary) -> some View {
-        card("SLAGEN", icon: "target") {
+        card(loc("SLAGEN"), icon: "target") {
             if summary.topShots.isEmpty {
-                Text("Nog geen punten met een slag gewonnen.")
+                Text("Nog geen punten met een slag gewonnen.", bundle: .module)
                     .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.textSecondary)
             } else {
@@ -209,7 +209,7 @@ public struct SharedPlayerTrendView: View {
                 }
             }
             if let error = summary.commonError {
-                Text("Meeste eigen fouten: \(error.title.lowercased()) (\(summary.commonErrorCount)×)")
+                Text("Meeste eigen fouten: \(error.title.lowercased()) (\(summary.commonErrorCount)×)", bundle: .module)
                     .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.textSecondary)
             }
@@ -239,15 +239,15 @@ public struct SharedPlayerTrendView: View {
     }
 
     private func courtCard(_ summary: PlayerTrendSummary) -> some View {
-        card("BAAN", icon: "scope") {
+        card(loc("BAAN"), icon: "scope") {
             ZoneProfileTable(profile: summary.zones)
             if let strong = summary.strongestArea {
-                Text("Wint de meeste punten \(strong).")
+                Text("Wint de meeste punten \(strong).", bundle: .module)
                     .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.positive)
             }
             if let weak = summary.weakestArea {
-                Text("Verliest de meeste punten \(weak).")
+                Text("Verliest de meeste punten \(weak).", bundle: .module)
                     .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.accent)
             }
@@ -255,17 +255,17 @@ public struct SharedPlayerTrendView: View {
     }
 
     private func tempoCard(_ summary: PlayerTrendSummary) -> some View {
-        card("TEMPO", icon: "timer") {
+        card(loc("TEMPO"), icon: "timer") {
             if summary.averageRallyWon == nil && summary.averageRallyLost == nil {
-                Text("Geen getimede rally's: tik op Start bij de eerste service, dan loopt de rallyklok.")
+                Text("Geen getimede rally's: tik op Start bij de eerste service, dan loopt de rallyklok.", bundle: .module)
                     .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.textSecondary)
             } else {
                 HStack(spacing: 10) {
-                    tempoBox("Gewonnen", summary.averageRallyWon, SharedColors.positive)
-                    tempoBox("Verloren", summary.averageRallyLost, SharedColors.accent)
+                    tempoBox(loc("Gewonnen"), summary.averageRallyWon, SharedColors.positive)
+                    tempoBox(loc("Verloren"), summary.averageRallyLost, SharedColors.accent)
                 }
-                Text("Gemiddelde rallyduur, inclusief de tijd voor de service.")
+                Text("Gemiddelde rallyduur, inclusief de tijd voor de service.", bundle: .module)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
             }
@@ -288,9 +288,9 @@ public struct SharedPlayerTrendView: View {
     }
 
     private func opponentsCard(_ summary: PlayerTrendSummary) -> some View {
-        card("TEGENSTANDERS", icon: "person.2.circle") {
+        card(loc("TEGENSTANDERS"), icon: "person.2.circle") {
             if summary.opponents.isEmpty {
-                Text("Nog geen beslissing in deze periode.")
+                Text("Nog geen beslissing in deze periode.", bundle: .module)
                     .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.textSecondary)
             } else {
@@ -306,7 +306,7 @@ public struct SharedPlayerTrendView: View {
                             .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                             .foregroundColor(opponent.won >= opponent.lost ? SharedColors.positive : SharedColors.accent)
                     }
-                    .accessibilityLabel("Tegen \(opponent.name) \(opponent.won) gewonnen, \(opponent.lost) verloren")
+                    .accessibilityLabel(loc("Tegen \(opponent.name) \(opponent.won) gewonnen, \(opponent.lost) verloren"))
                 }
             }
         }

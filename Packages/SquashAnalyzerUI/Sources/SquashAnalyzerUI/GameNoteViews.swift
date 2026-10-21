@@ -15,12 +15,12 @@ struct GameNoteEditor: View {
                 Text(title)
                     .font(SharedFonts.system(20, weight: .bold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
-                Text("Wat viel je op? Alleen voor jou: de notitie staat in de analyse en op de coachkaart, niet in wat je deelt.")
+                Text("Wat viel je op? Alleen voor jou: de notitie staat in de analyse en op de coachkaart, niet in wat je deelt.", bundle: .module)
                     .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
-                TextField("Bijvoorbeeld: backhand-volley te laat", text: $text, axis: .vertical)
-                    .accessibilityLabel("Notitie")
+                TextField(loc("Bijvoorbeeld: backhand-volley te laat"), text: $text, axis: .vertical)
+                    .accessibilityLabel(loc("Notitie"))
                     .textFieldStyle(.plain)
                     .font(SharedFonts.system(17))
                     .foregroundColor(SharedColors.textPrimary)
@@ -30,13 +30,13 @@ struct GameNoteEditor: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(SharedColors.line(0.12), lineWidth: 1))
                 if GameNotes.shared.saveFailed {
-                    Text("Bewaren lukte niet. Probeer het opnieuw.")
+                    Text("Bewaren lukte niet. Probeer het opnieuw.", bundle: .module)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.error)
                 }
                 HStack(spacing: 12) {
-                    ActionButton("ANNULEREN", style: .outlined, color: SharedColors.textSecondary) { onDone() }
-                    ActionButton("BEWAAR", style: .filled, color: SharedColors.accent) {
+                    ActionButton(loc("ANNULEREN"), style: .outlined, color: SharedColors.textSecondary) { onDone() }
+                    ActionButton(loc("BEWAAR"), style: .filled, color: SharedColors.accent) {
                         GameNotes.shared.set(text, for: gameId)
                         if !GameNotes.shared.saveFailed { onDone() }
                     }
@@ -60,19 +60,19 @@ struct GameNoteCard: View {
         return VStack(alignment: .leading, spacing: 8) {
             HStack {
                 AppSymbol("pencil", size: 13, color: SharedColors.accent)
-                Text("Notitie")
+                Text("Notitie", bundle: .module)
                     .font(SharedFonts.system(13, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                 Spacer()
                 Button(action: onEdit) {
-                    Text(note.isEmpty ? "Schrijf" : "Bewerk")
+                    Text(note.isEmpty ? loc("Schrijf") : loc("Bewerk"))
                         .font(SharedFonts.system(13, weight: .semibold))
                         .foregroundColor(SharedColors.accent)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(note.isEmpty ? "Notitie schrijven" : "Notitie bewerken")
+                .accessibilityLabel(note.isEmpty ? loc("Notitie schrijven") : loc("Notitie bewerken"))
             }
-            Text(note.isEmpty ? "Nog geen notitie bij deze game." : note)
+            Text(note.isEmpty ? loc("Nog geen notitie bij deze game.") : note)
                 .font(SharedFonts.system(note.isEmpty ? 13.0 : 15.0))
                 .foregroundColor(note.isEmpty ? SharedColors.textMuted : SharedColors.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -101,16 +101,16 @@ struct ServiceReturnCard: View {
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
                 AppSymbol("figure.tennis", size: 13, color: SharedColors.accent)
-                Text("Service en return")
+                Text("Service en return", bundle: .module)
                     .font(SharedFonts.system(13, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                 Spacer()
-                Text("game · wedstrijd")
+                Text("game · wedstrijd", bundle: .module)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
             }
-            row("Eigen service", now.servePercentage, before?.servePercentage, total.servePercentage)
-            row("Service van \(opponent)", now.returnPercentage, before?.returnPercentage, total.returnPercentage)
+            row(loc("Eigen service"), now.servePercentage, before?.servePercentage, total.servePercentage)
+            row(loc("Service van \(opponent)"), now.returnPercentage, before?.returnPercentage, total.returnPercentage)
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)

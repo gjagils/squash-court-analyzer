@@ -28,14 +28,14 @@ public struct ErrorKindPicker: View {
                 tile(ErrorKind.viaFloor)
             }
             Button { onSelect(nil) } label: {
-                Text("Weet niet")
+                Text("Weet niet", bundle: .module)
                     .font(SharedFonts.system(13, weight: .medium, design: .rounded))
                     .foregroundColor(color)
                     .padding(.vertical, 6)
                     .padding(.horizontal, 16)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Soort fout onbekend")
+            .accessibilityLabel(loc("Soort fout onbekend"))
         }
     }
 
@@ -72,6 +72,6 @@ public struct ErrorKindPicker: View {
         }
         .buttonStyle(.plain)
         .disabled(!isAvailable)
-        .accessibilityLabel(kind.description + (isAvailable ? "" : ", niet mogelijk"))
+        .accessibilityLabel(kind.description + (isAvailable ? "" : loc(", niet mogelijk")))
     }
 }

@@ -57,17 +57,17 @@ public struct SharedMatchHistoryView: View {
         ZStack {
             SharedColors.background.ignoresSafeArea()
             if isLoading {
-                ProgressView("Wedstrijden laden…").foregroundColor(SharedColors.textPrimary)
+                ProgressView(loc("Wedstrijden laden…")).foregroundColor(SharedColors.textPrimary)
             } else if loadFailed {
                 VStack(spacing: 12) {
-                    Text("Wedstrijden konden niet worden geladen.").foregroundColor(SharedColors.textSecondary)
-                    Button("Opnieuw laden") { Task { await load() } }
+                    Text("Wedstrijden konden niet worden geladen.", bundle: .module).foregroundColor(SharedColors.textSecondary)
+                    Button(loc("Opnieuw laden")) { Task { await load() } }
                 }
             } else if entries.isEmpty {
                 VStack(spacing: 12) {
                     AppSymbol("clock.arrow.circlepath", size: 48, color: SharedColors.textSecondary)
-                    Text("Nog geen afgeronde wedstrijden").font(.headline)
-                    Text("Voltooide en afgebroken coach- en scheidsrechterwedstrijden verschijnen hier.")
+                    Text("Nog geen afgeronde wedstrijden", bundle: .module).font(.headline)
+                    Text("Voltooide en afgebroken coach- en scheidsrechterwedstrijden verschijnen hier.", bundle: .module)
                         .multilineTextAlignment(.center)
                 }
                 .foregroundColor(SharedColors.textSecondary)
@@ -82,12 +82,12 @@ public struct SharedMatchHistoryView: View {
                                 .foregroundColor(SharedColors.gold)
                         }
                         if shown.isEmpty {
-                            Text("Geen wedstrijden met dit filter")
+                            Text("Geen wedstrijden met dit filter", bundle: .module)
                                 .foregroundColor(SharedColors.textSecondary)
                                 .padding(.top, 24)
                         }
                         if !refereeEntries.isEmpty {
-                            sectionHeader("SCHEIDSRECHTER", icon: "whistle")
+                            sectionHeader(loc("SCHEIDSRECHTER"), icon: "whistle")
                             ForEach(refereeEntries) { entry in
                                 refereeCard(entry)
                             }
@@ -108,17 +108,17 @@ public struct SharedMatchHistoryView: View {
                                          onCancel: { completing = nil })
             }
         }
-        .pageTitle("Wedstrijden")
+        .pageTitle(loc("Wedstrijden"))
         .task { await load() }
         .sheet(isPresented: $choosingPlayer) {
             NavigationStack {
                 List {
-                    Button("Alle spelers") { playerFilter = nil; choosingPlayer = false }
+                    Button(loc("Alle spelers")) { playerFilter = nil; choosingPlayer = false }
                     ForEach(playerNames, id: \.self) { name in
                         Button(name) { playerFilter = name; choosingPlayer = false }
                     }
                 }
-                .pageTitle("Speler")
+                .pageTitle(loc("Speler"))
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         CloseButton { choosingPlayer = false }
@@ -137,13 +137,13 @@ public struct SharedMatchHistoryView: View {
                 SharedMatchShareView(report: report, shareText: shareText) { shareReport = nil }
             }
         }
-        .alert("Wedstrijd verwijderen?", isPresented: $confirmDelete) {
-            Button("Annuleren", role: .cancel) { deleting = nil }
-            Button("Verwijderen", role: .destructive) {
+        .alert(loc("Wedstrijd verwijderen?"), isPresented: $confirmDelete) {
+            Button(loc("Annuleren"), role: .cancel) { deleting = nil }
+            Button(loc("Verwijderen"), role: .destructive) {
                 if let entry = deleting { remove(entry) }
             }
         } message: {
-            Text("Deze actie kan niet ongedaan worden gemaakt.")
+            Text("Deze actie kan niet ongedaan worden gemaakt.", bundle: .module)
         }
     }
 
@@ -152,13 +152,13 @@ public struct SharedMatchHistoryView: View {
     private var filters: some View {
         VStack(spacing: 10) {
             HStack(spacing: 8) {
-                filterChip("Alles", "alles")
-                filterChip("Scheidsrechter", "referee")
+                filterChip(loc("Alles"), "alles")
+                filterChip(loc("Scheidsrechter"), "referee")
                 filterChip("Coach", "coach")
             }
             Button { choosingPlayer = true } label: {
                 HStack {
-                    Text(playerFilter ?? "Alle spelers")
+                    Text(playerFilter ?? loc("Alle spelers"))
                         .foregroundColor(SharedColors.textPrimary)
                     Spacer()
                     AppSymbol(playerFilter == nil ? "chevron.down" : "xmark", size: 14, color: SharedColors.textSecondary)
@@ -167,7 +167,7 @@ public struct SharedMatchHistoryView: View {
                 .background(SharedColors.tint(0.05)).clipShape(RoundedRectangle(cornerRadius: 10))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Filter op speler")
+            .accessibilityLabel(loc("Filter op speler"))
         }
     }
 
@@ -214,7 +214,7 @@ public struct SharedMatchHistoryView: View {
     }
 
     private var incompleteLabel: some View {
-        Text("INCOMPLEET")
+        Text("INCOMPLEET", bundle: .module)
             .font(SharedFonts.system(9, weight: .semibold, design: .rounded))
             .tracking(1)
             .foregroundColor(SharedColors.warmRed)
@@ -225,7 +225,7 @@ public struct SharedMatchHistoryView: View {
 
     private var medal: some View {
         AppSymbol("medal.fill", size: 11, color: SharedColors.gold)
-            .accessibilityLabel("Badge verdiend")
+            .accessibilityLabel(loc("Badge verdiend"))
     }
 
     private func gameChips(_ entry: MatchHistorySummary) -> [String] {
@@ -245,14 +245,14 @@ public struct SharedMatchHistoryView: View {
                 .frame(width: 32, height: 28)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Verwijder \(entry.player1Name) – \(entry.player2Name)")
+        .accessibilityLabel(loc("Verwijder \(entry.player1Name) – \(entry.player2Name)"))
     }
 
     private func shareButton(_ entry: MatchHistorySummary) -> some View {
         Button { share(entry) } label: {
             HStack(spacing: 4) {
                 AppSymbol("square.and.arrow.up", size: 12, color: SharedColors.steelBlue)
-                Text("Delen")
+                Text("Delen", bundle: .module)
                     .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.steelBlue)
             }
@@ -311,7 +311,7 @@ public struct SharedMatchHistoryView: View {
                 Button { open(entry, analysis: false) } label: {
                     HStack(spacing: 4) {
                         AppSymbol("flag.checkered", size: 12, color: SharedColors.accent)
-                        Text("Uitslag aanvullen")
+                        Text("Uitslag aanvullen", bundle: .module)
                             .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.accent)
                     }
@@ -326,7 +326,7 @@ public struct SharedMatchHistoryView: View {
                 Button { open(entry, analysis: true) } label: {
                     HStack(spacing: 4) {
                         AppSymbol("magnifyingglass", size: 12, color: SharedColors.accent)
-                        Text("Bekijk analyse")
+                        Text("Bekijk analyse", bundle: .module)
                             .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.accent)
                     }
@@ -387,7 +387,7 @@ public struct SharedMatchHistoryView: View {
                         .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textMuted)
                     if let name = entry.winnerName {
-                        Text("· \(name) wint")
+                        Text("· \(name) wint", bundle: .module)
                             .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.gold.opacity(0.8))
                     } else {
@@ -415,7 +415,7 @@ public struct SharedMatchHistoryView: View {
     private func open(_ entry: MatchHistorySummary, analysis: Bool) {
         Task { @MainActor in
             guard let match = try? await store.coachMatch(id: entry.id) else {
-                message = "Deze wedstrijd kon niet worden geopend."
+                message = loc("Deze wedstrijd kon niet worden geopend.")
                 return
             }
             if analysis {
@@ -433,7 +433,7 @@ public struct SharedMatchHistoryView: View {
             } else {
                 shareReport = (try? await store.refereeMatch(id: entry.id))?.shareReport
             }
-            if shareReport == nil { message = "Deze wedstrijd kon niet worden gedeeld." }
+            if shareReport == nil { message = loc("Deze wedstrijd kon niet worden gedeeld.") }
         }
     }
 
@@ -443,9 +443,9 @@ public struct SharedMatchHistoryView: View {
         Task { @MainActor in
             do {
                 try await store.saveCoachMatch(match)
-                message = "Uitslag aangevuld."
+                message = loc("Uitslag aangevuld.")
             } catch {
-                message = "Opslaan is niet gelukt."
+                message = loc("Opslaan is niet gelukt.")
             }
             await load()
         }
@@ -458,7 +458,7 @@ public struct SharedMatchHistoryView: View {
                 try await store.delete(entry)
                 message = nil
             } catch {
-                message = "Verwijderen is niet gelukt."
+                message = loc("Verwijderen is niet gelukt.")
             }
             await load()
         }
@@ -470,7 +470,7 @@ public struct SharedMatchHistoryView: View {
     private static func dateText(for date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "d MMM yyyy, HH:mm"
-        formatter.locale = Locale(identifier: "nl_NL")
+        formatter.locale = displayLocale
         return formatter.string(from: date)
     }
 

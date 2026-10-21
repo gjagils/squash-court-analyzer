@@ -83,22 +83,22 @@ public struct CoachSessionView: View {
                 .disabled(saver.busy || saver.failed)
             }
             if saver.busy || (saver.saving && saver.exitAfterSave) {
-                ProgressView(match == nil && pending == nil && !showingSetup ? "Laden…" : "Even opslaan…")
+                ProgressView(match == nil && pending == nil && !showingSetup ? loc("Laden…") : loc("Even opslaan…"))
                     .padding(24).background(SharedColors.surface)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
             }
             if saver.failed {
                 VStack(spacing: 16) {
-                    Text(match == nil ? "Wedstrijd kon niet worden geladen" : "Opslaan is niet gelukt")
+                    Text(match == nil ? loc("Wedstrijd kon niet worden geladen") : loc("Opslaan is niet gelukt"))
                         .font(.headline)
-                    Text("Probeer het opnieuw. Je huidige invoer blijft in dit scherm staan.")
+                    Text("Probeer het opnieuw. Je huidige invoer blijft in dit scherm staan.", bundle: .module)
                         .multilineTextAlignment(.center)
-                    Button("Opnieuw proberen") {
+                    Button(loc("Opnieuw proberen")) {
                         if let match { persist(match, exit: saver.exitAfterSave) }
                         else { Task { await load() } }
                     }
                     // Every screen has a way out, also when saving or loading fails
-                    Button(match == nil ? "Terug naar home" : "Sluiten zonder opslaan") { close() }
+                    Button(match == nil ? loc("Terug naar home") : loc("Sluiten zonder opslaan")) { close() }
                         .foregroundColor(SharedColors.textSecondary)
                 }
                 .foregroundColor(SharedColors.textPrimary)

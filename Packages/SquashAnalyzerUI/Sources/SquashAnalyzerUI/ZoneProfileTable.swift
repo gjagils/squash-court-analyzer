@@ -19,26 +19,26 @@ public struct ZoneProfileTable: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Waar vallen de punten")
+            Text("Waar vallen de punten", bundle: .module)
                 .font(SharedFonts.system(11, weight: .semibold))
                 .foregroundColor(ZoneProfileTable.muted)
             // Explicit rows, not a nested ForEach (see docs/android-port.md)
             header
-            line("Gewonnen", profile.won, ZoneProfileTable.green)
-            line("Verloren", profile.lost, ZoneProfileTable.orange)
-            line("Fouten", profile.errors, ZoneProfileTable.red)
+            line(loc("Gewonnen"), profile.won, ZoneProfileTable.green)
+            line(loc("Verloren"), profile.lost, ZoneProfileTable.orange)
+            line(loc("Fouten"), profile.errors, ZoneProfileTable.red)
         }
     }
 
     private var header: some View {
         HStack(spacing: 4) {
             Text("").frame(width: 66, alignment: .leading)
-            cell("Voor", ZoneProfileTable.muted)
-            cell("Midden", ZoneProfileTable.muted)
-            cell("Achter", ZoneProfileTable.muted)
+            cell(loc("Voor"), ZoneProfileTable.muted)
+            cell(loc("Midden"), ZoneProfileTable.muted)
+            cell(loc("Achter"), ZoneProfileTable.muted)
             Spacer().frame(width: 8)
-            cell("Links", ZoneProfileTable.muted)
-            cell("Rechts", ZoneProfileTable.muted)
+            cell(loc("Links"), ZoneProfileTable.muted)
+            cell(loc("Rechts"), ZoneProfileTable.muted)
         }
         .font(SharedFonts.system(10))
     }

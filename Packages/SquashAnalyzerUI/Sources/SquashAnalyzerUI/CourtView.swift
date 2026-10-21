@@ -121,7 +121,7 @@ public struct CourtView: View {
         let color = player == .player1 ? SharedColors.accent : SharedColors.steelBlue
 
         return VStack {
-            Text("KIES EEN ZONE")
+            Text("KIES EEN ZONE", bundle: .module)
                 .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                 .foregroundColor(color)
                 .tracking(1.5)

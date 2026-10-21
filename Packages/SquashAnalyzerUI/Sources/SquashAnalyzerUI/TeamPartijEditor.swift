@@ -5,6 +5,17 @@ import SquashAnalyzerCore
 
 // MARK: - Partij invullen of koppelen
 
+/// A partij's place in the playing order: "1e" to "4e" (1st to 4th in English)
+func teamPlayOrderText(_ order: Int) -> String {
+    switch order {
+    case 1: return loc("1e")
+    case 2: return loc("2e")
+    case 3: return loc("3e")
+    case 4: return loc("4e")
+    default: return "\(order)e"
+    }
+}
+
 struct TeamPartijEditor: View {
     @State private var partij: TeamPartij
     let match: TeamMatch
@@ -56,13 +67,13 @@ struct TeamPartijEditor: View {
                     .padding(24)
                 }
             }
-            .pageTitle("Partij \(partij.label)")
+            .pageTitle(loc("Partij \(partij.label)"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    CloseButton(title: "Annuleren", action: onCancel)
+                    CloseButton(title: loc("Annuleren"), action: onCancel)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Bewaar") { onSave(partij) }.fontWeight(.bold).foregroundColor(SharedColors.accent)
+                    Button(loc("Bewaar")) { onSave(partij) }.fontWeight(.bold).foregroundColor(SharedColors.accent)
                 }
             }
             .sheet(isPresented: $choosingMatch) {
@@ -75,14 +86,14 @@ struct TeamPartijEditor: View {
                     onTrack(partij, kind)
                 } onCancel: { choosingMatch = false }
             }
-            .alert("Wie is onze speler?", isPresented: Binding(get: { chosen != nil }, set: { if !$0 { chosen = nil } })) {
+            .alert(loc("Wie is onze speler?"), isPresented: Binding(get: { chosen != nil }, set: { if !$0 { chosen = nil } })) {
                 if let chosen {
                     Button(chosen.player1Name) { link(chosen, ownIsPlayer1: true) }
                     Button(chosen.player2Name) { link(chosen, ownIsPlayer1: false) }
                 }
-                Button("Annuleren", role: .cancel) { chosen = nil }
+                Button(loc("Annuleren"), role: .cancel) { chosen = nil }
             } message: {
-                Text("De games komen uit die wedstrijd, gezien vanuit onze speler.")
+                Text("De games komen uit die wedstrijd, gezien vanuit onze speler.", bundle: .module)
             }
         }
         .preferredColorScheme(SharedColors.preferredScheme)
@@ -92,7 +103,7 @@ struct TeamPartijEditor: View {
     private var teamLine: some View {
         HStack(spacing: 8) {
             TeamShareBadge(isLive: match.isLive)
-            Text(match.isLive ? "Je werkt in de gedeelde teamwedstrijd" : "Je werkt in je eigen teamwedstrijd")
+            Text(match.isLive ? loc("Je werkt in de gedeelde teamwedstrijd") : loc("Je werkt in je eigen teamwedstrijd"))
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -101,7 +112,7 @@ struct TeamPartijEditor: View {
     }
 
     private var playersSection: some View {
-        section("SPELERS") {
+        section(loc("SPELERS")) {
             field(match.defaultOwnName(partij.slot), text: $partij.ownPlayer)
             if !roster.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -128,31 +139,31 @@ struct TeamPartijEditor: View {
     }
 
     private var linkSection: some View {
-        section("NIEUWE OF GETELDE WEDSTRIJD") {
+        section(loc("NIEUWE OF GETELDE WEDSTRIJD")) {
             if partij.isLinked {
-                Text("Gekoppeld aan een \(partij.linkedKind == "referee" ? "scheidsrechter" : "coach")wedstrijd uit Afgeronde wedstrijden.")
+                Text(partij.linkedKind == "referee" ? loc("Gekoppeld aan een scheidsrechterwedstrijd uit Afgeronde wedstrijden.") : loc("Gekoppeld aan een coachwedstrijd uit Afgeronde wedstrijden."))
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 10) {
-                    ActionButton("Vernieuwen", icon: "arrow.counterclockwise") { Task { await refreshLink() } }
-                    ActionButton("Ontkoppel", color: SharedColors.textSecondary) { partij.unlink() }
+                    ActionButton(loc("Vernieuwen"), icon: "arrow.counterclockwise") { Task { await refreshLink() } }
+                    ActionButton(loc("Ontkoppel"), color: SharedColors.textSecondary) { partij.unlink() }
                 }
                 .padding(.top, 8)
             } else {
-                Text("Een wedstrijd die je bijhoudt als coach of scheidsrechter vult de games vanzelf in. Of vul ze hieronder zelf in.")
+                Text("Een wedstrijd die je bijhoudt als coach of scheidsrechter vult de games vanzelf in. Of vul ze hieronder zelf in.", bundle: .module)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("Nieuwe wedstrijd starten")
+                Text("Nieuwe wedstrijd starten", bundle: .module)
                     .font(SharedFonts.system(13, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                     .padding(.top, 8)
                 HStack(spacing: 10) {
-                    ActionButton("Coach", style: .filled) { onTrack(partij, "coach") }
-                    ActionButton("Scheidsrechter", style: .filled) { onTrack(partij, "referee") }
+                    ActionButton(loc("Coach"), style: .filled) { onTrack(partij, "coach") }
+                    ActionButton(loc("Scheidsrechter"), style: .filled) { onTrack(partij, "referee") }
                 }
-                ActionButton("Eerder getelde wedstrijd koppelen", icon: "arrow.right") {
+                ActionButton(loc("Eerder getelde wedstrijd koppelen"), icon: "arrow.right") {
                     choosingMatch = true
                     Task { await loadHistory() }
                 }
@@ -162,19 +173,19 @@ struct TeamPartijEditor: View {
     }
 
     private var gamesSection: some View {
-        section("GAMES") {
+        section(loc("GAMES")) {
             if partij.games.isEmpty {
-                Text("Nog geen games.").font(SharedFonts.system(12)).foregroundColor(SharedColors.textMuted)
+                Text("Nog geen games.", bundle: .module).font(SharedFonts.system(12)).foregroundColor(SharedColors.textMuted)
             } else {
                 ForEach(0..<partij.games.count, id: \.self) { index in
                     let game = partij.games[index]
                     HStack {
-                        Text("Game \(index + 1)").font(SharedFonts.system(13)).foregroundColor(SharedColors.textSecondary)
+                        Text("Game \(index + 1)", bundle: .module).font(SharedFonts.system(13)).foregroundColor(SharedColors.textSecondary)
                         Spacer()
                         Text(game.text)
                             .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                             .foregroundColor(game.ownWon ? SharedColors.accent : SharedColors.steelBlueLight)
-                        Text(game.ownWon ? "wij" : "zij")
+                        Text(game.ownWon ? loc("wij") : loc("zij"))
                             .font(SharedFonts.system(11))
                             .foregroundColor(SharedColors.textMuted)
                             .frame(width: 26, alignment: .trailing)
@@ -182,11 +193,11 @@ struct TeamPartijEditor: View {
                     .padding(.vertical, 4)
                 }
                 HStack {
-                    Text("Stand \(partij.standText)")
+                    Text("Stand \(partij.standText)", bundle: .module)
                         .font(SharedFonts.system(13, weight: .bold, design: .rounded))
                         .foregroundColor(partij.isOver ? SharedColors.gold : SharedColors.textPrimary)
                     Spacer()
-                    Button("Laatste game wissen") { partij.removeLastGame() }
+                    Button(loc("Laatste game wissen")) { partij.removeLastGame() }
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                 }
@@ -194,28 +205,28 @@ struct TeamPartijEditor: View {
             }
             if partij.canAddGame {
                 Divider().overlay(SharedColors.line(0.09)).padding(.vertical, 6)
-                Text("Game \(partij.games.count + 1) toevoegen")
+                Text("Game \(partij.games.count + 1) toevoegen", bundle: .module)
                     .font(SharedFonts.system(12, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                 HStack(spacing: 10) {
-                    scoreField("wij", text: $ownText)
+                    scoreField(loc("wij"), text: $ownText)
                     Text("–").foregroundColor(SharedColors.textMuted)
-                    scoreField("zij", text: $theirText)
-                    ActionButton("Voeg toe", style: .filled) { addScoredGame() }
+                    scoreField(loc("zij"), text: $theirText)
+                    ActionButton(loc("Voeg toe"), style: .filled) { addScoredGame() }
                 }
                 if let scoreError {
                     Text(scoreError).font(SharedFonts.system(11)).foregroundColor(SharedColors.error)
                 }
-                Text("Stand niet bekend? Dan alleen wie won:")
+                Text("Stand niet bekend? Dan alleen wie won:", bundle: .module)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
                     .padding(.top, 4)
                 HStack(spacing: 10) {
-                    winnerButton("Wij wonnen", own: true, color: SharedColors.accent)
-                    winnerButton("Zij wonnen", own: false, color: SharedColors.steelBlueLight)
+                    winnerButton(loc("Wij wonnen"), own: true, color: SharedColors.accent)
+                    winnerButton(loc("Zij wonnen"), own: false, color: SharedColors.steelBlueLight)
                 }
             } else if partij.isOver {
-                Text("Partij beslist.").font(SharedFonts.system(12)).foregroundColor(SharedColors.textMuted).padding(.top, 4)
+                Text("Partij beslist.", bundle: .module).font(SharedFonts.system(12)).foregroundColor(SharedColors.textMuted).padding(.top, 4)
             }
         }
     }
@@ -224,40 +235,41 @@ struct TeamPartijEditor: View {
     @ViewBuilder
     private var endingSection: some View {
         if partij.endedBy != nil || (!partij.isOver && partij.games.count < partij.bestOf) {
-            section("OPGAVE OF NIET VERSCHENEN") {
+            section(loc("OPGAVE OF NIET VERSCHENEN")) {
                 if let text = partij.endText {
-                    let winner = partij.ownWon == true ? "Wij winnen" : "Zij winnen"
-                    Text("\(winner) deze partij door \(text == "opgave" ? "de opgave van de tegenstander" : "het wegblijven van de tegenstander"): alle resterende punten gaan naar de winnaar.")
+                    let winner = partij.ownWon == true ? loc("Wij winnen") : loc("Zij winnen")
+                    let reason = text == "opgave" ? loc("de opgave van de tegenstander") : loc("het wegblijven van de tegenstander")
+                    Text("\(winner) deze partij door \(reason): alle resterende punten gaan naar de winnaar.", bundle: .module)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
-                    ActionButton("Maak ongedaan", color: SharedColors.textSecondary) {
+                    ActionButton(loc("Maak ongedaan"), color: SharedColors.textSecondary) {
                         partij.clearEnd()
                         endError = nil
                     }
                     .padding(.top, 6)
                 } else {
-                    Text("Geeft een speler op, dan gaan alle resterende punten naar de tegenstander. Kwam een speler niet opdagen, dan wint de ander met 3 keer 11-0.")
+                    Text("Geeft een speler op, dan gaan alle resterende punten naar de tegenstander. Kwam een speler niet opdagen, dan wint de ander met 3 keer 11-0.", bundle: .module)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("Opgave: stand van de game waarin het gebeurde (optioneel)")
+                    Text("Opgave: stand van de game waarin het gebeurde (optioneel)", bundle: .module)
                         .font(SharedFonts.system(11))
                         .foregroundColor(SharedColors.textMuted)
                         .padding(.top, 4)
                     HStack(spacing: 10) {
-                        scoreField("wij", text: $stoppedOwnText)
+                        scoreField(loc("wij"), text: $stoppedOwnText)
                         Text("–").foregroundColor(SharedColors.textMuted)
-                        scoreField("zij", text: $stoppedTheirText)
+                        scoreField(loc("zij"), text: $stoppedTheirText)
                     }
                     HStack(spacing: 10) {
-                        endButton("Onze speler geeft op", color: SharedColors.accent) { giveUp(ownGivesUp: true) }
-                        endButton("Hun speler geeft op", color: SharedColors.steelBlueLight) { giveUp(ownGivesUp: false) }
+                        endButton(loc("Onze speler geeft op"), color: SharedColors.accent) { giveUp(ownGivesUp: true) }
+                        endButton(loc("Hun speler geeft op"), color: SharedColors.steelBlueLight) { giveUp(ownGivesUp: false) }
                     }
                     if partij.games.isEmpty {
                         HStack(spacing: 10) {
-                            endButton("Onze speler kwam niet", color: SharedColors.accent) { endWalkover(ownWins: false) }
-                            endButton("Hun speler kwam niet", color: SharedColors.steelBlueLight) { endWalkover(ownWins: true) }
+                            endButton(loc("Onze speler kwam niet"), color: SharedColors.accent) { endWalkover(ownWins: false) }
+                            endButton(loc("Hun speler kwam niet"), color: SharedColors.steelBlueLight) { endWalkover(ownWins: true) }
                         }
                     }
                 }
@@ -289,7 +301,7 @@ struct TeamPartijEditor: View {
         var their: Int? = nil
         if !ownTrimmed.isEmpty || !theirTrimmed.isEmpty {
             guard let a = Int(ownTrimmed), let b = Int(theirTrimmed), a >= 0, b >= 0 else {
-                endError = "Vul beide punten in, bijvoorbeeld 7 en 9, of laat ze allebei leeg."
+                endError = loc("Vul beide punten in, bijvoorbeeld 7 en 9, of laat ze allebei leeg.")
                 return
             }
             own = a
@@ -300,20 +312,20 @@ struct TeamPartijEditor: View {
             stoppedOwnText = ""
             stoppedTheirText = ""
         } else {
-            endError = "Dat kan niet bij deze partij."
+            endError = loc("Dat kan niet bij deze partij.")
         }
     }
 
     private func endWalkover(ownWins: Bool) {
-        endError = partij.walkover(ownWins: ownWins) ? nil : "Dat kan alleen bij een partij zonder games."
+        endError = partij.walkover(ownWins: ownWins) ? nil : loc("Dat kan alleen bij een partij zonder games.")
     }
 
     private var orderSection: some View {
-        section("SPEELVOLGORDE (OPTIONEEL)") {
+        section(loc("SPEELVOLGORDE (OPTIONEEL)")) {
             HStack(spacing: 8) {
                 ForEach(1..<5, id: \.self) { order in
                     Button { partij.playOrder = partij.playOrder == order ? nil : order } label: {
-                        Text("\(order)e")
+                        Text(teamPlayOrderText(order))
                             .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                             .foregroundColor(partij.playOrder == order ? SharedColors.background : SharedColors.textPrimary)
                             .frame(maxWidth: .infinity)
@@ -389,11 +401,11 @@ struct TeamPartijEditor: View {
     private func addScoredGame() {
         guard let own = Int(ownText.trimmingCharacters(in: .whitespaces)),
               let their = Int(theirText.trimmingCharacters(in: .whitespaces)) else {
-            scoreError = "Vul beide standen in, bijvoorbeeld 11 en 8."
+            scoreError = loc("Vul beide standen in, bijvoorbeeld 11 en 8.")
             return
         }
         guard TeamGame.isValidScore(own, their) else {
-            scoreError = "Geen squashstand: tot 11 met twee punten verschil (11-9, 12-10, 15-13)."
+            scoreError = loc("Geen squashstand: tot 11 met twee punten verschil (11-9, 12-10, 15-13).")
             return
         }
         if partij.addGame(TeamGame(own: own, their: their)) {
@@ -453,22 +465,22 @@ struct TrackedMatchPicker: View {
                 SharedColors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 8) {
-                        SectionHeader("NIEUWE WEDSTRIJD BIJHOUDEN")
+                        SectionHeader(loc("NIEUWE WEDSTRIJD BIJHOUDEN"))
                         HStack(spacing: 10) {
-                            ActionButton("Coach") { onNew("coach") }
-                            ActionButton("Scheidsrechter") { onNew("referee") }
+                            ActionButton(loc("Coach")) { onNew("coach") }
+                            ActionButton(loc("Scheidsrechter")) { onNew("referee") }
                         }
-                        Text(homeIsOurs ? "Wij spelen thuis: onze speler start als Speler 1." : "Wij spelen uit: onze speler start als Speler 2.")
+                        Text(homeIsOurs ? loc("Wij spelen thuis: onze speler start als Speler 1.") : loc("Wij spelen uit: onze speler start als Speler 2."))
                             .font(SharedFonts.system(11))
                             .foregroundColor(SharedColors.textMuted)
-                        SectionHeader("OF EEN BIJGEHOUDEN WEDSTRIJD")
+                        SectionHeader(loc("OF EEN BIJGEHOUDEN WEDSTRIJD"))
                             .padding(.top, 10)
                         if !loaded {
                             ProgressView().frame(maxWidth: .infinity)
                         } else if entries.isEmpty {
-                            Text("Nog geen bijgehouden wedstrijden.").font(SharedFonts.system(13)).foregroundColor(SharedColors.textMuted)
+                            Text("Nog geen bijgehouden wedstrijden.", bundle: .module).font(SharedFonts.system(13)).foregroundColor(SharedColors.textMuted)
                         } else {
-                            Text("Wedstrijden van de speeldag staan bovenaan.")
+                            Text("Wedstrijden van de speeldag staan bovenaan.", bundle: .module)
                                 .font(SharedFonts.system(12))
                                 .foregroundColor(SharedColors.textMuted)
                             ForEach(sorted) { entry in
@@ -479,7 +491,7 @@ struct TrackedMatchPicker: View {
                                                 .font(SharedFonts.system(14, weight: .semibold))
                                                 .foregroundColor(SharedColors.textPrimary)
                                                 .lineLimit(1)
-                                            Text("\(TeamMatchReport.dayText(entry.updatedAt)) · \(entry.kind == "referee" ? "scheidsrechter" : "coach") · \(entry.player1Games)-\(entry.player2Games)" + (entry.status == "abandoned" ? " · incompleet" : ""))
+                                            Text("\(TeamMatchReport.dayText(entry.updatedAt)) · \(entry.kind == "referee" ? loc("scheidsrechter") : loc("coach")) · \(entry.player1Games)-\(entry.player2Games)" + (entry.status == "abandoned" ? loc(" · incompleet") : ""))
                                                 .font(SharedFonts.system(11))
                                                 .foregroundColor(SharedColors.textSecondary)
                                         }
@@ -497,10 +509,10 @@ struct TrackedMatchPicker: View {
                     .padding(24)
                 }
             }
-            .pageTitle("Kies wedstrijd")
+            .pageTitle(loc("Kies wedstrijd"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    CloseButton(title: "Annuleren", action: onCancel)
+                    CloseButton(title: loc("Annuleren"), action: onCancel)
                 }
             }
         }

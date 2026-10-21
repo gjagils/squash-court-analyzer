@@ -42,7 +42,7 @@ struct TeamMatchShareView: View {
                         ResultCardPreview(card: ResultCard.from(match))
                     }
                 }
-                ActionButton("DELEN", style: .filled) { share() }
+                ActionButton(loc("DELEN"), style: .filled) { share() }
                 Spacer().frame(height: 24)
             }
             .padding(.horizontal, 20)
@@ -61,7 +61,7 @@ struct TeamMatchShareView: View {
 
     private var header: some View {
         ZStack {
-            Text("DEEL VERSLAG")
+            Text("DEEL VERSLAG", bundle: .module)
                 .font(SharedFonts.system(14, weight: .bold, design: .rounded))
                 .tracking(2)
                 .foregroundColor(SharedColors.textPrimary)
@@ -69,13 +69,13 @@ struct TeamMatchShareView: View {
                 Button(action: onClose) {
                     HStack(spacing: 4) {
                         AppSymbol("xmark", size: 14, color: SharedColors.textSecondary)
-                        Text("Sluiten")
+                        Text("Sluiten", bundle: .module)
                             .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.textSecondary)
                     }
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Sluiten")
+                .accessibilityLabel(loc("Sluiten"))
                 Spacer()
             }
         }

@@ -36,14 +36,14 @@ struct NewTeamMatchSheet: View {
                     VStack(alignment: .leading, spacing: 18) {
                         VStack(alignment: .leading, spacing: 6) {
                             Toggle(isOn: $shareWithTeam) {
-                                Text("Deel met mijn team")
+                                Text("Deel met mijn team", bundle: .module)
                                     .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                                     .foregroundColor(SharedColors.textPrimary)
                             }
                             .tint(SharedColors.accent)
                             Text(shareWithTeam
-                                 ? "Teamgenoten zetten hun eigen partij erin en supporters kijken mee. Alleen teamnamen, voornamen en de stand gaan naar de server; 2 uur na de laatste update wordt alles gewist."
-                                 : "De teamwedstrijd blijft alleen op deze telefoon. Je kunt hem later nog delen.")
+                                 ? loc("Teamgenoten zetten hun eigen partij erin en supporters kijken mee. Alleen teamnamen, voornamen en de stand gaan naar de server; 2 uur na de laatste update wordt alles gewist.")
+                                 : loc("De teamwedstrijd blijft alleen op deze telefoon. Je kunt hem later nog delen."))
                                 .font(SharedFonts.system(11))
                                 .foregroundColor(SharedColors.textMuted)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -54,7 +54,7 @@ struct NewTeamMatchSheet: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         if let team, !openFixtures.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
-                                SectionHeader("UIT HET PROGRAMMA VAN \(team.name.uppercased())")
+                                SectionHeader(loc("UIT HET PROGRAMMA VAN \(team.name.uppercased())"))
                                 ForEach(openFixtures) { fixture in
                                     Button { onCreate(TeamMatch.from(fixture: fixture, ownTeam: team.name), shareWithTeam) } label: {
                                         HStack(spacing: 10) {
@@ -79,25 +79,25 @@ struct NewTeamMatchSheet: View {
                             }
                         }
                         VStack(alignment: .leading, spacing: 8) {
-                            SectionHeader("ZELF INVULLEN")
+                            SectionHeader(loc("ZELF INVULLEN"))
                             VStack(alignment: .leading, spacing: 10) {
-                                TextField("Ons team", text: $ownTeam)
+                                TextField(loc("Ons team"), text: $ownTeam)
                                     .font(SharedFonts.system(14))
                                     .padding(10)
                                     .background(SharedColors.tint(0.06)).clipShape(RoundedRectangle(cornerRadius: 10))
-                                TextField("Tegenstander", text: $opponent)
+                                TextField(loc("Tegenstander"), text: $opponent)
                                     .font(SharedFonts.system(14))
                                     .padding(10)
                                     .background(SharedColors.tint(0.06)).clipShape(RoundedRectangle(cornerRadius: 10))
-                                Picker("Waar", selection: $atHome) {
-                                    Text("Thuis").tag(true)
-                                    Text("Uit").tag(false)
+                                Picker(loc("Waar"), selection: $atHome) {
+                                    Text("Thuis", bundle: .module).tag(true)
+                                    Text("Uit", bundle: .module).tag(false)
                                 }
                                 .pickerStyle(.segmented)
-                                DatePicker("Datum", selection: $date, displayedComponents: .date)
+                                DatePicker(loc("Datum"), selection: $date, displayedComponents: .date)
                                     .font(SharedFonts.system(14))
                                     .foregroundColor(SharedColors.textPrimary)
-                                ActionButton("Maak teamwedstrijd", style: .filled, disabled: ownTeam.trimmingCharacters(in: .whitespaces).isEmpty || opponent.trimmingCharacters(in: .whitespaces).isEmpty) {
+                                ActionButton(loc("Maak teamwedstrijd"), style: .filled, disabled: ownTeam.trimmingCharacters(in: .whitespaces).isEmpty || opponent.trimmingCharacters(in: .whitespaces).isEmpty) {
                                     let own = ownTeam.trimmingCharacters(in: .whitespaces)
                                     let other = opponent.trimmingCharacters(in: .whitespaces)
                                     onCreate(TeamMatch(date: date, home: atHome ? own : other, away: atHome ? other : own,
@@ -111,10 +111,10 @@ struct NewTeamMatchSheet: View {
                     .padding(24)
                 }
             }
-            .pageTitle("Nieuwe teamwedstrijd")
+            .pageTitle(loc("Nieuwe teamwedstrijd"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    CloseButton(title: "Annuleren", action: onCancel)
+                    CloseButton(title: loc("Annuleren"), action: onCancel)
                 }
             }
             .onAppear { if ownTeam.isEmpty, let team { ownTeam = team.name } }

@@ -26,7 +26,7 @@ struct TeamLiveCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                SectionHeader("DELEN")
+                SectionHeader(loc("DELEN"))
                 if match.isLive {
                     HStack(spacing: 5) {
                         Circle().fill(Color.white).frame(width: 7, height: 7)
@@ -43,12 +43,12 @@ struct TeamLiveCard: View {
                 Spacer()
             }
             if match.isLive {
-                Text("Kijkers volgen de hele teamavond op één pagina. Teamgenoten die de uitnodiging openen, zetten hun eigen partij erop. 2 uur na de laatste update wordt alles gewist.")
+                Text("Kijkers volgen de hele teamavond op één pagina. Teamgenoten die de uitnodiging openen, zetten hun eigen partij erop. 2 uur na de laatste update wordt alles gewist.", bundle: .module)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 // The share screen also shows the code (readable when nothing can be shared)
-                ActionButton("Deel met team en supporters", icon: canShare ? "square.and.arrow.up" : nil, style: .filled, disabled: busy, action: onShare)
+                ActionButton(loc("Deel met team en supporters"), icon: canShare ? "square.and.arrow.up" : nil, style: .filled, disabled: busy, action: onShare)
                 if let problem {
                     Text(problem)
                         .font(SharedFonts.system(12))
@@ -56,17 +56,17 @@ struct TeamLiveCard: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 HStack(spacing: 10) {
-                    ActionButton("Vernieuwen", icon: "arrow.counterclockwise", disabled: busy, action: onRefresh)
+                    ActionButton(loc("Vernieuwen"), icon: "arrow.counterclockwise", disabled: busy, action: onRefresh)
                     // Only the phone that started the live page can end it for everyone
-                    ActionButton(match.isLiveOwner ? "Live stoppen" : "Live verlaten", color: SharedColors.textSecondary,
+                    ActionButton(match.isLiveOwner ? loc("Live stoppen") : loc("Live verlaten"), color: SharedColors.textSecondary,
                                  disabled: busy, action: onStop)
                 }
             } else {
-                Text("Deel deze teamwedstrijd met je team: teamgenoten zetten hun eigen partij erop en supporters volgen de stand van de hele avond, per partij ook punt voor punt. Alleen teamnamen, voornamen en de stand gaan mee.")
+                Text("Deel deze teamwedstrijd met je team: teamgenoten zetten hun eigen partij erop en supporters volgen de stand van de hele avond, per partij ook punt voor punt. Alleen teamnamen, voornamen en de stand gaan mee.", bundle: .module)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
-                ActionButton(busy ? "Even geduld…" : "Deel met mijn team", style: .filled, disabled: busy, action: onGoLive)
+                ActionButton(busy ? loc("Even geduld…") : loc("Deel met mijn team"), style: .filled, disabled: busy, action: onGoLive)
             }
         }
         .padding(14)
@@ -80,16 +80,22 @@ struct TeamLiveCard: View {
 enum TeamLiveTexts {
     static func viewers(_ match: TeamMatch, baseURL: String) -> String {
         guard let id = match.liveId else { return "" }
-        return "Volg \(match.title) live: \(baseURL)/t/\(id)"
+        let url = "\(baseURL)/t/\(id)"
+        return loc("Volg \(match.title) live: \(url)")
     }
 
     static func invite(_ match: TeamMatch) -> String {
         guard let id = match.liveId, let key = match.liveKey else { return "" }
         let invite = TeamInvite(id: id, key: key)
-        return "Doe mee met onze teamwedstrijd \(match.title) in SquashAnalyzer en zet je eigen partij live: \(invite.link)\n"
-            + "Of plak deze code in de app (Competitie, Deelnemen): \(invite.code)\n"
+        // TeamInvite.parse reads any word of this text that is a link or code,
+        // so the sentences around them may be translated
+        let link = invite.link
+        let code = invite.code
+        let newer = CardInbox.newerAppText
+        return loc("Doe mee met onze teamwedstrijd \(match.title) in SquashAnalyzer en zet je eigen partij live: \(link)") + "\n"
+            + loc("Of plak deze code in de app (Competitie, Deelnemen): \(code)") + "\n"
             // Someone on an older app sees nothing happen: say why (test, 7 October)
-            + "Gebeurt er niets? \(CardInbox.newerAppText)"
+            + loc("Gebeurt er niets? \(newer)")
     }
 }
 
@@ -128,18 +134,18 @@ public struct SharedTeamJoinView: View {
                 SharedColors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Een teamgenoot deelde een link of code van de live teamwedstrijd. Plak die hier; je partij komt dan op dezelfde livepagina.")
+                        Text("Een teamgenoot deelde een link of code van de live teamwedstrijd. Plak die hier; je partij komt dan op dezelfde livepagina.", bundle: .module)
                             .font(SharedFonts.system(13))
                             .foregroundColor(SharedColors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
-                        TextField("Link of code", text: $text)
+                        TextField(loc("Link of code"), text: $text)
                             .font(SharedFonts.system(14))
                             .foregroundColor(SharedColors.textPrimary)
                             .padding(10)
                             .background(SharedColors.tint(0.06))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                         if state == nil {
-                            ActionButton(busy ? "Even geduld…" : "Zoek teamwedstrijd", style: .filled,
+                            ActionButton(busy ? loc("Even geduld…") : loc("Zoek teamwedstrijd"), style: .filled,
                                          disabled: busy || text.trimmingCharacters(in: .whitespaces).isEmpty) {
                                 Task { await lookUp() }
                             }
@@ -155,10 +161,10 @@ public struct SharedTeamJoinView: View {
                     .padding(24)
                 }
             }
-            .pageTitle("Deelnemen")
+            .pageTitle(loc("Deelnemen"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    CloseButton(title: "Annuleren", action: onCancel)
+                    CloseButton(title: loc("Annuleren"), action: onCancel)
                 }
             }
             .task {
@@ -170,17 +176,17 @@ public struct SharedTeamJoinView: View {
 
     private func found(_ state: TeamLiveState) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader("GEVONDEN")
+            SectionHeader(loc("GEVONDEN"))
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(state.team.home) – \(state.team.away)")
                     .font(SharedFonts.system(17, weight: .semibold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("\(TeamMatchReport.dayText(Date(timeIntervalSince1970: Double(state.team.date) / 1000.0))) · \(state.partijen.count) van 4 partijen staan erop")
+                Text("\(TeamMatchReport.dayText(Date(timeIntervalSince1970: Double(state.team.date) / 1000.0))) · \(state.partijen.count) van 4 partijen staan erop", bundle: .module)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
             }
-            Text("Welk team is van jou?")
+            Text("Welk team is van jou?", bundle: .module)
                 .font(SharedFonts.system(13, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
             HStack(spacing: 10) {
@@ -188,18 +194,18 @@ public struct SharedTeamJoinView: View {
                 sideButton(state.team.away, side: TeamSide.away)
             }
             if let twin = filledTwin {
-                Text("Je hebt deze teamwedstrijd al op je telefoon, met partijen die je zelf hebt ingevuld. Neem je de partijen van je teamgenoot over, dan gaan jouw ingevulde partijen verloren.")
+                Text("Je hebt deze teamwedstrijd al op je telefoon, met partijen die je zelf hebt ingevuld. Neem je de partijen van je teamgenoot over, dan gaan jouw ingevulde partijen verloren.", bundle: .module)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
-                ActionButton(busy ? "Even geduld…" : "Partijen van mijn teamgenoot overnemen", style: .filled, disabled: busy) {
+                ActionButton(busy ? loc("Even geduld…") : loc("Partijen van mijn teamgenoot overnemen"), style: .filled, disabled: busy) {
                     Task { await takeOver(twin, state) }
                 }
-                ActionButton("Annuleren", style: .text, disabled: busy) {
+                ActionButton(loc("Annuleren"), style: .text, disabled: busy) {
                     filledTwin = nil
                 }
             } else {
-                ActionButton(busy ? "Even geduld…" : "Deelnemen", style: .filled, disabled: busy) {
+                ActionButton(busy ? loc("Even geduld…") : loc("Deelnemen"), style: .filled, disabled: busy) {
                     Task { await join(state) }
                 }
             }
@@ -229,7 +235,7 @@ public struct SharedTeamJoinView: View {
 
     private func lookUp() async {
         guard let parsed = TeamInvite.parse(text) else {
-            message = "Dit is geen geldige link of code van een teamwedstrijd."
+            message = loc("Dit is geen geldige link of code van een teamwedstrijd.")
             return
         }
         busy = true
@@ -245,10 +251,10 @@ public struct SharedTeamJoinView: View {
             }
         } catch let error as TeamLiveError {
             message = error == TeamLiveError.gone
-                ? "Deze teamwedstrijd is afgelopen of de link klopt niet."
-                : "Geen verbinding. Controleer het internet en probeer het opnieuw."
+                ? loc("Deze teamwedstrijd is afgelopen of de link klopt niet.")
+                : loc("Geen verbinding. Controleer het internet en probeer het opnieuw.")
         } catch {
-            message = "Opzoeken lukte niet."
+            message = loc("Opzoeken lukte niet.")
         }
         busy = false
     }
@@ -265,16 +271,16 @@ public struct SharedTeamJoinView: View {
             busy = false
             switch error {
             case TeamLiveError.keyRejected:
-                message = "De code klopt niet: de teamwedstrijd is gevonden, maar de sleutel wordt niet geaccepteerd. Vraag je teamgenoot de uitnodiging opnieuw te sturen."
+                message = loc("De code klopt niet: de teamwedstrijd is gevonden, maar de sleutel wordt niet geaccepteerd. Vraag je teamgenoot de uitnodiging opnieuw te sturen.")
             case TeamLiveError.gone:
-                message = "Deze teamwedstrijd is afgelopen of de link klopt niet."
+                message = loc("Deze teamwedstrijd is afgelopen of de link klopt niet.")
             default:
-                message = "Geen verbinding. Controleer het internet en probeer het opnieuw."
+                message = loc("Geen verbinding. Controleer het internet en probeer het opnieuw.")
             }
             return
         } catch {
             busy = false
-            message = "Controleren van de code lukte niet."
+            message = loc("Controleren van de code lukte niet.")
             return
         }
         do {
@@ -306,7 +312,7 @@ public struct SharedTeamJoinView: View {
                 return
             case TeamJoinTwin.sharedElsewhere:
                 busy = false
-                message = "Je hebt deze teamwedstrijd al, maar gekoppeld aan een andere livepagina. Stop die eerst of gebruik die."
+                message = loc("Je hebt deze teamwedstrijd al, maar gekoppeld aan een andere livepagina. Stop die eerst of gebruik die.")
                 return
             case TeamJoinTwin.none:
                 break
@@ -317,7 +323,7 @@ public struct SharedTeamJoinView: View {
             onJoined(match)
         } catch {
             busy = false
-            message = "Deelnemen is niet gelukt."
+            message = loc("Deelnemen is niet gelukt.")
         }
     }
 
@@ -332,7 +338,7 @@ public struct SharedTeamJoinView: View {
             onJoined(taken)
         } catch {
             busy = false
-            message = "Overnemen is niet gelukt."
+            message = loc("Overnemen is niet gelukt.")
         }
     }
 }

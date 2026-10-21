@@ -121,6 +121,18 @@ public class RefereeMatch: Identifiable {
     public var canUndo: Bool { !undoStack.isEmpty }
 
     public func name(for player: Player) -> String { player == .player1 ? player1Name : player2Name }
+
+    /// Correct the names during the match (Gerd-Jan, 21 October 2026), as
+    /// `Match.rename`: a player picked from Spelers stays linked only under
+    /// their own name, and empty is the default again
+    public func rename(player1: String, player2: String) {
+        let name1 = Match.cleanName(player1, fallback: "Speler 1")
+        let name2 = Match.cleanName(player2, fallback: "Speler 2")
+        if name1 != player1Name { player1Id = nil }
+        if name2 != player2Name { player2Id = nil }
+        player1Name = name1
+        player2Name = name2
+    }
     public func preferredSide(for player: Player) -> ServerSide? { player == .player1 ? player1PreferredSide : player2PreferredSide }
     private func handOutSide(for player: Player) -> ServerSide { preferredSide(for: player) ?? .right }
 

@@ -249,6 +249,8 @@ public struct CoachScoringView: View {
     @State private var showingBadges = false
     /// De coachkaart of the game just finished, from the result card
     @State private var showingCard = false
+    /// Namen aanpassen: the sheet with the two names (the pencil under the scoreboard)
+    @State private var editingNames = false
     /// 6 or 9 zones, a setting (Instellingen)
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     /// "Uit de lucht" for the point being entered; off again after every point
@@ -297,6 +299,9 @@ public struct CoachScoringView: View {
                     RallyClock(game: game, hidden: game.isGameOver || match.isMatchOver)
                     instructionText
                     Spacer(minLength: 0)
+                    if !match.isMatchOver {
+                        renameButton
+                    }
                 }
                 .padding(.horizontal, 24)
                 .frame(height: 28)
@@ -351,6 +356,26 @@ public struct CoachScoringView: View {
                 showingCard = false
             }
         }
+        .sheet(isPresented: $editingNames) {
+            PlayerNamesEditor(player1Name: match.player1Name, player2Name: match.player2Name,
+                              player1Linked: match.player1Id != nil, player2Linked: match.player2Id != nil,
+                              onSave: { name1, name2 in
+                                  match.rename(player1: name1, player2: name2)
+                                  editingNames = false
+                                  matchChanged()
+                              }, onCancel: { editingNames = false })
+        }
+    }
+
+    /// Correct a name during the match (a typo, or the real name after a quick
+    /// start with "Speler 1"): the pencil under the scoreboard, next to the names
+    private var renameButton: some View {
+        Button { editingNames = true } label: {
+            AppSymbol("pencil", size: 16, color: SharedColors.textSecondary)
+                .frame(width: 32, height: 28)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(loc("Namen aanpassen"))
     }
 
     // MARK: - Header

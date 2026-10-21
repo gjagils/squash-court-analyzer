@@ -37,6 +37,24 @@
         }
       }
     },
+    "%@ %lld – %@ %lld, namen aanpassen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %lld – %@ %lld, edit names"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %lld – %@ %lld, namen aanpassen"
+          }
+        }
+      }
+    },
     "%@ deze partij door %@: alle resterende punten gaan naar de winnaar.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -2467,6 +2485,24 @@
         }
       }
     },
+    "De namen gelden voor deze wedstrijd, ook voor wie live meekijkt. De stand blijft staan.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The names apply to this match, also for anyone watching live. The score stays as it is."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De namen gelden voor deze wedstrijd, ook voor wie live meekijkt. De stand blijft staan."
+          }
+        }
+      }
+    },
     "De opgeslagen spelers konden niet worden geladen. Probeer het opnieuw.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -3147,6 +3183,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Een link naar de livepagina met de stand van de hele avond. Kijken kan in de browser, zonder app. Er is niets in te vullen."
+          }
+        }
+      }
+    },
+    "Een speler uit Spelers blijft gekoppeld zolang de naam dezelfde is. Een andere naam is een andere speler: badges en profiel tellen deze wedstrijd dan niet voor de gekozen speler.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A player from Players stays linked as long as the name stays the same. Another name is another player: badges and profile then do not count this match for the chosen player."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een speler uit Spelers blijft gekoppeld zolang de naam dezelfde is. Een andere naam is een andere speler: badges en profiel tellen deze wedstrijd dan niet voor de gekozen speler."
           }
         }
       }
@@ -5613,6 +5667,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Naam speler"
+          }
+        }
+      }
+    },
+    "Namen aanpassen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit names"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Namen aanpassen"
           }
         }
       }

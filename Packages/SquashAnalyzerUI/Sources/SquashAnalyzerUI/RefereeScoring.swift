@@ -23,6 +23,8 @@ public struct RefereeScoringView: View {
     /// game end, or the same one after an undo and a new point, shows it again
     @State private var hiddenResult: String? = nil
     @State private var showingBadges = false
+    /// Namen aanpassen: the sheet with the two names (tap the names above the scores)
+    @State private var editingNames = false
 
     public init(match: RefereeMatch, shareText: ((String) -> Void)? = nil, photos: [String: Data] = [:],
                 onSettings: (() -> Void)? = nil,
@@ -82,6 +84,15 @@ public struct RefereeScoringView: View {
                         if match.lastCallText == call { match.clearCallText() }
                     }
             }
+        }
+        .sheet(isPresented: $editingNames) {
+            PlayerNamesEditor(player1Name: match.player1Name, player2Name: match.player2Name,
+                              player1Linked: match.player1Id != nil, player2Linked: match.player2Id != nil,
+                              onSave: { name1, name2 in
+                                  match.rename(player1: name1, player2: name2)
+                                  editingNames = false
+                                  matchChanged()
+                              }, onCancel: { editingNames = false })
         }
     }
 
@@ -201,25 +212,34 @@ public struct RefereeScoringView: View {
                 .foregroundColor(SharedColors.textMuted)
                 .tracking(2)
             // Each name gets half of the room, so the games sit exactly in the
-            // middle (above the timeline) however long the names are
-            HStack(spacing: 8) {
-                Text(match.player1Name)
-                    .foregroundColor(SharedColors.accent)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                Text("\(match.player1GamesWon) – \(match.player2GamesWon)")
-                    .font(SharedFonts.system(22, weight: .bold, design: .monospaced))
-                    .foregroundColor(SharedColors.textPrimary)
-                    .fixedSize()
-                Text(match.player2Name)
-                    .foregroundColor(SharedColors.steelBlue)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            // middle (above the timeline) however long the names are. Tapping
+            // the row corrects the names (a typo, or the real names after a
+            // quick start with "Speler 1"); the pencil shows that, and an empty
+            // box of the same width on the left keeps the games in the middle.
+            Button { editingNames = true } label: {
+                HStack(spacing: 8) {
+                    Color.clear.frame(width: 14, height: 14)
+                    Text(match.player1Name)
+                        .foregroundColor(SharedColors.accent)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                    Text("\(match.player1GamesWon) – \(match.player2GamesWon)")
+                        .font(SharedFonts.system(22, weight: .bold, design: .monospaced))
+                        .foregroundColor(SharedColors.textPrimary)
+                        .fixedSize()
+                    Text(match.player2Name)
+                        .foregroundColor(SharedColors.steelBlue)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    AppSymbol("pencil", size: 14, color: SharedColors.textMuted)
+                }
+                .font(SharedFonts.system(13, weight: .bold, design: .rounded))
+                .padding(.horizontal, 16)
             }
-            .font(SharedFonts.system(13, weight: .bold, design: .rounded))
-            .padding(.horizontal, 16)
+            .buttonStyle(.plain)
+            .accessibilityLabel(loc("\(match.player1Name) \(match.player1GamesWon) – \(match.player2Name) \(match.player2GamesWon), namen aanpassen"))
             if !match.completedGames.isEmpty || match.firstGameNumber > 1 {
                 // Plain small text, as on iOS
                 HStack(spacing: 10) {

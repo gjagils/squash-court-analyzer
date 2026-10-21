@@ -117,6 +117,40 @@ public class Match: Identifiable {
         }
     }
 
+    /// Correct the names during the match (Gerd-Jan, 21 October 2026): a typo,
+    /// or the real names after a quick start with "Speler 1". The games played
+    /// so far follow, so the analysis, the advice and the share text use the
+    /// new names. A player picked from Spelers stays linked only under their
+    /// own name: another name is another person, so the id and the profile's
+    /// coaching focus go, as in the match setup. Empty is the default again.
+    public func rename(player1: String, player2: String) {
+        let name1 = Match.cleanName(player1, fallback: "Speler 1")
+        let name2 = Match.cleanName(player2, fallback: "Speler 2")
+        if name1 != player1Name {
+            player1Id = nil
+            player1CoachingFocus = [String]()
+            player1CoachingNotes = ""
+        }
+        if name2 != player2Name {
+            player2Id = nil
+            player2CoachingFocus = [String]()
+            player2CoachingNotes = ""
+        }
+        player1Name = name1
+        player2Name = name2
+        for game in games {
+            game.player1Name = name1
+            game.player2Name = name2
+        }
+        updatedAt = Date()
+    }
+
+    /// The name without the spaces around it, or the fallback when nothing is left
+    static func cleanName(_ name: String, fallback: String) -> String {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        return trimmed.isEmpty ? fallback : trimmed
+    }
+
     /// Start a new game in the match
     public func startNewGame() {
         let game = Game()

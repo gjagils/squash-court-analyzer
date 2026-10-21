@@ -10,7 +10,27 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 5)
 
-- (nog niets)
+- **Namen aanpassen in een lopende wedstrijd (21 oktober 2026, iOS en Android, gedeelde
+  schermen)**: op vraag van Gerd-Jan (`docs/backlog-2026-10-21.md`, N1), ondanks de feature
+  freeze. Coach: een potloodje rechts onder het scorebord (naast de rally-timer en de
+  instructie); Scheidsrechter: tik op de regel met de namen en de games boven de scores (met
+  een potloodje). Beide openen het gedeelde blad "Namen aanpassen" (`PlayerNamesEditor`) met
+  twee velden in de stijl van de wedstrijdopzet, Annuleren en Bewaar. Core: `Match.rename` en
+  `RefereeMatch.rename` (spaties eraf, leeg wordt weer de standaardnaam; alle gespeelde games
+  krijgen de nieuwe namen, dus analyse, advies en deeltekst volgen). Een speler die via Kies
+  speler gekozen is blijft alleen gekoppeld zolang de naam dezelfde is: een andere naam laat
+  het id en de coachingfocus los, dezelfde regel als in de wedstrijdopzet; het blad zegt dat
+  erbij als er een gekozen speler in de wedstrijd zit. Opslaan loopt via de bestaande
+  `onMatchChanged` (SwiftData, Room, scheidsrechter-UserDefaults) en de live-update stuurt de
+  namen mee (livepagina, vergrendelscherm, Dynamic Island). Niet mee: de labels op de live
+  teampagina komen uit de opstelling van de partij (`TeamLive.bind`), niet uit de wedstrijd.
+  Na afloop van de wedstrijd is het potloodje weg (de uitslagkaart dekt het scherm). Tests:
+  `PlayerRenameTests`. Handleidingen (nl en en, iPhone en Android) bijgewerkt.
+  - Nog te doen op de Mac (in de cloud is geen Swift of Xcode): Core-suite met Skip, iOS- en
+    Android-build en de UI-check in licht en donker op beide platforms.
+  - Releasenote: "Een naam verkeerd ingevuld? Tik tijdens de wedstrijd op het potloodje
+    (Coach) of op de namen boven de scores (Scheidsrechter) en pas hem aan; de stand blijft
+    staan."
 
 ## 3.0 build 5 (geüpload 21 oktober 2026)
 

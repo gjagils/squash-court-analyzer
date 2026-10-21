@@ -10,8 +10,18 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 5)
 
-- **Competitiewedstrijd op het vergrendelscherm, ontwerp B (20 oktober 2026, branch
-  `claude/teamscore-lockscreen-b`, nog NIET op `main`; Gerd-Jan beoordeelt eerst)**:
+- (nog niets)
+
+## 3.0 build 5 (geüpload 21 oktober 2026)
+
+TestFlight (groep Squashteam, bètareview ingediend) en Google Play (internal,
+alpha, Google Group testers; met R8-mapping). UI-check vooraf gedraaid (één
+bevinding, hersteld: "Player 1" in de Engelse wedstrijdopzet). Website
+(handleidingen, testen.html, nieuws) gepubliceerd. Releasenotes:
+`release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
+
+- **Competitiewedstrijd op het vergrendelscherm, ontwerp B (20 oktober 2026, op `main` sinds
+  commit 51cad99, in build 5)**:
   iPhone en Android 9–15. Tijdens de avond bovenaan groot de partij die nu bezig is
   ("● E3 · bezig", "games 1–1", de spelers met foto en de punten in het midden, een
   gouden stip bij wie serveert; tussen games "pauze"), twee banen tegelijk als twee
@@ -25,15 +35,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   (achterwaarts compatibel; oudere apps negeren het). Debug: `-LiveActivityDemo team`,
   `team-pause`, `team-two`, `team-next`, `team-finished`; Android `--es team
   spel|pauze|twee|tussen|uitslag`.
-  - Releasenote: nog te schrijven als Gerd-Jan het ontwerp kiest.
-
-## 3.0 build 5 (geüpload 21 oktober 2026)
-
-TestFlight (groep Squashteam, bètareview ingediend) en Google Play (internal,
-alpha, Google Group testers; met R8-mapping). UI-check vooraf gedraaid (één
-bevinding, hersteld: "Player 1" in de Engelse wedstrijdopzet). Website
-(handleidingen, testen.html, nieuws) gepubliceerd. Releasenotes:
-`release-notes/3.0-5.md` en `release-notes/android-3.0-5.md`.
+  - Releasenote: onderdeel van "Nieuw ontwerp live score" in `release-notes/3.0-5.md`.
 
 - **Engelse variant en Instellingen → Taal (21 oktober 2026, iOS, Android, live-server en
   website, Gerd-Jan)**: Nederlands blijft de brontaal en leest precies als voorheen; een

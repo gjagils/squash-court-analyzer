@@ -88,7 +88,7 @@ SHARE AND KEEP
 • Make a backup to iCloud Drive by hand or automatically every week. Backups can be exchanged with the Android version.
 • Choose a light or dark appearance, or let your phone decide.
 
-The app follows your phone's language: English, or Dutch when your phone is set to Dutch.
+The app follows your phone's language (English, or Dutch when your phone is set to Dutch), or choose English or Dutch in the app under Settings → Language.
 ```
 
 *2503 / 4000 tekens*
@@ -180,7 +180,7 @@ BACKUP AND PRIVACY
 • No account needed
 • Your players and matches stay on your phone; no ads, no tracking
 • Light or dark appearance
-• The app follows your phone's language (Android 13+: choose it per app under Settings → Language)
+• In English or Dutch: the app follows your phone's language, or choose it under Settings → Language
 ```
 
 *1662 / 4000 tekens*

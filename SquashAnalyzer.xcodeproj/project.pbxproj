@@ -53,6 +53,8 @@
 		F8B8AB9A30691B0A0098B973 /* SquashAnalyzerCore in Frameworks */ = {isa = PBXBuildFile; productRef = F8B8AB9930691B0A0098B973 /* SquashAnalyzerCore */; };
 		F8B8AB9B30691B0A0098B973 /* SquashAnalyzerCore in Frameworks */ = {isa = PBXBuildFile; productRef = F8B8AB9930691B0A0098B973 /* SquashAnalyzerCore */; };
 		F8FD9EFD2F5D73C5008892F1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F8FD9EFC2F5D73C5008892F1 /* PrivacyInfo.xcprivacy */; };
+		D1000001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D2000001 /* Localizable.xcstrings */; };
+		D1000002 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D2000002 /* Localizable.xcstrings */; };
 		A40000000000000000000001 /* SquashAnalyzerUI in Frameworks */ = {isa = PBXBuildFile; productRef = A40000000000000000000003 /* SquashAnalyzerUI */; };
 		A40000000000000000000002 /* SquashAnalyzerUI in Frameworks */ = {isa = PBXBuildFile; productRef = A40000000000000000000003 /* SquashAnalyzerUI */; };
 		C1000001 /* LiveScoreAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000001 /* LiveScoreAttributes.swift */; };
@@ -147,6 +149,8 @@
 		B3000010 /* SquashAnalyzerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SquashAnalyzerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8FD9EFB2F5D5D94008892F1 /* SquashAnalyzer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SquashAnalyzer.entitlements; sourceTree = "<group>"; };
 		F8FD9EFC2F5D73C5008892F1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		D2000001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		D2000002 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C2000001 /* LiveScoreAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveScoreAttributes.swift; sourceTree = "<group>"; };
 		C2000002 /* SquashLiveActivityBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquashLiveActivityBundle.swift; sourceTree = "<group>"; };
 		C2000003 /* LiveScoreActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveScoreActivityWidget.swift; sourceTree = "<group>"; };
@@ -212,6 +216,7 @@
 				A5000005 /* Models */,
 				A5000007 /* Services */,
 				A2000004 /* Assets.xcassets */,
+				D2000001 /* Localizable.xcstrings */,
 			);
 			path = SquashAnalyzer;
 			sourceTree = "<group>";
@@ -321,6 +326,7 @@
 				C200000A /* TeamScoreActivityWidget.swift */,
 				C2000004 /* Info.plist */,
 				C2000007 /* SquashLiveActivity.entitlements */,
+				D2000002 /* Localizable.xcstrings */,
 			);
 			path = SquashLiveActivity;
 			sourceTree = "<group>";
@@ -419,6 +425,7 @@
 			knownRegions = (
 				en,
 				Base,
+				nl,
 			);
 			mainGroup = A5000001;
 			packageReferences = (
@@ -443,6 +450,7 @@
 			files = (
 				F8FD9EFD2F5D73C5008892F1 /* PrivacyInfo.xcprivacy in Resources */,
 				A1000004 /* Assets.xcassets in Resources */,
+				D1000001 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -457,6 +465,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D1000002 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

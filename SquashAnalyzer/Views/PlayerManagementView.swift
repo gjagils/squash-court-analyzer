@@ -48,7 +48,7 @@ struct PlayerManagementView: View {
                         Button(action: { dismiss() }) {
                             HStack(spacing: 4) {
                                 Image(systemName: "xmark")
-                                Text(isPickerMode ? "Annuleren" : "Sluiten")
+                                Text(isPickerMode ? String(localized: "Annuleren") : String(localized: "Sluiten"))
                             }
                             .font(AppFonts.body(14))
                             .foregroundColor(AppColors.textSecondary)
@@ -59,7 +59,7 @@ struct PlayerManagementView: View {
                         Spacer(minLength: 8)
 
                         // Five controls share one row: shrink the title rather than wrap it
-                        Text(isPickerMode ? "Kies speler" : "Spelers")
+                        Text(isPickerMode ? String(localized: "Kies speler") : String(localized: "Spelers"))
                             .font(PageTitleStyle.font)
                             .foregroundColor(AppColors.textPrimary)
                             .lineLimit(1)
@@ -209,7 +209,7 @@ struct PlayerManagementView: View {
         Task {
             do {
                 let imported = try await TeamImportService.importTeam(link: link, context: modelContext)
-                teamImportMessage = "Geïmporteerd: \(imported.summary)"
+                teamImportMessage = String(localized: "Geïmporteerd: \(imported.summary)")
             } catch {
                 teamImportMessage = error.localizedDescription
             }
@@ -227,7 +227,7 @@ struct PlayerManagementView: View {
             defer { url.stopAccessingSecurityScopedResource() }
             let data = try Data(contentsOf: url)
             let imported = try TeamImportService.importTeam(zipData: data, context: modelContext)
-            teamImportMessage = "Geïmporteerd: \(imported.summary)"
+            teamImportMessage = String(localized: "Geïmporteerd: \(imported.summary)")
         } catch {
             teamImportMessage = error.localizedDescription
         }
@@ -444,7 +444,7 @@ struct PlayerEditSheet: View {
             ScrollView {
                 VStack(spacing: 24) {
                     // Title
-                    Text(player == nil ? "SPELER TOEVOEGEN" : "SPELER BEWERKEN")
+                    Text(player == nil ? String(localized: "SPELER TOEVOEGEN") : String(localized: "SPELER BEWERKEN"))
                         .font(AppFonts.title(18))
                         .foregroundColor(AppColors.textPrimary)
                         .tracking(3)

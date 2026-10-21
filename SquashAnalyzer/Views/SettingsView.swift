@@ -17,6 +17,8 @@ struct SettingsView: View {
     @State private var keySaveFailed = false
     @AppStorage(CoachInputSettings.teamURLKey) private var teamURL = ""
     @State private var teamSaveMessage: String?
+    /// The message above is the success one (green), not an error (red)
+    @State private var teamSaved = false
     /// What is typed; only a valid link is saved, cleaned up (as on Android)
     @State private var teamDraft = ""
     @AppStorage(AutomaticBackup.enabledKey) private var automaticBackup = true
@@ -25,6 +27,7 @@ struct SettingsView: View {
     @AppStorage(LiveShare.photosKey) private var livePhotos = true
     @AppStorage(LiveFollow.ownMatchKey) private var lockScreenScore = true
     @AppStorage(LiveFollow.alertsKey) private var liveAlerts = true
+    @Environment(\.openURL) private var openURL
     /// The part of Instellingen that is open; one at a time
     @State private var openPart: String? = nil
 
@@ -46,22 +49,26 @@ struct SettingsView: View {
                         // then a line per part that opens underneath, one at a time
                         SettingsManualCard(manual: UserManual.iPhone)
                             .padding(.bottom, 16)
-                        SettingsRow("Mijn team", icon: "person.2", open: openPart == "team") { toggle("team") }
+                        SettingsRow(String(localized: "Mijn team"), icon: "person.2", open: openPart == "team") { toggle("team") }
                         if openPart == "team" { teamSection.padding(.bottom, 16) }
                         SettingsDivider()
-                        SettingsRow("Weergave", icon: "circle.lefthalf.filled", open: openPart == "theme") { toggle("theme") }
+                        SettingsRow(String(localized: "Weergave"), icon: "circle.lefthalf.filled", open: openPart == "theme") { toggle("theme") }
                         if openPart == "theme" { AppearancePicker(showsTitle: false).padding(.bottom, 16) }
                         SettingsDivider()
-                        SettingsRow("Baanindeling", icon: "square.grid.3x3", open: openPart == "court") { toggle("court") }
+                        // The app's language is chosen in the iPhone's own settings for the app
+                        // (iOS shows it there because the app has Dutch and English)
+                        SettingsRow(String(localized: "Taal"), icon: "globe") { openLanguageSettings() }
+                        SettingsDivider()
+                        SettingsRow(String(localized: "Baanindeling"), icon: "square.grid.3x3", open: openPart == "court") { toggle("court") }
                         if openPart == "court" { courtSection.padding(.bottom, 16) }
                         SettingsDivider()
-                        SettingsRow("Live meekijken", icon: "dot.radiowaves.left.and.right", open: openPart == "live") { toggle("live") }
+                        SettingsRow(String(localized: "Live meekijken"), icon: "dot.radiowaves.left.and.right", open: openPart == "live") { toggle("live") }
                         if openPart == "live" { liveSection.padding(.bottom, 16) }
                         SettingsDivider()
-                        SettingsRow("Back-up", icon: "icloud.and.arrow.up", open: openPart == "backup") { toggle("backup") }
+                        SettingsRow(String(localized: "Back-up"), icon: "icloud.and.arrow.up", open: openPart == "backup") { toggle("backup") }
                         if openPart == "backup" { backupSection.padding(.bottom, 16) }
                         SettingsDivider()
-                        SettingsRow("AI Coach", icon: "brain", open: openPart == "ai") { toggle("ai") }
+                        SettingsRow(String(localized: "AI Coach"), icon: "brain", open: openPart == "ai") { toggle("ai") }
                         if openPart == "ai" {
                             VStack(alignment: .leading, spacing: 20) {
                                 aiCoachSection
@@ -100,25 +107,28 @@ struct SettingsView: View {
                 .textInputAutocapitalization(.never).autocorrectionDisabled()
                 .padding().background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.08)))
             HStack(spacing: 12) {
-                ActionButton("BEWAAR TEAMLINK", style: .filled, color: AppColors.warmOrange) {
+                ActionButton(String(localized: "BEWAAR TEAMLINK"), style: .filled, color: AppColors.warmOrange) {
                     do {
                         let link = try LeagueTeamLink(teamDraft)
                         teamURL = link.url.absoluteString
                         teamDraft = teamURL
-                        teamSaveMessage = "Teamlink opgeslagen"
+                        teamSaveMessage = String(localized: "Teamlink opgeslagen")
+                        teamSaved = true
                     } catch {
                         teamSaveMessage = (error as? LeagueTeamError)?.message ?? LeagueTeamError.invalidLink.message
+                        teamSaved = false
                     }
                 }
                 if !teamURL.isEmpty {
-                    ActionButton("VERWIJDER", color: AppColors.textSecondary) {
+                    ActionButton(String(localized: "VERWIJDER"), color: AppColors.textSecondary) {
                         teamURL = ""
                         teamDraft = ""
-                        teamSaveMessage = "Teamlink verwijderd"
+                        teamSaveMessage = String(localized: "Teamlink verwijderd")
+                        teamSaved = true
                     }
                 }
             }
-            if let teamSaveMessage { Text(teamSaveMessage).font(AppFonts.caption(12)).foregroundColor(teamSaveMessage.hasPrefix("Teamlink") ? AppColors.positive : AppColors.warmRed) }
+            if let teamSaveMessage { Text(teamSaveMessage).font(AppFonts.caption(12)).foregroundColor(teamSaved ? AppColors.positive : AppColors.warmRed) }
         }
     }
 
@@ -246,9 +256,9 @@ struct SettingsView: View {
     }
 
     private var backupFootnote: String {
-        var text = "Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in iCloud Drive (Bestanden → iCloud Drive → Squash Analyzer). De 7 nieuwste blijven bewaard. Ook terug te zetten op Android."
+        var text = String(localized: "Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in iCloud Drive (Bestanden → iCloud Drive → Squash Analyzer). De 7 nieuwste blijven bewaard. Ook terug te zetten op Android.")
         if let last = AutomaticBackup.lastBackup {
-            text += " Laatste: \(last.formatted(date: .abbreviated, time: .shortened))."
+            text += String(localized: " Laatste: \(last.formatted(date: .abbreviated, time: .shortened)).")
         }
         return text
     }
@@ -299,7 +309,7 @@ struct SettingsView: View {
             }
 
             // Save Button
-            ActionButton(showingSaveConfirmation ? "OPGESLAGEN!" : "BEWAAR API KEY", style: .filled,
+            ActionButton(showingSaveConfirmation ? String(localized: "OPGESLAGEN!") : String(localized: "BEWAAR API KEY"), style: .filled,
                          color: showingSaveConfirmation ? SharedColors.positive : AppColors.warmOrange) {
                 saveAPIKey()
             }
@@ -309,7 +319,7 @@ struct SettingsView: View {
                 Circle()
                     .fill(APIKeyManager.shared.hasOpenAIKey ? AppColors.positive : AppColors.warmRed)
                     .frame(width: 8, height: 8)
-                Text(APIKeyManager.shared.hasOpenAIKey ? "API key geconfigureerd" : "Geen API key ingesteld")
+                Text(APIKeyManager.shared.hasOpenAIKey ? String(localized: "API key geconfigureerd") : String(localized: "Geen API key ingesteld"))
                     .font(AppFonts.caption(12))
                     .foregroundColor(AppColors.textMuted)
             }
@@ -356,6 +366,10 @@ struct SettingsView: View {
     }
 
     // MARK: - Actions
+    private func openLanguageSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+    }
+
     private func saveAPIKey() {
         guard APIKeyManager.shared.setOpenAIKey(apiKey.isEmpty ? nil : apiKey) else {
             keySaveFailed = true
@@ -372,8 +386,8 @@ struct SettingsView: View {
 // MARK: - Info Row
 struct InfoRow: View {
     let icon: String
-    let title: String
-    let description: String
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -419,8 +433,8 @@ struct BackupActionsView: View {
         // view let only the last one present, so TERUGZETTEN never opened.
         VStack(spacing: 10) {
             HStack(spacing: 10) {
-                ActionButton("NU NAAR ICLOUD", color: AppColors.warmOrange) { saveToiCloud() }
-                ActionButton("TERUGZETTEN", color: AppColors.warmOrange) { showingBackupImporter = true }
+                ActionButton(String(localized: "NU NAAR ICLOUD"), color: AppColors.warmOrange) { saveToiCloud() }
+                ActionButton(String(localized: "TERUGZETTEN"), color: AppColors.warmOrange) { showingBackupImporter = true }
             }
             .fileImporter(isPresented: $showingBackupImporter, allowedContentTypes: [.json]) { result in
                 if let data = read(result) {
@@ -429,16 +443,16 @@ struct BackupActionsView: View {
                 }
             }
             HStack(spacing: 10) {
-                ActionButton("DELEN", color: AppColors.textSecondary) { shareBackup() }
-                ActionButton("WEDSTRIJD IMPORTEREN", color: AppColors.textSecondary) { showingMatchImporter = true }
+                ActionButton(String(localized: "DELEN"), color: AppColors.textSecondary) { shareBackup() }
+                ActionButton(String(localized: "WEDSTRIJD IMPORTEREN"), color: AppColors.textSecondary) { showingMatchImporter = true }
             }
             .fileImporter(isPresented: $showingMatchImporter, allowedContentTypes: [.json]) { result in
                 guard let data = read(result) else { return }
                 do {
                     try ExportService.importFromJSON(data, context: modelContext)
-                    show("Import gelukt!", "De wedstrijd is geïmporteerd.")
+                    show(String(localized: "Import gelukt!"), String(localized: "De wedstrijd is geïmporteerd."))
                 } catch {
-                    show("Import mislukt", error.localizedDescription)
+                    show(String(localized: "Import mislukt"), error.localizedDescription)
                 }
             }
         }
@@ -464,13 +478,13 @@ struct BackupActionsView: View {
         do {
             let url = try result.get()
             guard url.startAccessingSecurityScopedResource() else {
-                show("Import mislukt", "Geen toegang tot bestand")
+                show(String(localized: "Import mislukt"), String(localized: "Geen toegang tot bestand"))
                 return nil
             }
             defer { url.stopAccessingSecurityScopedResource() }
             return try Data(contentsOf: url)
         } catch {
-            show("Import mislukt", error.localizedDescription)
+            show(String(localized: "Import mislukt"), error.localizedDescription)
             return nil
         }
     }
@@ -491,7 +505,7 @@ struct BackupActionsView: View {
         do {
             data = try backupData()
         } catch {
-            show("Back-up mislukt", error.localizedDescription)
+            show(String(localized: "Back-up mislukt"), error.localizedDescription)
             return
         }
         Task {
@@ -503,9 +517,10 @@ struct BackupActionsView: View {
             }.value
             switch result {
             case .success(let url):
-                show("Back-up opgeslagen!", "'\(url.lastPathComponent)' staat in iCloud Drive, in de Bestanden-app onder iCloud Drive → Squash Analyzer.")
+                show(String(localized: "Back-up opgeslagen!"),
+                     String(localized: "'\(url.lastPathComponent)' staat in iCloud Drive, in de Bestanden-app onder iCloud Drive → Squash Analyzer."))
             case .failure(let error):
-                show("Back-up mislukt", error.localizedDescription)
+                show(String(localized: "Back-up mislukt"), error.localizedDescription)
             }
         }
     }
@@ -517,7 +532,7 @@ struct BackupActionsView: View {
             let url = try ExportService.writeToTempFile(try backupData(), filename: "squash-backup-\(formatter.string(from: Date())).json")
             IOSShare.present([url])
         } catch {
-            show("Back-up mislukt", error.localizedDescription)
+            show(String(localized: "Back-up mislukt"), error.localizedDescription)
         }
     }
 
@@ -527,13 +542,15 @@ struct BackupActionsView: View {
         do {
             if replacing {
                 let result = try ExportService.replaceWithBackup(data, context: modelContext)
-                show("Back-up hersteld", "\(result.players) spelers, \(result.matches) wedstrijden, \(result.games) losse games.")
+                show(String(localized: "Back-up hersteld"),
+                     String(localized: "\(result.players) spelers, \(result.matches) wedstrijden, \(result.games) losse games."))
             } else {
                 let result = try ExportService.importFullBackup(data, context: modelContext)
-                show("Back-up toegevoegd", "\(result.players) spelers, \(result.matches) wedstrijden, \(result.games) losse games.")
+                show(String(localized: "Back-up toegevoegd"),
+                     String(localized: "\(result.players) spelers, \(result.matches) wedstrijden, \(result.games) losse games."))
             }
         } catch {
-            show("Terugzetten mislukt", error.localizedDescription)
+            show(String(localized: "Terugzetten mislukt"), error.localizedDescription)
         }
     }
 }

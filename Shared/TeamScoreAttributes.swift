@@ -6,6 +6,8 @@ import Foundation
 // server through APNs. Compiled into the app and the widget extension, which
 // does not link SquashAnalyzerCore: the content state mirrors Core's
 // `TeamFollowStand` field by field (the server's teamContentState in push.js).
+// The texts shown go through String(localized:) (Dutch keys, English in the
+// String Catalogs of the app and the widget); the content state stays raw.
 
 struct TeamScoreAttributes: ActivityAttributes {
     /// Exactly the team push of the live server (`aps.content-state`):
@@ -151,7 +153,7 @@ extension TeamScoreAttributes.ContentState {
     var hasLive: Bool { partijen.contains { partij in partij.isLive } }
 
     /// "2 van 4 klaar"
-    var progressText: String { "\(decidedCount) van 4 klaar" }
+    var progressText: String { String(localized: "\(decidedCount) van 4 klaar") }
 
     /// The team name as the lock screen shows it (`TeamNameShortener`)
     func teamName(_ side: Int) -> String { TeamNameShortener.short(side == 1 ? home : away) }
@@ -188,8 +190,8 @@ extension TeamScoreAttributes.ContentState {
     /// "w.o." or "opgave", else nil
     static func endText(_ partij: TeamScorePartij) -> String? {
         switch partij.end {
-        case "walkover": return "w.o."
-        case "retired": return "opgave"
+        case "walkover": return String(localized: "w.o.")
+        case "retired": return String(localized: "opgave")
         default: return nil
         }
     }
@@ -221,17 +223,17 @@ extension TeamScoreAttributes.ContentState {
 
     /// The heading of the partij at the top: "E3 · bezig", "E3 · pauze", "E3 · inspelen", "Volgende partij · E3"
     func focusHeading(_ slot: Int) -> String {
-        guard let partij = partij(slot) else { return "Volgende partij · E\(slot)" }
-        if partij.isPause { return "E\(slot) · pauze" }
-        if partij.isLive { return "E\(slot) · bezig" }
-        if partij.status == "warmup" && !partij.isDecided { return "E\(slot) · inspelen" }
-        return "Volgende partij · E\(slot)"
+        guard let partij = partij(slot) else { return String(localized: "Volgende partij · E\(slot)") }
+        if partij.isPause { return String(localized: "E\(slot) · pauze") }
+        if partij.isLive { return String(localized: "E\(slot) · bezig") }
+        if partij.status == "warmup" && !partij.isDecided { return String(localized: "E\(slot) · inspelen") }
+        return String(localized: "Volgende partij · E\(slot)")
     }
 
     /// "games 1–1" of one partij, "" without one
     func gamesText(_ slot: Int) -> String {
         guard let partij = partij(slot) else { return "" }
-        return "games \(partij.games(1))–\(partij.games(2))"
+        return String(localized: "games \(partij.games(1))–\(partij.games(2))")
     }
 
     func tile(_ slot: Int) -> TeamScoreTile {
@@ -263,8 +265,8 @@ extension TeamScoreAttributes.ContentState {
     /// "Uitslag: All Inn 8 wint 9–4" (the winner's games first) or "Uitslag: gelijkspel 6–6"
     var resultTitle: String {
         let winner = teamWinner
-        if winner == 0 { return "Uitslag: gelijkspel \(games(1))–\(games(2))" }
-        return "Uitslag: \(teamName(winner)) wint \(games(winner))–\(games(3 - winner))"
+        if winner == 0 { return String(localized: "Uitslag: gelijkspel \(games(1))–\(games(2))") }
+        return String(localized: "Uitslag: \(teamName(winner)) wint \(games(winner))–\(games(3 - winner))")
     }
 
     /// Compact Dynamic Island and minimal: the partijen per team (SBN: partijen first)
@@ -274,12 +276,12 @@ extension TeamScoreAttributes.ContentState {
     var islandStatus: String {
         switch focus {
         case .finished:
-            return "Uitslag"
+            return String(localized: "Uitslag")
         case .next:
             return progressText
         case .live(let live):
             let first = live[0]
-            let text = first.isPause ? "E\(first.slot) pauze" : "E\(first.slot) \(pointsText(first))"
+            let text = first.isPause ? String(localized: "E\(first.slot) pauze") : "E\(first.slot) \(pointsText(first))"
             return live.count > 1 ? text + " +\(live.count - 1)" : text
         }
     }

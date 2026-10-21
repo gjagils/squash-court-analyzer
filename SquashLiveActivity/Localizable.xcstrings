@@ -1,0 +1,326 @@
+{
+  "sourceLanguage" : "nl",
+  "strings" : {
+    "%@ wint %lld-%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ wins %lld-%lld"
+          }
+        }
+      }
+    },
+    "%lld games" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld games"
+          }
+        }
+      }
+    },
+    "%lld van 4 klaar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld of 4 done"
+          }
+        }
+      }
+    },
+    ", serveert" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ", serves"
+          }
+        }
+      }
+    },
+    "AFGELOPEN" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FINISHED"
+          }
+        }
+      }
+    },
+    "Afgelopen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finished"
+          }
+        }
+      }
+    },
+    "E%lld pauze" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld break"
+          }
+        }
+      }
+    },
+    "E%lld · bezig" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld · in play"
+          }
+        }
+      }
+    },
+    "E%lld · inspelen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld · warm-up"
+          }
+        }
+      }
+    },
+    "E%lld · pauze" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E%lld · break"
+          }
+        }
+      }
+    },
+    "GAMEBAL" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GAME BALL"
+          }
+        }
+      }
+    },
+    "Game %lld · best of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Game %lld · best of %lld"
+          }
+        }
+      }
+    },
+    "Inspelen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warm-up"
+          }
+        }
+      }
+    },
+    "MATCHBAL" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MATCH BALL"
+          }
+        }
+      }
+    },
+    "Opslag" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serve"
+          }
+        }
+      }
+    },
+    "PAUZE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BREAK"
+          }
+        }
+      }
+    },
+    "Pauze" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Break"
+          }
+        }
+      }
+    },
+    "Uitslag" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Result"
+          }
+        }
+      }
+    },
+    "Uitslag: %@ wint %lld–%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Result: %@ wins %lld–%lld"
+          }
+        }
+      }
+    },
+    "Uitslag: gelijkspel %lld–%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Result: draw %lld–%lld"
+          }
+        }
+      }
+    },
+    "Volgende partij · E%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next match · E%lld"
+          }
+        }
+      }
+    },
+    "bezig" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "in play"
+          }
+        }
+      }
+    },
+    "games" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "games"
+          }
+        }
+      }
+    },
+    "games %lld–%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "games %lld–%lld"
+          }
+        }
+      }
+    },
+    "nog niet begonnen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "not started"
+          }
+        }
+      }
+    },
+    "opgave" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "retired"
+          }
+        }
+      }
+    },
+    "partijen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "matches"
+          }
+        }
+      }
+    },
+    "pauze" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "break"
+          }
+        }
+      }
+    },
+    "serveert links" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "serves left"
+          }
+        }
+      }
+    },
+    "serveert rechts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "serves right"
+          }
+        }
+      }
+    },
+    "spelers nog niet bekend" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "players not known yet"
+          }
+        }
+      }
+    },
+    "w.o." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "w/o"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

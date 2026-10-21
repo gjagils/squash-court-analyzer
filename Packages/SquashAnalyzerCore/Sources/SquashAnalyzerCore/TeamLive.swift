@@ -223,8 +223,10 @@ public extension TeamPartij {
                 order.append(game.ownWon == homeIsOwn ? 1 : 2)
             }
         }
-        let ownName = LiveSnapshot.firstName(ownPlayer, fallback: "")
-        let theirName = LiveSnapshot.firstName(opponentPlayer, fallback: "")
+        // The first name, with a surname letter when another known player shares it ("Paul R")
+        let known = LiveNames.known(in: match)
+        let ownName = LiveNames.label(ownPlayer, among: known)
+        let theirName = LiveNames.label(opponentPlayer, among: known)
         let homeGames = homeIsOwn ? ownGames : theirGames
         let awayGames = homeIsOwn ? theirGames : ownGames
         var winner: Int? = nil

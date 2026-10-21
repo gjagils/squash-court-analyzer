@@ -60,6 +60,12 @@ describe('input', () => {
     expect(cleanName('  Anne-Marie Jansen', 'x')).toBe('Anne-Marie');
     expect(cleanName('<script>alert(1)</script>', 'x')).toBe('scriptalertscript');
     expect(cleanName('', 'Speler 1')).toBe('Speler 1');
+    // A surname letter for two players with the same first name, never a whole surname
+    expect(cleanName('Paul R', 'x')).toBe('Paul R');
+    expect(cleanName('Paul Vi', 'x')).toBe('Paul Vi');
+    expect(cleanName('Paul Steenks', 'x')).toBe('Paul');
+    expect(cleanName('Paul r', 'x')).toBe('Paul');
+    expect(cleanName('Paul van Rijn', 'x')).toBe('Paul');
     expect(cleanName(42, 'Speler 2')).toBe('Speler 2');
   });
 

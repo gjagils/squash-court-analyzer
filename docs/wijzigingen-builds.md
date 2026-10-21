@@ -10,6 +10,12 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 4)
 
+- **Dubbele voornamen in een teamwedstrijd (21 oktober 2026, iOS, Android en server,
+  Gerd-Jan)**: live, op het vergrendelscherm en in de meldingen blijft het de voornaam,
+  maar heeft een andere bekende speler dezelfde voornaam (in de teamwedstrijd of in Mijn
+  team), dan komt de eerste letter van de achternaam erbij, zonder tussenvoegsels: "Paul S",
+  "Paul R", "Niels G" (`LiveNames` in Core; twee letters als ook die gelijk is). De server
+  laat alleen zo'n letter door, nooit een hele achternaam.
 - **Competitie op het vergrendelscherm: teamnamen en speelvolgorde (21 oktober 2026, iOS en
   Android, Gerd-Jan)**: een teamnaam staat er volledig tot en met 16 tekens; langer zonder
   Squash/Sportcity ("Squash Utrecht 11" → "Utrecht 11"), en met komma of & het eerste deel

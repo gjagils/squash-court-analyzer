@@ -8,12 +8,18 @@ export const LAST_POINT_MAX = 80;
 export const MAX_BODY_BYTES = 4096;
 export const MAX_PHOTO_BYTES = 24 * 1024;
 
-/** First name only, letters/hyphen/apostrophe, as LiveSnapshot.firstName in the app */
+/**
+ * First name only, letters/hyphen/apostrophe, as LiveSnapshot.firstName in the
+ * app; a first name may carry one or two surname letters when two players share
+ * it ("Paul R", "Paul Vi", LiveNames in the app). A whole surname never passes.
+ */
 export function cleanName(value, fallback) {
   if (typeof value !== 'string') return fallback;
-  const first = value.trim().split(/\s+/)[0] || '';
-  const kept = Array.from(first).filter((c) => /\p{L}|[-']/u.test(c)).join('').slice(0, NAME_MAX);
-  return kept || fallback;
+  const words = value.trim().split(/\s+/);
+  const kept = Array.from(words[0] || '').filter((c) => /\p{L}|[-']/u.test(c)).join('').slice(0, NAME_MAX);
+  if (!kept) return fallback;
+  if (words.length === 2 && /^\p{Lu}\p{Ll}?$/u.test(words[1])) return `${kept} ${words[1]}`;
+  return kept;
 }
 
 /** A base64 JPEG thumbnail as a Uint8Array, or null (wrong type, not a JPEG, too large) */

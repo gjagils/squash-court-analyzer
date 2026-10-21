@@ -53,8 +53,9 @@ public struct TeamTarget: Equatable {
         let own = ownName ?? team.ownDisplayName(partij)
         let opponent = opponentName ?? team.opponentDisplayName(partij)
         let ownFirst = ownIsPlayer1 ?? (team.ownSide == TeamSide.home)
+        let known = LiveNames.known(in: team) + [own, opponent]
         func label(_ name: String, _ standard: String) -> String {
-            TeamMatch.sameTeam(name, standard) ? "" : LiveSnapshot.firstName(name, fallback: "")
+            TeamMatch.sameTeam(name, standard) ? "" : LiveNames.label(name, among: known)
         }
         let ownLabel = label(own, team.defaultOwnName(slot))
         let opponentLabel = label(opponent, team.defaultOpponentName(slot))

@@ -265,24 +265,25 @@ class MainActivity : AppCompatActivity() {
 
     /** Live score on the lock screen: follow the match, and say how it went */
     private fun followLive(target: LiveFollowTarget) {
+        val texts = HostLocale.texts(this)
         lifecycleScope.launch {
             val message = try {
                 LiveFollow.shared.follow(target)
                 // "Jan – Piet", or the teams of a team match
                 val title = LiveFollow.shared.title(of = target)
-                if (title == null) "Je volgt de wedstrijd op je vergrendelscherm"
-                else "Je volgt $title op je vergrendelscherm"
+                if (title == null) texts.getString(R.string.follow_started)
+                else texts.getString(R.string.follow_started_title, title)
             } catch (e: LiveFollowError) {
                 when (e) {
-                    is LiveFollowError.NotFoundCase -> "Deze wedstrijd is al afgelopen"
-                    is LiveFollowError.NotAllowedCase -> "Meldingen staan uit voor SquashAnalyzer"
-                    is LiveFollowError.NoConnectionCase -> "Geen verbinding"
-                    is LiveFollowError.PushUnavailableCase -> "Deze server kan (nog) geen meldingen sturen"
-                    else -> "Volgen lukt nu niet"
+                    is LiveFollowError.NotFoundCase -> texts.getString(R.string.follow_not_found)
+                    is LiveFollowError.NotAllowedCase -> texts.getString(R.string.follow_not_allowed)
+                    is LiveFollowError.NoConnectionCase -> texts.getString(R.string.follow_no_connection)
+                    is LiveFollowError.PushUnavailableCase -> texts.getString(R.string.follow_push_unavailable)
+                    else -> texts.getString(R.string.follow_failed)
                 }
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
-                "Volgen lukt nu niet"
+                texts.getString(R.string.follow_failed)
             }
             android.widget.Toast.makeText(this@MainActivity, message, android.widget.Toast.LENGTH_LONG).show()
         }
@@ -290,14 +291,36 @@ class MainActivity : AppCompatActivity() {
 
     /** A link of ours this version cannot open (made by a newer app): say so instead of nothing */
     private fun showNewerAppNeeded() {
+        val texts = HostLocale.texts(this)
         AlertDialog.Builder(this, androidx.appcompat.R.style.Theme_AppCompat_Dialog_Alert)
-            .setTitle("Link niet te openen")
-            .setMessage(CardInbox.newerAppText + " Werk de app bij in Google Play.")
-            .setPositiveButton("Naar Google Play") { _, _ ->
+            .setTitle(texts.getString(R.string.newer_app_title))
+            .setMessage(texts.getString(R.string.newer_app_update, CardInbox.newerAppText))
+            .setPositiveButton(texts.getString(R.string.newer_app_store)) { _, _ ->
                 startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(CardInbox.playStoreLink)))
             }
-            .setNegativeButton("Later", null)
+            .setNegativeButton(texts.getString(R.string.newer_app_later), null)
             .show()
+    }
+
+    /**
+     * Instellingen → Taal: Android's own per-app language screen (Android 13+,
+     * the languages of res/xml/locales_config.xml); before that the app's
+     * details, where the phone's language decides
+     */
+    fun openAppLanguageSettings() {
+        val app = android.net.Uri.fromParts("package", packageName, null)
+        val intents = buildList {
+            if (android.os.Build.VERSION.SDK_INT >= 33) add(Intent(android.provider.Settings.ACTION_APP_LOCALE_SETTINGS, app))
+            add(Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app))
+        }
+        for (intent in intents) {
+            try {
+                startActivity(intent)
+                return
+            } catch (e: android.content.ActivityNotFoundException) {
+                // Not on this phone: the next one
+            }
+        }
     }
 
     /** Identifies this install as the awarding coach, like iOS' `BadgeAwarder.installId` */

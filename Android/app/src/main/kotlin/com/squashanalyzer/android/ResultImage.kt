@@ -37,7 +37,8 @@ object ResultImage {
 
     fun shareIntent(context: Context, card: ResultCard): Intent {
         val file = File(context.cacheDir, "kaart").apply { mkdirs() }.resolve("uitslag.png")
-        file.outputStream().use { render(card).compress(Bitmap.CompressFormat.PNG, 100, it) }
+        val matchesHeading = HostLocale.texts(context).getString(R.string.result_matches_heading)
+        file.outputStream().use { render(card, matchesHeading).compress(Bitmap.CompressFormat.PNG, 100, it) }
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", file)
         val send = Intent(Intent.ACTION_SEND).apply {
             type = "image/png"
@@ -57,7 +58,8 @@ object ResultImage {
             typeface = Typeface.create(Typeface.SANS_SERIF, if (bold) Typeface.BOLD else Typeface.NORMAL)
         }
 
-    fun render(card: ResultCard): Bitmap {
+    /** `matchesHeading`: "PARTIJEN" above the rows of a team match, in the app's language */
+    fun render(card: ResultCard, matchesHeading: String): Bitmap {
         val chips = card.chips.toList()
         val rows = card.rows.toList()
         // A team match picture has a line per partij under the score and is taller for it
@@ -142,7 +144,7 @@ object ResultImage {
         // only a hairline between them
         if (rows.isNotEmpty()) {
             val header = paint(26f, muted, bold = true, align = Paint.Align.LEFT).apply { letterSpacing = 0.25f }
-            canvas.drawText("PARTIJEN", PADDING, 985f, header)
+            canvas.drawText(matchesHeading, PADDING, 985f, header)
             val hairline = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(20, 255, 255, 255); strokeWidth = 2f }
             val nameX = PADDING + 78f
             val scoreWidth = 150f

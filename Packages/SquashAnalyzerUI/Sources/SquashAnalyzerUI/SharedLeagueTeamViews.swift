@@ -18,7 +18,7 @@ enum LeagueDates {
 
     private static func format(_ date: Date, _ pattern: String) -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "nl_NL")
+        formatter.locale = displayLocale
         formatter.timeZone = TimeZone(identifier: "Europe/Amsterdam")
         formatter.dateFormat = pattern
         return formatter.string(from: date)
@@ -60,18 +60,18 @@ public struct SharedLeagueTeamCard: View {
             if let snapshot {
                 Button { onOpen(snapshot) } label: { card(snapshot) }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Mijn team: \(snapshot.name)")
+                    .accessibilityLabel(loc("Mijn team: \(snapshot.name)"))
             } else if !teamURL.isEmpty {
                 HStack(spacing: 10) {
                     if loading {
                         ProgressView()
                     }
-                    Text(loading ? "Mijn team laden…" : (errorMessage ?? "Team laden niet gelukt"))
+                    Text(loading ? loc("Mijn team laden…") : (errorMessage ?? loc("Team laden niet gelukt")))
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                     Spacer()
                     if !loading {
-                        Button("Opnieuw") { Task { await load() } }
+                        Button(loc("Opnieuw")) { Task { await load() } }
                             .foregroundColor(SharedColors.accent)
                     }
                 }
@@ -89,32 +89,32 @@ public struct SharedLeagueTeamCard: View {
     private var setupPrompt: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top) {
-                Text("Speel je competitie bij SBN?")
+                Text("Speel je competitie bij SBN?", bundle: textBundle)
                     .font(SharedFonts.system(16, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
                 Spacer()
                 Button { promptDismissed = true } label: {
-                    Text("Sluiten")
+                    Text("Sluiten", bundle: textBundle)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textMuted)
                 }
-                .accessibilityLabel("Sluiten")
+                .accessibilityLabel(loc("Sluiten"))
             }
-            Text("Vul de link van je team in en je ziet de stand en het programma, en je teamleden komen vanzelf bij Spelers.")
+            Text("Vul de link van je team in en je ziet de stand en het programma, en je teamleden komen vanzelf bij Spelers.", bundle: textBundle)
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 16) {
                 if let onSetup {
                     Button { onSetup() } label: {
-                        Text("Teamlink invullen")
+                        Text("Teamlink invullen", bundle: textBundle)
                             .font(SharedFonts.system(14, weight: .semibold))
                             .foregroundColor(SharedColors.accent)
                     }
                 }
                 if let helpURL {
                     Link(destination: helpURL) {
-                        Text("Waar vind ik die?")
+                        Text("Waar vind ik die?", bundle: textBundle)
                             .font(SharedFonts.system(14))
                             .foregroundColor(SharedColors.accent)
                     }
@@ -185,7 +185,7 @@ public struct SharedLeagueTeamDetailView: View {
                             .font(SharedFonts.system(12))
                             .foregroundColor(SharedColors.textSecondary)
                     }
-                    section("STAND") {
+                    section(loc("STAND")) {
                         ForEach(snapshot.standings) { row in
                             let own = isOwnTeam(row)
                             HStack {
@@ -196,7 +196,7 @@ public struct SharedLeagueTeamDetailView: View {
                                     .foregroundColor(own ? SharedColors.accent : SharedColors.textPrimary)
                                     .fontWeight(own ? .bold : .regular)
                                 Spacer()
-                                Text("\(row.points) pt")
+                                Text("\(row.points) pt", bundle: textBundle)
                                     .foregroundColor(own ? SharedColors.accent : SharedColors.gold)
                                     .fontWeight(own ? .bold : .regular)
                             }
@@ -208,7 +208,7 @@ public struct SharedLeagueTeamDetailView: View {
                             .overlay(RoundedRectangle(cornerRadius: 8).stroke(own ? SharedColors.accent.opacity(0.5) : Color.clear, lineWidth: 1))
                         }
                     }
-                    section("WEDSTRIJDEN") {
+                    section(loc("WEDSTRIJDEN")) {
                         ForEach(snapshot.fixtures) { fixture in
                             HStack(spacing: 10) {
                                 Text(LeagueDates.day(fixture.date))
@@ -226,7 +226,7 @@ public struct SharedLeagueTeamDetailView: View {
                             .padding(.vertical, 5)
                         }
                     }
-                    section("SPELERS") {
+                    section(loc("SPELERS")) {
                         ForEach(snapshot.players) { player in
                             HStack {
                                 Text(player.name).foregroundColor(SharedColors.textPrimary)
@@ -239,7 +239,7 @@ public struct SharedLeagueTeamDetailView: View {
                         }
                     }
                     HStack(spacing: 12) {
-                        Text(refreshError ?? "Bijgewerkt: \(LeagueDates.day(snapshot.updatedAt)) \(LeagueDates.time(snapshot.updatedAt))")
+                        Text(refreshError ?? loc("Bijgewerkt: \(LeagueDates.day(snapshot.updatedAt)) \(LeagueDates.time(snapshot.updatedAt))"))
                             .font(SharedFonts.system(11))
                             .foregroundColor(SharedColors.textMuted)
                         Spacer()
@@ -247,7 +247,7 @@ public struct SharedLeagueTeamDetailView: View {
                             if refreshing {
                                 ProgressView()
                             } else {
-                                Button("Vernieuwen") { Task { await refresh() } }
+                                Button(loc("Vernieuwen")) { Task { await refresh() } }
                                     .font(SharedFonts.system(13, weight: .semibold))
                                     .foregroundColor(SharedColors.accent)
                             }
@@ -257,7 +257,7 @@ public struct SharedLeagueTeamDetailView: View {
                 .padding(24)
             }
         }
-        .pageTitle("Mijn team")
+        .pageTitle(loc("Mijn team"))
     }
 
     private func refresh() async {

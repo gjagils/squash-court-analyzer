@@ -62,7 +62,7 @@ public struct SettingsRow: View {
             SettingsRowLabel(title, icon: icon, open: open)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(open == nil ? title : (open == true ? "\(title), open" : "\(title), dicht"))
+        .accessibilityLabel(open == nil ? title : (open == true ? loc("\(title), open") : loc("\(title), dicht")))
     }
 }
 
@@ -89,15 +89,15 @@ public struct SettingsManualCard: View {
                     .clipShape(Circle())
                     .overlay(Circle().stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Handleiding")
+                    Text("Handleiding", bundle: textBundle)
                         .font(SharedFonts.system(16, weight: .semibold))
                         .foregroundColor(SharedColors.textPrimary)
-                    Text("Per tegel uitgelegd hoe alles werkt, op squashanalyzer.com.")
+                    Text("Per tegel uitgelegd hoe alles werkt, op squashanalyzer.com.", bundle: textBundle)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textSecondary)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("Open de handleiding")
+                    Text("Open de handleiding", bundle: textBundle)
                         .font(SharedFonts.system(13, weight: .semibold))
                         .foregroundColor(SharedColors.accent)
                 }
@@ -108,6 +108,6 @@ public struct SettingsManualCard: View {
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
         }
-        .accessibilityLabel("Open de handleiding")
+        .accessibilityLabel(loc("Open de handleiding"))
     }
 }

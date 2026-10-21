@@ -44,7 +44,7 @@ public struct SharedTestDataCleanupView: View {
                     if !counts.isEmpty {
                         cleanup
                     } else {
-                        ActionButton("BEGREPEN", style: .filled) { onDone() }
+                        ActionButton(loc("BEGREPEN"), style: .filled) { onDone() }
                     }
                 }
                 .padding(20)
@@ -57,16 +57,16 @@ public struct SharedTestDataCleanupView: View {
     /// The badge reset, for a device with badges from before it
     private var badgeReset: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Badges beginnen opnieuw")
+            Text("Badges beginnen opnieuw", bundle: textBundle)
                 .font(SharedFonts.system(22, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
-            Text("Vanaf de release begint iedereen opnieuw met badges. Je badges uit de testperiode worden niet gewist, maar tellen niet meer mee.")
+            Text("Vanaf de release begint iedereen opnieuw met badges. Je badges uit de testperiode worden niet gewist, maar tellen niet meer mee.", bundle: textBundle)
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(alignment: .top, spacing: 12) {
                 AppSymbol("medal", size: 20, color: SharedColors.accent, weight: .medium)
-                Text("Als dank voor het testen krijgen je spelers de badge Pionier. Je vindt hem bij je spelers en in de lijst onder Speciaal.")
+                Text("Als dank voor het testen krijgen je spelers de badge Pionier. Je vindt hem bij je spelers en in de lijst onder Speciaal.", bundle: textBundle)
                     .font(SharedFonts.system(13, weight: .medium))
                     .foregroundColor(SharedColors.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -81,12 +81,12 @@ public struct SharedTestDataCleanupView: View {
     /// The question itself: a switch per group, first a full backup
     private var cleanup: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Testgegevens opruimen")
+            Text("Testgegevens opruimen", bundle: textBundle)
                 .font(SharedFonts.system(counts.earlierBadges > 0 ? 18.0 : 22.0, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
             Text(counts.earlierBadges > 0
-                 ? "Wil je ook de wedstrijden uit de testperiode opruimen? Alleen wedstrijden van vóór de release; eerst wordt een volledige back-up gemaakt."
-                 : "De testperiode is voorbij en iedereen begint opnieuw met badges. Wil je ook de wedstrijden uit de testperiode opruimen? Alleen wedstrijden van vóór de release; eerst wordt een volledige back-up gemaakt.")
+                 ? loc("Wil je ook de wedstrijden uit de testperiode opruimen? Alleen wedstrijden van vóór de release; eerst wordt een volledige back-up gemaakt.")
+                 : loc("De testperiode is voorbij en iedereen begint opnieuw met badges. Wil je ook de wedstrijden uit de testperiode opruimen? Alleen wedstrijden van vóór de release; eerst wordt een volledige back-up gemaakt."))
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -97,7 +97,7 @@ public struct SharedTestDataCleanupView: View {
                             Text(group.title)
                                 .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                                 .foregroundColor(SharedColors.textPrimary)
-                            Text(counts.count(group) == 1 ? "1 wedstrijd" : "\(counts.count(group)) wedstrijden")
+                            Text(counts.count(group) == 1 ? loc("1 wedstrijd") : loc("\(counts.count(group)) wedstrijden"))
                                 .font(SharedFonts.system(11))
                                 .foregroundColor(SharedColors.textMuted)
                         }
@@ -110,7 +110,7 @@ public struct SharedTestDataCleanupView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(SharedColors.tint(0.04))
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            Text("Wat je bewaart, blijft in de geschiedenis en de analyse staan. Voor badges telt het niet meer mee.")
+            Text("Wat je bewaart, blijft in de geschiedenis en de analyse staan. Voor badges telt het niet meer mee.", bundle: textBundle)
                 .font(SharedFonts.system(11))
                 .foregroundColor(SharedColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -120,10 +120,10 @@ public struct SharedTestDataCleanupView: View {
                     .foregroundColor(SharedColors.error)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            ActionButton(busy ? "BEZIG…" : "OPRUIMEN", icon: "trash", style: .filled, disabled: busy || chosen.isEmpty) {
+            ActionButton(busy ? loc("BEZIG…") : loc("OPRUIMEN"), icon: "trash", style: .filled, disabled: busy || chosen.isEmpty) {
                 Task { await cleanUp() }
             }
-            ActionButton("ALLES BEWAREN", disabled: busy) { onDone() }
+            ActionButton(loc("ALLES BEWAREN"), disabled: busy) { onDone() }
         }
     }
 
@@ -134,7 +134,7 @@ public struct SharedTestDataCleanupView: View {
             try await store.backUp()
         } catch {
             busy = false
-            failure = "De back-up is niet gelukt, dus er is niets opgeruimd. Probeer het later opnieuw of kies Alles bewaren."
+            failure = loc("De back-up is niet gelukt, dus er is niets opgeruimd. Probeer het later opnieuw of kies Alles bewaren.")
             return
         }
         do {
@@ -142,7 +142,7 @@ public struct SharedTestDataCleanupView: View {
             onDone()
         } catch {
             busy = false
-            failure = "Opruimen is niet gelukt. De back-up van zojuist staat klaar; probeer het later opnieuw."
+            failure = loc("Opruimen is niet gelukt. De back-up van zojuist staat klaar; probeer het later opnieuw.")
         }
     }
 }

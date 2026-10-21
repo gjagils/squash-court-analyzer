@@ -13,7 +13,7 @@ struct TeamShareBadge: View {
     let isLive: Bool
 
     var body: some View {
-        Text(isLive ? "GEDEELD" : "EIGEN")
+        Text(isLive ? loc("GEDEELD") : loc("EIGEN"))
             .font(SharedFonts.system(9, weight: .bold, design: .rounded))
             .tracking(1)
             .foregroundColor(isLive ? SharedColors.background : SharedColors.textSecondary)
@@ -29,22 +29,22 @@ struct TeamShareBanner: View {
     let match: TeamMatch
 
     private var title: String {
-        if !match.isLive { return "Alleen op deze telefoon" }
-        return match.isLiveOwner ? "Gedeeld met je team · jij bent de eigenaar" : "Gedeeld met je team"
+        if !match.isLive { return loc("Alleen op deze telefoon") }
+        return match.isLiveOwner ? loc("Gedeeld met je team · jij bent de eigenaar") : loc("Gedeeld met je team")
     }
 
     private var detail: String {
         if !match.isLive {
-            return "Teamgenoten zien deze teamwedstrijd niet. Tik op Deel met mijn team om samen te werken."
+            return loc("Teamgenoten zien deze teamwedstrijd niet. Tik op Deel met mijn team om samen te werken.")
         }
         if match.needsOwnPartij {
-            return "Tik op jouw partij en zet er een wedstrijd op. Wat jij invult, zien je teamgenoten ook."
+            return loc("Tik op jouw partij en zet er een wedstrijd op. Wat jij invult, zien je teamgenoten ook.")
         }
         let others = match.teammatePartijen
         if others == 0 {
-            return "Partijen die teamgenoten invullen komen er vanzelf bij."
+            return loc("Partijen die teamgenoten invullen komen er vanzelf bij.")
         }
-        return "\(others) van 4 partijen komen van teamgenoten. Wat jij invult, zien zij ook."
+        return loc("\(others) van 4 partijen komen van teamgenoten. Wat jij invult, zien zij ook.")
     }
 
     var body: some View {
@@ -83,43 +83,43 @@ struct TeamShareSheet: View {
                 SharedColors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
-                        Text("Kies voor wie het bericht is. Supporters kunnen alleen kijken; teamleden kunnen ook hun eigen partij invullen.")
+                        Text("Kies voor wie het bericht is. Supporters kunnen alleen kijken; teamleden kunnen ook hun eigen partij invullen.", bundle: textBundle)
                             .font(SharedFonts.system(13))
                             .foregroundColor(SharedColors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
-                        group("VOOR SUPPORTERS") {
-                            Text("Een link naar de livepagina met de stand van de hele avond. Kijken kan in de browser, zonder app. Er is niets in te vullen.")
+                        group(loc("VOOR SUPPORTERS")) {
+                            Text("Een link naar de livepagina met de stand van de hele avond. Kijken kan in de browser, zonder app. Er is niets in te vullen.", bundle: textBundle)
                                 .font(SharedFonts.system(12))
                                 .foregroundColor(SharedColors.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
                             if let shareText {
-                                ActionButton("Deel kijkerslink", icon: "square.and.arrow.up", style: .filled) {
+                                ActionButton(loc("Deel kijkerslink"), icon: "square.and.arrow.up", style: .filled) {
                                     shareText(TeamLiveTexts.viewers(match, baseURL: baseURL))
                                 }
                                 .padding(.top, 6)
                             }
                         }
-                        group("VOOR TEAMLEDEN") {
-                            Text("Een uitnodiging om mee te doen in dezelfde teamwedstrijd en je eigen partij erop te zetten. Alleen voor mensen uit je team: wie de uitnodiging heeft, kan partijen invullen.")
+                        group(loc("VOOR TEAMLEDEN")) {
+                            Text("Een uitnodiging om mee te doen in dezelfde teamwedstrijd en je eigen partij erop te zetten. Alleen voor mensen uit je team: wie de uitnodiging heeft, kan partijen invullen.", bundle: textBundle)
                                 .font(SharedFonts.system(12))
                                 .foregroundColor(SharedColors.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
                             if let shareText {
-                                ActionButton("Nodig teamleden uit", icon: "square.and.arrow.up", style: .filled) {
+                                ActionButton(loc("Nodig teamleden uit"), icon: "square.and.arrow.up", style: .filled) {
                                     shareText(TeamLiveTexts.invite(match))
                                 }
                                 .padding(.top, 6)
                             }
                             if let id = match.liveId, let key = match.liveKey {
                                 // Also readable when nothing can be shared: the code teammates paste at Deelnemen
-                                Text("Code om mee te doen: \(TeamInvite(id: id, key: key).code)")
+                                Text("Code om mee te doen: \(TeamInvite(id: id, key: key).code)", bundle: textBundle)
                                     .font(SharedFonts.system(11))
                                     .foregroundColor(SharedColors.textMuted)
                                     .fixedSize(horizontal: false, vertical: true)
                                     .padding(.top, 4)
                             }
                         }
-                        Text("2 uur na de laatste update wordt alles van de livepagina gewist. Alleen teamnamen, voornamen en de stand gaan mee.")
+                        Text("2 uur na de laatste update wordt alles van de livepagina gewist. Alleen teamnamen, voornamen en de stand gaan mee.", bundle: textBundle)
                             .font(SharedFonts.system(11))
                             .foregroundColor(SharedColors.textMuted)
                             .fixedSize(horizontal: false, vertical: true)
@@ -127,10 +127,10 @@ struct TeamShareSheet: View {
                     .padding(24)
                 }
             }
-            .pageTitle("Deel met team")
+            .pageTitle(loc("Deel met team"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    CloseButton(title: "Sluiten", action: onClose)
+                    CloseButton(title: loc("Sluiten"), action: onClose)
                 }
             }
         }

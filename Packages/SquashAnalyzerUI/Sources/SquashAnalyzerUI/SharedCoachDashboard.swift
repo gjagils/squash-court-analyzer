@@ -75,7 +75,7 @@ public struct SharedCoachDashboardView: View {
                         gamePicker
                     }
                     // De coachkaart: the game's three points for the player, to show between games
-                    ActionButton("COACHKAART", icon: "list.bullet.clipboard", style: .filled, color: SharedColors.accent) {
+                    ActionButton(loc("COACHKAART"), icon: "list.bullet.clipboard", style: .filled, color: SharedColors.accent) {
                         showingCard = true
                     }
                     GameNoteCard(gameId: game.id) { showingNote = true }
@@ -93,7 +93,7 @@ public struct SharedCoachDashboardView: View {
                         aiCard
                     }
                     // As on iOS; Skip's sheet is not full height, so keep it clear of the system bar
-                    ActionButton("SLUITEN", color: SharedColors.textSecondary, action: onClose)
+                    ActionButton(loc("SLUITEN"), color: SharedColors.textSecondary, action: onClose)
                         .padding(.bottom, 48)
                 }
                 .padding(.horizontal, 20)
@@ -102,7 +102,7 @@ public struct SharedCoachDashboardView: View {
         }
         .onAppear { GameNotes.shared.reload() }
         .sheet(isPresented: $showingNote) {
-            GameNoteEditor(gameId: game.id, title: "Notitie · Game \(match.gameNumber(at: matchGameIndex))") { showingNote = false }
+            GameNoteEditor(gameId: game.id, title: loc("Notitie · Game \(match.gameNumber(at: matchGameIndex))")) { showingNote = false }
         }
         .trackedCover(isPresented: $showingCard) {
             SharedCoachCardView(match: match, gameIndex: matchGameIndex,
@@ -123,7 +123,7 @@ public struct SharedCoachDashboardView: View {
             if let shareText {
                 HStack {
                     Button { shareText(GameSummaryText.text(for: game)) } label: {
-                        Text("Deel")
+                        Text("Deel", bundle: textBundle)
                             .font(SharedFonts.system(13, weight: .semibold))
                             .foregroundColor(SharedColors.gold)
                             .padding(.horizontal, 12)
@@ -131,7 +131,7 @@ public struct SharedCoachDashboardView: View {
                             .background(SharedColors.tint(0.1)).clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Deel game-analyse")
+                    .accessibilityLabel(loc("Deel game-analyse"))
                     Spacer()
                 }
             }
@@ -141,17 +141,17 @@ public struct SharedCoachDashboardView: View {
                     .background(SharedColors.tint(0.1)).clipShape(Circle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Sluiten")
+            .accessibilityLabel(loc("Sluiten"))
         }
     }
 
     private var titleBlock: some View {
         VStack(spacing: 4) {
-            Text("Analyse")
+            Text("Analyse", bundle: textBundle)
                 .font(PageTitleStyle.font)
                 .foregroundColor(SharedColors.textPrimary)
             if let winner = game.winner {
-                Text("\(game.name(for: winner)) wint!")
+                Text("\(game.name(for: winner)) wint!", bundle: textBundle)
                     .font(SharedFonts.system(14))
                     .foregroundColor(SharedColors.gold)
             }
@@ -190,7 +190,7 @@ public struct SharedCoachDashboardView: View {
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(selected ? color(for: side).opacity(0.5) : Color.clear, lineWidth: 1))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Analyse voor \(game.name(for: side))")
+        .accessibilityLabel(loc("Analyse voor \(game.name(for: side))"))
     }
 
     private var gamePicker: some View {
@@ -199,7 +199,7 @@ public struct SharedCoachDashboardView: View {
                 ForEach(0..<games.count, id: \.self) { index in
                     let candidate = games[index]
                     Button { chooseGame(index) } label: {
-                        Text("Game \(gameNumber(of: candidate)) (\(candidate.player1Score)-\(candidate.player2Score))")
+                        Text("Game \(gameNumber(of: candidate)) (\(candidate.player1Score)-\(candidate.player2Score))", bundle: textBundle)
                             .font(SharedFonts.system(11))
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
@@ -245,10 +245,10 @@ public struct SharedCoachDashboardView: View {
         let won = game.averageDurationWon(by: player)
         let lost = game.averageDurationLost(by: player)
         return HStack(spacing: 8) {
-            stat("Gewonnen", won.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", SharedColors.positive, icon: "timer")
-            stat("Verloren", lost.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", SharedColors.warmRed, icon: "timer")
-            stat("Beste zone", game.bestZone(for: player)?.rawValue ?? "-", SharedColors.gold, icon: "mappin")
-            stat("Beste slag", game.bestShotType(for: player)?.rawValue ?? "-", SharedColors.accent, icon: "star.fill",
+            stat(loc("Gewonnen"), won.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", SharedColors.positive, icon: "timer")
+            stat(loc("Verloren"), lost.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", SharedColors.warmRed, icon: "timer")
+            stat(loc("Beste zone"), game.bestZone(for: player)?.rawValue ?? "-", SharedColors.gold, icon: "mappin")
+            stat(loc("Beste slag"), game.bestShotType(for: player)?.rawValue ?? "-", SharedColors.accent, icon: "star.fill",
                  shot: game.bestShotType(for: player))
         }
     }
@@ -286,7 +286,7 @@ public struct SharedCoachDashboardView: View {
         }
         let highest = most
         return VStack(spacing: 6) {
-            Text("Heatmap")
+            Text("Heatmap", bundle: textBundle)
                 .font(SharedFonts.system(10))
                 .foregroundColor(SharedColors.textMuted)
             VStack(spacing: 2) {
@@ -318,12 +318,12 @@ public struct SharedCoachDashboardView: View {
     private var shots: some View {
         let top = CoachAdvice.topShots(in: game, for: player)
         return VStack(alignment: .leading, spacing: 6) {
-            Text("Slagen")
+            Text("Slagen", bundle: textBundle)
                 .font(SharedFonts.system(10))
                 .foregroundColor(SharedColors.textMuted)
                 .frame(maxWidth: .infinity)
             if top.isEmpty {
-                Text("Nog geen slagen")
+                Text("Nog geen slagen", bundle: textBundle)
                     .font(SharedFonts.system(10))
                     .foregroundColor(SharedColors.textMuted)
             }
@@ -368,20 +368,20 @@ public struct SharedCoachDashboardView: View {
 
     private var pointTypes: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionTitle("Puntverdeling", icon: "chart.pie.fill")
+            sectionTitle(loc("Puntverdeling"), icon: "chart.pie.fill")
             HStack(spacing: 8) {
-                countBadge("Winners", game.winners(by: player).count, SharedColors.positive)
-                countBadge("Druk", game.forcedErrors(by: player).count, SharedColors.gold)
-                countBadge("Service", game.servicePoints(by: player).count, SharedColors.accent)
+                countBadge(loc("Winners"), game.winners(by: player).count, SharedColors.positive)
+                countBadge(loc("Druk"), game.forcedErrors(by: player).count, SharedColors.gold)
+                countBadge(loc("Service"), game.servicePoints(by: player).count, SharedColors.accent)
             }
             HStack(spacing: 8) {
-                countBadge("Cadeautjes", game.unforcedErrors(by: player).count, SharedColors.steelBlueLight)
-                countBadge("Eigen fouten", game.unforcedErrors(by: player.opponent).count, SharedColors.warmRed)
-                countBadge("Strokes", game.strokes(by: player).count, SharedColors.warmRed)
+                countBadge(loc("Cadeautjes"), game.unforcedErrors(by: player).count, SharedColors.steelBlueLight)
+                countBadge(loc("Eigen fouten"), game.unforcedErrors(by: player.opponent).count, SharedColors.warmRed)
+                countBadge(loc("Strokes"), game.strokes(by: player).count, SharedColors.warmRed)
             }
             // How the own unforced errors went: "Down 2 · Out 1"
             if let kinds = ErrorKind.summary(game.errorKindCounts(madeBy: player)) {
-                Text("Eigen fouten: \(kinds)")
+                Text("Eigen fouten: \(kinds)", bundle: textBundle)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textSecondary)
             }
@@ -396,10 +396,10 @@ public struct SharedCoachDashboardView: View {
         return HStack(spacing: 12) {
             AppSymbol("bolt.fill", size: 18, color: SharedColors.gold)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Uit de lucht")
+                Text("Uit de lucht", bundle: textBundle)
                     .font(SharedFonts.system(12, weight: .semibold))
                     .foregroundColor(SharedColors.textPrimary)
-                Text(CoachAdvice.volleyBreakdown(in: game, for: player) ?? "Nog geen volleys")
+                Text(CoachAdvice.volleyBreakdown(in: game, for: player) ?? loc("Nog geen volleys"))
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textSecondary)
             }
@@ -444,11 +444,11 @@ public struct SharedCoachDashboardView: View {
         // With the match, so findings that also showed in an earlier game are named
         let items = CoachAdvice.local(in: game, for: player, match: match)
         return VStack(alignment: .leading, spacing: 10) {
-            sectionTitle("Tactisch Advies", icon: "lightbulb.fill")
+            sectionTitle(loc("Tactisch Advies"), icon: "lightbulb.fill")
             ZoneProfileTable(profile: ZoneProfile.of(game, for: player))
                 .padding(.bottom, 4)
             if items.isEmpty {
-                Text("Nog te weinig punten voor advies.")
+                Text("Nog te weinig punten voor advies.", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textMuted)
             }
@@ -509,7 +509,7 @@ public struct SharedCoachDashboardView: View {
                 sectionTitle("AI Coach", icon: "brain")
                 Spacer()
                 if !hasKey {
-                    Text("API key vereist")
+                    Text("API key vereist", bundle: textBundle)
                         .font(SharedFonts.system(10))
                         .foregroundColor(SharedColors.textMuted)
                 }
@@ -520,18 +520,18 @@ public struct SharedCoachDashboardView: View {
                 Text(aiError)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.accent)
-                Button("Opnieuw proberen") { requestAdvice() }
+                Button(loc("Opnieuw proberen")) { requestAdvice() }
                     .foregroundColor(SharedColors.steelBlueLight)
             } else if loadingAI {
                 HStack(spacing: 10) {
                     ProgressView()
-                    Text("AI analyseert de game…")
+                    Text("AI analyseert de game…", bundle: textBundle)
                         .font(SharedFonts.system(13))
                         .foregroundColor(SharedColors.textSecondary)
                 }
             } else {
                 Button { requestAdvice() } label: {
-                    Text(hasKey ? "Vraag AI Coach om advies" : "Stel je API key in bij Instellingen")
+                    Text(hasKey ? loc("Vraag AI Coach om advies") : loc("Stel je API key in bij Instellingen"))
                         .font(SharedFonts.system(13, weight: .semibold))
                         .foregroundColor(hasKey ? SharedColors.steelBlueLight : SharedColors.textMuted)
                         .frame(maxWidth: .infinity)
@@ -553,8 +553,8 @@ public struct SharedCoachDashboardView: View {
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
-            bulletList("Sterke punten:", advice.sterktePunten, SharedColors.positive)
-            bulletList("Werkpunten:", advice.werkPunten, SharedColors.accent)
+            bulletList(loc("Sterke punten:"), advice.sterktePunten, SharedColors.positive)
+            bulletList(loc("Werkpunten:"), advice.werkPunten, SharedColors.accent)
             Text(advice.focusVolgendeGame)
                 .font(SharedFonts.system(12, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)

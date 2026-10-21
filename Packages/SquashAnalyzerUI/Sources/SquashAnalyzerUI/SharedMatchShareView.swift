@@ -65,7 +65,7 @@ public struct SharedMatchShareView: View {
                         ResultCardPreview(card: card)
                     }
                 }
-                ActionButton("DELEN", style: .filled) { share() }
+                ActionButton(loc("DELEN"), style: .filled) { share() }
                 Spacer().frame(height: 24)
             }
             .padding(.horizontal, 20)
@@ -84,7 +84,7 @@ public struct SharedMatchShareView: View {
     /// "✕ Sluiten" left, the title centred, as on iOS
     private var header: some View {
         ZStack {
-            Text("DEEL SCORE")
+            Text("DEEL SCORE", bundle: textBundle)
                 .font(SharedFonts.system(14, weight: .bold, design: .rounded))
                 .tracking(2)
                 .foregroundColor(SharedColors.textPrimary)
@@ -92,13 +92,13 @@ public struct SharedMatchShareView: View {
                 Button(action: onClose) {
                     HStack(spacing: 4) {
                         AppSymbol("xmark", size: 14, color: SharedColors.textSecondary)
-                        Text("Sluiten")
+                        Text("Sluiten", bundle: textBundle)
                             .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.textSecondary)
                     }
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Sluiten")
+                .accessibilityLabel(loc("Sluiten"))
                 Spacer()
             }
         }

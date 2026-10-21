@@ -17,14 +17,14 @@ struct SharedCompleteResultView: View {
         ZStack {
             SharedColors.background.opacity(0.6).ignoresSafeArea()
             VStack(spacing: 14) {
-                Text("UITSLAG AANVULLEN")
+                Text("UITSLAG AANVULLEN", bundle: textBundle)
                     .font(SharedFonts.system(16, weight: .bold, design: .rounded))
                     .tracking(2)
                     .foregroundColor(SharedColors.textPrimary)
-                Text("Kies per gemiste game wie hem won.")
+                Text("Kies per gemiste game wie hem won.", bundle: textBundle)
                     .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.textSecondary)
-                Text("Nu: \(match.player1Name) \(match.player1GamesWon) – \(match.player2GamesWon) \(match.player2Name)")
+                Text("Nu: \(match.player1Name) \(match.player1GamesWon) – \(match.player2GamesWon) \(match.player2Name)", bundle: textBundle)
                     .font(SharedFonts.system(13, weight: .semibold))
                     .foregroundColor(SharedColors.textSecondary)
 
@@ -41,7 +41,7 @@ struct SharedCompleteResultView: View {
                 }
 
                 if !isDecided && winners.count < 5 {
-                    Text("Game \(match.firstUnrecordedGameNumber + winners.count): wie won?")
+                    Text("Game \(match.firstUnrecordedGameNumber + winners.count): wie won?", bundle: textBundle)
                         .font(SharedFonts.system(13))
                         .foregroundColor(SharedColors.textPrimary)
                     HStack(spacing: 10) {
@@ -51,20 +51,20 @@ struct SharedCompleteResultView: View {
                 }
 
                 if !winners.isEmpty {
-                    Button("Laatste game wissen") { winners.removeLast() }
+                    Button(loc("Laatste game wissen")) { winners.removeLast() }
                         .foregroundColor(SharedColors.textSecondary)
                 }
 
                 HStack(spacing: 10) {
                     Button(action: onCancel) {
-                        Text("Annuleren")
+                        Text("Annuleren", bundle: textBundle)
                             .foregroundColor(SharedColors.textSecondary)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                     }
                     .buttonStyle(.plain)
                     Button { onSave(winners) } label: {
-                        Text("Opslaan")
+                        Text("Opslaan", bundle: textBundle)
                             .fontWeight(.bold)
                             .foregroundColor(SharedColors.background)
                             .frame(maxWidth: .infinity)
@@ -95,6 +95,6 @@ struct SharedCompleteResultView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(match.name(for: player)) won deze game")
+        .accessibilityLabel(loc("\(match.name(for: player)) won deze game"))
     }
 }

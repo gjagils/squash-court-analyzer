@@ -29,7 +29,7 @@ public struct SharedCardImportView: View {
                         Text(snapshot.name)
                             .font(SharedFonts.system(20, weight: .bold, design: .rounded))
                             .foregroundColor(SharedColors.textPrimary)
-                        Text(preview?.summary ?? "Kaart lezen…")
+                        Text(preview?.summary ?? loc("Kaart lezen…"))
                             .font(SharedFonts.system(13))
                             .foregroundColor(SharedColors.textSecondary)
                     }
@@ -42,17 +42,17 @@ public struct SharedCardImportView: View {
                             Button { importCard(to: linked.id) } label: {
                                 HStack(spacing: 8) {
                                     AppSymbol("arrow.triangle.2.circlepath", size: 16, color: SharedColors.gold)
-                                    Text("Bijwerken bij \(linked.name)").foregroundColor(SharedColors.gold)
+                                    Text("Bijwerken bij \(linked.name)", bundle: textBundle).foregroundColor(SharedColors.gold)
                                 }
                             }
                             .disabled(isImporting)
                         }
                     } else {
-                        Section("Koppel aan") {
+                        Section(loc("Koppel aan")) {
                             Button { importCard(to: nil) } label: {
                                 HStack(spacing: 8) {
                                     AppSymbol("person.badge.plus", size: 16, color: SharedColors.gold)
-                                    Text("Nieuwe speler \(snapshot.name)").foregroundColor(SharedColors.gold)
+                                    Text("Nieuwe speler \(snapshot.name)", bundle: textBundle).foregroundColor(SharedColors.gold)
                                 }
                             }
                             .disabled(isImporting)
@@ -63,7 +63,7 @@ public struct SharedCardImportView: View {
                                             .foregroundColor(SharedColors.textPrimary)
                                         Spacer()
                                         if player.name.lowercased() == snapshot.name.lowercased() {
-                                            Text("zelfde naam")
+                                            Text("zelfde naam", bundle: textBundle)
                                                 .font(SharedFonts.system(11))
                                                 .foregroundColor(SharedColors.textMuted)
                                         }
@@ -75,16 +75,16 @@ public struct SharedCardImportView: View {
                     }
                 }
             }
-            .pageTitle("Spelerskaart")
+            .pageTitle(loc("Spelerskaart"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    CloseButton(title: "Annuleren") { onClose(false) }
+                    CloseButton(title: loc("Annuleren")) { onClose(false) }
                 }
             }
-            .alert("Koppelen mislukt", isPresented: $failed) {
-                Button("OK", role: .cancel) { }
+            .alert(loc("Koppelen mislukt"), isPresented: $failed) {
+                Button(loc("OK"), role: .cancel) { }
             } message: {
-                Text("De kaart van \(snapshot.name) kon niet worden bewaard.")
+                Text("De kaart van \(snapshot.name) kon niet worden bewaard.", bundle: textBundle)
             }
         }
         .preferredColorScheme(SharedColors.preferredScheme)

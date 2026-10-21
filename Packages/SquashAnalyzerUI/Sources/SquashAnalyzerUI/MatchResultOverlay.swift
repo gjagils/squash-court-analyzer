@@ -239,7 +239,7 @@ public struct MatchResultOverlay: View {
 
     /// "Undo laatste punt", so a mis-tap on the final point can still be corrected
     private func undoButton(_ action: @escaping () -> Void) -> some View {
-        ActionButton("Undo laatste punt", icon: "arrow.uturn.backward", color: SharedColors.textSecondary, action: action)
+        ActionButton(loc("Undo laatste punt"), icon: "arrow.uturn.backward", color: SharedColors.textSecondary, action: action)
     }
 }
 
@@ -261,7 +261,7 @@ public struct MatchBadgesRow: View {
         return Button(action: onTap) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("BADGES VERDIEND")
+                    Text("BADGES VERDIEND", bundle: textBundle)
                         .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                         .tracking(1)
                         .foregroundColor(color)
@@ -279,14 +279,14 @@ public struct MatchBadgesRow: View {
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.35), lineWidth: 1))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Bekijk badges")
+        .accessibilityLabel(loc("Bekijk badges"))
     }
 
     /// The name and what was earned on one line, the medallions under it: with
     /// eight or nine medallions next to it the name was cut off ("Thé · 8…")
     private func earningLine(_ earning: MatchBadgeEarning) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("\(earning.name) · " + (earning.badges.count == 1 ? earning.badges[0].tieredTitle : "\(earning.badges.count) badges"))
+            Text("\(earning.name) · " + (earning.badges.count == 1 ? earning.badges[0].tieredTitle : loc("\(earning.badges.count) badges")))
                 .font(SharedFonts.system(13, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
                 .lineLimit(1)
@@ -336,7 +336,7 @@ public struct SharedMatchBadgesSheet: View {
                 }
                 #else
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Klaar") { onClose() }
+                    Button(loc("Klaar")) { onClose() }
                 }
                 #endif
             }
@@ -348,7 +348,7 @@ public struct SharedMatchBadgesSheet: View {
         Button { onClose() } label: {
             HStack(spacing: 4) {
                 Image(systemName: "xmark")
-                Text("Sluiten")
+                Text("Sluiten", bundle: textBundle)
             }
             .font(SharedFonts.system(14, weight: .medium, design: .rounded))
             .foregroundColor(SharedColors.textSecondary)

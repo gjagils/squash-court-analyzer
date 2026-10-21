@@ -83,7 +83,7 @@ struct ResultCardPreview: View {
     /// Team match: one quiet line per partij (who played whom, the stand, the games)
     private var rowsView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("PARTIJEN")
+            Text("PARTIJEN", bundle: textBundle)
                 .font(SharedFonts.system(10, weight: .semibold, design: .rounded))
                 .tracking(2.5)
                 .foregroundColor(muted)

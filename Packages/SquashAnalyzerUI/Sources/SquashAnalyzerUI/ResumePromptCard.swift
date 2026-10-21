@@ -14,16 +14,16 @@ struct ResumePromptCard: View {
         ZStack {
             SharedColors.background.opacity(0.6).ignoresSafeArea()
             VStack(spacing: 14) {
-                Text("Wedstrijd hervatten?")
+                Text("Wedstrijd hervatten?", bundle: textBundle)
                     .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
                 Text(message)
                     .font(SharedFonts.system(13))
                     .foregroundColor(SharedColors.textSecondary)
                     .multilineTextAlignment(.center)
-                button("Hervatten", SharedColors.accent, action: onResume)
-                button("Nieuwe wedstrijd", SharedColors.warmRed, action: onNew)
-                Button("Annuleren", action: onCancel)
+                button(loc("Hervatten"), SharedColors.accent, action: onResume)
+                button(loc("Nieuwe wedstrijd"), SharedColors.warmRed, action: onNew)
+                Button(loc("Annuleren"), action: onCancel)
                     .foregroundColor(SharedColors.textSecondary)
             }
             .padding(24)

@@ -49,7 +49,7 @@ public struct LiveShareButton: View {
                 Circle()
                     .fill(isLive ? Color.white : grey)
                     .frame(width: 7, height: 7)
-                Text(busy ? "…" : (newLink ? "NIEUWE LINK" : "LIVE"))
+                Text(busy ? "…" : (newLink ? loc("NIEUWE LINK") : "LIVE"))
                     .font(SharedFonts.system(11, weight: .bold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(isLive ? Color.white : grey)
@@ -64,21 +64,21 @@ public struct LiveShareButton: View {
         }
         .buttonStyle(.plain)
         .disabled(busy)
-        .accessibilityLabel(isLive ? "Live: link delen of stoppen" : "Live delen")
-        .alert("Live meekijken", isPresented: $showingMenu) {
-            Button("Link opnieuw delen") { shareLink() }
-            Button("Live stoppen", role: .destructive) {
+        .accessibilityLabel(isLive ? loc("Live: link delen of stoppen") : loc("Live delen"))
+        .alert(loc("Live meekijken"), isPresented: $showingMenu) {
+            Button(loc("Link opnieuw delen")) { shareLink() }
+            Button(loc("Live stoppen"), role: .destructive) {
                 Task { await live.stop() }
             }
-            Button("Annuleren", role: .cancel) {}
+            Button(loc("Annuleren"), role: .cancel) {}
         } message: {
-            Text(live.offline ? "Geen verbinding: de stand gaat weer mee zodra er netwerk is." : "Kijkers volgen de stand via de link. 2 uur na de wedstrijd wordt alles gewist (ook de foto's); Live stoppen wist het meteen.")
+            Text(live.offline ? loc("Geen verbinding: de stand gaat weer mee zodra er netwerk is.") : loc("Kijkers volgen de stand via de link. 2 uur na de wedstrijd wordt alles gewist (ook de foto's); Live stoppen wist het meteen."))
         }
-        .alert("Live delen lukte niet", isPresented: $failed) {
+        .alert(loc("Live delen lukte niet"), isPresented: $failed) {
             // No .cancel role: with only a cancel button Skip adds its own "OK" (two OKs on Android)
-            Button("OK") {}
+            Button(loc("OK")) {}
         } message: {
-            Text("Controleer de internetverbinding en probeer het opnieuw.")
+            Text("Controleer de internetverbinding en probeer het opnieuw.", bundle: textBundle)
         }
     }
 
@@ -115,7 +115,7 @@ public struct LiveShareButton: View {
         guard let link = live.link else { return }
         live.acknowledgeLink()
         let state = snapshot()
-        share?("Volg \(state.p1) – \(state.p2) live: \(link)")
+        share?(loc("Volg \(state.p1) – \(state.p2) live: \(link)"))
     }
 }
 

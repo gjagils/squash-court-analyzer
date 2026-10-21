@@ -16,7 +16,7 @@ public struct SharedMatchBadgesStrip: View {
     public var body: some View {
         if !earnings.isEmpty {
             VStack(spacing: 10) {
-                Text("BADGES VERDIEND")
+                Text("BADGES VERDIEND", bundle: textBundle)
                     .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                     .tracking(1.5)
                     .foregroundColor(SharedColors.gold)

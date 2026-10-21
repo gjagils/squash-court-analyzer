@@ -8,6 +8,7 @@ import androidx.compose.material.icons.outlined.Backup
 import androidx.compose.material.icons.outlined.Contrast
 import androidx.compose.material.icons.outlined.GridOn
 import androidx.compose.material.icons.outlined.Sensors
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
@@ -197,6 +198,7 @@ struct AppSymbol: View {
         case "play.fill": return Icons.Outlined.PlayArrow
         case "magnifyingglass": return Icons.Outlined.Search
         case "lock.iphone": return Icons.Outlined.ScreenLockPortrait
+        case "globe": return Icons.Outlined.Language
         default: return nil
         }
     }

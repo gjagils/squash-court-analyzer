@@ -35,9 +35,9 @@ public struct SharedCoachCardView: View {
                         ZoneHeatmap(game: game, player: Player.player1, color: color(Player.player1))
                         ZoneHeatmap(game: game, player: Player.player2, color: color(Player.player2))
                     }
-                    section("COACHPUNTEN · \(game.name(for: player).uppercased())")
+                    section(loc("COACHPUNTEN · \(game.name(for: player).uppercased())"))
                     if current.points.isEmpty {
-                        Text("Te weinig punten in deze game voor coachpunten. Leg vak en slag vast bij elk punt, dan komen ze hier.")
+                        Text("Te weinig punten in deze game voor coachpunten. Leg vak en slag vast bij elk punt, dan komen ze hier.", bundle: textBundle)
                             .font(SharedFonts.system(15))
                             .foregroundColor(SharedColors.textSecondary)
                     }
@@ -45,19 +45,19 @@ public struct SharedCoachCardView: View {
                         pointRow(current.points[index], number: index + 1)
                     }
                     if !GameNotes.shared.note(for: game.id).isEmpty {
-                        section("JOUW NOTITIE")
+                        section(loc("JOUW NOTITIE"))
                         Text(GameNotes.shared.note(for: game.id))
                             .font(SharedFonts.system(17))
                             .foregroundColor(SharedColors.textPrimary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     if let previous = current.previousGameNumber, !current.changes.isEmpty {
-                        section("SINDS GAME \(previous)")
+                        section(loc("SINDS GAME \(previous)"))
                         ForEach(0..<current.changes.count, id: \.self) { index in
                             pointRow(current.changes[index], number: nil)
                         }
                     }
-                    ActionButton("SLUITEN", color: SharedColors.textSecondary, action: onClose)
+                    ActionButton(loc("SLUITEN"), color: SharedColors.textSecondary, action: onClose)
                         .padding(.top, 8)
                         .padding(.bottom, 40)
                 }
@@ -70,7 +70,7 @@ public struct SharedCoachCardView: View {
     private func header(_ current: CoachCard) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Coachkaart · Game \(current.gameNumber)")
+                Text("Coachkaart · Game \(current.gameNumber)", bundle: textBundle)
                     .font(SharedFonts.system(24, weight: .bold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
                 Text("\(match.player1Name) \(game.player1Score)-\(game.player2Score) \(match.player2Name)")
@@ -86,7 +86,7 @@ public struct SharedCoachCardView: View {
                     .background(SharedColors.tint(0.1)).clipShape(Circle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Sluiten")
+            .accessibilityLabel(loc("Sluiten"))
         }
     }
 
@@ -203,11 +203,11 @@ struct ZoneHeatmap: View {
             .padding(6)
             .background(SharedColors.courtSand.opacity(0.3))
             .clipShape(RoundedRectangle(cornerRadius: 8))
-            Text("punten gewonnen")
+            Text("punten gewonnen", bundle: textBundle)
                 .font(SharedFonts.system(11))
                 .foregroundColor(SharedColors.textMuted)
         }
         .frame(maxWidth: .infinity)
-        .readAsOne("Heatmap van \(game.name(for: player))")
+        .readAsOne(loc("Heatmap van \(game.name(for: player))"))
     }
 }

@@ -63,12 +63,12 @@ public struct TeamMatchLinkPrompt: View {
             SharedColors.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    SectionHeader("COMPETITIE VANDAAG")
+                    SectionHeader(loc("COMPETITIE VANDAAG"))
                     Text(team.title)
                         .font(SharedFonts.system(20, weight: .semibold, design: .rounded))
                         .foregroundColor(SharedColors.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("Hoort \(player1Name) – \(player2Name) bij deze teamwedstrijd? Kies de partij.")
+                    Text("Hoort \(player1Name) – \(player2Name) bij deze teamwedstrijd? Kies de partij.", bundle: textBundle)
                         .font(SharedFonts.system(14))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -84,7 +84,7 @@ public struct TeamMatchLinkPrompt: View {
                                         .clipShape(Circle())
                                     Text(partij.hasEntry
                                          ? "\(team.ownDisplayName(partij)) – \(team.opponentDisplayName(partij)) · \(partij.standText)"
-                                         : "nog leeg")
+                                         : loc("nog leeg"))
                                         .font(SharedFonts.system(14))
                                         .foregroundColor(partij.hasEntry ? SharedColors.textPrimary : SharedColors.textMuted)
                                         .lineLimit(1)
@@ -98,7 +98,7 @@ public struct TeamMatchLinkPrompt: View {
                         }
                     }
                     if let slot {
-                        Text("Wie is onze speler (\(team.ownName))?")
+                        Text("Wie is onze speler (\(team.ownName))?", bundle: textBundle)
                             .font(SharedFonts.system(14, weight: .semibold))
                             .foregroundColor(SharedColors.textPrimary)
                         HStack(spacing: 10) {
@@ -106,7 +106,7 @@ public struct TeamMatchLinkPrompt: View {
                             ActionButton(player2Name, style: .filled, color: SharedColors.steelBlueLight) { onLink(slot, false) }
                         }
                     }
-                    ActionButton("Nee, gewone wedstrijd", color: SharedColors.textSecondary, action: onSkip)
+                    ActionButton(loc("Nee, gewone wedstrijd"), color: SharedColors.textSecondary, action: onSkip)
                         .padding(.top, 8)
                 }
                 .padding(24)
@@ -143,16 +143,16 @@ public struct SharedTeamMatchesView: View {
             SharedColors.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Een teamwedstrijd van de SBN-competitie: vier partijen (E1–E4). Koppel de wedstrijden die je bijhield of vul de game-standen in; de app telt de games, de bonuspunten en de winnaar.")
+                    Text("Een teamwedstrijd van de SBN-competitie: vier partijen (E1–E4). Koppel de wedstrijden die je bijhield of vul de game-standen in; de app telt de games, de bonuspunten en de winnaar.", bundle: textBundle)
                         .font(SharedFonts.system(13))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
-                    ActionButton("Nieuwe teamwedstrijd", style: .filled) { creating = true }
-                    ActionButton("Deelnemen met link of code") { joining = true }
+                    ActionButton(loc("Nieuwe teamwedstrijd"), style: .filled) { creating = true }
+                    ActionButton(loc("Deelnemen met link of code")) { joining = true }
                     if isLoading {
                         ProgressView().frame(maxWidth: .infinity)
                     } else if matches.isEmpty {
-                        Text("Nog geen teamwedstrijden.")
+                        Text("Nog geen teamwedstrijden.", bundle: textBundle)
                             .font(SharedFonts.system(14))
                             .foregroundColor(SharedColors.textMuted)
                             .frame(maxWidth: .infinity)
@@ -160,13 +160,13 @@ public struct SharedTeamMatchesView: View {
                     } else {
                         // Two groups when both exist: shared with the team (live) and only on this phone
                         if !sharedMatches.isEmpty && !ownMatches.isEmpty {
-                            SectionHeader("GEDEELD MET MIJN TEAM")
+                            SectionHeader(loc("GEDEELD MET MIJN TEAM"))
                         }
                         ForEach(sharedMatches) { match in
                             TeamMatchCard(match: match) { shareOnOpen = false; opened = match }
                         }
                         if !sharedMatches.isEmpty && !ownMatches.isEmpty {
-                            SectionHeader("ALLEEN OP MIJN TELEFOON")
+                            SectionHeader(loc("ALLEEN OP MIJN TELEFOON"))
                         }
                         ForEach(ownMatches) { match in
                             TeamMatchCard(match: match) { shareOnOpen = false; opened = match }
@@ -179,7 +179,7 @@ public struct SharedTeamMatchesView: View {
                 .padding(24)
             }
         }
-        .pageTitle("Competitie")
+        .pageTitle(loc("Competitie"))
         .task { await load() }
         .sheet(isPresented: $creating) {
             NewTeamMatchSheet(team: team, existing: matches) { match, share in
@@ -211,7 +211,7 @@ public struct SharedTeamMatchesView: View {
             matches = try await store.loadAll()
             message = nil
         } catch {
-            message = "De teamwedstrijden konden niet worden geladen."
+            message = loc("De teamwedstrijden konden niet worden geladen.")
         }
         isLoading = false
     }
@@ -232,7 +232,7 @@ public struct SharedTeamMatchesView: View {
             shareOnOpen = share
             opened = created
         } catch {
-            message = "Opslaan is niet gelukt."
+            message = loc("Opslaan is niet gelukt.")
         }
     }
 }
@@ -261,7 +261,7 @@ struct TeamMatchCard: View {
                                 .lineLimit(1)
                         }
                     } else {
-                        Text(score.partijenPlayed == 0 ? "NOG NIET BEGONNEN" : "BEZIG")
+                        Text(score.partijenPlayed == 0 ? loc("NOG NIET BEGONNEN") : loc("BEZIG"))
                             .font(SharedFonts.system(9, weight: .bold, design: .rounded))
                             .tracking(1.2)
                             .foregroundColor(SharedColors.textMuted)
@@ -275,7 +275,7 @@ struct TeamMatchCard: View {
                         .lineLimit(1)
                     teamSide(match.away, own: match.ownSide == TeamSide.away)
                 }
-                Text("\(match.homePartijen)-\(match.awayPartijen) in partijen · \(match.homeCompetitionPoints)-\(match.awayCompetitionPoints) competitiepunten")
+                Text("\(match.homePartijen)-\(match.awayPartijen) in partijen · \(match.homeCompetitionPoints)-\(match.awayCompetitionPoints) competitiepunten", bundle: textBundle)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
             }
@@ -354,14 +354,14 @@ public struct SharedTeamMatchView: View {
                         Text(message).font(SharedFonts.system(12)).foregroundColor(SharedColors.error)
                     }
                     if tools.shareText != nil {
-                        ActionButton("Deel verslag", icon: "square.and.arrow.up", style: .filled) { sharing = true }
+                        ActionButton(loc("Deel verslag"), icon: "square.and.arrow.up", style: .filled) { sharing = true }
                     }
-                    ActionButton("Verwijder teamwedstrijd", color: SharedColors.textSecondary) { confirmDelete = true }
+                    ActionButton(loc("Verwijder teamwedstrijd"), color: SharedColors.textSecondary) { confirmDelete = true }
                 }
                 .padding(24)
             }
         }
-        .pageTitle("Teamwedstrijd")
+        .pageTitle(loc("Teamwedstrijd"))
         .task {
             players = (try? await tools.playerStore.loadPlayers()) ?? []
             await syncFromLive(showGone: false)
@@ -369,17 +369,17 @@ public struct SharedTeamMatchView: View {
                 if match.isLive {
                     sharingTeam = true
                 } else {
-                    message = "Delen lukte niet. Controleer de internetverbinding en tik op Deel met mijn team om het opnieuw te proberen."
+                    message = loc("Delen lukte niet. Controleer de internetverbinding en tik op Deel met mijn team om het opnieuw te proberen.")
                 }
             }
         }
-        .alert(match.isLiveOwner ? "Live stoppen?" : "Live verlaten?", isPresented: $confirmStopLive) {
-            Button(match.isLiveOwner ? "Stop live" : "Verlaat live", role: .destructive) { Task { await stopLive() } }
-            Button("Annuleren", role: .cancel) { }
+        .alert(match.isLiveOwner ? loc("Live stoppen?") : loc("Live verlaten?"), isPresented: $confirmStopLive) {
+            Button(match.isLiveOwner ? loc("Stop live") : loc("Verlaat live"), role: .destructive) { Task { await stopLive() } }
+            Button(loc("Annuleren"), role: .cancel) { }
         } message: {
             Text(match.isLiveOwner
-                 ? "De livepagina is meteen weg voor iedereen. Je teamwedstrijd blijft in de app staan."
-                 : "Je partijen komen niet meer op de livepagina van je teamgenoot. De pagina blijft bestaan voor de rest; je teamwedstrijd blijft in de app staan.")
+                 ? loc("De livepagina is meteen weg voor iedereen. Je teamwedstrijd blijft in de app staan.")
+                 : loc("Je partijen komen niet meer op de livepagina van je teamgenoot. De pagina blijft bestaan voor de rest; je teamwedstrijd blijft in de app staan."))
         }
         .sheet(isPresented: Binding(get: { editing != nil }, set: { if !$0 { editing = nil } }), onDismiss: {
             // The full screen may only open once the sheet is really gone
@@ -412,11 +412,11 @@ public struct SharedTeamMatchView: View {
                 trackedSession(request)
             }
         }
-        .alert("Teamwedstrijd verwijderen?", isPresented: $confirmDelete) {
-            Button("Verwijder", role: .destructive) { Task { await remove() } }
-            Button("Annuleren", role: .cancel) { }
+        .alert(loc("Teamwedstrijd verwijderen?"), isPresented: $confirmDelete) {
+            Button(loc("Verwijder"), role: .destructive) { Task { await remove() } }
+            Button(loc("Annuleren"), role: .cancel) { }
         } message: {
-            Text("De gekoppelde coach- en scheidsrechterwedstrijden blijven in Afgeronde wedstrijden staan.")
+            Text("De gekoppelde coach- en scheidsrechterwedstrijden blijven in Afgeronde wedstrijden staan.", bundle: textBundle)
         }
     }
 
@@ -424,10 +424,10 @@ public struct SharedTeamMatchView: View {
     private var liveProblem: String? {
         guard let id = match.liveId else { return nil }
         if TeamLive.shared.isRejected(id) {
-            return "De livepagina wil je partij niet hebben: de uitnodigingscode klopt niet (meer). Vraag je teamgenoot de uitnodiging opnieuw te sturen en doe weer mee."
+            return loc("De livepagina wil je partij niet hebben: de uitnodigingscode klopt niet (meer). Vraag je teamgenoot de uitnodiging opnieuw te sturen en doe weer mee.")
         }
         if TeamLive.shared.offline {
-            return "Geen verbinding: je partij staat nog niet op de livepagina. Tik op Vernieuwen zodra je weer internet hebt."
+            return loc("Geen verbinding: je partij staat nog niet op de livepagina. Tik op Vernieuwen zodra je weer internet hebt.")
         }
         return nil
     }
@@ -490,7 +490,7 @@ public struct SharedTeamMatchView: View {
     private var header: some View {
         let score = match.score
         return VStack(alignment: .leading, spacing: 10) {
-            Text("\(TeamMatchReport.dayText(match.date)) · \(match.ownSide == TeamSide.home ? "thuis" : "uit")")
+            Text("\(TeamMatchReport.dayText(match.date)) · \(match.ownSide == TeamSide.home ? loc("thuis") : loc("uit"))")
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textSecondary)
             HStack(alignment: .center, spacing: 12) {
@@ -516,12 +516,12 @@ public struct SharedTeamMatchView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            Text("games").font(SharedFonts.system(10)).tracking(1.2).foregroundColor(SharedColors.textMuted).frame(maxWidth: .infinity)
+            Text("games", bundle: textBundle).font(SharedFonts.system(10)).tracking(1.2).foregroundColor(SharedColors.textMuted).frame(maxWidth: .infinity)
             Divider().overlay(SharedColors.line(0.15))
             HStack {
-                statCell("PARTIJEN", "\(match.homePartijen)-\(match.awayPartijen)")
-                statCell("COMPETITIEPUNTEN", "\(match.homeCompetitionPoints)-\(match.awayCompetitionPoints)")
-                statCell("RALLYPUNTEN", score.pointsKnown
+                statCell(loc("PARTIJEN"), "\(match.homePartijen)-\(match.awayPartijen)")
+                statCell(loc("COMPETITIEPUNTEN"), "\(match.homeCompetitionPoints)-\(match.awayCompetitionPoints)")
+                statCell(loc("RALLYPUNTEN"), score.pointsKnown
                          ? (match.ownSide == TeamSide.home ? "\(score.ownPoints)-\(score.theirPoints)" : "\(score.theirPoints)-\(score.ownPoints)")
                          : "–")
             }
@@ -530,7 +530,7 @@ public struct SharedTeamMatchView: View {
                 .foregroundColor(score.isComplete ? SharedColors.gold : SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             if score.isComplete {
-                Text("Winnaar: meeste partijen; gelijk → het volledige team; dan meeste games, meeste rallypunten, winnaar E1. Competitiepunten: games + 3 bonus voor de winnaar.")
+                Text("Winnaar: meeste partijen; gelijk → het volledige team; dan meeste games, meeste rallypunten, winnaar E1. Competitiepunten: games + 3 bonus voor de winnaar.", bundle: textBundle)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
                     .fixedSize(horizontal: false, vertical: true)
@@ -556,7 +556,7 @@ public struct SharedTeamMatchView: View {
 
     private var partijenList: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionHeader("PARTIJEN")
+            SectionHeader(loc("PARTIJEN"))
             VStack(spacing: 0) {
                 ForEach(match.partijen, id: \.slot) { partij in
                     partijRow(partij)
@@ -564,7 +564,7 @@ public struct SharedTeamMatchView: View {
                 }
             }
             .background(SharedColors.tint(0.04)).clipShape(RoundedRectangle(cornerRadius: 12))
-            Text("Tik op een partij om spelers en games in te vullen of een bijgehouden wedstrijd te koppelen.")
+            Text("Tik op een partij om spelers en games in te vullen of een bijgehouden wedstrijd te koppelen.", bundle: textBundle)
                 .font(SharedFonts.system(11))
                 .foregroundColor(SharedColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -606,12 +606,12 @@ public struct SharedTeamMatchView: View {
                             }
                         }
                     } else {
-                        Text("Nog niet ingevuld")
+                        Text("Nog niet ingevuld", bundle: textBundle)
                             .font(SharedFonts.system(12))
                             .foregroundColor(SharedColors.textMuted)
                     }
                     if let order = partij.playOrder {
-                        Text("Gespeeld als \(order)e")
+                        Text("Gespeeld als \(teamPlayOrderText(order))", bundle: textBundle)
                             .font(SharedFonts.system(10))
                             .foregroundColor(SharedColors.textMuted)
                     }
@@ -626,7 +626,7 @@ public struct SharedTeamMatchView: View {
             #endif
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Partij \(partij.label)")
+        .accessibilityLabel(loc("Partij \(partij.label)"))
     }
 
     private func save(_ changed: TeamMatch) async {
@@ -649,7 +649,7 @@ public struct SharedTeamMatchView: View {
                 }
             }
         } catch {
-            message = "Opslaan is niet gelukt."
+            message = loc("Opslaan is niet gelukt.")
         }
     }
 
@@ -664,7 +664,7 @@ public struct SharedTeamMatchView: View {
             message = nil
             sharingTeam = true
         } catch {
-            message = "Delen lukte niet. Controleer de internetverbinding en probeer het opnieuw."
+            message = loc("Delen lukte niet. Controleer de internetverbinding en probeer het opnieuw.")
         }
     }
 
@@ -705,13 +705,13 @@ public struct SharedTeamMatchView: View {
                 if showGone {
                     // Asked for by the user: the page is really gone, the live state ends here
                     await clearLive()
-                    message = "De livepagina is afgelopen (2 uur na de laatste update) en wordt niet meer bijgewerkt."
+                    message = loc("De livepagina is afgelopen (2 uur na de laatste update) en wordt niet meer bijgewerkt.")
                 } else {
                     // On opening the screen: not yet sure enough to throw the key away
-                    message = "De livepagina lijkt afgelopen. Tik op Vernieuwen om dat te bevestigen."
+                    message = loc("De livepagina lijkt afgelopen. Tik op Vernieuwen om dat te bevestigen.")
                 }
             } else if showGone {
-                message = "Geen verbinding om de livepagina te lezen."
+                message = loc("Geen verbinding om de livepagina te lezen.")
             }
         } catch {
         }
@@ -723,7 +723,7 @@ public struct SharedTeamMatchView: View {
             onChange(nil)
             dismiss()
         } catch {
-            message = "Verwijderen is niet gelukt."
+            message = loc("Verwijderen is niet gelukt.")
         }
     }
 }

@@ -21,9 +21,9 @@ public struct PlayerProfileFields: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             VStack(alignment: .leading, spacing: 8) {
-                caption("NAAM")
-                TextField("Naam speler", text: $name)
-                    .accessibilityLabel("Naam speler")
+                caption(loc("NAAM"))
+                TextField(loc("Naam speler"), text: $name)
+                    .accessibilityLabel(loc("Naam speler"))
                     .textFieldStyle(.plain)
                     .padding()
                     .background(SharedColors.tint(0.08))
@@ -34,10 +34,10 @@ public struct PlayerProfileFields: View {
                     caption("TEAM")
                     Toggle(isOn: Binding(get: { TeamRoster.contains(playerId, in: rosterRaw) },
                                          set: { rosterRaw = TeamRoster.setting(playerId, inTeam: $0, in: rosterRaw) })) {
-                        Text("In mijn team")
+                        Text("In mijn team", bundle: textBundle)
                     }
                     .tint(SharedColors.accent)
-                    Text("Spelers in je team staan bovenaan als je een partij van een teamwedstrijd invult.")
+                    Text("Spelers in je team staan bovenaan als je een partij van een teamwedstrijd invult.", bundle: textBundle)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textMuted)
                 }
@@ -61,14 +61,14 @@ public struct PlayerProfileFields: View {
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(tag.rawValue)
-                        .accessibilityValue(selected ? "Geselecteerd" : "Niet geselecteerd")
+                        .accessibilityValue(selected ? loc("Geselecteerd") : loc("Niet geselecteerd"))
                     }
                 }
             }
             VStack(alignment: .leading, spacing: 8) {
-                caption("NOTITIES")
-                TextField("Extra coaching aandachtspunten...", text: $notes, axis: .vertical)
-                    .accessibilityLabel("Coachingnotities")
+                caption(loc("NOTITIES"))
+                TextField(loc("Extra coaching aandachtspunten..."), text: $notes, axis: .vertical)
+                    .accessibilityLabel(loc("Coachingnotities"))
                     .textFieldStyle(.plain)
                     .lineLimit(6)
                     .padding()
@@ -148,7 +148,7 @@ public struct PlayerDirectoryView: View {
                             .frame(width: 36, height: 32)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Alle badges")
+                    .accessibilityLabel(loc("Alle badges"))
                     if teamImporter != nil {
                         Button { showingTeamImport = true } label: {
                             // AppSymbol: Skip's Label(systemImage:) draws a warning triangle for this symbol
@@ -157,14 +157,14 @@ public struct PlayerDirectoryView: View {
                                 Text("Team").lineLimit(1)
                             }
                         }
-                        .accessibilityLabel("Team importeren")
+                        .accessibilityLabel(loc("Team importeren"))
                         .disabled(isLoading || isDeleting || loadFailed)
                     }
                     Button { editing = PlayerProfile() } label: {
-                        Label("Toevoegen", systemImage: "plus")
+                        Label(loc("Toevoegen"), systemImage: "plus")
                             .lineLimit(1)
                     }
-                    .accessibilityLabel("Speler toevoegen")
+                    .accessibilityLabel(loc("Speler toevoegen"))
                     .disabled(isLoading || isDeleting || loadFailed)
                 }
                 .foregroundColor(SharedColors.accent)
@@ -173,21 +173,21 @@ public struct PlayerDirectoryView: View {
 
                 if isLoading {
                     Spacer()
-                    ProgressView("Spelers laden…")
+                    ProgressView(loc("Spelers laden…"))
                     Spacer()
                 } else if loadFailed {
                     Spacer()
-                    Text("Spelers konden niet worden geladen.")
+                    Text("Spelers konden niet worden geladen.", bundle: textBundle)
                         .foregroundColor(SharedColors.textSecondary)
-                    Button("Opnieuw laden") { Task { await reload() } }
+                    Button(loc("Opnieuw laden")) { Task { await reload() } }
                         .tint(SharedColors.accent)
                     Spacer()
                 } else if players.isEmpty {
                     Spacer()
                     VStack(spacing: 12) {
                         AppSymbol("person.crop.circle", size: 48, color: SharedColors.textSecondary)
-                        Text("Nog geen spelers opgeslagen").font(.headline)
-                        Text("Tik op + om een speler toe te voegen,\nof importeer een team (zip met team.json en foto's)")
+                        Text("Nog geen spelers opgeslagen", bundle: textBundle).font(.headline)
+                        Text("Tik op + om een speler toe te voegen,\nof importeer een team (zip met team.json en foto's)", bundle: textBundle)
                     }
                     .foregroundColor(SharedColors.textSecondary)
                     .multilineTextAlignment(.center)
@@ -240,17 +240,17 @@ public struct PlayerDirectoryView: View {
                                         }
                                     }
                                     .buttonStyle(.plain)
-                                    .accessibilityLabel(badgeCounts[player.id].map { $0 > 0 ? "\($0) badges van \(player.name)" : "Badges van \(player.name)" } ?? "Badges van \(player.name)")
+                                    .accessibilityLabel(badgeCounts[player.id].map { $0 > 0 ? loc("\($0) badges van \(player.name)") : loc("Badges van \(player.name)") } ?? loc("Badges van \(player.name)"))
                                     Spacer()
                                     Button { editing = player } label: {
                                         AppSymbol("pencil", size: 18, color: SharedColors.textPrimary).frame(width: 44, height: 44)
-                                    }.accessibilityLabel("Bewerk \(player.name)")
+                                    }.accessibilityLabel(loc("Bewerk \(player.name)"))
                                     Button {
                                         deleting = player
                                         confirmDelete = true
                                     } label: {
                                         AppSymbol("trash", size: 18, color: SharedColors.textPrimary).frame(width: 44, height: 44)
-                                    }.accessibilityLabel("Verwijder \(player.name)")
+                                    }.accessibilityLabel(loc("Verwijder \(player.name)"))
                                 }
                                 .foregroundColor(SharedColors.textPrimary)
                                 .padding(12)
@@ -259,8 +259,8 @@ public struct PlayerDirectoryView: View {
                                 // Long press, as on iOS
                                 .contextMenu {
                                     Button("Badges") { badgesForPlayer = player }
-                                    Button("Bewerken") { editing = player }
-                                    Button("Verwijderen", role: .destructive) {
+                                    Button(loc("Bewerken")) { editing = player }
+                                    Button(loc("Verwijderen"), role: .destructive) {
                                         deleting = player
                                         confirmDelete = true
                                     }
@@ -272,7 +272,7 @@ public struct PlayerDirectoryView: View {
                 }
             }
         }
-        .pageTitle("Spelers")
+        .pageTitle(loc("Spelers"))
         .navigationDestination(isPresented: $showingCatalog) {
             SharedBadgeCatalogView()
         }
@@ -292,26 +292,26 @@ public struct PlayerDirectoryView: View {
                                        shareCard: shareCard, cardInbox: cardInbox, historyStore: historyStore)
             }
         }
-        .alert("Speler verwijderen?", isPresented: $confirmDelete) {
-            Button("Annuleren", role: .cancel) { deleting = nil }
-            Button("Verwijderen", role: .destructive) {
+        .alert(loc("Speler verwijderen?"), isPresented: $confirmDelete) {
+            Button(loc("Annuleren"), role: .cancel) { deleting = nil }
+            Button(loc("Verwijderen"), role: .destructive) {
                 guard let player = deleting else { return }
                 isDeleting = true
                 Task {
                     do {
                         try await store.deletePlayer(player.id)
                         await reload()
-                    } catch { showError("Verwijderen is niet gelukt. Probeer het opnieuw.") }
+                    } catch { showError(loc("Verwijderen is niet gelukt. Probeer het opnieuw.")) }
                     isDeleting = false
                     deleting = nil
                 }
             }
         } message: {
-            Text("\(deleting?.name ?? "Deze speler") wordt verwijderd. Gespeelde wedstrijden blijven bewaard.")
+            Text("\(deleting?.name ?? loc("Deze speler")) wordt verwijderd. Gespeelde wedstrijden blijven bewaard.", bundle: textBundle)
         }
-        .alert("Spelers konden niet worden bijgewerkt", isPresented: $showingError) {
-            Button("Opnieuw proberen") { Task { await reload() } }
-            Button("Sluiten", role: .cancel) {}
+        .alert(loc("Spelers konden niet worden bijgewerkt"), isPresented: $showingError) {
+            Button(loc("Opnieuw proberen")) { Task { await reload() } }
+            Button(loc("Sluiten"), role: .cancel) {}
         } message: { Text(errorMessage) }
     }
 
@@ -326,7 +326,7 @@ public struct PlayerDirectoryView: View {
             }
         } catch {
             loadFailed = true
-            showError("De opgeslagen spelers konden niet worden geladen. Probeer het opnieuw.")
+            showError(loc("De opgeslagen spelers konden niet worden geladen. Probeer het opnieuw."))
         }
         isLoading = false
     }
@@ -365,10 +365,10 @@ struct PlayerProfileEditor: View {
                 }
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(photo == nil ? "Kies foto" : "Andere foto")
+            .accessibilityLabel(photo == nil ? loc("Kies foto") : loc("Andere foto"))
             HStack(spacing: 20) {
                 if photo != nil {
-                    Button("Foto verwijderen") {
+                    Button(loc("Foto verwijderen")) {
                         photo = nil
                         photoChanged = true
                     }
@@ -407,16 +407,16 @@ struct PlayerProfileEditor: View {
             SharedColors.background.ignoresSafeArea()
             ScrollView {
                 VStack(spacing: 24) {
-                    Text(isNew ? "SPELER TOEVOEGEN" : "SPELER BEWERKEN")
+                    Text(isNew ? loc("SPELER TOEVOEGEN") : loc("SPELER BEWERKEN"))
                         .font(SharedFonts.system(18, weight: .bold, design: .rounded)).tracking(2)
                     if photoStore != nil && filePicker != nil {
                         photoSection
                     }
                     PlayerProfileFields(name: $player.name, focus: $player.coachingFocusAreas, notes: $player.coachingNotes, playerId: player.id)
                     HStack(spacing: 16) {
-                        Button("Annuleren") { dismiss() }.disabled(isSaving)
+                        Button(loc("Annuleren")) { dismiss() }.disabled(isSaving)
                         Spacer()
-                        Button(isSaving ? "Opslaan…" : "Opslaan") {
+                        Button(isSaving ? loc("Opslaan…") : loc("Opslaan")) {
                             isSaving = true
                             Task {
                                 do {
@@ -445,11 +445,11 @@ struct PlayerProfileEditor: View {
             }
         }
         .interactiveDismissDisabled(isSaving)
-        .alert("Deze foto kon niet worden gebruikt", isPresented: $photoFailed) {
+        .alert(loc("Deze foto kon niet worden gebruikt"), isPresented: $photoFailed) {
             Button("OK", role: .cancel) {}
         }
-        .alert("Opslaan is niet gelukt", isPresented: $showingError) {
+        .alert(loc("Opslaan is niet gelukt"), isPresented: $showingError) {
             Button("OK", role: .cancel) {}
-        } message: { Text("Je invoer is bewaard in dit scherm. Probeer opnieuw op te slaan.") }
+        } message: { Text("Je invoer is bewaard in dit scherm. Probeer opnieuw op te slaan.", bundle: textBundle) }
     }
 }

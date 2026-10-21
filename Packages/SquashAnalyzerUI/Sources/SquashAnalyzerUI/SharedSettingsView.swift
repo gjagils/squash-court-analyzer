@@ -26,21 +26,26 @@ public struct BackupContext {
 public struct SettingsContext {
     public let aiCoach: AICoachContext?
     public let backup: BackupContext?
+    /// Opens the system's language setting for this app (Android); nil hides Taal
+    public let onLanguage: (() -> Void)?
     #if !SKIP
     /// The iPhone's own Instellingen (with iCloud back-up and the iPhone
     /// manual), so the gear opens the same screen everywhere; nil uses the
     /// shared one. Gets a closure that closes it.
     public let ownScreen: ((@escaping () -> Void) -> AnyView)?
 
-    public init(aiCoach: AICoachContext?, backup: BackupContext?, ownScreen: ((@escaping () -> Void) -> AnyView)? = nil) {
+    public init(aiCoach: AICoachContext?, backup: BackupContext?, ownScreen: ((@escaping () -> Void) -> AnyView)? = nil,
+                onLanguage: (() -> Void)? = nil) {
         self.aiCoach = aiCoach
         self.backup = backup
         self.ownScreen = ownScreen
+        self.onLanguage = onLanguage
     }
     #else
-    public init(aiCoach: AICoachContext?, backup: BackupContext?) {
+    public init(aiCoach: AICoachContext?, backup: BackupContext?, onLanguage: (() -> Void)? = nil) {
         self.aiCoach = aiCoach
         self.backup = backup
+        self.onLanguage = onLanguage
     }
     #endif
 }
@@ -65,7 +70,7 @@ struct SettingsSheet: View {
 
     private var shared: some View {
         NavigationStack {
-            SharedSettingsView(aiCoach: settings.aiCoach, backup: settings.backup)
+            SharedSettingsView(aiCoach: settings.aiCoach, backup: settings.backup, onLanguage: settings.onLanguage)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         CloseButton { close() }
@@ -81,6 +86,9 @@ struct SettingsSheet: View {
 public struct SharedSettingsView: View {
     let aiCoach: AICoachContext?
     let backup: BackupContext?
+    /// Opens the system's language setting for this app (Android's
+    /// per-app language, filled in by MainActivity); nil hides Taal
+    let onLanguage: (() -> Void)?
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
@@ -105,9 +113,10 @@ public struct SharedSettingsView: View {
     @State private var autoFolder: String?
     @State private var autoLast: Date?
 
-    public init(aiCoach: AICoachContext? = nil, backup: BackupContext? = nil) {
+    public init(aiCoach: AICoachContext? = nil, backup: BackupContext? = nil, onLanguage: (() -> Void)? = nil) {
         self.aiCoach = aiCoach
         self.backup = backup
+        self.onLanguage = onLanguage
     }
 
     /// The part that is open; one at a time
@@ -126,20 +135,25 @@ public struct SharedSettingsView: View {
                     // then a line per part that opens underneath, one at a time
                     SettingsManualCard(manual: UserManual.android)
                         .padding(.bottom, 16)
-                    SettingsRow("Mijn team", icon: "person.2", open: openPart == "team") { toggle("team") }
+                    SettingsRow(loc("Mijn team"), icon: "person.2", open: openPart == "team") { toggle("team") }
                     if openPart == "team" { teamSection.padding(.bottom, 16) }
                     SettingsDivider()
-                    SettingsRow("Weergave", icon: "circle.lefthalf.filled", open: openPart == "theme") { toggle("theme") }
+                    SettingsRow(loc("Weergave"), icon: "circle.lefthalf.filled", open: openPart == "theme") { toggle("theme") }
                     if openPart == "theme" { AppearancePicker(showsTitle: false).padding(.bottom, 16) }
                     SettingsDivider()
-                    SettingsRow("Baanindeling", icon: "square.grid.3x3", open: openPart == "court") { toggle("court") }
+                    // The phone's own per-app language screen: Dutch, or English for everything else
+                    if let onLanguage {
+                        SettingsRow(loc("Taal"), icon: "globe") { onLanguage() }
+                        SettingsDivider()
+                    }
+                    SettingsRow(loc("Baanindeling"), icon: "square.grid.3x3", open: openPart == "court") { toggle("court") }
                     if openPart == "court" { courtSection.padding(.bottom, 16) }
                     SettingsDivider()
-                    SettingsRow("Live meekijken", icon: "dot.radiowaves.left.and.right", open: openPart == "live") { toggle("live") }
+                    SettingsRow(loc("Live meekijken"), icon: "dot.radiowaves.left.and.right", open: openPart == "live") { toggle("live") }
                     if openPart == "live" { liveSection.padding(.bottom, 16) }
                     SettingsDivider()
                     if backup != nil {
-                        SettingsRow("Back-up", icon: "icloud.and.arrow.up", open: openPart == "backup") { toggle("backup") }
+                        SettingsRow(loc("Back-up"), icon: "icloud.and.arrow.up", open: openPart == "backup") { toggle("backup") }
                         if openPart == "backup" { backupSection.padding(.bottom, 16) }
                         SettingsDivider()
                     }
@@ -161,7 +175,7 @@ public struct SharedSettingsView: View {
                 .padding(24)
             }
         }
-        .pageTitle("Instellingen")
+        .pageTitle(loc("Instellingen"))
         .onAppear {
             draft = teamURL
             hasKey = aiCoach?.keyStore.hasOpenAIKey == true
@@ -171,16 +185,16 @@ public struct SharedSettingsView: View {
     /// Mijn team: the sbn.toernooi.nl link, saved or removed here
     private var teamSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
+            Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.", bundle: textBundle)
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
             Link(destination: UserManual.androidTeamLink) {
-                Text("Waar vind ik mijn teamlink?")
+                Text("Waar vind ik mijn teamlink?", bundle: textBundle)
                     .font(SharedFonts.system(13, weight: .semibold))
                     .foregroundColor(SharedColors.accent)
             }
             TextField("https://sbn.toernooi.nl/league/.../team/...", text: $draft)
-                .accessibilityLabel("Teamlink")
+                .accessibilityLabel(loc("Teamlink"))
                 // No autocapitalization/URL-keyboard modifiers: this package also builds
                 // for macOS; the link check is case-insensitive where it matters
                 .autocorrectionDisabled()
@@ -189,9 +203,9 @@ public struct SharedSettingsView: View {
                 .background(SharedColors.tint(0.08)).clipShape(RoundedRectangle(cornerRadius: 10))
             HStack(spacing: 12) {
                 // ActionButton as everywhere else: a system button turned white on grey in the light theme
-                ActionButton("BEWAAR TEAMLINK", style: .filled, color: SharedColors.accent) { save() }
+                ActionButton(loc("BEWAAR TEAMLINK"), style: .filled, color: SharedColors.accent) { save() }
                 if !teamURL.isEmpty {
-                    ActionButton("VERWIJDER", style: .outlined, color: SharedColors.textSecondary) { remove() }
+                    ActionButton(loc("VERWIJDER"), style: .outlined, color: SharedColors.textSecondary) { remove() }
                 }
             }
             if let message {
@@ -205,19 +219,19 @@ public struct SharedSettingsView: View {
     private var liveSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Toggle(isOn: $liveSharing) {
-                Text("Knop LIVE bij Scheidsrechter en Coach")
+                Text("Knop LIVE bij Scheidsrechter en Coach", bundle: textBundle)
                     .font(SharedFonts.system(14))
                     .foregroundColor(SharedColors.textPrimary)
             }
             .tint(SharedColors.accent)
             Toggle(isOn: $livePhotos) {
-                Text("Foto's van de spelers meesturen")
+                Text("Foto's van de spelers meesturen", bundle: textBundle)
                     .font(SharedFonts.system(14))
                     .foregroundColor(liveSharing ? SharedColors.textPrimary : SharedColors.textMuted)
             }
             .tint(SharedColors.accent)
             .disabled(!liveSharing)
-            Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.")
+            Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.", bundle: textBundle)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
             Toggle(isOn: Binding(get: { liveAlerts }, set: { on in
@@ -225,12 +239,12 @@ public struct SharedSettingsView: View {
                 // The server keeps the choice per followed match: tell it for the ones followed now
                 Task { await LiveFollow.shared.setAlerts(on) }
             })) {
-                Text("Melding bij elke game")
+                Text("Melding bij elke game", bundle: textBundle)
                     .font(SharedFonts.system(14))
                     .foregroundColor(SharedColors.textPrimary)
             }
             .tint(SharedColors.accent)
-            Text("Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag.")
+            Text("Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag.", bundle: textBundle)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
         }
@@ -238,12 +252,12 @@ public struct SharedSettingsView: View {
 
     private var courtSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Picker("Baanindeling", selection: $courtLayout) {
-                Text("6 vakken").tag(CourtLayout.six.rawValue)
-                Text("9 vakken").tag(CourtLayout.nine.rawValue)
+            Picker(loc("Baanindeling"), selection: $courtLayout) {
+                Text("6 vakken", bundle: textBundle).tag(CourtLayout.six.rawValue)
+                Text("9 vakken", bundle: textBundle).tag(CourtLayout.nine.rawValue)
             }
             .pickerStyle(.segmented)
-            Text("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak.")
+            Text("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak.", bundle: textBundle)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
         }
@@ -251,7 +265,7 @@ public struct SharedSettingsView: View {
 
     private var aiCoachSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach.")
+            Text("Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach.", bundle: textBundle)
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 8) {
@@ -265,23 +279,23 @@ public struct SharedSettingsView: View {
                         .accessibilityLabel("OpenAI API key")
                         .foregroundColor(SharedColors.textPrimary)
                 }
-                Button(showingKey ? "Verberg" : "Toon") { showingKey.toggle() }
+                Button(showingKey ? loc("Verberg") : loc("Toon")) { showingKey.toggle() }
                     .foregroundColor(SharedColors.textSecondary)
             }
             .padding()
             .background(SharedColors.tint(0.08)).clipShape(RoundedRectangle(cornerRadius: 10))
             HStack(spacing: 12) {
-                ActionButton("BEWAAR API KEY", style: .filled, color: SharedColors.accent,
+                ActionButton(loc("BEWAAR API KEY"), style: .filled, color: SharedColors.accent,
                              disabled: keyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) { saveKey() }
                 if hasKey {
-                    ActionButton("VERWIJDER KEY", style: .outlined, color: SharedColors.textSecondary) { removeKey() }
+                    ActionButton(loc("VERWIJDER KEY"), style: .outlined, color: SharedColors.textSecondary) { removeKey() }
                 }
             }
             HStack(spacing: 8) {
                 Circle()
                     .fill(hasKey ? SharedColors.positive : SharedColors.error)
                     .frame(width: 8, height: 8)
-                Text(keyMessage ?? (hasKey ? "API key geconfigureerd" : "Geen API key ingesteld"))
+                Text(keyMessage ?? (hasKey ? loc("API key geconfigureerd") : loc("Geen API key ingesteld")))
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textMuted)
             }
@@ -291,13 +305,13 @@ public struct SharedSettingsView: View {
     /// "Over AI Coach", as on iOS
     private var aboutAICoachSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Over AI Coach")
+            Text("Over AI Coach", bundle: textBundle)
                 .font(SharedFonts.system(16, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
-            infoRow("Veilig", "Je API key wordt versleuteld op dit toestel bewaard")
-            infoRow("Kosten", "~€0.01 per analyse (het goedkoopste beschikbare model)")
-            infoRow("Internet vereist", "AI advies werkt alleen met internetverbinding")
-            infoRow("Lokaal advies", "Basis advies werkt altijd, ook zonder API key")
+            infoRow(loc("Veilig"), loc("Je API key wordt versleuteld op dit toestel bewaard"))
+            infoRow(loc("Kosten"), loc("~€0.01 per analyse (het goedkoopste beschikbare model)"))
+            infoRow(loc("Internet vereist"), loc("AI advies werkt alleen met internetverbinding"))
+            infoRow(loc("Lokaal advies"), loc("Basis advies werkt altijd, ook zonder API key"))
         }
     }
 
@@ -314,12 +328,12 @@ public struct SharedSettingsView: View {
 
     private var backupSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Bewaar spelers, coach- en scheidsrechterwedstrijden en badges in een bestand, bijvoorbeeld op Google Drive. Een back-up van Android kun je ook op een iPhone terugzetten, en andersom.")
+            Text("Bewaar spelers, coach- en scheidsrechterwedstrijden en badges in een bestand, bijvoorbeeld op Google Drive. Een back-up van Android kun je ook op een iPhone terugzetten, en andersom.", bundle: textBundle)
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 12) {
-                ActionButton("MAAK BACK-UP", style: .filled, color: SharedColors.accent, disabled: backupBusy) { makeBackup() }
-                ActionButton("ZET BACK-UP TERUG", style: .outlined, color: SharedColors.accent, disabled: backupBusy) { pickBackup() }
+                ActionButton(loc("MAAK BACK-UP"), style: .filled, color: SharedColors.accent, disabled: backupBusy) { makeBackup() }
+                ActionButton(loc("ZET BACK-UP TERUG"), style: .outlined, color: SharedColors.accent, disabled: backupBusy) { pickBackup() }
             }
             if let auto = backup?.auto {
                 autoBackupRow(auto)
@@ -333,10 +347,10 @@ public struct SharedSettingsView: View {
                     .foregroundColor(backupIsError ? SharedColors.error : SharedColors.positive)
             }
         }
-        .alert("Back-up terugzetten?", isPresented: $askingRestore) {
-            Button("Samenvoegen") { restore(replacing: false) }
-            Button("Alles vervangen", role: .destructive) { restore(replacing: true) }
-            Button("Annuleren", role: .cancel) { pendingRestore = nil }
+        .alert(loc("Back-up terugzetten?"), isPresented: $askingRestore) {
+            Button(loc("Samenvoegen")) { restore(replacing: false) }
+            Button(loc("Alles vervangen"), role: .destructive) { restore(replacing: true) }
+            Button(loc("Annuleren"), role: .cancel) { pendingRestore = nil }
         } message: {
             Text(restoreQuestion)
         }
@@ -344,24 +358,24 @@ public struct SharedSettingsView: View {
 
     private func autoBackupRow(_ auto: any AutoBackupControl) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Automatische back-up")
+            Text("Automatische back-up", bundle: textBundle)
                 .font(SharedFonts.system(14, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
                 .padding(.top, 8)
             if let folder = autoFolder {
-                Text("Aan · map \u{201C}\(folder)\u{201D}\(autoLast.map { date in " · laatste \(Self.shortDate(date))" } ?? "")")
+                Text(loc("Aan · map \u{201C}\(folder)\u{201D}") + (autoLast.map { date in loc(" · laatste \(Self.shortDate(date))") } ?? ""))
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
-                Button("Uitzetten") {
+                Button(loc("Uitzetten")) {
                     auto.turnOff()
                     refreshAuto()
                 }
                 .foregroundColor(SharedColors.textSecondary)
             } else {
-                Text("Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in een map die je kiest (bijvoorbeeld Documenten). De 7 nieuwste blijven bewaard.")
+                Text("Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in een map die je kiest (bijvoorbeeld Documenten). De 7 nieuwste blijven bewaard.", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textMuted)
-                Button("Aanzetten en map kiezen") { turnOnAuto(auto) }
+                Button(loc("Aanzetten en map kiezen")) { turnOnAuto(auto) }
                     .foregroundColor(SharedColors.accent)
                     .disabled(backupBusy)
             }
@@ -371,7 +385,7 @@ public struct SharedSettingsView: View {
 
     private static func shortDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "nl_NL")
+        formatter.locale = displayLocale
         formatter.dateFormat = "d MMM HH:mm"
         return formatter.string(from: date)
     }
@@ -387,10 +401,10 @@ public struct SharedSettingsView: View {
         Task {
             do {
                 if try await auto.turnOn() {
-                    showBackup("Automatische back-up staat aan; de eerste is gemaakt.", error: false)
+                    showBackup(loc("Automatische back-up staat aan; de eerste is gemaakt."), error: false)
                 }
             } catch {
-                showBackup("Automatische back-up aanzetten is niet gelukt.", error: true)
+                showBackup(loc("Automatische back-up aanzetten is niet gelukt."), error: true)
             }
             refreshAuto()
             backupBusy = false
@@ -400,14 +414,14 @@ public struct SharedSettingsView: View {
     private var restoreQuestion: String {
         guard let backup = pendingRestore else { return "" }
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "nl_NL")
+        formatter.locale = displayLocale
         formatter.dateFormat = "d MMMM yyyy HH:mm"
-        var contents = "\(backup.players.count) spelers en \(backup.matches.count + backup.standaloneGames.count) wedstrijden"
+        var contents = loc("\(backup.players.count) spelers en \(backup.matches.count + backup.standaloneGames.count) wedstrijden")
         let referee = backup.refereeMatches?.count ?? 0
         let team = backup.teamMatches?.count ?? 0
-        if referee > 0 { contents += ", \(referee) scheidsrechterwedstrijden" }
-        if team > 0 { contents += ", \(team) teamwedstrijden" }
-        return "Back-up van \(formatter.string(from: backup.backupDate)): \(contents). Samenvoegen voegt toe wat er nog niet is; Alles vervangen wist eerst je spelers, wedstrijden en badges op dit toestel, ook de scheidsrechter- en teamwedstrijden als de back-up die bevat."
+        if referee > 0 { contents += loc(", \(referee) scheidsrechterwedstrijden") }
+        if team > 0 { contents += loc(", \(team) teamwedstrijden") }
+        return loc("Back-up van \(formatter.string(from: backup.backupDate)): \(contents). Samenvoegen voegt toe wat er nog niet is; Alles vervangen wist eerst je spelers, wedstrijden en badges op dit toestel, ook de scheidsrechter- en teamwedstrijden als de back-up die bevat.")
     }
 
     private func showBackup(_ text: String, error: Bool) {
@@ -427,10 +441,10 @@ public struct SharedSettingsView: View {
                 formatter.dateFormat = "yyyy-MM-dd-HHmmss"
                 let saved = try await backup.files.save(data, suggestedName: "squash-backup-\(formatter.string(from: Date())).json")
                 if saved {
-                    showBackup("Back-up opgeslagen: \(full.players.count) spelers, \(full.matches.count) wedstrijden", error: false)
+                    showBackup(loc("Back-up opgeslagen: \(full.players.count) spelers, \(full.matches.count) wedstrijden"), error: false)
                 }
             } catch {
-                showBackup("De back-up is niet gelukt.", error: true)
+                showBackup(loc("De back-up is niet gelukt."), error: true)
             }
             backupBusy = false
         }
@@ -447,7 +461,7 @@ public struct SharedSettingsView: View {
                     askingRestore = true
                 }
             } catch {
-                showBackup((error as? BackupValidationError)?.message ?? "Dit bestand kon niet worden gelezen.", error: true)
+                showBackup((error as? BackupValidationError)?.message ?? loc("Dit bestand kon niet worden gelezen."), error: true)
             }
             backupBusy = false
         }
@@ -460,9 +474,9 @@ public struct SharedSettingsView: View {
         Task {
             do {
                 let counts = try await backup.store.restore(full, replacing: replacing)
-                showBackup("Teruggezet: \(counts.summary)", error: false)
+                showBackup(loc("Teruggezet: \(counts.summary)"), error: false)
             } catch {
-                showBackup("Terugzetten is niet gelukt; er is niets veranderd.", error: true)
+                showBackup(loc("Terugzetten is niet gelukt; er is niets veranderd."), error: true)
             }
             backupBusy = false
         }
@@ -474,13 +488,13 @@ public struct SharedSettingsView: View {
         aiCoach.keyStore.openAIAPIKey = key
         keyDraft = ""
         hasKey = aiCoach.keyStore.hasOpenAIKey
-        keyMessage = hasKey ? "API key opgeslagen" : "Opslaan is niet gelukt"
+        keyMessage = hasKey ? loc("API key opgeslagen") : loc("Opslaan is niet gelukt")
     }
 
     private func removeKey() {
         aiCoach?.keyStore.openAIAPIKey = nil
         hasKey = false
-        keyMessage = "API key verwijderd"
+        keyMessage = loc("API key verwijderd")
     }
 
     private func save() {
@@ -488,7 +502,7 @@ public struct SharedSettingsView: View {
             let link = try LeagueTeamLink(draft)
             teamURL = link.url.absoluteString
             draft = teamURL
-            message = "Teamlink opgeslagen"
+            message = loc("Teamlink opgeslagen")
             messageIsError = false
         } catch {
             message = (error as? LeagueTeamError)?.message ?? LeagueTeamError.invalidLink.message
@@ -499,7 +513,7 @@ public struct SharedSettingsView: View {
     private func remove() {
         teamURL = ""
         draft = ""
-        message = "Teamlink verwijderd"
+        message = loc("Teamlink verwijderd")
         messageIsError = false
     }
 }

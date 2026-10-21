@@ -196,7 +196,7 @@ public struct SharedScoreboardView: View {
             }
             .buttonStyle(.plain)
             .disabled(game.isGameOver)
-            .accessibilityLabel("Punt voor \(game.name(for: player))")
+            .accessibilityLabel(loc("Punt voor \(game.name(for: player))"))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 4)
@@ -385,7 +385,7 @@ public struct CoachScoringView: View {
                             .frame(width: 36, height: 32)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Analyse vorige game")
+                    .accessibilityLabel(loc("Analyse vorige game"))
                 }
                 if let onHistory {
                     Button(action: onHistory) {
@@ -393,7 +393,7 @@ public struct CoachScoringView: View {
                             .frame(width: 36, height: 32)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Afgeronde wedstrijden")
+                    .accessibilityLabel(loc("Afgeronde wedstrijden"))
                 }
                 if let onSettings {
                     Button(action: onSettings) {
@@ -401,7 +401,7 @@ public struct CoachScoringView: View {
                             .frame(width: 36, height: 32)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Instellingen")
+                    .accessibilityLabel(loc("Instellingen"))
                 }
             }
         }
@@ -418,23 +418,23 @@ public struct CoachScoringView: View {
             } else {
                 switch game.scoringStep {
                 case .selectPlayer:
-                    Text(game.isStarted ? "Tik op de score van wie scoort" : "Tik START bij de eerste service")
+                    Text(game.isStarted ? loc("Tik op de score van wie scoort") : loc("Tik START bij de eerste service"))
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textSecondary)
                 case .selectPointType:
-                    Text("Hoe werd het punt gewonnen?")
+                    Text("Hoe werd het punt gewonnen?", bundle: textBundle)
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                 case .selectErrorKind:
-                    Text("Wat voor fout was het?")
+                    Text("Wat voor fout was het?", bundle: textBundle)
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                 case .selectZone:
-                    Text("Tik op de baan waar het punt viel")
+                    Text("Tik op de baan waar het punt viel", bundle: textBundle)
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                 case .selectShot:
-                    Text("Kies het type slag")
+                    Text("Kies het type slag", bundle: textBundle)
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                         .foregroundColor(playerColor)
                 }
@@ -573,7 +573,7 @@ public struct CoachScoringView: View {
             game.clearSelection()
             volley = false
         }) {
-            Text("Annuleren")
+            Text("Annuleren", bundle: textBundle)
                 .font(SharedFonts.system(13, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textMuted)
                 .padding(.vertical, 6)
@@ -598,23 +598,23 @@ public struct CoachScoringView: View {
 
     /// Game over and match over, the same card as iOS' GameOverOverlay
     private var resultCard: some View {
-        var secondary: [ResultButton] = [ResultButton("Analyse", icon: "magnifyingglass") {
+        var secondary: [ResultButton] = [ResultButton(loc("Analyse"), icon: "magnifyingglass") {
             analysedGame = game
             showingAnalysis = true
         }]
-        secondary.append(ResultButton("Coachkaart", icon: "list.bullet.clipboard") { showingCard = true })
+        secondary.append(ResultButton(loc("Coachkaart"), icon: "list.bullet.clipboard") { showingCard = true })
         if shareText != nil {
-            secondary.append(ResultButton("Deel score", icon: "square.and.arrow.up") { showingShare = true })
+            secondary.append(ResultButton(loc("Deel score"), icon: "square.and.arrow.up") { showingShare = true })
         }
         let primary: ResultButton
         if match.isMatchOver {
             if let onNewMatch {
-                primary = ResultButton("Nieuwe wedstrijd") { onNewMatch() }
+                primary = ResultButton(loc("Nieuwe wedstrijd")) { onNewMatch() }
             } else {
-                primary = ResultButton("Klaar") { onExit() }
+                primary = ResultButton(loc("Klaar")) { onExit() }
             }
         } else {
-            primary = ResultButton("Volgende game") {
+            primary = ResultButton(loc("Volgende game")) {
                 match.onGameEnd()
                 matchChanged()
             }
@@ -630,7 +630,7 @@ public struct CoachScoringView: View {
                 game.undoLastPoint()
                 matchChanged()
             },
-            link: match.isMatchOver ? nil : ResultButton("Stop wedstrijd") { requestStop() }
+            link: match.isMatchOver ? nil : ResultButton(loc("Stop wedstrijd")) { requestStop() }
         )
         .sheet(isPresented: $showingShare) {
             if let shareText {
@@ -678,7 +678,7 @@ public struct CoachScoringView: View {
                     .font(SharedFonts.system(22, weight: .bold, design: .rounded))
                     .tracking(3)
                     .foregroundColor(SharedColors.gold)
-                Text("Wie vraagt de let?")
+                Text("Wie vraagt de let?", bundle: textBundle)
                     .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textSecondary)
                 HStack(spacing: 16) {
@@ -686,12 +686,12 @@ public struct CoachScoringView: View {
                     letButton(Player.player2, SharedColors.steelBlue)
                 }
                 if game.totalLets > 0 {
-                    Text("Lets deze game: \(game.totalLets)")
+                    Text("Lets deze game: \(game.totalLets)", bundle: textBundle)
                         .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                         .foregroundColor(SharedColors.textMuted)
                 }
                 Button { showingLet = false } label: {
-                    Text("Annuleren")
+                    Text("Annuleren", bundle: textBundle)
                         .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                         .foregroundColor(SharedColors.textSecondary)
                         .padding(.horizontal, 24)
@@ -763,29 +763,29 @@ public struct CoachScoringView: View {
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
                 .multilineTextAlignment(.center)
-            overlayButton("Bewaar en ga later verder", SharedColors.accent) {
+            overlayButton(loc("Bewaar en ga later verder"), SharedColors.accent) {
                 showingStop = false
                 onExit()
             }
             if let onAbandon {
-                overlayButton("Opslaan als incompleet", SharedColors.textSecondary) {
+                overlayButton(loc("Opslaan als incompleet"), SharedColors.textSecondary) {
                     showingStop = false
                     stopLive()
                     onAbandon()
                 }
             }
-            overlayButton("Uitslag aanvullen", SharedColors.textSecondary) {
+            overlayButton(loc("Uitslag aanvullen"), SharedColors.textSecondary) {
                 showingStop = false
                 showingComplete = true
             }
             if let onDiscard {
-                overlayButton("Niet opslaan", SharedColors.error) {
+                overlayButton(loc("Niet opslaan"), SharedColors.error) {
                     showingStop = false
                     stopLive()
                     onDiscard()
                 }
             }
-            Button("Doorspelen") { showingStop = false }
+            Button(loc("Doorspelen")) { showingStop = false }
                 .foregroundColor(SharedColors.textSecondary)
         }
     }
@@ -898,7 +898,7 @@ struct RallyClock: View {
             }
         }
         .opacity(hidden ? 0.0 : 1.0)
-        .accessibilityLabel("Rallytijd \(text)")
+        .accessibilityLabel(loc("Rallytijd \(text)"))
         // Stops ticking while the game is over
         .task(id: hidden) {
             while !Task.isCancelled && !hidden {

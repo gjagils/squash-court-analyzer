@@ -82,7 +82,7 @@ public struct SharedPlayerBadgesView: View {
         ZStack {
             SharedColors.background.ignoresSafeArea()
             if isLoading {
-                ProgressView("Badges laden…").foregroundColor(SharedColors.textPrimary)
+                ProgressView(loc("Badges laden…")).foregroundColor(SharedColors.textPrimary)
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
@@ -94,10 +94,10 @@ public struct SharedPlayerBadgesView: View {
                                 HStack(spacing: 10) {
                                     AppSymbol("chart.bar.xaxis", size: 16, color: SharedColors.gold)
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("PROFIEL")
+                                        Text("PROFIEL", bundle: textBundle)
                                             .font(ActionButton.font)
                                             .foregroundColor(SharedColors.gold)
-                                        Text("Vorm, winners en fouten over de wedstrijden")
+                                        Text("Vorm, winners en fouten over de wedstrijden", bundle: textBundle)
                                             .font(SharedFonts.system(12))
                                             .foregroundColor(SharedColors.textSecondary)
                                     }
@@ -109,9 +109,9 @@ public struct SharedPlayerBadgesView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                             }
                             .buttonStyle(.plain)
-                            .accessibilityLabel("Profiel van \(playerName)")
+                            .accessibilityLabel(loc("Profiel van \(playerName)"))
                         }
-                        section("BADGES · \(earnedFamilies) VAN \(BadgeKind.collection.count)") {
+                        section(loc("BADGES · \(earnedFamilies) VAN \(BadgeKind.collection.count)")) {
                             // Rows of three, not a LazyVGrid: on Android that becomes a
                             // scroll area of its own inside the page
                             VStack(spacing: 18) {
@@ -120,11 +120,11 @@ public struct SharedPlayerBadgesView: View {
                                 }
                             }
                         }
-                        section("DELEN") {
-                            ActionButton("DEEL KAART", icon: "square.and.arrow.up", style: .filled, color: SharedColors.accent) {
+                        section(loc("DELEN")) {
+                            ActionButton(loc("DEEL KAART"), icon: "square.and.arrow.up", style: .filled, color: SharedColors.accent) {
                                 Task { await shareCard() }
                             }
-                            .accessibilityLabel("Deel kaart")
+                            .accessibilityLabel(loc("Deel kaart"))
                         }
                     }
                     .padding(20)
@@ -133,10 +133,10 @@ public struct SharedPlayerBadgesView: View {
             }
         }
         .pageTitle(playerName)
-        .alert("Delen lukt niet", isPresented: $shareFailed) {
-            Button("OK", role: .cancel) { }
+        .alert(loc("Delen lukt niet"), isPresented: $shareFailed) {
+            Button(loc("OK"), role: .cancel) { }
         } message: {
-            Text("De kaart van \(playerName) kon niet worden gemaakt.")
+            Text("De kaart van \(playerName) kon niet worden gemaakt.", bundle: textBundle)
         }
         .task(id: cardInbox.importCount) { await load() }
     }
@@ -167,7 +167,9 @@ public struct SharedPlayerBadgesView: View {
                 badgeTile(family)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("\(shownKind(family).tieredTitle), \(familyCount(family) > 0 ? "\(familyCount(family)) keer verdiend" : "nog niet verdiend")")
+            .accessibilityLabel(familyCount(family) > 0
+                                ? loc("\(shownKind(family).tieredTitle), \(familyCount(family)) keer verdiend")
+                                : loc("\(shownKind(family).tieredTitle), nog niet verdiend"))
         } else {
             Color.clear.frame(maxWidth: .infinity, maxHeight: 1)
         }
@@ -189,7 +191,7 @@ public struct SharedPlayerBadgesView: View {
                 Text(playerName)
                     .font(SharedFonts.system(18, weight: .bold, design: .rounded))
                     .foregroundColor(SharedColors.textPrimary)
-                Text(moments.count == 1 ? "1 badge verdiend" : "\(moments.count) badges verdiend")
+                Text(moments.count == 1 ? loc("1 badge verdiend") : loc("\(moments.count) badges verdiend"))
                     .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textSecondary)
             }
@@ -246,7 +248,7 @@ public struct SharedPlayerBadgesView: View {
                 return
             }
             let url = try snapshot.webURL()
-            let text = "Badgekaart van \(snapshot.name): \(url.absoluteString)"
+            let text = loc("Badgekaart van \(snapshot.name): \(url.absoluteString)")
             if let cardPicture { cardPicture(snapshot, text) } else { shareText(text) }
         } catch {
             shareFailed = true
@@ -300,11 +302,11 @@ struct SharedBadgeMomentsView: View {
                                     .foregroundColor(SharedColors.textMuted)
                             }
                             if family.coachOnly {
-                                Text("Alleen in coachmodus, waar de slagen worden bijgehouden")
+                                Text("Alleen in coachmodus, waar de slagen worden bijgehouden", bundle: textBundle)
                                     .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                                     .foregroundColor(SharedColors.textMuted)
                             } else if family.isCareer {
-                                Text("Telt de wedstrijden op dit toestel")
+                                Text("Telt de wedstrijden op dit toestel", bundle: textBundle)
                                     .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                                     .foregroundColor(SharedColors.textMuted)
                             }
@@ -312,7 +314,7 @@ struct SharedBadgeMomentsView: View {
                     }
                     .listRowBackground(Color.clear)
                 }
-                Section("\(moments.count)× verdiend") {
+                Section(loc("\(moments.count)× verdiend")) {
                     ForEach(moments) { moment in
                         VStack(alignment: .leading, spacing: 2) {
                             Text(Self.momentTitle(moment))
@@ -340,8 +342,8 @@ struct SharedBadgeMomentsView: View {
 
     /// "Goud · Tegen Kristian", "Tegen Kristian" or "Wedstrijd"
     static func momentTitle(_ moment: BadgeMoment) -> String {
-        if moment.badge == BadgeKind.pioneer { return "Testperiode" }
-        let against = moment.opponentName.isEmpty ? "Wedstrijd" : "Tegen \(moment.opponentName)"
+        if moment.badge == BadgeKind.pioneer { return loc("Testperiode") }
+        let against = moment.opponentName.isEmpty ? loc("Wedstrijd") : loc("Tegen \(moment.opponentName)")
         guard let tier = moment.badge.tier else { return against }
         return tier.title + " · " + against
     }
@@ -350,7 +352,7 @@ struct SharedBadgeMomentsView: View {
     private static func dateText(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "d MMM yyyy HH:mm"
-        formatter.locale = Locale(identifier: "nl_NL")
+        formatter.locale = displayLocale
         return formatter.string(from: date)
     }
 }

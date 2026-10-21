@@ -17,7 +17,7 @@ public struct VolleyToggle: View {
         Button { isOn.toggle() } label: {
             HStack(spacing: 8) {
                 AppSymbol("bolt.fill", size: 14, color: isOn ? SharedColors.onAccent : color)
-                Text("UIT DE LUCHT")
+                Text("UIT DE LUCHT", bundle: textBundle)
                     .font(SharedFonts.system(12, weight: .bold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(isOn ? SharedColors.onAccent : color)
@@ -31,6 +31,6 @@ public struct VolleyToggle: View {
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(isOn ? "Uit de lucht, aan" : "Uit de lucht, uit")
+        .accessibilityLabel(isOn ? loc("Uit de lucht, aan") : loc("Uit de lucht, uit"))
     }
 }

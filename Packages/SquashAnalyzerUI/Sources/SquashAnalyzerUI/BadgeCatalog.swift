@@ -50,7 +50,7 @@ public struct BadgeMedallion: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .accessibilityLabel("Badge \(kind.tieredTitle)\(isLocked ? ", nog niet verdiend" : "")")
+        .accessibilityLabel(isLocked ? loc("Badge \(kind.tieredTitle), nog niet verdiend") : loc("Badge \(kind.tieredTitle)"))
     }
 }
 
@@ -88,7 +88,7 @@ public struct SharedBadgeCatalogView: View {
     public var body: some View {
         List {
             Section {
-                Text("Spelers die je kiest via \"Kies speler\" verdienen badges tijdens een wedstrijd, in coach- en scheidsrechtermodus. Badges met het label Coach vragen om de slagen die alleen coachmodus bijhoudt. Een badge met drie treden verdien je in brons, zilver en goud: de rand laat zien hoe ver je bent.")
+                Text("Spelers die je kiest via \"Kies speler\" verdienen badges tijdens een wedstrijd, in coach- en scheidsrechtermodus. Badges met het label Coach vragen om de slagen die alleen coachmodus bijhoudt. Een badge met drie treden verdien je in brons, zilver en goud: de rand laat zien hoe ver je bent.", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .listRowBackground(Color.clear)
@@ -111,8 +111,8 @@ public struct SharedBadgeCatalogView: View {
                                         .foregroundColor(SharedColors.textMuted)
                                 }
                                 HStack(spacing: 6) {
-                                    if family.coachOnly { tag("Coach") }
-                                    if family.isOnce { tag("Eén keer") }
+                                    if family.coachOnly { tag(loc("Coach")) }
+                                    if family.isOnce { tag(loc("Eén keer")) }
                                 }
                             }
                         }
@@ -129,7 +129,7 @@ public struct SharedBadgeCatalogView: View {
         }
         .scrollContentBackground(.hidden)
         .background(SharedColors.background.ignoresSafeArea())
-        .pageTitle("Alle badges")
+        .pageTitle(loc("Alle badges"))
     }
 
     private func tag(_ text: String) -> some View {

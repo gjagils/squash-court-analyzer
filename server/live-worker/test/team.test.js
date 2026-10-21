@@ -212,6 +212,16 @@ describe('team sessions', () => {
     events.close();
   });
 
+  it('the link preview of a team match follows the starter\'s language', async () => {
+    const { id, writeKey } = (await call('POST', '/api/team', { home: 'All Inn 8', away: 'Delft 8', date: DAY, lang: 'en' })).json;
+    await call('PUT', `/api/team/${id}/partij/1`, { status: 'finished', gamesWon: [3, 0], winner: 1 }, writeKey);
+    const page = await call('GET', `/t/${id}`);
+    expect(page.text).toContain('<title>🔴 Live: All Inn 8 – Delft 8 · matches 1-0</title>');
+    expect(page.text).toContain('Follow the team match live in SquashAnalyzer');
+    // The team names stay as they were sent
+    expect((await call('GET', `/api/team/${id}`)).json.team).toEqual({ home: 'All Inn 8', away: 'Delft 8', date: DAY });
+  });
+
   it('the page shows the teams and the partijen in the link preview, and escapes them', async () => {
     const { id, writeKey } = (await call('POST', '/api/team', { home: 'All <Inn> 8', away: 'Delft & Co', date: DAY })).json;
     await call('PUT', `/api/team/${id}/partij/1`, { status: 'finished', gamesWon: [3, 0], winner: 1 }, writeKey);

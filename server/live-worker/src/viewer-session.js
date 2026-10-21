@@ -67,6 +67,11 @@ export class ViewerSession extends DurableObject {
     return id;
   }
 
+  /** The starter's language ("nl" or "en"), for the link preview; "nl" for a session from before 3.0 */
+  async lang() {
+    return (await this.ctx.storage.get('lang')) === 'en' ? 'en' : 'nl';
+  }
+
   async keyEquals(given) {
     return sameKey(given, await this.ctx.storage.get('key'));
   }
@@ -127,7 +132,7 @@ export class ViewerSession extends DurableObject {
     return 204;
   }
 
-  /** The registered followers ({ platform, token, sandbox, alerts }) */
+  /** The registered followers ({ platform, token, sandbox, alerts, lang }; no lang before 3.0) */
   async followers() {
     return Array.from((await this.ctx.storage.list({ prefix: FOLLOWER_PREFIX })).values());
   }

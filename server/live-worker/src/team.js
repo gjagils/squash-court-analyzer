@@ -15,18 +15,20 @@
 
 import { ViewerSession, sameKey } from './viewer-session.js';
 import { teamAlert, teamContentState, teamDecided } from './push.js';
+import { LANGS } from './validate.js';
 
 const SLOT_KEYS = ['1', '2', '3', '4'];
 const photoKey = (slot, index) => `photo:${slot}:${index}`;
 
 export class TeamSession extends ViewerSession {
   /** Creates the session; false when this id is already in use */
-  async create(key, ownerKey, team, id) {
+  async create(key, ownerKey, team, id, lang = 'nl') {
     if (await this.ctx.storage.get('key')) return false;
     const now = Date.now();
     // The id is kept in storage too: the limiter is released by it, and the
-    // name of a jurisdiction object id must not be what that depends on
-    await this.ctx.storage.put({ key, ownerKey, team, id, partijen: {}, updatedAt: now });
+    // name of a jurisdiction object id must not be what that depends on.
+    // `lang` is the starter's language, for the link preview.
+    await this.ctx.storage.put({ key, ownerKey, team, id, partijen: {}, updatedAt: now, lang });
     await this.scheduleIdleAlarm(now);
     return true;
   }
@@ -142,7 +144,9 @@ export class TeamSession extends ViewerSession {
     const event = await this.followerEvent(done);
     if (!event) return;
     const content = { kind: 'team', state: teamContentState(team, partijen), finished: done };
-    this.schedulePush(await this.pushJob(event, followers, content, teamAlert(previous, team, partijen)));
+    // The alert in every language; each follower gets its own
+    const alert = Object.fromEntries(LANGS.map((lang) => [lang, teamAlert(previous, team, partijen, lang)]));
+    this.schedulePush(await this.pushJob(event, followers, content, alert.nl ? alert : null));
   }
 
   /** The stand for the end the followers get when the session goes (Live stoppen, idle): gone in a minute */

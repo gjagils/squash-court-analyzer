@@ -122,6 +122,22 @@ describe('sessions', () => {
     expect(received[2].data.snapshot.score).toEqual([5, 2]);
   });
 
+  it('the link preview follows the language the share was started in; Dutch by default', async () => {
+    const dutch = await call('POST', '/api/live', snapshot);
+    expect((await call('GET', `/l/${dutch.json.id}`)).text).toMatch(/Volg de wedstrijd live in SquashAnalyzer/);
+    const english = await call('POST', '/api/live', { ...snapshot, lang: 'en' });
+    expect(english.status).toBe(201);
+    const page = await call('GET', `/l/${english.json.id}`);
+    expect(page.text).toMatch(/Follow the match live in SquashAnalyzer/);
+    expect(page.text).toMatch(/<title>🔴 Live: Jan – Piet<\/title>/);
+    // The language is not part of the stand the viewers get
+    expect((await call('GET', `/api/live/${english.json.id}`)).json.snapshot.lang).toBeUndefined();
+    const query = await call('POST', '/api/live?lang=en', snapshot);
+    expect((await call('GET', `/l/${query.json.id}`)).text).toMatch(/Follow the match live/);
+    const odd = await call('POST', '/api/live', { ...snapshot, lang: 'fr' });
+    expect((await call('GET', `/l/${odd.json.id}`)).text).toMatch(/Volg de wedstrijd live/);
+  });
+
   it('the viewer page shows the names in the link preview and escapes them', async () => {
     const created = await call('POST', '/api/live', { ...snapshot, p2: "O'Neil" });
     const page = await call('GET', `/l/${created.json.id}`);

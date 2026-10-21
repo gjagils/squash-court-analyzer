@@ -7,7 +7,7 @@
 // Cloudflare's edge, and a session is gone two hours after its last update.
 
 import {
-  cleanPhoto, escapeHtml, ID_PATTERN, MAX_PHOTO_BYTES, newSessionId, newWriteKey, readJson, SLOTS, validatePartij,
+  cleanLang, cleanPhoto, escapeHtml, ID_PATTERN, MAX_PHOTO_BYTES, newSessionId, newWriteKey, readJson, SLOTS, validatePartij,
   validateSnapshot, validateTeamHeader,
 } from './validate.js';
 import { readConfig } from './config.js';
@@ -66,19 +66,46 @@ async function renderPage(request, template, title, description, pageUrl, imageU
   });
 }
 
-async function viewerPage(request, env, config, id, state) {
+/**
+ * The link preview texts per language. The preview (WhatsApp, iMessage) is
+ * made once by a crawler, so it follows the language of the phone that started
+ * the share (`lang` at POST), not the viewer's browser; the page itself picks
+ * its language in the browser.
+ */
+const PREVIEW = {
+  nl: {
+    live: 'Volg de wedstrijd live in SquashAnalyzer', liveOver: 'Deze livewedstrijd is afgelopen.',
+    teamTitle: 'SquashAnalyzer · teamwedstrijd', team: 'Volg de teamwedstrijd live in SquashAnalyzer',
+    teamOver: 'Deze teamwedstrijd is afgelopen.', partijen: 'partijen',
+  },
+  en: {
+    live: 'Follow the match live in SquashAnalyzer', liveOver: 'This live match has ended.',
+    teamTitle: 'SquashAnalyzer · team match', team: 'Follow the team match live in SquashAnalyzer',
+    teamOver: 'This team match has ended.', partijen: 'matches',
+  },
+};
+
+/** The `lang` of a POST that starts a share: in the JSON body, or `?lang=`; Dutch by default */
+function requestLang(body, url) {
+  if (body && typeof body === 'object' && body.lang !== undefined) return cleanLang(body.lang);
+  return cleanLang(url.searchParams.get('lang'));
+}
+
+async function viewerPage(request, env, config, id, state, lang = 'nl') {
   const template = await (await env.ASSETS.fetch(new Request(new URL('/live.html', request.url)))).text();
+  const words = PREVIEW[lang] || PREVIEW.nl;
   const title = state ? `🔴 Live: ${state.snapshot.p1} – ${state.snapshot.p2}` : 'SquashAnalyzer · live';
-  const description = state ? 'Volg de wedstrijd live in SquashAnalyzer' : 'Deze livewedstrijd is afgelopen.';
+  const description = state ? words.live : words.liveOver;
   const base = baseUrl(request, config);
   return renderPage(request, template, title, description, `${base}/l/${id}`, `${base}/logo.png`, JSON.stringify(id));
 }
 
 /** The team match page: "🔴 Live: All Inn Squash 8 – Squash Delft 8 · partijen 2-1" (partijen decide the evening) */
-async function teamPage(request, env, config, id, state) {
+async function teamPage(request, env, config, id, state, lang = 'nl') {
   const template = await (await env.ASSETS.fetch(new Request(new URL('/team.html', request.url)))).text();
-  let title = 'SquashAnalyzer · teamwedstrijd';
-  let description = 'Deze teamwedstrijd is afgelopen.';
+  const words = PREVIEW[lang] || PREVIEW.nl;
+  let title = words.teamTitle;
+  let description = words.teamOver;
   if (state) {
     const won = [0, 0];
     for (const slot of SLOTS) {
@@ -86,8 +113,8 @@ async function teamPage(request, env, config, id, state) {
       const winner = partij && partijDecided(partij) ? partijWinner(partij) : 0;
       if (winner) won[winner - 1] += 1;
     }
-    title = `🔴 Live: ${state.team.home} – ${state.team.away} · partijen ${won[0]}-${won[1]}`;
-    description = 'Volg de teamwedstrijd live in SquashAnalyzer';
+    title = `🔴 Live: ${state.team.home} – ${state.team.away} · ${words.partijen} ${won[0]}-${won[1]}`;
+    description = words.team;
   }
   const base = baseUrl(request, config);
   return renderPage(request, template, title, description, `${base}/t/${id}`, `${base}/logo.png`, JSON.stringify(id));
@@ -95,7 +122,7 @@ async function teamPage(request, env, config, id, state) {
 
 /**
  * POST / DELETE .../followers of a live or team match: { platform, token,
- * sandbox?, alerts? }. 400 invalid, 503 platform off (POST), 404 unknown,
+ * sandbox?, alerts?, lang? } (lang "nl" or "en" for the alert texts, Dutch when missing). 400 invalid, 503 platform off (POST), 404 unknown,
  * 429 full, 201 registered, 204 forgotten.
  */
 async function handleFollowers(request, env, config, session, unknownText) {
@@ -150,13 +177,15 @@ async function handle(request, env) {
     // Only ids this server could have made reach the page (and its script)
     const pageId = ID_PATTERN.test(parts[1]) ? parts[1] : '';
     const state = pageId ? await sessionFor(pageId).state() : null;
-    return viewerPage(request, env, config, pageId, state);
+    const lang = state ? await sessionFor(pageId).lang() : 'nl';
+    return viewerPage(request, env, config, pageId, state, lang);
   }
 
   if (request.method === 'GET' && parts[0] === 't' && parts.length === 2) {
     const pageId = ID_PATTERN.test(parts[1]) ? parts[1] : '';
     const state = pageId ? await teamFor(pageId).state() : null;
-    return teamPage(request, env, config, pageId, state);
+    const lang = state ? await teamFor(pageId).lang() : 'nl';
+    return teamPage(request, env, config, pageId, state, lang);
   }
   if (parts[0] === 'api' && parts[1] === 'team') return handleTeam(request, env, config, parts, limiter, teamFor);
 
@@ -171,14 +200,17 @@ async function handle(request, env) {
     // Cloudflare sets CF-Connecting-IP itself; nobody can forge it here
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     if (!(await limiter.allowCreate(ip))) return send(429, { error: 'Te veel nieuwe sessies, probeer het zo opnieuw' });
-    const snapshot = validateSnapshot(await readJson(request));
+    // The snapshot, with the app's language next to it (3.0 and later, optional)
+    const body = await readJson(request);
+    const snapshot = validateSnapshot(body);
     if (!snapshot) return send(400, { error: 'Ongeldige stand' });
+    const lang = requestLang(body, url);
     let newId = newSessionId();
     const key = newWriteKey();
     if (!(await limiter.register(newId))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
     // An id already in use (practically never): pick another. The colliding id
     // belongs to the session that has it: it is not released here.
-    while (!(await sessionFor(newId).create(key, snapshot, newId))) {
+    while (!(await sessionFor(newId).create(key, snapshot, newId, lang))) {
       newId = newSessionId();
       if (!(await limiter.register(newId))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
     }
@@ -259,13 +291,15 @@ async function handleTeam(request, env, config, parts, limiter, teamFor) {
   if (request.method === 'POST' && parts.length === 2) {
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     if (!(await limiter.allowCreate(ip))) return send(429, { error: 'Te veel nieuwe sessies, probeer het zo opnieuw' });
-    const team = validateTeamHeader(await readJson(request));
+    const body = await readJson(request);
+    const team = validateTeamHeader(body);
     if (!team) return send(400, { error: 'Ongeldige teamwedstrijd' });
+    const lang = requestLang(body, new URL(request.url));
     let newId = newSessionId();
     const key = newWriteKey();
     const ownerKey = newWriteKey();
     if (!(await limiter.register(`t:${newId}`))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
-    while (!(await teamFor(newId).create(key, ownerKey, team, newId))) {
+    while (!(await teamFor(newId).create(key, ownerKey, team, newId, lang))) {
       newId = newSessionId();
       if (!(await limiter.register(`t:${newId}`))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
     }

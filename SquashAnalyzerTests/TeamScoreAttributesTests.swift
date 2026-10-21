@@ -134,11 +134,17 @@ final class TeamScoreAttributesTests: XCTestCase {
         XCTAssertEqual(state.focus, .next(slot: 4))
         XCTAssertEqual(state.focusHeading(4), "E4 · inspelen")
         XCTAssertEqual(state.islandStatus, "1 van 4 klaar")
-        // Else the first slot that is not decided
-        state = State(home: "A", away: "B", partijen: [partij(1, [3, 0], [11, 4], "finished", winner: 1)])
+        // Else the first not decided in the playing order E4, E2, E1, E3
+        XCTAssertEqual(State(home: "A", away: "B", partijen: []).focus, .next(slot: 4))
+        state = State(home: "A", away: "B", partijen: [partij(4, [3, 0], [11, 4], "finished", winner: 1)])
         XCTAssertEqual(state.focus, .next(slot: 2))
         XCTAssertEqual(state.focusHeading(2), "Volgende partij · E2")
-        XCTAssertEqual(State(home: "A", away: "B", partijen: []).focus, .next(slot: 1))
+        state = State(home: "A", away: "B", partijen: [
+            partij(4, [3, 0], [11, 4], "finished", winner: 1), partij(2, [1, 3], [9, 11], "finished", winner: 2),
+        ])
+        XCTAssertEqual(state.focus, .next(slot: 1))
+        state.partijen.append(partij(1, [3, 1], [11, 7], "finished", winner: 1))
+        XCTAssertEqual(state.focus, .next(slot: 3))
     }
 
     func testAllFourDecidedShowsTheResults() {

@@ -170,9 +170,17 @@ class TeamScoreCardTest {
         assertEquals(TeamScoreCard.Focus.Next(4), card.focus)
         assertEquals("E4 · inspelen", card.focusHeading(4))
         assertEquals("1 van 4 klaar · games 3–0", card.text)
-        card = TeamScoreCard(TeamScore("A", "B", listOf(partij(1, gamesWon = 3 to 0, status = "finished", winner = 1))))
+        // Else the first not decided in the playing order E4, E2, E1, E3
+        assertEquals(TeamScoreCard.Focus.Next(4), TeamScoreCard(TeamScore("A", "B", emptyList())).focus)
+        card = TeamScoreCard(TeamScore("A", "B", listOf(partij(4, gamesWon = 3 to 0, status = "finished", winner = 1))))
         assertEquals(TeamScoreCard.Focus.Next(2), card.focus)
         assertEquals("Volgende partij · E2", card.focusHeading(2))
+        card = TeamScoreCard(TeamScore("A", "B", listOf(
+            partij(4, gamesWon = 3 to 0, status = "finished", winner = 1),
+            partij(2, gamesWon = 1 to 3, status = "finished", winner = 2),
+            partij(1, gamesWon = 3 to 1, status = "finished", winner = 1),
+        )))
+        assertEquals(TeamScoreCard.Focus.Next(3), card.focus)
     }
 
     @Test fun theResultAndItsWinnerByTheSbnRule() {

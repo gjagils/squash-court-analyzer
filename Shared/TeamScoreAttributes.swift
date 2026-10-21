@@ -111,6 +111,8 @@ enum TeamScoreFocus: Equatable {
 /// the content state (unit tested in SquashAnalyzerTests/TeamScoreAttributesTests)
 extension TeamScoreAttributes.ContentState {
     static let slots = [1, 2, 3, 4]
+    /// The order an SBN team match is played in: E4, E2, E1, E3 (shown always as E1–E4)
+    static let playOrder = [4, 2, 1, 3]
 
     func partij(_ slot: Int) -> TeamScorePartij? {
         for partij in partijen where partij.slot == slot { return partij }
@@ -203,13 +205,14 @@ extension TeamScoreAttributes.ContentState {
         return .next(slot: nextSlot)
     }
 
-    /// The partij that comes next: one warming up, else the first slot not decided
+    /// The partij that comes next: one warming up, else the first not decided
+    /// in the playing order E4, E2, E1, E3
     var nextSlot: Int {
-        for slot in Self.slots {
+        for slot in Self.playOrder {
             if let partij = partij(slot), partij.status == "warmup", !partij.isDecided { return slot }
         }
-        for slot in Self.slots where partij(slot)?.isDecided != true { return slot }
-        return 1
+        for slot in Self.playOrder where partij(slot)?.isDecided != true { return slot }
+        return Self.playOrder[0]
     }
 
     /// "7–5"

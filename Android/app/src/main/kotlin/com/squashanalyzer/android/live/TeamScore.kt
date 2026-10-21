@@ -217,11 +217,11 @@ class TeamScoreCard(val score: TeamScore) {
             return Focus.Next(nextSlot)
         }
 
-    /** One warming up, else the first slot that is not decided */
+    /** One warming up, else the first that is not decided, in the playing order E4, E2, E1, E3 */
     val nextSlot: Int
         get() {
-            score.partijen.firstOrNull { partij -> partij.status == "warmup" && !partij.isDecided }?.let { return it.slot }
-            return (1..4).firstOrNull { slot -> score.partij(slot)?.isDecided != true } ?: 1
+            PLAY_ORDER.firstOrNull { slot -> score.partij(slot)?.let { it.status == "warmup" && !it.isDecided } == true }?.let { return it }
+            return PLAY_ORDER.firstOrNull { slot -> score.partij(slot)?.isDecided != true } ?: PLAY_ORDER.first()
         }
 
     /** "E3 · bezig", "E3 · pauze", "E3 · inspelen", "Volgende partij · E3" */
@@ -351,5 +351,8 @@ class TeamScoreCard(val score: TeamScore) {
     companion object {
         /** The length of one partij on the bar */
         const val PART = 100
+
+        /** The order an SBN team match is played in (shown always as E1-E4), as iOS' TeamScoreAttributes.playOrder */
+        val PLAY_ORDER = listOf(4, 2, 1, 3)
     }
 }

@@ -48,7 +48,7 @@ struct PlayerManagementView: View {
                         Button(action: { dismiss() }) {
                             HStack(spacing: 4) {
                                 Image(systemName: "xmark")
-                                Text(isPickerMode ? String(localized: "Annuleren") : String(localized: "Sluiten"))
+                                Text(isPickerMode ? appText("Annuleren") : appText("Sluiten"))
                             }
                             .font(AppFonts.body(14))
                             .foregroundColor(AppColors.textSecondary)
@@ -59,7 +59,7 @@ struct PlayerManagementView: View {
                         Spacer(minLength: 8)
 
                         // Five controls share one row: shrink the title rather than wrap it
-                        Text(isPickerMode ? String(localized: "Kies speler") : String(localized: "Spelers"))
+                        Text(isPickerMode ? appText("Kies speler") : appText("Spelers"))
                             .font(PageTitleStyle.font)
                             .foregroundColor(AppColors.textPrimary)
                             .lineLimit(1)
@@ -112,7 +112,7 @@ struct PlayerManagementView: View {
                             Image(systemName: "person.2")
                                 .font(SharedFonts.system(40))
                                 .foregroundColor(AppColors.textMuted)
-                            Text("Nog geen spelers opgeslagen")
+                            Text(appText("Nog geen spelers opgeslagen"))
                                 .font(AppFonts.body(16))
                                 .foregroundColor(AppColors.textSecondary)
                             Text("Tik op + om een speler toe te voegen,\nof importeer een team (zip met team.json en foto's)")
@@ -192,7 +192,7 @@ struct PlayerManagementView: View {
                 Button("Annuleren", role: .cancel) { }
                 Button("Importeren") { importTeam(link: teamLink) }
             } message: {
-                Text("Plak de teamlink die je hebt gekregen.")
+                Text(appText("Plak de teamlink die je hebt gekregen."))
             }
             .alert("Team importeren", isPresented: $showingTeamImportResult) {
                 Button("OK", role: .cancel) { }
@@ -209,7 +209,7 @@ struct PlayerManagementView: View {
         Task {
             do {
                 let imported = try await TeamImportService.importTeam(link: link, context: modelContext)
-                teamImportMessage = String(localized: "Geïmporteerd: \(imported.summary)")
+                teamImportMessage = appText("Geïmporteerd: \(imported.summary)")
             } catch {
                 teamImportMessage = error.localizedDescription
             }
@@ -227,7 +227,7 @@ struct PlayerManagementView: View {
             defer { url.stopAccessingSecurityScopedResource() }
             let data = try Data(contentsOf: url)
             let imported = try TeamImportService.importTeam(zipData: data, context: modelContext)
-            teamImportMessage = String(localized: "Geïmporteerd: \(imported.summary)")
+            teamImportMessage = appText("Geïmporteerd: \(imported.summary)")
         } catch {
             teamImportMessage = error.localizedDescription
         }
@@ -271,7 +271,7 @@ struct PlayerRowView: View {
                         .font(AppFonts.label(15))
                         .foregroundColor(AppColors.textPrimary)
                     if TeamRoster.contains(player.id.uuidString, in: rosterRaw) {
-                        Text("TEAM")
+                        Text(appText("TEAM"))
                             .font(AppFonts.caption(9))
                             .tracking(1)
                             .foregroundColor(AppColors.warmOrange)
@@ -368,7 +368,7 @@ struct PlayerRowView: View {
             Button("Annuleren", role: .cancel) { }
             Button("Verwijderen", role: .destructive, action: onDelete)
         } message: {
-            Text("Gespeelde wedstrijden blijven bewaard.")
+            Text(appText("Gespeelde wedstrijden blijven bewaard."))
         }
         .contentShape(Rectangle())
         .onTapGesture {
@@ -421,7 +421,7 @@ struct PlayerEditSheet: View {
 
             if photoData != nil {
                 Button(action: { photoData = nil; pickedPhoto = nil }) {
-                    Text("Foto verwijderen")
+                    Text(appText("Foto verwijderen"))
                         .font(AppFonts.caption(12))
                         .foregroundColor(AppColors.textMuted)
                 }
@@ -444,7 +444,7 @@ struct PlayerEditSheet: View {
             ScrollView {
                 VStack(spacing: 24) {
                     // Title
-                    Text(player == nil ? String(localized: "SPELER TOEVOEGEN") : String(localized: "SPELER BEWERKEN"))
+                    Text(player == nil ? appText("SPELER TOEVOEGEN") : appText("SPELER BEWERKEN"))
                         .font(AppFonts.title(18))
                         .foregroundColor(AppColors.textPrimary)
                         .tracking(3)
@@ -466,7 +466,7 @@ struct PlayerEditSheet: View {
                     // Save / Cancel
                     HStack(spacing: 16) {
                         Button(action: { dismiss() }) {
-                            Text("Annuleren")
+                            Text(appText("Annuleren"))
                                 .font(AppFonts.label(14))
                                 .foregroundColor(AppColors.textSecondary)
                                 .frame(maxWidth: .infinity)
@@ -479,7 +479,7 @@ struct PlayerEditSheet: View {
                             onSave(name.trimmingCharacters(in: .whitespaces), Array(selectedFocusAreas), notes, photoData)
                             dismiss()
                         }) {
-                            Text("Opslaan")
+                            Text(appText("Opslaan"))
                                 .font(AppFonts.label(14))
                                 .foregroundColor(AppColors.backgroundDark)
                                 .frame(maxWidth: .infinity)

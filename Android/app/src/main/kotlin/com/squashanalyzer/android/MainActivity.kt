@@ -183,7 +183,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 PresentationRoot(defaultColorScheme = if (light) ColorScheme.light else ColorScheme.dark, context = ComposeContext()) { context ->
                     Box(modifier = context.modifier.fillMaxSize()) {
-                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach, backup = backup, teamImporter = teamImporter, photoStore = playerStore, filePicker = playerFiles, shareCard = { snapshot, text -> shareOffMainThread { CardImage.shareIntent(this@MainActivity, snapshot, text) } }, teamMatchStore = teamMatchStore, testDataStore = testDataStore, onLanguage = { openAppLanguageSettings() })
+                        AndroidHomeView(playerStore = playerStore, badgeStore = badgeAwardStore, historyStore = historyStore, matchStore = matchStore, refereeMatchStore = refereeMatchStore, shareText = { startActivity(shareTextIntent(it)) }, cardInbox = cardInbox, cardImportStore = badgeAwardStore, leagueTeamFetcher = leagueTeamFetcher, aiCoach = aiCoach, backup = backup, teamImporter = teamImporter, photoStore = playerStore, filePicker = playerFiles, shareCard = { snapshot, text -> shareOffMainThread { CardImage.shareIntent(this@MainActivity, snapshot, text) } }, teamMatchStore = teamMatchStore, testDataStore = testDataStore, onLanguage = { code -> applyAppLanguage(code) })
                             // Page titles 20 sp semibold on every top bar, as PageTitleStyle on iOS (docs/style/README.md)
                             .material3TopAppBar { options ->
                                 val title = options.title
@@ -303,24 +303,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Instellingen → Taal: Android's own per-app language screen (Android 13+,
-     * the languages of res/xml/locales_config.xml); before that the app's
-     * details, where the phone's language decides
+     * Instellingen → Taal: "" follows the phone, "nl" or "en" sets the app's own
+     * locale (AppCompat keeps it, also before Android 13), so the Android texts
+     * and notifications follow too; the screens redraw in the new language.
+     * Core and the shared screens read the same choice (AppLanguage.storageKey).
      */
-    fun openAppLanguageSettings() {
-        val app = android.net.Uri.fromParts("package", packageName, null)
-        val intents = buildList {
-            if (android.os.Build.VERSION.SDK_INT >= 33) add(Intent(android.provider.Settings.ACTION_APP_LOCALE_SETTINGS, app))
-            add(Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app))
-        }
-        for (intent in intents) {
-            try {
-                startActivity(intent)
-                return
-            } catch (e: android.content.ActivityNotFoundException) {
-                // Not on this phone: the next one
-            }
-        }
+    fun applyAppLanguage(code: String) {
+        androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(
+            androidx.core.os.LocaleListCompat.forLanguageTags(code)
+        )
     }
 
     /** Identifies this install as the awarding coach, like iOS' `BadgeAwarder.installId` */

@@ -35,12 +35,12 @@ struct PlayerCardImage: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("BADGEKAART")
+                Text(appText("BADGEKAART"))
                     .font(AppFonts.label(12))
                     .tracking(2)
                     .foregroundColor(AppColors.accentGold)
                 Spacer()
-                Text("Squash Analyzer")
+                Text(appText("Squash Analyzer"))
                     .font(AppFonts.caption(11))
                     .foregroundColor(AppColors.textMuted)
             }
@@ -53,7 +53,7 @@ struct PlayerCardImage: View {
                     .foregroundColor(AppColors.textSecondary)
             }
             if earned.isEmpty {
-                Text("Nog geen badges verdiend")
+                Text(appText("Nog geen badges verdiend"))
                     .font(AppFonts.body(13))
                     .foregroundColor(AppColors.textMuted)
             }
@@ -153,7 +153,7 @@ struct CardImportSheet: View {
                                         .foregroundColor(AppColors.textPrimary)
                                     Spacer()
                                     if player.name.localizedCaseInsensitiveCompare(snapshot.name) == .orderedSame {
-                                        Text("zelfde naam")
+                                        Text(appText("zelfde naam"))
                                             .font(AppFonts.caption(11))
                                             .foregroundColor(AppColors.textMuted)
                                     }
@@ -166,9 +166,9 @@ struct CardImportSheet: View {
             }
             .scrollContentBackground(.hidden)
             .background(AppBackground())
-            .pageTitle(String(localized: "Spelerskaart"))
+            .pageTitle(appText("Spelerskaart"))
             .toolbar {
-                CloseToolbarItem(title: String(localized: "Annuleren")) { close() }
+                CloseToolbarItem(title: appText("Annuleren")) { close() }
             }
             .alert("Koppelen mislukt", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("OK", role: .cancel) { }

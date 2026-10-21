@@ -15,7 +15,7 @@ enum PersistenceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .saveFailed(let error):
-            return String(localized: "De wedstrijd kon niet worden opgeslagen: \(error.localizedDescription)")
+            return appText("De wedstrijd kon niet worden opgeslagen: \(error.localizedDescription)")
         }
     }
 }

@@ -8353,6 +8353,42 @@
         }
       }
     },
+    "Telefoon": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telefoon"
+          }
+        }
+      }
+    },
+    "Telefoon volgt de taal van je telefoon: Nederlands als die op Nederlands staat, anders Engels.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phone follows your phone's language: Dutch when it is set to Dutch, otherwise English."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telefoon volgt de taal van je telefoon: Nederlands als die op Nederlands staat, anders Engels."
+          }
+        }
+      }
+    },
     "Telt de wedstrijden op dit toestel": {
       "extractionState": "manual",
       "generatesSymbol": false,

@@ -111,3 +111,36 @@ public struct SettingsManualCard: View {
         .accessibilityLabel(loc("Open de handleiding"))
     }
 }
+
+/// Instellingen → Taal: Telefoon (the phone's language: Dutch when it is set to
+/// Dutch, else English), Nederlands or English. Kept under `AppLanguage.storageKey`;
+/// `onChange` lets the platform follow (iOS: the widget and the system texts,
+/// Android: the app's own locale).
+public struct LanguagePicker: View {
+    @AppStorage(AppLanguage.storageKey) private var stored = ""
+    let onChange: (String) -> Void
+
+    public init(onChange: @escaping (String) -> Void = { _ in }) {
+        self.onChange = onChange
+    }
+
+    public var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Picker(loc("Taal"), selection: Binding(get: { stored }, set: { value in
+                stored = value
+                onChange(value)
+            })) {
+                Text(loc("Telefoon")).tag("")
+                Text(verbatim: "Nederlands").tag("nl")
+                Text(verbatim: "English").tag("en")
+            }
+            .pickerStyle(.segmented)
+            // Drawn anew after a change: the segmented control keeps its old colours otherwise
+            .id(stored)
+            Text(loc("Telefoon volgt de taal van je telefoon: Nederlands als die op Nederlands staat, anders Engels."))
+                .font(SharedFonts.system(12))
+                .foregroundColor(SharedColors.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}

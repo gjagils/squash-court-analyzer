@@ -10,11 +10,22 @@ public enum AppLanguage: String, CaseIterable, Sendable {
     case dutch = "nl"
     case english = "en"
 
-    /// Dutch when the phone's first preferred language is Dutch, English for
-    /// every other language
+    /// Where Instellingen → Taal keeps the choice: "nl", "en", or nothing
+    /// (empty) to follow the phone (Gerd-Jan, 21 October 2026)
+    public static let storageKey = "appLanguage"
+
+    /// The choice in Instellingen → Taal; else Dutch when the phone's first
+    /// preferred language is Dutch, English for every other language
     public static var current: AppLanguage {
         if let forced = AppLanguageOverride.shared.language { return forced }
+        if let chosen = AppLanguage.chosen { return chosen }
         return AppLanguage.from(preferredLanguages: Locale.preferredLanguages)
+    }
+
+    /// The language chosen in Instellingen, nil for "Telefoon"
+    public static var chosen: AppLanguage? {
+        guard let stored = UserDefaults.standard.string(forKey: AppLanguage.storageKey) else { return nil }
+        return AppLanguage(rawValue: stored)
     }
 
     /// The language for a list such as `Locale.preferredLanguages` ("nl-NL", "en-GB", ...)

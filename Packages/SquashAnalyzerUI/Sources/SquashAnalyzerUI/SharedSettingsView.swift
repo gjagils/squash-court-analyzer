@@ -27,7 +27,7 @@ public struct SettingsContext {
     public let aiCoach: AICoachContext?
     public let backup: BackupContext?
     /// Opens the system's language setting for this app (Android); nil hides Taal
-    public let onLanguage: (() -> Void)?
+    public let onLanguage: ((String) -> Void)?
     #if !SKIP
     /// The iPhone's own Instellingen (with iCloud back-up and the iPhone
     /// manual), so the gear opens the same screen everywhere; nil uses the
@@ -35,14 +35,14 @@ public struct SettingsContext {
     public let ownScreen: ((@escaping () -> Void) -> AnyView)?
 
     public init(aiCoach: AICoachContext?, backup: BackupContext?, ownScreen: ((@escaping () -> Void) -> AnyView)? = nil,
-                onLanguage: (() -> Void)? = nil) {
+                onLanguage: ((String) -> Void)? = nil) {
         self.aiCoach = aiCoach
         self.backup = backup
         self.ownScreen = ownScreen
         self.onLanguage = onLanguage
     }
     #else
-    public init(aiCoach: AICoachContext?, backup: BackupContext?, onLanguage: (() -> Void)? = nil) {
+    public init(aiCoach: AICoachContext?, backup: BackupContext?, onLanguage: ((String) -> Void)? = nil) {
         self.aiCoach = aiCoach
         self.backup = backup
         self.onLanguage = onLanguage
@@ -88,7 +88,7 @@ public struct SharedSettingsView: View {
     let backup: BackupContext?
     /// Opens the system's language setting for this app (Android's
     /// per-app language, filled in by MainActivity); nil hides Taal
-    let onLanguage: (() -> Void)?
+    let onLanguage: ((String) -> Void)?
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
@@ -113,7 +113,7 @@ public struct SharedSettingsView: View {
     @State private var autoFolder: String?
     @State private var autoLast: Date?
 
-    public init(aiCoach: AICoachContext? = nil, backup: BackupContext? = nil, onLanguage: (() -> Void)? = nil) {
+    public init(aiCoach: AICoachContext? = nil, backup: BackupContext? = nil, onLanguage: ((String) -> Void)? = nil) {
         self.aiCoach = aiCoach
         self.backup = backup
         self.onLanguage = onLanguage
@@ -141,11 +141,12 @@ public struct SharedSettingsView: View {
                     SettingsRow(loc("Weergave"), icon: "circle.lefthalf.filled", open: openPart == "theme") { toggle("theme") }
                     if openPart == "theme" { AppearancePicker(showsTitle: false).padding(.bottom, 16) }
                     SettingsDivider()
-                    // The phone's own per-app language screen: Dutch, or English for everything else
-                    if let onLanguage {
-                        SettingsRow(loc("Taal"), icon: "globe") { onLanguage() }
-                        SettingsDivider()
+                    // Telefoon, Nederlands or English; the host follows the choice (Android: the app's locale)
+                    SettingsRow(loc("Taal"), icon: "globe", open: openPart == "language") { toggle("language") }
+                    if openPart == "language" {
+                        LanguagePicker { code in onLanguage?(code) }.padding(.bottom, 16)
                     }
+                    SettingsDivider()
                     SettingsRow(loc("Baanindeling"), icon: "square.grid.3x3", open: openPart == "court") { toggle("court") }
                     if openPart == "court" { courtSection.padding(.bottom, 16) }
                     SettingsDivider()

@@ -5,6 +5,8 @@ import SquashAnalyzerUI
 
 @main
 struct SquashAnalyzerApp: App {
+    /// Instellingen → Taal ("" = the phone's language)
+    @AppStorage(AppLanguage.storageKey) private var appLanguage = ""
     let container: ModelContainer
     let persistenceWarning: String?
 
@@ -44,8 +46,8 @@ struct SquashAnalyzerApp: App {
             } catch {
                 fatalError("Ook de veilige tijdelijke opslag kon niet worden gestart: \(error)")
             }
-            let location = recoveryURL?.path ?? String(localized: "de Application Support-map")
-            persistenceWarning = String(localized: "De lokale database kon niet worden geopend. De originele bestanden zijn behouden in \(location). Deze sessie gebruikt tijdelijke opslag; exporteer geen vervangende backup voordat de database is hersteld.")
+            let location = recoveryURL?.path ?? appText("de Application Support-map")
+            persistenceWarning = appText("De lokale database kon niet worden geopend. De originele bestanden zijn behouden in \(location). Deze sessie gebruikt tijdelijke opslag; exporteer geen vervangende backup voordat de database is hersteld.")
         }
     }
 
@@ -53,6 +55,8 @@ struct SquashAnalyzerApp: App {
         WindowGroup {
             ContentView(startupPersistenceWarning: persistenceWarning)
                 .appAppearance()
+                // A new choice in Instellingen → Taal draws every screen anew in that language
+                .id(appLanguage)
         }
         .modelContainer(container)
     }

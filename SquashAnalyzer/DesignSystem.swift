@@ -109,7 +109,7 @@ struct SportsPanel<Content: View>: View {
 /// `CloseButton` top left in a navigation bar, without the glass capsule
 /// iOS 26 puts around toolbar buttons, so it looks like the one on Spelers
 struct CloseToolbarItem: ToolbarContent {
-    var title: String = String(localized: "Sluiten")
+    var title: String = appText("Sluiten")
     let action: () -> Void
 
     var body: some ToolbarContent {
@@ -140,11 +140,11 @@ struct AppBackground: View {
     ZStack {
         AppBackground()
         VStack(spacing: 20) {
-            Text("Coach")
+            Text(appText("Coach"))
                 .font(PageTitleStyle.font)
                 .foregroundColor(AppColors.textPrimary)
             SportsPanel(accent: AppColors.warmOrange) {
-                Text("Kies wie scoort")
+                Text(appText("Kies wie scoort"))
                     .font(AppFonts.body(14))
                     .foregroundColor(AppColors.textSecondary)
                     .padding(20)

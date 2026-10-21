@@ -19,9 +19,9 @@ struct ZipArchive {
 
         var errorDescription: String? {
             switch self {
-            case .notAZipFile: return String(localized: "Dit bestand is geen zip-bestand.")
-            case .unsupportedCompression(let path): return String(localized: "'\(path)' gebruikt een niet-ondersteunde compressie.")
-            case .corrupt(let path): return String(localized: "'\(path)' in het zip-bestand is beschadigd.")
+            case .notAZipFile: return appText("Dit bestand is geen zip-bestand.")
+            case .unsupportedCompression(let path): return appText("'\(path)' gebruikt een niet-ondersteunde compressie.")
+            case .corrupt(let path): return appText("'\(path)' in het zip-bestand is beschadigd.")
             }
         }
     }

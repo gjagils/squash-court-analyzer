@@ -199,7 +199,7 @@ struct ContentView: View {
             }
             Button("Later", role: .cancel) { }
         } message: {
-            Text(CardInbox.newerAppText + String(localized: " Testers vinden de nieuwe versie in TestFlight."))
+            Text(CardInbox.newerAppText + appText(" Testers vinden de nieuwe versie in TestFlight."))
         }
         .sheet(isPresented: Binding(get: { testDataCounts != nil && !anyCoverOpen && !welcomeNeeded },
                                     set: { if !$0 { testDataCounts = nil } })) {

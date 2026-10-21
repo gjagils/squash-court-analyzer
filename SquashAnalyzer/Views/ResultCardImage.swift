@@ -91,7 +91,7 @@ struct ResultCardImage: View {
     /// whom, the stand and the games), only a hairline between the lines
     private var rowsView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("PARTIJEN")
+            Text(appText("PARTIJEN"))
                 .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                 .tracking(3)
                 .foregroundColor(muted)

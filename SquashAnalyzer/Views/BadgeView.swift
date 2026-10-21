@@ -27,7 +27,7 @@ struct BadgeView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(isLocked ? String(localized: "Badge \(kind.title), nog niet verdiend") : "Badge \(kind.title)")
+        .accessibilityLabel(isLocked ? appText("Badge \(kind.title), nog niet verdiend") : "Badge \(kind.title)")
     }
 
     /// The artwork lives in SquashAnalyzerUI, shared with Android

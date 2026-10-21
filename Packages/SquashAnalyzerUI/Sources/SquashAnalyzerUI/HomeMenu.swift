@@ -317,7 +317,7 @@ public struct AndroidHomeView: View {
     private let teamMatchStore: (any TeamMatchStore)?
     /// Instellingen → Taal: the system's per-app language screen (Android's
     /// MainActivity supplies it); nil hides the row
-    private let onLanguage: (() -> Void)?
+    private let onLanguage: ((String) -> Void)?
     @State private var showingCompetition = false
     /// Wedstrijd volgen (live score op het vergrendelscherm), when the app set a presenter
     @State private var showingLiveFollow = false
@@ -331,7 +331,7 @@ public struct AndroidHomeView: View {
                 teamImporter: (any TeamLinkImporter)? = nil, photoStore: (any PlayerPhotoStore)? = nil,
                 filePicker: (any PlayerFilePicker)? = nil, shareCard: ((CardSnapshot, String) -> Void)? = nil,
                 teamMatchStore: (any TeamMatchStore)? = nil, testDataStore: (any TestDataCleanupStore)? = nil,
-                onLanguage: (() -> Void)? = nil) {
+                onLanguage: ((String) -> Void)? = nil) {
         self.onLanguage = onLanguage
         self.teamMatchStore = teamMatchStore
         self.testDataStore = testDataStore

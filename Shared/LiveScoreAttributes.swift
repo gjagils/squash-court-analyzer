@@ -272,8 +272,17 @@ enum LiveScorePhotoStore {
 enum WidgetLanguage {
     static var forced: String? = nil
 
+    /// The app group the app shares the choice of Instellingen → Taal with
+    static let group = "group.com.squashanalyzer.app"
+    /// The same key as Core's `AppLanguage.storageKey`
+    static let storageKey = "appLanguage"
+
     static var code: String {
         if let forced { return forced }
+        // The choice in Instellingen: the app mirrors it into the app group for the widget
+        for defaults in [UserDefaults(suiteName: group), UserDefaults.standard] {
+            if let chosen = defaults?.string(forKey: storageKey), chosen == "nl" || chosen == "en" { return chosen }
+        }
         return (Locale.preferredLanguages.first ?? "nl").lowercased().hasPrefix("nl") ? "nl" : "en"
     }
 
@@ -284,6 +293,11 @@ enum WidgetLanguage {
         }
         return bundle
     }
+}
+
+/// A text of the iOS app itself (Dutch key) in the app's language, as `widgetText`
+func appText(_ key: String.LocalizationValue) -> String {
+    widgetText(key)
 }
 
 /// A lock screen text (the Dutch is the key) in `WidgetLanguage`

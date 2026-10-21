@@ -49,26 +49,28 @@ struct SettingsView: View {
                         // then a line per part that opens underneath, one at a time
                         SettingsManualCard(manual: UserManual.iPhone)
                             .padding(.bottom, 16)
-                        SettingsRow(String(localized: "Mijn team"), icon: "person.2", open: openPart == "team") { toggle("team") }
+                        SettingsRow(appText("Mijn team"), icon: "person.2", open: openPart == "team") { toggle("team") }
                         if openPart == "team" { teamSection.padding(.bottom, 16) }
                         SettingsDivider()
-                        SettingsRow(String(localized: "Weergave"), icon: "circle.lefthalf.filled", open: openPart == "theme") { toggle("theme") }
+                        SettingsRow(appText("Weergave"), icon: "circle.lefthalf.filled", open: openPart == "theme") { toggle("theme") }
                         if openPart == "theme" { AppearancePicker(showsTitle: false).padding(.bottom, 16) }
                         SettingsDivider()
-                        // The app's language is chosen in the iPhone's own settings for the app
-                        // (iOS shows it there because the app has Dutch and English)
-                        SettingsRow(String(localized: "Taal"), icon: "globe") { openLanguageSettings() }
+                        // Telefoon, Nederlands or English, for the whole app at once
+                        SettingsRow(appText("Taal"), icon: "globe", open: openPart == "language") { toggle("language") }
+                        if openPart == "language" {
+                            LanguagePicker { code in AppLanguageChoice.apply(code) }.padding(.bottom, 16)
+                        }
                         SettingsDivider()
-                        SettingsRow(String(localized: "Baanindeling"), icon: "square.grid.3x3", open: openPart == "court") { toggle("court") }
+                        SettingsRow(appText("Baanindeling"), icon: "square.grid.3x3", open: openPart == "court") { toggle("court") }
                         if openPart == "court" { courtSection.padding(.bottom, 16) }
                         SettingsDivider()
-                        SettingsRow(String(localized: "Live meekijken"), icon: "dot.radiowaves.left.and.right", open: openPart == "live") { toggle("live") }
+                        SettingsRow(appText("Live meekijken"), icon: "dot.radiowaves.left.and.right", open: openPart == "live") { toggle("live") }
                         if openPart == "live" { liveSection.padding(.bottom, 16) }
                         SettingsDivider()
-                        SettingsRow(String(localized: "Back-up"), icon: "icloud.and.arrow.up", open: openPart == "backup") { toggle("backup") }
+                        SettingsRow(appText("Back-up"), icon: "icloud.and.arrow.up", open: openPart == "backup") { toggle("backup") }
                         if openPart == "backup" { backupSection.padding(.bottom, 16) }
                         SettingsDivider()
-                        SettingsRow(String(localized: "AI Coach"), icon: "brain", open: openPart == "ai") { toggle("ai") }
+                        SettingsRow(appText("AI Coach"), icon: "brain", open: openPart == "ai") { toggle("ai") }
                         if openPart == "ai" {
                             VStack(alignment: .leading, spacing: 20) {
                                 aiCoachSection
@@ -91,28 +93,28 @@ struct SettingsView: View {
         .alert("API key niet opgeslagen", isPresented: $keySaveFailed) {
             Button("OK") {}
         } message: {
-            Text("De sleutel kon niet in de iPhone-sleutelhanger worden bewaard. Probeer het opnieuw.")
+            Text(appText("De sleutel kon niet in de iPhone-sleutelhanger worden bewaard. Probeer het opnieuw."))
         }
     }
 
     private var teamSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.")
+            Text(appText("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm."))
                 .font(AppFonts.body(13)).foregroundColor(AppColors.textSecondary)
             Link(destination: UserManual.iPhoneTeamLink) {
-                Text("Waar vind ik mijn teamlink?").font(AppFonts.label(13)).foregroundColor(AppColors.warmOrange)
+                Text(appText("Waar vind ik mijn teamlink?")).font(AppFonts.label(13)).foregroundColor(AppColors.warmOrange)
             }
             TextField("https://sbn.toernooi.nl/league/.../team/...", text: $teamDraft)
                 .font(AppFonts.body(13)).foregroundColor(AppColors.textPrimary)
                 .textInputAutocapitalization(.never).autocorrectionDisabled()
                 .padding().background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.08)))
             HStack(spacing: 12) {
-                ActionButton(String(localized: "BEWAAR TEAMLINK"), style: .filled, color: AppColors.warmOrange) {
+                ActionButton(appText("BEWAAR TEAMLINK"), style: .filled, color: AppColors.warmOrange) {
                     do {
                         let link = try LeagueTeamLink(teamDraft)
                         teamURL = link.url.absoluteString
                         teamDraft = teamURL
-                        teamSaveMessage = String(localized: "Teamlink opgeslagen")
+                        teamSaveMessage = appText("Teamlink opgeslagen")
                         teamSaved = true
                     } catch {
                         teamSaveMessage = (error as? LeagueTeamError)?.message ?? LeagueTeamError.invalidLink.message
@@ -120,10 +122,10 @@ struct SettingsView: View {
                     }
                 }
                 if !teamURL.isEmpty {
-                    ActionButton(String(localized: "VERWIJDER"), color: AppColors.textSecondary) {
+                    ActionButton(appText("VERWIJDER"), color: AppColors.textSecondary) {
                         teamURL = ""
                         teamDraft = ""
-                        teamSaveMessage = String(localized: "Teamlink verwijderd")
+                        teamSaveMessage = appText("Teamlink verwijderd")
                         teamSaved = true
                     }
                 }
@@ -138,7 +140,7 @@ struct SettingsView: View {
             Button(action: { isPresented = false }) {
                 HStack(spacing: 6) {
                     Image(systemName: "chevron.left")
-                    Text("Terug")
+                    Text(appText("Terug"))
                 }
                 .font(AppFonts.body(14))
                 .foregroundColor(AppColors.textSecondary)
@@ -146,7 +148,7 @@ struct SettingsView: View {
 
             Spacer()
 
-            Text("Instellingen")
+            Text(appText("Instellingen"))
                 .font(PageTitleStyle.font)
                 .foregroundColor(AppColors.textPrimary)
 
@@ -155,7 +157,7 @@ struct SettingsView: View {
             // Placeholder for symmetry
             HStack(spacing: 6) {
                 Image(systemName: "chevron.left")
-                Text("Terug")
+                Text(appText("Terug"))
             }
             .font(AppFonts.body(14))
             .foregroundColor(.clear)
@@ -178,13 +180,13 @@ struct SettingsView: View {
     private var courtSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Picker("Baanindeling", selection: $courtLayout) {
-                Text("6 vakken").tag(CourtLayout.six.rawValue)
-                Text("9 vakken").tag(CourtLayout.nine.rawValue)
+                Text(appText("6 vakken")).tag(CourtLayout.six.rawValue)
+                Text(appText("9 vakken")).tag(CourtLayout.nine.rawValue)
             }
             .pickerStyle(.segmented)
             // Dark segments so the unselected "9 vakken" stays readable on the dark card
             .environment(\.colorScheme, SharedColors.colorScheme)
-            Text("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak: voorin Drop, Boast en Kill, in het midden Kill, Drive, Cross en Boast, achterin Drive, Cross en Lob.")
+            Text(appText("Bij 6 vakken kies je voor, midden of achter, links of rechts; bij 9 komt er een middenkolom bij. De slagen die je ziet passen bij de rij van het vak: voorin Drop, Boast en Kill, in het midden Kill, Drive, Cross en Boast, achterin Drive, Cross en Lob."))
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -195,29 +197,29 @@ struct SettingsView: View {
     private var liveSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Toggle(isOn: $liveSharing) {
-                Text("Knop LIVE bij Scheidsrechter en Coach")
+                Text(appText("Knop LIVE bij Scheidsrechter en Coach"))
                     .font(AppFonts.label(14))
                     .foregroundColor(AppColors.textPrimary)
             }
             .tint(AppColors.warmOrange)
             Toggle(isOn: $livePhotos) {
-                Text("Foto's van de spelers meesturen")
+                Text(appText("Foto's van de spelers meesturen"))
                     .font(AppFonts.label(14))
                     .foregroundColor(liveSharing ? AppColors.textPrimary : AppColors.textMuted)
             }
             .tint(AppColors.warmOrange)
             .disabled(!liveSharing)
-            Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.")
+            Text(appText("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist."))
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
             Toggle(isOn: $lockScreenScore) {
-                Text("Stand op vergrendelscherm")
+                Text(appText("Stand op vergrendelscherm"))
                     .font(AppFonts.label(14))
                     .foregroundColor(AppColors.textPrimary)
             }
             .tint(AppColors.warmOrange)
-            Text("Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen op het beginscherm.")
+            Text(appText("Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen op het beginscherm."))
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -226,12 +228,12 @@ struct SettingsView: View {
                 // The server keeps the choice per followed match: tell it for the ones followed now
                 Task { await LiveFollow.shared.setAlerts(on) }
             })) {
-                Text("Melding bij elke game")
+                Text(appText("Melding bij elke game"))
                     .font(AppFonts.label(14))
                     .foregroundColor(AppColors.textPrimary)
             }
             .tint(AppColors.warmOrange)
-            Text("Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag.")
+            Text(appText("Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag."))
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -242,7 +244,7 @@ struct SettingsView: View {
     private var backupSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Toggle(isOn: $automaticBackup) {
-                Text("Wekelijkse back-up naar iCloud")
+                Text(appText("Wekelijkse back-up naar iCloud"))
                     .font(AppFonts.label(14))
                     .foregroundColor(AppColors.textPrimary)
             }
@@ -256,9 +258,9 @@ struct SettingsView: View {
     }
 
     private var backupFootnote: String {
-        var text = String(localized: "Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in iCloud Drive (Bestanden → iCloud Drive → Squash Analyzer). De 7 nieuwste blijven bewaard. Ook terug te zetten op Android.")
+        var text = appText("Eén keer per week, als je de app na gebruik wegzet, komt er een back-up in iCloud Drive (Bestanden → iCloud Drive → Squash Analyzer). De 7 nieuwste blijven bewaard. Ook terug te zetten op Android.")
         if let last = AutomaticBackup.lastBackup {
-            text += String(localized: " Laatste: \(last.formatted(date: .abbreviated, time: .shortened)).")
+            text += appText(" Laatste: \(last.formatted(date: .abbreviated, time: .shortened)).")
         }
         return text
     }
@@ -266,13 +268,13 @@ struct SettingsView: View {
     // MARK: - AI Coach Section
     private var aiCoachSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach.")
+            Text(appText("Voeg je OpenAI API key toe voor gepersonaliseerd tactisch advies van de AI Coach."))
                 .font(AppFonts.body(13))
                 .foregroundColor(AppColors.textSecondary)
 
             // API Key Input
             VStack(alignment: .leading, spacing: 8) {
-                Text("OPENAI API KEY")
+                Text(appText("OPENAI API KEY"))
                     .font(AppFonts.caption(11))
                     .foregroundColor(AppColors.textMuted)
                     .tracking(1)
@@ -309,7 +311,7 @@ struct SettingsView: View {
             }
 
             // Save Button
-            ActionButton(showingSaveConfirmation ? String(localized: "OPGESLAGEN!") : String(localized: "BEWAAR API KEY"), style: .filled,
+            ActionButton(showingSaveConfirmation ? appText("OPGESLAGEN!") : appText("BEWAAR API KEY"), style: .filled,
                          color: showingSaveConfirmation ? SharedColors.positive : AppColors.warmOrange) {
                 saveAPIKey()
             }
@@ -319,7 +321,7 @@ struct SettingsView: View {
                 Circle()
                     .fill(APIKeyManager.shared.hasOpenAIKey ? AppColors.positive : AppColors.warmRed)
                     .frame(width: 8, height: 8)
-                Text(APIKeyManager.shared.hasOpenAIKey ? String(localized: "API key geconfigureerd") : String(localized: "Geen API key ingesteld"))
+                Text(APIKeyManager.shared.hasOpenAIKey ? appText("API key geconfigureerd") : appText("Geen API key ingesteld"))
                     .font(AppFonts.caption(12))
                     .foregroundColor(AppColors.textMuted)
             }
@@ -332,7 +334,7 @@ struct SettingsView: View {
             HStack {
                 Image(systemName: "info.circle")
                     .foregroundColor(AppColors.steelBlue)
-                Text("Over AI Coach")
+                Text(appText("Over AI Coach"))
                     .font(AppFonts.label(16))
                     .foregroundColor(AppColors.textPrimary)
             }
@@ -366,10 +368,6 @@ struct SettingsView: View {
     }
 
     // MARK: - Actions
-    private func openLanguageSettings() {
-        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
-    }
-
     private func saveAPIKey() {
         guard APIKeyManager.shared.setOpenAIKey(apiKey.isEmpty ? nil : apiKey) else {
             keySaveFailed = true
@@ -433,8 +431,8 @@ struct BackupActionsView: View {
         // view let only the last one present, so TERUGZETTEN never opened.
         VStack(spacing: 10) {
             HStack(spacing: 10) {
-                ActionButton(String(localized: "NU NAAR ICLOUD"), color: AppColors.warmOrange) { saveToiCloud() }
-                ActionButton(String(localized: "TERUGZETTEN"), color: AppColors.warmOrange) { showingBackupImporter = true }
+                ActionButton(appText("NU NAAR ICLOUD"), color: AppColors.warmOrange) { saveToiCloud() }
+                ActionButton(appText("TERUGZETTEN"), color: AppColors.warmOrange) { showingBackupImporter = true }
             }
             .fileImporter(isPresented: $showingBackupImporter, allowedContentTypes: [.json]) { result in
                 if let data = read(result) {
@@ -443,16 +441,16 @@ struct BackupActionsView: View {
                 }
             }
             HStack(spacing: 10) {
-                ActionButton(String(localized: "DELEN"), color: AppColors.textSecondary) { shareBackup() }
-                ActionButton(String(localized: "WEDSTRIJD IMPORTEREN"), color: AppColors.textSecondary) { showingMatchImporter = true }
+                ActionButton(appText("DELEN"), color: AppColors.textSecondary) { shareBackup() }
+                ActionButton(appText("WEDSTRIJD IMPORTEREN"), color: AppColors.textSecondary) { showingMatchImporter = true }
             }
             .fileImporter(isPresented: $showingMatchImporter, allowedContentTypes: [.json]) { result in
                 guard let data = read(result) else { return }
                 do {
                     try ExportService.importFromJSON(data, context: modelContext)
-                    show(String(localized: "Import gelukt!"), String(localized: "De wedstrijd is geïmporteerd."))
+                    show(appText("Import gelukt!"), appText("De wedstrijd is geïmporteerd."))
                 } catch {
-                    show(String(localized: "Import mislukt"), error.localizedDescription)
+                    show(appText("Import mislukt"), error.localizedDescription)
                 }
             }
         }
@@ -460,7 +458,7 @@ struct BackupActionsView: View {
             Button("Vervang alles", role: .destructive) { restore(replacing: true) }
             Button("Voeg toe", role: .cancel) { restore(replacing: false) }
         } message: {
-            Text("Wil je alle bestaande data verwijderen en vervangen door de back-up, of de back-up toevoegen aan wat er al is?")
+            Text(appText("Wil je alle bestaande data verwijderen en vervangen door de back-up, of de back-up toevoegen aan wat er al is?"))
         }
         .alert(messageTitle, isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
             Button("OK", role: .cancel) { }
@@ -478,13 +476,13 @@ struct BackupActionsView: View {
         do {
             let url = try result.get()
             guard url.startAccessingSecurityScopedResource() else {
-                show(String(localized: "Import mislukt"), String(localized: "Geen toegang tot bestand"))
+                show(appText("Import mislukt"), appText("Geen toegang tot bestand"))
                 return nil
             }
             defer { url.stopAccessingSecurityScopedResource() }
             return try Data(contentsOf: url)
         } catch {
-            show(String(localized: "Import mislukt"), error.localizedDescription)
+            show(appText("Import mislukt"), error.localizedDescription)
             return nil
         }
     }
@@ -505,7 +503,7 @@ struct BackupActionsView: View {
         do {
             data = try backupData()
         } catch {
-            show(String(localized: "Back-up mislukt"), error.localizedDescription)
+            show(appText("Back-up mislukt"), error.localizedDescription)
             return
         }
         Task {
@@ -517,10 +515,10 @@ struct BackupActionsView: View {
             }.value
             switch result {
             case .success(let url):
-                show(String(localized: "Back-up opgeslagen!"),
-                     String(localized: "'\(url.lastPathComponent)' staat in iCloud Drive, in de Bestanden-app onder iCloud Drive → Squash Analyzer."))
+                show(appText("Back-up opgeslagen!"),
+                     appText("'\(url.lastPathComponent)' staat in iCloud Drive, in de Bestanden-app onder iCloud Drive → Squash Analyzer."))
             case .failure(let error):
-                show(String(localized: "Back-up mislukt"), error.localizedDescription)
+                show(appText("Back-up mislukt"), error.localizedDescription)
             }
         }
     }
@@ -532,7 +530,7 @@ struct BackupActionsView: View {
             let url = try ExportService.writeToTempFile(try backupData(), filename: "squash-backup-\(formatter.string(from: Date())).json")
             IOSShare.present([url])
         } catch {
-            show(String(localized: "Back-up mislukt"), error.localizedDescription)
+            show(appText("Back-up mislukt"), error.localizedDescription)
         }
     }
 
@@ -542,15 +540,29 @@ struct BackupActionsView: View {
         do {
             if replacing {
                 let result = try ExportService.replaceWithBackup(data, context: modelContext)
-                show(String(localized: "Back-up hersteld"),
-                     String(localized: "\(result.players) spelers, \(result.matches) wedstrijden, \(result.games) losse games."))
+                show(appText("Back-up hersteld"),
+                     appText("\(result.players) spelers, \(result.matches) wedstrijden, \(result.games) losse games."))
             } else {
                 let result = try ExportService.importFullBackup(data, context: modelContext)
-                show(String(localized: "Back-up toegevoegd"),
-                     String(localized: "\(result.players) spelers, \(result.matches) wedstrijden, \(result.games) losse games."))
+                show(appText("Back-up toegevoegd"),
+                     appText("\(result.players) spelers, \(result.matches) wedstrijden, \(result.games) losse games."))
             }
         } catch {
-            show(String(localized: "Terugzetten mislukt"), error.localizedDescription)
+            show(appText("Terugzetten mislukt"), error.localizedDescription)
+        }
+    }
+}
+
+/// Instellingen → Taal on the iPhone: the choice itself is in `AppLanguage.storageKey`
+/// (Core, the shared screens and the app's own texts read it at once); the widget
+/// reads its copy in the app group. iOS' own alerts keep the phone's language.
+enum AppLanguageChoice {
+    static func apply(_ code: String) {
+        let group = UserDefaults(suiteName: WidgetLanguage.group)
+        if code.isEmpty {
+            group?.removeObject(forKey: WidgetLanguage.storageKey)
+        } else {
+            group?.set(code, forKey: WidgetLanguage.storageKey)
         }
     }
 }

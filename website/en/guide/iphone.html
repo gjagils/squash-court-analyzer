@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Appearance before the first paint: Dark unless Light or System was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
+  <title>iPhone User Guide – SquashAnalyzer</title>
+  <meta name="description" content="SquashAnalyzer user guide for iPhone: tile by tile, how refereeing, coaching, matches, players, badges and settings work." />
+  <link rel="canonical" href="https://www.squashanalyzer.com/en/guide/iphone" />
+  <link rel="alternate" hreflang="nl" href="https://www.squashanalyzer.com/handleiding/iphone" />
+  <link rel="alternate" hreflang="en" href="https://www.squashanalyzer.com/en/guide/iphone" />
+  <link rel="alternate" hreflang="x-default" href="https://www.squashanalyzer.com/en/guide/iphone" />
+  <link rel="stylesheet" href="/style.css?v=20261021" />
+  <script src="/theme.js?v=20261021" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=5" />
+  <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=5" />
+  <link rel="apple-touch-icon" href="/logo.png?v=4" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="/en/" style="text-decoration:none;">
+        <img src="/logo.png?v=4" alt="" class="nav-logo-icon">
+        SquashAnalyzer
+      </a>
+      <div class="nav-right">
+        <span class="lang-switch"><a href="/handleiding/iphone.html" hreflang="nl" lang="nl">NL</a> | <span aria-current="page">EN</span></span>
+        <a class="nav-cta" href="/en/guide/">← User guide</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="manual">
+    <div class="manual-head">
+      <h1>User guide <span>iPhone</span></h1>
+      <p>Everything the app can do, part by part. Using Android? Choose the Android version below. The iPhone and Android apps now have the same screens. The screenshots show the Dutch version of the app.</p>
+      <p class="where">This guide describes version 3.0, with League, the Coach card, the light appearance and the live score on your lock screen.</p>
+      <div class="platform-switch">
+        <a class="active" href="/en/guide/iphone.html">iPhone</a>
+        <a href="/en/guide/android.html">Android</a>
+      </div>
+      <div class="toc">
+        <a href="#home-screen">Home screen</a>
+        <a href="#my-team">My team</a>
+        <a href="#referee">Referee</a>
+        <a href="#coach">Coach</a>
+        <a href="#finished-matches">Finished matches</a>
+        <a href="#league">League</a>
+        <a href="#follow-a-match">Follow a match</a>
+        <a href="#players">Players</a>
+        <a href="#badges">Badges</a>
+        <a href="#settings">Settings</a>
+      </div>
+    </div>
+
+    <!-- Home screen -->
+    <section class="tile" id="home-screen">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">home</span></span>Home screen</h2>
+        <p class="where">Where it all starts</p>
+        <p>At the top it says <em>Referee · Coach · Share</em>: what the app is for. Below that you see <strong>My team</strong> once you have set a team link; without a team link you see the card <em>Playing league at SBN?</em> with <span class="ui">Enter team link</span>, <span class="ui">Where do I find it?</span> and <span class="ui">Close</span>. Under <em>Ready to play?</em> there are two tiles: <span class="ui">Referee</span> (the whistle) on the left and <span class="ui">Coach</span> (the clipboard) on the right. Below them are the rows <span class="ui">Finished matches</span>, <span class="ui">League</span>, <a href="#follow-a-match"><span class="ui">Follow a match</span></a>, <span class="ui">Players</span> and <span class="ui">Badges</span>. The gear at the top right opens <a href="#settings">Settings</a>.</p>
+        <h3 id="tour">Tour</h3>
+        <p>The first time you open the app, you get a short tour of six screens: welcome (Referee, Coach, Share), <strong>Referee</strong>, <strong>Coach</strong>, <strong>Choose player</strong>, <strong>League</strong> (with <span class="ui">Enter team link</span>) and <strong>Share</strong> (keeping teammates and supporters up to date, LIVE and the backup). <span class="ui">Skip</span> takes you straight to the home screen. Want to see it again later? <a href="#settings">Settings</a> &rarr; <span class="ui">About the app</span> &rarr; <span class="ui">View tour again</span>.</p>
+        <div class="note">Players and matches are stored locally on your iPhone. Data only leaves your phone when you use an online feature, such as live sharing, AI Coach or sharing. A coach match is saved automatically after every point.</div>
+      </div>
+      <div class="shots">
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/home.jpg?v=18" alt="Home screen with Referee, Coach and the other sections" loading="lazy"><figcaption>The home screen</figcaption></figure>
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/rondleiding.jpg?v=18" alt="First screen of the tour with Referee, Coach and Share" loading="lazy"><figcaption>The tour on first launch</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- My team -->
+    <section class="tile" id="my-team">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">leaderboard</span></span>My team</h2>
+        <p class="where">The card above the tiles</p>
+        <p>Do you play league through sbn.toernooi.nl? Then you see your team's standings right on the home screen.</p>
+        <ol>
+          <li>Open <a href="#settings">Settings</a> and paste the public team link (such as <em>https://sbn.toernooi.nl/league/…/team/…</em>) under <span class="ui">My team</span>.</li>
+          <li>Tap <span class="ui">Save team link</span>. The card appears on the home screen.</li>
+        </ol>
+        <p>The card shows your <strong>position</strong>, <strong>matches played</strong>, <strong>points</strong> and the next match with its date. Tap the card for the full overview: the pool standings, all matches with their results and the players in your team.</p>
+        <p>If fetching fails for a moment, you see the last standings fetched or a <span class="ui">Retry</span> button.</p>
+      </div>
+      <div class="shots"></div>
+    </section>
+
+    <!-- Finding your team link -->
+    <section class="tile" id="find-team-link">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">link</span></span>Where do I find my team link?</h2>
+        <p class="where">Under My team in Settings</p>
+        <p>The app needs your team's public page on sbn.toernooi.nl. Here is how to get it:</p>
+        <ol>
+          <li>Open <strong>sbn.toernooi.nl</strong> in the browser on your phone or computer.</li>
+          <li>Find your league and your pool, and open the page of <strong>your own team</strong> (for example &ldquo;All Inn Squash 8&rdquo;).</li>
+          <li>Copy the <strong>address</strong> from the address bar of that team page.</li>
+          <li>Paste it in the app under <span class="ui">Settings</span> &rarr; <span class="ui">My team</span> and tap <span class="ui">Save team link</span>.</li>
+        </ol>
+        <p>The right address starts with <em>https://sbn.toernooi.nl/league/</em> and ends with <em>/team/</em> and a number. If you only see the page of the whole pool or of your club, open your team first. The app tells you if the link is not right.</p>
+        <p>Stuck, or can't find your team page? Email us at <a href="mailto:info@squashanalyzer.com">info@squashanalyzer.com</a> and we will help you find the link.</p>
+        <p>Once the link is saved, the players in your team appear automatically under <span class="ui">Players</span>, with the <span class="ui">In my team</span> tick.</p>
+      </div>
+      <div class="shots"></div>
+    </section>
+
+    <!-- Referee -->
+    <section class="tile" id="referee">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">sports</span></span>Referee</h2>
+        <p class="where">Fast, official scoring, with the service rules</p>
+        <h3>Starting</h3>
+        <p>Just like <a href="#coach">Coach</a> (below): names or <span class="ui">Choose player</span>, who serves first, optionally <span class="ui">Joining later?</span>, and then <span class="ui">Start referee</span>.</p>
+        <h3>Scoring</h3>
+        <ul>
+          <li><strong>Tap the big score</strong> (<em>tap = point</em>) of whoever wins the rally.</li>
+          <li>The service box changes automatically. For the server you can adjust <span class="ui">Left</span>/<span class="ui">Right</span>; the app remembers this as that player's preference (handy for left-handers).</li>
+          <li>In the middle is the <strong>score line</strong>: every rally with the new score and the box, for example <em>4R</em>. A stroke has a white border.</li>
+          <li><span class="ui">Let call</span> and <span class="ui">Stroke</span> are below the scores for each player.</li>
+          <li>At the bottom the <strong>match</strong> and <strong>game</strong> timers run, with <span class="ui">Undo</span> for the last point.</li>
+          <li>The share icon at the top right shares the current score; with <span class="ui">LIVE</span> your team follows the score in the browser (see <a href="#coach">Coach</a>).</li>
+          <li>The gear at the top right opens <a href="#settings">Settings</a>, just like in Coach and on the home screen.</li>
+        </ul>
+        <h3>Game and match over</h3>
+        <p>After a game you see the score and duration, with <span class="ui">Next game</span>, <span class="ui">Undo last point</span> and <span class="ui">View score</span>. After <span class="ui">View score</span> you continue with the <span class="ui">Next game</span> button below the scores. After the match: the winner, badges earned, <span class="ui">Share score</span> and <span class="ui">Close</span>.</p>
+        <p>If you close halfway, the Referee tile later asks <span class="ui">Resume match?</span>. After resuming, Undo works again for the current game.</p>
+        <div class="note">A referee match is saved after every rally. If you close halfway, carry on via the tile; if you choose <span class="ui">New match</span> there, the old one goes to Finished matches as incomplete. While the referee or coach screen is open, your screen does not lock.</div>
+      </div>
+      <div class="shots">
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/scheidsrechter.jpg?v=18" alt="Referee screen" loading="lazy"><figcaption>Tap the score = point</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- Coach -->
+    <section class="tile" id="coach">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">assignment</span></span>Coach</h2>
+        <p class="where">Record every rally: who scores, how, where and with which shot</p>
+
+        <h3>Starting a match</h3>
+        <p>Tap the Coach tile. If a match is still in progress, the app first asks <span class="ui">Resume match?</span>: <span class="ui">Resume</span>, <span class="ui">New match</span> (the old one goes to Finished matches as incomplete) or <span class="ui">Cancel</span>.</p>
+        <ol>
+          <li>Enter a name for <span class="ui">Player 1</span> and <span class="ui">Player 2</span>, or tap <span class="ui">Choose player</span> to pick a saved player. Only chosen players can earn <a href="#badges">badges</a>.</li>
+          <li>Under <span class="ui">Who serves first?</span>, choose the server.</li>
+          <li>Joining later? Open <span class="ui">Joining later?</span> and enter how many games each player has already won.</li>
+          <li>Tap <span class="ui">Start match</span>. Play continues until someone wins three games (best of 5).</li>
+          <li>At the first serve, tap <span class="ui">START GAME</span>: from then on the rally timer runs, so the warm-up and the break between games are not counted.</li>
+        </ol>
+
+        <h3>Entering a point</h3>
+        <ol>
+          <li><strong>Tap the score</strong> of the player who wins the point. (Tapping again cancels.)</li>
+          <li>Choose <strong>how</strong> the point was won: <span class="ui">Winner</span>, <span class="ui">Forced error</span> (error under pressure), <span class="ui">Unforced error</span> (error without pressure), <span class="ui">Stroke</span> or <span class="ui">Service point</span> (server only). For an unforced error you then choose the <strong>type of error</strong>: <span class="ui">Down</span> (in the tin), <span class="ui">Out</span>, <span class="ui">Service</span> (server only), <span class="ui">Floor</span> or <span class="ui">Don't know</span>.</li>
+          <li>Tap the court <strong>where</strong> the point ended. By default the court is divided into 6 zones: front, middle and back, left and right. (Prefer 9 zones? See <a href="#settings">Settings</a>.)</li>
+          <li>Choose the <strong>shot</strong>. You only see shots that fit that zone: at the front Drop, Boast and Kill; in the middle Kill, Drive, Cross and Boast; at the back Drive, Cross and Lob. Was it a volley? Then switch on <span class="ui">Volley</span> first.</li>
+        </ol>
+        <p>For a stroke you only choose the zone, for an unforced error only the type of error; a service point counts straight away. Every step has a <span class="ui">Cancel</span> button.</p>
+        <p>The scoreboard shows who is serving and from which box (<span class="ui">Left</span>/<span class="ui">Right</span>). If the box is wrong, tap the other one. Between the players runs a score line with the latest rallies, and to the left of the instruction is the rally timer.</p>
+
+        <h3>Let, undo and the last point</h3>
+        <ul>
+          <li><span class="ui">Let call</span>: choose who asks for the let. The app counts the lets per game.</li>
+          <li><span class="ui">Undo</span>: undoes the last point.</li>
+          <li>At the bottom you see the last point entered, for example <em>Gerard: Winner · Volley drop · Front Left</em>.</li>
+        </ul>
+
+        <h3>Game over</h3>
+        <p>At the end of a game you see the result with <span class="ui">Analysis</span>, <span class="ui">Coach card</span> and <span class="ui">Share score</span> (only if there is something to share), and below that <span class="ui">Next game</span>, <span class="ui">Undo last point</span> and <span class="ui">Stop match</span>. After the last game you also see which <strong>badges</strong> were earned, and you start the next one with <span class="ui">New match</span>.</p>
+        <p><span class="ui">Share score</span>: choose <em>Scorecard</em> (table), <em>Report</em> (per game, with times) or <em>Image</em> (the result as a picture, with the player photos) and tap <span class="ui">Share</span>.</p>
+
+        <h3>Live sharing</h3>
+        <p>Tap <span class="ui">LIVE</span> at the top and share the link, for example in the group chat. Anyone who opens the link follows the score in the browser, with a small photo of the players. LIVE is grey until there is a link and red while you are live. Tap it again to share the link again or to <span class="ui">Stop live</span>. The live data is deleted from the server 2 hours after the last score update. A page that is already open may still show the last score it received. If you are scoring yourself, your own match is also shown on your lock screen and in the Dynamic Island (even without LIVE); you switch that off with <span class="ui">Score on lock screen</span> in <a href="#settings">Settings</a>. You switch off LIVE (or just the photos) in <a href="#settings">Settings</a>. Anyone who has the app taps <span class="ui">Follow on your lock screen</span> on the live page and gets the score on their lock screen (see <a href="#follow-a-match">Follow a match</a>). At the bottom of the live page (and at the bottom of this website) you choose <em>Light</em>, <em>Dark</em> or <em>System</em> (follows your phone) under <span class="ui">Appearance</span>; the default is dark, and your choice is only stored in your own browser.</p>
+
+        <h3>Analysis</h3>
+        <p>After a game, tap <span class="ui">Analysis</span> (the magnifying glass). During a match, from game 2 onwards, the magnifying glass at the top opens the analysis of the previous game. At the top you choose the player and, if there are more games, the game.</p>
+        <p>The <strong>analysis</strong> shows, per player and per game: average rally length when winning and losing, best zone and shot, a <strong>heatmap</strong> of the court, the most used shots (a volley is listed separately, such as <em>Volley drop</em>), the point breakdown, <strong>Serve and return</strong>, the number of points <strong>on the volley</strong> and tactical advice. <span class="ui">Share</span> sends a summary.</p>
+        <p><strong>Serve and return</strong>: what percentage of rallies the player won on their own serve and on the opponent's, in this game and over the match up to and including this game. From game 2 onwards a small arrow shows whether it went up or down compared with the previous game.</p>
+        <p>At the top of the tactical advice is <strong>Where the points fall</strong>: per row (front, middle, back) and side (left, right), how many points the player won, lost and gave away. The advice is based on this: at most 5 lines, starting with what can gain the most points. If the same thing also happened in an earlier game, it says, for example, <em>Just like in game 1</em>.</p>
+        <p>If you have set an OpenAI key, <span class="ui">Ask AI Coach for advice</span> gives a detailed analysis with strengths, points to work on and a focus for the next game. No names are sent, only numbers. The app picks an available model from a preference list of affordable models. Without a key you do not see this section.</p>
+
+        <h3>Note per game</h3>
+        <p>The analysis has a <strong>Note</strong> section. Tap <span class="ui">Write</span> (or <span class="ui">Edit</span> if there is already something there), type or dictate with your keyboard's microphone what you noticed, and tap <span class="ui">Save</span>. You can also do this afterwards. The note is just for you: it appears in the analysis and on the coach card, not in what you share, and it is included in the backup.</p>
+
+        <h3>Coach card</h3>
+        <p>The <strong>coach card</strong> (the clipboard) is a single screen to show your player between games. You open it after a game with <span class="ui">Coach card</span>, or at the top of the analysis. On the card:</p>
+        <ul>
+          <li>the <strong>heatmap</strong> of both players: where they won their points;</li>
+          <li>the <strong>3 most important coaching points</strong> of the game;</li>
+          <li>your <strong>note</strong> for that game, if you wrote one;</li>
+          <li>from game 2 onwards, what changed since the previous game: <em>Still there</em> (a point to work on comes back), <em>Improved!</em> (a point to work on has gone or halved) or <em>Pick this up like you did in game 1</em> (something went well earlier and not now).</li>
+        </ul>
+        <p>The card opens on the player from your team (under <a href="#players">Players</a> they are set to <span class="ui">In my team</span>); if there are two or none, on the first one named; at the top you switch player. Also for matches you coached earlier: <a href="#finished-matches">Finished matches</a> &rarr; <span class="ui">View analysis</span> &rarr; <span class="ui">Coach card</span>.</p>
+
+
+        <h3>Stopping and resuming</h3>
+        <ul>
+          <li>Tap <span class="ui">Stop</span>. If the match is over, it is saved. If nothing has been played yet, it disappears. Otherwise you choose: <span class="ui">Save and continue later</span>, <span class="ui">Save as incomplete</span>, <span class="ui">Complete result</span> (enter who won the remaining games; after that you start a new match), <span class="ui">Don't save</span> or <span class="ui">Keep playing</span>.</li>
+          <li>If you tap the Coach tile while a match is still in progress, the app asks <span class="ui">Resume match?</span>: <span class="ui">Resume</span>, <span class="ui">New match</span> (the old one goes to Finished matches as incomplete) or <span class="ui">Cancel</span>.</li>
+        </ul>
+      </div>
+      <div class="shots">
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/coach-start.jpg?v=18" alt="Starting a coach match" loading="lazy"><figcaption>Starting a match</figcaption></figure>
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/coach.jpg?v=18" alt="Coach screen with scoreboard" loading="lazy"><figcaption>Tap the score of whoever scores</figcaption></figure>
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/coach-zone.jpg?v=18" alt="Court with 6 zones" loading="lazy"><figcaption>Choose the zone</figcaption></figure>
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/coach-game-klaar.jpg?v=18" alt="Game over" loading="lazy"><figcaption>Game over</figcaption></figure>
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/analyse.jpg?v=18" alt="Analysis" loading="lazy"><figcaption>Analysis</figcaption></figure>
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/coachkaart.jpg?v=18" alt="Coach card with heatmaps and three coaching points" loading="lazy"><figcaption>Coach card: show your player what matters</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- Finished matches -->
+    <section class="tile" id="finished-matches">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">history</span></span>Finished matches</h2>
+        <p class="where">Look back, share and keep everything</p>
+        <ul>
+          <li>Filter on <span class="ui">All</span>, <span class="ui">Referee</span> or <span class="ui">Coach</span>, and on a single player via <span class="ui">All players</span>.</li>
+          <li>A coach match shows the score per game. Tap the card or <span class="ui">View analysis</span> for the <a href="#coach">analysis</a>, which includes the <span class="ui">Coach card</span> and the note per game. <span class="ui">Share</span> offers Scorecard, Report or Image; the bin deletes.</li>
+          <li>Not finished? Then it is marked <strong>INCOMPLETE</strong> and you can use <span class="ui">Complete result</span> to enter who won the remaining games.</li>
+          <li>Referee matches show the result per game; you can share and delete from the card.</li>
+          <li>A match still in progress is not listed here: the Referee or Coach tile offers it to you.</li>
+        </ul>
+        <p>You make and restore backups in <a href="#settings">Settings</a>.</p>
+      </div>
+      <div class="shots">
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/wedstrijden.jpg?v=18" alt="Finished matches" loading="lazy"><figcaption>Matches with filters</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- Players -->
+    <!-- League -->
+    <section class="tile" id="league">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">emoji_events</span></span>League</h2>
+        <p class="where">Team matches in the SBN league, new in version 3.0</p>
+        <p>A team match in the SBN league consists of four matches (E1 to E4). Tap <span class="ui">New team match</span> and choose a match from the My team fixtures, or enter the teams, home or away and the date yourself. The <span class="ui">Share with my team</span> switch is on by default: the app then creates a live page right away and opens the share screen. With it off (or without internet) the team match stays on your phone only; you can still share it later.</p>
+        <p>Every team match has a label: <strong>SHARED</strong> (with your team, there is a live page) or <strong>PRIVATE</strong> (on this phone only).</p>
+        <ul>
+          <li><strong>Filling in a match</strong>: tap E1 to E4. Choose our player (the My team squad is ready as buttons), type the opponent and add the games with the score (for example 11-8), or just <span class="ui">We won</span> / <span class="ui">They won</span> if you no longer remember the score.</li>
+          <li><strong>Scoring or linking</strong>: if you want to score the match now, choose <span class="ui">Coach</span> or <span class="ui">Referee</span> under <span class="ui">Start new match</span>: the names are already filled in (the home player is Player 1) and the result goes into the match automatically afterwards. Already scored the match? Tap <span class="ui">Link a previously scored match</span>, pick it from Finished matches and say who our player was. The games then come along automatically; <span class="ui">Refresh</span> fetches them again if you complete the result later.</li>
+          <li><strong>On match day</strong>: after a referee or coach match, the app asks whether it belongs to today's team match and to which match.</li>
+          <li><strong>Score and result</strong>: the app counts the games, the matches and the rally points, and decides the winner according to the SBN rules (most matches; if tied: the team with a full line-up; then the most games; then the most rally points; then whoever won E1). League points are the games plus 3 bonus points for the winner, unless a team without a full line-up wins. Did a player retire or not turn up? Choose that in the match: if a player retires, all remaining points go to the opponent; if a player does not turn up, the other wins 11-0 three times.</li>
+          <li><strong>Share report</strong>: choose Scorecard, Report or Image, just like for a match, and share the result with all matches in the group chat. Below the score, the image shows per match who played whom and the games.</li>
+          <li><strong>Sharing with team and supporters</strong>: if the team match has not been shared yet, tap <span class="ui">Share with my team</span> at the bottom. After that, <span class="ui">Share with team and supporters</span> opens the share screen with two groups: <em>For supporters</em> (<span class="ui">Share viewer link</span>: view only, in the browser, with the score of the whole evening and the games per match, point by point too) and <em>For team members</em> (<span class="ui">Invite team members</span>: a link and code to join). Only team names, first names and the score are sent; without names filled in, it shows the team name followed by the match (for example Delft 7 E1). Two hours after the last update, the live team match data is deleted from the server. Supporters with the app tap <span class="ui">Follow on your lock screen</span> on the viewer page and follow the whole team evening on their lock screen (see <a href="#follow-a-match">Follow a match</a>). With <span class="ui">Send player photos</span> on, small photos of both players are sent for each match. Whoever started the live page can end it with <span class="ui">Stop live</span>; a teammate sees <span class="ui">Leave live</span>.</li>
+          <li><strong>Joining as a teammate</strong>: open the invitation (or tap <span class="ui">Join with link or code</span> in League), choose which team is yours and add a match. The app updates the chosen match; <span class="ui">Refresh</span> fetches the others' matches. If you already created the same evening yourself, the live page is added to your own team match; if you had already filled in matches there, choose <span class="ui">Take over my teammate's matches</span> or <span class="ui">Cancel</span>. Agree among yourselves who scores which match.</li>
+          <li><strong>With a new match</strong>: if you start a referee or coach match that belongs to a team match, switch on <span class="ui">Part of a team match</span> and choose the match and who our player is. If the team match is shared, the score of that match goes to the team page point by point.</li>
+          <li><strong>In my team</strong>: under <span class="ui">Players</span>, switch on <span class="ui">In my team</span> for a player. Those players appear at the top when you fill in a match. With a team link in My team, the players in your team appear in the list automatically with this tick. Team matches and this choice are also included in the backup.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Follow a match -->
+    <section class="tile" id="follow-a-match">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">lock</span></span>Follow a match</h2>
+        <p class="where">Live score on your lock screen, new in version 3.0</p>
+        <p>Can't be there? Then put a live match on your lock screen. The score updates after every rally, even when the app is closed.</p>
+        <ol>
+          <li>Open the live link shared in the group (a single match or a team match from League) and tap <span class="ui">Follow on your lock screen</span> on the live page. The app opens and puts the match on your lock screen straight away.</li>
+          <li>Or: tap <span class="ui">Follow a match</span> on the home screen, paste the live link and tap <span class="ui">Follow</span>.</li>
+        </ol>
+        <p>Under <em>On your lock screen</em> you see which matches you are following.</p>
+        <h3>What you see</h3>
+        <p>On the lock screen the players are on the left and right, with a photo or initial and the name underneath; a dot on the photo shows who is serving. In the middle the score of the current game is shown large, with <em>LIVE</em> above it and, for example, <em>GAME 3 · BEST OF 5</em> (or <em>GAME BALL</em>, <em>MATCH BALL</em>, <em>BREAK</em>), and the games won below it. The bar at the bottom shows SquashAnalyzer, the games played in the winner's colour and the playing time. Afterwards it says <em>FINISHED</em> and who won, and the result stays up for a while. In the <strong>Dynamic Island</strong> (on iPhones that have one) you see the score in short.</p>
+        <p><strong>Team match</strong>: E1 to E4 each on their own line, with photo or initial, first name, the games and, in the middle, the score of a match in progress, <em>done</em> or <em>–</em>. The bar at the bottom shows the team names with the games per team and <em>LIVE</em>. A match or photo that arrives later while the app is closed is shown with the initial first; open the app briefly and the photos come through.</p>
+        <h3>Notifications for a game and the result</h3>
+        <p>When a game is finished, you get a notification with sound, for example <em>Game 2 to Thomas</em>, and at the end a notification with the result. For a team match you get a notification for each decided match and for the final result. Never per rally. The notification also appears on your Apple Watch, just like a goal in a football app, as long as the watch is unlocked on your wrist. You don't hear a sound if your iPhone is on silent or a Focus is on. Prefer just the score? Switch off <span class="ui">Notify every game</span> in <a href="#settings">Settings</a>.</p>
+        <h3>Your own match</h3>
+        <p>If you are scoring yourself (Referee or Coach), the score of your own match is also shown on your lock screen and in the Dynamic Island, with the match time. This works without internet and without LIVE. After the match the result stays up for half an hour. To switch it off: <span class="ui">Score on lock screen</span> in <a href="#settings">Settings</a>.</p>
+        <h3>Stopping</h3>
+        <p>Swipe the score away on your lock screen, or tap <span class="ui">Stop</span> next to the match in <span class="ui">Follow a match</span>. When the match is over, it stops by itself.</p>
+        <div class="note">Don't see anything? Then check in your iPhone's Settings under SquashAnalyzer that <em>Live Activities</em> is switched on. The app also tells you if your iPhone does not allow it.</div>
+        <p>Photos are only shown if the scorer has <span class="ui">Send player photos</span> switched on. To send the score, the live server stores a code from your phone (a push token) with the match, temporarily and in the EU; it is deleted together with the match, 2 hours after the last score. More in the <a href="/en/privacy.html">privacy policy</a>.</p>
+      </div>
+      <div class="shots"></div>
+    </section>
+
+    <section class="tile" id="players">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">groups</span></span>Players</h2>
+        <p class="where">Your regular players, with photo, focus points and badges</p>
+        <h3>Adding and editing players</h3>
+        <ul>
+          <li>The app starts with two example players, <strong>Bob</strong> and <strong>Wim</strong>, so you can try it straight away. Feel free to delete them; they won't come back.</li>
+          <li>Tap <span class="ui">+</span> for a new player: name, photo, <strong>coaching focus</strong> (such as Backhand or Fitness) and notes.</li>
+          <li>The pencil edits, the bin deletes. Matches played are kept.</li>
+          <li>Tap a player to see that player's badges.</li>
+        </ul>
+        <h3>Importing a whole team</h3>
+        <p>Tap the import icon and choose:</p>
+        <ul>
+          <li><span class="ui">Via link</span>: paste the team link you received (<em>https://squashanalyzer.com/teams/…</em>) and tap <span class="ui">Import</span>.</li>
+          <li><span class="ui">From file (zip)</span>: choose a team zip from the Files app.</li>
+        </ul>
+        <p>Players with the same name are updated, new ones are added.</p>
+        <h3>Sharing a player card</h3>
+        <p>Open a player's badges and tap <span class="ui">Share card</span>. You share an image with a link. Anyone who opens the link sees the card in the app (iPhone or Android) or in the browser and can link it to one of their own players. Only share a card with the player's permission.</p>
+        <h3 id="profile">Profile: how the matches are going</h3>
+        <p>Open a player's badges and tap <span class="ui">Profile</span> at the top. You see the number of matches and the win percentage, the <strong>form</strong> (the last ten results), <strong>winners and unforced errors per game</strong> as a line across the matches (from four coach matches, with "from … to …"), the <strong>shots</strong> the player scores with most often and the most frequent error, the <strong>court</strong> (where points are won and lost), the <strong>pace</strong> (average rally length) and the <strong>opponents</strong> with the head-to-head record. At the top, choose the last 10, the last 25 or all matches. Only matches in which you chose the player via <span class="ui">Choose player</span> count; referee matches only provide the result, the rest comes from coach matches.</p>
+      </div>
+      <div class="shots">
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/spelers.jpg?v=18" alt="Player list" loading="lazy"><figcaption>Players with badges and focus</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- Badges -->
+    <section class="tile" id="badges">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">military_tech</span></span>Badges</h2>
+        <p class="where">All 37 badges and how to earn them</p>
+        <p>You earn badges automatically during matches, but <strong>only with players you chose via Choose player</strong>. The list is divided into <em>In one game</em>, <em>In one match</em> and <em>Across all your matches</em>. The label <strong>COACH</strong> means the badge can only be earned in coach mode; <strong>ONCE</strong> means you only get it once.</p>
+        <p>Seventeen badges have a bronze, silver and gold tier. For a player you see the highest tier reached and how often and when the badge was earned. You delete an earned moment by swiping left.</p>
+        <h3>A fresh start at release</h3>
+        <p>With the release of version 3.0, everyone starts again with badges. Badges from the test period are not erased, but they no longer count and are no longer shown with the players; matches from before then no longer give badges. Anyone who had badges in the test period gets the <strong>Pioneer</strong> badge, listed under <em>Special</em>. Pioneer does not count towards the total of 37.</p>
+        <p>The first time you open the app after that, it asks whether you want to clear up the matches from the test period, with a switch per group: matches with the old example players Bombardino or Whiskey, incomplete and paused matches, and league matches. A full backup is made first. If you choose <span class="ui">Keep everything</span>, everything stays in the history and the analysis. The question only comes once, and only if there is something to clear up.</p>
+      </div>
+      <div class="shots">
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/badges.jpg?v=18" alt="Badges earned after a match" loading="lazy"><figcaption>Badges</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section class="tile" id="settings">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">settings</span></span>Settings</h2>
+        <p class="where">The gear at the top right of the home screen or the coach screen</p>
+        <ul>
+          <li><strong>User guide</strong>: opens this page.</li>
+          <li><strong>Language</strong>: opens the iPhone language screen for the app (see <a href="#language">Language</a> below).</li>
+          <li><strong>Appearance</strong>: <span class="ui">System</span> (follows your phone), <span class="ui">Light</span> or <span class="ui">Dark</span> (default). The choice applies to the whole app straight away; a result you share as an image stays dark, as does the app icon.</li>
+          <li><strong>Court layout</strong>: choose <span class="ui">6 zones</span> (default) or <span class="ui">9 zones</span> with a middle column.</li>
+          <li><strong>My team</strong>: paste your team link from sbn.toernooi.nl and tap <span class="ui">Save team link</span>; only a valid link is saved. <span class="ui">Remove</span> deletes it.</li>
+          <li><strong>Live sharing</strong>: the <span class="ui">LIVE</span> button in Referee and Coach, and <span class="ui">Send player photos</span>. Both are on by default. Below them, <span class="ui">Score on lock screen</span> (your own match on the lock screen and in the Dynamic Island while scoring) and <span class="ui">Notify every game</span> (a notification with sound for a finished game and the result of a match you <a href="#follow-a-match">follow</a>); these are also on by default.</li>
+          <li><strong>Backup</strong>: <span class="ui">Weekly backup to iCloud</span> is on by default. Once a week, when you put the app away after use, a backup is made in iCloud Drive; the 7 most recent are kept. With the buttons below: <span class="ui">Back up to iCloud now</span>, <span class="ui">Restore</span> (choose <span class="ui">Add</span> or <span class="ui">Replace all</span>), <span class="ui">Share</span> (the backup file to another app) and <span class="ui">Import match</span> (a shared match). Backups can also be restored on an Android phone.</li>
+          <li><strong>AI Coach</strong>: enter your own OpenAI API key and tap <span class="ui">Save API key</span>. The key is stored safely in the iPhone keychain. The costs are charged by OpenAI and depend on the chosen model and usage. Saving an empty field deletes the key. If the advice fails, tap <span class="ui">Try again</span>.</li>
+          <li><strong>About the app</strong>: <span class="ui">View tour again</span> (the six intro screens from the first launch), <span class="ui">Share the app</span> (a message with the links to the Play Store and the App Store) and <span class="ui">Send feedback</span> (an email to info@squashanalyzer.com with the app version).</li>
+        </ul>
+        <h3 id="language">Language</h3>
+        <p>The app follows your phone's language: Dutch when your phone is set to Dutch, English otherwise.</p>
+        <p>To choose a different language for the app only, go to Settings &rarr; Squash Analyzer &rarr; Language in the iPhone Settings app, or tap the <span class="ui">Language</span> row in the app's Settings, which opens that same screen.</p>
+      </div>
+      <div class="shots">
+        <figure><span class="beta-tag">Beta</span><img src="/handleiding/img/iphone/instellingen.jpg?v=18" alt="Settings" loading="lazy"><figcaption>Settings</figcaption></figure>
+      </div>
+    </section>
+
+    <p style="margin-top:32px;color:var(--text-3);font-size:14px;">Question, bug or idea? Email <a href="mailto:info@squashanalyzer.com">info@squashanalyzer.com</a>.</p>
+  </main>
+
+  <hr class="divider" />
+
+  <footer>
+    <span class="footer-logo">© 2026 SquashAnalyzer</span>
+    <div class="footer-links">
+      <a href="/en/">Home</a>
+      <a href="/en/privacy.html">Privacy policy</a>
+      <a href="mailto:info@squashanalyzer.com">Contact</a>
+      <a href="https://bunq.me/squashanalyzer" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">local_cafe</span> Buy me a coffee</a>
+    </div>
+    <div data-theme-choice-slot></div>
+  </footer>
+
+</body>
+</html>

@@ -117,9 +117,9 @@ public struct RefereeScoringView: View {
                 result: MatchResult.refereeMatch(match),
                 player1Photo: photo(Player.player1), player2Photo: photo(Player.player2),
                 badgeEarnings: badgeEarnings, onBadges: { showingBadges = true },
-                primary: shareText == nil ? ResultButton("Sluiten") { close() }
-                    : ResultButton("Deel score") { hiddenResult = resultKey; sharingNow = true },
-                outlined: shareText == nil ? nil : ResultButton("Sluiten") { close() },
+                primary: shareText == nil ? ResultButton(loc("Sluiten")) { close() }
+                    : ResultButton(loc("Deel score")) { hiddenResult = resultKey; sharingNow = true },
+                outlined: shareText == nil ? nil : ResultButton(loc("Sluiten")) { close() },
                 onUndo: { undoLastPoint() }
             )
             .sheet(isPresented: $showingBadges) {
@@ -129,12 +129,12 @@ public struct RefereeScoringView: View {
             MatchResultOverlay(
                 result: MatchResult.refereeGame(match),
                 player1Photo: photo(Player.player1), player2Photo: photo(Player.player2),
-                primary: ResultButton("Volgende game") {
+                primary: ResultButton(loc("Volgende game")) {
                     withAnimation(.easeInOut(duration: 0.15)) { match.confirmNextGame() }
                     matchChanged()
                 },
                 onUndo: { undoLastPoint() },
-                link: ResultButton("Bekijk stand") { hiddenResult = resultKey }
+                link: ResultButton(loc("Bekijk stand")) { hiddenResult = resultKey }
             )
         }
     }
@@ -155,7 +155,7 @@ public struct RefereeScoringView: View {
             Button(action: close) {
                 HStack(spacing: 6) {
                     AppSymbol("xmark", size: 13, color: SharedColors.textSecondary)
-                    Text("Sluiten").lineLimit(1)
+                    Text("Sluiten", bundle: .module).lineLimit(1)
                 }
                 .font(SharedFonts.system(14, weight: .medium, design: .rounded))
             }
@@ -167,7 +167,7 @@ public struct RefereeScoringView: View {
                     .fixedSize()
             }
             Spacer(minLength: 4)
-            Text("Scheidsrechter")
+            Text("Scheidsrechter", bundle: .module)
                 .font(PageTitleStyle.font)
                 .foregroundColor(SharedColors.textPrimary)
                 .lineLimit(1)
@@ -179,7 +179,7 @@ public struct RefereeScoringView: View {
                         .frame(width: 36, height: 32)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Deel de stand")
+                .accessibilityLabel(loc("Deel de stand"))
             }
             if let onSettings {
                 Button(action: onSettings) {
@@ -187,7 +187,7 @@ public struct RefereeScoringView: View {
                         .frame(width: 36, height: 32)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Instellingen")
+                .accessibilityLabel(loc("Instellingen"))
             }
         }
         .padding(.horizontal, 20)
@@ -295,7 +295,7 @@ public struct RefereeScoringView: View {
                     Text("\(score)")
                         .font(SharedFonts.system(76, weight: .bold, design: .rounded))
                         .foregroundColor(highlight.score)
-                    Text("TIK = PUNT")
+                    Text("TIK = PUNT", bundle: .module)
                         .font(SharedFonts.system(9, weight: .medium, design: .rounded))
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
@@ -310,7 +310,7 @@ public struct RefereeScoringView: View {
             }
             .buttonStyle(.plain)
             .disabled(match.isGameOver)
-            .accessibilityLabel("Punt voor \(match.name(for: player))")
+            .accessibilityLabel(loc("Punt voor \(match.name(for: player))"))
             .padding(.horizontal, 10)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -330,12 +330,12 @@ public struct RefereeScoringView: View {
             }
             HStack(spacing: 8) {
                 actionButton("STROKE", color: SharedColors.warmRed) { match.callStroke(to: .player1); matchChanged() }
-                    .accessibilityLabel("Stroke voor \(match.player1Name)")
+                    .accessibilityLabel(loc("Stroke voor \(match.player1Name)"))
                 actionButton("STROKE", color: SharedColors.coolIndigo) { match.callStroke(to: .player2); matchChanged() }
-                    .accessibilityLabel("Stroke voor \(match.player2Name)")
+                    .accessibilityLabel(loc("Stroke voor \(match.player2Name)"))
             }
             if match.isGameOver && !match.isMatchOver {
-                Button("VOLGENDE GAME") {
+                Button(loc("VOLGENDE GAME")) {
                     withAnimation(.easeInOut(duration: 0.15)) { match.confirmNextGame() }
                     matchChanged()
                 }
@@ -440,6 +440,6 @@ struct RefereeTimers: View {
                 .font(SharedFonts.system(16, weight: .bold, design: .monospaced))
                 .foregroundColor(SharedColors.textSecondary)
         }
-        .accessibilityLabel("\(label == "MATCH" ? "Wedstrijdtijd" : "Gametijd") \(text)")
+        .accessibilityLabel(label == "MATCH" ? loc("Wedstrijdtijd \(text)") : loc("Gametijd \(text)"))
     }
 }

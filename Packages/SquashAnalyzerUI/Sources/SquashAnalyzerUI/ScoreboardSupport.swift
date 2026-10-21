@@ -53,8 +53,8 @@ public struct ServiceSideSelector: View {
                 .tracking(1)
 
             HStack(spacing: compact ? 4.0 : 6.0) {
-                chip("Links", .left)
-                chip("Rechts", .right)
+                chip(loc("Links"), .left)
+                chip(loc("Rechts"), .right)
             }
         }
     }

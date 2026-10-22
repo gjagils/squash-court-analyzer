@@ -31,8 +31,9 @@ default Donker), independent of the system.
   and `defaults write … onboardingVersion -int 1` plus `defaults write … whatsNewVersion -int 1` to skip "Nieuw in 3.0" and the tour (`0` to show them).
 - iOS scenario data mixes with what is already on the simulator (for example "Wedstrijd
   hervatten?" on setup): uninstall and install the app for a clean run.
-- Android: open Instellingen (gear, content description "Instellingen") and tap
-  "Licht" or "Donker" under Weergave, then back. A fresh install shows the tour
+- Android: open Instellingen (gear, content description "Instellingen"), tap "Weergave"
+  to unfold that section, then "Licht" or "Donker", then back. On the referee screen the
+  gear opens the referee settings, not the app settings: go back to Home first. A fresh install shows the tour
   first: tap "Overslaan".
 - Large text: only Android (`android-textsize large`, font scale 1.3; put it back to
   normal afterwards). iOS uses fixed font sizes on purpose (`SharedFonts`), so a large-text

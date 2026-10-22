@@ -26,8 +26,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   teampagina komen uit de opstelling van de partij (`TeamLive.bind`), niet uit de wedstrijd.
   Na afloop van de wedstrijd is het potloodje weg (de uitslagkaart dekt het scherm). Tests:
   `PlayerRenameTests`. Handleidingen (nl en en, iPhone en Android) bijgewerkt.
-  - Nog te doen op de Mac (in de cloud is geen Swift of Xcode): Core-suite met Skip, iOS- en
-    Android-build en de UI-check in licht en donker op beide platforms.
+  - Getest en gemergd op de Mac op 22 oktober 2026: Core-suite met Skip (318 tests, ook in
+    Kotlin), iOS-tests, Android unit-tests en debug-APK, Worker-tests en lint groen. Eén fout
+    in de nieuwe test gecorrigeerd (de live-snapshot toont alleen voornamen, dus "Speler 2"
+    wordt daar "Speler"). UI-check op iPhone 17 Pro Max-simulator en Android-emulator in licht
+    en donker: coach-potloodje, scheidsrechter-namenregel en het blad zien er op beide
+    platforms gelijk uit; naam aanpassen met LIVE aan, Annuleren, leeg veld → standaardnaam en
+    de nieuwe naam na afsluiten en Hervatten (SwiftData en Room) kloppen. Niet gecontroleerd:
+    de livepagina en het vergrendelscherm met een echte meekijker.
   - Releasenote: "Een naam verkeerd ingevuld? Tik tijdens de wedstrijd op het potloodje
     (Coach) of op de namen boven de scores (Scheidsrechter) en pas hem aan; de stand blijft
     staan."

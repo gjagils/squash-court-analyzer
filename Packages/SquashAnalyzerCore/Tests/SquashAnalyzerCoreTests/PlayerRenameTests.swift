@@ -85,7 +85,8 @@ final class PlayerRenameTests: XCTestCase {
         XCTAssertNil(match.player1Id, "another name is another person")
         XCTAssertEqual(match.player1Score, 1, "the points stay")
         XCTAssertEqual(match.liveSnapshot.p1, "Bas")
-        XCTAssertEqual(match.liveSnapshot.p2, "Speler 2")
+        // The live snapshot shows first names only (LiveSnapshot.firstName), so the default name becomes "Speler"
+        XCTAssertEqual(match.liveSnapshot.p2, "Speler")
 
         match.callStroke(to: Player.player1)
         XCTAssertEqual(match.lastCallText, "STROKE -> BAS")

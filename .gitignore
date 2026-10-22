@@ -150,6 +150,8 @@ build/
 
 # App Store screenshots are regenerated with scripts/screenshots.sh
 screenshots/
+# Play listing screenshots for the English listing (outside git, like Android/play/screenshots)
+Android/play/screenshots-en-GB/
 Packages/*/.build/
 /.build/
 

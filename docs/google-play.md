@@ -20,7 +20,9 @@ gedaan; deel B doet Gerd-Jan in de terminal en de Play Console; deel C
   alfakanaal, zoals Play eist), `feature-graphic-1024x500.png` (eenvoudig:
   icoon op zwart; vervang gerust door een eigen ontwerp) en
   `screenshots/` (1080×2160; Play staat maximaal 2:1 toe, de emulator maakt
-  2400 hoog, dus bijgesneden).
+  2400 hoog, dus bijgesneden) en sinds 22 oktober 2026 `screenshots-en-GB/` voor de
+  Engelse vermelding (app op Engels via Instellingen → Taal; `play_listing.py` doet
+  alleen nl-NL, de Engelse set is met de hand via de API geüpload).
 - **Ondertekening**: `app/build.gradle.kts` leest de upload-sleutel uit
   `~/.android-keys/squashanalyzer-upload.jks` en de wachtwoorden uit
   `~/.gradle/gradle.properties` (nooit in de repo). Zonder die sleutel is een

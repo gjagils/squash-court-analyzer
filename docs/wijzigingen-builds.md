@@ -8,7 +8,17 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.0 build 5)
+## Volgende build (na 3.0 build 6)
+
+- (nog niets)
+
+## 3.0 build 6 (geüpload 22 oktober 2026)
+
+De laatste testversie vóór de productierelease van 3.0. TestFlight (Squashteam, notes
+`release-notes/3.0-6.md`, bètareview) en Google Play (internal, alpha, Google Group testers,
+versionCode 3000600, R8-mapping; notes `release-notes/android-3.0-6.md`). App Store-screenshots
+vernieuwd (donker, met het potloodje), handleidingsafbeeldingen opzet/coach/scheidsrechter
+vernieuwd, testen.html en nieuws bijgewerkt. Play-productietoegang was al toegekend.
 
 - **Best of 1, 3 of 5 in de wedstrijdopzet (22 oktober 2026, iOS en Android, gedeeld
   scherm)**: op vraag van Gerd-Jan (`docs/backlog-2026-10-21.md`, N2), ondanks de feature

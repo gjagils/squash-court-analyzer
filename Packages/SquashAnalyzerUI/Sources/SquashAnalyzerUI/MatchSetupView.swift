@@ -8,6 +8,8 @@ public struct MatchSetupChoice: Equatable {
     public let player1Id: String?
     public let player2Id: String?
     public let startingServer: Player
+    /// Best of 1, 3 or 5 games (5 in a team match)
+    public let bestOf: Int
     /// Games each player already won before the app was used ("Later instappen")
     public let player1GamesBefore: Int
     public let player2GamesBefore: Int
@@ -76,6 +78,8 @@ public struct MatchSetupView: View {
     @State private var player2Pick: PlayerProfile? = nil
     @State private var pickingSlot: Int? = nil
     @State private var server = Player.player1
+    /// Best of 1, 3 or 5; a partij of a team match is always best of 5
+    @State private var bestOf = 5
     @State private var lateStart = false
     @State private var gamesBefore1 = 0
     @State private var gamesBefore2 = 0
@@ -104,7 +108,11 @@ public struct MatchSetupView: View {
     /// The same names as shown on this screen: the empty case in the app's language
     private var shownName1: String { resolvedName(player1Name, fallback: loc("Speler 1")) }
     private var shownName2: String { resolvedName(player2Name, fallback: loc("Speler 2")) }
-    private var headStartIsValid: Bool { Match.isValidHeadStart(player1: gamesBefore1, player2: gamesBefore2) }
+    /// The format the match starts with: a team match (SBN) is always best of 5
+    private var chosenBestOf: Int { inTeam && chosenTeam != nil ? 5 : bestOf }
+    /// The most games a player can have won already with "Later instappen"
+    private var maxGamesBefore: Int { MatchStand.gamesToWin(bestOf: chosenBestOf) - 1 }
+    private var headStartIsValid: Bool { Match.isValidHeadStart(player1: gamesBefore1, player2: gamesBefore2, bestOf: chosenBestOf) }
     /// Games already played count also with "Later instappen" folded, as on iOS
     private var hasHeadStart: Bool { gamesBefore1 + gamesBefore2 > 0 }
     private var isCoach: Bool { mode == .coach }
@@ -119,7 +127,11 @@ public struct MatchSetupView: View {
 
                 serverPicker
                 teamSection
-                lateStartSection
+                bestOfPicker
+                // Best of 1 has nothing to join later
+                if maxGamesBefore > 0 {
+                    lateStartSection
+                }
 
                 ActionButton(isCoach ? loc("START WEDSTRIJD") : loc("START SCHEIDSRECHTER"), style: .filled,
                              disabled: !headStartIsValid, action: start)
@@ -261,6 +273,48 @@ public struct MatchSetupView: View {
         .accessibilityLabel(loc("\(name) serveert eerst"))
     }
 
+    /// "Best of 1 · 3 · 5": a training match is often shorter than best of 5
+    /// (Gerd-Jan, 22 October 2026). Hidden for a partij of a team match (always 5).
+    @ViewBuilder
+    private var bestOfPicker: some View {
+        if !(inTeam && chosenTeam != nil) {
+            VStack(spacing: 10) {
+                Text("Best of", bundle: textBundle)
+                    .font(SharedFonts.system(14, weight: .medium, design: .rounded))
+                    .foregroundColor(SharedColors.textSecondary)
+                HStack(spacing: 10) {
+                    ForEach(Match.bestOfOptions, id: \.self) { option in
+                        bestOfButton(option)
+                    }
+                }
+            }
+        }
+    }
+
+    private func bestOfButton(_ option: Int) -> some View {
+        let selected = bestOf == option
+        return Button { chooseBestOf(option) } label: {
+            Text("\(option)")
+                .font(SharedFonts.system(15, weight: .bold, design: .rounded))
+                .foregroundColor(selected ? SharedColors.accent : SharedColors.textPrimary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(SharedColors.accent.opacity(selected ? 0.15 : 0.05))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(SharedColors.accent.opacity(selected ? 0.6 : 0.15), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(loc("Best of \(option)"))
+    }
+
+    /// A shorter format cannot keep a head start it has no room for
+    private func chooseBestOf(_ option: Int) {
+        bestOf = option
+        let limit = MatchStand.gamesToWin(bestOf: option) - 1
+        gamesBefore1 = min(gamesBefore1, limit)
+        gamesBefore2 = min(gamesBefore2, limit)
+    }
+
     private var lateStartSection: some View {
         VStack(spacing: 12) {
             Button { lateStart.toggle() } label: {
@@ -281,8 +335,8 @@ public struct MatchSetupView: View {
                     .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                     .tracking(1)
                     .foregroundColor(SharedColors.accent)
-                gamesRow(shownName1, color: SharedColors.accent, value: gamesBefore1, onMinus: { gamesBefore1 = max(0, gamesBefore1 - 1) }, onPlus: { gamesBefore1 = min(2, gamesBefore1 + 1) })
-                gamesRow(shownName2, color: SharedColors.steelBlue, value: gamesBefore2, onMinus: { gamesBefore2 = max(0, gamesBefore2 - 1) }, onPlus: { gamesBefore2 = min(2, gamesBefore2 + 1) })
+                gamesRow(shownName1, color: SharedColors.accent, value: gamesBefore1, onMinus: { gamesBefore1 = max(0, gamesBefore1 - 1) }, onPlus: { gamesBefore1 = min(maxGamesBefore, gamesBefore1 + 1) })
+                gamesRow(shownName2, color: SharedColors.steelBlue, value: gamesBefore2, onMinus: { gamesBefore2 = max(0, gamesBefore2 - 1) }, onPlus: { gamesBefore2 = min(maxGamesBefore, gamesBefore2 + 1) })
                 if !headStartIsValid {
                     Text("Met deze stand is de wedstrijd al beslist", bundle: textBundle)
                         .font(SharedFonts.system(12))
@@ -441,7 +495,7 @@ public struct MatchSetupView: View {
         onStart(MatchSetupChoice(
             player1Name: name1, player2Name: name2,
             player1Id: pickedId(player1Pick, currentName: player1Name), player2Id: pickedId(player2Pick, currentName: player2Name),
-            startingServer: server,
+            startingServer: server, bestOf: chosenBestOf,
             player1GamesBefore: late ? gamesBefore1 : 0, player2GamesBefore: late ? gamesBefore2 : 0,
             player1Focus: focus(player1Pick, currentName: player1Name), player2Focus: focus(player2Pick, currentName: player2Name),
             teamMatch: team, teamSlot: teamSlot, teamOwnIsPlayer1: teamOwnIsPlayer1

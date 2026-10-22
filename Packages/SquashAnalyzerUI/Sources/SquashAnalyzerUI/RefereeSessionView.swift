@@ -195,7 +195,7 @@ public struct RefereeSessionView: View {
 
     private func startNewMatch(_ choice: MatchSetupChoice) {
         showingSetup = false
-        let fresh = RefereeMatch(player1Name: choice.player1Name, player2Name: choice.player2Name, bestOf: 5,
+        let fresh = RefereeMatch(player1Name: choice.player1Name, player2Name: choice.player2Name, bestOf: choice.bestOf,
                                  startingServer: choice.startingServer,
                                  player1GamesBefore: choice.player1GamesBefore, player2GamesBefore: choice.player2GamesBefore)
         fresh.player1Id = choice.player1Id.flatMap { UUID(uuidString: $0) }

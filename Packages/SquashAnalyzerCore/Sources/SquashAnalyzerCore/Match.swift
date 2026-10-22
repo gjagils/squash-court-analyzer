@@ -46,8 +46,17 @@ public class Match: Identifiable {
     public var player1GamesAfter: Int = 0
     public var player2GamesAfter: Int = 0
 
-    /// Best of X games (default 5)
-    public let bestOf: Int = 5
+    /// Best of 1, 3 or 5 games (Gerd-Jan, 22 October 2026: a training match is
+    /// often shorter than best of 5). Chosen in the match setup; 5 by default
+    public var bestOf: Int = 5
+
+    /// The formats the setup offers
+    public static let bestOfOptions: [Int] = [1, 3, 5]
+
+    /// A format the app knows, or 5 (an older backup without the field, a stray value)
+    public static func validBestOf(_ bestOf: Int) -> Int {
+        bestOfOptions.contains(bestOf) ? bestOf : 5
+    }
 
     /// Games needed to win
     public var gamesToWin: Int {
@@ -240,10 +249,12 @@ public class Match: Identifiable {
         player1GamesBefore: Int = 0,
         player2GamesBefore: Int = 0,
         player1Id: UUID? = nil,
-        player2Id: UUID? = nil
+        player2Id: UUID? = nil,
+        bestOf: Int = 5
     ) {
         self.player1Id = player1Id
         self.player2Id = player2Id
+        self.bestOf = Match.validBestOf(bestOf)
         player1Name = player1.isEmpty ? "Speler 1" : player1
         player2Name = player2.isEmpty ? "Speler 2" : player2
         matchStartingServer = startingServer

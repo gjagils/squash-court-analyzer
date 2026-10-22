@@ -1621,6 +1621,42 @@
         }
       }
     },
+    "Best of": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best of"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best of"
+          }
+        }
+      }
+    },
+    "Best of %lld": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best of %lld"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best of %lld"
+          }
+        }
+      }
+    },
     "Beste slag": {
       "extractionState": "manual",
       "generatesSymbol": false,

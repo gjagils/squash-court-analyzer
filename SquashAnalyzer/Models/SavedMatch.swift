@@ -123,6 +123,7 @@ final class SavedMatch {
         match.player1Name = player1Name
         match.player2Name = player2Name
         match.matchStartingServer = startingServer
+        match.bestOf = Match.validBestOf(bestOf)
         match.status = matchStatus
         match.updatedAt = updatedAt
         match.player1CoachingFocus = player1CoachingFocus

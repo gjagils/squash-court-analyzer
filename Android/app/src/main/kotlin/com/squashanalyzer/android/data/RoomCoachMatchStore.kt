@@ -95,8 +95,8 @@ class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardS
     }
 
     private fun restore(row: MatchRecord): Match {
-        require(row.bestOf == 5) { "Unsupported match format" }
         val match = Match(id = uuid(row.id))
+        match.bestOf = Match.validBestOf(row.bestOf)
         match.player1Name = row.player1Name
         match.player2Name = row.player2Name
         match.matchStartingServer = player(row.matchStartingServer)

@@ -239,7 +239,7 @@ class RoomBackupStore(private val db: AppDatabase, private val teamDirectory: UR
         val savedAt = millis(game.savedAt)
         return MatchRecord(
             id = game.id?.takeIf { UUID(uuidString = it) != null } ?: newId(), player1Name = game.player1Name, player2Name = game.player2Name,
-            matchStartingServer = validPlayer(game.startingServer), bestOf = 5, savedAt = savedAt, updatedAt = savedAt,
+            matchStartingServer = validPlayer(game.startingServer), bestOf = 1, savedAt = savedAt, updatedAt = savedAt,
             status = MatchStatus.COMPLETED, games = listOf(gameRecord(game)),
         )
     }

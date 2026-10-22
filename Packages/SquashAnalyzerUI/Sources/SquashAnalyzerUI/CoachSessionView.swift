@@ -222,7 +222,8 @@ public struct CoachSessionView: View {
             player1CoachingFocus: choice.player1Focus, player2CoachingFocus: choice.player2Focus,
             player1GamesBefore: choice.player1GamesBefore, player2GamesBefore: choice.player2GamesBefore,
             player1Id: choice.player1Id.flatMap { UUID(uuidString: $0) },
-            player2Id: choice.player2Id.flatMap { UUID(uuidString: $0) }
+            player2Id: choice.player2Id.flatMap { UUID(uuidString: $0) },
+            bestOf: choice.bestOf
         )
         match = fresh
         // "Onderdeel van een teamwedstrijd" chosen in the setup: the team match

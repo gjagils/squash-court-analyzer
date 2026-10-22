@@ -10,6 +10,23 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 5)
 
+- **Best of 1, 3 of 5 in de wedstrijdopzet (22 oktober 2026, iOS en Android, gedeeld
+  scherm)**: op vraag van Gerd-Jan (`docs/backlog-2026-10-21.md`, N2), ondanks de feature
+  freeze. In de opzet van Coach en Scheidsrechter staat onder "Wie serveert eerst?" de keuze
+  "Best of" 1 · 3 · 5 (standaard 5), in de stijl van de serveerkeuze. Bij best of 3 is de
+  wedstrijd na twee gewonnen games afgelopen (uitslagkaart, analyse, badges, deeltekst
+  "best of 3" en livepagina volgen); best of 1 verbergt "Later instappen?" en bij best of 3 kan
+  een speler hooguit 1 game voorsprong hebben. Een partij van een teamwedstrijd blijft best
+  of 5 (de keuze verdwijnt zodra "Onderdeel van een teamwedstrijd" aanstaat). Core:
+  `Match.bestOf` is nu een `var` met `bestOfOptions` en `validBestOf` (een onbekende waarde
+  wordt 5); `setupMatch(bestOf:)`; de scheidsrechter geeft de keuze door aan `RefereeMatch`.
+  Opslag: SwiftData (V7 had het veld al, geen migratie), Room en de back-up droegen `bestOf`
+  al mee; `SavedMatch.toMatch` en Room's `restore` zetten hem nu ook terug (Room weigerde tot
+  nu alles behalve 5). Oudere builds en de livepagina begrijpen een andere waarde al. Tests:
+  `BestOfTests`. Handleidingen (nl en en) bijgewerkt.
+  - Releasenote: "Training of een korte partij? Kies in de opzet Best of 1, 3 of 5; bij best
+    of 3 is de wedstrijd na twee gewonnen games klaar."
+
 - **Namen aanpassen in een lopende wedstrijd (21 oktober 2026, iOS en Android, gedeelde
   schermen)**: op vraag van Gerd-Jan (`docs/backlog-2026-10-21.md`, N1), ondanks de feature
   freeze. Coach: een potloodje rechts onder het scorebord (naast de rally-timer en de

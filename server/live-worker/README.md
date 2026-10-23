@@ -38,6 +38,26 @@ is reserve.
 - De limiter bewaart apart IP-adressen en tijdstippen. De sessietermijn van
   twee uur geldt niet voor die administratie; oude verzoeken worden bij
   volgende aanmaakverzoeken gefilterd, zonder afzonderlijk verwijderalarm.
+- **Gebruikscijfers** (`src/stats.js`, sinds 23 oktober 2026, zie
+  `docs/voorstel-gebruikscijfers.md`): één object `StatsCounter` met een
+  SQLite-tabel `counts(day, kind, platform, lang, country, region, club, test, n)`.
+  Per dag (Nederlandse datum) telt de Worker `live` en `team` (een geslaagde
+  `POST`), `viewer-live`/`viewer-team` (een geopende events-stream van een
+  bestaande sessie) en `follower-live`/`follower-team` (een geslaagde
+  pushregistratie). `platform` komt uit het veld `platform` ("ios"/"android")
+  dat de app bij het starten meestuurt (oudere apps: `unknown`), `country` en
+  `region` uit `request.cf` (nooit het adres zelf), `club` is de thuisteamnaam
+  zonder teamnummer ("All Inn Squash 8" → "All Inn Squash"; de tegenstander
+  wordt niet opgeslagen), en `test` is 1 voor een wedstrijd tussen de
+  voorbeeldspelers Bob en Wim (allebei), een wedstrijd met Bombardino of
+  Whiskey, of een team met "test" of "voorbeeld" in de naam. Geen namen,
+  sessie-ids of IP-adressen, geen tijd fijner dan een dag, geen
+  verwijdertermijn (het zijn getallen). Een mislukte telling faalt het verzoek
+  niet. Uitlezen: `GET /api/stats?from=2026-10-01&to=2026-10-31` met
+  `Authorization: Bearer <STATS_KEY>` (`npx wrangler secret put STATS_KEY`;
+  zonder die secret bestaat het pad niet): `{ rows, totals }`, met per soort
+  `real` en `test`. Bijvoorbeeld:
+  `curl -s -H "Authorization: Bearer $STATS_KEY" "https://live.squashanalyzer.com/api/stats?from=2026-10-01" | jq .totals`.
 
 Verschil met de Node-versie: geen totaalmaximum op kijkers over alle
 sessies (wel per sessie), en een herstart van de Worker breekt geen sessies.

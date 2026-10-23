@@ -285,8 +285,10 @@ GitHub-secrets.
   expliciete vraag; ideeën gaan op de backlog.
 - Notities van Gerd-Jan van 21 oktober 2026 (namen aanpassen in een wedstrijd vóór de release;
   geavanceerde coachmodus en businessmodel na de release): `docs/backlog-2026-10-21.md`.
-- Gebruikscijfers van live meekijken tellen zonder herleidbaarheid (vraag Gerd-Jan, 23 oktober):
-  voorstel in `docs/voorstel-gebruikscijfers.md`, nog niet besloten.
+- **Gebruikscijfers van live meekijken** (gebouwd 23 oktober 2026, zonder herleidbaarheid; zie
+  `docs/voorstel-gebruikscijfers.md` en de README van de Worker): de Worker telt per dag; Gerd-Jan
+  moet nog `npx wrangler secret put STATS_KEY` zetten om `/api/stats` te kunnen lezen. De app-kant
+  (veld `platform`) staat op de branch `claude/gebruikscijfers-app`, nog te testen op de Mac.
 - **iOS 3.0 staat in de App Store** (stand 23 oktober 2026, gezien op de storepagina; 3.0
   build 6). De website zegt nog "Nieuwe bètaversie voor iPhone" en "De versie in de App Store
   kan er nog anders uitzien" (`website/index.html`): aan te passen zodra Gerd-Jan dat wil. De

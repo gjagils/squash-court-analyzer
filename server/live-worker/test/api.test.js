@@ -54,6 +54,13 @@ async function openEvents(id) {
 
 const sessionStub = (id) => env.SESSION.get(env.SESSION.idFromName(id));
 
+describe('usage counts without a key', () => {
+  it('has no /api/stats when STATS_KEY is not set', async () => {
+    expect((await call('GET', '/api/stats', undefined, 'anything')).status).toBe(404);
+    expect((await call('GET', '/api/stats')).status).toBe(404);
+  });
+});
+
 describe('input', () => {
   it('first names only, letters kept', () => {
     expect(cleanName('Jan de Vries', 'x')).toBe('Jan');

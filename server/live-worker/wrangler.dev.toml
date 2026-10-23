@@ -38,6 +38,12 @@ class_name = "LiveLimiter"
 name = "TEAM"
 class_name = "TeamSession"
 
+# The usage counts per day (stats.js), nothing personal; read with GET /api/stats
+# and the secret STATS_KEY (`npx wrangler secret put STATS_KEY`)
+[[durable_objects.bindings]]
+name = "STATS"
+class_name = "StatsCounter"
+
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["LiveSession", "LiveLimiter"]
@@ -45,6 +51,11 @@ new_sqlite_classes = ["LiveSession", "LiveLimiter"]
 [[migrations]]
 tag = "v2"
 new_sqlite_classes = ["TeamSession"]
+
+# Usage counts (23 October 2026)
+[[migrations]]
+tag = "v3"
+new_sqlite_classes = ["StatsCounter"]
 
 [observability]
 enabled = true

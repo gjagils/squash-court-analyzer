@@ -3,7 +3,8 @@
 // sends the whole match state after every rally and deletes the session when
 // the match is over; viewers follow it in the browser through Server-Sent
 // Events. One Durable Object per session holds the state (see session.js),
-// one more counts creations and sessions (limiter.js). Nothing leaves
+// one more counts creations and sessions (limiter.js), and one keeps the
+// usage counts per day without anything personal (stats.js). Nothing leaves
 // Cloudflare's edge, and a session is gone two hours after its last update.
 
 import {
@@ -12,10 +13,12 @@ import {
 } from './validate.js';
 import { readConfig } from './config.js';
 import { partijDecided, partijWinner, pushAvailability, validateFollower } from './push.js';
+import { clubName, isSampleMatch, isTestTeam, totalsOf } from './stats.js';
 
 export { LiveSession } from './session.js';
 export { LiveLimiter } from './limiter.js';
 export { TeamSession } from './team.js';
+export { StatsCounter } from './stats.js';
 
 /** A follower registration: an FCM token may be up to 4096 characters */
 const FOLLOWER_BODY_BYTES = 8192;
@@ -125,7 +128,7 @@ async function teamPage(request, env, config, id, state, lang = 'nl') {
  * sandbox?, alerts?, lang? } (lang "nl" or "en" for the alert texts, Dutch when missing). 400 invalid, 503 platform off (POST), 404 unknown,
  * 429 full, 201 registered, 204 forgotten.
  */
-async function handleFollowers(request, env, config, session, unknownText) {
+async function handleFollowers(request, env, config, session, unknownText, count, kind) {
   const follower = validateFollower(await readJson(request, FOLLOWER_BODY_BYTES));
   if (!follower) return send(400, { error: 'Ongeldige pushregistratie' });
   if (request.method === 'DELETE') {
@@ -138,6 +141,7 @@ async function handleFollowers(request, env, config, session, unknownText) {
   const status = await session.addFollower(follower, baseUrl(request, config));
   if (status === 404) return send(404, { error: unknownText });
   if (status === 429) return send(429, { error: 'Te veel volgers voor deze wedstrijd' });
+  await count(kind, { platform: follower.platform });
   return send(201, { ok: true });
 }
 
@@ -166,6 +170,13 @@ async function handle(request, env) {
   const where = (namespace) => (config.jurisdiction ? namespace.jurisdiction(config.jurisdiction) : namespace);
   const sessionFor = (id) => where(env.SESSION).get(where(env.SESSION).idFromName(id));
   const teamFor = (id) => where(env.TEAM).get(where(env.TEAM).idFromName(id));
+  // The usage counts (stats.js): country and region as Cloudflare derives them
+  // from the request, never the address itself; a failed count never fails a request
+  const stats = where(env.STATS).get(where(env.STATS).idFromName('global'));
+  const place = { country: request.cf && request.cf.country, region: request.cf && request.cf.region };
+  const count = async (kind, fields) => {
+    try { await stats.bump(kind, { ...place, ...fields }); } catch (error) { console.error('stats error', error && error.message); }
+  };
 
   if (request.method === 'GET' && url.pathname === '/health') {
     return send(200, { ok: true, sessions: await limiter.count() });
@@ -187,10 +198,19 @@ async function handle(request, env) {
     const lang = state ? await teamFor(pageId).lang() : 'nl';
     return teamPage(request, env, config, pageId, state, lang);
   }
-  if (parts[0] === 'api' && parts[1] === 'team') return handleTeam(request, env, config, parts, limiter, teamFor);
+  if (parts[0] === 'api' && parts[1] === 'team') return handleTeam(request, env, config, parts, limiter, teamFor, count);
 
   // GET /api/push: which platforms this server can push to (lock screen)
   if (request.method === 'GET' && url.pathname === '/api/push') return send(200, pushAvailability(env));
+
+  // GET /api/stats?from=YYYY-MM-DD&to=YYYY-MM-DD: the usage counts per day (stats.js), only
+  // with the STATS_KEY secret (`wrangler secret put STATS_KEY`); without it the path does not exist
+  if (request.method === 'GET' && url.pathname === '/api/stats') {
+    const secret = String(env.STATS_KEY || '');
+    if (!secret || bearer(request) !== secret) return send(404, 'Not found');
+    const rows = await stats.rows(url.searchParams.get('from'), url.searchParams.get('to'));
+    return send(200, { rows, totals: totalsOf(rows) });
+  }
 
   if (parts[0] !== 'api' || parts[1] !== 'live') return send(404, 'Not found');
   const id = parts[2];
@@ -214,6 +234,7 @@ async function handle(request, env) {
       newId = newSessionId();
       if (!(await limiter.register(newId))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
     }
+    await count('live', { platform: body.platform, lang, test: isSampleMatch(snapshot.p1, snapshot.p2) });
     return send(201, { id: newId, writeKey: key, url: `${baseUrl(request, config)}/l/${newId}` });
   }
 
@@ -229,13 +250,15 @@ async function handle(request, env) {
 
   // GET /api/live/:id/events: Server-Sent Events for viewers, served by the session itself
   if (request.method === 'GET' && parts[3] === 'events') {
-    return session.fetch(new Request(new URL('/events', request.url), { headers: request.headers, signal: request.signal }));
+    const stream = await session.fetch(new Request(new URL('/events', request.url), { headers: request.headers, signal: request.signal }));
+    if (stream.status === 200) await count('viewer-live', {});
+    return stream;
   }
 
   // POST / DELETE /api/live/:id/followers: a phone follows the match on its lock
   // screen ({ platform, token, sandbox? }). No key: anyone with the link may watch.
   if (parts[3] === 'followers' && parts.length === 4 && (request.method === 'POST' || request.method === 'DELETE')) {
-    return handleFollowers(request, env, config, session, 'Onbekende sessie');
+    return handleFollowers(request, env, config, session, 'Onbekende sessie', count, 'follower-live');
   }
   if (parts.length !== 3 && !(parts.length === 4 && parts[3] === 'photos')) return send(404, 'Not found');
 
@@ -284,7 +307,7 @@ async function handle(request, env) {
  * /partij/:slot/photos, GET /photo/:slot/:n) and lock screen followers
  * (/followers) as for a live match.
  */
-async function handleTeam(request, env, config, parts, limiter, teamFor) {
+async function handleTeam(request, env, config, parts, limiter, teamFor, count) {
   const id = parts[2];
 
   // POST /api/team: a new team match
@@ -303,6 +326,7 @@ async function handleTeam(request, env, config, parts, limiter, teamFor) {
       newId = newSessionId();
       if (!(await limiter.register(`t:${newId}`))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
     }
+    await count('team', { platform: body.platform, lang, club: clubName(team.home), test: isTestTeam(team.home, team.away) });
     return send(201, { id: newId, writeKey: key, ownerKey, url: `${baseUrl(request, config)}/t/${newId}` });
   }
 
@@ -318,7 +342,7 @@ async function handleTeam(request, env, config, parts, limiter, teamFor) {
 
   // POST / DELETE /api/team/:id/followers: lock screen, as for a live match
   if (parts[3] === 'followers' && parts.length === 4 && (request.method === 'POST' || request.method === 'DELETE')) {
-    return handleFollowers(request, env, config, session, 'Onbekende teamwedstrijd');
+    return handleFollowers(request, env, config, session, 'Onbekende teamwedstrijd', count, 'follower-team');
   }
 
   // GET /api/team/:id/verify: does this key work, and what may it do ("owner" or "writer")
@@ -331,7 +355,9 @@ async function handleTeam(request, env, config, parts, limiter, teamFor) {
 
   // GET /api/team/:id/events: Server-Sent Events for viewers
   if (request.method === 'GET' && parts[3] === 'events' && parts.length === 4) {
-    return session.fetch(new Request(new URL('/events', request.url), { headers: request.headers, signal: request.signal }));
+    const stream = await session.fetch(new Request(new URL('/events', request.url), { headers: request.headers, signal: request.signal }));
+    if (stream.status === 200) await count('viewer-team', {});
+    return stream;
   }
 
   // GET /api/team/:id: the current state

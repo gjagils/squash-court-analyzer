@@ -3,8 +3,18 @@
 Vraag van Gerd-Jan (23 oktober 2026): bijhouden hoeveel livewedstrijden en live
 teamwedstrijden er gestart worden, en waar het gebruik zit (alleen het eigen team
 bij All Inn, of ook andere verenigingen). Niet als administratie, niet herleidbaar
-tot personen, alleen om te zien of en waar de app gebruikt wordt. Dit is een
-voorstel, nog niet gebouwd en niet besloten.
+tot personen, alleen om te zien of en waar de app gebruikt wordt.
+
+**Besluit en stand (23 oktober 2026)**: Gerd-Jan koos voor bouwen, mét de club, en
+met wedstrijden van de testspelers (Bob, Wim, Bombardino, Whiskey) apart geteld.
+De Worker-kant staat op `main` (`server/live-worker/src/stats.js`, tests in
+`test/stats.test.js`, uitleg in de README van de Worker); de app-kant (het veld
+`platform` meesturen) staat op de branch `claude/gebruikscijfers-app` en moet op
+de Mac getest en gemerged worden. Nog te doen door Gerd-Jan:
+`npx wrangler secret put STATS_KEY` (anders bestaat `/api/stats` niet; tellen
+gebeurt wel). De tekst hieronder is het oorspronkelijke voorstel; waar de bouw
+afwijkt staat het in de README van de Worker (soorten `viewer-live`/`viewer-team`
+en `follower-live`/`follower-team`, kolom `test`).
 
 ## Wat de live-server nu al ziet
 

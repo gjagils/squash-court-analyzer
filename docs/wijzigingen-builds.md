@@ -10,7 +10,20 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 6)
 
-- (nog niets)
+- **Gebruikscijfers van de live-dienst (23 oktober 2026, live-server; app-kant op branch
+  `claude/gebruikscijfers-app`)**: op vraag van Gerd-Jan (`docs/voorstel-gebruikscijfers.md`).
+  De Worker telt per dag hoe vaak een livewedstrijd en een live teamwedstrijd gestart worden en
+  hoe vaak kijkers en volgers op het vergrendelscherm verbinden, met land en regio (uit
+  `request.cf`), taal, platform, bij een teamwedstrijd de club (thuisteamnaam zonder
+  teamnummer) en apart voor de testspelers (Bob én Wim, of Bombardino of Whiskey, of een team
+  met "test"/"voorbeeld"). Geen namen, sessie-ids, IP-adressen of tijd fijner dan een dag.
+  Nieuw Durable Object `StatsCounter` (migratie v3), `GET /api/stats` alleen met de secret
+  `STATS_KEY`. Worker-tests: `test/stats.test.js` (71 tests groen op 23 oktober). Privacytekst
+  (nl en en) uitgebreid onder "Technische verzoekgegevens". De app stuurt bij het starten van
+  live en van een teamwedstrijd het veld `platform` ("ios"/"android") mee naast `lang`
+  (`AppPlatform.current` in Core, `LiveSnapshot.platform`, `TeamLiveHeader.platform`;
+  achterwaarts compatibel, een oudere app telt als "unknown"). Geen zichtbare wijziging in de
+  app; geen releasenote nodig.
 
 ## 3.0 build 6 (geüpload 22 oktober 2026)
 

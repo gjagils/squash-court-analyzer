@@ -289,6 +289,9 @@ GitHub-secrets.
   `docs/voorstel-gebruikscijfers.md` en de README van de Worker): de Worker telt per dag; Gerd-Jan
   moet nog `npx wrangler secret put STATS_KEY` zetten om `/api/stats` te kunnen lezen. De app-kant
   (veld `platform`) staat op de branch `claude/gebruikscijfers-app`, nog te testen op de Mac.
+- **Weekrapport per mail** (sinds 23 oktober 2026): elke zaterdag 07:40 een geplande taak die
+  `scripts/weekly-stats.py` draait en het rapport via Cirrux naar info@squashanalyzer.com
+  stuurt; zie `docs/weekrapport.md` voor de twee sleutels die Gerd-Jan nog moet zetten.
 - **iOS 3.0 staat in de App Store** (stand 23 oktober 2026, gezien op de storepagina; 3.0
   build 6). De website zegt nog "Nieuwe bètaversie voor iPhone" en "De versie in de App Store
   kan er nog anders uitzien" (`website/index.html`): aan te passen zodra Gerd-Jan dat wil. De

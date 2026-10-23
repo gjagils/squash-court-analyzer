@@ -22,6 +22,15 @@ van de afgelopen week plus een trend, per mail naar info@squashanalyzer.com.
 - **Snapshots**: per week één klein JSON-bestand in `docs/stats/weekly/`, zodat
   de trend blijft kloppen als Cloudflare oudere dagen niet meer geeft.
 
+## Connector (eenmalig, Gerd-Jan)
+
+De geplande taak is op 23 oktober vanuit een sessie aangemaakt en kon daarbij
+geen connector meekrijgen. Zonder de Cirrux-connector kan de sessie het
+rapport wel maken en het snapshot committen, maar niet mailen. Koppel daarom
+in Claude (de lijst geplande taken, taak "Weekrapport website") de connector
+Cirrux aan de taak, of maak de taak daar opnieuw aan met dezelfde opdracht en
+Cirrux erbij. De eerste run is zaterdag 24 oktober 2026 om 07:40.
+
 ## Sleutels (eenmalig, Gerd-Jan)
 
 Beide als geheim in de cloudomgeving van Claude Code (menu van de omgeving in

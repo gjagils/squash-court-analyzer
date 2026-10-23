@@ -20,7 +20,8 @@ versionCode 3000600, R8-mapping; notes `release-notes/android-3.0-6.md`). App St
 vernieuwd (donker, met het potloodje), handleidingsafbeeldingen opzet/coach/scheidsrechter
 vernieuwd, testen.html en nieuws bijgewerkt. Play-productietoegang was al toegekend.
 **Stand 23 oktober 2026: iOS 3.0 (deze build) staat in de App Store** (gezien op de
-storepagina); de Android-productierelease is nog niet gedaan, build 6 staat in de testtracks.
+storepagina); de Android-productierelease van deze build is op 22 oktober ingediend en wordt
+beoordeeld.
 
 - **Best of 1, 3 of 5 in de wedstrijdopzet (22 oktober 2026, iOS en Android, gedeeld
   scherm)**: op vraag van Gerd-Jan (`docs/backlog-2026-10-21.md`, N2), ondanks de feature

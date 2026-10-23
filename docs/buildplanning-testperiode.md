@@ -50,9 +50,9 @@ Er is geen gegarandeerde productiedatum of automatische App Store-indiening.
 
 **Stand 23 oktober 2026**: iOS 3.0 (build 6) staat in de App Store (gezien op
 de storepagina). De Play-productietoegang is op 20 oktober toegekend, maar de
-productierelease van Android 3.0 is nog niet gedaan: 3.0 build 6 staat in de
-testtracks en de publieke Play-pagina bestaat nog niet (volgens Gerd-Jan en
-gecontroleerd op 23 oktober).
+productierelease van Android 3.0 (6) is op 22 oktober om 15:55 ingediend
+(inzending 20: volledige uitrol, alle landen, en-GB-vermelding) en staat op
+23 oktober op "Wordt beoordeeld"; de publieke Play-pagina bestaat nog niet.
 
 ## Werkwijze
 

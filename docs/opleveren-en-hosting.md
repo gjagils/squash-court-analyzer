@@ -131,8 +131,9 @@ Gerd-Jan dat zegt.** Stand 23 oktober 2026: in productie staat **iOS 3.0**
 (App Store, versie 3.0 zichtbaar op de storepagina op 23 oktober; dat is 3.0
 build 6 van 22 oktober). **Android heeft nog niets in productie**: 3.0 build 6
 staat in de Play-testtracks (internal, alpha, Google Group testers), de
-productietoegang is op 20 oktober toegekend, maar de productierelease is nog
-niet gedaan (de publieke Play-pagina bestaat nog niet). Wat hierna komt is
+productietoegang is op 20 oktober toegekend en de productierelease (volledige
+uitrol, alle landen) is op 22 oktober om 15:55 ingediend; op 23 oktober staat
+die op "Wordt beoordeeld" en bestaat de publieke Play-pagina nog niet. Wat hierna komt is
 een nieuwe testronde **3.1 build 1** of een bugfix op 3.0 (nummering
 hieronder).
 
@@ -291,8 +292,10 @@ GitHub-secrets.
   bedoeld voor het moment dat Android ook live is.
 - **Google Play productie**: de eis van 12 testers × 14 dagen is gehaald en de productietoegang
   is op 20 oktober 2026 toegekend (zie `docs/wijzigingen-builds.md`, badgereset). De
-  productierelease van Android 3.0 is op 23 oktober nog niet gedaan; de gesloten test
-  (Google Group testers) blijft tot die tijd staan. De Play-vermelding is op 22 oktober
+  productierelease van Android 3.0 (6) is op 22 oktober ingediend (volledige uitrol, 177
+  landen plus rest van de wereld, en-GB-vermelding) en wordt op 23 oktober nog beoordeeld; de
+  gesloten test (Google Group testers) blijft tot die tijd staan. Gerd-Jan zet daarna de
+  nieuwe website live (`website/beta/index.html`). De Play-vermelding is op 22 oktober
   bijgewerkt (nl en en-GB). Daarna: de Play-knoppen op de website (`website/beta/index.html`
   als voorbeeld) en `testen.html` omzetten naar downloadlinks.
 - Live teamwedstrijd is getest tussen iOS-simulator en Android-emulator, en

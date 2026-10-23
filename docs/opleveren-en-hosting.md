@@ -127,12 +127,14 @@ Regels voor tests op toestellen:
 ## 4. Opleveren naar testers
 
 **Er wordt niets geüpload naar TestFlight of Google Play zonder dat
-Gerd-Jan dat zegt.** Stand: in productie staat iOS 2.0 (App Store); Android
-heeft nog niets in productie. In de tests zitten iOS 2.2 (18) (TestFlight) en
-Android 0.5 (5) (Play-testtracks). Wat daarna komt (Competitie, live
-teamwedstrijd, nieuwe hosting) is **3.0 build 1**, de eerste upload van de
-versie die na de testperiode in productie gaat. In de projectbestanden staat
-nu `3.0 build 0`: er is nog niets van 3.0 geüpload.
+Gerd-Jan dat zegt.** Stand 23 oktober 2026: in productie staat **iOS 3.0**
+(App Store, versie 3.0 zichtbaar op de storepagina op 23 oktober; dat is 3.0
+build 6 van 22 oktober). **Android heeft nog niets in productie**: 3.0 build 6
+staat in de Play-testtracks (internal, alpha, Google Group testers), de
+productietoegang is op 20 oktober toegekend, maar de productierelease is nog
+niet gedaan (de publieke Play-pagina bestaat nog niet). Wat hierna komt is
+een nieuwe testronde **3.1 build 1** of een bugfix op 3.0 (nummering
+hieronder).
 
 ### Versienummers (besluit Gerd-Jan, 6 oktober 2026)
 
@@ -282,11 +284,17 @@ GitHub-secrets.
   expliciete vraag; ideeën gaan op de backlog.
 - Notities van Gerd-Jan van 21 oktober 2026 (namen aanpassen in een wedstrijd vóór de release;
   geavanceerde coachmodus en businessmodel na de release): `docs/backlog-2026-10-21.md`.
-- **Google Play productie**: op 11 oktober 2026 meldt de Play Console dat 12 testers 6 dagen
-  aaneengesloten in de gesloten test zitten; de eis is 14 dagen. Op zijn vroegst op 19 oktober 2026
-  kan "Toegang tot productie aanvragen" (Dashboard → Productie), mits niemand afhaakt. De
-  gesloten test (Google Group testers) moet tot die tijd blijven staan.
-- 3.0 build 3 is op 12 oktober 2026 geüpload (TestFlight groep Squashteam, Play intern, alpha en Google Group testers); zie `docs/wijzigingen-builds.md`. Het App Store-concept 3.0 bestaat met nieuwe schermafbeeldingen maar is nog niet ingediend; de Play-listing is nog niet vernieuwd.
+- **iOS 3.0 staat in de App Store** (stand 23 oktober 2026, gezien op de storepagina; 3.0
+  build 6). De website zegt nog "Nieuwe bètaversie voor iPhone" en "De versie in de App Store
+  kan er nog anders uitzien" (`website/index.html`): aan te passen zodra Gerd-Jan dat wil. De
+  releasehomepage `website/beta/index.html` ("Nu ook op Android", met Play-knoppen) is
+  bedoeld voor het moment dat Android ook live is.
+- **Google Play productie**: de eis van 12 testers × 14 dagen is gehaald en de productietoegang
+  is op 20 oktober 2026 toegekend (zie `docs/wijzigingen-builds.md`, badgereset). De
+  productierelease van Android 3.0 is op 23 oktober nog niet gedaan; de gesloten test
+  (Google Group testers) blijft tot die tijd staan. De Play-vermelding is op 22 oktober
+  bijgewerkt (nl en en-GB). Daarna: de Play-knoppen op de website (`website/beta/index.html`
+  als voorbeeld) en `testen.html` omzetten naar downloadlinks.
 - Live teamwedstrijd is getest tussen iOS-simulator en Android-emulator, en
   door Gerd-Jan op de iPhone en de A13 (9 oktober 2026).
 - Vergelijken met de SBN-uitslag en een badgecategorie Teamspeler (zie

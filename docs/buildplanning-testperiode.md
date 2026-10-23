@@ -48,6 +48,12 @@ vragen in de Play Console vóór de productieaanvraag. Zie
 [de officiële Google Play-uitleg](https://support.google.com/googleplay/android-developer/answer/14151465?hl=en-GB).
 Er is geen gegarandeerde productiedatum of automatische App Store-indiening.
 
+**Stand 23 oktober 2026**: iOS 3.0 (build 6) staat in de App Store (gezien op
+de storepagina). De Play-productietoegang is op 20 oktober toegekend, maar de
+productierelease van Android 3.0 is nog niet gedaan: 3.0 build 6 staat in de
+testtracks en de publieke Play-pagina bestaat nog niet (volgens Gerd-Jan en
+gecontroleerd op 23 oktober).
+
 ## Werkwijze
 
 - Bugfixes voor opslaan, herstellen, hervatten en echte wedstrijdsituaties gaan voor.

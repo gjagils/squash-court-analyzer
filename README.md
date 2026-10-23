@@ -40,7 +40,8 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest
 ```
 
-Laatste gedocumenteerde uploads (5 oktober): **iOS 2.2 (18)** en **Android 0.5 (5)**.
-Competitie en live teamwedstrijden zijn gebouwd op main voor de eerstvolgende
-upload, **3.0 build 1** (iOS en Android; nummering: `docs/opleveren-en-hosting.md`), nog niet geüpload. Zie [de actuele stand](docs/stand-van-zaken-2026-10-06.md).
+Stand 23 oktober 2026: **iOS 3.0** staat in de App Store (3.0 build 6, geüpload 22
+oktober). **Android 3.0 build 6** staat in de Play-testtracks; de productierelease op
+Google Play is nog niet gedaan. Nummering: `docs/opleveren-en-hosting.md`; wat er per
+build veranderde: `docs/wijzigingen-builds.md`.
 Een nieuwe app-upload gebeurt alleen op expliciete opdracht.

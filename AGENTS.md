@@ -79,7 +79,8 @@ samengevoegd moest worden. Daarom:
 - **Versienummers**: versie (3.1) gelijk op iOS en Android, `build 4` per
   upload naar testers, `build 4.1` per interne uitlevering; alleen aanpassen
   met `scripts/version.py` (uitleg in `docs/opleveren-en-hosting.md`). In
-  productie staat iOS 2.0; de testperiode loopt tot 3.0.
+  productie staat iOS 3.0 (App Store, sinds 23 oktober 2026); Android 3.0 staat nog in
+  de gesloten test, de productierelease op Google Play moet nog (stand 23 oktober).
 - **Branches opruimen**: push gemergd werk direct naar `main` (`git push origin
   HEAD:main`) en laat geen remote werkbranch staan; is een branch na een
   commit leeg (alles in `main`), verwijder hem dan (`git push origin --delete

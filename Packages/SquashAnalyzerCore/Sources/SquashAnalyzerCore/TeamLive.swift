@@ -90,12 +90,16 @@ public struct TeamLiveHeader: Codable, Equatable, Sendable {
     /// The app's language, "nl" or "en" (`AppLanguage.code`), sent when the
     /// live page is made; nil (left out) otherwise
     public var lang: String?
+    /// "ios" or "android" (`AppPlatform.current`), sent when the live page is
+    /// made, for the usage counts of the live service; nil (left out) otherwise
+    public var platform: String?
 
-    public init(home: String, away: String, date: Int64, lang: String? = nil) {
+    public init(home: String, away: String, date: Int64, lang: String? = nil, platform: String? = nil) {
         self.home = home
         self.away = away
         self.date = date
         self.lang = lang
+        self.platform = platform
     }
 }
 
@@ -543,7 +547,7 @@ public final class TeamLive {
         guard let transport = activeTransport else { throw TeamLiveError.noTransport }
         guard let url = URL(string: "\(baseURL)/api/team") else { throw TeamLiveError.noConnection }
         let header = TeamLiveHeader(home: match.home, away: match.away, date: Int64(match.date.timeIntervalSince1970 * 1000.0),
-                                    lang: AppLanguage.current.code)
+                                    lang: AppLanguage.current.code, platform: AppPlatform.current)
         let body = try JSONEncoder().encode(header)
         let response: AITransportResponse
         do {

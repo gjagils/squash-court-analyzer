@@ -214,8 +214,7 @@ Volgorde bij een externe build:
      blok "Nieuw in deze versie" met de nieuwe features en "Probeer vooral"
      (de tekst van de releasenotes, uitgebreider), en het blok van de vorige
      build schuift door naar "Nieuw in build N" / "Uit eerdere versies";
-   - **`website/index.html`**, het nieuwsblok (`#nieuws`): de nieuwe feature
-     bovenaan de lijst;
+   - **`website/index.html`** (en `en/index.html`): alleen als de feature op de homepage hoort;
    - **de handleiding** (`website/handleiding/iphone.html` en `android.html`,
      per tegel één sectie) en, als er gegevens bij komen, **`privacy.html`**;
    - dan publiceren met `npx wrangler deploy -c server/website-worker/wrangler.jsonc`
@@ -292,19 +291,11 @@ GitHub-secrets.
 - **Weekrapport per mail** (sinds 23 oktober 2026): elke zaterdag 07:40 een geplande taak die
   `scripts/weekly-stats.py` draait en het rapport via Cirrux naar info@squashanalyzer.com
   stuurt; zie `docs/weekrapport.md` voor de twee sleutels die Gerd-Jan nog moet zetten.
-- **iOS 3.0 staat in de App Store** (stand 23 oktober 2026, gezien op de storepagina; 3.0
-  build 6). De website zegt nog "Nieuwe bètaversie voor iPhone" en "De versie in de App Store
-  kan er nog anders uitzien" (`website/index.html`): aan te passen zodra Gerd-Jan dat wil. De
-  releasehomepage `website/beta/index.html` ("Nu ook op Android", met Play-knoppen) is
-  bedoeld voor het moment dat Android ook live is.
-- **Google Play productie**: de eis van 12 testers × 14 dagen is gehaald en de productietoegang
-  is op 20 oktober 2026 toegekend (zie `docs/wijzigingen-builds.md`, badgereset). De
-  productierelease van Android 3.0 (6) is op 22 oktober ingediend (volledige uitrol, 177
-  landen plus rest van de wereld, en-GB-vermelding) en wordt op 23 oktober nog beoordeeld; de
-  gesloten test (Google Group testers) blijft tot die tijd staan. Gerd-Jan zet daarna de
-  nieuwe website live (`website/beta/index.html`). De Play-vermelding is op 22 oktober
-  bijgewerkt (nl en en-GB). Daarna: de Play-knoppen op de website (`website/beta/index.html`
-  als voorbeeld) en `testen.html` omzetten naar downloadlinks.
+- **3.0 staat live op iOS en Android** (stand 25 oktober 2026): App Store sinds 23 oktober,
+  Google Play publiek (`com.squashanalyzer.android`, gecontroleerd op 25 oktober). De releasehomepage
+  is op 25 oktober `website/index.html` geworden (de map `website/beta/` is weg), met werkende
+  Play-knoppen op de NL- en EN-homepage; `testen.html` verwijst nu eerst naar de stores. De gesloten
+  test (Google Group testers) kan blijven voor 3.1.
 - Live teamwedstrijd is getest tussen iOS-simulator en Android-emulator, en
   door Gerd-Jan op de iPhone en de A13 (9 oktober 2026).
 - Vergelijken met de SBN-uitslag en een badgecategorie Teamspeler (zie

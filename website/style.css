@@ -519,7 +519,9 @@ footer {
 
 .footer-links {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  max-width: 100%;
 }
 
 .footer-links a {
@@ -682,6 +684,7 @@ a:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-r
 .tile h2 .icon .ms { font-size: 24px; }
 .btn-primary .ms { color: inherit; font-size: 20px; }
 .footer-links .ms { font-size: 16px; vertical-align: -3px; }
+.footer-links .ig-icon { width: 14px; height: 14px; vertical-align: -2px; fill: none; stroke: var(--gold); stroke-width: 2; }
 
 /* ── Logo op licht: het zwarte logo als compact zwart vlak ──── */
 :root[data-theme="light"] .nav-logo-icon { border-radius: 8px; }

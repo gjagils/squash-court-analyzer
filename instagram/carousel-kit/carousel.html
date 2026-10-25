@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Carousels</title>
+<style>
+@font-face { font-family: "SA Rounded"; src: url("file:///System/Library/Fonts/SFNSRounded.ttf"); font-weight: 100 900; }
+:root { --gold: #F28C26; --line: rgba(242,140,38,0.35); --text-1: #F2EDE6; --text-2: #B3ADA6; --text-3: #8C8680; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #000; }
+body { font-family: "SA Rounded", -apple-system, sans-serif; color: var(--text-1); }
+.slide { width: 1080px; height: 1350px; position: relative; overflow: hidden;
+  background:
+    radial-gradient(900px 700px at 50% 108%, rgba(242,140,38,0.22), transparent 70%),
+    radial-gradient(700px 500px at 100% -10%, rgba(242,140,38,0.10), transparent 70%), #000; }
+.brand { position: absolute; top: 56px; left: 72px; font-size: 34px; font-weight: 700; }
+.brand b { color: var(--gold); }
+.count { position: absolute; top: 62px; right: 72px; font-size: 26px; color: var(--text-3); font-weight: 600; }
+.text { position: absolute; top: 150px; left: 72px; right: 72px; }
+h1 { font-size: 82px; line-height: 1.04; font-weight: 800; letter-spacing: -1.5px; }
+h1 em { font-style: normal; color: var(--gold); }
+.sub { margin-top: 26px; font-size: 38px; line-height: 1.3; color: var(--text-2); font-weight: 500; }
+/* Phone with a highlight around the part the slide is about */
+.phone { position: absolute; left: 50%; transform: translateX(-50%); bottom: -90px; height: 1040px; aspect-ratio: 1320 / 2868;
+  border-radius: 62px; border: 3px solid var(--line); box-shadow: 0 40px 90px rgba(0,0,0,.7), 0 0 0 10px #0d0905; }
+/* The screen clips the dimming around the highlight, so the headline stays bright */
+.screen { position: absolute; inset: 0; border-radius: 59px; overflow: hidden; }
+.screen img { width: 100%; height: 100%; display: block; }
+.hl { position: absolute; border: 5px solid var(--gold); border-radius: 22px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,.42), 0 0 40px rgba(242,140,38,.6); }
+.center { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 90px; }
+.center h1 { font-size: 104px; }
+.swipe { position: absolute; bottom: 64px; right: 72px; font-size: 28px; color: var(--gold); font-weight: 700; }
+.steps { list-style: none; margin-top: 56px; counter-reset: s; }
+.steps li { counter-increment: s; display: flex; gap: 30px; align-items: flex-start; font-size: 44px; font-weight: 600; line-height: 1.25; padding: 26px 0; border-bottom: 2px solid rgba(255,255,255,.08); }
+.steps li:last-child { border: 0; }
+.steps li::before { content: counter(s); flex: none; width: 64px; height: 64px; border-radius: 50%; background: var(--gold); color: #000; display: grid; place-items: center; font-weight: 900; font-size: 36px; margin-top: -4px; }
+.cta { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 80px; }
+.cta img { width: 240px; height: 240px; border-radius: 22.5%; box-shadow: 0 30px 80px rgba(242,140,38,.25); }
+.cta h1 { margin-top: 60px; }
+.cta .url { font-size: 48px; font-weight: 700; margin-top: 34px; }
+.cta .sub { margin-top: 60px; }
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script>
+// Each carousel: a list of slides. Types: hook, phone (img + highlight box in % of
+// the screenshot: [left, top, width, height]), steps, cta. Render one with #<name>:<n>.
+var A = '../carousel-assets/';
+var CAROUSELS = {
+  coachkaart: [
+    { type: 'hook', h: 'Je speler verliest <em>game 1.</em>', s: 'Wat zeg je in de 90 seconden pauze?' },
+    { type: 'phone', img: 'analyse-heatmap.png', box: [7, 50, 34, 15.5], h: 'Niet <em>‘speel beter’.</em>', s: 'Maar: waar gaan de punten verloren?' },
+    { type: 'phone', img: 'coachkaart-boven.png', box: [0.5, 20.5, 99, 20], h: 'Per vak: <em>wie wint waar.</em>', s: 'Oranje is Gerard, blauw is Thé.' },
+    { type: 'phone', img: 'coachkaart-boven.png', box: [0.5, 42.5, 99, 30.5], h: 'Drie <em>coachpunten.</em>', s: 'Kort genoeg voor één pauze.' },
+    { type: 'phone', img: 'coachkaart-onder.png', box: [0.5, 52, 99, 30], h: 'En wat er <em>beter ging.</em>', s: 'De kaart vergelijkt met de vorige game.' },
+    { type: 'steps', h: 'Zo werkt <em>het.</em>', steps: ['Kies Coach en vul de spelers in.', 'Tik per rally: wie, hoe, waar en welke slag.', 'Na de game: tik op COACHKAART.', 'Laat het je speler zien.'] },
+    { type: 'cta', h: 'Probeer het bij je <em>volgende wedstrijd.</em>' }
+  ],
+  scheids5: [
+    { type: 'hook', h: '5 dingen die je als scheids <em>niet meer hoeft te onthouden.</em>', s: '' },
+    { type: 'phone', img: 'scheids-7-3.png', box: [0.5, 19.5, 38, 29], h: '1. Wie er <em>serveert.</em>', s: 'De serveerder licht oranje op.' },
+    { type: 'phone', img: 'scheids-7-3.png', box: [6, 31, 28, 4.5], h: '2. Uit welk <em>vak.</em>', s: 'Links of rechts wisselt vanzelf.' },
+    { type: 'phone', img: 'scheids-7-3.png', box: [39.5, 21.5, 21, 36], h: '3. Wie elke rally <em>won.</em>', s: 'De scorelijn laat het rally voor rally zien.' },
+    { type: 'phone', img: 'scheids-7-3.png', box: [27, 12.5, 46, 6], h: '4. De stand <em>in games.</em>', s: 'Altijd bovenin beeld.' },
+    { type: 'phone', img: 'scheids-7-3.png', box: [1.5, 83.5, 97, 5.5], h: '5. Hoe lang het <em>al duurt.</em>', s: 'Wedstrijd- en gametimer lopen mee.' },
+    { type: 'cta', h: 'Jij let op de rally. <em>De app op de rest.</em>' }
+  ]
+};
+var APPLE = '<svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>';
+var DROID = '<svg viewBox="0 0 24 24"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24a11.43 11.43 0 0 0-8.94 0L5.65 5.67c-.19-.29-.58-.38-.87-.2-.28.18-.37.54-.22.83L6.4 9.48A10.78 10.78 0 0 0 1 18h22a10.78 10.78 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></svg>';
+var PILL = 'display:inline-flex;align-items:center;gap:14px;padding:18px 30px;border-radius:999px;border:2px solid var(--line);background:rgba(242,140,38,.1);font-size:32px;font-weight:700';
+function pills() {
+  return '<div style="display:flex;gap:20px;justify-content:center;margin-top:40px">' +
+    '<span style="' + PILL + '"><span style="width:34px;height:34px;fill:var(--gold);display:inline-block">' + APPLE + '</span>App Store</span>' +
+    '<span style="' + PILL + '"><span style="width:34px;height:34px;fill:var(--gold);display:inline-block">' + DROID + '</span>Google Play</span></div>';
+}
+var p = decodeURIComponent(location.hash.slice(1)).split(':');
+var list = CAROUSELS[p[0]], i = +p[1], d = list[i - 1], total = list.length, html = '';
+var head = '<div class="brand">Squash<b>Analyzer</b></div><div class="count">' + i + ' / ' + total + '</div>';
+if (d.type === 'hook') {
+  html = '<div class="center"><h1>' + d.h + '</h1>' + (d.s ? '<p class="sub" style="font-size:44px">' + d.s + '</p>' : '') + '</div><div class="swipe">Swipe →</div>';
+} else if (d.type === 'phone') {
+  var b = d.box;
+  html = head + '<div class="text"><h1>' + d.h + '</h1><p class="sub">' + d.s + '</p></div>' +
+    '<div class="phone"><div class="screen"><img src="' + A + d.img + '" alt=""><div class="hl" style="left:' + b[0] + '%;top:' + b[1] + '%;width:' + b[2] + '%;height:' + b[3] + '%"></div></div></div>';
+} else if (d.type === 'steps') {
+  html = head + '<div class="text"><h1>' + d.h + '</h1><ul class="steps">' + d.steps.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul></div>';
+} else {
+  html = '<div class="cta"><img src="../release-3.0/assets/icon.png" alt=""><h1>' + d.h + '</h1>' +
+    '<p class="url">squashanalyzer.com</p>' + pills() + '<p class="sub">Gratis · link in de bio · volg <b style="color:var(--gold)">@squashanalyzer</b></p></div>';
+}
+document.getElementById('out').innerHTML = '<section class="slide">' + html + '</section>';
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Reel layers</title>
+<style>
+@font-face { font-family: "SA Rounded"; src: url("file:///System/Library/Fonts/SFNSRounded.ttf"); font-weight: 100 900; }
+:root { --gold: #F28C26; --line: rgba(242,140,38,0.45); --text-1: #F2EDE6; --text-2: #B3ADA6; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: transparent; }
+body { font-family: "SA Rounded", -apple-system, sans-serif; color: var(--text-1); position: relative; }
+/* Layers, chosen with the hash: #base, #cap=<n>, #end, #mask */
+.layer { position: absolute; inset: 0; display: none; }
+.on { display: block; }
+#base {
+  background:
+    radial-gradient(900px 800px at 50% 100%, rgba(242,140,38,0.22), transparent 70%),
+    radial-gradient(700px 500px at 100% 0%, rgba(242,140,38,0.10), transparent 70%),
+    #000;
+}
+.brand { position: absolute; top: 170px; left: 72px; font-size: 34px; font-weight: 700; }
+.brand b { color: var(--gold); }
+/* Phone window: the video is placed at PHONE_X/Y/W/H (see make_reel.sh) */
+.frame { position: absolute; left: 270px; top: 594px; width: 541px; height: 1162px; border-radius: 70px;
+  border: 3px solid var(--line); box-shadow: 0 0 0 10px #0d0905, 0 40px 100px rgba(0,0,0,.8); background: #000; }
+.cap { position: absolute; top: 250px; left: 72px; right: 72px; }
+.cap h1 { font-size: 76px; line-height: 1.05; font-weight: 800; letter-spacing: -1.4px; text-shadow: 0 2px 16px rgba(0,0,0,.6); }
+.cap h1 em { font-style: normal; color: var(--gold); }
+.cap p { margin-top: 18px; font-size: 38px; color: var(--text-2); font-weight: 500; }
+#end { background:
+    radial-gradient(900px 800px at 50% 100%, rgba(242,140,38,0.25), transparent 70%), #000; }
+#end .c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 90px; }
+#end img { width: 300px; height: 300px; border-radius: 22.5%; box-shadow: 0 30px 80px rgba(242,140,38,.25); }
+#end h1 { font-size: 92px; font-weight: 800; margin-top: 60px; letter-spacing: -1.5px; }
+#end h1 em { font-style: normal; color: var(--gold); }
+#end p { font-size: 42px; color: var(--text-2); margin-top: 24px; font-weight: 500; }
+#mask { width: 532px; height: 1156px; border-radius: 67px; background: #fff; }
+</style>
+</head>
+<body>
+<div id="base" class="layer"><div class="brand">Squash<b>Analyzer</b></div><div class="frame"></div></div>
+<div id="cap" class="layer"><div class="cap"><h1></h1><p></p></div></div>
+<div id="end" class="layer"><div class="c">
+  <img src="../release-3.0/assets/icon.png" alt="">
+  <h1>Gratis op iPhone <em>én</em> Android.</h1>
+  <p>Link in de bio · squashanalyzer.com</p>
+</div></div>
+<div id="mask" class="layer"></div>
+<script>
+  // Captions per reel: #cap=<reel>:<n>
+  var CAPS = {
+    scheidsen: [
+      ['Welk vak serveert ze nu <em>ook alweer?</em>', 'Tik op wie scoort. De app weet de rest.'],
+      ['Wint de ontvanger? Service <em>wisselt vanzelf.</em>', 'Links of rechts, de app houdt het bij.'],
+      ['Let? <em>Eén tik.</em>', 'De stand blijft staan, de rally telt opnieuw.'],
+      ['Stroke? <em>Ook één tik.</em>', 'Het punt gaat naar de juiste speler.'],
+      ['Verkeerd getikt? <em>Undo.</em>', 'Het laatste punt is zo teruggezet.'],
+      ['Elke rally <em>op een rij.</em>', 'De scorelijn laat zien hoe de game liep.']
+    ],
+    live: [
+      ['Telefoon even <em>wegleggen?</em>', 'Tik op wie scoort, zoals altijd.'],
+      ['De stand staat op je <em>vergrendelscherm.</em>', 'Ook met de app dicht.'],
+      ['Gewoon <em>doortellen.</em>', 'Elke rally komt meteen in beeld.'],
+      ['Gamebal? <em>Zie je meteen.</em>', 'Met de stand in games erbij.'],
+      ['En je team <em>kijkt mee.</em>', 'Deel een link: volgen in de browser of op hun eigen vergrendelscherm.']
+    ],
+    coachen: [
+      ['‘Speel meer lengte’ is <em>geen coachadvies.</em>', 'Laat zien waar de punten vallen.'],
+      ['Wie scoort, hoe, <em>waar en met welke slag.</em>', 'Een paar tikken per rally.'],
+      ['Winner, forced of <em>unforced error.</em>', 'Per vak alleen de slagen die daar passen.'],
+      ['Na de game: <em>de Analyse.</em>', 'Heatmap, slagen, puntverdeling en tactisch advies.'],
+      ['Tussen de games: <em>de Coachkaart.</em>', 'Drie punten waar je speler iets mee kan.']
+    ]
+  };
+  var h = decodeURIComponent(location.hash.slice(1));
+  if (h.indexOf('cap=') === 0) {
+    var p = h.slice(4).split(':'), c = CAPS[p[0]][+p[1]];
+    document.querySelector('#cap h1').innerHTML = c[0];
+    document.querySelector('#cap p').textContent = c[1];
+    document.getElementById('cap').classList.add('on');
+  } else {
+    document.getElementById(h || 'base').classList.add('on');
+  }
+</script>
+</body>
+</html>

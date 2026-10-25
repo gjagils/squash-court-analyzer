@@ -2,6 +2,7 @@
 
 Posts voor het Instagram-account, per post een map met de bron en de beelden.
 
+- `planning.md`: de planning met onderschriften voor de komende posts.
 - `release-3.0/`: releasepost van 25 oktober 2026 (carousel van 9 slides).
   - `slides.html`: de bron, in de huisstijl van de website. `#3` toont slide 3
     als post (1080×1350), `#3s` als verhaal (1080×1920).

@@ -176,3 +176,6 @@ __pycache__/
 # Build output and loose screenshots in the repo root (never commit)
 output/
 Squashanalyzerscreens/
+
+# Raw simulator recordings for the Instagram reels (large, kept on the Mac)
+instagram/video-raw/

@@ -101,6 +101,7 @@ public struct SharedCoachDashboardView: View {
             }
         }
         .onAppear { GameNotes.shared.reload() }
+        .task { await AppUsage.shared.used(AppUsagePart.analysis) }
         .sheet(isPresented: $showingNote) {
             GameNoteEditor(gameId: game.id, title: loc("Notitie · Game \(match.gameNumber(at: matchGameIndex))")) { showingNote = false }
         }

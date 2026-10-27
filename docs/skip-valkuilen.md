@@ -20,6 +20,10 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
   struct (`PlayerRun`, `ServiceState`).
 - **Kotlin-sleutelwoorden als naam vermijden**: `out`, `in`, `is`, `object`, `fun`,
   `val`, `when` (geen enum-case `out`; lint-regel).
+- **`open` als naam van een `CodingKey`** (dus ook als property van een `Codable`-struct)
+  breekt de Kotlin-enum van de sleutels ("Expecting ';' after the last enum entry", 27
+  oktober, `AppUsageReport`): noem de property anders en zet de JSON-naam in een eigen
+  `CodingKeys` (`case opened = "open"`).
 - **Een property en een methode `set<Naam>` botsen** op JVM-niveau
   (`startingServer` ↔ `setStartingServer`).
 - **Een argumentlabel gelijk aan een property verbergt die property**

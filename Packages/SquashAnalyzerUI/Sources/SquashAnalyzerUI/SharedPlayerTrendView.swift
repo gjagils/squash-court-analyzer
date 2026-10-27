@@ -42,7 +42,10 @@ public struct SharedPlayerTrendView: View {
             }
         }
         .pageTitle(loc("Profiel"))
-        .task { await load() }
+        .task {
+            await load()
+            await AppUsage.shared.used(AppUsagePart.analysis)
+        }
     }
 
     private func content(_ summary: PlayerTrendSummary) -> some View {

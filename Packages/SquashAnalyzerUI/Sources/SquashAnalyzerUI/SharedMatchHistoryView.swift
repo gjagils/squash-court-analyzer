@@ -109,7 +109,10 @@ public struct SharedMatchHistoryView: View {
             }
         }
         .pageTitle(loc("Wedstrijden"))
-        .task { await load() }
+        .task {
+            await load()
+            await AppUsage.shared.used(AppUsagePart.analysis)
+        }
         .sheet(isPresented: $choosingPlayer) {
             NavigationStack {
                 List {

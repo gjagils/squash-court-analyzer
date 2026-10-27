@@ -47,7 +47,9 @@ KIND_LABELS = [("live", "Livewedstrijden"), ("team", "Teamwedstrijden"),
 
 def http_json(url, headers=None, data=None):
     body = json.dumps(data).encode("utf-8") if data is not None else None
-    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json", **(headers or {})})
+    # Cloudflare's bot protection answers 403 to urllib's default user agent
+    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json",
+                                                          "User-Agent": "squashanalyzer-weekrapport/1.0", **(headers or {})})
     with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
@@ -145,19 +147,19 @@ def fetch_cloudflare(first_day, last_day, notes):
 # ---------------------------------------------------------------- live-dienst
 
 def fetch_live(first_day, last_day, notes):
+    # Without STATS_KEY in the environment the request still goes out: a network
+    # secret of the cloud environment adds the Authorization header on the way
     key = os.environ.get("STATS_KEY", "").strip()
-    if not key:
-        notes.append("Cijfers van de live-dienst ontbreken: zet STATS_KEY als geheim in de cloudomgeving "
-                     "(dezelfde waarde als `npx wrangler secret put STATS_KEY` in server/live-worker).")
-        return None
     since = first_day - dt.timedelta(days=7 * WEEKS)
     url = f"{LIVE_URL}/api/stats?from={since.isoformat()}&to={last_day.isoformat()}"
     try:
-        answer = http_json(url, headers={"Authorization": f"Bearer {key}"})
+        answer = http_json(url, headers={"Authorization": f"Bearer {key}"} if key else None)
         return answer.get("rows") or []
     except urllib.error.HTTPError as error:
         if error.code == 404:
-            notes.append("De live-dienst kent /api/stats nog niet: STATS_KEY staat daar niet (of is anders dan hier).")
+            notes.append("Cijfers van de live-dienst ontbreken: de sleutel klopt niet of ontbreekt. Zet STATS_KEY als "
+                         "netwerkgeheim (host live.squashanalyzer.com, header Authorization, voorvoegsel Bearer) "
+                         "of als omgevingsvariabele in de cloudomgeving; zie docs/weekrapport.md.")
         else:
             notes.append(f"Cijfers van de live-dienst konden niet worden opgehaald: HTTP {error.code}")
     except (urllib.error.URLError, ValueError) as error:

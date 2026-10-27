@@ -9,7 +9,7 @@ Hashtags: Instagram telt er maximaal 5 per post, zet ze onderaan het onderschrif
 | Datum | Soort | Bestand |
 |---|---|---|
 | zo 25 okt | Carousel, release 3.0 (geplaatst) | `release-3.0/png/` |
-| tussendoor | Carousel, Competitie-vrijdag (+ verhaal) | `competitie-vrijdag/slide-1..3.png`, `story-1..3.png` |
+| di 27 okt | Carousel, Competitie-vrijdag (geplaatst, verhaal in de app) | `competitie-vrijdag/slide-1..3.png`, `story-1..3.png` |
 | za 31 okt | Reel, scheidsen | `reel-scheidsen/reel-scheidsen.mp4` |
 | di 3 nov | Carousel, Coachkaart | `carousel-coachkaart/slide-1..7.png` |
 | za 7 nov | Reel, live-stand op het vergrendelscherm | `reel-live/reel-live.mp4` |
@@ -27,7 +27,7 @@ de opname was gedimd).
 Bij de Team-posts: zet in je verhaal een poll-sticker met de twee teams (kan
 alleen in de app).
 
-## Tussendoor · Carousel: Competitie-vrijdag
+## di 27 okt · Carousel: Competitie-vrijdag (geplaatst)
 
 ```
 Vrijdag competitie? 🏆

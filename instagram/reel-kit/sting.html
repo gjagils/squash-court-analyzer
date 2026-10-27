@@ -24,7 +24,13 @@ h1 em { font-style: normal; color: var(--gold); }
 .pill svg { width: 40px; height: 40px; fill: var(--gold); }
 .link { margin-top: 44px; font-size: 42px; color: var(--text-2); font-weight: 600; }
 .link b { color: var(--text-1); }
+/* Light ("warm licht", as on the website): sting.html?light */
+html.light { --gold: #A94F08; --line: #DEC9B4; --text-1: #26211C; --text-2: #71665B; }
+html.light, html.light body { background: #F7F3ED; }
+html.light .icon { box-shadow: 0 24px 70px rgba(38,33,28,.22); }
+html.light .pill { background: #FFFFFF; }
 </style>
+<script>if (location.search.indexOf('light') >= 0) document.documentElement.classList.add('light');</script>
 </head>
 <body>
 <div id="glow"></div>
@@ -56,8 +62,9 @@ function set(id, o, ty, s) {
   e.style.transform = 'translateY(' + (ty || 0) + 'px) scale(' + (s == null ? 1 : s) + ')';
 }
 var g = easeOut(prog(0, 0.7)), pulse = kind === 'outro' ? 0.04 * Math.sin(t * 2.4) : 0;
+var glow = document.documentElement.classList.contains('light') ? 0.6 : 1;
 document.getElementById('glow').style.background =
-  'radial-gradient(' + (500 + 500 * g) + 'px ' + (500 + 500 * g) + 'px at 50% 46%, rgba(242,140,38,' + (0.26 * g + pulse) + '), transparent 70%)';
+  'radial-gradient(' + (500 + 500 * g) + 'px ' + (500 + 500 * g) + 'px at 50% 46%, rgba(242,140,38,' + glow * (0.26 * g + pulse) + '), transparent 70%)';
 if (kind === 'intro') {
   document.getElementById('intro').hidden = false;
   var a = prog(0, 0.55);

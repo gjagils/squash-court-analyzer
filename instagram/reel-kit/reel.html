@@ -35,7 +35,18 @@ body { font-family: "SA Rounded", -apple-system, sans-serif; color: var(--text-1
 #end h1 em { font-style: normal; color: var(--gold); }
 #end p { font-size: 42px; color: var(--text-2); margin-top: 24px; font-weight: 500; }
 #mask { width: 532px; height: 1156px; border-radius: 67px; background: #fff; }
+/* Light ("warm licht", as on the website): reel.html?light */
+html.light { --gold: #A94F08; --line: #DEC9B4; --text-1: #26211C; --text-2: #71665B; }
+html.light #base {
+  background:
+    radial-gradient(900px 800px at 50% 100%, rgba(242,140,38,0.16), transparent 70%),
+    radial-gradient(700px 500px at 100% 0%, rgba(242,140,38,0.08), transparent 70%),
+    #F7F3ED;
+}
+html.light .frame { box-shadow: 0 0 0 10px #EFE6DA, 0 30px 80px rgba(38,33,28,.18); background: #F7F3ED; }
+html.light .cap h1 { text-shadow: none; }
 </style>
+<script>if (location.search.indexOf('light') >= 0) document.documentElement.classList.add('light');</script>
 </head>
 <body>
 <div id="base" class="layer"><div class="brand">Squash<b>Analyzer</b></div><div class="frame"></div></div>

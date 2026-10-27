@@ -7,6 +7,8 @@ import { DurableObject } from 'cloudflare:workers';
 import { readConfig } from './config.js';
 
 const MINUTE = 60 * 1000;
+/** App usage reports per IP per minute: a phone sends one or two a day, a club wifi a few more */
+const REPORTS_PER_MINUTE = 20;
 
 export class LiveLimiter extends DurableObject {
   constructor(ctx, env) {
@@ -31,6 +33,22 @@ export class LiveLimiter extends DurableObject {
     creates[ip] = recent;
     all.push(now);
     await this.ctx.storage.put({ creates, allCreates: all });
+    return true;
+  }
+
+  /**
+   * One more app usage report (POST /api/app/day) for `ip` this minute? Only in
+   * memory: an evicted object starts again, which is fine for a rough brake.
+   */
+  allowReport(ip) {
+    const minuteAgo = Date.now() - MINUTE;
+    if (!this.reports || this.reportsMinute < minuteAgo) {
+      this.reports = new Map();
+      this.reportsMinute = Date.now();
+    }
+    const seen = this.reports.get(ip) || 0;
+    if (seen >= REPORTS_PER_MINUTE) return false;
+    this.reports.set(ip, seen + 1);
     return true;
   }
 

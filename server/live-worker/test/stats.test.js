@@ -2,7 +2,7 @@
 // points to a person, read only with the STATS_KEY secret.
 import { SELF, env, runInDurableObject } from 'cloudflare:test';
 import { describe, expect, it } from 'vitest';
-import { clubName, dayOf, isSampleMatch, isTestTeam, totalsOf } from '../src/stats.js';
+import { cleanParts, cleanVersion, clubName, dayOf, isSampleMatch, isTestTeam, totalsOf } from '../src/stats.js';
 
 const BASE = 'https://live.test';
 const KEY = 'test-stats-key';
@@ -129,6 +129,62 @@ describe('usage counts', () => {
   });
 });
 
+describe('daily app usage', () => {
+  const appCount = async (fields) => countOf((await stats()).json.appRows, fields);
+
+  it('counts an app that was opened, with platform, version and language, without anything else', async () => {
+    const before = await appCount({ kind: 'app', platform: 'android', version: '3.1', lang: 'en' });
+    const answer = await call('POST', '/api/app/day', { platform: 'android', version: '3.1', lang: 'en', device: 'abc-123' });
+    expect(answer.status).toBe(204);
+    const { appRows } = (await stats()).json;
+    expect(countOf(appRows, { kind: 'app', platform: 'android', version: '3.1', lang: 'en' })).toBe(before + 1);
+    expect(JSON.stringify(appRows)).not.toContain('abc-123');
+    expect(JSON.stringify(appRows)).not.toContain('10.3.');
+  });
+
+  it('counts the parts used and a first report, and no open when open is false', async () => {
+    const opened = await appCount({ kind: 'app', platform: 'ios' });
+    const coach = await appCount({ kind: 'app-coach', platform: 'ios' });
+    const referee = await appCount({ kind: 'app-referee', platform: 'ios' });
+    const first = await appCount({ kind: 'app-first', platform: 'ios' });
+    await call('POST', '/api/app/day', { platform: 'ios', version: '3.1', parts: ['coach', 'coach', 'golf'], first: true });
+    await call('POST', '/api/app/day', { platform: 'ios', version: '3.1', parts: ['referee'], open: false });
+    expect(await appCount({ kind: 'app', platform: 'ios' })).toBe(opened + 1);
+    expect(await appCount({ kind: 'app-coach', platform: 'ios' })).toBe(coach + 1);
+    expect(await appCount({ kind: 'app-referee', platform: 'ios' })).toBe(referee + 1);
+    expect(await appCount({ kind: 'app-first', platform: 'ios' })).toBe(first + 1);
+    expect(JSON.stringify((await stats()).json.appRows)).not.toContain('golf');
+    const { totals } = (await stats()).json;
+    expect(totals.app.real).toBeGreaterThanOrEqual(1);
+    expect(totals['app-competition']).toEqual({ real: 0, test: 0 });
+  });
+
+  it('turns an odd version or platform into unknown, and ignores a body that is not an object', async () => {
+    const before = await appCount({ kind: 'app', platform: 'unknown', version: 'unknown' });
+    await call('POST', '/api/app/day', { platform: 'windows', version: '3.1 beta <script>' });
+    expect(await appCount({ kind: 'app', platform: 'unknown', version: 'unknown' })).toBe(before + 1);
+    const total = (await stats()).json.totals.app.real;
+    expect((await call('POST', '/api/app/day', 'hallo')).status).toBe(204);
+    expect((await stats()).json.totals.app.real).toBe(total);
+  });
+
+  it('still answers 204 above the limit per address, but no longer counts', async () => {
+    const before = await appCount({ kind: 'app', version: '9.9' });
+    const headers = { 'Content-Type': 'application/json', 'CF-Connecting-IP': '10.4.0.1' };
+    for (let i = 0; i < 25; i += 1) {
+      const res = await SELF.fetch(`${BASE}/api/app/day`, { method: 'POST', headers, body: JSON.stringify({ platform: 'ios', version: '9.9' }) });
+      expect(res.status).toBe(204);
+    }
+    expect(await appCount({ kind: 'app', version: '9.9' })).toBe(before + 20);
+  });
+
+  it('keeps only counts in the app table: no ids or addresses', async () => {
+    const stub = env.STATS.get(env.STATS.idFromName('global'));
+    const columns = await runInDurableObject(stub, (instance) => instance.ctx.storage.sql.exec('SELECT * FROM app_days LIMIT 1').columnNames);
+    expect(columns).toEqual(['day', 'kind', 'platform', 'version', 'lang', 'country', 'region', 'n']);
+  });
+});
+
 describe('the helpers', () => {
   it('finds the club in a team name', () => {
     expect(clubName('All Inn Squash 8')).toBe('All Inn Squash');
@@ -165,6 +221,22 @@ describe('the helpers', () => {
     expect(totals.team).toEqual({ real: 1, test: 0 });
     expect(totals['viewer-live']).toEqual({ real: 0, test: 0 });
     expect(totals.x).toBeUndefined();
+  });
+
+  it('cleans the app version and the parts', () => {
+    expect(cleanVersion('3.1')).toBe('3.1');
+    expect(cleanVersion(' 3.1.2 ')).toBe('3.1.2');
+    expect(cleanVersion('3.1 (4)')).toBe('unknown');
+    expect(cleanVersion(31)).toBe('unknown');
+    expect(cleanParts(['competition', 'coach', 'coach', 'x'])).toEqual(['coach', 'competition']);
+    expect(cleanParts('coach')).toEqual([]);
+  });
+
+  it('adds the app rows to the totals as real', () => {
+    const totals = totalsOf([], [{ kind: 'app', n: 4 }, { kind: 'app-coach', n: 1 }, { kind: 'y', n: 2 }]);
+    expect(totals.app).toEqual({ real: 4, test: 0 });
+    expect(totals['app-coach']).toEqual({ real: 1, test: 0 });
+    expect(totals.y).toBeUndefined();
   });
 
   it('writes the day as YYYY-MM-DD', () => {

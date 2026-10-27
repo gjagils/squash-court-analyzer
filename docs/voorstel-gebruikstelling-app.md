@@ -148,7 +148,6 @@ app-build live, dan staat het pad klaar als de 3.1-testers beginnen.
   - per deel: op hoeveel apparaat-dagen coach, scheidsrechter, analyse,
     competitie gebruikt is;
   - (keuze 3) nieuwe installaties deze week;
-  - testers apart (keuze 4), net als nu bij live.
 - Een zin in het rapport die uitlegt dat de weektotalen apparaat-dagen zijn,
   geen unieke gebruikers.
 - Het weeksnapshot in `docs/stats/weekly/` krijgt een veld `app` (gemiddelde per

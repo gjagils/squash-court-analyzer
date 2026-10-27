@@ -7,8 +7,21 @@ alleen live meekijken en teamwedstrijden (`docs/voorstel-gebruikscijfers.md`).
 Wie de app gebruikt zonder live te gaan, is nu onzichtbaar.
 
 Idee: de app meldt hooguit één keer per dag "app geopend" aan dezelfde teller
-in de live-Worker. **Status (27 oktober 2026): alleen voorstel, er is niets
+in de live-Worker. **Status (27 oktober 2026): voorstel, er is niets
 gebouwd.** Bedoeld voor de 3.1-testronde.
+
+**Besluit (Gerd-Jan, 27 oktober 2026)** over de open keuzes onderaan:
+
+1. Standaard **aan**, uit te zetten in Instellingen (opt-out).
+2. **Wel** meten welk deel gebruikt wordt (coach, scheidsrechter, analyse, competitie).
+3. **Wel** nieuwe installaties tellen (`app-first`).
+4. Testers **niet** apart tellen: geen `test`-vlag vanuit de app, ook niet op iOS.
+5. De versie in een **eigen tabel** `app_days` (niet in de kolom `club`).
+6. Land **en** regio bewaren, zoals bij live.
+7. In de **eerste 3.1-testbuild**; de Worker mag eerder live, privacypagina en
+   console-formulieren gelijk met de 3.1-productierelease.
+
+Waar de tekst hieronder nog meerdere wegen beschrijft, geldt dit besluit.
 
 ## Wat de app stuurt
 
@@ -77,7 +90,7 @@ Wanneer de app niets stuurt: als de gebruikstelling uit staat (Instellingen, zie
 onder), in debug-builds, in de screenshot-scenario's (`applyScreenshotScenario`)
 en in tests (er is dan geen transport gezet, of een nep-transport).
 
-**Testers apart (keuze 4)**: TestFlight- en interne Play-builds sturen
+**Testers apart (keuze 4; besloten: niet doen)**: TestFlight- en interne Play-builds sturen
 `"test": true` mee; de server zet die in de bestaande kolom `test`, zoals de
 voorbeeldspelers nu. Op iOS is TestFlight te herkennen aan de
 `sandboxReceipt` van `Bundle.main.appStoreReceiptURL`; op Android is het spoor
@@ -101,6 +114,9 @@ tabel `counts`, zelfde `GET /api/stats`:
    club bij `team`, de appversie bij `app`"). Netter maar meer werk: een tweede
    tabel `app_days(day, kind, platform, version, lang, country, region, test, n)`
    in hetzelfde Durable Object, en `rows()` geeft beide (keuze 5).
+   **Besloten: de eigen tabel.** `GET /api/stats` krijgt daarvoor een extra
+   veld `appRows` naast `rows` (achterwaarts compatibel: het weekrapport van nu
+   negeert het), en `totals` telt de `app`-soorten uit die tabel.
 3. **Nieuw pad** in `index.js`: `POST /api/app/day`. Het leest de body, valideert
    streng (alleen bekende `parts`, versie alleen cijfers en punten, maximaal 10
    tekens, anders `unknown`) en roept de bestaande `count(...)` aan, één keer

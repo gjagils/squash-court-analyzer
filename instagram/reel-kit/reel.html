@@ -35,6 +35,11 @@ body { font-family: "SA Rounded", -apple-system, sans-serif; color: var(--text-1
 #end h1 em { font-style: normal; color: var(--gold); }
 #end p { font-size: 42px; color: var(--text-2); margin-top: 24px; font-weight: 500; }
 #mask { width: 532px; height: 1156px; border-radius: 67px; background: #fff; }
+/* Two phones side by side (make_duo.sh): videos at 87,703 and 579,703, 414x900 */
+.dframe { position: absolute; top: 700px; width: 420px; height: 906px; border-radius: 56px;
+  border: 3px solid var(--line); box-shadow: 0 0 0 8px #0d0905, 0 30px 80px rgba(0,0,0,.8); background: #000; }
+.dlabel { position: absolute; top: 626px; width: 420px; text-align: center; font-size: 34px; font-weight: 800; letter-spacing: 6px; color: var(--gold); }
+#dmask { width: 414px; height: 900px; border-radius: 53px; background: #fff; }
 /* Light ("warm licht", as on the website): reel.html?light */
 html.light { --gold: #A94F08; --line: #DEC9B4; --text-1: #26211C; --text-2: #71665B; }
 html.light #base {
@@ -57,6 +62,12 @@ html.light .cap h1 { text-shadow: none; }
   <p>Link in de bio · squashanalyzer.com</p>
 </div></div>
 <div id="mask" class="layer"></div>
+<div id="duo" class="layer" style="background:radial-gradient(900px 800px at 50% 100%, rgba(242,140,38,0.22), transparent 70%), radial-gradient(700px 500px at 100% 0%, rgba(242,140,38,0.10), transparent 70%), #000">
+  <div class="brand">Squash<b>Analyzer</b></div>
+  <div class="dlabel" style="left:84px">TEAM SCHEIDS</div><div class="dlabel" style="left:576px">TEAM COACH</div>
+  <div class="dframe" style="left:84px"></div><div class="dframe" style="left:576px"></div>
+</div>
+<div id="dmask" class="layer"></div>
 <script>
   // Captions per reel: #cap=<reel>:<n>
   var CAPS = {
@@ -74,6 +85,28 @@ html.light .cap h1 { text-shadow: none; }
       ['Gewoon <em>doortellen.</em>', 'Elke rally komt meteen in beeld.'],
       ['Gamebal? <em>Zie je meteen.</em>', 'Met de stand in games erbij.'],
       ['En je team <em>kijkt mee.</em>', 'Deel de link, ze volgen live mee.']
+    ],
+    // Light live reel: no "doortellen" part (that piece of the recording was dimmed)
+    'live-licht': [
+      ['Telefoon even <em>wegleggen?</em>', 'Tik op wie scoort, zoals altijd.'],
+      ['De stand staat op je <em>vergrendelscherm.</em>', 'Ook met de app dicht.'],
+      ['Gamebal? <em>Zie je meteen.</em>', 'Met de stand in games erbij.'],
+      ['En je team <em>kijkt mee.</em>', 'Deel de link, ze volgen live mee.']
+    ],
+    // Team series: two choices, then the question
+    'team-thema': [
+      ['Team <em>Licht…</em>', 'Warm en rustig, net als de website.'],
+      ['…of Team <em>Donker?</em>', 'Instellingen → Weergave, één tik.'],
+      ['Welke ben <em>jij?</em> 👇', 'Zet het in de reacties.']
+    ],
+    'team-taal': [
+      ['Team <em>Nederlands…</em>', 'Tellen in je eigen taal.'],
+      ['…or Team <em>English?</em>', 'Nieuw in 3.0: Instellingen → Taal.'],
+      ['Welke ben <em>jij?</em> 👇', 'Which one are you?']
+    ],
+    'team-duo': [
+      ['Team <em>Scheids</em> of Team <em>Coach?</em>', 'Twee modi, één app.'],
+      ['Welke ben <em>jij?</em> 👇', 'Zet het in de reacties.']
     ],
     coachen: [
       ['‘Speel meer lengte’ is <em>geen coachadvies.</em>', 'Laat zien waar de punten vallen.'],

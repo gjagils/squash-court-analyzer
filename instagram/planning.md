@@ -10,6 +10,7 @@ Hashtags: Instagram telt er maximaal 5 per post, zet ze onderaan het onderschrif
 |---|---|---|
 | zo 25 okt | Carousel, release 3.0 (geplaatst) | `release-3.0/png/` |
 | di 27 okt | Carousel, Competitie-vrijdag (geplaatst, verhaal in de app) | `competitie-vrijdag/slide-1..3.png`, `story-1..3.png` |
+| do 29 okt | Carousel, je teamgenoot coachen (+ verhaal), nog niet live | `teamcoach/slide-1..5.png`, `story-1..5.png` |
 | za 31 okt | Reel, scheidsen | `reel-scheidsen/reel-scheidsen.mp4` |
 | di 3 nov | Carousel, Coachkaart | `carousel-coachkaart/slide-1..7.png` |
 | za 7 nov | Reel, live-stand op het vergrendelscherm | `reel-live/reel-live.mp4` |
@@ -41,6 +42,21 @@ Download hem nu, dan sta je vrijdag klaar. Gratis voor iPhone en Android, link i
 
 Eerste reactie: `Op welke avond speel jij competitie? 👇`
 Verhaal (in de app): `story-1..3.png`, op slide 1 een linksticker "Download de app" naar squashanalyzer.com op de plek van de oranje tekst onderin. Leuk als vaste vrijdagstory, met een poll "Speel jij vanavond?".
+
+## do 29 okt · Carousel: je teamgenoot coachen (nog niet live)
+
+```
+Je teamgenoot helpen winnen? 💪
+
+Sta je langs de baan bij een competitiewedstrijd? Coach dan met Squash Analyzer. Tik per rally waar het punt viel, en in de pauze heb je de coachkaart: drie concrete punten en wat er al beter gaat.
+
+Gratis voor iPhone en Android, link in de bio.
+
+#squash #squashnederland #squashcompetitie #squashcoach #squashapp
+```
+
+Eerste reactie: `Wie is jouw vaste coach langs de baan? Tag ze 👇`
+Verhaal (in de app): `story-1..5.png`, linksticker op de oranje tekst onderin.
 
 ## za 31 okt · Reel: scheidsen
 

@@ -42,7 +42,7 @@ onder "Let op" welk deel ontbreekt.
 |---|---|
 | `CLOUDFLARE_API_TOKEN` | Cloudflare → My Profile → API Tokens → Create Token: alleen *Zone · Analytics · Read* op de zone squashanalyzer.com (geen schrijfrechten). |
 | `CLOUDFLARE_ZONE_ID` | Optioneel; zonder zoekt het script de zone op naam. Staat rechtsonder op de overzichtspagina van de zone. |
-| `STATS_KEY` | Dezelfde waarde als `npx wrangler secret put STATS_KEY` in `server/live-worker` (een lange willekeurige tekens­reeks, bijvoorbeeld `openssl rand -hex 24`). |
+| `STATS_KEY` | Dezelfde waarde als het geheim `STATS_KEY` van de Worker squash-live-beta. Op 27 oktober 2026 aangemaakt en gezet; de waarde staat op Gerd-Jans Mac in `~/.squash-keys/stats-key.txt` (alleen voor hem leesbaar, niet in git). |
 
 ## Zelf draaien
 

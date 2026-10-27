@@ -10,9 +10,9 @@ met wedstrijden van de testspelers (Bob, Wim, Bombardino, Whiskey) apart geteld.
 De Worker-kant staat op `main` (`server/live-worker/src/stats.js`, tests in
 `test/stats.test.js`, uitleg in de README van de Worker); de app-kant (het veld
 `platform` meesturen) staat op de branch `claude/gebruikscijfers-app` en moet op
-de Mac getest en gemerged worden. Nog te doen door Gerd-Jan:
-`npx wrangler secret put STATS_KEY` (anders bestaat `/api/stats` niet; tellen
-gebeurt wel). De tekst hieronder is het oorspronkelijke voorstel; waar de bouw
+de Mac getest en gemerged worden. Het geheim
+`STATS_KEY` staat sinds 27 oktober 2026 op de Worker (waarde op Gerd-Jans Mac in
+`~/.squash-keys/stats-key.txt`); geteld wordt sinds de deploy van 23 oktober. De tekst hieronder is het oorspronkelijke voorstel; waar de bouw
 afwijkt staat het in de README van de Worker (soorten `viewer-live`/`viewer-team`
 en `follower-live`/`follower-team`, kolom `test`).
 

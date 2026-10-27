@@ -87,8 +87,15 @@ Eerste reactie: `Coach jij op gevoel of op cijfers? 👇`
 ## Opnieuw maken
 
 - Reels: `reel-kit/make_reel.sh` (zie de uitleg bovenin het script); de teksten
-  per moment staan in `reel-kit/reel.html`. De ruwe simulatoropnames staan in
-  `video-raw/` (buiten git, te groot).
+  per moment staan in `reel-kit/reel.html`. Elke reel begint met de logo-intro en
+  eindigt met de download-outro (`intro.mp4`, `outro.mp4`, gemaakt met
+  `make_stings.sh` uit `sting.html`). Stukken uit opnames, elk met een eigen
+  snelheid, plak je aan elkaar met `cut_clip.sh`. De ruwe simulatoropnames staan
+  in `video-raw/` (buiten git, te groot).
+- De gebruikte knippen: scheidsen = `referee.mp4` 0.5–10 (1,8×), 13,4–15,6 en
+  23,4–25,8 (let, stroke), 29,4–33,8 (1,6×, undo) + `vak-vastzetten.mp4` 12,3–15,3
+  en 25,2–28,2; live = `lockscreen.mp4` 0–11 (1,3×), 11–25,5 (2,2×), 25,5–37,5 (1,3×);
+  coachen = `coach-cut.mp4` op 1,7×.
 - Carousels: `carousel-kit/carousel.html#<naam>:<slide>`, gerenderd met headless
   Chrome op 1080×1350, net als `release-3.0` (zie `README.md`).
 - Opnames maken: simulator iPhone 17 Pro Max, `xcrun simctl io booted recordVideo`.

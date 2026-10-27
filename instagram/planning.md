@@ -22,6 +22,8 @@ Welk vak serveert ze nu ook alweer? 🤔
 
 Met Squash Analyzer tik je alleen op wie het punt wint. Servicevak, let, stroke en de stand per game houdt de app bij.
 
+Serveert iemand liever van links? Eén keer aanpassen en de app onthoudt het voor de rest van de wedstrijd.
+
 Gratis voor iPhone en Android, link in de bio.
 
 #squash #squashnederland #squashreferee #squashscheidsrechter #squashapp

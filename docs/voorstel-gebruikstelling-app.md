@@ -7,8 +7,12 @@ alleen live meekijken en teamwedstrijden (`docs/voorstel-gebruikscijfers.md`).
 Wie de app gebruikt zonder live te gaan, is nu onzichtbaar.
 
 Idee: de app meldt hooguit één keer per dag "app geopend" aan dezelfde teller
-in de live-Worker. **Status (27 oktober 2026): voorstel, er is niets
-gebouwd.** Bedoeld voor de 3.1-testronde.
+in de live-Worker. **Status (27 oktober 2026, avond): gebouwd op de branch
+`claude/gebruikstelling-3.1` als 3.1 build 1, nog niet op `main`, niet live en
+niet geüpload.** Wat gebouwd is staat in `docs/wijzigingen-builds.md`. Afwijkend
+van de tekst hieronder: "gebruikt" is het openen van het scherm van dat deel
+(coach- of scheidsrechtersscherm, wedstrijdlijst, coachanalyse of
+spelersprofiel, Competitie), en de schakelaar staat in Instellingen onder Live.
 
 **Besluit (Gerd-Jan, 27 oktober 2026)** over de open keuzes onderaan:
 

@@ -8,6 +8,29 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
+## 3.1 build 1 (lokaal aangemaakt 27 oktober 2026, nog niet geüpload)
+
+Eerste build van de 3.1-testronde, op de branch `claude/gebruikstelling-3.1`; nog niet op
+`main` en nog niet live (een push naar `main` rolt de Worker uit). Versie gezet met
+`scripts/version.py set 3.1` en `upload` (iOS 3.1 (1), Android versionCode 3010100).
+
+- **Anonieme dagelijkse gebruikstelling (27 oktober 2026, iOS en Android, live-server)**: op
+  vraag van Gerd-Jan, voorstel en besluit in `docs/voorstel-gebruikstelling-app.md`. De app
+  meldt hooguit één keer per dag `POST /api/app/day` met platform, versie, taal en welke delen
+  die dag gebruikt zijn (coach, scheidsrechter, analyse, competitie), plus éénmalig "eerste
+  melding" van een installatie; geen apparaat-ID of tijdstip. Core `AppUsage` (dag en gemelde
+  delen in UserDefaults, mislukt = volgende keer opnieuw, 404 = klaar), alleen release-builds
+  melden. Schakelaar "Anoniem gebruik tellen" (standaard aan) in Instellingen onder Live, op
+  beide platforms. Worker: eigen tabel `app_days` in `StatsCounter`, `appRows` in
+  `GET /api/stats`, limiet 20 per IP per minuut. Weekrapport: blok App-gebruik.
+  `PrivacyInfo.xcprivacy`: Productinteractie (Analyse, niet gekoppeld). Nog te doen bij de
+  release: privacytekst op de website, App Privacy in App Store Connect en Data safety in Play
+  Console (zie het voorstel). Releasenote: "Nieuw in Instellingen: Anoniem gebruik tellen. Eén
+  keer per dag meldt de app zonder naam of apparaat-ID dat hij gebruikt is, zodat we zien hoe
+  de app gebruikt wordt. Je kunt het uitzetten."
+- **Platform bij live en teamwedstrijd** (commit van de branch `claude/gebruikscijfers-app`
+  overgenomen): zie het punt hieronder.
+
 ## Volgende build (na 3.0 build 6)
 
 - **Gebruikscijfers van de live-dienst (23 oktober 2026, live-server; app-kant op branch

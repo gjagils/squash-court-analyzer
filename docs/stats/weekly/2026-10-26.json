@@ -1,3 +1,19 @@
 {
-  "week_end": "2026-10-26"
+  "week_end": "2026-10-26",
+  "live": {
+    "live": 0,
+    "team": 0,
+    "viewer-live": 0,
+    "viewer-team": 0,
+    "follower-live": 0,
+    "follower-team": 0
+  },
+  "live_test": {
+    "live": 0,
+    "team": 0,
+    "viewer-live": 0,
+    "viewer-team": 0,
+    "follower-live": 0,
+    "follower-team": 0
+  }
 }

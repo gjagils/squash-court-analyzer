@@ -9,6 +9,7 @@ Hashtags: Instagram telt er maximaal 5 per post, zet ze onderaan het onderschrif
 | Datum | Soort | Bestand |
 |---|---|---|
 | zo 25 okt | Carousel, release 3.0 (geplaatst) | `release-3.0/png/` |
+| tussendoor | Carousel, Competitie-vrijdag (+ verhaal) | `competitie-vrijdag/slide-1..3.png`, `story-1..3.png` |
 | za 31 okt | Reel, scheidsen | `reel-scheidsen/reel-scheidsen.mp4` |
 | di 3 nov | Carousel, Coachkaart | `carousel-coachkaart/slide-1..7.png` |
 | za 7 nov | Reel, live-stand op het vergrendelscherm | `reel-live/reel-live.mp4` |
@@ -25,6 +26,21 @@ de opname was gedimd).
 
 Bij de Team-posts: zet in je verhaal een poll-sticker met de twee teams (kan
 alleen in de app).
+
+## Tussendoor · Carousel: Competitie-vrijdag
+
+```
+Vrijdag competitie? 🏆
+
+Geen papiertje of discussie over de stand: met Squash Analyzer tel je de wedstrijd op je telefoon. Jij tikt wie het punt wint, de app houdt serve, vak en stand bij.
+
+Download hem nu, dan sta je vrijdag klaar. Gratis voor iPhone en Android, link in de bio.
+
+#squash #squashnederland #squashcompetitie #squashlife #squashapp
+```
+
+Eerste reactie: `Op welke avond speel jij competitie? 👇`
+Verhaal (in de app): `story-1..3.png`, op slide 1 een linksticker "Download de app" naar squashanalyzer.com op de plek van de oranje tekst onderin. Leuk als vaste vrijdagstory, met een poll "Speel jij vanavond?".
 
 ## za 31 okt · Reel: scheidsen
 

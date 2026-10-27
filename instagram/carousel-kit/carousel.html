@@ -40,13 +40,20 @@ h1 em { font-style: normal; color: var(--gold); }
 .cta h1 { margin-top: 60px; }
 .cta .url { font-size: 48px; font-weight: 700; margin-top: 34px; }
 .cta .sub { margin-top: 60px; }
+/* Story variant: 9:16, room at the bottom for a link sticker */
+.story .slide { height: 1920px; }
+.story .brand, .story .count { top: 150px; }
+.story .text { top: 250px; }
+.story .phone { height: 1180px; bottom: 300px; }
+.story .sticker { position: absolute; left: 0; right: 0; bottom: 150px; text-align: center; font-size: 34px; font-weight: 700; color: var(--gold); }
 </style>
 </head>
 <body>
 <div id="out"></div>
 <script>
 // Each carousel: a list of slides. Types: hook, phone (img + highlight box in % of
-// the screenshot: [left, top, width, height]), steps, cta. Render one with #<name>:<n>.
+// the screenshot: [left, top, width, height]), steps, cta. Render one with #<name>:<n>,
+// or as a 1080x1920 story with #<name>:<n>:story.
 var A = '../carousel-assets/';
 var CAROUSELS = {
   coachkaart: [
@@ -66,6 +73,11 @@ var CAROUSELS = {
     { type: 'phone', img: 'scheids-7-3.png', box: [27, 12.5, 46, 6], h: '4. De stand <em>in games.</em>', s: 'Altijd bovenin beeld.' },
     { type: 'phone', img: 'scheids-7-3.png', box: [1.5, 83.5, 97, 5.5], h: '5. Hoe lang het <em>al duurt.</em>', s: 'Wedstrijd- en gametimer lopen mee.' },
     { type: 'cta', h: 'Jij let op de rally. <em>De app op de rest.</em>' }
+  ],
+  competitie: [
+    { type: 'phone', img: 'bob-wim-2-2.png', box: [1, 19.5, 98, 29.5], h: 'Vrijdag = <em>competitie.</em>', s: 'Wie telt er vanavond?' },
+    { type: 'steps', h: 'Klaar in <em>3 stappen.</em>', steps: ['Download Squash Analyzer. Gratis, iPhone en Android.', 'Kies Scheidsrechter en vul de spelers in.', 'Tik wie het punt wint. Serve, vak en stand doet de app.'] },
+    { type: 'cta', h: 'Download nu, dan sta je <em>vanavond klaar.</em>' }
   ]
 };
 var APPLE = '<svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>';
@@ -78,6 +90,7 @@ function pills() {
 }
 var p = decodeURIComponent(location.hash.slice(1)).split(':');
 var list = CAROUSELS[p[0]], i = +p[1], d = list[i - 1], total = list.length, html = '';
+if (p[2] === 'story') document.body.className = 'story';
 var head = '<div class="brand">Squash<b>Analyzer</b></div><div class="count">' + i + ' / ' + total + '</div>';
 if (d.type === 'hook') {
   html = '<div class="center"><h1>' + d.h + '</h1>' + (d.s ? '<p class="sub" style="font-size:44px">' + d.s + '</p>' : '') + '</div><div class="swipe">Swipe →</div>';
@@ -91,6 +104,7 @@ if (d.type === 'hook') {
   html = '<div class="cta"><img src="../release-3.0/assets/icon.png" alt=""><h1>' + d.h + '</h1>' +
     '<p class="url">squashanalyzer.com</p>' + pills() + '<p class="sub">Gratis · link in de bio · volg <b style="color:var(--gold)">@squashanalyzer</b></p></div>';
 }
+if (p[2] === 'story') html = html.replace('<div class="count">' + i + ' / ' + total + '</div>', '') + '<div class="sticker">Download de app ↓</div>';
 document.getElementById('out').innerHTML = '<section class="slide">' + html + '</section>';
 </script>
 </body>

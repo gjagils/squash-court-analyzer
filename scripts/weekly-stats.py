@@ -66,11 +66,16 @@ def period_text(first, last):
 
 # ---------------------------------------------------------------- Cloudflare
 
+def auth(token):
+    """The Authorization header, or none when a network secret adds it on the way"""
+    return {"Authorization": f"Bearer {token}"} if token else None
+
+
 def cloudflare_zone_id(token):
     zone = os.environ.get("CLOUDFLARE_ZONE_ID", "").strip()
     if zone:
         return zone
-    answer = http_json(f"{REST}/zones?name={ZONE_NAME}", headers={"Authorization": f"Bearer {token}"})
+    answer = http_json(f"{REST}/zones?name={ZONE_NAME}", headers=auth(token))
     zones = answer.get("result") or []
     if not zones:
         raise RuntimeError(f"zone {ZONE_NAME} niet gevonden met deze token")
@@ -78,7 +83,7 @@ def cloudflare_zone_id(token):
 
 
 def graphql(token, query, variables):
-    answer = http_json(GRAPHQL, headers={"Authorization": f"Bearer {token}"}, data={"query": query, "variables": variables})
+    answer = http_json(GRAPHQL, headers=auth(token), data={"query": query, "variables": variables})
     if answer.get("errors"):
         raise RuntimeError("; ".join(e.get("message", "?") for e in answer["errors"]))
     return answer["data"]["viewer"]["zones"][0]
@@ -109,11 +114,8 @@ query($zone: String!, $since: Time!, $until: Time!) {
 
 def fetch_cloudflare(first_day, last_day, notes):
     """Per dag: verzoeken, paginaweergaven, unieke bezoekers, landen; plus de drukste pagina's van de week."""
+    # As with the live service, a network secret may add the header instead of the environment
     token = os.environ.get("CLOUDFLARE_API_TOKEN", "").strip()
-    if not token:
-        notes.append("Websitecijfers ontbreken: zet CLOUDFLARE_API_TOKEN (Cloudflare-token met *Analytics: Read* "
-                     "op de zone squashanalyzer.com) als geheim in de cloudomgeving.")
-        return None
     try:
         zone = cloudflare_zone_id(token)
         since = first_day - dt.timedelta(days=7 * WEEKS)
@@ -128,7 +130,8 @@ def fetch_cloudflare(first_day, last_day, notes):
                 "threats": group["sum"]["threats"], "uniques": group["uniq"]["uniques"], "countries": countries,
             }
     except (urllib.error.URLError, RuntimeError, KeyError, IndexError) as error:
-        notes.append(f"Websitecijfers van Cloudflare konden niet worden opgehaald: {error}")
+        notes.append(f"Websitecijfers van Cloudflare konden niet worden opgehaald ({error}); staat CLOUDFLARE_API_TOKEN "
+                     "als geheim in de cloudomgeving (netwerkgeheim voor api.cloudflare.com, of omgevingsvariabele)?")
         return None
     paths = []
     try:

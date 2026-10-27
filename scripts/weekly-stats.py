@@ -8,7 +8,8 @@ info@squashanalyzer.com gestuurd (zie docs/weekrapport.md). Bronnen:
   paginaweergaven, unieke bezoekers, landen, meest bezochte pagina's. Vraagt
   CLOUDFLARE_API_TOKEN (Analytics: Read) en optioneel CLOUDFLARE_ZONE_ID.
 - De gebruikscijfers van de live-dienst (GET /api/stats, server/live-worker/src/stats.js).
-  Vraagt STATS_KEY. Alleen tellingen per dag, niets persoonlijks.
+  Vraagt STATS_KEY. Alleen tellingen per dag, niets persoonlijks. Daarin ook de
+  dagelijkse app-telling (3.1 en later, `appRows`, docs/voorstel-gebruikstelling-app.md).
 
 Ontbreekt een sleutel, dan staat dat in het rapport en komt de rest gewoon.
 Per week wordt een snapshot in docs/stats/weekly/<einddatum>.json bewaard, zodat
@@ -41,6 +42,8 @@ MONTHS = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augus
 KIND_LABELS = [("live", "Livewedstrijden"), ("team", "Teamwedstrijden"),
                ("viewer-live", "Kijkers bij een livewedstrijd"), ("viewer-team", "Kijkers bij een teamwedstrijd"),
                ("follower-live", "Volgers vergrendelscherm (live)"), ("follower-team", "Volgers vergrendelscherm (team)")]
+APP_PARTS = [("app-coach", "Coach"), ("app-referee", "Scheidsrechter"), ("app-analysis", "Analyse"),
+             ("app-competition", "Competitie")]
 
 
 # ---------------------------------------------------------------- HTTP
@@ -157,7 +160,7 @@ def fetch_live(first_day, last_day, notes):
     url = f"{LIVE_URL}/api/stats?from={since.isoformat()}&to={last_day.isoformat()}"
     try:
         answer = http_json(url, headers={"Authorization": f"Bearer {key}"} if key else None)
-        return answer.get("rows") or []
+        return answer.get("rows") or [], answer.get("appRows") or []
     except urllib.error.HTTPError as error:
         if error.code == 404:
             notes.append("Cijfers van de live-dienst ontbreken: de sleutel klopt niet of ontbreekt. Zet STATS_KEY als "
@@ -167,7 +170,7 @@ def fetch_live(first_day, last_day, notes):
             notes.append(f"Cijfers van de live-dienst konden niet worden opgehaald: HTTP {error.code}")
     except (urllib.error.URLError, ValueError) as error:
         notes.append(f"Cijfers van de live-dienst konden niet worden opgehaald: {error}")
-    return None
+    return None, None
 
 
 # ---------------------------------------------------------------- rekenen
@@ -222,6 +225,28 @@ def live_week(rows, bounds):
     return result
 
 
+def app_week(app_rows, bounds):
+    """De app-telling van een week: apparaat-dagen (geopend), per dag, per deel, platform, versie en taal."""
+    if app_rows is None:
+        return None
+    week = [r for r in app_rows if in_week(r["day"], bounds)]
+    result = {"opens": 0, "first": 0, "days": {}, "parts": {kind: 0 for kind, _ in APP_PARTS},
+              "platforms": {}, "versions": {}, "languages": {}}
+    for r in week:
+        if r["kind"] == "app":
+            result["opens"] += r["n"]
+            result["days"][r["day"]] = result["days"].get(r["day"], 0) + r["n"]
+            result["platforms"][r["platform"]] = result["platforms"].get(r["platform"], 0) + r["n"]
+            result["versions"][r["version"]] = result["versions"].get(r["version"], 0) + r["n"]
+            result["languages"][r["lang"]] = result["languages"].get(r["lang"], 0) + r["n"]
+        elif r["kind"] == "app-first":
+            result["first"] += r["n"]
+        elif r["kind"] in result["parts"]:
+            result["parts"][r["kind"]] += r["n"]
+    result["per_day"] = round(result["opens"] / 7, 1)
+    return result
+
+
 def diff_text(now, before):
     if before is None:
         return "–"
@@ -252,7 +277,7 @@ def top(items, limit=6, total=None):
 
 # ---------------------------------------------------------------- snapshots
 
-def save_snapshot(end, site_now, live_now):
+def save_snapshot(end, site_now, live_now, app_now=None):
     SNAPSHOTS.mkdir(parents=True, exist_ok=True)
     snapshot = {"week_end": end.isoformat()}
     if site_now:
@@ -260,6 +285,9 @@ def save_snapshot(end, site_now, live_now):
     if live_now:
         snapshot["live"] = {kind: v["real"] for kind, v in live_now["kinds"].items()}
         snapshot["live_test"] = {kind: v["test"] for kind, v in live_now["kinds"].items()}
+    if app_now and app_now["opens"]:
+        snapshot["app"] = {"opens": app_now["opens"], "per_day": app_now["per_day"], "first": app_now["first"],
+                           "parts": app_now["parts"]}
     (SNAPSHOTS / f"{end.isoformat()}.json").write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n")
 
 
@@ -278,10 +306,11 @@ def load_snapshots():
 
 # ---------------------------------------------------------------- rapport
 
-def render(end, site, rows, notes, snapshots):
+def render(end, site, rows, notes, snapshots, app_rows=None):
     now_b, before_b = week_bounds(end)
     site_now, site_before = site_week(site, now_b), site_week(site, before_b)
     live_now, live_before = live_week(rows, now_b), live_week(rows, before_b)
+    app_now, app_before = app_week(app_rows, now_b), app_week(app_rows, before_b)
     lines = [f"# SquashAnalyzer weekrapport · {period_text(*now_b)}", ""]
 
     lines += ["## Website (squashanalyzer.com)", ""]
@@ -301,6 +330,35 @@ def render(end, site, rows, notes, snapshots):
             lines.append(f"_Cloudflare had cijfers voor {site_now['days']} van de 7 dagen._")
     else:
         lines.append("_Geen websitecijfers deze week (zie onderaan)._")
+    lines.append("")
+
+    lines += ["## App-gebruik (dagelijkse melding, 3.1 en later)", ""]
+    if app_now and app_now["opens"]:
+        lines += ["| | Deze week | Vorige week | Verschil |", "|---|---:|---:|---:|"]
+        before = app_before if app_before and app_before["opens"] else None
+        rows_app = [("Apparaten per dag (gemiddeld)", app_now["per_day"], before["per_day"] if before else None),
+                    ("Apparaat-dagen (opgeteld)", app_now["opens"], before["opens"] if before else None),
+                    ("Nieuwe installaties", app_now["first"], before["first"] if before else None)]
+        rows_app += [(f"{label} gebruikt (apparaat-dagen)", app_now["parts"][kind], before["parts"][kind] if before else None)
+                     for kind, label in APP_PARTS]
+        for label, now_n, before_n in rows_app:
+            shown = str(now_n).replace(".", ",") if isinstance(now_n, float) else fmt(now_n)
+            shown_before = (str(before_n).replace(".", ",") if isinstance(before_n, float) else fmt(before_n))
+            change = diff_text(now_n, before_n) if not isinstance(now_n, float) else ("–" if before_n is None else
+                                                                                      f"{now_n - before_n:+.1f}".replace(".", ",").replace("-", "−"))
+            lines.append(f"| {label} | {shown} | {shown_before} | {change} |")
+        lines.append("")
+        busiest = max(app_now["days"].items(), key=lambda kv: kv[1])
+        lines.append(f"**Drukste dag**: {day_text(dt.date.fromisoformat(busiest[0]))} ({fmt(busiest[1])} apparaten)")
+        lines.append(f"**Platform**: {top(app_now['platforms'], total=app_now['opens'])} · "
+                     f"**Versie**: {top(app_now['versions'], total=app_now['opens'])} · **Taal**: {top(app_now['languages'])}")
+        lines.append("")
+        lines.append("_Elk apparaat meldt zich hooguit één keer per dag, zonder ID. Opgeteld over de week zijn het "
+                     "apparaat-dagen, geen unieke gebruikers: wie elke dag speelt telt zeven keer._")
+    elif app_rows is not None:
+        lines.append("_Nog geen meldingen van de app deze week (de telling zit in 3.1 en later)._")
+    else:
+        lines.append("_Geen app-cijfers deze week (zie onderaan)._")
     lines.append("")
 
     lines += ["## Live-dienst (live.squashanalyzer.com)", ""]
@@ -324,7 +382,8 @@ def render(end, site, rows, notes, snapshots):
 
     # Trend: 8 weken uit de snapshots (website) en de live-rijen
     lines += [f"## Trend ({WEEKS} weken)", ""]
-    lines += ["| Week t/m | Bezoekers | Paginaweergaven | Live | Team | Kijkers | Volgers |", "|---|---:|---:|---:|---:|---:|---:|"]
+    lines += ["| Week t/m | Bezoekers | Paginaweergaven | App per dag | Live | Team | Kijkers | Volgers |",
+              "|---|---:|---:|---:|---:|---:|---:|---:|"]
     for i in range(WEEKS - 1, -1, -1):
         week_end = end - dt.timedelta(days=7 * i)
         bounds = week_bounds(week_end)[0]
@@ -333,13 +392,16 @@ def render(end, site, rows, notes, snapshots):
         if l is None:
             stored = snapshots.get(week_end.isoformat(), {}).get("live")
             l = {"kinds": {k: {"real": v} for k, v in stored.items()}} if stored else None
+        a = app_week(app_rows, bounds)
+        app_per_day = a["per_day"] if a and a["opens"] else snapshots.get(week_end.isoformat(), {}).get("app", {}).get("per_day")
         kinds = l["kinds"] if l else {}
         get = lambda k: kinds.get(k, {}).get("real") if kinds else None  # noqa: E731
         viewers = None if not kinds else (get("viewer-live") or 0) + (get("viewer-team") or 0)
         followers = None if not kinds else (get("follower-live") or 0) + (get("follower-team") or 0)
         mark = " **(deze week)**" if i == 0 else ""
+        app_text = "–" if app_per_day is None else str(app_per_day).replace(".", ",")
         lines.append(f"| {day_text(week_end)}{mark} | {fmt(s['uniques'] if s else None)} | {fmt(s['pageViews'] if s else None)} "
-                     f"| {fmt(get('live'))} | {fmt(get('team'))} | {fmt(viewers)} | {fmt(followers)} |")
+                     f"| {app_text} | {fmt(get('live'))} | {fmt(get('team'))} | {fmt(viewers)} | {fmt(followers)} |")
     lines.append("")
     lines.append("_Een streepje: geen cijfers voor die week (nog niet geteld, of ouder dan Cloudflare bewaart)._")
     lines.append("")
@@ -376,7 +438,17 @@ def sample_data(end):
         if i % 5 == 1:
             rows.append({"day": day, "kind": "live", "platform": "unknown", "lang": "nl", "country": "NL", "region": "Utrecht", "club": "", "test": 1, "n": 1})
             rows.append({"day": day, "kind": "viewer-live", "platform": "unknown", "lang": "en", "country": "BE", "region": "Flanders", "club": "", "test": 0, "n": 3})
-    return site, rows
+    app_rows = []
+    for i in range(7 * WEEKS):
+        day = (end - dt.timedelta(days=i)).isoformat()
+        app_rows.append({"day": day, "kind": "app", "platform": "ios", "version": "3.1", "lang": "nl", "country": "NL", "region": "South Holland", "n": 4 + (i % 3)})
+        app_rows.append({"day": day, "kind": "app", "platform": "android", "version": "3.1", "lang": "nl", "country": "NL", "region": "Utrecht", "n": 2 + (i % 2)})
+        app_rows.append({"day": day, "kind": "app-referee", "platform": "ios", "version": "3.1", "lang": "nl", "country": "NL", "region": "South Holland", "n": 2})
+        app_rows.append({"day": day, "kind": "app-analysis", "platform": "android", "version": "3.1", "lang": "nl", "country": "NL", "region": "Utrecht", "n": 1})
+        if i % 7 == 3:
+            app_rows.append({"day": day, "kind": "app-competition", "platform": "ios", "version": "3.1", "lang": "nl", "country": "NL", "region": "South Holland", "n": 3})
+            app_rows.append({"day": day, "kind": "app-first", "platform": "android", "version": "3.1", "lang": "en", "country": "BE", "region": "Flanders", "n": 1})
+    return site, rows, app_rows
 
 
 def main():
@@ -390,14 +462,14 @@ def main():
     now_b = week_bounds(end)[0]
     notes = []
     if args.sample:
-        site, rows = sample_data(end)
+        site, rows, app_rows = sample_data(end)
     else:
         site = fetch_cloudflare(now_b[0], end, notes)
-        rows = fetch_live(now_b[0], end, notes)
+        rows, app_rows = fetch_live(now_b[0], end, notes)
     snapshots = {} if args.sample else load_snapshots()
-    report = render(end, site, rows, notes, snapshots)
+    report = render(end, site, rows, notes, snapshots, app_rows)
     if not args.sample and not args.no_snapshot:
-        save_snapshot(end, site_week(site, now_b), live_week(rows, now_b))
+        save_snapshot(end, site_week(site, now_b), live_week(rows, now_b), app_week(app_rows, now_b))
     if args.out:
         pathlib.Path(args.out).write_text(report)
         print(f"rapport geschreven naar {args.out}", file=sys.stderr)

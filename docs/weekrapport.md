@@ -19,6 +19,12 @@ van de afgelopen week plus een trend, per mail naar info@squashanalyzer.com.
   en de gebruikscijfers van de live-dienst (`GET /api/stats`, zie
   `docs/voorstel-gebruikscijfers.md`). Niets persoonlijks: Cloudflare levert
   totalen, de live-dienst alleen tellingen per dag.
+- **App-gebruik** (vanaf 3.1, `appRows` uit dezelfde `GET /api/stats`, zie
+  `docs/voorstel-gebruikstelling-app.md`): apparaten per dag (gemiddeld),
+  apparaat-dagen, nieuwe installaties en per deel (coach, scheidsrechter,
+  analyse, competitie), plus platform, versie en taal. Het zijn
+  apparaat-dagen, geen unieke gebruikers. Zolang de Worker of de app de
+  telling nog niet heeft, staat er "Nog geen meldingen van de app".
 - **Snapshots**: per week één klein JSON-bestand in `docs/stats/weekly/`, zodat
   de trend blijft kloppen als Cloudflare oudere dagen niet meer geeft.
 

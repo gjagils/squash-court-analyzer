@@ -10,7 +10,7 @@ Hashtags: Instagram telt er maximaal 5 per post, zet ze onderaan het onderschrif
 |---|---|---|
 | zo 25 okt | Carousel, release 3.0 (geplaatst) | `release-3.0/png/` |
 | di 27 okt | Carousel, Competitie-vrijdag (geplaatst, verhaal in de app) | `competitie-vrijdag/slide-1..3.png`, `story-1..3.png` |
-| do 29 okt | Carousel, je teamgenoot coachen (+ verhaal), nog niet live | `teamcoach/slide-1..5.png`, `story-1..5.png` |
+| vr 30 okt | Carousel, je teamgenoot coachen (geplaatst, verhaal in de app) | `teamcoach/slide-1..5.png`, `story-1..5.png` |
 | za 31 okt | Reel, scheidsen | `reel-scheidsen/reel-scheidsen.mp4` |
 | di 3 nov | Carousel, Coachkaart | `carousel-coachkaart/slide-1..7.png` |
 | za 7 nov | Reel, live-stand op het vergrendelscherm | `reel-live/reel-live.mp4` |
@@ -43,7 +43,7 @@ Download hem nu, dan sta je vrijdag klaar. Gratis voor iPhone en Android, link i
 Eerste reactie: `Op welke avond speel jij competitie? 👇`
 Verhaal (in de app): `story-1..3.png`, op slide 1 een linksticker "Download de app" naar squashanalyzer.com op de plek van de oranje tekst onderin. Leuk als vaste vrijdagstory, met een poll "Speel jij vanavond?".
 
-## do 29 okt · Carousel: je teamgenoot coachen (nog niet live)
+## vr 30 okt · Carousel: je teamgenoot coachen (geplaatst)
 
 ```
 Je teamgenoot helpen winnen? 💪

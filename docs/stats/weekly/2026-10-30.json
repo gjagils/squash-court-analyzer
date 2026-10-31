@@ -1,0 +1,25 @@
+{
+  "week_end": "2026-10-30",
+  "site": {
+    "requests": 9184,
+    "pageViews": 854,
+    "uniques": 1363,
+    "days": 7
+  },
+  "live": {
+    "live": 5,
+    "team": 2,
+    "viewer-live": 37,
+    "viewer-team": 16,
+    "follower-live": 0,
+    "follower-team": 4
+  },
+  "live_test": {
+    "live": 0,
+    "team": 0,
+    "viewer-live": 0,
+    "viewer-team": 0,
+    "follower-live": 0,
+    "follower-team": 0
+  }
+}

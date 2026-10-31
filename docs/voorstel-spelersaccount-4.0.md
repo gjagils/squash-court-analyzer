@@ -1,7 +1,7 @@
 # Voorstel: spelersaccount met centrale badges (4.0)
 
-Stand: 31 oktober 2026. Tweede versie: de feedback op de eerste versie is
-verwerkt. Er is nog niets gebouwd. Gerd-Jan wil eerst zien wat dit betekent
+Stand: 31 oktober 2026. Tweede versie, met de feedback verwerkt. De keuzes
+zijn gemaakt (zie Besluiten). Er is nog niets gebouwd. Gerd-Jan wil eerst zien wat dit betekent
 voor:
 
 - de opslag;
@@ -344,16 +344,25 @@ inrichten van Apple en Google, en het privacypapierwerk.
 - Betaalt een club via de website, dan zijn de kosten een paar procent. Of dat
   mag, moet nog worden uitgezocht.
 
-## Open keuzes voor Gerd-Jan
+## Besluiten van Gerd-Jan (31 oktober)
 
-1. Firebase Authentication via de REST-API (advies) of alles zelf bouwen?
-2. Insturen zonder account met een apparaatsleutel (advies), of moet de
-   invoerder ook inloggen?
-3. Jeugd: A (een account vanaf 16) of B (toestemming van een ouder)?
-4. Foto's in het account meteen, of later?
-5. Moet een niet-SBN-speler ook een account kunnen maken? Advies: ja, dan is
-   alleen de naam nodig.
-6. Komt het clubabonnement in 4.0, of eerst alleen spelersaccounts?
+Alle keuzes volgen het advies:
+
+1. **Inloggen:** Firebase Authentication via de REST-API, met e-mail en
+   wachtwoord, Apple en Google.
+2. **Insturen:** zonder account, met een apparaatsleutel, limieten per
+   apparaat en IP, en een blokkeerknop.
+3. **Jeugd:** een account pas vanaf 16. Jongere spelers spelen zoals nu,
+   zonder account. Het geboortejaar wordt gevraagd bij het maken van een
+   account.
+4. **Opslag in de app:** de accountdata komt in eigen bestanden, buiten
+   SwiftData en Room. Er komt geen schemamigratie voor 4.0.
+5. **Foto's:** niet in 4.0. Je foto blijft lokaal zoals nu. Later kan het
+   via R2.
+6. **Niet-SBN-spelers:** mogen een account maken met alleen een naam. Zij
+   worden gekoppeld via een spelerscode of QR-code.
+7. **Clubabonnement:** niet in 4.0. Het clubscherm kan al eerder als gratis
+   proef met een geheime link draaien.
 
 ## Grootte (ruw)
 

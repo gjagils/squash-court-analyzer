@@ -137,10 +137,10 @@ of track kiezen.
 
 1. **3.1 afronden** en naar productie. Het privacylabel moet daarvoor nog
    worden aangepast.
-2. **Besluiten** over de open keuzes in het
-   [voorstel](voorstel-spelersaccount-4.0.md#open-keuzes-voor-gerd-jan).
-3. **Besluit over het schema:** accountdata in eigen bestanden (advies).
-   Als er toch een migratie komt, staat vast welke en in welke 3.x-build.
+2. ~~Besluiten over de open keuzes~~: genomen op 31 oktober, zie het
+   [voorstel](voorstel-spelersaccount-4.0.md#besluiten-van-gerd-jan-31-oktober).
+3. ~~Besluit over het schema~~: genomen op 31 oktober. De accountdata komt in
+   eigen bestanden en er komt geen migratie.
 4. **De vlag en de tests in beide standen** bouwen, in 3.2, met de vlag uit.
 5. **De proefgroep samenstellen** en de testers vertellen dat ze tot de
    release op 4.0 blijven.

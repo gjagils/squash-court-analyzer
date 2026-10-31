@@ -58,6 +58,18 @@ is reserve.
   zonder die secret bestaat het pad niet): `{ rows, totals }`, met per soort
   `real` en `test`. Bijvoorbeeld:
   `curl -s -H "Authorization: Bearer $STATS_KEY" "https://live.squashanalyzer.com/api/stats?from=2026-10-01" | jq .totals`.
+- **Dagelijkse app-telling** (3.1 en later, zie
+  `docs/voorstel-gebruikstelling-app.md`): de app stuurt hooguit één keer per
+  dag `POST /api/app/day` met `{ platform, version, lang, parts?, open?, first? }`,
+  zonder ID. De Worker telt in een eigen tabel
+  `app_days(day, kind, platform, version, lang, country, region, n)` de soorten
+  `app` (geopend; niet bij `open: false`), `app-first` (eerste melding van een
+  installatie) en per gebruikt deel `app-coach`, `app-referee`, `app-analysis`,
+  `app-competition`. Een onbekend deel valt weg, een versie die niet op `3.1`
+  lijkt wordt `unknown`. Antwoord altijd 204; boven 20 meldingen per IP per
+  minuut (alleen in het geheugen van de limiter) telt hij niet meer.
+  `GET /api/stats` geeft deze rijen als `appRows` naast `rows`, en `totals`
+  telt de app-soorten mee (alles `real`).
 
 Verschil met de Node-versie: geen totaalmaximum op kijkers over alle
 sessies (wel per sessie), en een herstart van de Worker breekt geen sessies.

@@ -8,6 +8,14 @@
 import { DurableObject } from 'cloudflare:workers';
 
 export const KINDS = ['live', 'team', 'viewer-live', 'viewer-team', 'follower-live', 'follower-team'];
+/**
+ * The daily usage count of the app itself (3.1 and later, docs/voorstel-gebruikstelling-app.md):
+ * `app` = opened that day, `app-first` = the first report of an installation, and per part of
+ * the app whether it was used that day. Kept in their own table, with the app version.
+ */
+export const APP_PARTS = ['coach', 'referee', 'analysis', 'competition'];
+export const APP_KINDS = ['app', 'app-first', ...APP_PARTS.map((part) => `app-${part}`)];
+const VERSION_PATTERN = /^\d{1,3}(\.\d{1,3}){0,2}$/;
 const PLATFORMS = ['ios', 'android'];
 /** The sample players of the app (Bob and Wim): a match between the two is a try-out, counted apart */
 const SAMPLE_PLAYERS = ['bob', 'wim'];
@@ -56,16 +64,35 @@ export function dayOf(now = Date.now()) {
   }
 }
 
+/** The marketing version an app sends ("3.1"); anything else is unknown */
+export function cleanVersion(value) {
+  if (typeof value !== 'string') return 'unknown';
+  const text = value.trim();
+  return VERSION_PATTERN.test(text) ? text : 'unknown';
+}
+
+/** The known parts in a report, each once, in a fixed order; anything else is dropped */
+export function cleanParts(value) {
+  if (!Array.isArray(value)) return [];
+  return APP_PARTS.filter((part) => value.includes(part));
+}
+
 function cleanText(value, max = TEXT_MAX) {
   if (typeof value !== 'string') return 'unknown';
   const text = value.trim();
   return text ? text.slice(0, max) : 'unknown';
 }
 
-/** Per kind: how many real and how many test (sample players, test team) events the rows hold */
-export function totalsOf(rows) {
+/**
+ * Per kind: how many real and how many test (sample players, test team) events the rows hold.
+ * The app rows (`appRows`) have no test column: they all count as real.
+ */
+export function totalsOf(rows, appRows = []) {
   const totals = {};
-  for (const kind of KINDS) totals[kind] = { real: 0, test: 0 };
+  for (const kind of [...KINDS, ...APP_KINDS]) totals[kind] = { real: 0, test: 0 };
+  for (const row of appRows) {
+    if (totals[row.kind]) totals[row.kind].real += Number(row.n) || 0;
+  }
   for (const row of rows) {
     if (!totals[row.kind]) continue;
     totals[row.kind][row.test ? 'test' : 'real'] += Number(row.n) || 0;
@@ -81,6 +108,10 @@ export class StatsCounter extends DurableObject {
       country TEXT NOT NULL, region TEXT NOT NULL, club TEXT NOT NULL, test INTEGER NOT NULL,
       n INTEGER NOT NULL,
       PRIMARY KEY (day, kind, platform, lang, country, region, club, test))`);
+    this.ctx.storage.sql.exec(`CREATE TABLE IF NOT EXISTS app_days (
+      day TEXT NOT NULL, kind TEXT NOT NULL, platform TEXT NOT NULL, version TEXT NOT NULL,
+      lang TEXT NOT NULL, country TEXT NOT NULL, region TEXT NOT NULL, n INTEGER NOT NULL,
+      PRIMARY KEY (day, kind, platform, version, lang, country, region))`);
   }
 
   /** One more of `kind` today. Unknown kinds are ignored; nothing here can fail the request. */
@@ -92,6 +123,25 @@ export class StatsCounter extends DurableObject {
       dayOf(), kind, cleanPlatform(fields.platform), fields.lang === 'en' ? 'en' : 'nl',
       cleanText(fields.country, 2), cleanText(fields.region), typeof fields.club === 'string' && fields.club ? fields.club.slice(0, TEXT_MAX) : '',
       fields.test ? 1 : 0);
+  }
+
+  /** One more of an app kind today (`app`, `app-first`, `app-coach`, ...). Unknown kinds are ignored. */
+  async bumpApp(kind, fields = {}) {
+    if (!APP_KINDS.includes(kind)) return;
+    this.ctx.storage.sql.exec(
+      `INSERT INTO app_days (day, kind, platform, version, lang, country, region, n) VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+       ON CONFLICT (day, kind, platform, version, lang, country, region) DO UPDATE SET n = n + 1`,
+      dayOf(), kind, cleanPlatform(fields.platform), cleanVersion(fields.version), fields.lang === 'en' ? 'en' : 'nl',
+      cleanText(fields.country, 2), cleanText(fields.region));
+  }
+
+  /** The app rows of the days from..to (inclusive, YYYY-MM-DD; either may be missing), oldest first */
+  async appRows(from, to) {
+    const first = DAY_PATTERN.test(from || '') ? from : '0000-00-00';
+    const last = DAY_PATTERN.test(to || '') ? to : '9999-99-99';
+    return this.ctx.storage.sql.exec(
+      `SELECT day, kind, platform, version, lang, country, region, n FROM app_days WHERE day >= ? AND day <= ?
+       ORDER BY day, kind, platform, version, lang, country, region`, first, last).toArray();
   }
 
   /** The rows of the days from..to (inclusive, YYYY-MM-DD; either may be missing), oldest first */

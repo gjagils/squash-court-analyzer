@@ -140,6 +140,8 @@ struct ContentView: View {
             }
             #endif
             TeamImportService.addSamplePlayersIfNew(context: modelContext)
+            // A cold start may already be active before the scene phase changes
+            Task { await AppUsage.shared.appOpened() }
             _ = try? BadgeAwarder(context: modelContext).grantPioneers()
             offerTestDataCleanup()
             showingStartupPersistenceWarning = startupPersistenceWarning != nil
@@ -156,6 +158,7 @@ struct ContentView: View {
                 presentPendingTeam()
                 // A live final score that could not be sent (no network) goes now
                 Task { await LiveShare.shared.retryPending() }
+                Task { await AppUsage.shared.appOpened() }
                 Task { @MainActor in TeamLive.shared.retryPending() }
             }
         }

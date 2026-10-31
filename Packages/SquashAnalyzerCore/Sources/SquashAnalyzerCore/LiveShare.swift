@@ -68,6 +68,10 @@ public struct LiveSnapshot: Codable, Equatable, Sendable {
     /// The app's language, "nl" or "en" (`AppLanguage.code`): only in the
     /// request that starts the session, nil (left out) in every update
     public var lang: String? = nil
+    /// "ios" or "android" (`AppPlatform.current`): only in the request that
+    /// starts the session, for the usage counts of the live service (never
+    /// stored with the session); nil (left out) in every update
+    public var platform: String? = nil
 
     public init(p1: String, p2: String, bestOf: Int, games: [[Int]], score: [Int], gamesWon: [Int],
                 server: Int, side: String, status: LiveStatus, lastPoint: String? = nil, winner: Int? = nil) {
@@ -363,6 +367,7 @@ public final class LiveShare {
         guard let url = URL(string: "\(sessionBaseURL)/api/live") else { throw LiveShareError.noConnection }
         var first = snapshot
         first.lang = AppLanguage.current.code
+        first.platform = AppPlatform.current
         let body = try JSONEncoder().encode(first)
         let response: AITransportResponse
         do {
@@ -428,5 +433,19 @@ public final class LiveShare {
         }
         offline = !LiveWrite.isSuccess(status)
         return !offline
+    }
+}
+
+/// Which app sends a request to the live service, "ios" or "android": only
+/// for the usage counts per day (docs/voorstel-gebruikscijfers.md), never
+/// stored with a session. Core built for macOS (the first step of the Android
+/// build, `swift test`) says "ios" too; that never reaches the server.
+public enum AppPlatform {
+    public static var current: String {
+        #if SKIP
+        return "android"
+        #else
+        return "ios"
+        #endif
     }
 }

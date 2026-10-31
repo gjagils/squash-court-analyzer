@@ -8,14 +8,39 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.1 build 1)
+## Volgende build (na 3.1 build 2)
 
-## 3.1 build 1 (geüpload 31 oktober 2026)
+## 3.1 build 2 (31 oktober 2026)
+
+Build 1 staat alleen op Play; de iPhone-upload van build 1 strandde op de nieuwe Apple-
+licentieovereenkomst, dus iOS begint bij build 2. Releasenotes: `release-notes/3.1-2.md` en
+`release-notes/android-3.1-2.md`. Op vraag van Gerd-Jan zit de gebruikstelling er nu in
+(branch `claude/gebruikstelling-3.1` gemerged; een push naar `main` rolt de Worker uit).
+
+- **Anonieme dagelijkse gebruikstelling (27 oktober 2026, iOS en Android, live-server)**: op
+  vraag van Gerd-Jan, voorstel en besluit in `docs/voorstel-gebruikstelling-app.md`. De app
+  meldt hooguit één keer per dag `POST /api/app/day` met platform, versie, taal en welke delen
+  die dag gebruikt zijn (coach, scheidsrechter, analyse, competitie), plus éénmalig "eerste
+  melding" van een installatie; geen apparaat-ID of tijdstip. Core `AppUsage` (dag en gemelde
+  delen in UserDefaults, mislukt = volgende keer opnieuw, 404 = klaar), alleen release-builds
+  melden. Schakelaar "Anoniem gebruik tellen" (standaard aan) in Instellingen onder Live, op
+  beide platforms. Worker: eigen tabel `app_days` in `StatsCounter`, `appRows` in
+  `GET /api/stats`, limiet 20 per IP per minuut. Weekrapport: blok App-gebruik.
+  `PrivacyInfo.xcprivacy`: Productinteractie (Analyse, niet gekoppeld). Nog te doen bij de
+  release: privacytekst op de website, App Privacy in App Store Connect en Data safety in Play
+  Console (zie het voorstel). Releasenote: "Nieuw in Instellingen: Anoniem gebruik tellen. Eén
+  keer per dag meldt de app zonder naam of apparaat-ID dat hij gebruikt is, zodat we zien hoe
+  de app gebruikt wordt. Je kunt het uitzetten."
+- **Platform bij live en teamwedstrijd** (commit van de branch `claude/gebruikscijfers-app`
+  overgenomen): zie het punt hieronder.
+
+
+## 3.1 build 1 (31 oktober 2026, alleen Play)
 
 Releasenotes: `release-notes/3.1-1.md` en `release-notes/android-3.1-1.md`. Website: 3.1-sectie op
 de homepage (nl en en), testen.html met "Nieuw in 3.1", handleidingen bijgewerkt (club zoeken,
 eenvoudig coachen, Sluiten, scheidsrechterwedstrijd openen, tegenstanders, Instellingen →
-Coachen). Niet in deze build: de app-gebruikstelling van branch `claude/gebruikstelling-3.1`.
+Coachen).
 
 
 - **Competitiekaart en rondleiding: "Zoek je club" (31 oktober 2026, iOS en Android)**: de

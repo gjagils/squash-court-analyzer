@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.room.withTransaction
 import androidx.lifecycle.lifecycleScope
+import squash.analyzer.core.AppUsage
 import squash.analyzer.core.ResultCard
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
@@ -163,6 +164,9 @@ class MainActivity : AppCompatActivity() {
         val aiCoach = AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport()))
         // Live meekijken: the shared LiveShare sends the state through this (server/live)
         LiveShare.shared.transport = HttpLiveTransport()
+        // The anonymous daily usage count (AppUsage): only release builds report, never a test run
+        AppUsage.shared.version = AppUsage.marketingVersion(from = packageManager.getPackageInfo(packageName, 0).versionName ?: "")
+        if (!BuildConfig.DEBUG && !isInstrumentedTest()) AppUsage.shared.transport = HttpLiveTransport()
         // "Deel als plaatje" in Deel score: the result card as a PNG (ResultImage)
         // The PNG is drawn and written off the main thread; the static hook is
         // cleared in onDestroy so it never keeps an old Activity alive
@@ -205,6 +209,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         lifecycleScope.launch { LiveShare.shared.retryPending() }
         lifecycleScope.launch { TeamLive.shared.retryPending() }
+        lifecycleScope.launch { AppUsage.shared.appOpened() }
         // Pionier after the badge reset, also for a card from before it imported since
         badges?.let { store -> lifecycleScope.launch { runCatching { store.grantPioneers() } } }
     }

@@ -100,6 +100,8 @@ public struct RefereeSessionView: View {
         .task {
             saver.onExit = { close() }
             ScreenAwake.set(true)
+            // The daily usage count: the referee part was used today
+            await AppUsage.shared.used(AppUsagePart.referee)
             photos = await PlayerPhotos.load(photoStore: photoStore, playerStore: playerStore)
             if match == nil && pending == nil && !showingSetup { await load() }
         }

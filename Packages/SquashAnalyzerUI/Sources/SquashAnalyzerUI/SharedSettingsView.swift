@@ -97,6 +97,7 @@ public struct SharedSettingsView: View {
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     @AppStorage(CoachInputMode.storageKey) private var coachInput = CoachInputMode.detailed.rawValue
     @AppStorage(LiveShare.enabledKey) private var liveSharing = true
+    @AppStorage(AppUsage.enabledKey) private var usageCounting = true
     @AppStorage(LiveShare.photosKey) private var livePhotos = true
     @AppStorage(LiveFollow.alertsKey) private var liveAlerts = true
     @State private var draft = ""
@@ -267,6 +268,15 @@ public struct SharedSettingsView: View {
             }
             .tint(SharedColors.accent)
             Text("Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag.", bundle: textBundle)
+                .font(SharedFonts.system(12))
+                .foregroundColor(SharedColors.textMuted)
+            Toggle(isOn: $usageCounting) {
+                Text("Anoniem gebruik tellen", bundle: textBundle)
+                    .font(SharedFonts.system(14))
+                    .foregroundColor(SharedColors.textPrimary)
+            }
+            .tint(SharedColors.accent)
+            Text("Eén keer per dag meldt de app dat hij gebruikt is: platform, versie, taal en welk deel. Zonder naam of apparaat-ID.", bundle: textBundle)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
         }

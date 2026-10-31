@@ -118,6 +118,8 @@ public struct CoachSessionView: View {
         .task {
             saver.onExit = { close() }
             ScreenAwake.set(true)
+            // The daily usage count: the coach part was used today
+            await AppUsage.shared.used(AppUsagePart.coach)
             photos = await PlayerPhotos.load(photoStore: photoStore, playerStore: playerStore)
             if match == nil && pending == nil && !showingSetup { await load() }
         }

@@ -13,6 +13,12 @@ struct SquashAnalyzerApp: App {
     init() {
         // Live meekijken: the shared LiveShare sends the state through URLSession (server/live)
         LiveShare.shared.transport = URLSessionLiveTransport()
+        // The anonymous daily usage count (AppUsage): only release builds report, so
+        // the simulator, screenshots and tests never count
+        AppUsage.shared.version = AppUsage.marketingVersion(from: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")
+        #if !DEBUG
+        AppUsage.shared.transport = URLSessionLiveTransport()
+        #endif
         // Live score op het vergrendelscherm: Live Activities (followed matches and the own match)
         ActivityKitLiveFollowPresenter.shared.install()
         #if DEBUG

@@ -184,7 +184,10 @@ public struct SharedTeamMatchesView: View {
             }
         }
         .pageTitle(loc("Competitie"))
-        .task { await load() }
+        .task {
+            await load()
+            await AppUsage.shared.used(AppUsagePart.competition)
+        }
         .sheet(isPresented: $creating) {
             NewTeamMatchSheet(team: team, existing: matches) { match, share in
                 creating = false

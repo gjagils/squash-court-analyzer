@@ -1153,6 +1153,24 @@
         }
       }
     },
+    "Anoniem gebruik tellen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Count usage anonymously"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anoniem gebruik tellen"
+          }
+        }
+      }
+    },
     "Automatische back-up": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -3579,6 +3597,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Eén keer"
+          }
+        }
+      }
+    },
+    "Eén keer per dag meldt de app dat hij gebruikt is: platform, versie, taal en welk deel. Zonder naam of apparaat-ID.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Once a day the app reports that it was used: platform, version, language and which part. No name or device ID."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eén keer per dag meldt de app dat hij gebruikt is: platform, versie, taal en welk deel. Zonder naam of apparaat-ID."
           }
         }
       }

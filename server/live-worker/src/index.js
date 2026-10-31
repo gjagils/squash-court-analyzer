@@ -13,7 +13,7 @@ import {
 } from './validate.js';
 import { readConfig } from './config.js';
 import { partijDecided, partijWinner, pushAvailability, validateFollower } from './push.js';
-import { clubName, isSampleMatch, isTestTeam, totalsOf } from './stats.js';
+import { cleanParts, clubName, isSampleMatch, isTestTeam, totalsOf } from './stats.js';
 
 export { LiveSession } from './session.js';
 export { LiveLimiter } from './limiter.js';
@@ -209,7 +209,27 @@ async function handle(request, env) {
     const secret = String(env.STATS_KEY || '');
     if (!secret || bearer(request) !== secret) return send(404, 'Not found');
     const rows = await stats.rows(url.searchParams.get('from'), url.searchParams.get('to'));
-    return send(200, { rows, totals: totalsOf(rows) });
+    const appRows = await stats.appRows(url.searchParams.get('from'), url.searchParams.get('to'));
+    return send(200, { rows, appRows, totals: totalsOf(rows, appRows) });
+  }
+
+  // POST /api/app/day: the app (3.1 and later) reports at most once a day that it
+  // was used ({ platform, version, lang, parts?, open?, first? }), without any id
+  // (docs/voorstel-gebruikstelling-app.md). Always 204: the app needs no answer.
+  if (request.method === 'POST' && url.pathname === '/api/app/day') {
+    const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+    const body = await readJson(request);
+    if (body && typeof body === 'object' && (await limiter.allowReport(ip))) {
+      const fields = { ...place, platform: body.platform, version: body.version, lang: requestLang(body, url) };
+      const kinds = [];
+      if (body.open !== false) kinds.push('app');
+      if (body.first === true) kinds.push('app-first');
+      for (const part of cleanParts(body.parts)) kinds.push(`app-${part}`);
+      for (const kind of kinds) {
+        try { await stats.bumpApp(kind, fields); } catch (error) { console.error('stats error', error && error.message); }
+      }
+    }
+    return send(204);
   }
 
   if (parts[0] !== 'api' || parts[1] !== 'live') return send(404, 'Not found');

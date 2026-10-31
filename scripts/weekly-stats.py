@@ -39,7 +39,7 @@ SNAPSHOTS = ROOT / "docs" / "stats" / "weekly"
 MONTHS = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus",
           "september", "oktober", "november", "december"]
 KIND_LABELS = [("live", "Livewedstrijden"), ("team", "Teamwedstrijden"),
-               ("viewer-live", "Kijkers bij een livewedstrijd"), ("viewer-team", "Kijkers bij een teamwedstrijd"),
+               ("viewer-live", "Kijkpagina geopend (live)"), ("viewer-team", "Kijkpagina geopend (team)"),
                ("follower-live", "Volgers vergrendelscherm (live)"), ("follower-team", "Volgers vergrendelscherm (team)")]
 
 
@@ -324,7 +324,7 @@ def render(end, site, rows, notes, snapshots):
 
     # Trend: 8 weken uit de snapshots (website) en de live-rijen
     lines += [f"## Trend ({WEEKS} weken)", ""]
-    lines += ["| Week t/m | Bezoekers | Paginaweergaven | Live | Team | Kijkers | Volgers |", "|---|---:|---:|---:|---:|---:|---:|"]
+    lines += ["| Week t/m | Bezoekers | Paginaweergaven | Live | Team | Geopend | Volgers |", "|---|---:|---:|---:|---:|---:|---:|"]
     for i in range(WEEKS - 1, -1, -1):
         week_end = end - dt.timedelta(days=7 * i)
         bounds = week_bounds(week_end)[0]

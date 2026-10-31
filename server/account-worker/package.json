@@ -4,7 +4,8 @@
   "description": "Squash Analyzer 4.0: spelersaccount met centrale wedstrijden en badges (Cloudflare Worker + D1, EU)",
   "scripts": {
     "test": "vitest run",
-    "dev": "wrangler dev"
+    "dev": "wrangler dev",
+    "local": "node dev/local.mjs"
   },
   "license": "UNLICENSED",
   "devDependencies": {

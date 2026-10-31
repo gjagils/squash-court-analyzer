@@ -24,6 +24,13 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
   breekt de Kotlin-enum van de sleutels ("Expecting ';' after the last enum entry", 27
   oktober, `AppUsageReport`): noem de property anders en zet de JSON-naam in een eigen
   `CodingKeys` (`case opened = "open"`).
+- **`entries` als `CodingKey`** (een property van een `Codable`-struct) botst met Kotlins
+  `Enum.entries` ("Conflicting declarations: the enum entry 'entries'", 31 oktober,
+  `AccountOutboxFile`): kies een andere naam.
+- **`to` of `from` als property van een `Codable`-struct** wordt in Kotlin verborgen door de
+  parameter van `encode(to:)` / `init(from:)` (ClassCastException `JSONEncoderImpl cannot be
+  cast to Encodable`, 31 oktober, `AccountSubmission`): noem de property anders en zet de
+  JSON-naam in `CodingKeys` (`case recipient = "to"`).
 - **Een property en een methode `set<Naam>` botsen** op JVM-niveau
   (`startingServer` ↔ `setStartingServer`).
 - **Een argumentlabel gelijk aan een property verbergt die property**

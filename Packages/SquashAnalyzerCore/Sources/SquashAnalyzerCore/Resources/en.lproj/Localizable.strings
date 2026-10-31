@@ -318,3 +318,22 @@
 "Eenvoudig" = "Simple";
 "Per punt: wie, hoe (winner, fout, stroke), waar op de baan en welke slag. De volledige analyse." = "Per point: who, how (winner, error, stroke), where on court and which shot. The full analysis.";
 "Per punt alleen wie en waar op de baan: twee tikken. De analyse toont waar punten gemaakt en verloren worden, service en rallytijd." = "Per point only who and where on court: two taps. The analysis shows where points are won and lost, serve and rally time.";
+
+/* 4.0: the player account (behind Features.playerAccount) */
+"Geen verbinding. Probeer het straks opnieuw." = "No connection. Try again in a moment.";
+"Inloggen is in deze build niet ingesteld." = "Signing in is not set up in this build.";
+"Er is al een account met dit e-mailadres. Log in of kies Wachtwoord vergeten." = "There is already an account with this email address. Sign in or choose Forgot password.";
+"Het e-mailadres of wachtwoord klopt niet." = "The email address or password is not right.";
+"Kies een wachtwoord van minstens 6 tekens." = "Choose a password of at least 6 characters.";
+"Dit e-mailadres klopt niet." = "This email address is not valid.";
+"Te veel pogingen. Probeer het over een paar minuten opnieuw." = "Too many attempts. Try again in a few minutes.";
+"Dit account is uitgeschakeld." = "This account has been disabled.";
+"Log opnieuw in." = "Please sign in again.";
+"Een account kan vanaf 16 jaar. Je kunt de app gewoon zonder account gebruiken." = "An account is for ages 16 and up. You can keep using the app without an account.";
+"Deze SBN-speler hoort al bij een ander account." = "This SBN player already belongs to another account.";
+"Zonder toestemming kan er geen account komen." = "An account needs your consent.";
+"Vul je naam in." = "Enter your name.";
+"Niet gevonden." = "Not found.";
+"Even te veel tegelijk. Probeer het later opnieuw." = "Too much at once. Try again later.";
+"Serverfout (code: %@)" = "Server error (code: %@)";
+"%@ tegen %@" = "%@ against %@";

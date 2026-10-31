@@ -179,3 +179,7 @@ Squashanalyzerscreens/
 
 # Raw simulator recordings for the Instagram reels (large, kept on the Mac)
 instagram/video-raw/
+
+# Account Worker, local test setup (server/account-worker/dev/local.mjs)
+server/account-worker/.dev.vars
+server/account-worker/dev/.local/

@@ -21,6 +21,8 @@ struct ContentView: View {
     @State private var showingReferee = false
     @State private var showingHistory = false
     @State private var showingSettings = false
+    /// Instellingen opens with Mijn team unfolded
+    @State private var settingsOpensTeam = false
     /// The tour version seen; the tour shows by itself until it is current
     @AppStorage(Onboarding.storageKey) private var tourSeen = 0
     /// The "Nieuw in 3.0" version seen; it comes first, with the tour as a choice
@@ -61,7 +63,8 @@ struct ContentView: View {
         HomeView(onCoach: { showingCoach = true },
                  onReferee: { showingReferee = true },
                  onViewHistory: { showingHistory = true },
-                 onOpenSettings: { showingSettings = true },
+                 onOpenSettings: { settingsOpensTeam = false; showingSettings = true },
+                 onFindClub: { settingsOpensTeam = true; showingSettings = true },
                  onLiveFollow: { liveFollow = LiveFollowRequest(link: "") })
         .fullScreenCover(isPresented: $showingCoach) {
             let players = SwiftDataPlayerStore(context: modelContext)
@@ -103,7 +106,7 @@ struct ContentView: View {
             }
         }
         .fullScreenCover(isPresented: $showingSettings) {
-            SettingsView(isPresented: $showingSettings)
+            SettingsView(isPresented: $showingSettings, opensTeam: settingsOpensTeam)
         }
         .fullScreenCover(isPresented: Binding(get: { analysedMatch != nil }, set: { if !$0 { analysedMatch = nil } })) {
             if let match = analysedMatch {
@@ -240,9 +243,10 @@ struct ContentView: View {
         tourSeen = Onboarding.currentVersion
     }
 
-    /// "Teamlink invullen" in the tour: Instellingen opens once the cover has gone
+    /// "Zoek je club" in the tour: Instellingen opens once the cover has gone
     private func openTeamLinkFromTour() {
         welcomeSeen()
+        settingsOpensTeam = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { showingSettings = true }
     }
 

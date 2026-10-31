@@ -13,6 +13,8 @@ struct HomeView: View {
     var onReferee: () -> Void
     var onViewHistory: () -> Void
     var onOpenSettings: () -> Void
+    /// "Zoek je club" on the competition card: Instellingen with Mijn team open
+    var onFindClub: () -> Void
     /// Wedstrijd volgen (live score op het vergrendelscherm)
     var onLiveFollow: () -> Void
 
@@ -29,7 +31,7 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     HomeMenuHeader(onSettings: onOpenSettings)
-                    LeagueTeamCard(onSetup: onOpenSettings)
+                    LeagueTeamCard(onSetup: onFindClub)
                     HomeMenuTiles(
                         onCoach: onCoach,
                         onReferee: onReferee,

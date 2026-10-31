@@ -11,6 +11,8 @@ enum CoachInputSettings {
 /// Settings view for managing app configuration
 struct SettingsView: View {
     @Binding var isPresented: Bool
+    /// Opens with Mijn team unfolded (from "Zoek je club")
+    var opensTeam = false
     @State private var apiKey: String = ""
     @State private var showingAPIKey = false
     @State private var showingSaveConfirmation = false
@@ -96,6 +98,7 @@ struct SettingsView: View {
             }
         }
         .onAppear {
+            if opensTeam { openPart = "team" }
             apiKey = APIKeyManager.shared.openAIAPIKey ?? ""
             teamDraft = teamURL
         }

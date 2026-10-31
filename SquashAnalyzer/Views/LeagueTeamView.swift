@@ -16,7 +16,7 @@ struct LeagueTeamCard: View {
             // Once per team link: the players of Mijn team into Spelers, marked "In mijn team"
             let store = SwiftDataPlayerStore(context: modelContext)
             Task { _ = await TeamRosterSync.run(snapshot, store: store) }
-        }, onSetup: onSetup, helpURL: UserManual.iPhoneTeamLink) { snapshot in
+        }, onSetup: onSetup) { snapshot in
             openedTeam = snapshot
         }
         .sheet(isPresented: Binding(get: { openedTeam != nil }, set: { if !$0 { openedTeam = nil } })) {

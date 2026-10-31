@@ -280,6 +280,8 @@ public struct AndroidHomeView: View {
     /// A coach match opened for its analysis from Afgeronde wedstrijden
     @State private var analysedMatch: Match? = nil
     @State private var showingSettings = false
+    /// Instellingen opens with Mijn team unfolded
+    @State private var settingsOpensTeam = false
     @State private var showingTeam = false
     @State private var team: LeagueTeamSnapshot?
     /// The tour version seen; the tour shows by itself until it is current
@@ -388,7 +390,8 @@ public struct AndroidHomeView: View {
                     }
                 }
                 .navigationDestination(isPresented: $showingSettings) {
-                    SharedSettingsView(aiCoach: aiCoach, backup: backup, onLanguage: onLanguage, leagueFetcher: leagueTeamFetcher)
+                    SharedSettingsView(aiCoach: aiCoach, backup: backup, onLanguage: onLanguage, leagueFetcher: leagueTeamFetcher,
+                                       opensTeam: settingsOpensTeam)
                 }
                 .navigationDestination(isPresented: $showingTeam) {
                     if let team {
@@ -412,11 +415,13 @@ public struct AndroidHomeView: View {
             if WhatsNew.shouldShow(seenVersion: whatsNewSeen) {
                 SharedWhatsNewView(manual: UserManual.android, onTeamLink: {
                     welcomeSeen()
+                    settingsOpensTeam = true
                     showingSettings = true
                 }) { welcomeSeen() }
             } else {
                 SharedOnboardingView(manual: UserManual.android, onTeamLink: {
                     welcomeSeen()
+                    settingsOpensTeam = true
                     showingSettings = true
                 }) { welcomeSeen() }
             }
@@ -485,11 +490,11 @@ public struct AndroidHomeView: View {
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 16) {
-                        HomeMenuHeader { showingSettings = true }
+                        HomeMenuHeader { settingsOpensTeam = false; showingSettings = true }
                         SharedLeagueTeamCard(fetcher: leagueTeamFetcher, onTeam: { snapshot in
                             let store = playerStore
                             Task { _ = await TeamRosterSync.run(snapshot, store: store) }
-                        }, onSetup: { showingSettings = true }, helpURL: UserManual.androidTeamLink) { snapshot in
+                        }, onSetup: { settingsOpensTeam = true; showingSettings = true }) { snapshot in
                             team = snapshot
                             showingTeam = true
                         }

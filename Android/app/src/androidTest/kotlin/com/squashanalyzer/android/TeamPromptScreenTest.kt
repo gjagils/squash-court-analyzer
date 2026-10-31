@@ -35,11 +35,10 @@ class TeamPromptScreenTest {
         compose.activityRule.scenario.recreate()
     }
 
-    @Test fun promptLeadsToSettingsWithTheHelpLink() {
+    @Test fun promptLeadsToSettingsWithTheClubSearch() {
         awaitText(prompt)
-        compose.onNodeWithText("Waar vind ik die?").assertIsDisplayed()
-        compose.onNodeWithText("Teamlink invullen").performClick()
-        awaitText("Vul de openbare teamlink", substring = true)
+        compose.onNodeWithText("Zoek je club").performClick()
+        awaitText("Zoek je club en kies je team. Daarna", substring = true)
         compose.onNodeWithText("Waar vind ik mijn teamlink?").performScrollTo().assertIsDisplayed()
         pressBack()
         awaitText(prompt)

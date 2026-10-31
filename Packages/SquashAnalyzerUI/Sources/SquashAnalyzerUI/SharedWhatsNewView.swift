@@ -7,7 +7,7 @@ import SquashAnalyzerCore
 /// then the badge reset sheet can come. iOS and Android alike.
 public struct SharedWhatsNewView: View {
     let manual: URL
-    /// "Teamlink invullen" on the tour's Competitie page
+    /// "Zoek je club" on the tour's Competitie page
     let onTeamLink: (() -> Void)?
     let onDone: () -> Void
 

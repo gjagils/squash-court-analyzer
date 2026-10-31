@@ -6,7 +6,7 @@ import SquashAnalyzerCore
 /// is always there. Own paging (a drag and the buttons), not a paged TabView:
 /// how Skip turns that into Compose is uncertain.
 public struct SharedOnboardingView: View {
-    /// "Teamlink invullen" on the Competitie page; nil leaves the button out
+    /// "Zoek je club" on the Competitie page; nil leaves the button out
     let onTeamLink: (() -> Void)?
     let manual: URL
     /// Finished or skipped
@@ -56,7 +56,7 @@ public struct SharedOnboardingView: View {
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                     if page == Onboarding.competitionPage, let onTeamLink {
-                        ActionButton(loc("TEAMLINK INVULLEN"), icon: "person.2.circle", style: .outlined, color: SharedColors.accent) {
+                        ActionButton(loc("ZOEK JE CLUB"), icon: "person.2.circle", style: .outlined, color: SharedColors.accent) {
                             onTeamLink()
                         }
                     }

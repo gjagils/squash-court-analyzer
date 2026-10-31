@@ -118,15 +118,16 @@ public struct SharedSettingsView: View {
     @State private var autoLast: Date?
 
     public init(aiCoach: AICoachContext? = nil, backup: BackupContext? = nil, onLanguage: ((String) -> Void)? = nil,
-                leagueFetcher: LeagueTeamFetcher? = nil) {
+                leagueFetcher: LeagueTeamFetcher? = nil, opensTeam: Bool = false) {
         self.aiCoach = aiCoach
         self.backup = backup
         self.onLanguage = onLanguage
         self.leagueFetcher = leagueFetcher
+        _openPart = State(initialValue: opensTeam ? "team" : nil)
     }
 
-    /// The part that is open; one at a time
-    @State private var openPart: String? = nil
+    /// The part that is open; one at a time (Mijn team when opened from "Zoek je club")
+    @State private var openPart: String?
 
     private func toggle(_ part: String) {
         withAnimation(.easeInOut(duration: 0.2)) { openPart = openPart == part ? nil : part }

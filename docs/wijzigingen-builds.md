@@ -10,6 +10,13 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 6)
 
+- **Competitiekaart en rondleiding: "Zoek je club" (31 oktober 2026, iOS en Android)**: de
+  kaart "Speel je competitie bij SBN?" op het beginscherm en de Competitie-pagina van de
+  rondleiding zeggen niet meer "vul je teamlink in" maar "zoek je club en kies je team"; de knop
+  heet "Zoek je club" en opent Instellingen met Mijn team al opengeklapt (`opensTeam`). De link
+  "Waar vind ik die?" op de kaart is weg (in Instellingen staat hij nog). Android-test
+  `TeamPromptScreenTest` aangepast.
+
 - **SBN: club zoeken en namen van de tegenstander (31 oktober 2026, iOS en Android, gedeelde
   schermen)**: op vraag van Gerd-Jan, afgestemd met SBN. Alleen openbare pagina's van
   sbn.toernooi.nl, er gaat niets terug.

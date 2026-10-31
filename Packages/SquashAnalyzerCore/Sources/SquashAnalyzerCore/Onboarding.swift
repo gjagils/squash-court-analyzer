@@ -30,7 +30,7 @@ public enum Onboarding {
         }
     }
 
-    /// Page 5 offers "Teamlink invullen"; page 6 is the last one
+    /// Page 5 offers "Zoek je club"; page 6 is the last one
     public static let competitionPage = 4
 
     /// The first page shows the three themes in the sticker's order (scheidsen, coachen, delen) instead of one symbol
@@ -47,7 +47,7 @@ public enum Onboarding {
         Page(symbol: "person.2", title: L10n.text("Kies speler"),
              text: L10n.text("Sla spelers op en kies ze bij het starten via Kies speler. Alleen dan verdienen ze badges en groeit hun profiel over de wedstrijden.")),
         Page(symbol: "trophy", title: L10n.text("Competitie"),
-             text: L10n.text("Speel je bij SBN? Vul je teamlink in, dan zie je je programma en de stand. Op de wedstrijdavond houd je de teamwedstrijd bij, van E1 tot E4.")),
+             text: L10n.text("Speel je bij SBN? Zoek je club en kies je team, dan zie je je programma en de stand. Op de wedstrijdavond houd je de teamwedstrijd bij, van E1 tot E4.")),
         Page(symbol: "square.and.arrow.up", title: L10n.text("Delen"),
              text: L10n.text("Houd je teamgenoten en supporters op de hoogte van de wedstrijden en de competitie. Met LIVE kijken ze mee via een link of op hun vergrendelscherm. Alles staat op je eigen telefoon: maak af en toe een back-up in Instellingen.")),
     ] }

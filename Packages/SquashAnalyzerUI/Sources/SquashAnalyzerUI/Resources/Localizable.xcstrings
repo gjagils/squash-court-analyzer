@@ -8425,24 +8425,6 @@
         }
       }
     },
-    "TEAMLINK INVULLEN": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ENTER TEAM LINK"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "TEAMLINK INVULLEN"
-          }
-        }
-      }
-    },
     "TEGENSTANDERS": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -8637,24 +8619,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Teamlink"
-          }
-        }
-      }
-    },
-    "Teamlink invullen": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enter team link"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Teamlink invullen"
           }
         }
       }
@@ -9991,24 +9955,6 @@
         }
       }
     },
-    "Vul de link van je team in en je ziet de stand en het programma, en je teamleden komen vanzelf bij Spelers.": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enter your team's link to see the standings and the fixtures, and your teammates appear in Players automatically."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vul de link van je team in en je ziet de stand en het programma, en je teamleden komen vanzelf bij Spelers."
-          }
-        }
-      }
-    },
     "Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -10149,24 +10095,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Waar vallen de punten"
-          }
-        }
-      }
-    },
-    "Waar vind ik die?": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Where do I find it?"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Waar vind ik die?"
           }
         }
       }
@@ -10783,6 +10711,24 @@
         }
       }
     },
+    "ZOEK JE CLUB": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FIND YOUR CLUB"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZOEK JE CLUB"
+          }
+        }
+      }
+    },
     "Zij winnen": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -10869,6 +10815,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zoek je club en kies je team. Daarna verschijnt Mijn team op het beginscherm."
+          }
+        }
+      }
+    },
+    "Zoek je club en kies je team: je ziet de stand en het programma, en je teamleden komen vanzelf bij Spelers.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find your club and pick your team to see the standings and the fixtures, and your teammates appear in Players automatically."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoek je club en kies je team: je ziet de stand en het programma, en je teamleden komen vanzelf bij Spelers."
           }
         }
       }

@@ -35,8 +35,6 @@ public struct SharedLeagueTeamCard: View {
     let onTeam: ((LeagueTeamSnapshot) -> Void)?
     /// Opens Instellingen, for the prompt shown while no team link is saved; nil hides that button
     let onSetup: (() -> Void)?
-    /// "Waar vind ik mijn teamlink?" in the manual of this platform
-    let helpURL: URL?
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     /// The prompt was closed with the cross: it stays away (Instellingen still has the field)
@@ -46,12 +44,11 @@ public struct SharedLeagueTeamCard: View {
     @State private var loading = false
 
     public init(fetcher: LeagueTeamFetcher, onTeam: ((LeagueTeamSnapshot) -> Void)? = nil,
-                onSetup: (() -> Void)? = nil, helpURL: URL? = nil,
+                onSetup: (() -> Void)? = nil,
                 onOpen: @escaping (LeagueTeamSnapshot) -> Void) {
         self.fetcher = fetcher
         self.onTeam = onTeam
         self.onSetup = onSetup
-        self.helpURL = helpURL
         self.onOpen = onOpen
     }
 
@@ -100,24 +97,15 @@ public struct SharedLeagueTeamCard: View {
                 }
                 .accessibilityLabel(loc("Sluiten"))
             }
-            Text("Vul de link van je team in en je ziet de stand en het programma, en je teamleden komen vanzelf bij Spelers.", bundle: textBundle)
+            Text("Zoek je club en kies je team: je ziet de stand en het programma, en je teamleden komen vanzelf bij Spelers.", bundle: textBundle)
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
-            HStack(spacing: 16) {
-                if let onSetup {
-                    Button { onSetup() } label: {
-                        Text("Teamlink invullen", bundle: textBundle)
-                            .font(SharedFonts.system(14, weight: .semibold))
-                            .foregroundColor(SharedColors.accent)
-                    }
-                }
-                if let helpURL {
-                    Link(destination: helpURL) {
-                        Text("Waar vind ik die?", bundle: textBundle)
-                            .font(SharedFonts.system(14))
-                            .foregroundColor(SharedColors.accent)
-                    }
+            if let onSetup {
+                Button { onSetup() } label: {
+                    Text("Zoek je club", bundle: textBundle)
+                        .font(SharedFonts.system(14, weight: .semibold))
+                        .foregroundColor(SharedColors.accent)
                 }
             }
         }

@@ -280,6 +280,21 @@ public class Match: Identifiable {
         games.flatMap { $0.points }
     }
 
+    /// Entered with simple coaching (only who and where): a match keeps the
+    /// way it was started, also when the setting changes halfway
+    public var isSimpleInput: Bool {
+        for point in allPoints where point.pointType == PointType.rally { return true }
+        return false
+    }
+
+    /// The input for the next point: the match's own once it has points
+    /// (anything but a simple point makes it detailed), else the setting
+    public func inputMode(setting: CoachInputMode) -> CoachInputMode {
+        if isSimpleInput { return CoachInputMode.simple }
+        if !allPoints.isEmpty { return CoachInputMode.detailed }
+        return setting
+    }
+
     /// Total match duration (sum of all rally durations)
     public func totalMatchDuration() -> TimeInterval {
         allPoints.reduce(0.0) { $0 + $1.duration }

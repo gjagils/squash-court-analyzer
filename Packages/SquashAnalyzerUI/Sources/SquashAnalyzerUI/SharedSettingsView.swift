@@ -80,9 +80,8 @@ struct SettingsSheet: View {
     }
 }
 
-/// Android's settings: the Mijn team link, the AI Coach API key and backups.
-/// The coach input mode is not here because Android's coach screen has only
-/// the score-tap flow.
+/// Android's settings: the Mijn team link, Coachen (Uitgebreid/Eenvoudig),
+/// the AI Coach API key and backups.
 public struct SharedSettingsView: View {
     let aiCoach: AICoachContext?
     let backup: BackupContext?
@@ -92,6 +91,7 @@ public struct SharedSettingsView: View {
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
+    @AppStorage(CoachInputMode.storageKey) private var coachInput = CoachInputMode.detailed.rawValue
     @AppStorage(LiveShare.enabledKey) private var liveSharing = true
     @AppStorage(LiveShare.photosKey) private var livePhotos = true
     @AppStorage(LiveFollow.alertsKey) private var liveAlerts = true
@@ -146,6 +146,9 @@ public struct SharedSettingsView: View {
                     if openPart == "language" {
                         LanguagePicker { code in onLanguage?(code) }.padding(.bottom, 16)
                     }
+                    SettingsDivider()
+                    SettingsRow(loc("Coachen"), icon: "list.bullet.clipboard", open: openPart == "coach") { toggle("coach") }
+                    if openPart == "coach" { CoachInputModePicker(selection: $coachInput).padding(.bottom, 16) }
                     SettingsDivider()
                     SettingsRow(loc("Baanindeling"), icon: "square.grid.3x3", open: openPart == "court") { toggle("court") }
                     if openPart == "court" { courtSection.padding(.bottom, 16) }
@@ -516,5 +519,31 @@ public struct SharedSettingsView: View {
         draft = ""
         message = loc("Teamlink verwijderd")
         messageIsError = false
+    }
+}
+
+/// Coachen: Uitgebreid or Eenvoudig, with what each asks per point. Shared by
+/// Android's settings; iOS has its own row with the same texts.
+public struct CoachInputModePicker: View {
+    @Binding var selection: String
+
+    public init(selection: Binding<String>) {
+        self._selection = selection
+    }
+
+    public var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Picker(loc("Coachen"), selection: $selection) {
+                Text(CoachInputMode.detailed.title).tag(CoachInputMode.detailed.rawValue)
+                Text(CoachInputMode.simple.title).tag(CoachInputMode.simple.rawValue)
+            }
+            .pickerStyle(.segmented)
+            Text(CoachInputMode.from(stored: selection).explanation)
+                .font(SharedFonts.system(12))
+                .foregroundColor(SharedColors.textMuted)
+            Text("Een wedstrijd houdt de manier waarop hij begon.", bundle: textBundle)
+                .font(SharedFonts.system(12))
+                .foregroundColor(SharedColors.textMuted)
+        }
     }
 }

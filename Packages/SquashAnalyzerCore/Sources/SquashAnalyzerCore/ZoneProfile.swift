@@ -109,7 +109,7 @@ public struct ZoneProfile: Equatable, Sendable {
         var profile = ZoneProfile()
         for point in game.points {
             guard let zone = point.zone else { continue }
-            let attacking = point.pointType == PointType.winner || point.pointType == PointType.forcedError
+            let attacking = point.pointType.isAttacking
             if attacking && point.scorer == player {
                 profile.won.add(zone)
             } else if attacking {

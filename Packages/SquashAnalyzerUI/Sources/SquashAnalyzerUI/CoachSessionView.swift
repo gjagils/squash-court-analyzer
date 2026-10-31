@@ -34,6 +34,9 @@ public struct CoachSessionView: View {
     @State private var match: Match? = nil
     @State private var pending: Match? = nil
     @State private var showingSetup = false
+    /// Uitgebreid or Eenvoudig coachen, asked once over the first setup
+    @AppStorage(CoachInputMode.storageKey) private var inputSetting = CoachInputMode.detailed.rawValue
+    @AppStorage(CoachInputMode.askedKey) private var inputModeAsked = false
     /// The session's writes, one at a time (SessionSaver, T19): points save in
     /// the background, finishing waits for a save that is still running
     @State private var saver = SessionSaver(busy: true)
@@ -81,6 +84,12 @@ public struct CoachSessionView: View {
                     startNewMatch(choice)
                 }
                 .disabled(saver.busy || saver.failed)
+                if !inputModeAsked {
+                    CoachInputModePrompt { mode in
+                        inputSetting = mode.rawValue
+                        inputModeAsked = true
+                    }
+                }
             }
             if saver.busy || (saver.saving && saver.exitAfterSave) {
                 ProgressView(match == nil && pending == nil && !showingSetup ? loc("Laden…") : loc("Even opslaan…"))
@@ -280,5 +289,63 @@ public struct CoachSessionView: View {
     @MainActor private func close() {
         onExit()
         dismiss()
+    }
+}
+
+/// "Hoe wil je coachen?": once, over the first coach setup. Both ways with
+/// what they ask per point; the choice stays in Instellingen → Coachen.
+struct CoachInputModePrompt: View {
+    let onChoose: (CoachInputMode) -> Void
+
+    var body: some View {
+        ZStack {
+            SharedColors.background.opacity(0.85).ignoresSafeArea()
+            ScrollView {
+                VStack(spacing: 14) {
+                    Text("Hoe wil je coachen?", bundle: textBundle)
+                        .font(SharedFonts.system(20, weight: .bold, design: .rounded))
+                        .foregroundColor(SharedColors.textPrimary)
+                        .multilineTextAlignment(.center)
+                    option(CoachInputMode.simple, icon: "mappin")
+                    option(CoachInputMode.detailed, icon: "list.bullet.clipboard")
+                    Text("Je kunt dit altijd wijzigen in Instellingen → Coachen.", bundle: textBundle)
+                        .font(SharedFonts.system(12, weight: .medium, design: .rounded))
+                        .foregroundColor(SharedColors.textMuted)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(22)
+                .background(SharedColors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .overlay(RoundedRectangle(cornerRadius: 20).stroke(SharedColors.accent.opacity(0.4), lineWidth: 1))
+                .padding(.horizontal, 20)
+                .padding(.vertical, 40)
+            }
+        }
+    }
+
+    private func option(_ mode: CoachInputMode, icon: String) -> some View {
+        Button { onChoose(mode) } label: {
+            HStack(alignment: .top, spacing: 12) {
+                AppSymbol(icon, size: 20, color: SharedColors.accent)
+                    .frame(width: 28)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(mode.title.uppercased())
+                        .font(SharedFonts.system(14, weight: .bold, design: .rounded))
+                        .tracking(1)
+                        .foregroundColor(SharedColors.accent)
+                    Text(mode.explanation)
+                        .font(SharedFonts.system(12, weight: .medium, design: .rounded))
+                        .foregroundColor(SharedColors.textSecondary)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(14)
+            .background(SharedColors.accent.opacity(0.08))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.accent.opacity(0.4), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
     }
 }

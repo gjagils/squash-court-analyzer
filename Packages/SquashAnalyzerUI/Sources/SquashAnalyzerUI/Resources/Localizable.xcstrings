@@ -3331,6 +3331,42 @@
         }
       }
     },
+    "Een wedstrijd houdt de manier waarop hij begon.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A match keeps the way it started."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een wedstrijd houdt de manier waarop hij begon."
+          }
+        }
+      }
+    },
+    "Eenvoudig gecoacht: per punt alleen wie en waar. Winners, fouten en slagen zijn niet bijgehouden; de zones laten zien waar punten gemaakt en verloren worden.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simple coaching: per point only who and where. Winners, errors and shots were not recorded; the zones show where points were won and lost."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eenvoudig gecoacht: per punt alleen wie en waar. Winners, fouten en slagen zijn niet bijgehouden; de zones laten zien waar punten gemaakt en verloren worden."
+          }
+        }
+      }
+    },
     "Eerder getelde wedstrijd koppelen": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -4303,6 +4339,24 @@
         }
       }
     },
+    "Hoe wil je coachen?": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How do you want to coach?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoe wil je coachen?"
+          }
+        }
+      }
+    },
     "Hoort %@ – %@ bij deze teamwedstrijd? Kies de partij.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -4533,6 +4587,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je invoer is bewaard in dit scherm. Probeer opnieuw op te slaan."
+          }
+        }
+      }
+    },
+    "Je kunt dit altijd wijzigen in Instellingen → Coachen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can change this any time in Settings → Coach."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je kunt dit altijd wijzigen in Instellingen → Coachen."
           }
         }
       }

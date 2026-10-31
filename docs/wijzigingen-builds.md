@@ -10,6 +10,26 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 6)
 
+- **Eenvoudig coachen (31 oktober 2026, iOS en Android, gedeelde schermen)**: op vraag van
+  Gerd-Jan na de competitie-avond (`docs/voorstel-simpel-coachen.md`). Per punt alleen wie
+  en waar: tik op de score, dan direct op de baan. Instellingen → Coachen: Uitgebreid ·
+  Eenvoudig (`CoachInputMode`, `@AppStorage("coachInputMode")`, standaard Uitgebreid); de
+  eerste keer dat Coach opent vraagt een pop-up "Hoe wil je coachen?" (`CoachInputModePrompt`,
+  eenmalig via `coachInputModeAsked`). Core: nieuw punttype `PointType.rally` ("Rally",
+  titel "Punt"): zone ja, slag nee; telt als aanvallend punt (`PointType.isAttacking`) voor
+  beste zone, `ZoneProfile` en het zone-advies, niet als winner. Een wedstrijd houdt zijn
+  manier (`Match.isSimpleInput`, `inputMode(setting:)`), ook als de instelling halverwege
+  verandert. Badges: `recordsPointTypes` is uit bij een eenvoudige wedstrijd (geen "zonder
+  fouten"-badges). Analyse: uitleg bovenaan; slagen, punttypes, volleys en "Beste slag"
+  verborgen. Geen schemawijziging (punttype is al tekst). Let op: een oudere Android-build
+  kan een wedstrijd met `Rally`-punten niet openen (Room weigert een onbekend punttype); alleen
+  relevant bij teruggaan naar een oudere build, een back-up zet hem daar om naar Winner.
+  Tests: `SimpleCoachTests`. Getest op iOS-simulator en Android-emulator (pop-up, instelling,
+  een game van 11-4, analyse en coachkaart). Nog niet: de handleiding op de website.
+  - Releasenote: "Nieuw: eenvoudig coachen. Tik alleen wie het punt maakt en waar op de baan;
+    de analyse laat zien waar punten gewonnen en verloren worden. Kies in Instellingen →
+    Coachen tussen Uitgebreid en Eenvoudig."
+
 - **Bevindingen competitie-avond 30 oktober (31 oktober 2026, iOS en Android, gedeelde
   schermen)**: op vraag van Gerd-Jan.
   - *Groot lettertype / schermzoom* (Galaxy A57: het veld was een niet aan te tikken

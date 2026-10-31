@@ -544,7 +544,7 @@ public class Game: Identifiable {
     /// service points say nothing about where the ball went, and the opponent's
     /// own errors are the opponent's.
     public func attackingPoints(by player: Player) -> [Point] {
-        points.filter { $0.scorer == player && ($0.pointType == PointType.winner || $0.pointType == PointType.forcedError) }
+        points.filter { $0.scorer == player && $0.pointType.isAttacking }
     }
 
     // MARK: - Duration Analysis

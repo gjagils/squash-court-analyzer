@@ -23,6 +23,7 @@ struct SettingsView: View {
     @State private var teamDraft = ""
     @AppStorage(AutomaticBackup.enabledKey) private var automaticBackup = true
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
+    @AppStorage(CoachInputMode.storageKey) private var coachInput = CoachInputMode.detailed.rawValue
     @AppStorage(LiveShare.enabledKey) private var liveSharing = true
     @AppStorage(LiveShare.photosKey) private var livePhotos = true
     @AppStorage(LiveFollow.ownMatchKey) private var lockScreenScore = true
@@ -59,6 +60,14 @@ struct SettingsView: View {
                         SettingsRow(appText("Taal"), icon: "globe", open: openPart == "language") { toggle("language") }
                         if openPart == "language" {
                             LanguagePicker { code in AppLanguageChoice.apply(code) }.padding(.bottom, 16)
+                        }
+                        SettingsDivider()
+                        // Uitgebreid or Eenvoudig coachen (the shared picker, as on Android)
+                        SettingsRow(appText("Coachen"), icon: "list.bullet.clipboard", open: openPart == "coach") { toggle("coach") }
+                        if openPart == "coach" {
+                            CoachInputModePicker(selection: $coachInput)
+                                .environment(\.colorScheme, SharedColors.colorScheme)
+                                .padding(.bottom, 16)
                         }
                         SettingsDivider()
                         SettingsRow(appText("Baanindeling"), icon: "square.grid.3x3", open: openPart == "court") { toggle("court") }

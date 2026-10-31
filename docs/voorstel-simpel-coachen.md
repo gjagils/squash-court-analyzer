@@ -1,7 +1,9 @@
 # Voorstel: simpel coachen (alleen wie en waar)
 
-Status: voorstel, 31 oktober 2026, op vraag van Gerd-Jan na de competitie-avond. Nog niets
-gebouwd.
+Status: gebouwd op 31 oktober 2026 (zie `docs/wijzigingen-builds.md`, "Eenvoudig coachen"). De
+keuzes: een nieuw punttype `Rally` ("Punt"), "waar eindigde de rally", een instelling
+Uitgebreid/Eenvoudig met een eenmalige pop-up; standaard blijft Uitgebreid. Hieronder het
+oorspronkelijke voorstel.
 
 ## Het idee
 

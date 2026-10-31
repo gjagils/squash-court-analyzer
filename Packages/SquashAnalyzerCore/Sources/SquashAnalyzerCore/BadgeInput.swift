@@ -17,7 +17,8 @@ public extension Match {
             player2GamesWon: player2GamesWon,
             matchWinner: matchWinner,
             gamesToWin: gamesToWin,
-            recordsPointTypes: true,
+            // Simple coaching keeps no errors: "no unforced errors" badges cannot be earned
+            recordsPointTypes: !isSimpleInput,
             duration: totalMatchDuration(),
             startedAt: allPoints.min { a, b in a.timestamp < b.timestamp }?.timestamp
         )

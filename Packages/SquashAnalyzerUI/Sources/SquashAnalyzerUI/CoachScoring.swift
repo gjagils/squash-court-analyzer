@@ -253,6 +253,8 @@ public struct CoachScoringView: View {
     @State private var editingNames = false
     /// 6 or 9 zones, a setting (Instellingen)
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
+    /// Uitgebreid or Eenvoudig (Instellingen → Coachen); a match keeps its own once it has points
+    @AppStorage(CoachInputMode.storageKey) private var inputSetting = CoachInputMode.detailed.rawValue
     /// "Uit de lucht" for the point being entered; off again after every point
     @State private var volley = false
     /// Down / Out / Service / Grond for an unforced error; cleared after every point
@@ -514,7 +516,7 @@ public struct CoachScoringView: View {
             // Scrolls when the list does not fit (large text or display zoom)
             FitOrScroll {
                 VStack(spacing: 8) {
-                    ForEach(PointType.allCases) { type in
+                    ForEach(PointType.detailed) { type in
                         if !type.serverOnly || game.selectedPlayer == game.currentServer {
                             PointTypeButton(pointType: type, color: playerColor, compact: true) {
                                 selectPointType(type)
@@ -897,6 +899,10 @@ public struct CoachScoringView: View {
                 game.clearSelection()
             } else {
                 game.selectPlayer(player)
+                // Eenvoudig: only who and where, so straight on to the court
+                if match.inputMode(setting: CoachInputMode.from(stored: inputSetting)) == CoachInputMode.simple {
+                    game.selectPointType(PointType.rally)
+                }
             }
         }
     }

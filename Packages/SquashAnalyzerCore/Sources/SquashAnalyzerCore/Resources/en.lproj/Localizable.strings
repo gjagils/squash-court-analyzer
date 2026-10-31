@@ -310,3 +310,11 @@
 "Deze server kan de stand nog niet naar je telefoon sturen." = "This server can't send the score to your phone yet.";
 "Je telefoon staat het niet toe. Zet Live Activities (iPhone) of meldingen (Android) aan voor SquashAnalyzer in de instellingen van je telefoon." = "Your phone doesn't allow it. Turn on Live Activities (iPhone) or notifications (Android) for SquashAnalyzer in your phone's settings.";
 "Volgen lukte niet. Probeer het later opnieuw." = "Following didn't work. Please try again later.";
+
+/* MARK: Simple coaching (PointType.rally, CoachInputMode) */
+"Punt" = "Point";
+"Alleen wie en waar" = "Only who and where";
+"Uitgebreid" = "Detailed";
+"Eenvoudig" = "Simple";
+"Per punt: wie, hoe (winner, fout, stroke), waar op de baan en welke slag. De volledige analyse." = "Per point: who, how (winner, error, stroke), where on court and which shot. The full analysis.";
+"Per punt alleen wie en waar op de baan: twee tikken. De analyse toont waar punten gemaakt en verloren worden, service en rallytijd." = "Per point only who and where on court: two taps. The analysis shows where points are won and lost, serve and rally time.";

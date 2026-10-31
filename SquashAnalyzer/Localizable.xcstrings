@@ -647,6 +647,23 @@
         }
       }
     },
+    "Coachen" : {
+      "generatesSymbol" : false,
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coach"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coachen"
+          }
+        }
+      }
+    },
     "DELEN" : {
       "generatesSymbol" : false,
       "localizations" : {

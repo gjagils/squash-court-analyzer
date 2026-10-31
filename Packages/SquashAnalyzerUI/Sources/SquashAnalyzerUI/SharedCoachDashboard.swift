@@ -79,14 +79,25 @@ public struct SharedCoachDashboardView: View {
                         showingCard = true
                     }
                     GameNoteCard(gameId: game.id) { showingNote = true }
-                    quickStats
-                    HStack(alignment: .top, spacing: 12) {
-                        heatmap
-                        shots
+                    if simple {
+                        simpleNote
                     }
-                    pointTypes
+                    quickStats
+                    // Eenvoudig coachen keeps no shots, winners or errors: only the
+                    // parts that work with who and where
+                    if simple {
+                        heatmap
+                    } else {
+                        HStack(alignment: .top, spacing: 12) {
+                            heatmap
+                            shots
+                        }
+                        pointTypes
+                    }
                     ServiceReturnCard(match: match, gameIndex: matchGameIndex, player: player)
-                    volleys
+                    if !simple {
+                        volleys
+                    }
                     localAdvice
                     // Only with an OpenAI key (Instellingen); without one the local advice is it
                     if hasKey {
@@ -239,6 +250,23 @@ public struct SharedCoachDashboardView: View {
         loadingAI = false
     }
 
+    /// Entered with Eenvoudig coachen (only who and where)
+    private var simple: Bool { match.isSimpleInput }
+
+    private var simpleNote: some View {
+        HStack(alignment: .top, spacing: 10) {
+            AppSymbol("mappin", size: 14, color: SharedColors.accent)
+            Text("Eenvoudig gecoacht: per punt alleen wie en waar. Winners, fouten en slagen zijn niet bijgehouden; de zones laten zien waar punten gemaakt en verloren worden.", bundle: textBundle)
+                .font(SharedFonts.system(12, weight: .medium, design: .rounded))
+                .foregroundColor(SharedColors.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(SharedColors.accent.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
     // MARK: Numbers
 
     private var quickStats: some View {
@@ -248,8 +276,10 @@ public struct SharedCoachDashboardView: View {
             stat(loc("Gewonnen"), won.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", SharedColors.positive, icon: "timer")
             stat(loc("Verloren"), lost.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", SharedColors.warmRed, icon: "timer")
             stat(loc("Beste zone"), game.bestZone(for: player)?.title ?? "-", SharedColors.gold, icon: "mappin")
-            stat(loc("Beste slag"), game.bestShotType(for: player)?.rawValue ?? "-", SharedColors.accent, icon: "star.fill",
-                 shot: game.bestShotType(for: player))
+            if !simple {
+                stat(loc("Beste slag"), game.bestShotType(for: player)?.rawValue ?? "-", SharedColors.accent, icon: "star.fill",
+                     shot: game.bestShotType(for: player))
+            }
         }
     }
 

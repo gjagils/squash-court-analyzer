@@ -42,10 +42,10 @@ tussen games) en in het vervolg na de wedstrijd.
 | C2 | **Snelle invoer** (instelling): alleen wie en hoe (winner/fout), zonder vak en slag | Bij snelle rally's of een eerste keer is 4 tikken per punt veel; liever minder detail dan gemiste punten | M | **Gebouwd 31 oktober als Eenvoudig coachen** (3.1): wie en waar op de baan, zonder slag en punttype; keuze bij de eerste keer Coach en in Instellingen |
 | C3 | **Notitie per game** (tekst, eventueel dicteren) die in de analyse en het verslag terugkomt | Coaches onthouden "backhand-volley te laat" niet tot na de wedstrijd | S | **Gebouwd 12 oktober** |
 | C4 | **Service en return**: punten gewonnen op eigen service versus bij hand-out, per speler | Data is er al (`Point.server`); zegt veel over druk zetten | S | **Gebouwd 12 oktober** |
-| C5 | **Verslag voor de speler** (pdf of plaatje) met analyse, advies en de profiellijn | Nu deel je de score; de analyse zelf blijft op de telefoon van de coach | M | Later |
-| C6 | **Scouting**: profiel van een tegenstander (als die opgeslagen is) vóór een wedstrijd, ook vanuit het programma van Mijn team | Het profiel werkt al voor iedere gekozen speler; alleen de ingang ontbreekt | S | Later (3.1 haalt wel de spelers van de tegenstander op bij SBN, maar opent nog geen profiel) |
-| C7 | **Coachingfocus koppelen aan cijfers** (focus "Backhand" → hoe vaak won/verloor je links achter) | De focus-tags staan nu los van de analyse | M | Later |
-| C8 | **Trainingsmodus** (oefenpartij zonder badges en zonder telling in het profiel) | Staat al als vroeg idee op de lijst | M | Later |
+| C5 | **Verslag voor de speler** (pdf of plaatje) met analyse, advies en de profiellijn | Nu deel je de score; de analyse zelf blijft op de telefoon van de coach | M | **Na 4.0** ([roadmap](roadmap.md)) |
+| C6 | **Scouting**: profiel van een tegenstander (als die opgeslagen is) vóór een wedstrijd, ook vanuit het programma van Mijn team | Het profiel werkt al voor iedere gekozen speler; alleen de ingang ontbreekt | S | **3.2** ([roadmap](roadmap.md)) |
+| C7 | **Coachingfocus koppelen aan cijfers** (focus "Backhand" → hoe vaak won/verloor je links achter) | De focus-tags staan nu los van de analyse | M | **3.3** ([roadmap](roadmap.md)) |
+| C8 | **Trainingsmodus** (oefenpartij zonder badges en zonder telling in het profiel) | Staat al als vroeg idee op de lijst | M | **3.1** ([roadmap](roadmap.md)) |
 
 ## Scheidsrechter
 
@@ -63,15 +63,15 @@ hieronder). Let op: de WSF-regels zijn in 2025 aangepast (inspelen 4 minuten,
 | # | Punt | Waarom | Grootte | Voorstel |
 |---|---|---|---|---|
 | R1 | **Scherm blijft aan** tijdens een wedstrijd | In de pauze ging het scherm op slot | S | **Gedaan 11 oktober** (iOS en Android, nog op een telefoon te proberen) |
-| R2 | **Officiële timers** met waarschuwing: inspelen 4 min (wissel na 2), 1 min tot start, 2 min tussen games, "15 seconden" en "Time" (trillen of geluid) | Een scheidsrechter moet de tijd bewaken; nu is er alleen een stopwatch | M | Backlog |
-| R3 | **Conduct**: waarschuwing, conduct stroke, game, match, met de soort overtreding; een conduct stroke verandert het servicevak niet | Regel 14; elke serieuze scheidsrechterapp heeft het | M | Backlog |
-| R4 | **"No let"** als vastgelegde beslissing, plus **appeals**, met een beslissingenlijst in de wedstrijd | Nu tel je bij "no let" alleen het punt; achteraf is niet terug te zien wat er beslist is | M | Backlog |
+| R2 | **Officiële timers** met waarschuwing: inspelen 4 min (wissel na 2), 1 min tot start, 2 min tussen games, "15 seconden" en "Time" (trillen of geluid) | Een scheidsrechter moet de tijd bewaken; nu is er alleen een stopwatch | M | **3.2** ([roadmap](roadmap.md)) |
+| R3 | **Conduct**: waarschuwing, conduct stroke, game, match, met de soort overtreding; een conduct stroke verandert het servicevak niet | Regel 14; elke serieuze scheidsrechterapp heeft het | M | **Na 4.0** ([roadmap](roadmap.md)) |
+| R4 | **"No let"** als vastgelegde beslissing, plus **appeals**, met een beslissingenlijst in de wedstrijd | Nu tel je bij "no let" alleen het punt; achteraf is niet terug te zien wat er beslist is | M | **Na 4.0** ([roadmap](roadmap.md)) |
 | R5 | **Best of 3** kiezen (nu altijd best of 5) | Jeugd, toernooien en oefenpartijen; de coachmodus heeft hetzelfde | S | **Gebouwd 22 oktober** (best of 1, 3 of 5, coach en scheidsrechter; N2 in de backlog van 21 oktober) |
-| R6 | **Blessuretimer per soort** (3 min eigen, 15 min veroorzaakt, 5 min bloed, 2 min materiaal) en opgave | Op het lastigste moment geen regels opzoeken | M | Backlog |
-| R7 | **Stand omroepen**: tekst in WSF-bewoording op het scherm ("Hand-out, 5-3", "Game ball", "10-all"), optioneel uitgesproken | Helpt clubleden die zelden fluiten | M | Backlog |
-| R8 | **Wedstrijdformulier** als pdf (games, beslissingen, conduct) | SBN werkt met een papieren formulier; de captain voert de uitslag in | M | Backlog |
-| R9 | **Liggend scherm en tablet**, grote stand leesbaar door het glas | Wat Squore en Squash Score Referee gewaardeerd maakt | L | Backlog |
-| R10 | **Invoer zonder te kijken**: Apple Watch, toetsenbord of bluetooth-klikker | Niche, maar gevraagd door scheidsrechters op de galerij | L | Backlog |
+| R6 | **Blessuretimer per soort** (3 min eigen, 15 min veroorzaakt, 5 min bloed, 2 min materiaal) en opgave | Op het lastigste moment geen regels opzoeken | M | **Na 4.0** ([roadmap](roadmap.md)) |
+| R7 | **Stand omroepen**: tekst in WSF-bewoording op het scherm ("Hand-out, 5-3", "Game ball", "10-all"), optioneel uitgesproken | Helpt clubleden die zelden fluiten | M | **Weggehaald** ([roadmap](roadmap.md)) |
+| R8 | **Wedstrijdformulier** als pdf (games, beslissingen, conduct) | SBN werkt met een papieren formulier; de captain voert de uitslag in | M | **Na 4.0** ([roadmap](roadmap.md)) |
+| R9 | **Liggend scherm en tablet**, grote stand leesbaar door het glas | Wat Squore en Squash Score Referee gewaardeerd maakt | L | **Na 4.0** ([roadmap](roadmap.md)) |
+| R10 | **Invoer zonder te kijken**: Apple Watch, toetsenbord of bluetooth-klikker | Niche, maar gevraagd door scheidsrechters op de galerij | L | **Weggehaald** ([roadmap](roadmap.md)) |
 
 ## Teamgenoot
 
@@ -86,14 +86,14 @@ opstelling, geen seizoensoverzicht.
 
 | # | Punt | Waarom | Grootte | Voorstel |
 |---|---|---|---|---|
-| T1 | **Programma in je agenda** (.ics-export van de wedstrijden van Mijn team) | Klein, en iedereen in het team wil het | S | Backlog |
-| T2 | **Seizoensoverzicht per teamlid**: partijen, gewonnen/verloren, games, uit de teamwedstrijden in de app en het record van SBN | "Hoe staan we ervoor" gaat nu alleen over het team | M | Backlog |
-| T3 | **Vergelijken met de SBN-uitslag** na de wedstrijd (staat al op de lijst) | Fouten in de invoer bij SBN vallen dan op | M | Backlog |
-| T4 | **Opstelling plannen**: wie speelt E1–E4 volgende week, met beschikbaarheid via de teamlink | Captains regelen dit nu in de groepsapp | L | Later |
-| T5 | **Tegenstander bekijken**: de vorige uitslag tegen dit team en hun stand, vanuit het programma | De gegevens staan al op de SBN-pagina's die de app leest | S | Later |
-| T6 | **Melding als een teamgenoot een partij invult** tijdens een live teamwedstrijd | Nu moet je op Vernieuwen tikken | L (vraagt push) | Later |
-| T7 | **Badgecategorie Teamspeler** (staat al op de lijst) | Beloont meedoen aan de competitie | M | Later |
-| T8 | **Koppeling met toernooi.nl** (idee Gerd-Jan, 12 oktober): uitslagen, opstelling en spelers rechtstreeks van het competitiesysteem, in plaats van de openbare teampagina | Maakt T2–T5 eenvoudiger; de opstelling komt dan ook in beeld | L | Backlog, eerst uitzoeken |
+| T1 | **Programma in je agenda** (.ics-export van de wedstrijden van Mijn team) | Klein, en iedereen in het team wil het | S | **Weggehaald** ([roadmap](roadmap.md)) |
+| T2 | **Seizoensoverzicht per teamlid**: partijen, gewonnen/verloren, games, uit de teamwedstrijden in de app en het record van SBN | "Hoe staan we ervoor" gaat nu alleen over het team | M | **4.0** ([roadmap](roadmap.md)) |
+| T3 | **Vergelijken met de SBN-uitslag** na de wedstrijd (staat al op de lijst) | Fouten in de invoer bij SBN vallen dan op | M | **Na 4.0** ([roadmap](roadmap.md)) |
+| T4 | **Opstelling plannen**: wie speelt E1–E4 volgende week, met beschikbaarheid via de teamlink | Captains regelen dit nu in de groepsapp | L | **Na 4.0** ([roadmap](roadmap.md)) |
+| T5 | **Tegenstander bekijken**: de vorige uitslag tegen dit team en hun stand, vanuit het programma | De gegevens staan al op de SBN-pagina's die de app leest | S | **3.1** ([roadmap](roadmap.md)) |
+| T6 | **Melding als een teamgenoot een partij invult** tijdens een live teamwedstrijd | Nu moet je op Vernieuwen tikken | L (vraagt push) | **3.3** ([roadmap](roadmap.md)) |
+| T7 | **Badgecategorie Teamspeler** (staat al op de lijst) | Beloont meedoen aan de competitie | M | **4.0** ([roadmap](roadmap.md)) |
+| T8 | **Koppeling met toernooi.nl** (idee Gerd-Jan, 12 oktober): uitslagen, opstelling en spelers rechtstreeks van het competitiesysteem, in plaats van de openbare teampagina | Maakt T2–T5 eenvoudiger; de opstelling komt dan ook in beeld | L | **Na 4.0** ([roadmap](roadmap.md)) |
 
 Over T8: de app leest nu alleen de openbare teampagina die de gebruiker zelf
 instelt. Een zoektool over sbn.toernooi.nl is op 8 oktober bewust niet gebouwd,

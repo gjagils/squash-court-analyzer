@@ -173,9 +173,15 @@ public struct HomeTeamSummary: View {
                 }
                 if let next = snapshot.nextFixture() {
                     Divider().overlay(SharedColors.line(0.15))
-                    Text("Volgende · \(LeagueDates.day(next.date)) · \(next.home) – \(next.away)", bundle: textBundle)
+                    Text("Volgende · \(LeagueDates.day(next.date))", bundle: textBundle)
                         .font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    // The own team lighter and bolder, so you see at a glance which side you are
+                    HStack(spacing: 4) {
+                        LeagueTeamName(name: next.home, own: snapshot.name)
+                        Text("–").foregroundColor(SharedColors.textMuted)
+                        LeagueTeamName(name: next.away, own: snapshot.name)
+                    }
+                    .font(SharedFonts.system(13))
                     let opponent = LeagueOpponentText.line(snapshot.opponent(in: next))
                     if !opponent.isEmpty {
                         Text(opponent)

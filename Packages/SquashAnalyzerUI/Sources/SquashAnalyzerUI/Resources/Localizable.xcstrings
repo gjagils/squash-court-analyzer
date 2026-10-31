@@ -9991,20 +9991,20 @@
         }
       }
     },
-    "Volgende · %@ · %@ – %@": {
+    "Volgende · %@": {
       "extractionState": "manual",
       "generatesSymbol": false,
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Next · %@ · %@ – %@"
+            "value": "Next · %@"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Volgende · %@ · %@ – %@"
+            "value": "Volgende · %@"
           }
         }
       }

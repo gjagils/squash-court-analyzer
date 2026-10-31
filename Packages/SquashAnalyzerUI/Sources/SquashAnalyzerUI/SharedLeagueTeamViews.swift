@@ -25,6 +25,21 @@ enum LeagueDates {
     }
 }
 
+/// A team name in the programme: the followed team light and bold, the other
+/// team muted, so you see at a glance which side is yours
+struct LeagueTeamName: View {
+    let name: String
+    let own: String
+
+    var body: some View {
+        let isOwn = TeamMatch.sameTeam(name, own)
+        Text(name)
+            .fontWeight(isOwn ? .semibold : .regular)
+            .foregroundColor(isOwn ? SharedColors.textPrimary : SharedColors.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
 /// The opponent of a coming match in one line: "Nr. 2 · vorige keer 7-13
 /// verloren" (backlog T5); "" when there is nothing to say (a cup match, the
 /// first meeting with a team outside the poule)
@@ -227,8 +242,8 @@ public struct SharedLeagueTeamDetailView: View {
                                     .foregroundColor(SharedColors.textMuted)
                                     .frame(width: 82, alignment: .leading)
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(fixture.home).foregroundColor(SharedColors.textPrimary)
-                                    Text(fixture.away).foregroundColor(SharedColors.textSecondary)
+                                    LeagueTeamName(name: fixture.home, own: snapshot.name)
+                                    LeagueTeamName(name: fixture.away, own: snapshot.name)
                                     // A coming match: who the opponent is in the standings and how it went last time
                                     let opponent = fixture.score == nil ? LeagueOpponentText.line(snapshot.opponent(in: fixture)) : ""
                                     if !opponent.isEmpty {

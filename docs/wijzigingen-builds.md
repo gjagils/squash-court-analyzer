@@ -10,7 +10,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.1 build 2)
 
-## 3.1 build 2 (31 oktober 2026)
+## 3.1 build 2 (geüpload 31 oktober 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group)
 
 Build 1 staat alleen op Play; de iPhone-upload van build 1 strandde op de nieuwe Apple-
 licentieovereenkomst, dus iOS begint bij build 2. Releasenotes: `release-notes/3.1-2.md` en

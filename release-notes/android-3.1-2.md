@@ -1,0 +1,1 @@
+Nieuw in 3.1: eenvoudig coachen (tik alleen wie het punt maakt en waar), Mijn team zonder link (zoek je club en tik je team) en de spelers van de tegenstander met één tik in een teamwedstrijd. Build 2 telt ook anoniem het gebruik, één keer per dag zonder naam of apparaat-ID; uit te zetten in Instellingen → Live meekijken. Uitleg: squashanalyzer.com/testen

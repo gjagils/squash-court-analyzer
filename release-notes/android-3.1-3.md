@@ -1,0 +1,1 @@
+Build 3: kies bij Soort wedstrijd voor Oefenpartij, dan telt de wedstrijd niet mee voor badges en je profiel. De opzet is korter (Best of en Later instappen onder Meer opties) en onthoudt je laatste keuze. In Mijn team zie je bij een komende wedstrijd de plaats van de tegenstander en de vorige uitslag, en je eigen team staat vet. Uitleg: squashanalyzer.com/testen

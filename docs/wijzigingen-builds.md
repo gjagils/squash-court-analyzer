@@ -8,7 +8,15 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.0 build 6)
+## Volgende build (na 3.1 build 1)
+
+## 3.1 build 1 (geüpload 31 oktober 2026)
+
+Releasenotes: `release-notes/3.1-1.md` en `release-notes/android-3.1-1.md`. Website: 3.1-sectie op
+de homepage (nl en en), testen.html met "Nieuw in 3.1", handleidingen bijgewerkt (club zoeken,
+eenvoudig coachen, Sluiten, scheidsrechterwedstrijd openen, tegenstanders, Instellingen →
+Coachen). Niet in deze build: de app-gebruikstelling van branch `claude/gebruikstelling-3.1`.
+
 
 - **Competitiekaart en rondleiding: "Zoek je club" (31 oktober 2026, iOS en Android)**: de
   kaart "Speel je competitie bij SBN?" op het beginscherm en de Competitie-pagina van de

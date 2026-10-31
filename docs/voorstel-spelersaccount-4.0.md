@@ -77,16 +77,17 @@ leger dan de lokale. Daarom komen er twee knoppen:
 
 - **"Eerdere wedstrijden meenemen"**: één keer, op je eigen telefoon, bij het
   maken van het account. Je kiest welke opgeslagen speler jij bent. De app
-  stuurt de wedstrijden met die speler vanaf het begin van het badgeseizoen
-  (`BadgeSeason.start`, 23 oktober 2026) als je eigen wedstrijden. Ze tellen
-  meteen mee.
+  stuurt **alle** wedstrijden met die speler als je eigen wedstrijden, ook
+  die van vóór het badgeseizoen. Ze tellen meteen mee.
 - **"Eerdere wedstrijden sturen"** bij de coach, in Spelers, bij een speler
   die aan een account gekoppeld is. Die wedstrijden komen als gewone
   verzoeken binnen. De speler beoordeelt ze, zo nodig in één keer ("Alle 12
   gebruiken").
 
-Oudere wedstrijden van vóór het badgeseizoen tellen voor trend en vorm, niet
-voor badges. Zo gaat het nu ook.
+Wedstrijden van vóór het badgeseizoen (`BadgeSeason.start`, 23 oktober 2026)
+tellen voor trend en vorm, niet voor badges. Dat regelt `BadgeEngine` al bij
+het rekenen in de app, dus zo gaat het nu lokaal ook. Daarom moeten ze wel
+mee naar de server: anders mist de centrale trend de eerste maanden.
 
 ### 4. De kaart van de coach blijft anders. Dat is bewust
 

@@ -1,103 +1,170 @@
 # Releaseplan: kleine 3.x-releases naast 4.0
 
-Stand: 31 oktober 2026. Gerd-Jan wil:
+Stand: 31 oktober 2026. Tweede versie: de feedback op de eerste versie is
+verwerkt. Gerd-Jan wil:
 
 - 3.1 en 3.2 als kleine releases, met bugfixes en kleine wijzigingen;
-- de grote features (spelersaccount, centrale badges en wat daarbij hoort)
-  als 4.0.
+- de grote features (spelersaccount, centrale badges, zie het
+  [voorstel](voorstel-spelersaccount-4.0.md)) als 4.0.
 
-Hieronder staat hoe dat aan te pakken is zonder dat de twee elkaar in de weg
-zitten.
+## Advies: alles op `main`, 4.0 achter een vlag
 
-## Advies: alles op `main`, 4.0 achter een schakelaar
-
-Er zijn twee manieren.
-
-| | **Lange 4.0-branch** | **Op `main` achter een schakelaar** (advies) |
+| | **Lange 4.0-branch** | **Op `main` achter een vlag** (advies) |
 |---|---|---|
-| Hoe | 4.0 wordt op een eigen branch gebouwd, `main` blijft 3.x. Pas bij de release wordt alles samengevoegd | Alles gaat in kleine stukjes naar `main`, zoals nu. Nieuwe 4.0-onderdelen staan uit in een 3.x-build |
-| Samenvoegen | Wordt steeds pijnlijker. 4.0 raakt dezelfde bestanden als bijna elke 3.x-fix (Instellingen, beginscherm, Spelers, badges), en via Skip ook de Android-kant | Er valt niets samen te voegen |
-| Bugfixes | Moeten op twee plekken | Eén keer |
-| Testen | Twee codebases om groen te houden | De suites testen alles, ook 4.0 met de schakelaar aan |
-| Past bij de werkafspraken | Nee, die zeggen: klein committen, direct naar `main` | Ja |
+| Hoe | 4.0 op een eigen branch, `main` blijft 3.x | Alles in kleine stukjes naar `main`; 4.0-onderdelen staan uit in 3.x-builds |
+| Samenvoegen | Wordt steeds pijnlijker: 4.0 raakt dezelfde bestanden als bijna elke 3.x-fix (Instellingen, beginscherm, Spelers, badges), via Skip ook op Android | Er valt niets samen te voegen |
+| Bugfixes | Op twee plekken | Eén keer |
+| Past bij de werkafspraken | Nee | Ja: klein committen, direct naar `main` |
 
-### De schakelaar
+## Het grootste risico: het databaseschema
 
-- **In de app:** in Core komt een vlag `Features.playerAccount`.
-  - In een 3.x-build staat hij vast uit. Dan zie je geen menu-item, geen
-    scherm en geen netwerkverkeer naar de account-API.
-  - Voor 4.0-testbuilds staat hij aan, via een buildinstelling: een
-    Xcode-configuratie en een Gradle-`buildConfigField`. Dat werkt hetzelfde
-    als hoe de Firebase-waarden nu al in de Android-build komen.
-  - Daarnaast een verborgen ontwikkelaarsschakelaar, zodat je 4.0 op je eigen
-    iPhone kunt aanzetten zonder aparte build.
-- **Op de server:** de account-Worker (zie het [voorstel](voorstel-spelersaccount-4.0.md))
-  is nieuw en los. Hij kan gewoon live staan terwijl geen enkele app hem
-  gebruikt.
-- **Database-wijzigingen** in D1 gaan via genummerde migraties. Een 3.x-app
-  merkt daar niets van.
+De iPhone-app gebruikt SwiftData. Het schema staat nu op `SchemaV7`. Android
+gebruikt Room, nu versie 9.
 
-Ook het clubscherm kan zo: eerst als proef met een geheime link. Daarvoor is
-geen app-update nodig.
+Stel dat 4.0 een nieuw schema nodig heeft (`SchemaV8`, Room 10) en een tester
+installeert een 4.0-build. Dan migreert de database. Gaat hij daarna terug
+naar 3.x, dan kan die oudere app de database niet meer openen.
+
+**Afspraak:**
+1. **De accountdata blijft buiten het schema.** Het account, de wachtrij, het
+   postvak en de gesynchroniseerde wedstrijden komen in een eigen bestand of
+   eigen bestanden, zoals Competitie dat nu doet met `TeamMatchStore`. Dan
+   verandert er aan SwiftData en Room niets.
+2. **Is een schemawijziging toch nodig**, bijvoorbeeld een account-id bij een
+   speler, dan gaat die migratie **eerst in een 3.x-build**, met lege kolommen.
+   Pas daarna gaat 4.0 de kolommen gebruiken. Zo delen beide lijnen altijd
+   hetzelfde schema.
+3. Een test controleert dat een 3.x-build een database van de nieuwste
+   4.0-build kan openen.
+
+## De vlag: wat zit er in een 3.x-build
+
+- **In Core** komt een vlag `Features.playerAccount`. Die bepaalt of
+  menu-items, schermen en netwerkverkeer naar de account-API bestaan.
+- **De waarde komt uit de buildconfiguratie:** een Xcode-configuratie en een
+  Gradle-`buildConfigField`, zoals de Firebase-waarden nu op Android. Een
+  3.x-store-build heeft de vlag vast uit.
+- **Geen zware afhankelijkheden.** Inloggen gaat via de REST-API van Firebase
+  (zie het voorstel). Daarom komt er geen Firebase-SDK en geen
+  `skip-firebase` in de app. De extra code in een 3.x-build is dus klein.
+  Apple-inlog gebruikt `AuthenticationServices`, en dat zit al in iOS.
+- **Een verborgen ontwikkelaarsschakelaar alleen in debug-builds.** Zo kun je
+  4.0 op je eigen telefoon aanzetten zonder aparte build. In een
+  store-build zit hij niet. App Review keurt verborgen functies in een
+  store-build soms af.
+
+## De live-Worker
+
+Het spelersaccount komt in een eigen Worker. Toch verandert er ook iets aan
+de bestaande live-Worker (`squash-live-beta`):
+
+- **koppelen via het SBN-spelerpad** in teamsessies;
+- **het clubscherm**, dat zich aanmeldt bij de bestaande teamsessies.
+
+Regels daarvoor:
+
+- **Alleen toevoegen.** Nieuwe velden zijn optioneel. Een 3.x-app die ze
+  niet stuurt, werkt precies zoals nu.
+- **Nieuwe endpoints** komen naast de bestaande, er verandert niets aan de
+  oude.
+- De bestaande tests van de Worker blijven ongewijzigd groen. Dat is het
+  bewijs dat 3.x niets merkt.
 
 ## Versies en builds
 
 - **3.1** = wat nu in de test zit (build 2). Daar alleen nog bugfixes bij,
   dan naar productie.
 - **3.2** = de volgende kleine release. Kandidaten (allemaal S of M, geen
-  account nodig):
-  - programma in je agenda (.ics, T1);
-  - SquashLevels-link bij een speler;
-  - voortgang naar de volgende badgetrede;
-  - onderlinge stand bij Kies speler;
+  account nodig), uit de [persona-backlog](backlog-personas-2026-10-11.md)
+  en de [buildbacklog](wijzigingen-builds.md#backlog):
+  - programma in je agenda (T1);
   - vorige uitslag tegen de tegenstander (T5);
-  - eventueel de officiële timers voor de scheidsrechter (R2).
+  - officiële timers voor de scheidsrechter (R2);
+  - SquashLevels-link bij een speler ([plan](plan-squashlevels-profiel.md));
+  - voortgang naar de volgende badgetrede;
+  - onderlinge stand bij Kies speler.
+
+  Ook de vlag zelf (uit) en eventueel een schemamigratie voor 4.0 (zie
+  hierboven) gaan in 3.2.
 - **3.3 enzovoort** zolang 4.0 nog niet klaar is.
 - **4.0** = spelersaccount en centrale badges, eventueel met het
   clubabonnement.
 
-Twee versielijnen tegelijk testen kan in beide stores:
+### Testen in twee lijnen: let op
 
-- **TestFlight** kent per versie een eigen reeks builds. 3.2 build 1 en
-  4.0 build 1 kunnen naast elkaar staan, elk voor een eigen groep testers.
-  Bijvoorbeeld Squashteam voor 3.x en een kleinere groep "4.0-proef".
-- **Google Play** kijkt alleen naar de versionCode. Wie op twee tracks zit,
-  krijgt de build met de hoogste code. 4.0 (versionCode 4.000.100 en hoger)
-  is altijd hoger dan elke 3.x.
-  - Zet de 4.0-testers op een **eigen gesloten track**.
-  - Laat de 3.x-testers op intern, alpha en de Google Group zoals nu.
-  - Testers die op beide tracks zitten, krijgen 4.0. Dat is precies wat je
-    wilt voor de proefgroep.
+- **TestFlight:** er kan per toestel maar één versie van de app staan. Een
+  tester heeft dus 3.2 **of** 4.0, nooit beide. Hij kan wel terugwisselen,
+  maar dat werkt alleen als het schema gedeeld blijft (zie hierboven).
+- **Google Play** kijkt alleen naar de versionCode. Een 4.0-build
+  (versionCode 4.000.100 en hoger) is altijd hoger dan elke 3.x. Wie een
+  4.0-build heeft, **kan niet terug** naar 3.x en krijgt ook de 3.2 uit
+  productie niet meer. De proefgroep blijft dus op de 4.0-testtrack tot 4.0
+  in productie gaat.
+- **Daarom:** maak de 4.0-proefgroep **klein en bewust**, met een paar mensen
+  die dat weten en ermee kunnen leven. Bijvoorbeeld jij, één coach en twee of
+  drie spelers van je eigen team. Op Play krijgen zij een eigen gesloten
+  track. In TestFlight komen ze in een eigen groep "4.0-proef".
 
-`scripts/version.py` kan dit al aan: het schema rekent met major en minor.
-Wel nodig: de 4.0-builds krijgen de schakelaar aan. Dat kan als extra vlag
-bij `--xcode`/`--gradle`, of via een eigen buildconfiguratie. Het distributie-
-en uploadscript moeten dan de juiste groep of track kiezen.
+`scripts/version.py` rekent al met major en minor. Nodig: een vlag voor de
+4.0-buildconfiguratie, en distributie- en uploadscripts die de juiste groep
+of track kiezen.
 
-## Werkwijze per week (voorstel)
+### Testen in beide standen
 
-1. **Bugfixes en kleine wensen** gaan direct naar `main`, zoals nu. Ze komen
-   in de volgende 3.x-build.
-2. **4.0-werk** gaat in kleine stukken achter de schakelaar naar `main`, elk
-   stuk met tests. Eerst de server, dan de app.
-3. **Een 3.x-release** komt van `main` met de schakelaar uit. Voor de release
-   controleren dat er niets van 4.0 zichtbaar is. Daar komt een test voor
-   die de app met de schakelaar uit doorloopt.
-4. **Een 4.0-proefbuild** komt van dezelfde `main` met de schakelaar aan, en
-   gaat naar de 4.0-proefgroep.
-5. **4.0 klaar:** de schakelaar wordt standaard aan en de oude-situatiecode
-   gaat weg. De release-notes, de website en de handleiding krijgen een
-   4.0-sectie.
+- De suites draaien **met de vlag uit**. Zo bewijs je dat 3.x niets van 4.0
+  laat zien.
+- De suites draaien **ook met de vlag aan**. Anders veroudert de 4.0-code op
+  `main` ongemerkt.
+- Hoe: Core-tests met beide waarden, de iOS-tests met beide
+  buildconfiguraties, Android unit tests met beide `buildConfigField`s. De
+  connected-tests op de emulator draaien alleen in de stand van de volgende
+  upload.
 
-`docs/wijzigingen-builds.md` krijgt twee kopjes per build: "3.x" en
-"4.0 (achter de schakelaar)". Zo blijft zichtbaar wat in welke release
-zit.
+## Werkwijze
 
-## Eerste stappen als je hiervoor kiest
+1. **Bugfixes en kleine wensen** gaan direct naar `main`, en in de volgende
+   3.x-build.
+2. **4.0-werk** gaat in kleine stukken achter de vlag naar `main`, met
+   tests. Eerst de server, dan de app.
+3. **Een 3.x-release** komt van `main` met de vlag uit, nadat beide standen
+   groen zijn.
+4. **Een 4.0-proefbuild** komt van dezelfde `main` met de vlag aan, voor de
+   proefgroep.
+5. `docs/wijzigingen-builds.md` krijgt per build twee kopjes: "3.x" en
+   "4.0 (achter de vlag)".
 
-1. 3.1 afronden en naar productie. Het privacylabel moet daarvoor nog worden
-   aangepast, zie [wijzigingen per build](wijzigingen-builds.md).
-2. Besluiten over de open keuzes in het
-   [voorstel spelersaccount](voorstel-spelersaccount-4.0.md).
-3. De schakelaar bouwen. Dat is klein en kan al in 3.2, uitgeschakeld.
-4. De 3.2-lijst kiezen uit de kandidaten hierboven.
+## Eerste stappen
+
+1. **3.1 afronden** en naar productie. Het privacylabel moet daarvoor nog
+   worden aangepast.
+2. **Besluiten** over de open keuzes in het
+   [voorstel](voorstel-spelersaccount-4.0.md#open-keuzes-voor-gerd-jan).
+3. **Besluit over het schema:** accountdata in eigen bestanden (advies).
+   Als er toch een migratie komt, staat vast welke en in welke 3.x-build.
+4. **De vlag en de tests in beide standen** bouwen, in 3.2, met de vlag uit.
+5. **De proefgroep samenstellen** en de testers vertellen dat ze tot de
+   release op 4.0 blijven.
+6. **De 3.2-lijst kiezen** uit de kandidaten hierboven.
+
+## Wanneer is 4.0 klaar
+
+4.0 gaat naar productie als:
+
+- iedereen in de proefgroep minstens één competitieavond heeft gespeeld met
+  wedstrijden die door een ander zijn ingestuurd en door de speler zijn
+  goedgekeurd;
+- eerdere wedstrijden meenemen werkt, en de centrale kaart dan klopt met de
+  lokale;
+- inloggen werkt op iOS en Android, met e-mail, Apple en Google;
+- account verwijderen werkt, met het Apple-token ingetrokken en de data
+  weg, en ook het verwijderformulier op de website werkt;
+- versturen zonder dekking en daarna opnieuw proberen geeft geen dubbele
+  verzoeken;
+- de suites zijn groen in beide standen;
+- de live-Worker-tests zijn ongewijzigd groen;
+- het privacybeleid, de privacylabels in beide stores en de
+  verwerkersovereenkomsten zijn geregeld;
+- de handleiding, de website en de releasenotes hebben een 4.0-sectie.
+
+Daarna gaat de vlag standaard aan, en wordt de code voor zonder vlag
+opgeruimd in 4.1.

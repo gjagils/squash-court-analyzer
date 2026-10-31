@@ -1,7 +1,8 @@
 # Voorstel: spelersaccount met centrale badges (4.0)
 
-Stand: 31 oktober 2026. Dit is een uitwerking. Er is nog niets gebouwd.
-Gerd-Jan wil eerst zien wat het betekent voor:
+Stand: 31 oktober 2026. Tweede versie: de feedback op de eerste versie is
+verwerkt. Er is nog niets gebouwd. Gerd-Jan wil eerst zien wat dit betekent
+voor:
 
 - de opslag;
 - de hoeveelheid data;
@@ -9,8 +10,8 @@ Gerd-Jan wil eerst zien wat het betekent voor:
 - de beveiliging;
 - de kosten.
 
-Daarna beslist hij. De bijbehorende planning (3.1 en 3.2 klein, dit als 4.0)
-staat in [releaseplan 3.x en 4.0](releaseplan-3x-4.0.md).
+Daarna beslist hij. De planning (3.1 en 3.2 klein, dit als 4.0) staat in het
+[releaseplan 3.x en 4.0](releaseplan-3x-4.0.md).
 
 ## Het idee (besluiten van Gerd-Jan, 31 oktober)
 
@@ -21,250 +22,349 @@ staat in [releaseplan 3.x en 4.0](releaseplan-3x-4.0.md).
   worden berekend uit al jouw geaccepteerde wedstrijden. De kaarten van andere
   spelers blijven zoals nu: lokaal, alleen uit de wedstrijden op die
   telefoon.
-- **Iedereen mag een wedstrijd voor je laten tellen.** Na de wedstrijd
-  beoordeel jij of je hem wilt gebruiken. Er is dus geen lijst van vaste
-  invoerders. Jij beslist per wedstrijd.
+- **Iedereen mag een wedstrijd voor je insturen.** Na de wedstrijd beoordeel
+  jij of je hem wilt gebruiken.
 - **Inloggen kan op drie manieren:** met e-mail en wachtwoord, met Apple of met
   Google.
 - **Het account is vrijwillig.** De app blijft zonder account werken zoals nu.
 
+## Keuzes in het ontwerp
+
+### 1. Heeft de invoerder een account nodig? Advies: nee
+
+Als de coach en de scheidsrechter ook moeten inloggen, is dat een forse
+drempel. Dan komen er veel minder wedstrijden binnen. Daarom:
+
+- **Insturen mag zonder account.** De app krijgt een eigen
+  **apparaatsleutel**, net zoals een live-sessie nu een schrijfsleutel heeft.
+  Een wedstrijd insturen gaat met die sleutel.
+- **Limieten** gelden per apparaatsleutel en per IP-adres, met de bestaande
+  `LiveLimiter`. Bijvoorbeeld 20 wedstrijden per apparaat per dag.
+- **Afzender blokkeren** gaat per apparaatsleutel. In een verzoek staat de naam
+  die de invoerder in de app gebruikt, bijvoorbeeld de coachnaam uit
+  Instellingen.
+- **Heeft de invoerder wel een account**, dan staat dat bij het verzoek
+  ("van Peter, geverifieerd"). Dat geeft extra vertrouwen, maar is niet nodig.
+
+Alleen **je eigen data lezen en beheren** vraagt om inloggen.
+
+### 2. Wie rekent de badges uit? Advies: de app
+
+De badgeregels zitten in `BadgeEngine` (Core, Swift). Die regels naar
+JavaScript overzetten voor de server betekent twee regelsets die gelijk
+moeten blijven. Dat gaat op den duur mis. Daarom:
+
+- **De server bewaart alleen** de ruwe wedstrijden (het compacte formaat
+  hieronder) en de awards.
+- **De app rekent.** Na inloggen of synchroniseren haalt de app je
+  geaccepteerde wedstrijden op en draait de bestaande `BadgeEngine`
+  eroverheen. Nieuwe awards stuurt hij terug naar de server.
+- **Verwijderde awards** worden bewaard als markering met datum (een
+  "tombstone", het veld `deletedAt`). Zo worden ze bij het samenvoegen niet
+  opnieuw toegevoegd. Dat werkt hetzelfde als hoe `CardStore` nu kaartlinks
+  samenvoegt.
+- **Twee telefoons tegelijk:** awards hebben al een vast id per badge,
+  wedstrijd en kaart (`AwardValue.awardId`). Twee telefoons die hetzelfde
+  uitrekenen, leveren dus geen dubbele awards op.
+
+Het nadeel: een gebruiker zou met een aangepaste app zichzelf badges kunnen
+geven. Dat raakt alleen zijn eigen kaart, dus dat accepteren we.
+
+### 3. Eerdere wedstrijden: niet op nul beginnen
+
+Zonder regeling begint iedereen in 4.0 op nul, en is de centrale kaart lang
+leger dan de lokale. Daarom komen er twee knoppen:
+
+- **"Eerdere wedstrijden meenemen"**: één keer, op je eigen telefoon, bij het
+  maken van het account. Je kiest welke opgeslagen speler jij bent. De app
+  stuurt de wedstrijden met die speler vanaf het begin van het badgeseizoen
+  (`BadgeSeason.start`, 23 oktober 2026) als je eigen wedstrijden. Ze tellen
+  meteen mee.
+- **"Eerdere wedstrijden sturen"** bij de coach, in Spelers, bij een speler
+  die aan een account gekoppeld is. Die wedstrijden komen als gewone
+  verzoeken binnen. De speler beoordeelt ze, zo nodig in één keer ("Alle 12
+  gebruiken").
+
+Oudere wedstrijden van vóór het badgeseizoen tellen voor trend en vorm, niet
+voor badges. Zo gaat het nu ook.
+
+### 4. De kaart van de coach blijft anders. Dat is bewust
+
+De coach ziet bij Peter lokaal een kaart uit zijn eigen wedstrijden. Peter
+ziet centraal een kaart uit alles wat hij heeft goedgekeurd. Die twee
+verschillen, en dat is de bedoeling: de data blijft van Peter.
+
+Wil de coach de centrale kaart zien, dan deelt Peter zijn **kaartlink**, zoals
+nu al kan. Dat zetten we in de handleiding en bij het koppelen in de app.
+
 ## Hoe het werkt voor de gebruiker
 
-1. **Account maken.** Instellingen → Mijn account. Je logt in met e-mail en
-   wachtwoord, met Apple of met Google. Daarna kies je "Dit ben ik": je
-   SBN-speler uit Mijn team, of alleen je naam als je niet bij SBN speelt. Je
-   geeft toestemming met één duidelijke vraag. Daar staat bij wat er
-   bewaard wordt en waarom.
-2. **Herkend worden.** Een ander moet jou kunnen kiezen als speler in een
-   wedstrijd. Dat kan op drie manieren:
-   - **automatisch via het SBN-spelerpad**: speel je in een teamwedstrijd, dan
-     weet de app al wie je bent;
-   - **met je spelerscode of QR-code**: die laat je zien aan de coach, en die
-     koppelt hem aan een speler in Spelers;
-   - **via een link die je deelt**, zoals de kaartlinks nu.
-3. **Wedstrijd invoeren.** Je coach of de scheidsrechter speelt de wedstrijd
-   zoals nu. Is een van de spelers gekoppeld aan een account, dan stuurt de
-   app na afloop een compacte versie naar de server, geadresseerd aan die
-   speler. Voor de invoerder verandert er verder niets.
+1. **Account maken.** Instellingen → Mijn account.
+   - Je logt in met e-mail en wachtwoord, met Apple of met Google.
+   - De app vraagt je **geboortejaar**, zie Jeugd hieronder.
+   - Je kiest "Dit ben ik": je SBN-speler uit Mijn team, of alleen je naam als
+     je niet bij SBN speelt.
+   - Je geeft toestemming met één duidelijke vraag. Daar staat bij wat er
+     bewaard wordt en waarom.
+   - Daarna komt de vraag "Eerdere wedstrijden meenemen?".
+2. **Herkend worden.** Een invoerder moet jou kunnen kiezen. Dat kan op drie
+   manieren:
+   - **automatisch via het SBN-spelerpad** in een teamwedstrijd;
+   - **met je spelerscode of QR-code**, die de coach koppelt aan een speler in
+     Spelers;
+   - **via een link** die je deelt.
+3. **Wedstrijd invoeren.** Dat gaat zoals nu. Is een speler gekoppeld, dan
+   zet de app na afloop een compacte versie in een **uitgaande wachtrij**:
+   - elke wedstrijd heeft een vast id, dus opnieuw proberen geeft geen
+     tweede verzoek, want de server negeert een id die hij al heeft;
+   - zonder dekking in de sporthal blijft de wedstrijd in de wachtrij tot er
+     weer verbinding is, ook na het herstarten van de app;
+   - de invoerder ziet alleen een klein "wordt verstuurd" bij de wedstrijd.
 4. **Beoordelen.** Je krijgt een melding: "Nieuwe wedstrijd van Peter, 30 okt,
    3-1 tegen Mark. Gebruiken?" Je kunt kiezen:
-   - **Gebruiken**: de wedstrijd telt mee voor je badges, kaart, vorm en
-     trend.
+   - **Gebruiken**: de wedstrijd telt mee voor badges, kaart, vorm en trend.
    - **Niet gebruiken**: de wedstrijd wordt van de server gewist.
-   - **Geen antwoord binnen 30 dagen**: de wedstrijd wordt ook gewist.
+   - **Geen antwoord**: na 7 dagen komt er een herinnering. Na **90 dagen**
+     wordt de wedstrijd gewist.
 
-   Wedstrijden die je zelf invoert, tellen meteen mee.
+   Wat je zelf invoert, telt meteen mee.
 5. **Dubbele wedstrijden.** Voeren de coach en de scheidsrechter dezelfde
-   partij in, dan herkent de server dat aan de datum, de tegenstander en de
-   uitslag. Je ziet dan één verzoek met de keuze welke versie je gebruikt. De
-   versie van de coach heeft meer details.
-6. **Op elke telefoon.** Log je in op een tweede telefoon, dan staan je
-   kaart en badges daar ook.
+   partij in, dan zie je één verzoek met de keuze welke versie je gebruikt.
+   Herkennen gaat in deze volgorde:
+   1. **Teamwedstrijd**: team-id plus partij E1–E4. Die zijn eenduidig.
+   2. **SBN-spelerpad** van beide spelers plus de datum.
+   3. **Terugval**: datum, tegenstandernaam en uitslag. Dat is minder
+      betrouwbaar ("Mark" tegen "Mark de Vries", een telfout in de uitslag).
+      Daarom voegt de server niets samen, maar vraagt hij het de speler:
+      "Is dit dezelfde wedstrijd als …?"
+6. **Op elke telefoon.** Log je in op een tweede telefoon, dan haalt die je
+   wedstrijden op en rekent dezelfde kaart en badges uit.
 
 ## Welke data, en hoeveel
 
 Het uitgangspunt is: zo weinig mogelijk centraal. De volledige analyse blijft
-op de telefoon van wie hem invoerde. Dat zijn onder meer de notities per
-game, het advies, de AI Coach en foto's van tegenstanders.
+op de telefoon van wie hem invoerde. Dat zijn onder meer de notities, het
+advies, de AI Coach en foto's van tegenstanders.
 
 | Gegeven | Inhoud | Grootte |
 |---|---|---|
-| Account | e-mail, inlogmethode, aanmaakdatum, toestemmingsdatum | < 1 KB |
+| Account | e-mail en inlogmethode (bij Firebase), geboortejaar, toestemmingsdatum | < 1 KB |
 | Spelersprofiel | naam, eventueel SBN-spelerpad, club, eigen foto (optioneel) | 1 KB + foto 30–60 KB |
-| Wedstrijd voor de badges | datum, tegenstander (alleen naam), uitslag per game, per rally: winnaar, soort punt, vak, slag, duur, volley, serveerder. Dit is wat `BadgeMatchInput` nu ook gebruikt | ca. 2–3 KB (een wedstrijd van 4 games en ~95 rally's, gemeten in het huidige formaat) |
-| Samenvatting voor trend en vorm | winners, fouten, slagen, vakken, rallyduur. Dit is wat `PlayerTrend` nu per wedstrijd uitrekent | ca. 0,3 KB |
-| Behaalde badges | badge, wedstrijd, datum | < 0,1 KB per stuk |
-| Openstaande verzoeken | dezelfde wedstrijd plus van wie hij komt, maximaal 30 dagen | ca. 3 KB, tijdelijk |
+| Wedstrijd | vast id, datum, eventueel team-id en partij, tegenstander (naam en eventueel SBN-pad), uitslag per game. Per rally: winnaar, soort punt, vak, slag, duur, volley, serveerder. Dit is wat `BadgeMatchInput` nu ook gebruikt | ca. 2–3 KB (4 games, ~95 rally's, gemeten) |
+| Awards | badge, wedstrijd, datum, eventueel `deletedAt` | < 0,1 KB per stuk |
+| Openstaande verzoeken | dezelfde wedstrijd plus apparaatsleutel en naam van de afzender, maximaal 90 dagen | ca. 3 KB, tijdelijk |
 
-Ter vergelijking: een volledige coachwedstrijd zoals de app hem nu bewaart is
-ongeveer 26 KB.
+Trend en vorm rekent de app uit de wedstrijden. Daarvoor is geen aparte opslag
+nodig. Ter vergelijking: een volledige coachwedstrijd zoals de app hem nu
+bewaart is ongeveer 26 KB.
 
-**Per speler:** een actieve competitiespeler speelt zo'n 40 tot 80 gemeten
-wedstrijden per seizoen. Dat is **ongeveer 150–250 KB per seizoen**, plus
-een foto.
+**Per speler:** zo'n 40 tot 80 gemeten wedstrijden per seizoen. Dat is
+**ongeveer 150–250 KB per seizoen**, plus een foto.
 
 | Spelers met account | Data per jaar (zonder foto's) | Foto's |
 |---|---|---|
 | 500 | ca. 0,1 GB | 25 MB |
 | 5.000 | ca. 1 GB | 250 MB |
-| 50.000 | ca. 10 GB | 2,5 GB |
+| 50.000 | ca. 10–12 GB | 2,5 GB |
 
-Ter vergelijking: SBN heeft enkele duizenden competitiespelers. 5.000
-accounts is al een groot succes. 50.000 accounts is het scenario "heel
-Nederland en België plus het buitenland".
+SBN heeft enkele duizenden competitiespelers. 5.000 accounts is al een groot
+succes. 50.000 accounts is het scenario "heel Nederland en België plus het
+buitenland".
 
 ## Waar zetten we het neer
 
 Ja, dit wordt **een echte database**. De live-server bewaart nu alleen
-tijdelijke dingen in Durable Objects: een live wedstrijd wordt na twee uur
-gewist. Accounts en wedstrijden moeten jaren blijven staan, en je wilt
-erin kunnen zoeken. Bijvoorbeeld "welke verzoeken staan er voor speler X"
-of "alle spelers van All Inn" voor het clubscherm.
-
-Advies: blijf bij Cloudflare. Daar draait alles al, en je hebt Workers Paid.
+tijdelijke dingen. Accounts en wedstrijden moeten jaren blijven staan en je
+wilt erin kunnen zoeken. Advies: blijf bij Cloudflare, waar alles al draait.
 
 | Onderdeel | Waar | Waarom |
 |---|---|---|
-| Database | **Cloudflare D1** (SQLite), aangemaakt met jurisdictie `eu` | Een gewone SQL-database naast de Worker die er al is. De data staat gegarandeerd in de EU, net als de live-sessies nu (`LIVE_JURISDICTION = "eu"`). De jurisdictie kan alleen bij het aanmaken worden gekozen. D1 heeft **Time Travel**: je kunt de database tot 30 dagen terugzetten |
-| Foto's | **Cloudflare R2** met jurisdictie `eu`, of in eerste instantie geen foto's | Bestanden horen niet in de database |
-| Inloggen | Zie hieronder | |
+| Database | **Cloudflare D1** (SQLite), aangemaakt met jurisdictie `eu` | Een gewone SQL-database. De data staat gegarandeerd in de EU, net als de live-sessies nu (`LIVE_JURISDICTION = "eu"`). De jurisdictie kan alleen bij het aanmaken worden gekozen. **Time Travel** zet de database tot 30 dagen terug |
+| Foto's | **Cloudflare R2**, jurisdictie `eu`, of in eerste instantie geen foto's | Bestanden horen niet in de database |
+| API | Een **aparte Worker** `squash-account` | Een fout in de accountcode raakt het live meekijken op de competitieavond dan niet |
 | Live, team, clubscherm | Blijft in Durable Objects | Tijdelijk en realtime, zoals nu |
 
-De API komt in de bestaande Worker (`server/live-worker`) onder `/api/v4/...`,
-of in een aparte Worker `squash-account`. Mijn advies is een **aparte
-Worker**. Dan raakt een fout in de accountcode het live meekijken op de
-competitieavond niet, en kun je ze los uitrollen.
+**Grens van D1:** een D1-database mag op Workers Paid maximaal **10 GB**
+zijn. Bij 5.000 spelers is dat jarenlang geen punt. Bij het scenario met
+50.000 spelers (10–12 GB per jaar) past het niet meer in één database. Er
+zijn twee uitwegen, en die hoeven we nu niet te bouwen:
 
-### Inloggen: zelf bouwen of een dienst
+- **Wedstrijdgegevens naar R2.** De rally's van een wedstrijd gaan als één
+  bestand naar R2. In D1 blijven alleen de index, de uitslag en de awards
+  staan. Dan is D1 maar een fractie zo groot.
+- **Eén database per seizoen.**
+
+Het datamodel houdt hier vanaf het begin rekening mee: de rally's staan in
+een eigen kolom of tabel, zodat ze later makkelijk te verhuizen zijn.
+
+### Inloggen
 
 E-mail met wachtwoord is het lastigste deel. Het vraagt het volgende:
 
 - wachtwoorden veilig bewaren;
 - het e-mailadres bevestigen;
-- wachtwoord vergeten, met een resetmail;
-- bescherming tegen raden van wachtwoorden;
-- inloggen met Apple en Google controleren.
+- wachtwoord vergeten;
+- bescherming tegen raden van wachtwoorden.
 
-| | **A. Firebase Authentication** (advies) | **B. Zelf in de Worker** |
-|---|---|---|
-| E-mail + wachtwoord, Apple, Google | Alles kant-en-klaar, ook bevestigingsmail en wachtwoord vergeten | Alles zelf bouwen, plus een maildienst voor de mails |
-| Beveiliging | Wachtwoorden en beveiliging tegen inbraakpogingen bij Google | Ons eigen werk en onze eigen verantwoordelijkheid |
-| Waar staat het | Alleen de inloggegevens (e-mail, uid) bij Google, mogelijk buiten de EU. **Alle squashdata blijft in D1 in de EU** | Alles in de EU |
-| Al aanwezig | Er is al een Firebase-project voor de pushmeldingen op Android | Nee |
-| Kosten | Gratis tot ongeveer 50.000 actieve gebruikers per maand | Gratis, plus de maildienst |
-| Op iOS en Android | Firebase-SDK; voor de gedeelde code is er `skip-firebase` (nog na te gaan of de Auth-module alles dekt) | Eigen schermen, eigen code |
+Advies: **Firebase Authentication, via de REST-API**.
 
-Bij A stuurt de app bij elk verzoek een kort geldig token van Firebase mee. De
-Worker controleert dat token met de openbare sleutels van Google. Pas dan
-geeft hij data vrij. Firebase weet dus alleen wie je bent. Wat je speelt,
-ziet Firebase niet.
+- **Firebase doet de wachtwoorden en de mails.** Firebase bewaart de
+  wachtwoorden, verstuurt de bevestigings- en resetmails en beschermt tegen
+  raden. Er is al een Firebase-project voor de pushmeldingen op Android.
+- **REST-API in plaats van de SDK.** Het inloggen zit dan in gedeelde
+  Swift-code (Core), met gewone HTTP-aanroepen. Er hoeft geen Firebase-SDK op
+  iOS en geen `skip-firebase` op Android. Dat houdt de 3.x-builds ook vrij van
+  een extra afhankelijkheid (zie het releaseplan).
+- **Apple op iOS** gaat native (`AuthenticationServices`). Het resultaat gaat
+  via de REST-API naar Firebase.
+- **Apple op Android** gaat via een webflow. Daarvoor zijn bij Apple een
+  **Services ID** en een sleutel nodig. Dat is eenmalig werk, maar geen
+  klein werk: reken op een halve dag inrichten en testen.
+- **Google** gaat op Android native of via een webflow, en op iOS via een
+  webflow.
+- **De Worker controleert** bij elk verzoek het korte geldige token van
+  Firebase met de openbare sleutels van Google. Firebase weet dus wie je
+  bent. Wat je speelt, ziet Firebase niet.
 
-**Let op bij Apple:** wie inloggen met Google aanbiedt, moet ook inloggen met
-Apple aanbieden. Dat zit in beide varianten.
+Het alternatief is alles zelf in de Worker bouwen. Dan staat alles in de EU,
+maar ligt de beveiliging van de wachtwoorden bij ons, en is er ook een
+maildienst nodig. Dat raad ik af.
+
+**Apple-eisen:**
+- Wie inloggen met Google aanbiedt, moet ook inloggen met Apple aanbieden.
+- Bij het verwijderen van een account moet het **Apple-token worden
+  ingetrokken**. Dat is verplicht sinds 2022. Firebase heeft daarvoor een
+  aanroep. De app vraagt bij het verwijderen even opnieuw om in te loggen met
+  Apple, zodat er een vers token is om in te trekken.
 
 ## Hoe houden we het veilig
 
 **Toegang**
-- Elk verzoek naar de account-API heeft een geldig inlogtoken nodig.
-- De server geeft **alleen je eigen data** terug. Een andere speler kan je
-  kaart niet ophalen, behalve via een kaartlink die je zelf deelt, zoals nu.
-- Een invoerder kan een wedstrijd alleen **afleveren** in iemands
-  postvak. Bekijken, wijzigen of iets anders van die speler zien kan hij
-  niet.
-- Het postvak is beschermd tegen spam:
-  - een limiet per invoerder per dag, met de bestaande `LiveLimiter`;
+- **Lezen en beheren** van je eigen data kan alleen met je inlogtoken. Een
+  ander kan je kaart niet ophalen, behalve via een kaartlink die je zelf
+  deelt.
+- **Insturen** gaat met een apparaatsleutel. Daarmee kun je alleen een
+  wedstrijd in iemands postvak leggen. Bekijken of wijzigen kan niet.
+- **Spam** wordt tegengegaan op vier manieren:
+  - een limiet per apparaatsleutel en per IP;
   - je kunt een afzender blokkeren;
-  - verzoeken worden na 30 dagen automatisch gewist.
+  - verzoeken worden na 90 dagen gewist;
+  - een spelerscode is lang genoeg om niet te raden.
 
 **Opslag**
-- De database staat in de EU (jurisdictie `eu`) en is versleuteld opgeslagen
-  door Cloudflare.
-- Wachtwoorden worden nooit door ons bewaard: bij A doet Firebase dat, bij B
-  bewaren we ze alleen als sterke hash.
-- Geheimen staan alleen als Worker-secrets, nooit in git. Dat is nu ook al
-  zo voor de push-sleutels.
-- Een back-up kan via D1 Time Travel (30 dagen terug). Daarnaast komt er een
-  wekelijkse export naar R2 in de EU.
-- In de logs komen geen namen of e-mailadressen. De observability staat nu
-  aan; die moet dit respecteren.
+- De database staat in de EU en is versleuteld opgeslagen door Cloudflare.
+- Wachtwoorden worden nooit door ons bewaard; dat doet Firebase.
+- Geheimen staan alleen als Worker-secrets, nooit in git.
+- Back-up: D1 Time Travel (30 dagen terug), plus een wekelijkse export naar
+  R2 in de EU.
+- In de logs komen geen namen of e-mailadressen.
 
 **Rechten van de gebruiker (AVG)**
 - Toestemming wordt vooraf en apart gevraagd. Een account is nooit
   verplicht.
-- Je kunt je account verwijderen, in de app en via een webpagina. Apple en
-  Google verplichten allebei het verwijderen in de app; Google wil ook een
-  weblink. Daarbij gaan alle wedstrijden, verzoeken en badges direct weg, ook
-  uit de verwijderde-lijst. In de Time Travel-back-up blijven ze nog
-  hoogstens 30 dagen staan, en dat zetten we in de privacytekst.
+- **Account verwijderen** kan in de app; Apple en Google verplichten dat
+  allebei.
+  - Alles gaat direct weg: wedstrijden, verzoeken, awards en de
+    verwijdermarkeringen (`deletedAt`) daarvan.
+  - Het Apple-token wordt ingetrokken.
+  - In de back-up blijft het nog hoogstens 30 dagen staan. Dat zetten we in
+    de privacytekst.
+- **Verwijderen buiten de app:** Google wil ook een weg buiten de app.
+  Advies: een **aanvraagformulier** op de website. Je vult je e-mailadres in
+  en bevestigt via een link in je mail; daarna wordt het account
+  verwijderd. Dat is veel kleiner dan een echte weblogin en voldoet aan de
+  eis van Google.
 - Je kunt je data downloaden als één bestand. Dat lijkt op de back-up die er
   nu is.
-- **Jeugdspelers:** in Nederland moet een ouder toestemming geven onder de 16
-  jaar. Er zijn twee mogelijkheden:
-  - een account pas vanaf 16;
-  - bij jongere spelers toestemming van een ouder vragen, bijvoorbeeld via het
-    e-mailadres van de ouder.
-
-  Dit moet een bewuste keuze zijn.
-- De tegenstander krijgt niets en wordt alleen met een naam bewaard, net als
-  nu in de geschiedenis.
+- **Jeugd:** de app kent geen leeftijd, en een SBN-speler heeft in de app geen
+  geboortedatum. Daarom vraagt de app bij het maken van een account **altijd
+  het geboortejaar**. Onder de 16 is in Nederland toestemming van een ouder
+  nodig. Er zijn twee mogelijkheden:
+  - **A.** Een account kan pas vanaf 16. Daaronder speel je zoals nu, zonder
+    account.
+  - **B.** Onder de 16 vul je het e-mailadres van een ouder in. Die bevestigt
+    via een link.
+- De tegenstander krijgt niets en wordt alleen met een naam en eventueel een
+  SBN-pad bewaard.
 
 **Papierwerk**
 - Het privacybeleid moet herschreven worden, in het Nederlands en het Engels.
   Het moet vermelden:
-  - een account;
+  - het account;
   - waar de data staat;
   - hoe lang de data bewaard wordt;
-  - Firebase als verwerker.
-- Verwerkersovereenkomsten: Cloudflare en Google bieden die standaard aan.
-- De privacylabels in App Store Connect en Play moeten worden aangepast. Er
-  komen contactgegevens bij (e-mail), gebruikersinhoud en een gebruikers-ID,
-  allemaal **gekoppeld aan identiteit**. Alles blijft zonder tracking.
+  - Firebase als verwerker;
+  - de apparaatsleutel.
+- Verwerkersovereenkomsten met Cloudflare en Google (standaard).
+- De privacylabels in de stores moeten worden aangepast. Er komen
+  contactgegevens (e-mail), gebruikersinhoud en een gebruikers-ID bij,
+  allemaal gekoppeld aan identiteit. Alles blijft zonder tracking.
 
 ## Kostenschatting
 
-De bedragen komen van de prijspagina's van Cloudflare en Google zoals ik ze
-op 31 oktober 2026 vond. **Controleer ze vlak voor het bouwen.**
+De bedragen komen van de prijspagina's zoals ik ze op 31 oktober 2026 vond.
+**Controleer ze vlak voor het bouwen.**
 
-**Wat er al betaald wordt:** Workers Paid kost $5 per maand. Daarin zit onder
-meer:
+**Wat er al betaald wordt:** Workers Paid kost $5 per maand. Daarin zit:
 
 | Wat | Inbegrepen per maand | Daarboven |
 |---|---|---|
 | Worker-verzoeken | 10 miljoen | |
-| D1 en Durable Objects (SQLite): opslag | 5 GB | D1 ca. $0,75 per GB per maand, Durable Objects $0,20 |
-| D1 en Durable Objects (SQLite): rijen schrijven | 50 miljoen | $1 per miljoen |
-| D1 en Durable Objects (SQLite): rijen lezen | 25 miljard | |
+| D1: opslag | 5 GB | ca. $0,75 per GB per maand, maximaal 10 GB per database |
+| D1: rijen schrijven | 50 miljoen | $1 per miljoen |
+| D1: rijen lezen | 25 miljard | |
 | R2 | 10 GB | ca. $0,015 per GB per maand |
-| Firebase Authentication | gratis tot ongeveer 50.000 actieve gebruikers per maand | |
+
+**Firebase Authentication:** e-mail, Apple en Google zijn zonder limiet gratis
+in de gewone Firebase Authentication. De grens van ongeveer 50.000 actieve
+gebruikers per maand geldt alleen als je overstapt naar **Identity
+Platform**, en dat hebben we niet nodig. Alleen inloggen met sms kost geld,
+en dat gebruiken we niet. Dit klopt volgens wat ik vond, maar controleer het
+op de officiële prijspagina.
 
 **Uitgangspunten:**
 - Een speler opent de app zo'n 30 keer per maand en synchroniseert dan
   2–3 keer.
 - Hij speelt 8 wedstrijden per maand.
-- Per wedstrijd zijn er zo'n 10 schrijfacties: wedstrijd, verzoek,
-  beoordeling, badges, samenvatting en indexen.
+- Per wedstrijd zijn er zo'n 10 schrijfacties.
 
 | Scenario | Verzoeken per maand | Rijen geschreven per maand | Opslag na 1 jaar | Extra kosten per maand |
 |---|---|---|---|---|
-| 500 spelers | ca. 45.000 | ca. 40.000 | 0,1 GB | **$0**, valt binnen de $5 |
-| 5.000 spelers | ca. 450.000 | ca. 400.000 | 1,2 GB | **$0**, valt binnen de $5 |
-| 50.000 spelers | ca. 4,5 miljoen | ca. 4 miljoen | 12 GB + 2,5 GB foto's | **ca. $5–10** (opslag boven 5 GB). Firebase zit rond de grens van het gratis deel |
-
-Voor het clubscherm en de live-sessies verandert er niets. Die vallen al
-binnen het huidige abonnement.
+| 500 spelers | ca. 45.000 | ca. 40.000 | 0,1 GB | **$0** |
+| 5.000 spelers | ca. 450.000 | ca. 400.000 | 1,2 GB | **$0** |
+| 50.000 spelers | ca. 4,5 miljoen | ca. 4 miljoen | 12 GB + 2,5 GB foto's | **ca. $5–10**. Wel eerst de rally's naar R2 verhuizen vanwege de grens van 10 GB |
 
 **Conclusie:** tot enkele duizenden spelers kost dit niets extra bovenop de
-$5 die je al betaalt. Pas bij tienduizenden spelers wordt het een paar tientjes per
-maand. De echte kosten zitten in de tijd voor bouwen, testen en onderhoud,
-en in het privacypapierwerk.
+$5 die je al betaalt. De echte kosten zijn tijd: bouwen, testen, het
+inrichten van Apple en Google, en het privacypapierwerk.
 
-**Niet meegerekend, voor later:**
-- **Een abonnement voor clubs.**
-  - Koopt een club in de app, dan houdt Apple of Google 15–30% in.
-  - Betaalt een club via de website, bijvoorbeeld met iDEAL, dan zijn de
-    kosten een paar procent. Of dat mag zolang de app er niet naar verwijst,
-    moet nog worden uitgezocht.
-- **Een eigen maildienst**, alleen bij variant B. Kleine aantallen zijn vaak
-  gratis.
+**Niet meegerekend, voor later:** een abonnement voor clubs.
+- Koopt een club in de app, dan houdt Apple of Google 15–30% in.
+- Betaalt een club via de website, dan zijn de kosten een paar procent. Of dat
+  mag, moet nog worden uitgezocht.
 
 ## Open keuzes voor Gerd-Jan
 
-1. Firebase Authentication (A) of zelf bouwen (B)?
-2. Foto's in het account meteen, of later?
-3. Jeugd: een account vanaf 16, of toestemming van een ouder?
-4. Moet een niet-SBN-speler (recreant, buitenland) ook een account kunnen
-   maken? Mijn advies is ja: dan is alleen de naam nodig.
-5. Komt het clubabonnement ook in 4.0, of eerst alleen spelersaccounts?
+1. Firebase Authentication via de REST-API (advies) of alles zelf bouwen?
+2. Insturen zonder account met een apparaatsleutel (advies), of moet de
+   invoerder ook inloggen?
+3. Jeugd: A (een account vanaf 16) of B (toestemming van een ouder)?
+4. Foto's in het account meteen, of later?
+5. Moet een niet-SBN-speler ook een account kunnen maken? Advies: ja, dan is
+   alleen de naam nodig.
+6. Komt het clubabonnement in 4.0, of eerst alleen spelersaccounts?
 
 ## Grootte (ruw)
 
 | Onderdeel | Grootte |
 |---|---|
-| Accountschermen en inloggen op iOS en Android, met toestemming en verwijderen | L |
-| Account-Worker met D1, API, postvak, tests | L |
-| Koppelen van spelers (SBN-pad, code of QR) en versturen na een wedstrijd | M |
-| Beoordelen (postvak in de app, melding, dubbele wedstrijden) | M |
-| Badges en kaart uit de centrale wedstrijden, synchroniseren tussen telefoons | L |
-| Privacybeleid, labels, verwijderpagina, handleiding | M |
+| Inloggen in gedeelde code (REST), schermen, geboortejaar, toestemming, verwijderen met intrekken van het Apple-token | L |
+| Apple en Google inrichten (Services ID, sleutels, webflow op Android) | M |
+| Account-Worker met D1, API, postvak, apparaatsleutels, limieten, tests | L |
+| Koppelen van spelers (SBN-pad, code of QR), uitgaande wachtrij | M |
+| Beoordelen: postvak, melding, herinnering, dubbele wedstrijden | M |
+| Synchroniseren en badges rekenen in de app met `BadgeEngine`, awards met tombstones samenvoegen | M (de regels bestaan al) |
+| Eerdere wedstrijden meenemen en sturen | M |
+| Privacybeleid, labels, verwijderformulier op de website, handleiding | M |
 
 Samen is dit enkele weken werk. Het is dus terecht een 4.0.

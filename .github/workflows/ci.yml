@@ -37,6 +37,21 @@ jobs:
       - run: npm test
         working-directory: server/live-worker
 
+  account:
+    name: Account-Worker 4.0 (workerd + D1)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/account-worker/package-lock.json
+      - run: npm ci
+        working-directory: server/account-worker
+      - run: npm test
+        working-directory: server/account-worker
+
   server:
     name: Live-server (Node, reserve)
     runs-on: ubuntu-latest
@@ -99,6 +114,11 @@ jobs:
       - name: Unit tests and a debug build
         working-directory: Android
         run: ./gradlew testDebugUnitTest assembleDebug --no-daemon
+      # 4.0 sits behind a switch on main (docs/releaseplan-3x-4.0.md): the
+      # unit tests also run with it on, so the 4.0 code never rots unseen
+      - name: Unit tests with the 4.0 switch on
+        working-directory: Android
+        run: ./gradlew testDebugUnitTest -PsquashPlayerAccount=true --no-daemon
       # The build writes the Room schema (schemas/<version>.json). When it differs
       # from what is committed, the entities changed: raise the database version,
       # write the migration and commit the new JSON (docs/android-port.md).

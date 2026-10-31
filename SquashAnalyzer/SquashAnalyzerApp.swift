@@ -11,6 +11,9 @@ struct SquashAnalyzerApp: App {
     let persistenceWarning: String?
 
     init() {
+        // 4.0 behind a switch (docs/releaseplan-3x-4.0.md): only a 4.0 test build sets
+        // SQUASH_PLAYER_ACCOUNT=YES, which Info.plist passes on
+        Features.shared.playerAccount = Features.isOn(Bundle.main.infoDictionary?["SquashPlayerAccount"] as? String)
         // Live meekijken: the shared LiveShare sends the state through URLSession (server/live)
         LiveShare.shared.transport = URLSessionLiveTransport()
         // The anonymous daily usage count (AppUsage): only release builds report, so

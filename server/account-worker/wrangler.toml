@@ -1,0 +1,32 @@
+# Squash Analyzer 4.0: the player account (docs/voorstel-spelersaccount-4.0.md).
+# Not deployed yet. Before the first deploy, Gerd-Jan creates the database in
+# the EU (the jurisdiction can only be set at creation):
+#   npx wrangler d1 create squash-account --jurisdiction eu
+# and puts its database_id below. No route yet: the app only talks to this
+# Worker in 4.0 test builds (Features.playerAccount).
+name = "squash-account"
+main = "src/index.js"
+compatibility_date = "2025-10-01"
+workers_dev = false
+
+[vars]
+# The Firebase project whose ID tokens are accepted (aud and iss of the token)
+FIREBASE_PROJECT_ID = "squash-analyzer-18fb3"
+# Requests that wait for an answer are wiped after this many days
+PENDING_DAYS = "90"
+# Matches one phone may send per day, and phone keys one address may create per hour
+SUBMISSIONS_PER_DAY = "20"
+DEVICES_PER_HOUR = "5"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "squash-account"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[triggers]
+# Once a day: wipe requests nobody answered within PENDING_DAYS
+crons = ["17 3 * * *"]
+
+[observability]
+enabled = true

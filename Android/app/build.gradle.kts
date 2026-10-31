@@ -13,6 +13,9 @@ val squashVersion = "3.1"
 val squashBuild = 2
 val squashCode = 3010200
 val squashInternal = (findProperty("squashInternal") as String?)?.toInt() ?: 0
+// 4.0 behind a switch (docs/releaseplan-3x-4.0.md): only a 4.0 test build adds
+// -PsquashPlayerAccount=true
+val squashPlayerAccount = (findProperty("squashPlayerAccount") as String?)?.toBoolean() ?: false
 
 // Google Play upload key: never in the repo. The keystore lives in
 // ~/.android-keys (backed up in 1Password), the passwords in
@@ -85,6 +88,7 @@ android {
         buildConfigField("String", "FIREBASE_APP_ID", "\"${firebaseValues["appId"]}\"")
         buildConfigField("String", "FIREBASE_API_KEY", "\"${firebaseValues["apiKey"]}\"")
         buildConfigField("String", "FIREBASE_SENDER_ID", "\"${firebaseValues["senderId"]}\"")
+        buildConfigField("boolean", "PLAYER_ACCOUNT", "$squashPlayerAccount")
     }
 
     signingConfigs {

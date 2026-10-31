@@ -53,6 +53,11 @@ naar 3.x, dan kan die oudere app de database niet meer openen.
   store-build zit hij niet. App Review keurt verborgen functies in een
   store-build soms af.
 
+**Zo bouw je een 4.0-testbuild** (gebouwd op 31 oktober):
+
+- iOS: `xcodebuild … SQUASH_PLAYER_ACCOUNT=YES` (de build setting staat standaard op `NO`)
+- Android: `./gradlew … -PsquashPlayerAccount=true`
+
 ## De live-Worker
 
 Het spelersaccount komt in een eigen Worker. Toch verandert er ook iets aan

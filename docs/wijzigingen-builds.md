@@ -10,6 +10,21 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.1 build 2)
 
+### 4.0 (achter de vlag, uit in 3.x)
+
+- **Vlag `Features.shared.playerAccount`** (31 oktober 2026, Core, iOS en Android). Standaard
+  uit. Aan in een 4.0-testbuild: iOS `xcodebuild … SQUASH_PLAYER_ACCOUNT=YES` (build setting →
+  `Info.plist` sleutel `SquashPlayerAccount`), Android `./gradlew … -PsquashPlayerAccount=true`
+  (`BuildConfig.PLAYER_ACCOUNT`). Gecontroleerd: de iPhone-build heeft `NO` resp. `YES` in
+  Info.plist, de Android-build compileert in beide standen. CI draait de Android-unittests ook met
+  de vlag aan. Nog geen zichtbare 4.0-code in de app.
+- **Account-Worker `server/account-worker`** (31 oktober 2026, nog niet uitgerold, geen route):
+  D1-schema (accounts, spelers met code en SBN-pad, apparaatsleutels, wedstrijden pending/accepted,
+  awards met tombstones, blokkades), Firebase-ID-tokens controleren, insturen met apparaatsleutel
+  (zelfde antwoord voor onbekende spelers, limieten per apparaat en IP, opnieuw proberen geeft geen
+  dubbel verzoek), postvak gebruiken/niet gebruiken/blokkeren, eigen wedstrijden, awards samenvoegen,
+  account verwijderen, dagelijks verzoeken ouder dan 90 dagen wissen. 19 tests, in CI.
+
 ## 3.1 build 2 (geüpload 31 oktober 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group)
 
 Build 1 staat alleen op Play; de iPhone-upload van build 1 strandde op de nieuwe Apple-

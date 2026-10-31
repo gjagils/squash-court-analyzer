@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.room.withTransaction
 import androidx.lifecycle.lifecycleScope
 import squash.analyzer.core.AppUsage
+import squash.analyzer.core.Features
 import squash.analyzer.core.ResultCard
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
@@ -162,6 +163,8 @@ class MainActivity : AppCompatActivity() {
         }
         val playerFiles = ActivityPlayerFiles(this)
         val aiCoach = AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport()))
+        // 4.0 behind a switch (docs/releaseplan-3x-4.0.md): -PsquashPlayerAccount=true
+        Features.shared.playerAccount = BuildConfig.PLAYER_ACCOUNT
         // Live meekijken: the shared LiveShare sends the state through this (server/live)
         LiveShare.shared.transport = HttpLiveTransport()
         // The anonymous daily usage count (AppUsage): only release builds report, never a test run

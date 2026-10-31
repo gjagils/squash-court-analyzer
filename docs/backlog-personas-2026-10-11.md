@@ -39,11 +39,11 @@ tussen games) en in het vervolg na de wedstrijd.
 | # | Punt | Waarom | Grootte | Voorstel |
 |---|---|---|---|---|
 | C1 | **Pauzekaart tussen games**: na "Game klaar" één scherm met 3 korte punten in grote letters (uit het lokale advies), om de speler in de pauze te laten zien | De pauze duurt 2 minuten; het dashboard is te druk om samen met de speler te bekijken | M | **Gebouwd 12 oktober** (Coachkaart) |
-| C2 | **Snelle invoer** (instelling): alleen wie en hoe (winner/fout), zonder vak en slag | Bij snelle rally's of een eerste keer is 4 tikken per punt veel; liever minder detail dan gemiste punten | M | Backlog (idee; besluit 12 oktober: nu niet) |
+| C2 | **Snelle invoer** (instelling): alleen wie en hoe (winner/fout), zonder vak en slag | Bij snelle rally's of een eerste keer is 4 tikken per punt veel; liever minder detail dan gemiste punten | M | **Gebouwd 31 oktober als Eenvoudig coachen** (3.1): wie en waar op de baan, zonder slag en punttype; keuze bij de eerste keer Coach en in Instellingen |
 | C3 | **Notitie per game** (tekst, eventueel dicteren) die in de analyse en het verslag terugkomt | Coaches onthouden "backhand-volley te laat" niet tot na de wedstrijd | S | **Gebouwd 12 oktober** |
 | C4 | **Service en return**: punten gewonnen op eigen service versus bij hand-out, per speler | Data is er al (`Point.server`); zegt veel over druk zetten | S | **Gebouwd 12 oktober** |
 | C5 | **Verslag voor de speler** (pdf of plaatje) met analyse, advies en de profiellijn | Nu deel je de score; de analyse zelf blijft op de telefoon van de coach | M | Later |
-| C6 | **Scouting**: profiel van een tegenstander (als die opgeslagen is) vóór een wedstrijd, ook vanuit het programma van Mijn team | Het profiel werkt al voor iedere gekozen speler; alleen de ingang ontbreekt | S | Later |
+| C6 | **Scouting**: profiel van een tegenstander (als die opgeslagen is) vóór een wedstrijd, ook vanuit het programma van Mijn team | Het profiel werkt al voor iedere gekozen speler; alleen de ingang ontbreekt | S | Later (3.1 haalt wel de spelers van de tegenstander op bij SBN, maar opent nog geen profiel) |
 | C7 | **Coachingfocus koppelen aan cijfers** (focus "Backhand" → hoe vaak won/verloor je links achter) | De focus-tags staan nu los van de analyse | M | Later |
 | C8 | **Trainingsmodus** (oefenpartij zonder badges en zonder telling in het profiel) | Staat al als vroeg idee op de lijst | M | Later |
 
@@ -66,7 +66,7 @@ hieronder). Let op: de WSF-regels zijn in 2025 aangepast (inspelen 4 minuten,
 | R2 | **Officiële timers** met waarschuwing: inspelen 4 min (wissel na 2), 1 min tot start, 2 min tussen games, "15 seconden" en "Time" (trillen of geluid) | Een scheidsrechter moet de tijd bewaken; nu is er alleen een stopwatch | M | Backlog |
 | R3 | **Conduct**: waarschuwing, conduct stroke, game, match, met de soort overtreding; een conduct stroke verandert het servicevak niet | Regel 14; elke serieuze scheidsrechterapp heeft het | M | Backlog |
 | R4 | **"No let"** als vastgelegde beslissing, plus **appeals**, met een beslissingenlijst in de wedstrijd | Nu tel je bij "no let" alleen het punt; achteraf is niet terug te zien wat er beslist is | M | Backlog |
-| R5 | **Best of 3** kiezen (nu altijd best of 5) | Jeugd, toernooien en oefenpartijen; de coachmodus heeft hetzelfde | S | Backlog |
+| R5 | **Best of 3** kiezen (nu altijd best of 5) | Jeugd, toernooien en oefenpartijen; de coachmodus heeft hetzelfde | S | **Gebouwd 22 oktober** (best of 1, 3 of 5, coach en scheidsrechter; N2 in de backlog van 21 oktober) |
 | R6 | **Blessuretimer per soort** (3 min eigen, 15 min veroorzaakt, 5 min bloed, 2 min materiaal) en opgave | Op het lastigste moment geen regels opzoeken | M | Backlog |
 | R7 | **Stand omroepen**: tekst in WSF-bewoording op het scherm ("Hand-out, 5-3", "Game ball", "10-all"), optioneel uitgesproken | Helpt clubleden die zelden fluiten | M | Backlog |
 | R8 | **Wedstrijdformulier** als pdf (games, beslissingen, conduct) | SBN werkt met een papieren formulier; de captain voert de uitslag in | M | Backlog |

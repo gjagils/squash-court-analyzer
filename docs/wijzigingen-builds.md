@@ -822,7 +822,7 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
 
 ## Backlog
 
-- [ ] **Badges op 0 bij de productierelease 3.0** (afgesproken 18 oktober;
+- [x] **Badges op 0 bij de productierelease 3.0** (zit in 3.0, live sinds 27 oktober; afgesproken 18 oktober;
       op `main` sinds 18 oktober, getest op de Mac (suites, ook met een start in
       het verleden, en op simulator en emulator); startdatum vrijdag
       23 oktober 2026, 00:00, zie ARCHITECTURE.md "Badgereset"). Een vaste startdatum `BadgeSeason.start` in Core. Awards van
@@ -837,7 +837,7 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       volgende upload aanpassen (app én `website/kaart/`, en de website publiceren). Testers krijgen
       de badge Pionier; omschrijving en artwork (klaar) staan in
       `docs/style/badge-prompt-pioneer.md`.
-- [ ] **Testgegevens opruimen bij de eerste start van 3.0** (afgesproken 18
+- [x] **Testgegevens opruimen bij de eerste start van 3.0** (zit in 3.0; afgesproken 18
       oktober; op `main` sinds 18 oktober en getest op simulator en emulator;
       zie ARCHITECTURE.md). Eén vraag met een vinkje per groep, alle drie
       standaard aan: wedstrijden met de voorbeeldspelers, onvolledige én
@@ -867,7 +867,7 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       bij teamimport uit zip of via link. Uitwerking en acceptatiecriteria:
       [plan-squashlevels-profiel.md](plan-squashlevels-profiel.md).
 
-- [ ] **Spelers van Mijn team in één keer importeren** (idee Gerd-Jan,
+- [x] **Spelers van Mijn team in één keer importeren** (gedaan, anders dan hieronder: de teamleden komen vanzelf bij Spelers zodra Mijn team is ingesteld, `TeamRoster`; idee Gerd-Jan,
       7 oktober, nog niet gebouwd; kandidaat voor de definitieve 3.0). Wie bij Instellingen de SBN-teamlink heeft
       ingevuld, krijgt bij Spelers een knop "Importeer Mijn team" die alle
       spelers van de teampagina als opgeslagen speler toevoegt. De app leest
@@ -884,7 +884,7 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       met rust (niet verwijderen, niet markeren); pas bij een nieuw seizoen
       synchroniseren we opnieuw.
 
-- [ ] **Meldingen bij live meekijken** (idee Gerd-Jan, 7 oktober; **3.1 of
+- [ ] **Meldingen bij live meekijken** (deels gedaan: volgen op het vergrendelscherm en in de meldingen met APNs en FCM zit in 3.0, zie `server/live-worker/src/push.js`; open: een losse melding bij een gewonnen game, partij of einduitslag; idee Gerd-Jan, 7 oktober; **3.1 of
       later**, niet voor 3.0: te ingrijpend, eerst releasen). Gekozen route:
       **2, pushmeldingen in de app**. Wie een live wedstrijd of live teamwedstrijd volgt, krijgt
       een melding op de telefoon bij een gewonnen game, een gewonnen partij en
@@ -1022,7 +1022,7 @@ Vroege ideeën, nog niet uitgewerkt en zonder build (7 oktober overgenomen uit
 - [ ] Onderlinge stand bij Kies speler.
 - [ ] Vergelijken met de officiële SBN-uitslag van een teamwedstrijd.
 - [ ] Trainingsmodus.
-- [ ] Clubranglijst.
+- [ ] Clubranglijst (eerste stap: het clubscherm, [voorstel](voorstel-clubscherm.md)).
 
 Notities van Gerd-Jan van 21 oktober (namen aanpassen in een lopende wedstrijd,
 geavanceerde coachmodus, businessmodel): `backlog-2026-10-21.md`.

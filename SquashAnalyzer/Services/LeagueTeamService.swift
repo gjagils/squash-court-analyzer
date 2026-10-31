@@ -33,6 +33,12 @@ struct URLSessionLeaguePageLoader: LeaguePageLoader {
         return page(try await session.data(for: request))
     }
 
+    func getFragment(_ url: URL) async throws -> LeaguePage {
+        var request = URLRequest(url: url)
+        request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
+        return page(try await session.data(for: request))
+    }
+
     private func page(_ result: (Data, URLResponse)) -> LeaguePage {
         let (data, response) = result
         return LeaguePage(finalURL: response.url, status: (response as? HTTPURLResponse)?.statusCode ?? 0,

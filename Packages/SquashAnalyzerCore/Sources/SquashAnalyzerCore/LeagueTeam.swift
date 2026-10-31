@@ -355,6 +355,9 @@ public protocol LeaguePageLoader: Sendable {
     func get(_ url: URL) async throws -> LeaguePage
     /// POSTs an application/x-www-form-urlencoded body (already encoded)
     func postForm(_ url: URL, body: String) async throws -> LeaguePage
+    /// GETs a part of a page the site loads with JavaScript (a club's teams):
+    /// sent with `X-Requested-With: XMLHttpRequest`, without it SBN answers the whole page
+    func getFragment(_ url: URL) async throws -> LeaguePage
 }
 
 /// Fetches and parses a team, answering SBN's cookie wall with the
@@ -383,13 +386,23 @@ public struct LeagueTeamFetcher: Sendable {
     }
 
     func page(_ url: URL) async throws -> String {
+        try await page(url, form: nil, fragment: false)
+    }
+
+    /// A page as HTML: a GET, a form POST (`form`) or a JavaScript part (`fragment`).
+    /// After the cookie wall a GET continues on the page it redirects back to;
+    /// a POST or a part is asked for again.
+    func page(_ url: URL, form: String?, fragment: Bool) async throws -> String {
         guard url.scheme == "https", url.host == "sbn.toernooi.nl" else { throw LeagueTeamError.invalidLink }
         do {
-            var response = try await loader.get(url)
+            var response = try await request(url, form: form, fragment: fragment)
             if response.finalURL?.path.lowercased().contains("cookiewall") == true {
                 guard response.body?.contains("/cookiewall/Save") == true else { throw LeagueTeamError.unavailable }
                 response = try await loader.postForm(URL(string: "https://sbn.toernooi.nl/cookiewall/Save")!,
                                                      body: LeagueTeamFetcher.consentBody(returnPath: url.path))
+                if form != nil || fragment {
+                    response = try await request(url, form: form, fragment: fragment)
+                }
             }
             guard response.status == 200, response.finalURL?.host == url.host, response.byteCount < 5_000_000,
                   let html = response.body, !html.contains("<form action=\"/cookiewall/Save\"") else {
@@ -401,6 +414,12 @@ public struct LeagueTeamFetcher: Sendable {
             if let known = error as? LeagueTeamError { throw known }
             throw LeagueTeamError.unavailable
         }
+    }
+
+    private func request(_ url: URL, form: String?, fragment: Bool) async throws -> LeaguePage {
+        if let form { return try await loader.postForm(url, body: form) }
+        if fragment { return try await loader.getFragment(url) }
+        return try await loader.get(url)
     }
 }
 

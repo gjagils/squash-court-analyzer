@@ -35,7 +35,10 @@ class HttpLeaguePageLoader(private val maxBytes: Int = 5_000_000) : LeaguePageLo
 
     override suspend fun postForm(url: URL, body: String): LeaguePage = request(url, body)
 
-    private suspend fun request(url: URL, formBody: String?): LeaguePage = withContext(Dispatchers.IO) {
+    /** A part of a page SBN loads with JavaScript (a club's teams) */
+    override suspend fun getFragment(url: URL): LeaguePage = request(url, null, fragment = true)
+
+    private suspend fun request(url: URL, formBody: String?, fragment: Boolean = false): LeaguePage = withContext(Dispatchers.IO) {
         val connection = java.net.URL(url.absoluteString).openConnection() as HttpURLConnection
         try {
             connection.instanceFollowRedirects = true
@@ -43,6 +46,7 @@ class HttpLeaguePageLoader(private val maxBytes: Int = 5_000_000) : LeaguePageLo
             connection.readTimeout = 20_000
             connection.setRequestProperty("User-Agent", "Mozilla/5.0 SquashAnalyzer/Android")
             connection.setRequestProperty("Accept-Language", "nl-NL,nl;q=0.9")
+            if (fragment) connection.setRequestProperty("X-Requested-With", "XMLHttpRequest")
             if (formBody != null) {
                 connection.requestMethod = "POST"
                 connection.doOutput = true

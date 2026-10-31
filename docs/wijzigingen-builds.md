@@ -10,6 +10,28 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 6)
 
+- **SBN: club zoeken en namen van de tegenstander (31 oktober 2026, iOS en Android, gedeelde
+  schermen)**: op vraag van Gerd-Jan, afgestemd met SBN. Alleen openbare pagina's van
+  sbn.toernooi.nl, er gaat niets terug.
+  - *Teamlink via club en team*: Instellingen → Mijn team heeft "Zoek je club"
+    (`LeagueClubFinder`): typ minstens 3 letters, kies de club, tik je team; de link wordt
+    opgeslagen. Plakken van een link blijft kunnen. Core: `LeagueTeamFetcher.searchClubs`
+    (POST `LeagueHome/DoSearch`), `teams(of:)` (de tab "Teams" van de club,
+    `club/<n>/GetTabContent/teams`, alleen met `X-Requested-With: XMLHttpRequest`; daarvoor is
+    `LeaguePageLoader.getFragment` erbij op iOS en Android), parsers `clubs` en `clubTeams`.
+  - *Seizoen vast*: gekoppeld aan SBN Competitie 2026-2027 (`LeagueSeason.leagueID`). **Vóór
+    de nieuwe competitie (september 2027) het ID vervangen** (https://sbn.toernooi.nl/find/league).
+  - *Spelers van de tegenstander*: bij een teamwedstrijd uit het programma van Mijn team zoekt
+    de app de tegenstander op in de poulestand, haalt die teampagina op en toont de spelers als
+    knopjes onder "tegenstander" in de partij (`LeagueOpponent`, `LeagueOpponentStorage`:
+    bewaard op de telefoon, na een dag opnieuw opgehaald, zonder verbinding de bewaarde namen).
+    Een tegenstander buiten de poule (beker) of een zelf ingevulde teamwedstrijd: typen zoals
+    altijd.
+  - Tests: `LeagueLookupTests`; de live-test `TeamLinkLiveTests` (met `SBN_LIVE_TEAM=1`) zoekt
+    All Inn Squash, vindt team 7, de tegenstander en zijn spelers (geslaagd op 31 oktober).
+  - Releasenote: "Mijn team instellen gaat nu zonder link: zoek je club en tik je team. In een
+    teamwedstrijd kies je de spelers van de tegenstander met één tik."
+
 - **Eenvoudig coachen (31 oktober 2026, iOS en Android, gedeelde schermen)**: op vraag van
   Gerd-Jan na de competitie-avond (`docs/voorstel-simpel-coachen.md`). Per punt alleen wie
   en waar: tik op de score, dan direct op de baan. Instellingen → Coachen: Uitgebreid ·

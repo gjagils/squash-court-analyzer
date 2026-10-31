@@ -293,6 +293,11 @@ final class FakeLoader: LeaguePageLoader, @unchecked Sendable {
         return try next()
     }
 
+    func getFragment(_ url: URL) async throws -> LeaguePage {
+        requests.append("PART \(url.absoluteString)")
+        return try next()
+    }
+
     private func next() throws -> LeaguePage {
         guard !pages.isEmpty else { throw URLError(.notConnectedToInternet) }
         return pages.removeFirst()

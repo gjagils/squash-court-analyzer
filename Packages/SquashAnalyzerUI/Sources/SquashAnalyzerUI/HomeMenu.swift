@@ -302,6 +302,11 @@ public struct AndroidHomeView: View {
     private let cardImportStore: any CardImportStore
     /// Fetches Mijn team from sbn.toernooi.nl (Android supplies the page loader)
     private let leagueTeamFetcher: LeagueTeamFetcher
+    private var settingsContext: SettingsContext {
+        var context = SettingsContext(aiCoach: aiCoach, backup: backup, onLanguage: onLanguage)
+        context.leagueFetcher = leagueTeamFetcher
+        return context
+    }
     /// AI Coach (Android supplies the key store and the sender)
     private let aiCoach: AICoachContext?
     /// Backups in Instellingen (Android supplies Room and the file pickers)
@@ -361,14 +366,14 @@ public struct AndroidHomeView: View {
                 }
                 .navigationDestination(isPresented: $showingCoach) {
                     CoachSessionView(store: matchStore, playerStore: playerStore, photoStore: photoStore, filePicker: filePicker, aiCoach: aiCoach, shareText: shareText,
-                                     historyStore: historyStore, settings: SettingsContext(aiCoach: aiCoach, backup: backup, onLanguage: onLanguage),
+                                     historyStore: historyStore, settings: settingsContext,
                                      teamMatchStore: teamMatchStore,
                                      onExit: { showingCoach = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingReferee) {
                     RefereeSessionView(store: refereeMatchStore, playerStore: playerStore, photoStore: photoStore, filePicker: filePicker, shareText: shareText,
-                                       settings: SettingsContext(aiCoach: aiCoach, backup: backup, onLanguage: onLanguage),
+                                       settings: settingsContext,
                                        teamMatchStore: teamMatchStore, onExit: { showingReferee = false })
                         .navigationBarBackButtonHidden(true)
                 }
@@ -383,7 +388,7 @@ public struct AndroidHomeView: View {
                     }
                 }
                 .navigationDestination(isPresented: $showingSettings) {
-                    SharedSettingsView(aiCoach: aiCoach, backup: backup, onLanguage: onLanguage)
+                    SharedSettingsView(aiCoach: aiCoach, backup: backup, onLanguage: onLanguage, leagueFetcher: leagueTeamFetcher)
                 }
                 .navigationDestination(isPresented: $showingTeam) {
                     if let team {
@@ -396,7 +401,7 @@ public struct AndroidHomeView: View {
                             store: teamMatchStore,
                             tools: TeamMatchTools(historyStore: historyStore, playerStore: playerStore, coachStore: matchStore,
                                                   refereeStore: refereeMatchStore, photoStore: photoStore, filePicker: filePicker,
-                                                  aiCoach: aiCoach, shareText: shareText),
+                                                  aiCoach: aiCoach, shareText: shareText, leagueFetcher: leagueTeamFetcher),
                             team: TeamMatchSupport.cachedTeam())
                     }
                 }

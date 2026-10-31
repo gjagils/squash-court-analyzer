@@ -1081,6 +1081,42 @@
         }
       }
     },
+    "Ander team": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other team"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ander team"
+          }
+        }
+      }
+    },
+    "Andere club": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other club"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andere club"
+          }
+        }
+      }
+    },
     "Andere foto": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -2053,6 +2089,24 @@
         }
       }
     },
+    "Clubnaam": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Club name"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clubnaam"
+          }
+        }
+      }
+    },
     "Coach": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -3003,6 +3057,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deze actie kan niet ongedaan worden gemaakt."
+          }
+        }
+      }
+    },
+    "Deze club heeft geen teams in de competitie.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This club has no teams in the competition."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze club heeft geen teams in de competitie."
           }
         }
       }
@@ -3961,6 +4033,24 @@
         }
       }
     },
+    "Geen club gevonden. Probeer een deel van de naam.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No club found. Try part of the name."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen club gevonden. Probeer een deel van de naam."
+          }
+        }
+      }
+    },
     "Geen getimede rally's: tik op Start bij de eerste service, dan loopt de rallyklok.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -4807,6 +4897,24 @@
         }
       }
     },
+    "Kies je team:": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose your team:"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kies je team:"
+          }
+        }
+      }
+    },
     "Kies per gemiste game wie hem won.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -5635,6 +5743,24 @@
         }
       }
     },
+    "Mijn team is nu %@": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My team is now %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn team is nu %@"
+          }
+        }
+      }
+    },
     "Mijn team laden…": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -6441,6 +6567,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Of kies een team-zip van je telefoon."
+          }
+        }
+      }
+    },
+    "Of plak de openbare teamlink van sbn.toernooi.nl:": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Or paste the public team link from sbn.toernooi.nl:"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Of plak de openbare teamlink van sbn.toernooi.nl:"
           }
         }
       }
@@ -8947,6 +9091,24 @@
         }
       }
     },
+    "Typ minstens 3 letters van de clubnaam.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type at least 3 letters of the club name."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typ minstens 3 letters van de clubnaam."
+          }
+        }
+      }
+    },
     "UIT DE LUCHT": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -10653,6 +10815,60 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zij wonnen"
+          }
+        }
+      }
+    },
+    "Zoek": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoek"
+          }
+        }
+      }
+    },
+    "Zoek je club": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find your club"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoek je club"
+          }
+        }
+      }
+    },
+    "Zoek je club en kies je team. Daarna verschijnt Mijn team op het beginscherm.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find your club and choose your team. My team then appears on the home screen."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoek je club en kies je team. Daarna verschijnt Mijn team op het beginscherm."
           }
         }
       }

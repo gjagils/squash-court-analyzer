@@ -28,6 +28,8 @@ public struct SettingsContext {
     public let backup: BackupContext?
     /// Opens the system's language setting for this app (Android); nil hides Taal
     public let onLanguage: ((String) -> Void)?
+    /// Finds a club and its teams on sbn.toernooi.nl for the team link
+    public var leagueFetcher: LeagueTeamFetcher? = nil
     #if !SKIP
     /// The iPhone's own Instellingen (with iCloud back-up and the iPhone
     /// manual), so the gear opens the same screen everywhere; nil uses the
@@ -70,7 +72,8 @@ struct SettingsSheet: View {
 
     private var shared: some View {
         NavigationStack {
-            SharedSettingsView(aiCoach: settings.aiCoach, backup: settings.backup, onLanguage: settings.onLanguage)
+            SharedSettingsView(aiCoach: settings.aiCoach, backup: settings.backup, onLanguage: settings.onLanguage,
+                               leagueFetcher: settings.leagueFetcher)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         CloseButton { close() }
@@ -88,6 +91,7 @@ public struct SharedSettingsView: View {
     /// Opens the system's language setting for this app (Android's
     /// per-app language, filled in by MainActivity); nil hides Taal
     let onLanguage: ((String) -> Void)?
+    let leagueFetcher: LeagueTeamFetcher?
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
@@ -113,10 +117,12 @@ public struct SharedSettingsView: View {
     @State private var autoFolder: String?
     @State private var autoLast: Date?
 
-    public init(aiCoach: AICoachContext? = nil, backup: BackupContext? = nil, onLanguage: ((String) -> Void)? = nil) {
+    public init(aiCoach: AICoachContext? = nil, backup: BackupContext? = nil, onLanguage: ((String) -> Void)? = nil,
+                leagueFetcher: LeagueTeamFetcher? = nil) {
         self.aiCoach = aiCoach
         self.backup = backup
         self.onLanguage = onLanguage
+        self.leagueFetcher = leagueFetcher
     }
 
     /// The part that is open; one at a time
@@ -189,9 +195,20 @@ public struct SharedSettingsView: View {
     /// Mijn team: the sbn.toernooi.nl link, saved or removed here
     private var teamSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.", bundle: textBundle)
-                .font(SharedFonts.system(13))
-                .foregroundColor(SharedColors.textSecondary)
+            if let leagueFetcher {
+                Text("Zoek je club en kies je team. Daarna verschijnt Mijn team op het beginscherm.", bundle: textBundle)
+                    .font(SharedFonts.system(13))
+                    .foregroundColor(SharedColors.textSecondary)
+                LeagueClubFinder(fetcher: leagueFetcher) { team in pick(team) }
+                Text("Of plak de openbare teamlink van sbn.toernooi.nl:", bundle: textBundle)
+                    .font(SharedFonts.system(13))
+                    .foregroundColor(SharedColors.textSecondary)
+                    .padding(.top, 6)
+            } else {
+                Text("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm.", bundle: textBundle)
+                    .font(SharedFonts.system(13))
+                    .foregroundColor(SharedColors.textSecondary)
+            }
             Link(destination: UserManual.androidTeamLink) {
                 Text("Waar vind ik mijn teamlink?", bundle: textBundle)
                     .font(SharedFonts.system(13, weight: .semibold))
@@ -512,6 +529,14 @@ public struct SharedSettingsView: View {
             message = (error as? LeagueTeamError)?.message ?? LeagueTeamError.invalidLink.message
             messageIsError = true
         }
+    }
+
+    /// A team picked in Zoek je club
+    private func pick(_ team: LeagueClubTeam) {
+        teamURL = team.link.url.absoluteString
+        draft = teamURL
+        // The finder says so itself, next to the list
+        message = nil
     }
 
     private func remove() {

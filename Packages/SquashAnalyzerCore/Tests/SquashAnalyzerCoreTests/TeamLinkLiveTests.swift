@@ -40,6 +40,12 @@ final class TeamLinkLiveTests: XCTestCase {
             return page(try await session.data(for: request))
         }
 
+        func getFragment(_ url: URL) async throws -> LeaguePage {
+            var request = URLRequest(url: url)
+            request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
+            return page(try await session.data(for: request))
+        }
+
         private func page(_ result: (Data, URLResponse)) -> LeaguePage {
             let (data, response) = result
             return LeaguePage(finalURL: response.url, status: (response as? HTTPURLResponse)?.statusCode ?? 0,
@@ -72,6 +78,29 @@ final class TeamLinkLiveTests: XCTestCase {
         XCTAssertEqual(TeamRoster.ids(in: defaults).count, store.players.count, "everyone is marked In mijn team")
         let again = await TeamRosterSync.run(snapshot, store: store, in: defaults)
         XCTAssertEqual(again, 0, "once per team link")
+    }
+
+    /// Club, its teams and an opponent's players: the search in the settings
+    /// and the names in a team match. A few pages of the season, nothing more.
+    func testAClubItsTeamsAndAnOpponentAreFound() async throws {
+        guard let setting = ProcessInfo.processInfo.environment["SBN_LIVE_TEAM"], !setting.isEmpty else {
+            throw XCTSkip("Set SBN_LIVE_TEAM=1 to run against sbn.toernooi.nl")
+        }
+        let fetcher = LeagueTeamFetcher(loader: Loader())
+        let clubs = try await fetcher.searchClubs("All Inn")
+        let club = try XCTUnwrap(clubs.first(where: { club in club.name == "All Inn Squash" }), "\(clubs)")
+        XCTAssertEqual(club.place, "Utrecht")
+        let teams = try await fetcher.teams(of: club)
+        let own = try XCTUnwrap(teams.first(where: { team in team.link.url.absoluteString == TeamLinkLiveTests.defaultLink }), "\(teams)")
+        XCTAssertEqual(own.name, "All Inn Squash 7")
+        XCTAssertFalse(own.division.isEmpty)
+
+        let snapshot = try await fetcher.fetch(own.link)
+        let fixture = try XCTUnwrap(snapshot.fixtures.first)
+        let opponent = try XCTUnwrap(LeagueOpponent.link(for: fixture, in: snapshot), "the opponent is in the poule")
+        XCTAssertNotEqual(opponent, own.link)
+        let players = try await fetcher.players(of: opponent)
+        XCTAssertFalse(players.isEmpty, "the opponent's page lists players")
     }
 }
 #endif

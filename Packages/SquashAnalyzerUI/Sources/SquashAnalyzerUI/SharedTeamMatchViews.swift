@@ -21,11 +21,14 @@ public struct TeamMatchTools {
     public let filePicker: (any PlayerFilePicker)?
     public let aiCoach: AICoachContext?
     public let shareText: ((String) -> Void)?
+    /// Reads the opponent's players from sbn.toernooi.nl (none: type them)
+    public let leagueFetcher: LeagueTeamFetcher?
 
     public init(historyStore: any MatchHistoryStore, playerStore: any PlayerProfileStore,
                 coachStore: any CoachMatchStore, refereeStore: any RefereeMatchStore,
                 photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil,
-                aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil) {
+                aiCoach: AICoachContext? = nil, shareText: ((String) -> Void)? = nil,
+                leagueFetcher: LeagueTeamFetcher? = nil) {
         self.historyStore = historyStore
         self.playerStore = playerStore
         self.coachStore = coachStore
@@ -34,6 +37,7 @@ public struct TeamMatchTools {
         self.filePicker = filePicker
         self.aiCoach = aiCoach
         self.shareText = shareText
+        self.leagueFetcher = leagueFetcher
     }
 }
 
@@ -323,6 +327,8 @@ public struct SharedTeamMatchView: View {
     /// Asked for in the editor; opens as soon as the editor sheet is gone
     @State private var pendingTrack: TeamTrackRequest? = nil
     @State private var players: [PlayerProfile] = []
+    /// The opponent's players from SBN, for a team match from the programme
+    @State private var opponentRoster: [String] = []
     @AppStorage(TeamRoster.storageKey) private var rosterRaw = ""
     @Environment(\.dismiss) private var dismiss
 
@@ -364,6 +370,9 @@ public struct SharedTeamMatchView: View {
         .pageTitle(loc("Teamwedstrijd"))
         .task {
             players = (try? await tools.playerStore.loadPlayers()) ?? []
+            if let fetcher = tools.leagueFetcher, let link = LeagueOpponent.link(for: match, in: team) {
+                opponentRoster = await LeagueOpponentStorage.names(for: link, fetcher: fetcher)
+            }
             await syncFromLive(showGone: false)
             if openShare {
                 if match.isLive {
@@ -389,7 +398,7 @@ public struct SharedTeamMatchView: View {
             }
         }) {
             if let editing {
-                TeamPartijEditor(partij: editing, match: match, roster: rosterNames, historyStore: tools.historyStore) { updated in
+                TeamPartijEditor(partij: editing, match: match, roster: rosterNames, opponentRoster: opponentRoster, historyStore: tools.historyStore) { updated in
                     var changed = match
                     changed.update(updated)
                     self.editing = nil

@@ -1480,6 +1480,23 @@
         }
       }
     },
+    "Of plak de openbare teamlink van sbn.toernooi.nl:" : {
+      "generatesSymbol" : false,
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Or paste the public team link from sbn.toernooi.nl:"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Of plak de openbare teamlink van sbn.toernooi.nl:"
+          }
+        }
+      }
+    },
     "Opslaan" : {
       "generatesSymbol" : false,
       "localizations" : {
@@ -2207,6 +2224,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wil je alle bestaande data verwijderen en vervangen door de back-up, of de back-up toevoegen aan wat er al is?"
+          }
+        }
+      }
+    },
+    "Zoek je club en kies je team. Daarna verschijnt Mijn team op het beginscherm." : {
+      "generatesSymbol" : false,
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find your club and choose your team. My team then appears on the home screen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoek je club en kies je team. Daarna verschijnt Mijn team op het beginscherm."
           }
         }
       }

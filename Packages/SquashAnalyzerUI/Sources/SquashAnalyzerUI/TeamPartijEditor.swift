@@ -20,6 +20,8 @@ struct TeamPartijEditor: View {
     @State private var partij: TeamPartij
     let match: TeamMatch
     let roster: [String]
+    /// The opponent's players from SBN (empty when unknown)
+    let opponentRoster: [String]
     let historyStore: any MatchHistoryStore
     let onSave: (TeamPartij) -> Void
     /// A new tracked match for this partij: the partij as edited and "coach" or "referee"
@@ -39,12 +41,13 @@ struct TeamPartijEditor: View {
     /// A tracked match chosen; which of its players is ours is asked next
     @State private var chosen: MatchHistorySummary? = nil
 
-    init(partij: TeamPartij, match: TeamMatch, roster: [String], historyStore: any MatchHistoryStore,
+    init(partij: TeamPartij, match: TeamMatch, roster: [String], opponentRoster: [String] = [], historyStore: any MatchHistoryStore,
          onSave: @escaping (TeamPartij) -> Void, onTrack: @escaping (TeamPartij, String) -> Void,
          onCancel: @escaping () -> Void) {
         _partij = State(initialValue: partij)
         self.match = match
         self.roster = roster
+        self.opponentRoster = opponentRoster
         self.historyStore = historyStore
         self.onSave = onSave
         self.onTrack = onTrack
@@ -114,27 +117,34 @@ struct TeamPartijEditor: View {
     private var playersSection: some View {
         section(loc("SPELERS")) {
             field(match.defaultOwnName(partij.slot), text: $partij.ownPlayer)
-            if !roster.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(roster, id: \.self) { name in
-                            Button { partij.ownPlayer = name } label: {
-                                Text(name)
-                                    .font(SharedFonts.system(12, weight: .medium))
-                                    .foregroundColor(partij.ownPlayer == name ? SharedColors.background : SharedColors.accent)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 6)
-                                    .background(partij.ownPlayer == name ? SharedColors.accent : SharedColors.accent.opacity(0.12))
-                                    .clipShape(RoundedRectangle(cornerRadius: 999))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                }
-                .padding(.top, 2)
-            }
+            nameChips(roster, selection: $partij.ownPlayer)
             field(match.defaultOpponentName(partij.slot), text: $partij.opponentPlayer)
                 .padding(.top, 8)
+            nameChips(opponentRoster, selection: $partij.opponentPlayer)
+        }
+    }
+
+    /// Names to tap instead of typing: our players, or the opponent's from SBN
+    @ViewBuilder
+    private func nameChips(_ names: [String], selection: Binding<String>) -> some View {
+        if !names.isEmpty {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(names, id: \.self) { name in
+                        Button { selection.wrappedValue = name } label: {
+                            Text(name)
+                                .font(SharedFonts.system(12, weight: .medium))
+                                .foregroundColor(selection.wrappedValue == name ? SharedColors.background : SharedColors.accent)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(selection.wrappedValue == name ? SharedColors.accent : SharedColors.accent.opacity(0.12))
+                                .clipShape(RoundedRectangle(cornerRadius: 999))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .padding(.top, 2)
         }
     }
 

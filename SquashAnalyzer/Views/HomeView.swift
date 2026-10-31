@@ -64,7 +64,8 @@ struct HomeView: View {
                                           coachStore: SwiftDataCoachMatchStore(context: modelContext),
                                           refereeStore: SwiftDataRefereeMatchStore(context: modelContext),
                                           photoStore: players, filePicker: nil, aiCoach: IOSAICoach.context,
-                                          shareText: { text in IOSShare.text(text) }),
+                                          shareText: { text in IOSShare.text(text) },
+                                          leagueFetcher: LeagueTeamService.shared),
                     team: TeamMatchSupport.cachedTeam())
                     .toolbar {
                         CloseToolbarItem { showingCompetition = false }

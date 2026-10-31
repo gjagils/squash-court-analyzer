@@ -108,8 +108,17 @@ struct SettingsView: View {
 
     private var teamSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(appText("Vul de openbare teamlink van sbn.toernooi.nl in. Daarna verschijnt Mijn team op het beginscherm."))
+            Text(appText("Zoek je club en kies je team. Daarna verschijnt Mijn team op het beginscherm."))
                 .font(AppFonts.body(13)).foregroundColor(AppColors.textSecondary)
+            LeagueClubFinder(fetcher: LeagueTeamService.shared) { team in
+                teamURL = team.link.url.absoluteString
+                teamDraft = teamURL
+                // The finder says so itself, next to the list
+                teamSaveMessage = nil
+            }
+            Text(appText("Of plak de openbare teamlink van sbn.toernooi.nl:"))
+                .font(AppFonts.body(13)).foregroundColor(AppColors.textSecondary)
+                .padding(.top, 6)
             Link(destination: UserManual.iPhoneTeamLink) {
                 Text(appText("Waar vind ik mijn teamlink?")).font(AppFonts.label(13)).foregroundColor(AppColors.warmOrange)
             }

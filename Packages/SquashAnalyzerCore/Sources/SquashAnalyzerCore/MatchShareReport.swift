@@ -129,7 +129,8 @@ public struct MatchShareReport {
         formattedDate(pattern: "EEEE d MMMM yyyy")
     }
 
-    private func minutesText(_ seconds: TimeInterval) -> String {
+    /// "8 min", "1 u 05 min" (also the referee match details in Afgeronde wedstrijden)
+    public func minutesText(_ seconds: TimeInterval) -> String {
         let minutes = Int((seconds / 60).rounded())
         if minutes >= 60 { return L10n.text("%@ u %@ min", "\(minutes / 60)", String(format: "%02d", minutes % 60)) }
         return "\(max(minutes, 1)) min"

@@ -23,6 +23,9 @@ public struct SharedMatchHistoryView: View {
     @State private var confirmDelete = false
     @State private var analysed: Match? = nil
     @State private var shareReport: MatchShareReport? = nil
+    /// A referee match opened from its row, with its date
+    @State private var refereeDetail: MatchShareReport? = nil
+    @State private var refereeDetailDate = ""
     @State private var completing: Match? = nil
     @State private var message: String? = nil
 
@@ -130,6 +133,19 @@ public struct SharedMatchHistoryView: View {
             if let match = analysed {
                 SharedCoachDashboardView(match: match, game: match.games.last ?? match.currentGame, aiCoach: aiCoach,
                                          shareText: shareText) { analysed = nil }
+            }
+        }
+        .sheet(isPresented: Binding(get: { refereeDetail != nil }, set: { if !$0 { refereeDetail = nil } })) {
+            if let report = refereeDetail {
+                RefereeMatchDetailView(report: report, date: refereeDetailDate,
+                                       onShare: shareText == nil ? nil : {
+                                           // One sheet at a time: the share sheet follows the details
+                                           refereeDetail = nil
+                                           Task { @MainActor in
+                                               try? await Task.sleep(nanoseconds: 400_000_000)
+                                               shareReport = report
+                                           }
+                                       }) { refereeDetail = nil }
             }
         }
         .sheet(isPresented: Binding(get: { shareReport != nil }, set: { if !$0 { shareReport = nil } })) {
@@ -358,51 +374,62 @@ public struct SharedMatchHistoryView: View {
     }
 
     private func refereeCard(_ entry: MatchHistorySummary) -> some View {
-        HStack(spacing: 14) {
-            AppSymbol("whistle", size: 18, color: SharedColors.accent)
-                .frame(width: 36, height: 36)
-                .background(SharedColors.accent.opacity(0.12))
-                .clipShape(Circle())
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(entry.player1Name)
-                        .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
-                        .foregroundColor(SharedColors.accent)
-                        .lineLimit(1)
-                    Text("vs")
-                        .font(SharedFonts.system(11, weight: .medium, design: .rounded))
-                        .foregroundColor(SharedColors.textMuted)
-                    Text(entry.player2Name)
-                        .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
-                        .foregroundColor(SharedColors.steelBlue)
-                        .lineLimit(1)
-                    Spacer()
-                    if entry.hasBadges { medal }
-                    Text("\(entry.player1Games)-\(entry.player2Games)")
-                        .font(SharedFonts.system(16, weight: .bold, design: .monospaced))
-                        .foregroundColor(SharedColors.textPrimary)
-                }
-                HStack(spacing: 8) {
-                    Text(entry.gameScoresText)
-                        .font(SharedFonts.system(11, weight: .medium, design: .rounded))
-                        .foregroundColor(SharedColors.textMuted)
-                    if let name = entry.winnerName {
-                        Text("· \(name) wint", bundle: textBundle)
-                            .font(SharedFonts.system(11, weight: .medium, design: .rounded))
-                            .foregroundColor(SharedColors.gold.opacity(0.8))
-                    } else {
-                        incompleteLabel
+        VStack(alignment: .leading, spacing: 4) {
+            // The names and scores open the match (a button of its own, as on the
+            // coach card: Delen and the bin below keep their own tap on Android)
+            Button { openReferee(entry) } label: {
+                HStack(spacing: 14) {
+                    AppSymbol("whistle", size: 18, color: SharedColors.accent)
+                        .frame(width: 36, height: 36)
+                        .background(SharedColors.accent.opacity(0.12))
+                        .clipShape(Circle())
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Text(entry.player1Name)
+                                .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
+                                .foregroundColor(SharedColors.accent)
+                                .lineLimit(1)
+                            Text("vs")
+                                .font(SharedFonts.system(11, weight: .medium, design: .rounded))
+                                .foregroundColor(SharedColors.textMuted)
+                            Text(entry.player2Name)
+                                .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
+                                .foregroundColor(SharedColors.steelBlue)
+                                .lineLimit(1)
+                            Spacer()
+                            if entry.hasBadges { medal }
+                            Text("\(entry.player1Games)-\(entry.player2Games)")
+                                .font(SharedFonts.system(16, weight: .bold, design: .monospaced))
+                                .foregroundColor(SharedColors.textPrimary)
+                        }
+                        HStack(spacing: 8) {
+                            Text(entry.gameScoresText)
+                                .font(SharedFonts.system(11, weight: .medium, design: .rounded))
+                                .foregroundColor(SharedColors.textMuted)
+                            if let name = entry.winnerName {
+                                Text("· \(name) wint", bundle: textBundle)
+                                    .font(SharedFonts.system(11, weight: .medium, design: .rounded))
+                                    .foregroundColor(SharedColors.gold.opacity(0.8))
+                            } else {
+                                incompleteLabel
+                            }
+                            Spacer()
+                        }
                     }
-                }
-                HStack {
-                    Text(Self.dateText(for: entry.updatedAt))
-                        .font(SharedFonts.system(10, weight: .medium, design: .rounded))
-                        .foregroundColor(SharedColors.textMuted.opacity(0.7))
-                    Spacer()
-                    if shareText != nil { shareButton(entry) }
-                    deleteButton(entry)
+                    AppSymbol("chevron.right", size: 12, color: SharedColors.textMuted)
                 }
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(loc("Open \(entry.player1Name) – \(entry.player2Name)"))
+            HStack {
+                Text(Self.dateText(for: entry.updatedAt))
+                    .font(SharedFonts.system(10, weight: .medium, design: .rounded))
+                    .foregroundColor(SharedColors.textMuted.opacity(0.7))
+                Spacer()
+                if shareText != nil { shareButton(entry) }
+                deleteButton(entry)
+            }
+            .padding(.leading, 50)
         }
         .padding(14)
         .background(SharedColors.tint(0.05))
@@ -423,6 +450,18 @@ public struct SharedMatchHistoryView: View {
             } else {
                 completing = match
             }
+        }
+    }
+
+    /// A referee match: its games, times and runs (it has no analysis)
+    private func openReferee(_ entry: MatchHistorySummary) {
+        Task { @MainActor in
+            guard let report = (try? await store.refereeMatch(id: entry.id))?.shareReport else {
+                message = loc("Deze wedstrijd kon niet worden geopend.")
+                return
+            }
+            refereeDetailDate = Self.dateText(for: entry.updatedAt)
+            refereeDetail = report
         }
     }
 

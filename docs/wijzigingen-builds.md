@@ -10,6 +10,31 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.0 build 6)
 
+- **Bevindingen competitie-avond 30 oktober (31 oktober 2026, iOS en Android, gedeelde
+  schermen)**: op vraag van Gerd-Jan.
+  - *Groot lettertype / schermzoom* (Galaxy A57: het veld was een niet aan te tikken
+    postzegel en de punttypes pasten niet): de tekstgrootte was al begrensd
+    (`FontScaleCap`, 1.3), Samsung-schermzoom niet. Coach toont nu tijdens het invoeren van
+    een punt een compacte scorebalk (`CompactScoreBar`) in plaats van het grote scorebord als
+    het scherm lager is dan 740 punten (`CoachScoringView.compactEntryHeight`; alle huidige
+    iPhones zitten erboven, een iPhone SE en een telefoon met grote schermzoom eronder). De
+    punttypes, foutsoorten en slagen scrollen als ze niet passen (`FitOrScroll`) en het veld
+    is minstens 300 punten hoog (dan scrollt het). Smaller dan 380 punten verdwijnt de titel
+    "Coach" (hij viel over LIVE) en de regel met rallyklok en instructie mag twee regels hoog
+    worden. Getest op de emulator met A57-scherm, lettergrootte 1.3 en density 504.
+  - *Sluiten na een afgeronde coachwedstrijd*: de eindkaart had alleen "Nieuwe wedstrijd";
+    er staat nu ook "Sluiten" onder (terug naar Home, met de vraag om de teamwedstrijd te
+    koppelen op een competitiedag), zoals bij de scheidsrechter.
+  - *Afgeronde wedstrijden*: een scheidsrechterwedstrijd was niet aan te tikken (en ze staan
+    bovenaan, dus het leek alsof de lijst niets deed). Nu opent hij een overzicht
+    (`RefereeMatchDetailView`): uitslag, per game de stand, tijd, alle rally's als
+    gekleurde strook, langste reeks en strokes, met Delen. Core: `MatchShareReport.minutesText`
+    is publiek.
+  - Releasenote: "Op telefoons met grote tekst of schermzoom past het invoeren van een punt
+    weer: het scorebord wordt even één regel, zodat het veld en alle keuzes passen. Na een
+    coachwedstrijd kun je nu ook gewoon Sluiten, en scheidsrechterwedstrijden in Afgeronde
+    wedstrijden zijn aan te tikken voor een overzicht per game."
+
 - **Gebruikscijfers van de live-dienst (23 oktober 2026, live-server; app-kant op branch
   `claude/gebruikscijfers-app`)**: op vraag van Gerd-Jan (`docs/voorstel-gebruikscijfers.md`).
   De Worker telt per dag hoe vaak een livewedstrijd en een live teamwedstrijd gestart worden en

@@ -91,6 +91,24 @@
         }
       }
     },
+    "%@ wint": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ wins"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ wint"
+          }
+        }
+      }
+    },
     "%@ wint!": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -4987,6 +5005,42 @@
         }
       }
     },
+    "Langste reeks": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longest run"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langste reeks"
+          }
+        }
+      }
+    },
+    "Langste reeks: %@ %lld": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longest run: %@ %lld"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langste reeks: %@ %lld"
+          }
+        }
+      }
+    },
     "Later instappen": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -6427,6 +6481,24 @@
         }
       }
     },
+    "Open %@ – %@": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open %@ – %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open %@ – %@"
+          }
+        }
+      }
+    },
     "Open de handleiding": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -7053,6 +7125,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "RONDLEIDING"
+          }
+        }
+      }
+    },
+    "Rally's": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rallies"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rally's"
           }
         }
       }
@@ -8061,6 +8151,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Strokes"
+          }
+        }
+      }
+    },
+    "Strokes: %lld": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strokes: %lld"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strokes: %lld"
           }
         }
       }
@@ -9699,6 +9807,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "W"
+          }
+        }
+      }
+    },
+    "WEDSTRIJD": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MATCH"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WEDSTRIJD"
           }
         }
       }

@@ -286,42 +286,25 @@ public struct CoachScoringView: View {
             }
     }
 
+    /// Below this height (points) the scoreboard shrinks to one line while a
+    /// point is entered, so the court and the choices keep room. Every current
+    /// iPhone stays above it; a phone with a large display zoom (a Galaxy A57
+    /// at the competitie-avond, 30 October) or an iPhone SE falls below it.
+    static let compactEntryHeight: CGFloat = 740
+    /// Narrower than this (iPhone mini/SE, large display zoom) the title
+    /// "Coach" gives way to Stop and LIVE in the header, which it overlapped
+    static let narrowWidth: CGFloat = 380
+
     private var screen: some View {
         ZStack {
             GlowBackground()
 
-            VStack(spacing: 12) {
-                header
-                SharedScoreboardView(game: game, match: match, photos: photos, onServiceChanged: { matchChanged() }) { player in handleScoreTap(player) }
-                    .padding(.horizontal, 20)
-
-                HStack(spacing: 12) {
-                    RallyClock(game: game, hidden: game.isGameOver || match.isMatchOver)
-                    instructionText
-                    Spacer(minLength: 0)
-                    if !match.isMatchOver {
-                        renameButton
-                    }
-                }
-                .padding(.horizontal, 24)
-                .frame(height: 28)
-
-                if match.isMatchOver || game.isGameOver {
-                    // The result card covers the screen (see resultCard)
-                    Spacer(minLength: 0)
-                } else {
-                    scoreTapStage
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-
-                bottomActions
-                    .padding(.horizontal, 24)
-                lastPointLine
-                    .padding(.horizontal, 24)
-
-                Spacer(minLength: 0)
+            GeometryReader { geometry in
+                screenColumn(compact: geometry.size.height < Self.compactEntryHeight
+                             && game.selectedPlayer != nil && !game.isGameOver && !match.isMatchOver,
+                             narrow: geometry.size.width < Self.narrowWidth)
+                    .frame(width: geometry.size.width, height: geometry.size.height)
             }
-            .padding(.vertical, 8)
 
             if match.isMatchOver || game.isGameOver {
                 resultCard
@@ -367,6 +350,47 @@ public struct CoachScoringView: View {
         }
     }
 
+    private func screenColumn(compact: Bool, narrow: Bool) -> some View {
+        VStack(spacing: compact ? CGFloat(8) : CGFloat(12)) {
+            header(narrow: narrow)
+            if compact {
+                CompactScoreBar(game: game, match: match) { player in handleScoreTap(player) }
+                    .padding(.horizontal, 20)
+            } else {
+                SharedScoreboardView(game: game, match: match, photos: photos, onServiceChanged: { matchChanged() }) { player in handleScoreTap(player) }
+                    .padding(.horizontal, 20)
+            }
+
+            HStack(spacing: 12) {
+                RallyClock(game: game, hidden: game.isGameOver || match.isMatchOver)
+                instructionText
+                Spacer(minLength: 0)
+                if !match.isMatchOver {
+                    renameButton
+                }
+            }
+            .padding(.horizontal, 24)
+            // At least 28: with large text the clock and the instruction need more
+            .frame(minHeight: 28)
+
+            if match.isMatchOver || game.isGameOver {
+                // The result card covers the screen (see resultCard)
+                Spacer(minLength: 0)
+            } else {
+                scoreTapStage
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+
+            bottomActions
+                .padding(.horizontal, 24)
+            lastPointLine
+                .padding(.horizontal, 24)
+
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 8)
+    }
+
     /// Correct a name during the match (a typo, or the real name after a quick
     /// start with "Speler 1"): the pencil under the scoreboard, next to the names
     private var renameButton: some View {
@@ -380,9 +404,10 @@ public struct CoachScoringView: View {
 
     // MARK: - Header
 
-    private var header: some View {
+    private func header(narrow: Bool) -> some View {
         ZStack {
             Text("Coach")
+                .opacity(narrow ? 0.0 : 1.0)
                 .font(PageTitleStyle.font)
                 .foregroundColor(SharedColors.textPrimary)
                 .lineLimit(1)
@@ -486,80 +511,87 @@ public struct CoachScoringView: View {
             }
             .padding(.horizontal, 24)
         case .selectPointType:
-            VStack(spacing: 8) {
-                Spacer(minLength: 0)
-                ForEach(PointType.allCases) { type in
-                    if !type.serverOnly || game.selectedPlayer == game.currentServer {
-                        PointTypeButton(pointType: type, color: playerColor, compact: true) {
-                            selectPointType(type)
+            // Scrolls when the list does not fit (large text or display zoom)
+            FitOrScroll {
+                VStack(spacing: 8) {
+                    ForEach(PointType.allCases) { type in
+                        if !type.serverOnly || game.selectedPlayer == game.currentServer {
+                            PointTypeButton(pointType: type, color: playerColor, compact: true) {
+                                selectPointType(type)
+                            }
                         }
                     }
-                }
-                cancelButton
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 24)
-        case .selectErrorKind:
-            // How the unforced error went wrong; no court for an unforced error
-            VStack(spacing: 12) {
-                Spacer(minLength: 0)
-                ErrorKindPicker(available: game.errorKindOptions(whenScoring: game.selectedPlayer ?? Player.player1),
-                                color: playerColor) { kind in
-                    handleErrorKind(kind)
-                }
-                cancelButton
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 24)
-        case .selectZone:
-            // The court gets an exact size that fits above the cancel button
-            GeometryReader { geometry in
-                let court = CourtView.fittedSize(in: CGSize(width: geometry.size.width - 32,
-                                                            height: geometry.size.height - 50))
-                VStack(spacing: 10) {
-                    CourtView(isInteractive: true, selectedPlayer: game.selectedPlayer,
-                              layout: CourtLayout.from(stored: courtLayout)) { zone in
-                        handleZoneTap(zone)
-                    }
-                    .frame(width: court.width, height: court.height)
                     cancelButton
                 }
-                .frame(width: geometry.size.width, height: geometry.size.height)
+                .padding(.horizontal, 24)
+            }
+        case .selectErrorKind:
+            // How the unforced error went wrong; no court for an unforced error
+            FitOrScroll {
+                VStack(spacing: 12) {
+                    ErrorKindPicker(available: game.errorKindOptions(whenScoring: game.selectedPlayer ?? Player.player1),
+                                    color: playerColor) { kind in
+                        handleErrorKind(kind)
+                    }
+                    cancelButton
+                }
+                .padding(.horizontal, 24)
+            }
+        case .selectZone:
+            // The court gets an exact size that fits above the cancel button,
+            // but never smaller than a tappable court: then the stage scrolls
+            GeometryReader { geometry in
+                let court = CourtView.fittedSize(in: CGSize(width: geometry.size.width - 32,
+                                                            height: max(geometry.size.height - 50, Self.minimumCourtHeight)))
+                FitOrScroll {
+                    VStack(spacing: 10) {
+                        CourtView(isInteractive: true, selectedPlayer: game.selectedPlayer,
+                                  layout: CourtLayout.from(stored: courtLayout)) { zone in
+                            handleZoneTap(zone)
+                        }
+                        .frame(width: court.width, height: court.height)
+                        cancelButton
+                    }
+                    .frame(width: geometry.size.width)
+                }
             }
         case .selectShot:
-            VStack(spacing: 12) {
-                Spacer(minLength: 0)
-                if let zone = game.selectedZone {
-                    Text(zone.title.uppercased())
-                        .font(SharedFonts.system(11, weight: .medium, design: .rounded))
-                        .foregroundColor(playerColor)
-                        .tracking(1.5)
-                }
-                VolleyToggle(isOn: $volley, color: playerColor)
-                // The shots that fit the zone's row: 3 in a row, or 4 as 2×2.
-                // Two plain rows, not a nested ForEach (Skip mixes up captured
-                // values in nested loops, see docs/android-port.md).
-                let rows = ShotType.rows(ShotType.options(for: game.selectedZone))
-                if rows.count > 0 {
-                    HStack(spacing: 12) {
-                        ForEach(rows[0]) { shot in
-                            ShotTypeButton(shotType: shot, color: playerColor) { handleShotTypeSelect(shot) }
+            FitOrScroll {
+                VStack(spacing: 12) {
+                    if let zone = game.selectedZone {
+                        Text(zone.title.uppercased())
+                            .font(SharedFonts.system(11, weight: .medium, design: .rounded))
+                            .foregroundColor(playerColor)
+                            .tracking(1.5)
+                    }
+                    VolleyToggle(isOn: $volley, color: playerColor)
+                    // The shots that fit the zone's row: 3 in a row, or 4 as 2×2.
+                    // Two plain rows, not a nested ForEach (Skip mixes up captured
+                    // values in nested loops, see docs/android-port.md).
+                    let rows = ShotType.rows(ShotType.options(for: game.selectedZone))
+                    if rows.count > 0 {
+                        HStack(spacing: 12) {
+                            ForEach(rows[0]) { shot in
+                                ShotTypeButton(shotType: shot, color: playerColor) { handleShotTypeSelect(shot) }
+                            }
                         }
                     }
-                }
-                if rows.count > 1 {
-                    HStack(spacing: 12) {
-                        ForEach(rows[1]) { shot in
-                            ShotTypeButton(shotType: shot, color: playerColor) { handleShotTypeSelect(shot) }
+                    if rows.count > 1 {
+                        HStack(spacing: 12) {
+                            ForEach(rows[1]) { shot in
+                                ShotTypeButton(shotType: shot, color: playerColor) { handleShotTypeSelect(shot) }
+                            }
                         }
                     }
+                    cancelButton
                 }
-                cancelButton
-                Spacer(minLength: 0)
+                .padding(.horizontal, 24)
             }
-            .padding(.horizontal, 24)
         }
     }
+
+    /// A court smaller than this cannot be tapped reliably (9 zones)
+    static let minimumCourtHeight: CGFloat = 300
 
     /// START at the first serve of a game: from then the rally clock runs, so
     /// the warm-up and the break between games never count as a rally
@@ -632,9 +664,13 @@ public struct CoachScoringView: View {
             secondary.append(ResultButton(loc("Deel score"), icon: "square.and.arrow.up") { showingShare = true })
         }
         let primary: ResultButton
+        // "Sluiten" next to "Nieuwe wedstrijd": the card covers Stop, so without
+        // it the only way home was a new match (competitie-avond, 30 October)
+        var outlined: ResultButton? = nil
         if match.isMatchOver {
             if let onNewMatch {
                 primary = ResultButton(loc("Nieuwe wedstrijd")) { onNewMatch() }
+                outlined = ResultButton(loc("Sluiten")) { onExit() }
             } else {
                 primary = ResultButton(loc("Klaar")) { onExit() }
             }
@@ -648,7 +684,7 @@ public struct CoachScoringView: View {
             result: MatchResult.coach(match, game: game),
             player1Photo: photo(Player.player1), player2Photo: photo(Player.player2),
             badgeEarnings: badgeEarnings, onBadges: { showingBadges = true },
-            secondary: secondary, primary: primary,
+            secondary: secondary, primary: primary, outlined: outlined,
             onUndo: {
                 // Back in play: the match is no longer finished
                 match.status = MatchStatus.inProgress
@@ -929,6 +965,80 @@ struct RallyClock: View {
             while !Task.isCancelled && !hidden {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 now = Date()
+            }
+        }
+    }
+}
+
+/// The point being entered, in one line instead of the full scoreboard: on a
+/// short screen (large display zoom) the court and the choices need the room.
+/// Tapping the selected player's side cancels, as on the full scoreboard.
+struct CompactScoreBar: View {
+    let game: Game
+    let match: Match
+    let onSelectPlayer: (Player) -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            side(Player.player1)
+            Text("\(match.player1GamesWon)–\(match.player2GamesWon)")
+                .font(SharedFonts.system(13, weight: .bold, design: .monospaced))
+                .foregroundColor(SharedColors.textMuted)
+                .lineLimit(1)
+            side(Player.player2)
+        }
+        .padding(6)
+        .background(SharedColors.tint(0.055))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.line(0.10), lineWidth: 1))
+    }
+
+    private func side(_ player: Player) -> some View {
+        let color = player == Player.player1 ? SharedColors.accent : SharedColors.steelBlue
+        let selected = game.selectedPlayer == player
+        let score = player == Player.player1 ? game.player1Score : game.player2Score
+        return Button { onSelectPlayer(player) } label: {
+            HStack(spacing: 6) {
+                if player == Player.player2 { scoreText(score, color: color, selected: selected) }
+                Text(game.name(for: player))
+                    .font(SharedFonts.system(13, weight: .bold, design: .rounded))
+                    .foregroundColor(selected ? color : SharedColors.textSecondary)
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: player == Player.player1 ? .leading : .trailing)
+                if player == Player.player1 { scoreText(score, color: color, selected: selected) }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(selected ? color.opacity(0.18) : Color.clear)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(color.opacity(selected ? 0.7 : 0.0), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(loc("Punt voor \(game.name(for: player))"))
+    }
+
+    private func scoreText(_ score: Int, color: Color, selected: Bool) -> some View {
+        Text("\(score)")
+            .font(SharedFonts.system(22, weight: .bold, design: .rounded))
+            .foregroundColor(selected ? color : SharedColors.textPrimary)
+    }
+}
+
+/// Content centred in the space it gets, and scrollable when it is taller
+/// (point types or shots with large text on a short screen)
+struct FitOrScroll<Content: View>: View {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            ScrollView(.vertical) {
+                content
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: geometry.size.height)
             }
         }
     }

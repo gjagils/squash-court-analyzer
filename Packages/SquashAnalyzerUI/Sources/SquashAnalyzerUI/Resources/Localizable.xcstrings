@@ -9865,6 +9865,132 @@
         }
       }
     },
+    "Nr. %lld": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No. %lld"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nr. %lld"
+          }
+        }
+      }
+    },
+    "vorige keer %lld-%lld gewonnen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "won %lld-%lld last time"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vorige keer %lld-%lld gewonnen"
+          }
+        }
+      }
+    },
+    "vorige keer %lld-%lld verloren": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lost %lld-%lld last time"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vorige keer %lld-%lld verloren"
+          }
+        }
+      }
+    },
+    "vorige keer %lld-%lld gelijk": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "drew %lld-%lld last time"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vorige keer %lld-%lld gelijk"
+          }
+        }
+      }
+    },
+    "Oefenpartij": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Practice match"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oefenpartij"
+          }
+        }
+      }
+    },
+    "OEFENPARTIJ": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PRACTICE"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OEFENPARTIJ"
+          }
+        }
+      }
+    },
+    "Telt niet mee voor badges en het spelersprofiel. Je vindt hem wel terug bij Afgeronde wedstrijden.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Does not count for badges or the player profile. You will still find it under Finished matches."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telt niet mee voor badges en het spelersprofiel. Je vindt hem wel terug bij Afgeronde wedstrijden."
+          }
+        }
+      }
+    },
     "Volgende · %@ · %@ – %@": {
       "extractionState": "manual",
       "generatesSymbol": false,

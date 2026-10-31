@@ -268,6 +268,49 @@ final class LeagueTeamTests: XCTestCase {
         XCTAssertFalse(LeagueTeamRefresh.isDue(saved, lastAttempt: nil, now: now))
     }
 
+    // MARK: - The opponent in the programme (T5)
+
+    private func match(_ day: Double, _ home: String, _ away: String, _ score: String?) -> LeagueFixture {
+        LeagueFixture(id: "m\(day)", date: Date(timeIntervalSince1970: 1_790_000_000.0 + day * 86_400.0), home: home, away: away,
+                      score: score, url: URL(string: "https://sbn.toernooi.nl/match/\(day)")!)
+    }
+
+    func testTheOpponentHasTheirStandingAndTheLastResultFromOurSide() {
+        // Team 0 lost 7-13 at Team 1 in the first half, won 12-8 at home against Team 2
+        let fixtures = [match(0, "Team 1", "Team 0", "13-7"), match(7, "Team 0", "Team 2", "12-8"),
+                        match(14, "Team 0", "Team 1", nil), match(21, "Team 2", "Team 0", nil)]
+        let saved = team(fixtures: fixtures, played: [2, 2, 2], updatedAt: Date())
+        let home = saved.opponent(in: fixtures[2])
+        XCTAssertEqual(home?.name, "Team 1")
+        XCTAssertEqual(home?.standing?.rank, 2)
+        XCTAssertEqual(home?.previous?.ownGames, 7)
+        XCTAssertEqual(home?.previous?.theirGames, 13)
+        XCTAssertEqual(home?.previous?.atHome, false)
+        XCTAssertEqual(home?.previous?.lost, true)
+        let away = saved.opponent(in: fixtures[3])
+        XCTAssertEqual(away?.name, "Team 2")
+        XCTAssertEqual(away?.previous?.ownGames, 12)
+        XCTAssertEqual(away?.previous?.won, true)
+        XCTAssertEqual(away?.previous?.atHome, true)
+    }
+
+    func testTheFirstMeetingHasNoPreviousResult() {
+        let fixtures = [match(0, "Team 0", "Team 1", nil), match(7, "Team 3", "Team 0", nil)]
+        let saved = team(fixtures: fixtures, played: [0, 0], updatedAt: Date())
+        XCTAssertNil(saved.opponent(in: fixtures[0])?.previous)
+        // Team 3 is not in the poule (a cup match): no standing, still an opponent
+        XCTAssertEqual(saved.opponent(in: fixtures[1])?.name, "Team 3")
+        XCTAssertNil(saved.opponent(in: fixtures[1])?.standing)
+    }
+
+    func testAMatchOfOtherTeamsHasNoOpponentAndANonScoreIsIgnored() {
+        let fixtures = [match(0, "Team 0", "Team 1", "afgelast"), match(7, "Team 1", "Team 2", "10-10"), match(14, "Team 1", "Team 0", nil)]
+        let saved = team(fixtures: fixtures, played: [1, 1, 1], updatedAt: Date())
+        XCTAssertNil(saved.opponent(in: fixtures[1]))
+        XCTAssertNil(saved.opponent(in: fixtures[2])?.previous)
+        XCTAssertEqual(LeagueResult(date: Date(), ownGames: 10, theirGames: 10, atHome: true).won, false)
+    }
+
     func testWithoutASavedTeamItFetches() {
         XCTAssertTrue(LeagueTeamRefresh.isDue(nil, lastAttempt: nil))
     }

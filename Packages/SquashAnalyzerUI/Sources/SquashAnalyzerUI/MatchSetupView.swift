@@ -21,6 +21,8 @@ public struct MatchSetupChoice: Equatable {
     public let teamMatch: TeamMatch?
     public let teamSlot: Int
     public let teamOwnIsPlayer1: Bool
+    /// "Oefenpartij": no badges, not in the profile (backlog C8, `PracticeMatches`)
+    public var isPractice: Bool = false
 }
 
 public extension MatchSetupChoice {
@@ -81,6 +83,8 @@ public struct MatchSetupView: View {
     /// Best of 1, 3 or 5; a partij of a team match is always best of 5
     @State private var bestOf = 5
     @State private var lateStart = false
+    /// Oefenpartij (backlog C8); never for a partij of a team match
+    @State private var practice = false
     @State private var gamesBefore1 = 0
     @State private var gamesBefore2 = 0
 
@@ -128,6 +132,7 @@ public struct MatchSetupView: View {
                 serverPicker
                 teamSection
                 bestOfPicker
+                practiceSection
                 // Best of 1 has nothing to join later
                 if maxGamesBefore > 0 {
                     lateStartSection
@@ -454,6 +459,29 @@ public struct MatchSetupView: View {
         }
     }
 
+    /// "Oefenpartij": a training game that keeps the badges and the profile clean.
+    /// Hidden for a partij of a team match, which always counts.
+    @ViewBuilder
+    private var practiceSection: some View {
+        if !(inTeam && chosenTeam != nil) {
+            VStack(alignment: .leading, spacing: 6) {
+                Toggle(isOn: $practice) {
+                    Text("Oefenpartij", bundle: textBundle)
+                        .font(SharedFonts.system(14, weight: .medium, design: .rounded))
+                        .foregroundColor(SharedColors.textPrimary)
+                }
+                .tint(SharedColors.accent)
+                Text("Telt niet mee voor badges en het spelersprofiel. Je vindt hem wel terug bij Afgeronde wedstrijden.", bundle: textBundle)
+                    .font(SharedFonts.system(11))
+                    .foregroundColor(SharedColors.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(14)
+            .background(SharedColors.tint(0.04))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+    }
+
     private func ownChoice(_ name: String, isPlayer1: Bool, color: Color) -> some View {
         let selected = teamOwnIsPlayer1 == isPlayer1
         return Button { teamOwnIsPlayer1 = isPlayer1 } label: {
@@ -492,14 +520,16 @@ public struct MatchSetupView: View {
     private func start() {
         let late = headStartIsValid
         let team = chosenTeam
-        onStart(MatchSetupChoice(
+        var choice = MatchSetupChoice(
             player1Name: name1, player2Name: name2,
             player1Id: pickedId(player1Pick, currentName: player1Name), player2Id: pickedId(player2Pick, currentName: player2Name),
             startingServer: server, bestOf: chosenBestOf,
             player1GamesBefore: late ? gamesBefore1 : 0, player2GamesBefore: late ? gamesBefore2 : 0,
             player1Focus: focus(player1Pick, currentName: player1Name), player2Focus: focus(player2Pick, currentName: player2Name),
             teamMatch: team, teamSlot: teamSlot, teamOwnIsPlayer1: teamOwnIsPlayer1
-        ))
+        )
+        choice.isPractice = practice && team == nil
+        onStart(choice)
     }
 
     private func reloadPlayers() async {

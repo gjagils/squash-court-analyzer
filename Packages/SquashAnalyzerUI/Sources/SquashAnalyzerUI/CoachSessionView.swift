@@ -236,6 +236,8 @@ public struct CoachSessionView: View {
             player2Id: choice.player2Id.flatMap { UUID(uuidString: $0) },
             bestOf: choice.bestOf
         )
+        // Before the first point, so no badge is ever worked out for it
+        PracticeMatches.shared.set(choice.isPractice, for: fresh.id)
         match = fresh
         // "Onderdeel van een teamwedstrijd" chosen in the setup: the team match
         // must exist for the result to be linked, and a live one gets the state

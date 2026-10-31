@@ -202,6 +202,8 @@ public struct RefereeSessionView: View {
                                  player1GamesBefore: choice.player1GamesBefore, player2GamesBefore: choice.player2GamesBefore)
         fresh.player1Id = choice.player1Id.flatMap { UUID(uuidString: $0) }
         fresh.player2Id = choice.player2Id.flatMap { UUID(uuidString: $0) }
+        // Before the first rally, so no badge is ever worked out for it
+        PracticeMatches.shared.set(choice.isPractice, for: fresh.id)
         match = fresh
         // "Onderdeel van een teamwedstrijd" chosen in the setup: the team match
         // must exist for the result to be linked, and a live one gets the state

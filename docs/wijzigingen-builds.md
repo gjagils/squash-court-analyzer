@@ -10,6 +10,24 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.1 build 2)
 
+### 3.x
+
+- **Tegenstander in het programma (T5, 31 oktober 2026, gedeeld iOS en Android).** Bij een komende
+  wedstrijd in Mijn team en onder "Volgende" op de thuiskaart staat een regel als "Nr. 2 · vorige
+  keer 7-13 verloren": de plaats van de tegenstander in de stand en de laatste uitslag tegen hen,
+  vanuit ons team gezien. Core: `LeagueTeamSnapshot.opponent(in:)` (`LeagueOpponentInfo`,
+  `LeagueResult`); een bekerwedstrijd zonder stand of een eerste ontmoeting laat weg wat er niet is.
+- **Oefenpartij (C8, 31 oktober 2026, gedeeld iOS en Android).** Schakelaar "Oefenpartij" in de
+  opzet van coach en scheidsrechter (niet bij een partij van een teamwedstrijd). Zo'n wedstrijd wordt
+  gewoon bewaard en staat met het label OEFENPARTIJ in Afgeronde wedstrijden, maar levert geen
+  badges op (ook geen carrièrebadges), telt niet in de reeksen van andere wedstrijden en niet in
+  profiel en trend. Opslag zoals de notities per game: `practice-matches.json` naast de
+  teamwedstrijden (`PracticeMatches`), geen SwiftData- of Room-migratie; de volledige back-up
+  draagt `practiceMatchIds` (samenvoegen voegt toe, een oud bestand wist niets).
+- Releasenote-tekst: "Oefenpartij: zet in de opzet de schakelaar Oefenpartij aan. De wedstrijd wordt
+  bewaard, maar telt niet mee voor badges en je spelersprofiel." en "In Mijn team zie je bij een
+  komende wedstrijd de plaats van de tegenstander in de stand en hoe het vorige keer tegen hen ging."
+
 ### 4.0 (achter de vlag, uit in 3.x)
 
 - **Vlag `Features.shared.playerAccount`** (31 oktober 2026, Core, iOS en Android). Standaard

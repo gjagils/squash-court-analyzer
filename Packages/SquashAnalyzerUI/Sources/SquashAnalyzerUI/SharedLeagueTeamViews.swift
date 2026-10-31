@@ -25,6 +25,29 @@ enum LeagueDates {
     }
 }
 
+/// The opponent of a coming match in one line: "Nr. 2 · vorige keer 7-13
+/// verloren" (backlog T5); "" when there is nothing to say (a cup match, the
+/// first meeting with a team outside the poule)
+enum LeagueOpponentText {
+    static func line(_ info: LeagueOpponentInfo?) -> String {
+        guard let info else { return "" }
+        var parts: [String] = []
+        if let standing = info.standing {
+            parts.append(loc("Nr. \(standing.rank)"))
+        }
+        if let previous = info.previous {
+            if previous.won {
+                parts.append(loc("vorige keer \(previous.ownGames)-\(previous.theirGames) gewonnen"))
+            } else if previous.lost {
+                parts.append(loc("vorige keer \(previous.ownGames)-\(previous.theirGames) verloren"))
+            } else {
+                parts.append(loc("vorige keer \(previous.ownGames)-\(previous.theirGames) gelijk"))
+            }
+        }
+        return parts.joined(separator: " · ")
+    }
+}
+
 /// The home-screen card: stand, played and points, and the next match. Shows
 /// nothing until a team link is saved in Instellingen; keeps showing the last
 /// fetched team when SBN cannot be reached.
@@ -206,6 +229,14 @@ public struct SharedLeagueTeamDetailView: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(fixture.home).foregroundColor(SharedColors.textPrimary)
                                     Text(fixture.away).foregroundColor(SharedColors.textSecondary)
+                                    // A coming match: who the opponent is in the standings and how it went last time
+                                    let opponent = fixture.score == nil ? LeagueOpponentText.line(snapshot.opponent(in: fixture)) : ""
+                                    if !opponent.isEmpty {
+                                        Text(opponent)
+                                            .font(SharedFonts.system(11))
+                                            .foregroundColor(SharedColors.textMuted)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
                                 }
                                 Spacer()
                                 Text(fixture.score ?? LeagueDates.time(fixture.date))

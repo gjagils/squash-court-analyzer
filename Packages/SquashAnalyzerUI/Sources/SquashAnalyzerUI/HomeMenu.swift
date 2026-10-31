@@ -176,6 +176,12 @@ public struct HomeTeamSummary: View {
                     Text("Volgende · \(LeagueDates.day(next.date)) · \(next.home) – \(next.away)", bundle: textBundle)
                         .font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
+                    let opponent = LeagueOpponentText.line(snapshot.opponent(in: next))
+                    if !opponent.isEmpty {
+                        Text(opponent)
+                            .font(SharedFonts.system(11)).foregroundColor(SharedColors.textMuted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
             }
             .padding(16).frame(maxWidth: .infinity, alignment: .leading)

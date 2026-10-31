@@ -344,6 +344,8 @@ extension MatchHistoryStore {
     public func trendMatches(forPlayer playerId: String) async throws -> [PlayerTrendMatch] {
         var result: [PlayerTrendMatch] = []
         for entry in try await loadHistory() {
+            // An oefenpartij does not count in the profile (backlog C8)
+            if PracticeMatches.shared.contains(id: entry.id) { continue }
             if entry.kind == "coach" {
                 if let match = try await coachMatch(id: entry.id),
                    let seen = PlayerTrendMatch.of(coach: match, playerId: playerId, date: entry.updatedAt) {

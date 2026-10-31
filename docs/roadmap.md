@@ -10,8 +10,8 @@ lopen staat in het [releaseplan](releaseplan-3x-4.0.md).
 
 | Punt | Bron |
 |---|---|
-| Vorige uitslag en stand van de tegenstander vanuit het programma | T5 |
-| Trainingsmodus: oefenpartij zonder badges en zonder telling in het profiel | C8 |
+| Vorige uitslag en stand van de tegenstander vanuit het programma | T5 — **gebouwd 31 oktober** |
+| Trainingsmodus: oefenpartij zonder badges en zonder telling in het profiel | C8 — **gebouwd 31 oktober** |
 
 ## 3.2
 

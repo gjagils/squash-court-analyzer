@@ -39,6 +39,7 @@ import squash.analyzer.core.LiveShare
 import squash.analyzer.core.TeamLive
 import squash.analyzer.core.AppTheme
 import squash.analyzer.core.GameNotes
+import squash.analyzer.core.PracticeMatches
 import androidx.compose.foundation.isSystemInDarkTheme
 import squash.analyzer.ui.AICoachContext
 import squash.analyzer.ui.ResultImageSharing
@@ -139,6 +140,8 @@ class MainActivity : AppCompatActivity() {
         val teamMatchStore = BackgroundTeamMatchStore(directory = teamDirectory)
         // The coach's notes per game live next to the team matches (GameNotes)
         GameNotes.shared.configure(directory = teamDirectory)
+        // Oefenpartijen (no badges, not in the profile) in the same folder
+        PracticeMatches.shared.configure(directory = teamDirectory)
         // Registers activity-result launchers, so it must exist before the activity starts
         val appVersion = "Android " + (packageManager.getPackageInfo(packageName, 0).versionName ?: "?")
         val backupStore = RoomBackupStore(db, teamDirectory)

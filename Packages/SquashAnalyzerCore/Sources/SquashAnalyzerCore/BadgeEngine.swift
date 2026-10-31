@@ -455,10 +455,14 @@ public struct BadgeMatchInput: Equatable {
     /// When the match began (its first rally); a match from before the badge
     /// reset earns nothing (`BadgeSeason`). Nil when unknown.
     public var startedAt: Date?
+    /// An oefenpartij (`PracticeMatches`): earns nothing
+    public var isPractice: Bool
 
     public init(games: [BadgeGame], player1GamesBefore: Int = 0, player2GamesBefore: Int = 0,
                 player1GamesWon: Int = 0, player2GamesWon: Int = 0, matchWinner: Player? = nil,
-                gamesToWin: Int = 3, recordsPointTypes: Bool = false, duration: TimeInterval = 0, startedAt: Date? = nil) {
+                gamesToWin: Int = 3, recordsPointTypes: Bool = false, duration: TimeInterval = 0, startedAt: Date? = nil,
+                isPractice: Bool = false) {
+        self.isPractice = isPractice
         self.games = games
         self.player1GamesBefore = player1GamesBefore
         self.player2GamesBefore = player2GamesBefore
@@ -502,6 +506,8 @@ public struct BadgeEngine {
 
     public func badges(for input: BadgeMatchInput) -> [Player: Set<BadgeKind>] {
         var earned: [Player: Set<BadgeKind>] = [:]
+        // An oefenpartij earns no badges (backlog C8)
+        if input.isPractice { return earned }
         func award(_ badge: BadgeKind, to player: Player) { earned[player, default: []].insert(badge) }
         /// Every tier of `family` whose threshold `value` reaches
         func awardTiers(_ family: BadgeKind, _ value: Int, to player: Player) {
@@ -675,8 +681,10 @@ public struct BadgeEngine {
     /// this device. `earnedElsewhere` are once-only badges already on the card for
     /// another match, which are not awarded a second time.
     public func careerBadges(in matchId: UUID, history: [CareerMatch], earnedElsewhere: Set<BadgeKind>) -> Set<BadgeKind> {
-        // Matches from before the badge reset no longer count (BadgeSeason)
-        let ordered = history.filter { entry in BadgeSeason.counts(entry.date) }.sorted { a, b in a.date < b.date }
+        // Matches from before the badge reset no longer count (BadgeSeason), nor
+        // does an oefenpartij (PracticeMatches): not itself, not in a streak
+        let ordered = history.filter { entry in BadgeSeason.counts(entry.date) && !PracticeMatches.shared.contains(entry.matchId) }
+            .sorted { a, b in a.date < b.date }
         guard let index = ordered.firstIndex(where: { entry in entry.matchId == matchId }) else { return [] }
         let match = ordered[index]
         let before = Array(ordered[..<index])

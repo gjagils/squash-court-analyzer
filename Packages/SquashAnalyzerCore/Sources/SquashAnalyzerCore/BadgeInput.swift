@@ -20,7 +20,8 @@ public extension Match {
             // Simple coaching keeps no errors: "no unforced errors" badges cannot be earned
             recordsPointTypes: !isSimpleInput,
             duration: totalMatchDuration(),
-            startedAt: allPoints.min { a, b in a.timestamp < b.timestamp }?.timestamp
+            startedAt: allPoints.min { a, b in a.timestamp < b.timestamp }?.timestamp,
+            isPractice: PracticeMatches.shared.contains(id)
         )
     }
 
@@ -69,7 +70,8 @@ public extension RefereeMatch {
             matchWinner: matchWinner,
             gamesToWin: gamesToWin,
             duration: matchDuration,
-            startedAt: matchStartedAt
+            startedAt: matchStartedAt,
+            isPractice: PracticeMatches.shared.contains(id)
         )
     }
 

@@ -134,6 +134,64 @@ public struct LeagueTeamSnapshot: Codable, Equatable, Sendable {
     public func nextFixture(after now: Date = Date()) -> LeagueFixture? {
         fixtures.first { fixture in fixture.date >= now }
     }
+
+    /// The opponent of a match in the programme: their place in the standings
+    /// and how the last match against them ended (backlog T5). Nil when the
+    /// match is not one of this team's.
+    public func opponent(in fixture: LeagueFixture) -> LeagueOpponentInfo? {
+        let ownIsHome: Bool
+        if TeamMatch.sameTeam(fixture.home, name) {
+            ownIsHome = true
+        } else if TeamMatch.sameTeam(fixture.away, name) {
+            ownIsHome = false
+        } else {
+            return nil
+        }
+        let opponentName = ownIsHome ? fixture.away : fixture.home
+        let standing = standings.first { row in TeamMatch.sameTeam(row.name, opponentName) }
+        var previous: LeagueFixture? = nil
+        for other in fixtures where other.id != fixture.id && other.date < fixture.date && other.score != nil {
+            let samePair = (TeamMatch.sameTeam(other.home, name) && TeamMatch.sameTeam(other.away, opponentName))
+                || (TeamMatch.sameTeam(other.home, opponentName) && TeamMatch.sameTeam(other.away, name))
+            if samePair && (previous == nil || other.date > previous!.date) { previous = other }
+        }
+        var previousResult: LeagueResult? = nil
+        if let previous, let score = previous.score, let games = LeagueResult.games(score) {
+            let atHome = TeamMatch.sameTeam(previous.home, name)
+            previousResult = LeagueResult(date: previous.date, ownGames: atHome ? games.home : games.away,
+                                          theirGames: atHome ? games.away : games.home, atHome: atHome)
+        }
+        return LeagueOpponentInfo(name: opponentName, standing: standing, previous: previousResult)
+    }
+}
+
+/// The other team in a match of the programme (`LeagueTeamSnapshot.opponent(in:)`)
+public struct LeagueOpponentInfo: Equatable, Sendable {
+    public let name: String
+    /// Their row in the standings; nil when the poule has no such team (a cup match)
+    public let standing: LeagueStanding?
+    /// The last match against them with a score, before this one
+    public let previous: LeagueResult?
+}
+
+/// A played match from the followed team's side
+public struct LeagueResult: Equatable, Sendable {
+    public let date: Date
+    public let ownGames: Int
+    public let theirGames: Int
+    public let atHome: Bool
+
+    public var won: Bool { ownGames > theirGames }
+    public var lost: Bool { ownGames < theirGames }
+
+    /// "13-7" (home first, as SBN writes it) → games of home and away; nil when it is no score
+    static func games(_ score: String) -> (home: Int, away: Int)? {
+        let parts = score.components(separatedBy: "-")
+        guard parts.count == 2,
+              let home = Int(parts[0].trimmingCharacters(in: .whitespaces)),
+              let away = Int(parts[1].trimmingCharacters(in: .whitespaces)) else { return nil }
+        return (home: home, away: away)
+    }
 }
 
 /// A link on a page: its href and its text

@@ -26,6 +26,8 @@ public struct FullBackup: Codable, Equatable, Sendable {
     public var teamPlayerIds: [String]? = nil
     /// The coach's note per game, by game id (`GameNotes`); left out when there are none
     public var gameNotes: [GameNote]? = nil
+    /// The ids of the oefenpartijen (`PracticeMatches`); left out when there are none
+    public var practiceMatchIds: [String]? = nil
 
     public init(version: Int, backupDate: Date, players: [PlayerBackupData], matches: [MatchExportData],
                 standaloneGames: [GameExportData], badgeAwards: [BadgeAwardBackupData]? = nil,

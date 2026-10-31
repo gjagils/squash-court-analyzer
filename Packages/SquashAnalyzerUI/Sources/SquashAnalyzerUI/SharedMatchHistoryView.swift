@@ -242,6 +242,17 @@ public struct SharedMatchHistoryView: View {
             .overlay(Capsule().stroke(SharedColors.warmRed.opacity(0.6), lineWidth: 1))
     }
 
+    /// An oefenpartij (backlog C8): kept, but no badges and not in the profile
+    private var practiceLabel: some View {
+        Text("OEFENPARTIJ", bundle: textBundle)
+            .font(SharedFonts.system(9, weight: .semibold, design: .rounded))
+            .tracking(1)
+            .foregroundColor(SharedColors.textSecondary)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .overlay(Capsule().stroke(SharedColors.textSecondary.opacity(0.5), lineWidth: 1))
+    }
+
     private var medal: some View {
         AppSymbol("medal.fill", size: 11, color: SharedColors.gold)
             .accessibilityLabel(loc("Badge verdiend"))
@@ -290,6 +301,7 @@ public struct SharedMatchHistoryView: View {
                             .font(SharedFonts.system(11, weight: .medium, design: .rounded))
                             .foregroundColor(SharedColors.textSecondary)
                         if entry.status == "abandoned" { incompleteLabel }
+                        if PracticeMatches.shared.contains(id: entry.id) { practiceLabel }
                         if entry.hasBadges { medal }
                         Spacer()
                         if let name = entry.winnerName {
@@ -428,6 +440,7 @@ public struct SharedMatchHistoryView: View {
                 Text(Self.dateText(for: entry.updatedAt))
                     .font(SharedFonts.system(10, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textMuted.opacity(0.7))
+                if PracticeMatches.shared.contains(id: entry.id) { practiceLabel }
                 Spacer()
                 if shareText != nil { shareButton(entry) }
                 deleteButton(entry)

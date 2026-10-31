@@ -10,7 +10,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.1 build 3)
 
-## 3.1 build 3 (31 oktober 2026, TestFlight Squashteam en Play internal, alpha, Google Group)
+## 3.1 build 3 (geüpload 31 oktober 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 
 Releasenotes `release-notes/3.1-3.md` en `android-3.1-3.md`; website testen, homepage (nl/en) en handleiding bijgewerkt. Geen "met SBN afgestemd" meer in de teksten (opmerking Gerd-Jan). Inhoud: zie hieronder.
 

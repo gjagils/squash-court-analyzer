@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,5 +40,16 @@ class KeystoreAPIKeyStoreTest {
         val store = KeystoreAPIKeyStore(context)
         store.openAIAPIKey = null
         assertNull(store.openAIAPIKey)
+    }
+
+    /** 4.0: the account's secrets go the same way, under their own key, and leave the OpenAI key alone */
+    @Test fun accountSecretsKeepApartFromTheApiKey() {
+        val prefs = context.getSharedPreferences(KeystoreAPIKeyStore.PREFS, Context.MODE_PRIVATE)
+        prefs.edit().putString("openai_api_key", "versleuteld").commit()
+        val secrets = KeystoreAccountSecrets(context)
+        secrets.accountSecrets = "{\"session\":null}"
+        assertNull(secrets.accountSecrets)
+        assertFalse(prefs.contains("account_secrets"))
+        assertTrue(prefs.contains("openai_api_key"))
     }
 }

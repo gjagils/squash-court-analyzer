@@ -4,6 +4,7 @@ import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import squash.analyzer.core.AccountSecretStore
 import squash.analyzer.core.APIKeyStore
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -21,21 +22,49 @@ import javax.crypto.spec.GCMParameterSpec
  * the key then simply reads as not set and can be entered again.
  */
 class KeystoreAPIKeyStore(context: Context) : APIKeyStore {
-    private val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private val sealed = KeystoreSealedText(context, ALIAS, KEY)
 
     override var openAIAPIKey: String?
+        get() = sealed.value
+        set(value) { sealed.value = value }
+
+    companion object {
+        private const val ALIAS = "squashanalyzer.openai"
+        const val PREFS = KeystoreSealedText.PREFS
+        private const val KEY = "openai_api_key"
+    }
+}
+
+/**
+ * 4.0, the player account (Core's `PlayerAccount`): the Firebase refresh token
+ * and the device key, sealed the same way as the OpenAI key, under a Keystore
+ * key of their own. The counterpart of iOS' `KeychainAccountSecrets`.
+ */
+class KeystoreAccountSecrets(context: Context) : AccountSecretStore {
+    private val sealed = KeystoreSealedText(context, "squashanalyzer.account", "account_secrets")
+
+    override var accountSecrets: String?
+        get() = sealed.value
+        set(value) { sealed.value = value }
+}
+
+/** One text, AES-GCM-sealed with a Keystore key (`alias`), the ciphertext under `key` in SharedPreferences */
+class KeystoreSealedText(context: Context, private val alias: String, private val key: String) {
+    private val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+    var value: String?
         get() = synchronized(LOCK) { read() }
         set(value) = synchronized(LOCK) {
-            // A failed write empties the key on purpose ("not set", not a stale old key): docs/bewuste-keuzes.md
-            if (value.isNullOrEmpty() || !write(value)) prefs.edit().remove(KEY).apply()
+            // A failed write empties the value on purpose ("not set", not a stale old value): docs/bewuste-keuzes.md
+            if (value.isNullOrEmpty() || !write(value)) prefs.edit().remove(key).apply()
         }
 
     private fun secretKey(): SecretKey {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
-        (keyStore.getKey(ALIAS, null) as? SecretKey)?.let { return it }
+        (keyStore.getKey(alias, null) as? SecretKey)?.let { return it }
         val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
         generator.init(
-            KeyGenParameterSpec.Builder(ALIAS, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+            KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .setKeySize(256)
@@ -54,7 +83,7 @@ class KeystoreAPIKeyStore(context: Context) : APIKeyStore {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, secretKey())
         val sealed = cipher.iv + cipher.doFinal(value.toByteArray(Charsets.UTF_8))
-        prefs.edit().putString(KEY, Base64.encodeToString(sealed, Base64.NO_WRAP)).apply()
+        prefs.edit().putString(key, Base64.encodeToString(sealed, Base64.NO_WRAP)).apply()
         true
     } catch (e: Exception) {
         false
@@ -62,7 +91,7 @@ class KeystoreAPIKeyStore(context: Context) : APIKeyStore {
 
     /** Nil when nothing is stored or the value cannot be decrypted (e.g. a new Keystore key) */
     private fun read(): String? {
-        val stored = prefs.getString(KEY, null) ?: return null
+        val stored = prefs.getString(key, null) ?: return null
         return try {
             val sealed = Base64.decode(stored, Base64.NO_WRAP)
             val cipher = Cipher.getInstance(TRANSFORMATION)
@@ -77,10 +106,8 @@ class KeystoreAPIKeyStore(context: Context) : APIKeyStore {
         /** One lock for every instance: they share the same preferences and Keystore entry */
         private val LOCK = Any()
         private const val ANDROID_KEYSTORE = "AndroidKeyStore"
-        private const val ALIAS = "squashanalyzer.openai"
         private const val TRANSFORMATION = "AES/GCM/NoPadding"
         private const val IV_LENGTH = 12
         const val PREFS = "squash-analyzer-secure"
-        private const val KEY = "openai_api_key"
     }
 }

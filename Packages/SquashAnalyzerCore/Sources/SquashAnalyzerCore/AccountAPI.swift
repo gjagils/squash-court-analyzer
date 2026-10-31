@@ -23,6 +23,18 @@ public struct AccountProfile: Codable, Equatable, Sendable {
         self.birthYear = birthYear
         self.createdAt = createdAt
     }
+
+    /// "ABCDE FGHJK": easier to read out and type over
+    public static func spaced(_ code: String) -> String {
+        var result = ""
+        var count = 0
+        for character in code {
+            if count == 5 { result += " " }
+            result += String(character)
+            count += 1
+        }
+        return result
+    }
 }
 
 /// Making the account: "Dit ben ik", the birth year (16+) and the consent
@@ -75,6 +87,21 @@ public struct AccountServerMatch: Codable, Equatable, Sendable, Identifiable {
     }
 
     public var playedDate: Date { Date(timeIntervalSince1970: Double(playedAt) / 1000.0) }
+
+    /// "Van Peter, 30 okt."
+    public var inboxTitle: String {
+        let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.locale
+        formatter.dateFormat = "d MMM"
+        let sender = senderName.isEmpty ? L10n.text("onbekende afzender") : senderName
+        return L10n.text("Van %@, %@", sender, formatter.string(from: playedDate))
+    }
+
+    /// "3-1 tegen Mark · coach" (who entered it: a coach or a referee)
+    public var inboxDetail: String {
+        let kind = summary.kind == "referee" ? L10n.text("scheidsrechter") : L10n.text("coach")
+        return "\(summary.resultLine) · \(kind)"
+    }
 
     /// For BadgeEngine; nil without rallies (an inbox entry)
     public var badgeInput: BadgeMatchInput? {

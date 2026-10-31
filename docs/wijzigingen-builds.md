@@ -50,6 +50,28 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   (zelfde antwoord voor onbekende spelers, limieten per apparaat en IP, opnieuw proberen geeft geen
   dubbel verzoek), postvak gebruiken/niet gebruiken/blokkeren, eigen wedstrijden, awards samenvoegen,
   account verwijderen, dagelijks verzoeken ouder dan 90 dagen wissen. 19 tests, in CI.
+- **Spelersaccount in de app, stap 1–3** (31 oktober 2026, Core, iOS en Android, alleen met de
+  vlag aan). Getest tegen een lokale Worker op de iOS-simulator en de Android-emulator:
+  registreren, inloggen (fout wachtwoord geeft een melding), sessie na herstart, "Dit ben ik" met
+  geboortejaar (onder 16 geweigerd) en toestemming, spelerscode, postvak met Gebruiken, Niet
+  gebruiken en Blokkeren, uitloggen, account verwijderen (Worker-data en Firebase-gebruiker weg).
+  - Core `FirebaseAuthREST`: Firebase Authentication via de REST-API (registreren, inloggen,
+    wachtwoord vergeten, bevestigingsmail, token verversen, gebruiker verwijderen, inloggen met een
+    Apple- of Google-token, Apple-token intrekken). Geen Firebase-SDK, geen `skip-firebase`.
+  - Core `AccountClient` voor de account-Worker en `PlayerAccount` voor de schermen. De
+    refresh-token en apparaatsleutel staan in de Keychain (iOS) of versleuteld met de Android
+    Keystore (`KeystoreAccountSecrets`).
+  - Compact wedstrijdformaat (`AccountMatchUpload`, uit `BadgeMatchInput`, ca. 2–3 KB voor
+    4 games; badges uit de kopie zijn gelijk aan die uit de wedstrijd) en uitgaande wachtrij
+    `account-outbox.json` naast de teamwedstrijden. Oefenpartijen gaan nooit mee. De wachtrij
+    wordt nog niet gevuld: het koppelen van spelers bij de coach komt later.
+  - Instellingen → Mijn account (gedeeld scherm `SharedAccountSection`), alleen met de vlag aan.
+  - Inloggen met Apple (iOS, native) is gebouwd maar staat uit tot het entitlement er is
+    (`SQUASH_APPLE_SIGN_IN=YES`). Google en Apple op Android zijn nog niet gebouwd.
+  - Build settings: iOS `SQUASH_ACCOUNT_SERVER` (`local` = de Mac), `SQUASH_FIREBASE_API_KEY`,
+    `SQUASH_APPLE_SIGN_IN`; Android `-PsquashAccountServer=local` (de Firebase-sleutel komt uit
+    google-services.json). Lokaal testen: `npm run local` in `server/account-worker`.
+  - 24 nieuwe Core-tests (ook in Kotlin), 1 Android-test voor de Keystore-opslag.
 
 ## 3.1 build 2 (geüpload 31 oktober 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group)
 

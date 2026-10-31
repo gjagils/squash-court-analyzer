@@ -337,3 +337,7 @@
 "Even te veel tegelijk. Probeer het later opnieuw." = "Too much at once. Try again later.";
 "Serverfout (code: %@)" = "Server error (code: %@)";
 "%@ tegen %@" = "%@ against %@";
+"onbekende afzender" = "unknown sender";
+"Van %@, %@" = "From %@, %@";
+"scheidsrechter" = "referee";
+"coach" = "coach";

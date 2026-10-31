@@ -16,6 +16,10 @@ val squashInternal = (findProperty("squashInternal") as String?)?.toInt() ?: 0
 // 4.0 behind a switch (docs/releaseplan-3x-4.0.md): only a 4.0 test build adds
 // -PsquashPlayerAccount=true
 val squashPlayerAccount = (findProperty("squashPlayerAccount") as String?)?.toBoolean() ?: false
+// Where a 4.0 build finds the account: empty is the deployed Worker, "local" the
+// test setup on the Mac (server/account-worker: npm run local), seen from the
+// emulator as 10.0.2.2; "local:<ip>" for a phone on the same network
+val squashAccountServer = (findProperty("squashAccountServer") as String?) ?: ""
 
 // Google Play upload key: never in the repo. The keystore lives in
 // ~/.android-keys (backed up in 1Password), the passwords in
@@ -89,6 +93,7 @@ android {
         buildConfigField("String", "FIREBASE_API_KEY", "\"${firebaseValues["apiKey"]}\"")
         buildConfigField("String", "FIREBASE_SENDER_ID", "\"${firebaseValues["senderId"]}\"")
         buildConfigField("boolean", "PLAYER_ACCOUNT", "$squashPlayerAccount")
+        buildConfigField("String", "ACCOUNT_SERVER", "\"$squashAccountServer\"")
     }
 
     signingConfigs {

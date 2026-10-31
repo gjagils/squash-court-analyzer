@@ -14,6 +14,18 @@ struct SquashAnalyzerApp: App {
         // 4.0 behind a switch (docs/releaseplan-3x-4.0.md): only a 4.0 test build sets
         // SQUASH_PLAYER_ACCOUNT=YES, which Info.plist passes on
         Features.shared.playerAccount = Features.isOn(Bundle.main.infoDictionary?["SquashPlayerAccount"] as? String)
+        if Features.shared.playerAccount {
+            // The player account: its outgoing matches next to the team matches, the
+            // refresh token and device key in the Keychain
+            AccountOutbox.shared.configure(directory: TeamMatchStorage.directory)
+            PlayerAccount.shared.configure(
+                endpoints: AccountEndpoints.from(server: Bundle.main.infoDictionary?["SquashAccountServer"] as? String,
+                                                 apiKey: Bundle.main.infoDictionary?["SquashFirebaseAPIKey"] as? String,
+                                                 defaultHost: "localhost"),
+                transport: URLSessionLiveTransport(),
+                secrets: KeychainAccountSecrets())
+            Task { await PlayerAccount.shared.sendOutbox() }
+        }
         // Live meekijken: the shared LiveShare sends the state through URLSession (server/live)
         LiveShare.shared.transport = URLSessionLiveTransport()
         // The anonymous daily usage count (AppUsage): only release builds report, so

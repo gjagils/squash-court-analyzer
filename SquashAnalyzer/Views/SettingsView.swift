@@ -53,6 +53,15 @@ struct SettingsView: View {
                         // then a line per part that opens underneath, one at a time
                         SettingsManualCard(manual: UserManual.iPhone)
                             .padding(.bottom, 16)
+                        // 4.0, behind the switch: nothing of it in a 3.x build
+                        if Features.shared.playerAccount {
+                            SettingsRow(appText("Mijn account"), icon: "person.crop.circle", open: openPart == "account") { toggle("account") }
+                            if openPart == "account" {
+                                SharedAccountSection(providers: AppleAccountSignIn.providers, appleReauthorize: AppleAccountSignIn.reauthorize)
+                                    .padding(.bottom, 16)
+                            }
+                            SettingsDivider()
+                        }
                         SettingsRow(appText("Mijn team"), icon: "person.2", open: openPart == "team") { toggle("team") }
                         if openPart == "team" { teamSection.padding(.bottom, 16) }
                         SettingsDivider()
@@ -96,6 +105,8 @@ struct SettingsView: View {
                     .padding(.horizontal, 24)
                     .padding(.vertical, 20)
                 }
+                // The number pad (Mijn account's birth year) has no return key
+                .scrollDismissesKeyboard(.interactively)
             }
         }
         .onAppear {

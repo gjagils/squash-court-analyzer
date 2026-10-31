@@ -82,6 +82,9 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
   `.background(kleur)` + `.clipShape` dan `RoundedRectangle().fill`.
   Op Android gaf `.background(RoundedRectangle().fill(kleur))` in licht een lavendelzweem
   (#FAF8FE in plaats van warm wit, UI-check 12 oktober); alles is omgezet.
+- **`ForEach(lijst.indices, id: \.self)` transpileert niet** ("Argument type mismatch: actual type is
+  'Sequence<Int>'", 31 oktober, Mijn account): maak het element `Identifiable` en schrijf
+  `ForEach(lijst) { item in … }`.
 - **Een `Button` nooit conditioneel tussen twee takken splitsen**: één vaste knop met een
   optioneel aangeroepen closure.
 - **Een `.alert` met alleen een `.cancel`-knop krijgt op Android twee knoppen**: geef de

@@ -11376,6 +11376,744 @@
           }
         }
       }
+    },
+    "ACCOUNT MAKEN": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CREATE ACCOUNT"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ACCOUNT MAKEN"
+          }
+        }
+      }
+    },
+    "ACCOUNT VERWIJDEREN": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DELETE ACCOUNT"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ACCOUNT VERWIJDEREN"
+          }
+        }
+      }
+    },
+    "Account": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account"
+          }
+        }
+      }
+    },
+    "Account maken": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create account"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account maken"
+          }
+        }
+      }
+    },
+    "Account verwijderen?": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete account?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account verwijderen?"
+          }
+        }
+      }
+    },
+    "Afzender blokkeren?": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Block sender?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afzender blokkeren?"
+          }
+        }
+      }
+    },
+    "Als er een account met dit adres is, krijg je een mail om een nieuw wachtwoord te kiezen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If there is an account with this address, you will get an email to choose a new password."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als er een account met dit adres is, krijg je een mail om een nieuw wachtwoord te kiezen."
+          }
+        }
+      }
+    },
+    "Bewaard worden: je e-mailadres (bij Firebase, van Google), je naam, je geboortejaar en de wedstrijden die je goedkeurt, met per rally wie won, hoe en waar. In de EU, bij Cloudflare. Notities, advies en foto's blijven op de telefoon. Je kunt het account altijd verwijderen; dan is alles meteen weg.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What is kept: your email address (at Firebase, from Google), your name, your birth year and the matches you approve, with who won each rally, how and where. In the EU, at Cloudflare. Notes, advice and photos stay on the phone. You can delete the account at any time; then everything is gone at once."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewaard worden: je e-mailadres (bij Firebase, van Google), je naam, je geboortejaar en de wedstrijden die je goedkeurt, met per rally wie won, hoe en waar. In de EU, bij Cloudflare. Notities, advies en foto's blijven op de telefoon. Je kunt het account altijd verwijderen; dan is alles meteen weg."
+          }
+        }
+      }
+    },
+    "Blokkeren": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Block"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blokkeren"
+          }
+        }
+      }
+    },
+    "De wedstrijd telt mee.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The match counts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De wedstrijd telt mee."
+          }
+        }
+      }
+    },
+    "Deze wedstrijd wordt gewist en van deze telefoon krijg je geen verzoeken meer.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This match is deleted and you will get no more requests from this phone."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze wedstrijd wordt gewist en van deze telefoon krijg je geen verzoeken meer."
+          }
+        }
+      }
+    },
+    "Dit ben ik": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is me"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit ben ik"
+          }
+        }
+      }
+    },
+    "E-mailadres": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email address"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E-mailadres"
+          }
+        }
+      }
+    },
+    "Een account kan vanaf 16 jaar. Het geboortejaar wordt alleen daarvoor bewaard.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An account is for ages 16 and up. The birth year is kept for that only."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een account kan vanaf 16 jaar. Het geboortejaar wordt alleen daarvoor bewaard."
+          }
+        }
+      }
+    },
+    "GEBRUIKEN": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USE"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GEBRUIKEN"
+          }
+        }
+      }
+    },
+    "Geboortejaar": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Birth year"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geboortejaar"
+          }
+        }
+      }
+    },
+    "Geef deze code aan je coach of de scheidsrechter. Dan kunnen ze wedstrijden naar je sturen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Give this code to your coach or the referee. Then they can send matches to you."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geef deze code aan je coach of de scheidsrechter. Dan kunnen ze wedstrijden naar je sturen."
+          }
+        }
+      }
+    },
+    "Geen wedstrijden die op je antwoord wachten.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No matches waiting for your answer."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen wedstrijden die op je antwoord wachten."
+          }
+        }
+      }
+    },
+    "INLOGGEN": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIGN IN"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "INLOGGEN"
+          }
+        }
+      }
+    },
+    "Ik geef toestemming": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I give my consent"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ik geef toestemming"
+          }
+        }
+      }
+    },
+    "Inloggen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inloggen"
+          }
+        }
+      }
+    },
+    "Inloggen is in deze build niet ingesteld.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signing in is not set up in this build."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inloggen is in deze build niet ingesteld."
+          }
+        }
+      }
+    },
+    "Je account is gemaakt.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your account has been created."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je account is gemaakt."
+          }
+        }
+      }
+    },
+    "Je account is verwijderd.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your account has been deleted."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je account is verwijderd."
+          }
+        }
+      }
+    },
+    "Je login is gemaakt. Je krijgt een mail om je adres te bevestigen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your login has been created. You will get an email to confirm your address."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je login is gemaakt. Je krijgt een mail om je adres te bevestigen."
+          }
+        }
+      }
+    },
+    "Je naam": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your name"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je naam"
+          }
+        }
+      }
+    },
+    "Je spelerscode": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your player code"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je spelerscode"
+          }
+        }
+      }
+    },
+    "Je wedstrijden, verzoeken en badges op de server worden meteen gewist. Wat op deze telefoon staat blijft.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your matches, requests and badges on the server are deleted at once. What is on this phone stays."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je wedstrijden, verzoeken en badges op de server worden meteen gewist. Wat op deze telefoon staat blijft."
+          }
+        }
+      }
+    },
+    "Met een account komen wedstrijden die je coach of de scheidsrechter invoert bij jou terecht. Jij kiest per wedstrijd of hij meetelt. Een account is niet nodig om de app te gebruiken.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With an account, matches your coach or the referee enters come to you. You choose per match whether it counts. You do not need an account to use the app."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Met een account komen wedstrijden die je coach of de scheidsrechter invoert bij jou terecht. Jij kiest per wedstrijd of hij meetelt. Een account is niet nodig om de app te gebruiken."
+          }
+        }
+      }
+    },
+    "Mijn account": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My account"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn account"
+          }
+        }
+      }
+    },
+    "NIET GEBRUIKEN": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DO NOT USE"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NIET GEBRUIKEN"
+          }
+        }
+      }
+    },
+    "Of vul alleen je naam in:": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Or just enter your name:"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Of vul alleen je naam in:"
+          }
+        }
+      }
+    },
+    "Postvak": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inbox"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Postvak"
+          }
+        }
+      }
+    },
+    "Speel je in Mijn team? Kies jezelf, dan komen teamwedstrijden vanzelf bij je terecht.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do you play in My team? Pick yourself, and team matches come to you by themselves."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speel je in Mijn team? Kies jezelf, dan komen teamwedstrijden vanzelf bij je terecht."
+          }
+        }
+      }
+    },
+    "UITLOGGEN": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIGN OUT"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UITLOGGEN"
+          }
+        }
+      }
+    },
+    "Uitloggen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign out"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uitloggen"
+          }
+        }
+      }
+    },
+    "Vul eerst je e-mailadres in.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter your email address first."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vul eerst je e-mailadres in."
+          }
+        }
+      }
+    },
+    "Vul je geboortejaar in, bijvoorbeeld 1990.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter your birth year, for example 1990."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vul je geboortejaar in, bijvoorbeeld 1990."
+          }
+        }
+      }
+    },
+    "Wachtwoord": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Password"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wachtwoord"
+          }
+        }
+      }
+    },
+    "Wachtwoord vergeten": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forgot password"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wachtwoord vergeten"
+          }
+        }
+      }
+    },
+    "Gereed": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gereed"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

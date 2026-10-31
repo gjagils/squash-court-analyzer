@@ -294,6 +294,15 @@ public final class PlayerAccount {
         return value
     }
 
+    /// The players of Mijn team (cached from sbn.toernooi.nl), for "Dit ben ik";
+    /// their id is the SBN player path. Empty without a team link.
+    public static func mijnTeamPlayers(in defaults: UserDefaults = UserDefaults.standard) -> [LeaguePlayer] {
+        let link = defaults.string(forKey: LeagueTeamStorage.linkKey) ?? ""
+        guard !link.isEmpty, let parsed = try? LeagueTeamLink(link),
+              let snapshot = LeagueTeamStorage.cachedSnapshot(for: parsed, in: defaults) else { return [] }
+        return snapshot.players
+    }
+
     static func cleanEmail(_ email: String) -> String {
         email.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).lowercased()
     }

@@ -25,6 +25,12 @@
 	</dict>
 	<key>SquashPlayerAccount</key>
 	<string>$(SQUASH_PLAYER_ACCOUNT)</string>
+	<key>SquashAccountServer</key>
+	<string>$(SQUASH_ACCOUNT_SERVER)</string>
+	<key>SquashFirebaseAPIKey</key>
+	<string>$(SQUASH_FIREBASE_API_KEY)</string>
+	<key>SquashAppleSignIn</key>
+	<string>$(SQUASH_APPLE_SIGN_IN)</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSSupportsLiveActivitiesFrequentUpdates</key>

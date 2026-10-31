@@ -87,7 +87,7 @@ public struct AuthSession: Codable, Equatable, Sendable {
         expiresAt - Int64(5 * 60 * 1000) > AuthSession.millis(now)
     }
 
-    static func millis(_ date: Date) -> Int64 { Int64(date.timeIntervalSince1970 * 1000.0) }
+    public static func millis(_ date: Date) -> Int64 { Int64(date.timeIntervalSince1970 * 1000.0) }
 
     static func expiry(_ expiresIn: String?, from now: Date) -> Int64 {
         let seconds = Int64(expiresIn ?? "") ?? Int64(3600)

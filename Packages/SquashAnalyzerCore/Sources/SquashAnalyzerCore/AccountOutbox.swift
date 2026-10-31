@@ -32,7 +32,7 @@ public struct AccountOutboxEntry: Codable, Equatable, Sendable {
     public var isOwn: Bool { recipient == nil }
 
     /// The same match for another player is another entry
-    var key: String {
+    public var key: String {
         let code = recipient?.code ?? ""
         let path = recipient?.sbnPath ?? ""
         return "\(match.matchId)|\(code)|\(path)"
@@ -106,11 +106,12 @@ public final class AccountOutbox {
         return entries.contains { entry in entry.match.matchId == wanted }
     }
 
-    func remove(_ keys: [String]) {
+    public func remove(_ keys: [String]) {
+        if keys.isEmpty { return }
         save(entries.filter { entry in !keys.contains(entry.key) })
     }
 
-    func countAttempt(_ keys: [String]) {
+    public func countAttempt(_ keys: [String]) {
         var updated: [AccountOutboxEntry] = []
         for entry in entries {
             var copy = entry
@@ -121,7 +122,7 @@ public final class AccountOutbox {
     }
 
     /// Entries to drop before sending: too old, or marked as practice since
-    func stale(now: Date) -> [String] {
+    public func stale(now: Date) -> [String] {
         let cutoff = AuthSession.millis(now) - Int64(AccountOutbox.maxAgeDays) * Int64(24 * 60 * 60 * 1000)
         var keys: [String] = []
         for entry in entries {

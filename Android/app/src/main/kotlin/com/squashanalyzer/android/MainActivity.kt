@@ -36,6 +36,10 @@ import squash.analyzer.core.LeagueTeamFetcher
 import skip.foundation.URL
 import squash.analyzer.core.AICoachClient
 import squash.analyzer.core.LiveShare
+import squash.analyzer.core.AccountEndpoints
+import squash.analyzer.core.AccountOutbox
+import squash.analyzer.core.PlayerAccount
+import com.squashanalyzer.android.aicoach.KeystoreAccountSecrets
 import squash.analyzer.core.TeamLive
 import squash.analyzer.core.AppTheme
 import squash.analyzer.core.GameNotes
@@ -168,6 +172,17 @@ class MainActivity : AppCompatActivity() {
         val aiCoach = AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport()))
         // 4.0 behind a switch (docs/releaseplan-3x-4.0.md): -PsquashPlayerAccount=true
         Features.shared.playerAccount = BuildConfig.PLAYER_ACCOUNT
+        if (Features.shared.playerAccount) {
+            // The player account: its outgoing matches next to the team matches, the
+            // refresh token and device key sealed with the Keystore
+            AccountOutbox.shared.configure(directory = teamDirectory)
+            PlayerAccount.shared.configure(
+                endpoints = AccountEndpoints.from(server = BuildConfig.ACCOUNT_SERVER, apiKey = BuildConfig.FIREBASE_API_KEY, defaultHost = "10.0.2.2"),
+                transport = HttpLiveTransport(),
+                secrets = KeystoreAccountSecrets(this),
+            )
+            lifecycleScope.launch { PlayerAccount.shared.sendOutbox() }
+        }
         // Live meekijken: the shared LiveShare sends the state through this (server/live)
         LiveShare.shared.transport = HttpLiveTransport()
         // The anonymous daily usage count (AppUsage): only release builds report, never a test run

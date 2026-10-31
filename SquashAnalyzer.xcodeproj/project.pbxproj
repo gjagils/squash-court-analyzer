@@ -16,6 +16,7 @@
 		A1000018 /* SavedPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000018 /* SavedPoint.swift */; };
 		A1000022 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000022 /* SettingsView.swift */; };
 		A1000024 /* NetworkTransports.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000024 /* NetworkTransports.swift */; };
+		A1000090 /* AccountServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000090 /* AccountServices.swift */; };
 		A1000025 /* APIKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000025 /* APIKeyManager.swift */; };
 		A1000027 /* SavedLet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000027 /* SavedLet.swift */; };
 		A1000029 /* SavedPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000029 /* SavedPlayer.swift */; };
@@ -111,6 +112,7 @@
 		A2000018 /* SavedPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPoint.swift; sourceTree = "<group>"; };
 		A2000022 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A2000024 /* NetworkTransports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTransports.swift; sourceTree = "<group>"; };
+		A2000090 /* AccountServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountServices.swift; sourceTree = "<group>"; };
 		A2000025 /* APIKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyManager.swift; sourceTree = "<group>"; };
 		A2000027 /* SavedLet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedLet.swift; sourceTree = "<group>"; };
 		A2000029 /* SavedPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlayer.swift; sourceTree = "<group>"; };
@@ -275,6 +277,7 @@
 				B2000002 /* MatchRepository.swift */,
 				B2000003 /* PersistenceSchema.swift */,
 				A2000024 /* NetworkTransports.swift */,
+				A2000090 /* AccountServices.swift */,
 				C2000005 /* ActivityKitLiveFollowPresenter.swift */,
 				A2000025 /* APIKeyManager.swift */,
 				A2000031 /* ExportService.swift */,
@@ -488,6 +491,7 @@
 				A1000018 /* SavedPoint.swift in Sources */,
 				A1000022 /* SettingsView.swift in Sources */,
 				A1000024 /* NetworkTransports.swift in Sources */,
+				A1000090 /* AccountServices.swift in Sources */,
 				A1000025 /* APIKeyManager.swift in Sources */,
 				A1000029 /* SavedPlayer.swift in Sources */,
 				A1000030 /* PlayerManagementView.swift in Sources */,
@@ -706,6 +710,9 @@
 				);
 				MARKETING_VERSION = 3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.squashanalyzer.app;
+				SQUASH_ACCOUNT_SERVER = "";
+				SQUASH_APPLE_SIGN_IN = NO;
+				SQUASH_FIREBASE_API_KEY = "";
 				SQUASH_PLAYER_ACCOUNT = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -744,6 +751,9 @@
 				);
 				MARKETING_VERSION = 3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.squashanalyzer.app;
+				SQUASH_ACCOUNT_SERVER = "";
+				SQUASH_APPLE_SIGN_IN = NO;
+				SQUASH_FIREBASE_API_KEY = "";
 				SQUASH_PLAYER_ACCOUNT = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

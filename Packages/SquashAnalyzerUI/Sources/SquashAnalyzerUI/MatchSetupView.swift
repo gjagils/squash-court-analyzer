@@ -16,7 +16,7 @@ public struct MatchSetupChoice: Equatable {
     /// Coaching focus of a picked player (empty otherwise)
     public let player1Focus: [String]
     public let player2Focus: [String]
-    /// "Onderdeel van een teamwedstrijd": which team match, which partij and
+    /// Teamwedstrijd as the kind of match: which team match, which partij and
     /// whether our player is Speler 1 (nil team match = an ordinary match)
     public let teamMatch: TeamMatch?
     public let teamSlot: Int
@@ -61,7 +61,7 @@ public struct MatchSetupView: View {
     let onCancel: (() -> Void)?
     let onStart: (MatchSetupChoice) -> Void
     /// Competitie: when given and there is a team match to play for, the setup offers
-    /// "Onderdeel van een teamwedstrijd"
+    /// Teamwedstrijd as the kind of match
     let teamMatchStore: (any TeamMatchStore)?
     @State private var teamCandidates: [TeamMatch] = []
     @State private var inTeam = false
@@ -85,6 +85,12 @@ public struct MatchSetupView: View {
     @State private var lateStart = false
     /// Oefenpartij (backlog C8); never for a partij of a team match
     @State private var practice = false
+    /// "Meer opties": Best of and Later instappen, folded by default
+    @State private var showMore = false
+    /// The last format and kind chosen, so a weekly training needs no changes
+    /// (Gerd-Jan, 31 October 2026); a team match is never remembered
+    @AppStorage("setupLastBestOf") private var lastBestOf = 5
+    @AppStorage("setupLastPractice") private var lastPractice = false
     @State private var gamesBefore1 = 0
     @State private var gamesBefore2 = 0
 
@@ -130,13 +136,9 @@ public struct MatchSetupView: View {
                 playerRow(label: loc("Speler 2"), name: $player2Name, slot: 2, color: SharedColors.steelBlue, focus: focus(player2Pick, currentName: player2Name))
 
                 serverPicker
+                kindPicker
                 teamSection
-                bestOfPicker
-                practiceSection
-                // Best of 1 has nothing to join later
-                if maxGamesBefore > 0 {
-                    lateStartSection
-                }
+                moreOptions
 
                 ActionButton(isCoach ? loc("START WEDSTRIJD") : loc("START SCHEIDSRECHTER"), style: .filled,
                              disabled: !headStartIsValid, action: start)
@@ -144,6 +146,7 @@ public struct MatchSetupView: View {
             .padding(24)
         }
         .task {
+            restoreLastChoice()
             await reloadPlayers()
             if let teamMatchStore { teamCandidates = await TeamMatchSupport.candidates(store: teamMatchStore) }
         }
@@ -278,6 +281,95 @@ public struct MatchSetupView: View {
         .accessibilityLabel(loc("\(name) serveert eerst"))
     }
 
+    /// The kind of match in one row instead of separate switches (Gerd-Jan,
+    /// 31 October 2026): Wedstrijd, Oefenpartij, and Teamwedstrijd when a team
+    /// match is waiting. They exclude each other: a partij of a team match
+    /// always counts and is always best of 5.
+    private var kindPicker: some View {
+        VStack(spacing: 10) {
+            Text("Soort wedstrijd", bundle: textBundle)
+                .font(SharedFonts.system(14, weight: .medium, design: .rounded))
+                .foregroundColor(SharedColors.textSecondary)
+            HStack(spacing: 10) {
+                kindButton(loc("Wedstrijd"), selected: !inTeam && !practice) { chooseKind(team: false, isPractice: false) }
+                kindButton(loc("Oefenpartij"), selected: !inTeam && practice) { chooseKind(team: false, isPractice: true) }
+                if !teamCandidates.isEmpty {
+                    kindButton(loc("Teamwedstrijd"), selected: inTeam) { chooseKind(team: true, isPractice: false) }
+                }
+            }
+            if practice && !inTeam {
+                Text("Telt niet mee voor badges en het spelersprofiel. Je vindt hem wel terug bij Afgeronde wedstrijden.", bundle: textBundle)
+                    .font(SharedFonts.system(11))
+                    .foregroundColor(SharedColors.textMuted)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func kindButton(_ title: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
+                .foregroundColor(selected ? SharedColors.accent : SharedColors.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(SharedColors.accent.opacity(selected ? 0.15 : 0.05))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(SharedColors.accent.opacity(selected ? 0.6 : 0.15), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func chooseKind(team: Bool, isPractice: Bool) {
+        practice = isPractice
+        turnTeamOn(team)
+    }
+
+    /// "Meer opties": Best of and Later instappen behind one line that says
+    /// what is set ("Best of 3 · start bij game 2"), so the screen stays short
+    private var moreOptions: some View {
+        VStack(spacing: 16) {
+            Button { showMore.toggle() } label: {
+                HStack(spacing: 4) {
+                    Text(moreSummary)
+                        .font(SharedFonts.system(14, weight: .medium, design: .rounded))
+                        .foregroundColor(hasHeadStart ? SharedColors.gold : SharedColors.textSecondary)
+                    AppSymbol(showMore ? "chevron.up" : "chevron.down", size: 12,
+                              color: hasHeadStart ? SharedColors.gold : SharedColors.textSecondary)
+                }
+            }
+            .buttonStyle(.plain)
+            if showMore {
+                bestOfPicker
+                // Best of 1 has nothing to join later
+                if maxGamesBefore > 0 {
+                    lateStartSection
+                }
+            }
+        }
+    }
+
+    /// Folded: "Meer opties · Best of 5", with a head start "… · start bij game 3"
+    private var moreSummary: String {
+        // Open, the choices show right below: the line only folds them again
+        if showMore { return loc("Minder opties") }
+        var parts: [String] = [loc("Meer opties")]
+        if !(inTeam && chosenTeam != nil) { parts.append(loc("Best of \(chosenBestOf)")) }
+        if hasHeadStart && headStartIsValid { parts.append(loc("start bij game \(1 + gamesBefore1 + gamesBefore2)")) }
+        return parts.joined(separator: " · ")
+    }
+
+    /// The format and kind of the last match started here (not for a match
+    /// that comes from a team match, which is always best of 5 and counts)
+    private func restoreLastChoice() {
+        guard !prefilled else { return }
+        if Match.bestOfOptions.contains(lastBestOf) { bestOf = lastBestOf }
+        practice = lastPractice
+    }
+
     /// "Best of 1 · 3 · 5": a training match is often shorter than best of 5
     /// (Gerd-Jan, 22 October 2026). Hidden for a partij of a team match (always 5).
     @ViewBuilder
@@ -375,25 +467,19 @@ public struct MatchSetupView: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
-    /// The team match picked in the setup, when "Onderdeel van een teamwedstrijd" is on
+    /// The team match picked in the setup, when Teamwedstrijd is the kind
     private var chosenTeam: TeamMatch? {
         guard inTeam else { return nil }
         for candidate in teamCandidates where candidate.id == pickedTeam { return candidate }
         return teamCandidates.first
     }
 
-    /// "Onderdeel van een teamwedstrijd": pick the team match, the partij and which player is ours
+    /// Teamwedstrijd chosen as the kind: pick the team match, the partij and which player is ours
     @ViewBuilder
     private var teamSection: some View {
-        if !teamCandidates.isEmpty {
+        if inTeam, let team = chosenTeam {
             VStack(alignment: .leading, spacing: 10) {
-                Toggle(isOn: Binding(get: { inTeam }, set: { turnTeamOn($0) })) {
-                    Text("Onderdeel van een teamwedstrijd", bundle: textBundle)
-                        .font(SharedFonts.system(14, weight: .medium, design: .rounded))
-                        .foregroundColor(SharedColors.textPrimary)
-                }
-                .tint(SharedColors.accent)
-                if inTeam, let team = chosenTeam {
+                VStack(alignment: .leading, spacing: 10) {
                     if teamCandidates.count > 1 {
                         ForEach(teamCandidates) { candidate in
                             Button { pickedTeam = candidate.id; teamSlot = freeSlot(candidate) } label: {
@@ -459,29 +545,6 @@ public struct MatchSetupView: View {
         }
     }
 
-    /// "Oefenpartij": a training game that keeps the badges and the profile clean.
-    /// Hidden for a partij of a team match, which always counts.
-    @ViewBuilder
-    private var practiceSection: some View {
-        if !(inTeam && chosenTeam != nil) {
-            VStack(alignment: .leading, spacing: 6) {
-                Toggle(isOn: $practice) {
-                    Text("Oefenpartij", bundle: textBundle)
-                        .font(SharedFonts.system(14, weight: .medium, design: .rounded))
-                        .foregroundColor(SharedColors.textPrimary)
-                }
-                .tint(SharedColors.accent)
-                Text("Telt niet mee voor badges en het spelersprofiel. Je vindt hem wel terug bij Afgeronde wedstrijden.", bundle: textBundle)
-                    .font(SharedFonts.system(11))
-                    .foregroundColor(SharedColors.textMuted)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(14)
-            .background(SharedColors.tint(0.04))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-    }
-
     private func ownChoice(_ name: String, isPlayer1: Bool, color: Color) -> some View {
         let selected = teamOwnIsPlayer1 == isPlayer1
         return Button { teamOwnIsPlayer1 = isPlayer1 } label: {
@@ -528,7 +591,11 @@ public struct MatchSetupView: View {
             player1Focus: focus(player1Pick, currentName: player1Name), player2Focus: focus(player2Pick, currentName: player2Name),
             teamMatch: team, teamSlot: teamSlot, teamOwnIsPlayer1: teamOwnIsPlayer1
         )
-        choice.isPractice = practice && team == nil
+        choice.isPractice = practice && team == nil && !prefilled
+        if team == nil && !prefilled {
+            lastBestOf = bestOf
+            lastPractice = practice
+        }
         onStart(choice)
     }
 

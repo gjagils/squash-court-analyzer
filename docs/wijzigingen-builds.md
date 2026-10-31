@@ -24,7 +24,15 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   profiel en trend. Opslag zoals de notities per game: `practice-matches.json` naast de
   teamwedstrijden (`PracticeMatches`), geen SwiftData- of Room-migratie; de volledige back-up
   draagt `practiceMatchIds` (samenvoegen voegt toe, een oud bestand wist niets).
-- Releasenote-tekst: "Oefenpartij: zet in de opzet de schakelaar Oefenpartij aan. De wedstrijd wordt
+- **Opzet korter (31 oktober 2026, Gerd-Jan koos voorstel 1 + 3).** In plaats van de schakelaars
+  "Onderdeel van een teamwedstrijd" en "Oefenpartij" één rij **Soort wedstrijd**: Wedstrijd ·
+  Oefenpartij · Teamwedstrijd (die laatste alleen als er een teamwedstrijd klaarstaat). Best of en
+  Later instappen staan ingeklapt onder **Meer opties** met een samenvatting ("Meer opties · Best of 3
+  · start bij game 2"). Best of en oefenpartij worden onthouden (`setupLastBestOf`,
+  `setupLastPractice`), niet bij een partij uit een teamwedstrijd. Handleidingen bijgewerkt.
+- **Eigen team uitgelicht** bij "Volgende" op de thuiskaart en in het programma van Mijn team (wit en
+  vet, de tegenstander gedempt).
+- Releasenote-tekst: "Oefenpartij: kies in de opzet bij Soort wedstrijd voor Oefenpartij. De wedstrijd wordt
   bewaard, maar telt niet mee voor badges en je spelersprofiel." en "In Mijn team zie je bij een
   komende wedstrijd de plaats van de tegenstander in de stand en hoe het vorige keer tegen hen ging."
 

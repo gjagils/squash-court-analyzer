@@ -8,10 +8,14 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.1 build 4)
+## Volgende build (na 3.1 build 5)
 
-Releasenotes klaar in `release-notes/3.1-5.md` en `android-3.1-5.md`; testen, homepage (nl/en),
-handleiding (nl/en) en privacybeleid (nl/en) bijgewerkt.
+## 3.1 build 5 (geüpload 1 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
+
+Releasenotes `release-notes/3.1-5.md` en `android-3.1-5.md`; testen, homepage (nl/en), handleiding (nl/en,
+met nieuwe beginschermafbeeldingen) en privacybeleid (nl/en) bijgewerkt en gepubliceerd. TestFlight build 4 is
+verlopen; App Store-screenshots niet opnieuw geüpload (de scenario's tonen de teamkaart niet). Suites: Core 396
+tests, iOS-tests en Android-unittests groen; Worker ongewijzigd (in de worktree geen node_modules).
 
 - **Mijn team-kaart opnieuw ontworpen (1 november 2026, gedeeld iOS en Android).** Gerd-Jan was
   niet tevreden over de compacte kaart van build 4 en wilde de oude sfeer (de drie grote cijfers)

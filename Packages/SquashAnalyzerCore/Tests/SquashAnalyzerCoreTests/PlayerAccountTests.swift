@@ -445,6 +445,8 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
     var patches: [String] = []
     /// Set to 401 to make GET /me refuse the session
     var meStatus = 0
+    /// Accepted matches for GET /me/matches: (match id, decidedAt)
+    var accepted: [(String, Int64)] = []
     private var profile: String? = nil
     private var refreshes = 1
 
@@ -510,6 +512,14 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
             teamPending = teamPending.filter { item in item.0 != id }
             return reply(200, FakeAccountTransport.serverMatch(id, status: "accepted", name: nil))
         }
+        if path == "/api/v1/me/matches" && method == "GET" {
+            let since = Int64(url.query?.replacingOccurrences(of: "since=", with: "") ?? "0") ?? 0
+            var items: [String] = []
+            for (id, decided) in accepted where decided > since {
+                items.append(FakeAccountTransport.serverMatch(id, status: "accepted", name: nil, decidedAt: decided))
+            }
+            return reply(200, "{\"matches\":[\(items.joined(separator: ","))]}")
+        }
         if path == "/api/v1/me/matches" && method == "POST" {
             ownMatchCalls += 1
             return reply(200, "{\"stored\":1}")
@@ -528,8 +538,9 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
     }
 
 
-    static func serverMatch(_ id: String, status: String, name: String?) -> String {
-        let named = name.map { value in ",\"name\":\"\(value)\"" } ?? ""
+    static func serverMatch(_ id: String, status: String, name: String?, decidedAt: Int64? = nil) -> String {
+        var named = name.map { value in ",\"name\":\"\(value)\"" } ?? ""
+        if let decidedAt { named += ",\"decidedAt\":\(decidedAt)" }
         let rallies = status == "accepted" ? ",\"rallies\":[{\"winner\":1,\"duration\":60.5,\"rallies\":[\"1|Winner|Achter Links|Drive|150||1\"]}]" : ""
         return "{\"matchId\":\"\(id)\",\"status\":\"\(status)\",\"senderName\":\"Coach Peter\",\"fromDevice\":\"dev-1\",\"playedAt\":1,\"receivedAt\":2,\"teamKey\":null,\"opponent\":\"Mark\",\"summary\":{\"v\":1,\"kind\":\"coach\",\"me\":1,\"p1\":\"Gerd Lasso\",\"p2\":\"Mark\",\"gamesToWin\":3,\"gamesBefore\":[0,0],\"gamesWon\":[3,1],\"winner\":1,\"scores\":[[11,7]],\"duration\":60.5,\"recordsPointTypes\":true}\(rallies)\(named)}"
     }

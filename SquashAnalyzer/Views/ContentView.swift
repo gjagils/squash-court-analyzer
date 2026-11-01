@@ -160,6 +160,12 @@ struct ContentView: View {
                 Task { await LiveShare.shared.retryPending() }
                 Task { await AppUsage.shared.appOpened() }
                 Task { @MainActor in TeamLive.shared.retryPending() }
+                // 4.0: the matches in your account come to Afgeronde wedstrijden
+                if Features.shared.playerAccount {
+                    AccountSync.shared.configure(history: SwiftDataMatchHistoryStore(context: modelContext),
+                                                 players: SwiftDataPlayerStore(context: modelContext))
+                    Task { await AccountSync.shared.run() }
+                }
             }
         }
         // A player card link (website or squashanalyzer://kaart#…)

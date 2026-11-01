@@ -163,7 +163,8 @@ public extension AccountSending {
     /// queued for its players, then sent when there is network
     @MainActor
     static func queueFinished(_ match: Match) {
-        guard Features.shared.playerAccount, match.isMatchOver else { return }
+        // An imported match (AccountSync) is the player's own: never send it back
+        guard Features.shared.playerAccount, match.isMatchOver, !AccountImports.contains(match.id) else { return }
         queueAndSend(upload: { side in match.accountUpload(for: side) },
                      ids: [match.player1Id, match.player2Id], names: [match.player1Name, match.player2Name])
     }

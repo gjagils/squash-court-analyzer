@@ -433,6 +433,7 @@ public struct SharedAccountSection: View {
             if account.profile != nil {
                 try await account.loadInbox()
                 await account.sendOutbox()
+                await AccountSync.shared.run()
             }
         }
     }
@@ -505,14 +506,16 @@ public struct SharedAccountSection: View {
     }
 
     private func claim(_ match: AccountServerMatch) {
-        run(loc("De wedstrijd telt mee.")) {
+        run(loc("De wedstrijd telt mee en staat bij Afgeronde wedstrijden.")) {
             try await account.claimTeamMatch(match)
+            await AccountSync.shared.run()
         }
     }
 
     private func answer(_ matchId: String, use: Bool, block: Bool) {
-        run(use ? loc("De wedstrijd telt mee.") : nil) {
+        run(use ? loc("De wedstrijd telt mee en staat bij Afgeronde wedstrijden.") : nil) {
             try await account.answer(matchId: matchId, use: use, block: block)
+            if use { await AccountSync.shared.run() }
         }
     }
 

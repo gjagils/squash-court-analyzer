@@ -39,6 +39,7 @@ import squash.analyzer.core.LiveShare
 import squash.analyzer.core.AccountClaimLink
 import squash.analyzer.core.AccountEndpoints
 import squash.analyzer.core.AccountOutbox
+import squash.analyzer.core.AccountSync
 import squash.analyzer.core.PlayerAccount
 import com.squashanalyzer.android.aicoach.KeystoreAccountSecrets
 import squash.analyzer.core.TeamLive
@@ -139,6 +140,10 @@ class MainActivity : AppCompatActivity() {
         val matchStore = RoomCoachMatchStore(coachMatchStore, badgeAwardStore)
         val refereeMatchStore = RoomRefereeMatchStore(refereeMatchDataStore, badgeAwardStore)
         val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore, matchStore, refereeMatchStore, badgeAwardStore)
+        // 4.0: the matches in your account come to Afgeronde wedstrijden (AccountSync)
+        if (Features.shared.playerAccount) {
+            AccountSync.shared.configure(history = historyStore, players = playerStore)
+        }
         val leagueTeamFetcher = LeagueTeamFetcher(loader = HttpLeaguePageLoader())
         // Competitie: team matches in one JSON file in the app's files directory (Core's file, off the main thread)
         val teamDirectory = URL(fileURLWithPath = filesDir.absolutePath, isDirectory = true)
@@ -182,7 +187,10 @@ class MainActivity : AppCompatActivity() {
                 transport = HttpLiveTransport(),
                 secrets = KeystoreAccountSecrets(this),
             )
-            lifecycleScope.launch { PlayerAccount.shared.sendOutbox() }
+            lifecycleScope.launch {
+                PlayerAccount.shared.sendOutbox()
+                AccountSync.shared.run()
+            }
         }
         // Live meekijken: the shared LiveShare sends the state through this (server/live)
         LiveShare.shared.transport = HttpLiveTransport()

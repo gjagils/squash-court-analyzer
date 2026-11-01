@@ -107,6 +107,7 @@ public final class PlayerAccount {
 
     /// Forgets the session on this phone; the account and its data stay
     public func signOut() {
+        AccountImports.reset()
         session = nil
         profile = nil
         profileChecked = false
@@ -323,6 +324,12 @@ public final class PlayerAccount {
                 return
             }
         }
+    }
+
+    /// Accepted matches decided after `since` (milliseconds), with their rallies (`AccountSync`)
+    public func acceptedMatches(since: Int64) async throws -> [AccountServerMatch] {
+        let token = try await validToken()
+        return try await client().matches(token: token, since: since)
     }
 
     /// What teammates' claims taught this phone, into `PlayerSBNLinks`. Only

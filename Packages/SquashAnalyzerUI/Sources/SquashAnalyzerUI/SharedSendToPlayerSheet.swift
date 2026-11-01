@@ -113,7 +113,7 @@ public struct SharedAccountClaimSheet: View {
                         .foregroundColor(SharedColors.accent)
                 }
                 if done {
-                    Text("De wedstrijd staat in je account en telt mee.", bundle: textBundle)
+                    Text("De wedstrijd staat in je account en bij Afgeronde wedstrijden, en telt mee.", bundle: textBundle)
                         .font(SharedFonts.system(14))
                         .foregroundColor(SharedColors.positive)
                 } else if account.profile != nil {
@@ -147,6 +147,7 @@ public struct SharedAccountClaimSheet: View {
         Task {
             do {
                 _ = try await account.claimLink(token)
+                await AccountSync.shared.run()
                 done = true
             } catch let error as AccountError {
                 message = error == AccountError.notFound ? loc("Deze wedstrijd is al toegevoegd, of de link is verlopen.") : error.message

@@ -323,6 +323,7 @@ function matchView(row, withRallies) {
     fromDevice: row.device_id,
     playedAt: row.played_at,
     receivedAt: row.received_at,
+    decidedAt: row.decided_at ?? null,
     teamKey: row.team_key,
     opponent: row.opponent,
     summary: JSON.parse(row.summary),

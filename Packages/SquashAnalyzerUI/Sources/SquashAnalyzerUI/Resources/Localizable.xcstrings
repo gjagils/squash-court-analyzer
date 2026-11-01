@@ -12493,24 +12493,6 @@
         }
       }
     },
-    "De wedstrijd staat in je account en telt mee.": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The match is in your account and counts."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De wedstrijd staat in je account en telt mee."
-          }
-        }
-      }
-    },
     "Iemand heeft een wedstrijd met jou gedeeld. Voeg hem toe, dan telt hij mee voor je badges.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -12615,6 +12597,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "Competitie ›"
+          }
+        }
+      }
+    },
+    "De wedstrijd telt mee en staat bij Afgeronde wedstrijden.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The match counts and is in Finished matches."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De wedstrijd telt mee en staat bij Afgeronde wedstrijden."
+          }
+        }
+      }
+    },
+    "De wedstrijd staat in je account en bij Afgeronde wedstrijden, en telt mee.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The match is in your account and in Finished matches, and counts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De wedstrijd staat in je account en bij Afgeronde wedstrijden, en telt mee."
           }
         }
       }

@@ -91,11 +91,14 @@ public struct AccountServerMatch: Codable, Equatable, Sendable, Identifiable {
     public let rallies: [AccountGame]?
     /// A team match waiting for a name: the name the sender used ("Gerd Lasso")
     public let name: String?
+    /// When it was accepted (milliseconds; accepted matches only): the sync's cursor
+    public let decidedAt: Int64?
 
     public var id: String { matchId }
 
     public init(matchId: String, status: String, senderName: String, fromDevice: String?, playedAt: Int64, receivedAt: Int64,
-                teamKey: String?, opponent: String, summary: AccountMatchSummary, rallies: [AccountGame]?, name: String? = nil) {
+                teamKey: String?, opponent: String, summary: AccountMatchSummary, rallies: [AccountGame]?, name: String? = nil,
+                decidedAt: Int64? = nil) {
         self.matchId = matchId
         self.status = status
         self.senderName = senderName
@@ -107,6 +110,7 @@ public struct AccountServerMatch: Codable, Equatable, Sendable, Identifiable {
         self.summary = summary
         self.rallies = rallies
         self.name = name
+        self.decidedAt = decidedAt
     }
 
     public var playedDate: Date { Date(timeIntervalSince1970: Double(playedAt) / 1000.0) }

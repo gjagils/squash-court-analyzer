@@ -207,7 +207,7 @@
 "Jouw spel scherp in beeld. Fluit een wedstrijd, coach je teamgenoot en deel de stand met je team." = "Your game in sharp focus. Referee a match, coach your teammate and share the score with your team.";
 "Scheidsrechter" = "Referee";
 "Tik op de score van wie de rally wint. LET, STROKE, undo en de servicekant zitten erbij; de app houdt games en tijd bij." = "Tap the score of whoever wins the rally. LET, STROKE, undo and the service side are all there; the app keeps track of games and time.";
-"Om je teamgenoot beter te coachen. Leg per punt vast wie scoorde, hoe, waar op de baan en met welke slag. Na elke game zie je de analyse, en de coachkaart laat je speler in één scherm zien waar het om draait." = "To coach your teammate better. For every point, record who scored, how, where on court and with which shot. After each game you see the analysis, and the coach card shows your player what matters on one screen.";
+"Om je teamgenoot beter te coachen. Leg per punt vast wie scoorde, hoe, waar op de baan en met welke slag, of coach eenvoudig: alleen wie en waar. Na elke game zie je de analyse, en de coachkaart laat je speler in één scherm zien waar het om draait." = "To coach your teammate better. Record who scored each point, how, where on the court and with which shot, or coach the simple way: just who and where. After each game you see the analysis, and the Coach card shows your player what matters in one screen.";
 "Kies speler" = "Choose player";
 "Sla spelers op en kies ze bij het starten via Kies speler. Alleen dan verdienen ze badges en groeit hun profiel over de wedstrijden." = "Save players and pick them at the start with Choose player. Only then do they earn badges and does their profile grow over the matches.";
 "Competitie" = "League";
@@ -341,3 +341,17 @@
 "Van %@, %@" = "From %@, %@";
 "scheidsrechter" = "referee";
 "coach" = "coach";
+
+// Nieuw in 3.1 (1 November 2026)
+"Nieuw in 3.1" = "What's new in 3.1";
+"Squash Analyzer is op de competitieavond beter geworden. Dit is wat je merkt." = "Squash Analyzer got better on league night. This is what you will notice.";
+"Mijn team zonder link" = "My team without a link";
+"Zoek je club en tik je team: je stand, je volgende wedstrijd en de stand van je tegenstander op het beginscherm." = "Find your club and tap your team: your standing, your next match and your opponent's standing on the home screen.";
+"Eenvoudig coachen" = "Simple coaching";
+"Geen tijd voor slagen en punttypes? Tik alleen wie het punt maakt en waar op de baan; de analyse laat zien waar punten gewonnen en verloren worden." = "No time for shots and point types? Just tap who won the point and where on the court; the analysis shows where points are won and lost.";
+"Teamwedstrijd zonder gedoe" = "Team matches without the hassle";
+"De partijen van je teamgenoten komen vanzelf binnen, en de uitslag haal je zo nodig op bij SBN, ook van een gespeelde wedstrijd die nog niet in de app stond." = "Your teammates' matches come in by themselves, and you can fetch the result from SBN when needed, also for a played match that was not in the app yet.";
+"Oefenpartij" = "Practice match";
+"Bewaard, maar zonder badges en buiten je spelersprofiel. Je badges blijven over echte wedstrijden gaan." = "Kept, but without badges and outside your player profile. Your badges stay about real matches.";
+"Nieuwe look" = "New look";
+"Rustiger beginscherm en één kleur per betekenis: zeegroen voor goed nieuws en alles wat live is, rood alleen voor fouten, goud alleen voor badges." = "A calmer home screen and one colour per meaning: sea green for good news and everything live, red only for errors, gold only for badges.";

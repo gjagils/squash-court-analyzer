@@ -8,7 +8,26 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.1 build 7)
+## Volgende build (na 3.1 build 8)
+
+- **"Nieuw in 3.1" in de app (1 november 2026, akkoord Gerd-Jan):** `WhatsNew.currentVersion` 2, vijf
+  punten (Mijn team zonder link, Eenvoudig coachen, Teamwedstrijd zonder gedoe, Oefenpartij, Nieuwe look),
+  Nederlands en Engels (`Onboarding.swift`, `en.lproj/Localizable.strings`). Verschijnt één keer bij
+  iedereen die de versie voor het eerst opent, dus voor de releasebuild. Storeteksten 3.1 staan in
+  `release-notes/store-3.1/` (App Store nl/en) en `release-notes/android-3.1-production.md` (Play, 374 tekens).
+
+## 3.1 build 8 (geüpload 1 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd; gekoppeld aan storeversie 3.1 in App Store Connect en als conceptrelease in Play-productie)
+
+Releasenotes `release-notes/3.1-8.md` en `android-3.1-8.md`; testen, handleiding (nl/en), privacy (nl/en) en de
+kijkpagina gepubliceerd. Eerst als 3.1 build 7.1 op Gerd-Jans iPhone gezet. Suites: Core 406 tests (met Skip),
+Worker 78, Android-unittests, iOS-build en lint groen; "Ophalen bij SBN" live getest op de simulator met de
+wedstrijd van 30 oktober (team-match/1074).
+
+## 3.1 build 7 (geüpload 1 november 2026: TestFlight Squashteam, Play internal, alpha, Google Group; website gepubliceerd)
+
+Releasenotes `release-notes/3.1-7.md` en `android-3.1-7.md`. Storeversie 3.1 aangemaakt in App Store Connect
+(`scripts/asc_version.py`: teksten nl/en uit `release-notes/store-3.1/`, screenshots, build gekoppeld; niet
+ingediend) en een conceptrelease in Play-productie (`scripts/play_upload.py --production-draft`).
 
 - **Partijen van teamgenoten komen vanzelf (1 november 2026, naar aanleiding van de teamwedstrijd van
   30 oktober: E1 en E3 bleven leeg op Gerd-Jans telefoon).** Oorzaak: alleen het scherm Teamwedstrijd las

@@ -43,7 +43,7 @@ public enum Onboarding {
         Page(symbol: "whistle", title: L10n.text("Scheidsrechter"),
              text: L10n.text("Tik op de score van wie de rally wint. LET, STROKE, undo en de servicekant zitten erbij; de app houdt games en tijd bij.")),
         Page(symbol: "list.bullet.clipboard", title: "Coach",
-             text: L10n.text("Om je teamgenoot beter te coachen. Leg per punt vast wie scoorde, hoe, waar op de baan en met welke slag. Na elke game zie je de analyse, en de coachkaart laat je speler in één scherm zien waar het om draait.")),
+             text: L10n.text("Om je teamgenoot beter te coachen. Leg per punt vast wie scoorde, hoe, waar op de baan en met welke slag, of coach eenvoudig: alleen wie en waar. Na elke game zie je de analyse, en de coachkaart laat je speler in één scherm zien waar het om draait.")),
         Page(symbol: "person.2", title: L10n.text("Kies speler"),
              text: L10n.text("Sla spelers op en kies ze bij het starten via Kies speler. Alleen dan verdienen ze badges en groeit hun profiel over de wedstrijden.")),
         Page(symbol: "trophy", title: L10n.text("Competitie"),
@@ -60,27 +60,28 @@ public enum Onboarding {
 public enum WhatsNew {
     /// The what's-new version this device has seen (0 = none)
     public static let storageKey = "whatsNewVersion"
-    /// 1 = 3.0; raise it with new items for a later version
-    public static let currentVersion = 1
-    public static var title: String { L10n.text("Nieuw in 3.0") }
-    public static var intro: String { L10n.text("Squash Analyzer is flink gegroeid. Dit zijn de grootste veranderingen.") }
+    /// 1 = 3.0, 2 = 3.1; raise it with new items for a later version
+    public static let currentVersion = 2
+    public static var title: String { L10n.text("Nieuw in 3.1") }
+    public static var intro: String { L10n.text("Squash Analyzer is op de competitieavond beter geworden. Dit is wat je merkt.") }
 
     public static func shouldShow(seenVersion: Int) -> Bool {
         seenVersion < currentVersion
     }
 
-    /// The symbols are the home screen's outline icons (AppSymbol names)
+    /// The symbols are the home screen's outline icons (AppSymbol names).
+    /// 3.1 (Gerd-Jan, 1 November 2026): five items, in this order
     public static var items: [Onboarding.Page] { [
-        Onboarding.Page(symbol: "trophy", title: L10n.text("Competitie"),
-                        text: L10n.text("Houd een hele teamwedstrijd bij, van E1 tot E4, met de puntentelling van de SBN.")),
-        Onboarding.Page(symbol: "square.and.arrow.up", title: L10n.text("Live meekijken"),
-                        text: L10n.text("Je team en supporters volgen de stand via een link of op hun vergrendelscherm.")),
-        Onboarding.Page(symbol: "medal", title: "Badges",
-                        text: L10n.text("Verdien badges in brons, zilver en goud. Vanaf 23 oktober begint iedereen opnieuw.")),
-        Onboarding.Page(symbol: "list.bullet.clipboard", title: L10n.text("Coachen"),
-                        text: L10n.text("Leg per rally de slag en de plek op de baan vast. Na afloop is er een coachkaart.")),
-        Onboarding.Page(symbol: "person.2", title: L10n.text("Mijn team"),
-                        text: L10n.text("Stand en programma van je SBN-team. Je teamgenoten staan klaar om te kiezen als je gaat scheidsen of coachen.")),
+        Onboarding.Page(symbol: "person.2", title: L10n.text("Mijn team zonder link"),
+                        text: L10n.text("Zoek je club en tik je team: je stand, je volgende wedstrijd en de stand van je tegenstander op het beginscherm.")),
+        Onboarding.Page(symbol: "list.bullet.clipboard", title: L10n.text("Eenvoudig coachen"),
+                        text: L10n.text("Geen tijd voor slagen en punttypes? Tik alleen wie het punt maakt en waar op de baan; de analyse laat zien waar punten gewonnen en verloren worden.")),
+        Onboarding.Page(symbol: "trophy", title: L10n.text("Teamwedstrijd zonder gedoe"),
+                        text: L10n.text("De partijen van je teamgenoten komen vanzelf binnen, en de uitslag haal je zo nodig op bij SBN, ook van een gespeelde wedstrijd die nog niet in de app stond.")),
+        Onboarding.Page(symbol: "whistle", title: L10n.text("Oefenpartij"),
+                        text: L10n.text("Bewaard, maar zonder badges en buiten je spelersprofiel. Je badges blijven over echte wedstrijden gaan.")),
+        Onboarding.Page(symbol: "circle.lefthalf.filled", title: L10n.text("Nieuwe look"),
+                        text: L10n.text("Rustiger beginscherm en één kleur per betekenis: zeegroen voor goed nieuws en alles wat live is, rood alleen voor fouten, goud alleen voor badges.")),
     ] }
 }
 

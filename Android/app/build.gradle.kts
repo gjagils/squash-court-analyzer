@@ -20,6 +20,10 @@ val squashPlayerAccount = (findProperty("squashPlayerAccount") as String?)?.toBo
 // test setup on the Mac (server/account-worker: npm run local), seen from the
 // emulator as 10.0.2.2; "local:<ip>" for a phone on the same network
 val squashAccountServer = (findProperty("squashAccountServer") as String?) ?: ""
+// A 4.0 test app next to the real one (docs/testplan-4.0-koppelen.md):
+// -PsquashTestApp=true installs as com.squashanalyzer.android.test4, "SA 4.0 test",
+// so the Play version on the phone and its data stay untouched
+val squashTestApp = (findProperty("squashTestApp") as String?)?.toBoolean() ?: false
 
 // Google Play upload key: never in the repo. The keystore lives in
 // ~/.android-keys (backed up in 1Password), the passwords in
@@ -94,6 +98,11 @@ android {
         buildConfigField("String", "FIREBASE_SENDER_ID", "\"${firebaseValues["senderId"]}\"")
         buildConfigField("boolean", "PLAYER_ACCOUNT", "$squashPlayerAccount")
         buildConfigField("String", "ACCOUNT_SERVER", "\"$squashAccountServer\"")
+        manifestPlaceholders["appLabel"] = "@string/app_name"
+        if (squashTestApp) {
+            applicationIdSuffix = ".test4"
+            manifestPlaceholders["appLabel"] = "SA 4.0 test"
+        }
     }
 
     signingConfigs {

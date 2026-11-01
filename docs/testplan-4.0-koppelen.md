@@ -45,6 +45,7 @@ cd ~/Github/squash-court-analyzer && git pull && cd server/account-worker && npm
 ```
 
 Controle: `https://test-account.squashanalyzer.com/health` geeft `{"ok":true}`.
+(Ingericht op 1 november 2026; eenmalig `npm ci` in `server/account-worker`.)
 
 ## Testlogins
 
@@ -68,8 +69,14 @@ nodig als de coach zelf ook speler is.
 | Android-emulator (of een teamgenoot) | Speler 2 | idem |
 
 Claude bouwt de testbuilds (iOS `SQUASH_PLAYER_ACCOUNT=YES SQUASH_ACCOUNT_SERVER=test`,
-Android `-PsquashPlayerAccount=true -PsquashAccountServer=test`). Geen upload:
-installeren via Xcode en `adb install`.
+Android `-PsquashPlayerAccount=true -PsquashAccountServer=test -PsquashTestApp=true`).
+Geen upload: installeren via Xcode en `adb install`.
+
+De Android-testapp heet **SA 4.0 test** (`com.squashanalyzer.android.test4`) en
+staat **naast** je gewone app: de Play-versie en haar gegevens blijven
+onaangeroerd. Weggooien kan gewoon via de app-instellingen van Android.
+Pushmeldingen voor live-scores werken in de testapp niet (andere pakketnaam);
+voor dit testen is dat niet nodig.
 
 ## Met één telefoon: de nep-coach
 

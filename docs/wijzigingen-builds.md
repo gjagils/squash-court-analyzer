@@ -10,6 +10,36 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.1 build 4)
 
+Releasenotes klaar in `release-notes/3.1-5.md` en `android-3.1-5.md`; testen, homepage (nl/en),
+handleiding (nl/en) en privacybeleid (nl/en) bijgewerkt.
+
+- **Mijn team-kaart opnieuw ontworpen (1 november 2026, gedeeld iOS en Android).** Gerd-Jan was
+  niet tevreden over de compacte kaart van build 4 en wilde de oude sfeer (de drie grote cijfers)
+  terug, maar die past samen met de tegenstanderregel niet op een gewone iPhone (gemeten: 173–193
+  pt ruimte op iPhone 15–17, 259 dp op Android). Ontwerp op een canvas met de oude kaart en tien
+  varianten met de langste poulenaam ("Squash & Padel Centrum Zwolle 2"); gekozen zijn 3c en 3d:
+  MIJN TEAM met "Competitie ›", de teamnaam met rechts de stand als badge ("8e" met STAND),
+  daaronder "5 gespeeld · 37 punten"; de volgende wedstrijd als één rij: datumblok ("6" boven
+  "NOV"), "Thuis ·" of "Uit ·" met de tegenstander, "Vorige keer 7-8 verloren", en rechts de stand
+  van de tegenstander in dezelfde badge, omlijnd. 3d zet die rij in een getinte balk (accent 10%).
+  Beide zitten erin: schakelaar **Mijn team-kaart met balk** in Instellingen → Weergave
+  (`HomeTeamCardStyle.barKey`, standaard uit); de testers kiezen deze middag. Nieuw in de UI:
+  `LeagueRankBadge`, `LeagueDateBlock`, `LeagueOrdinal` ("8e"/"8th"),
+  `LeagueOpponentText.previousLine`, `LeagueDates.dayNumber/monthShort`. Hoogte 184 pt (3c) en
+  187 pt (3d) bij de langste namen: past op iPhone 17 en Android, op iPhone 15/16 alleen als de rij
+  Badges onder de home-indicator mag.
+- **Team-import verwijderd (backlog S3, 1 november 2026, op verzoek van Gerd-Jan eerder dan 3.2).**
+  De knop Team bij Spelers (team ophalen via een squashanalyzer.com/teams-link of een zip) is weg
+  op iOS (`PlayerManagementView`) en Android (`PlayerDirectoryView`, `SharedTeamImportView`
+  verwijderd), met `TeamDownloader`, `TeamLinkImporter`, `TeamImport.link(from:)`,
+  `URLSessionTeamDownloader` en `HttpTeamDownloader`. Het zip-formaat (`TeamImport`,
+  `TeamImportService.importTeam(zipData:)`, `RoomTeamImporter.importZip`) blijft intern voor de
+  voorbeeldspelers Bob en Wim en de screenshot-scenario's. Website: de uitleg uit de handleidingen,
+  het privacybeleid ("Teams via een link", "Teams op squashanalyzer.com") en de homepage gehaald;
+  `docs/team-import/` naar `docs/archief/`. De teamzips onder `website/teams/` (buiten git) staan
+  nog online; Gerd-Jan beslist of die weg mogen.
+
+
 ## 3.1 build 4 (geüpload 1 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 
 Releasenotes `release-notes/3.1-4.md` en `android-3.1-4.md`; testen, homepage (nl/en) en handleiding

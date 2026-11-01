@@ -80,6 +80,27 @@ versie 9 bestaan niet (`exportSchema` kwam later); de oudere stappen worden
 getest met die terugspoeltests (`ErrorKindMigrationTest`,
 `VolleyAndOpeningServeMigrationTest`, `BadgeAwardMigrationTest`).
 
+## Stijl
+
+### Live is zeegroen, rood is fout (1 november 2026)
+
+Sinds de ontwerpreview heeft elke kleur één taak (`docs/style/README.md`,
+"Steunkleur en kleurrollen"). De LIVE-pil bij coach en scheidsrechter en de
+live-markeringen op het beginscherm en de kijkpagina's zijn zeegroen
+(`SharedColors.support`), niet rood: rood betekent in de app fout en STROKE.
+Goud is alleen voor badges, medailles, de kroon van de winnaar en "afgerond";
+een gouden statistiek, avatar of selectie is een fout, geen stijlkeuze. Delen
+is een neutrale actie in de steunkleur, nooit in het staalblauw van speler 2.
+Scores en klokken staan in het ronde systeemfont; `monospacedDigit()` alleen
+onder `#if !SKIP`.
+
+### Geen kop boven de tegels op het beginscherm (1 november 2026)
+
+"Klaar om te spelen?" is bewust weg: de tegels zeggen zelf "Start met fluiten"
+en "Start met coachen", en de 30 pt ruimte is nodig om de Mijn team-kaart met
+balk op een iPhone 15/16 zonder scrollen te laten passen. Geen lijn in de
+plaats.
+
 ## Servers
 
 ### Node-reserve: `X-Forwarded-For` als terugvaloptie (7 oktober 2026)

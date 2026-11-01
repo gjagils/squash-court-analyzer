@@ -10,6 +10,43 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.1 build 5)
 
+- **Ontwerpreview en steunkleur (1 november 2026, gedeeld iOS en Android).** Alle schermen bekeken in
+  donker en warm licht (canvas "SquashAnalyzer ontwerpreview"); besluit Gerd-Jan: één steunkleur en één
+  taak per kleur, vastgelegd in `docs/style/README.md` ("Steunkleur en kleurrollen"), `tokens.json`
+  (versie 4), `.claude/ui-check.md` en `AGENTS.md`. Nieuw token `SharedColors.support` (zeegroen
+  #3DBDA9, licht #1A6F63) voor goed nieuws en alles wat live is; `positive` (het groen #66C773) is
+  weg. Goud alleen nog voor badges, medailles, de kroon en "afgerond"; staalblauw alleen speler 2;
+  rood alleen fout. Concreet: LIVE-pil bij coach en scheidsrechter zeegroen in plaats van rood
+  (`LiveShareButton`); Delen in Wedstrijden en Analyse zeegroen in plaats van staalblauw/goud;
+  Analyse: "wint!" in de spelerskleur, gekozen game als gevulde oranje pil (was goud 30%), Beste
+  zone/slag in gewone tekst met grijs icoon, slagbalken en -iconen grijs, Druk en Cadeautjes
+  zeegroen, sectie-iconen oranje, AI-coachknop en info-advies zeegroen, focusblok oranje 12%;
+  avatars zonder foto in de tekstkleur (Spelers, profiel, badges, wedstrijdstart, trend) en de
+  cameraknop oranje; deelkeuzes (wedstrijd, teamwedstrijd) en kaartimport oranje in plaats van
+  goud; trend: iconen oranje/grijs; LET-overlay neutraal; klokiconen grijs.
+- **Scores in het ronde font.** Gamestand in de kop van coach en scheidsrechter, de scores en het
+  streepje in de Analyse, de rallyklok, MATCH/GAME-klokken, de compacte scorebalk en de uitslag in
+  Wedstrijden: `design: .rounded` in plaats van `.monospaced`; klokken met `monospacedDigit()`
+  (alleen Apple, Skip kent het niet).
+- **Beginscherm A3.** Merkheader zonder kader; de kop "Klaar om te spelen?" is weg (ook uit de
+  vertalingen); tegels Scheidsrechter en Coach met `tileCard` (accent 15%) en `tileStroke` (1,5 pt
+  op 70%), icoon 32; Mijn team-kaart altijd met balk (`brandCard` nu accent 7%, rand 25%, balk 7%)
+  en de schakelaar "Mijn team-kaart met balk" uit Instellingen → Weergave (iOS en gedeeld;
+  `HomeTeamCardStyle`/`HomeTeamCardStyleToggle` verwijderd); lijntjes tussen de menurijen 13%;
+  zeegroene `LivePill` bij Competitie (een eigen teamwedstrijd met `liveId` die niet af is, iOS
+  leest dat uit de teamwedstrijdopslag via `competitionLive`) en bij Wedstrijd volgen (aantal uit
+  `LiveFollow.shared.following`, gelezen bij verschijnen).
+- **Coach:** de laatste drie punten als lijst ("LAATSTE PUNTEN", `LastPointRow`) in het lege midden
+  zolang er geen punt wordt ingevoerd, in plaats van één regel onder de knoppen.
+- **Scheidsrechter:** de scorekaart van de ontvanger houdt een zichtbare rand in zijn kleur
+  (rand 30%, vulling 6%; server 50%/12%).
+- **Baan in warm licht:** zandkleurige vloer (`courtSand` 50%), lijnen in `courtLine` (#BF6B52),
+  zones met een sterkere rand; donker ongewijzigd (`SharedColors.isLight`, `courtLine`).
+- **Website en live-pagina's:** handleiding (nl/en) zonder de kop en de schakelaar, LIVE
+  "zeegroen zolang je live bent", de LIVE-markering op het beginscherm; homepage (nl/en) en
+  testen.html voor build 6; `live.html` en `team.html`: `--live` zeegroen (#3DBDA9 / licht #1A6F63)
+  met donkere tekst en een stip in `currentColor`.
+
 ## 3.1 build 5 (geüpload 1 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 
 Releasenotes `release-notes/3.1-5.md` en `android-3.1-5.md`; testen, homepage (nl/en), handleiding (nl/en,

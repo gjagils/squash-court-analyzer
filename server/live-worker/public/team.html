@@ -20,17 +20,17 @@
     /* Huisstijl "Clubhuis" (docs/style/README.md), as the page of a single match */
     --bg: #000000; --card: #180E04; --line: rgba(242,140,38,0.35); --gold: #F28C26; --orange: #F28C26;
     --blue: #59738C; --blue-light: #8094AD;
-    --text-1: #F2EDE6; --text-2: #B3ADA6; --text-3: #8C8680; --border: rgba(255,255,255,0.09); --live: #E5484D;
+    --text-1: #F2EDE6; --text-2: #B3ADA6; --text-3: #8C8680; --border: rgba(255,255,255,0.09); --live: #3DBDA9;
     --won2-line: rgba(128,148,173,0.45); --focus: #F28C26; color-scheme: dark;
   }
   /* Warm licht (docs/style/README.md, tokens.json → themes.light): deep orange for
      player 1 and text (5.0:1 on the background), dark steel blue for player 2, a
-     darker live red so the white "Live" label keeps 5.6:1 */
+     deeper sea green for live (white label, 5.4:1) */
   :root[data-theme="light"] {
     color-scheme: light;
     --bg: #F7F3ED; --card: #FFFFFF; --line: #DEC9B4; --gold: #A94F08; --orange: #A94F08;
     --blue: #405A73; --blue-light: #405A73; --won2-line: rgba(64,90,115,0.4);
-    --text-1: #26211C; --text-2: #71665B; --text-3: #776C61; --border: #E4DBD1; --live: #C62A2F; --focus: #A94F08;
+    --text-1: #26211C; --text-2: #71665B; --text-3: #776C61; --border: #E4DBD1; --live: #1A6F63; --focus: #A94F08;
   }
   /* The black logo stays a compact black tile on light */
   :root[data-theme="light"] .brand img { border-radius: 8px; }
@@ -50,8 +50,9 @@
   .brand img { width: 32px; height: 32px; display: block; }
   .badge { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; padding: 5px 10px; border-radius: 999px;
            border: 1px solid var(--border); color: var(--text-2); text-transform: uppercase; }
-  .badge.live { color: #fff; background: var(--live); border-color: var(--live); }
-  .badge.live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #fff;
+  .badge.live { color: #0B1F1B; background: var(--live); border-color: var(--live); }
+  :root[data-theme="light"] .badge.live { color: #fff; }
+  .badge.live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: currentColor;
                         margin-right: 6px; vertical-align: 1px; animation: pulse 1.6s ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: 0.3; } }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }

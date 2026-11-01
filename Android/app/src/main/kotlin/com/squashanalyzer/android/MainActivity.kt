@@ -140,10 +140,6 @@ class MainActivity : AppCompatActivity() {
         val matchStore = RoomCoachMatchStore(coachMatchStore, badgeAwardStore)
         val refereeMatchStore = RoomRefereeMatchStore(refereeMatchDataStore, badgeAwardStore)
         val historyStore = RoomMatchHistoryStore(coachMatchStore, refereeMatchDataStore, matchStore, refereeMatchStore, badgeAwardStore)
-        // 4.0: the matches in your account come to Afgeronde wedstrijden (AccountSync)
-        if (Features.shared.playerAccount) {
-            AccountSync.shared.configure(history = historyStore, players = playerStore)
-        }
         val leagueTeamFetcher = LeagueTeamFetcher(loader = HttpLeaguePageLoader())
         // Competitie: team matches in one JSON file in the app's files directory (Core's file, off the main thread)
         val teamDirectory = URL(fileURLWithPath = filesDir.absolutePath, isDirectory = true)
@@ -187,6 +183,8 @@ class MainActivity : AppCompatActivity() {
                 transport = HttpLiveTransport(),
                 secrets = KeystoreAccountSecrets(this),
             )
+            // The matches in your account come to Afgeronde wedstrijden (AccountSync)
+            AccountSync.shared.configure(history = historyStore, players = playerStore)
             lifecycleScope.launch {
                 PlayerAccount.shared.sendOutbox()
                 AccountSync.shared.run()

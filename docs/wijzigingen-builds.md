@@ -10,6 +10,16 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.1 build 6)
 
+- **Beginscherm: het icoon van een rij met LIVE-markering kleurt mee in zeegroen** (Gerd-Jan zag in
+  build 6 de pil wel en het icoon niet; `HomeMenu.menuRow`).
+- **LIVE-markering bij Competitie volgt de server.** De Worker haalt een live teamwedstrijd twee uur
+  na de laatste update weg, maar de telefoon hield de sleutel (en dus de markering) tot Live stoppen
+  of een bevestigd Vernieuwen. Nu: `TeamMatch.isProbablyLive(now:)` (live, niet compleet en binnen
+  `liveIdleInterval` van 2 uur na `updatedAt`) bepaalt de markering, het beginscherm leest opnieuw
+  als Competitie sluit, en de teamwedstrijd beëindigt de live-stand meteen als de server "gone"
+  zegt, ook bij het openen (de tussenstap "lijkt afgelopen, tik op Vernieuwen" is weg). Core-test
+  `testALiveTeamMatchIsOnlyProbablyLiveWithinTheServersIdleWindow`.
+
 ## 3.1 build 6 (geüpload 1 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 
 Releasenotes `release-notes/3.1-6.md` en `android-3.1-6.md`; testen, homepage (nl/en), handleiding (nl/en,

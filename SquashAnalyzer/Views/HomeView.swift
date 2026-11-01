@@ -26,10 +26,11 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
 
 
-    /// A team match on the server (shared live, or joined with a code) that is not finished yet
+    /// A team match on the server (shared live, or joined with a code) that can
+    /// still be live: not finished, and updated within the server's two-hour window
     private static func hasLiveTeamMatch() async -> Bool {
         let matches = (try? await TeamMatchStorage.store.loadAll()) ?? []
-        return matches.contains { match in match.liveId != nil && !match.isComplete }
+        return matches.contains { match in match.isProbablyLive() }
     }
 
     var body: some View {
@@ -57,6 +58,10 @@ struct HomeView: View {
         }
         // LIVE on the Competitie row while a team match of the own team is live
         .task { competitionLive = await Self.hasLiveTeamMatch() }
+        // Back from Competitie (Live stoppen, a new live match): read it again
+        .onChange(of: showingCompetition) { _, shown in
+            if !shown { Task { competitionLive = await Self.hasLiveTeamMatch() } }
+        }
         .sheet(isPresented: $showingPlayerManagement) {
             PlayerManagementView()
         }

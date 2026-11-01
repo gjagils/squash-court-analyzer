@@ -565,6 +565,15 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
 
     public var isLive: Bool { liveId != nil && liveKey != nil }
 
+    /// The Worker removes a live team match `IDLE_MINUTES` (120) after the last
+    /// update of any partij; the phone keeps its key until Live stoppen or a
+    /// confirmed "gone". Until then this says whether the page can still be
+    /// there: live, not complete, and changed within that window.
+    public static let liveIdleInterval: TimeInterval = 2 * 60 * 60
+    public func isProbablyLive(now: Date = Date()) -> Bool {
+        isLive && !isComplete && now.timeIntervalSince(updatedAt) < TeamMatch.liveIdleInterval
+    }
+
     /// Partijen filled in on another phone and taken in from the live page
     public var teammatePartijen: Int {
         var count = 0

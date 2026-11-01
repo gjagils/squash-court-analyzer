@@ -2593,24 +2593,6 @@
         }
       }
     },
-    "De livepagina lijkt afgelopen. Tik op Vernieuwen om dat te bevestigen.": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The live page seems to have ended. Tap Refresh to confirm."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De livepagina lijkt afgelopen. Tik op Vernieuwen om dat te bevestigen."
-          }
-        }
-      }
-    },
     "De livepagina wil je partij niet hebben: de uitnodigingscode klopt niet (meer). Vraag je teamgenoot de uitnodiging opnieuw te sturen en doe weer mee.": {
       "extractionState": "manual",
       "generatesSymbol": false,

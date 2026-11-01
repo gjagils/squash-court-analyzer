@@ -140,7 +140,8 @@ public struct HomeMenuTiles: View {
     private func menuRow(_ title: String, icon: HomeTileIcon, live: String? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                HomeTileIconView(icon: icon, color: SharedColors.accent, size: 23)
+                // The icon colours along with the LIVE pill (Gerd-Jan, 1 November 2026)
+                HomeTileIconView(icon: icon, color: live == nil ? SharedColors.accent : SharedColors.support, size: 23)
                 Text(title).font(SharedFonts.system(14))
                 Spacer()
                 if let live {

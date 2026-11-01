@@ -714,14 +714,12 @@ public struct SharedTeamMatchView: View {
             if showGone { message = nil }
         } catch let error as TeamLiveError {
             if error == TeamLiveError.gone {
-                if showGone {
-                    // Asked for by the user: the page is really gone, the live state ends here
-                    await clearLive()
-                    message = loc("De livepagina is afgelopen (2 uur na de laatste update) en wordt niet meer bijgewerkt.")
-                } else {
-                    // On opening the screen: not yet sure enough to throw the key away
-                    message = loc("De livepagina lijkt afgelopen. Tik op Vernieuwen om dat te bevestigen.")
-                }
+                // The server answered that the page is gone (two hours after the
+                // last update, or stopped): the live state ends here, also on
+                // opening the screen, so the LIVE marker on the home screen
+                // follows the server (Gerd-Jan, 1 November 2026)
+                await clearLive()
+                message = loc("De livepagina is afgelopen (2 uur na de laatste update) en wordt niet meer bijgewerkt.")
             } else if showGone {
                 message = loc("Geen verbinding om de livepagina te lezen.")
             }

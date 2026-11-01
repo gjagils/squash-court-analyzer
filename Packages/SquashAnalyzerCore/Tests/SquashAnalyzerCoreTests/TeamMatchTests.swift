@@ -677,4 +677,16 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertEqual(again, all)
         try? FileManager.default.removeItem(at: folder)
     }
+
+    func testALiveTeamMatchIsOnlyProbablyLiveWithinTheServersIdleWindow() {
+        let now = Date()
+        var match = TeamMatch(date: now, home: "All Inn Squash 7", away: "Squash Utrecht 9", ownSide: .home,
+                              updatedAt: now, liveId: "abc", liveKey: "key")
+        XCTAssertTrue(match.isProbablyLive(now: now))
+        XCTAssertTrue(match.isProbablyLive(now: now.addingTimeInterval(TeamMatch.liveIdleInterval - 1)))
+        XCTAssertFalse(match.isProbablyLive(now: now.addingTimeInterval(TeamMatch.liveIdleInterval + 1)),
+                       "two hours after the last update the server has removed the page")
+        match.liveId = nil
+        XCTAssertFalse(match.isProbablyLive(now: now), "without a key it is not live at all")
+    }
 }

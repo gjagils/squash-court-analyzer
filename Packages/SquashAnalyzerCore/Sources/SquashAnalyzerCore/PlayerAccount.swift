@@ -210,7 +210,8 @@ public final class PlayerAccount {
         let token = try await validToken()
         await followOwnTeam()
         inbox = try await client().inbox(token: token)
-        teamInbox = try await client().teamMatches(token: token)
+        let hidden = PlayerAccount.hiddenTeamMatches()
+        teamInbox = try await client().teamMatches(token: token).filter { match in !hidden.contains(match.matchId) }
     }
 
     /// "Dat ben ik": the team match counts at once
@@ -223,8 +224,19 @@ public final class PlayerAccount {
     }
 
     /// "Niet ik": hidden on this phone only, the match stays for the teammate it is for
-    public func hideTeamMatch(_ match: AccountServerMatch) {
+    public func hideTeamMatch(_ match: AccountServerMatch, in defaults: UserDefaults = UserDefaults.standard) {
         teamInbox = teamInbox.filter { other in other.matchId != match.matchId }
+        var hidden = PlayerAccount.hiddenTeamMatches(in: defaults)
+        if !hidden.contains(match.matchId) { hidden.append(match.matchId) }
+        // The server wipes waiting matches after 90 days: the newest few hundred are plenty
+        defaults.set(TeamRoster.raw(Array(hidden.suffix(300))), forKey: PlayerAccount.hiddenTeamMatchesKey)
+    }
+
+    /// "Niet ik" survives a restart: the ids, comma separated like `TeamRoster`
+    public static let hiddenTeamMatchesKey = "accountHiddenTeamMatches"
+
+    static func hiddenTeamMatches(in defaults: UserDefaults = UserDefaults.standard) -> [String] {
+        TeamRoster.parse(defaults.string(forKey: PlayerAccount.hiddenTeamMatchesKey) ?? "")
     }
 
     /// A match from a shared link: it counts at once

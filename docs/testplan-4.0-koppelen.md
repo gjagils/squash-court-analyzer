@@ -174,9 +174,9 @@ Gebruikers → zoeken op `+speler` / `+coach` → verwijderen.
 | Scenario | Stand | Opmerking |
 |---|---|---|
 | A. Teamgenoot onder een andere naam | **Geslaagd** (A13) | Gerd Lasso – Paul van Rijn; claim → geaccepteerd; de A13 leerde *Gerd Lasso = Gerd-Jan van Gils* |
-| B. Gekoppelde speler zonder account | Klaar om te testen | Paul van Rijn (SBN 942) heeft een wedstrijd die wacht; login `satest+speler2@gerdjan.nl` |
+| B. Gekoppelde speler zonder account | **Geslaagd** | Paul van Rijn (`satest+speler2`) koos zichzelf bij Dit ben ik: de wachtende wedstrijd stond meteen in zijn Postvak |
 | C. De deellink | **Geslaagd** (A13) | Toevoegen werkt; een tweede keer: "al toegevoegd, of de link is verlopen" |
-| D. Niet ik | **Geslaagd** (A13) | Verdwijnt bij jou, blijft op de server staan voor de echte Kees. Let op: "Niet ik" onthoudt de app nog niet na een herstart |
+| D. Niet ik | **Geslaagd** (A13) | Verdwijnt bij jou, blijft op de server staan voor de echte Kees. "Niet ik" blijft sinds 1 november ook na een herstart bewaard |
 | E. Naam wijzigen en verwijderen | Deels | Naam wijzigen werkt (simulator, lokaal); verwijderen nog niet op de testserver |
 | F. Zonder netwerk | Nog niet | |
 

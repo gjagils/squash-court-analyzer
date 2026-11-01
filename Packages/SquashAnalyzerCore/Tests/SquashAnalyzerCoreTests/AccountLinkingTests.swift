@@ -136,8 +136,10 @@ final class AccountLinkingTests: XCTestCase {
                 && String(data: request.body ?? Data(), encoding: String.Encoding.utf8) == "{\"name\":\"Gerd Lasso\"}"
         })
         XCTAssertEqual(account.teamInbox.count, 1)
-        account.hideTeamMatch(account.teamInbox[0])
+        let store = defaults()
+        account.hideTeamMatch(account.teamInbox[0], in: store)
         XCTAssertTrue(account.teamInbox.isEmpty)
+        XCTAssertEqual(PlayerAccount.hiddenTeamMatches(in: store), ["M-2"], "Niet ik is remembered")
 
         do {
             try await account.updateAccount(name: "  ")

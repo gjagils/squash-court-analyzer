@@ -1,0 +1,1 @@
+Build 9, de releaseversie van 3.1: dezelfde code als build 8, plus het scherm "Nieuw in 3.1" bij de eerste start en een aanvulling in de rondleiding (eenvoudig coachen). Uitleg: squashanalyzer.com/handleiding

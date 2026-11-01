@@ -93,6 +93,12 @@ samengevoegd moest worden. Daarom:
 - Geheimen (App Store Connect-, Play- en Cloudflare-sleutels) staan buiten de
   repo; zie `docs/opleveren-en-hosting.md`.
 - Nieuwe UI in de stijl van het scheidsrechtersscherm (`docs/style/README.md`).
+  Kleuren alleen via `SharedColors`, met één taak per kleur (sinds 1 november
+  2026, zie "Steunkleur en kleurrollen" in die gids): oranje is merk, speler 1
+  en de ene hoofdactie; staalblauw is speler 2; zeegroen (`support`) is goed
+  nieuws en alles wat live is; goud is alleen badges, medailles en de kroon;
+  rood is fout. Geen groen, geen monospace voor scores, geen goud voor
+  statistiek of avatars.
 
 ## Testen
 

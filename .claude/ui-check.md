@@ -77,14 +77,23 @@ On iOS, screens without a scenario need taps: use the iOS Simulator control tool
 Source: `Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/SharedColors.swift`,
 `docs/style/README.md`, `docs/style/tokens.json`.
 
-- Dark: background #000000, text #F2EDE6 / #B3ADA6 / #807A73, accent (player 1)
+- Dark: background #000000, text #F2EDE6 / #B3ADA6 / #807A73, support (sea green, good news and live) #3DBDA9, accent (player 1)
   #F28C26, gold #E6B859, player 2 #59738C.
-- Light ("warm licht"): background #F7F3ED, cards #FFFFFF, text #26211C / #71665B /
+- Light ("warm licht"): background #F7F3ED, cards #FFFFFF, support #1A6F63, text #26211C / #71665B /
   #786C60, accent (player 1) #A94F08, gold #8A6412, player 2 #405A73, border #DEC9B4.
 - Buttons are the app's own `ActionButton` (outlined, tinted, or filled); no system
   buttons. A disabled button is a quiet outlined one, never light text on grey.
 - In light mode the serving player is shown in the full player colour, the other faded.
 - Cards: radius 12–16, no shadow.
+- Colour roles (since 1 November 2026): orange = brand, player 1, the one filled main action
+  and selection; steel blue = player 2 and the opponent only; sea green (support) = good news
+  (won, winners, saved, key set) and everything live, including the LIVE pill; gold = badges,
+  medals, the winner's crown and "afgerond" only; red = errors, STROKE left, error messages.
+  Report green (#66C773), a red LIVE pill, gold statistics or a steel-blue Delen as a bug.
+- Home: no heading above the two tiles; brand header without a border; tiles with a 1.5 pt
+  border at 70% orange and a 15% fill, the Mijn team card lighter (7% fill, 25% border) and
+  always with the tinted bar; the game score in the coach and referee headers in the rounded
+  font (no monospace).
 
 ## Accepted differences (do not report)
 

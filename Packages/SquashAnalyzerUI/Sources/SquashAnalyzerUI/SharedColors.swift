@@ -39,8 +39,13 @@ public enum SharedColors {
     public static var accent: Color { pick(Color(red: 0.95, green: 0.55, blue: 0.15), hex(0xA9, 0x4F, 0x08)) }
     /// The bright brand orange in both themes, for decoration and large areas only (never small text on light)
     public static var brandAccent: Color { Color(red: 0.95, green: 0.55, blue: 0.15) }
-    /// Gold for statistics, badges and highlights
+    /// Gold: badges, medals, the winner's crown and "afgerond" only (since 1
+    /// November 2026; statistics and selection no longer use it)
     public static var gold: Color { pick(Color(red: 0.90, green: 0.72, blue: 0.35), hex(0x8A, 0x64, 0x12)) }
+    /// The support colour, sea green (#3DBDA9; light #1A6F63): good news (won,
+    /// winners, saved, a key that is set) and everything that is live. Cool
+    /// against the warm orange and never a player's colour (1 November 2026)
+    public static var support: Color { pick(hex(0x3D, 0xBD, 0xA9), hex(0x1A, 0x6F, 0x63)) }
     /// Player 2 (#59738C; light #405A73)
     public static var steelBlue: Color { pick(Color(red: 0.35, green: 0.45, blue: 0.55), hex(0x40, 0x5A, 0x73)) }
     /// Player 2 for small text and lines on black, where steel blue is too dark
@@ -54,14 +59,16 @@ public enum SharedColors {
     public static var coolIndigo: Color { pick(Color(red: 0.55, green: 0.47, blue: 0.90), hex(0x5B, 0x47, 0xC2)) }
     /// STROKE of the left-hand player, errors and warnings
     public static var warmRed: Color { pick(Color(red: 0.85, green: 0.30, blue: 0.30), hex(0xB2, 0x3B, 0x3B)) }
-    /// Good news: strengths in the analysis, "opgeslagen", a key that is set
-    public static var positive: Color { pick(Color(red: 0.40, green: 0.78, blue: 0.45), hex(0x2E, 0x7A, 0x3A)) }
     /// Error messages and "Niet opslaan"
     public static var error: Color { pick(Color(red: 0.95, green: 0.40, blue: 0.35), hex(0xB2, 0x3A, 0x2E)) }
     /// The dot on the serving player's score
     public static var serverIndicator: Color { pick(Color(red: 1.0, green: 0.60, blue: 0.15), hex(0xC2, 0x62, 0x0A)) }
     /// The court floor (heatmap), the same in both themes
     public static var courtSand: Color { Color(red: 0.82, green: 0.72, blue: 0.60) }
+    /// The court lines (#BF6B52), drawn on the sand floor in the light theme
+    public static var courtLine: Color { hex(0xBF, 0x6B, 0x52) }
+    /// Whether the light theme is drawn, for the few views that need their own light look
+    public static var isLight: Bool { SharedColors.light }
 
     // MARK: Surfaces
 
@@ -69,8 +76,18 @@ public enum SharedColors {
     public static var surface: Color { pick(Color(red: 0.12, green: 0.10, blue: 0.08), Color.white) }
     /// A card that stands out a little more (Mijn team)
     public static var surfaceRaised: Color { pick(Color(red: 0.14, green: 0.12, blue: 0.10), Color.white) }
-    /// Accent at 10% on black, pre-mixed so SwiftUI and Compose match (home tiles); in light the hover tint (#FFF6EB)
-    public static var brandCard: Color { pick(Color(red: 0.095, green: 0.055, blue: 0.015), hex(0xFF, 0xF6, 0xEB)) }
+    /// Accent at 7% on black, pre-mixed so SwiftUI and Compose match (the Mijn
+    /// team card and the date block in its bar); in light the hover tint (#FFF6EB)
+    public static var brandCard: Color { pick(hex(0x11, 0x0A, 0x03), hex(0xFF, 0xF6, 0xEB)) }
+    /// The stroke of the Mijn team card: accent at 25%
+    public static var brandCardStroke: Color { accent.opacity(0.25) }
+    /// The two home tiles (Scheidsrechter, Coach): accent at 15% on black, a
+    /// step heavier than the team card so they carry the emphasis (A3, 1
+    /// November 2026); in light the pressed tint (#FBE8D3)
+    public static var tileCard: Color { pick(hex(0x24, 0x15, 0x06), hex(0xFB, 0xE8, 0xD3)) }
+    /// The tiles' stroke, 1.5 pt: accent at 70% on black, the deep orange at 60% on light
+    public static var tileStroke: Color { accent.opacity(SharedColors.light ? 0.6 : 0.7) }
+    public static let tileStrokeWidth: CGFloat = 1.5
     /// A faint white tint for cards in the analysis; white cards in light
     public static var cardTint: Color { tint(0.05) }
 

@@ -31,7 +31,8 @@ enum AppColors {
     static var coolBlue: Color { SharedColors.coolBlue }
     static var coolIndigo: Color { SharedColors.coolIndigo }
     static var warmRed: Color { SharedColors.warmRed }
-    static var positive: Color { SharedColors.positive }
+    /// Good news and live: the support colour, sea green
+    static var support: Color { SharedColors.support }
 
     /// Player 1 orange, player 2 steel blue
     static func player(_ player: Player) -> Color {

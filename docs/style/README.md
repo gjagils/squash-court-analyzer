@@ -27,13 +27,36 @@ De volledige merkheader hoort op de startpagina. Vervolgschermen krijgen een com
 | accent | #F28C26 | Iconen, teamstatistieken en accenten |
 | textPrimary | #F2EDE6 | Titels en knopnamen |
 | textSecondary | #B3ADA6 | Omschrijvingen, metadata en tagline |
-| surface | accent met 10% dekking | Alle interactieve kaarten |
-| border | accent met 35% dekking | Dunne kaartomlijning |
+| surface | accent met 7% dekking (teamkaart) en 15% (tegels) | Interactieve kaarten; sinds 1 november 2026 twee niveaus |
+| border | accent met 25% dekking (teamkaart, 1 pt) en 70% (tegels, 1,5 pt) | Kaartomlijning |
 | hover | accent met 18% dekking | Pointerfeedback |
 | pressed | accent met 25% dekking | Aanraakfeedback |
-| divider | wit met 9% dekking | Subtiele scheidingslijnen |
+| divider | wit met 13% dekking | Subtiele scheidingslijnen |
 
-De transparante kaartvulling wordt op zwart getekend (circa #180E04). Gebruik dezelfde compositie op beide platformen. Geen groen, grijze teamkaart, oranje verloop of gevulde oranje hoofdtegel in deze homepage. Kleur alleen is nooit de enige statusindicator.
+De transparante kaartvulling wordt op zwart getekend. Gebruik dezelfde compositie op beide platformen. Geen groen, grijze teamkaart, oranje verloop of gevulde oranje hoofdtegel in deze homepage. Kleur alleen is nooit de enige statusindicator.
+
+## Steunkleur en kleurrollen (1 november 2026)
+
+Na een review van alle schermen (canvas "SquashAnalyzer ontwerpreview") is er één steunkleur bij en heeft elke kleur één taak. Besluit Gerd-Jan, 1 november 2026.
+
+| Token | Donker | Licht | Taak |
+| --- | --- | --- | --- |
+| accent | #F28C26 | #A94F08 | Merk, speler 1, de ene gevulde hoofdactie (START WEDSTRIJD, COACHKAART), selectie (de gekozen game, de tab Alles) |
+| steelBlue | #59738C | #405A73 | Speler 2 en de tegenstander. Nooit voor een neutrale actie zoals Delen |
+| **support** (zeegroen) | **#3DBDA9** | **#1A6F63** | Goed nieuws (gewonnen, winners, heatmap, "opgeslagen", sleutel ingesteld) en alles wat live is: de LIVE-pil bij coach en scheidsrechter, de live-markering op het beginscherm, Delen in Wedstrijden en Analyse |
+| gold | #E6B859 | #8A6412 | Badges, medailles, de kroon van de winnaar en de markering "afgerond". Niet voor statistiek, selectie, knoppen of avatars |
+| warmRed | #D94D4D | #B23B3B | Fouten, STROKE links, foutmeldingen. Niet voor live |
+
+Het groen (#66C773) en de rode LIVE-pil zijn vervallen. Avatars zonder foto krijgen de tekstkleur op een lichte tint, niet goud. Scores en gamestanden staan in het ronde systeemfont; monospace is weg, klokken gebruiken tabulaire cijfers. De baan is in warm licht getekend met de zandkleur als vloer (50%) en `courtLine` als lijn, zodat de zones zichtbaar blijven.
+
+## Beginscherm A3 (1 november 2026)
+
+- Merkheader zonder kader: logo, naam en tagline direct op de achtergrond.
+- Geen kop boven de tegels ("Klaar om te spelen?" is vervallen); de tegels zeggen zelf "Start met fluiten" en "Start met coachen". Geen lijn in de plaats, alleen ruimte.
+- Tegels Scheidsrechter en Coach: vulling accent 15% (`tileCard`), rand 1,5 pt op 70% (`tileStroke`), icoon 32. Dit zijn de zwaarste kaarten op het scherm.
+- Mijn team-kaart: altijd met de getinte balk voor de volgende wedstrijd; vulling 7% (`brandCard`), rand 1 pt op 25%, balk 7%. Datumblok in de kaartkleur met oranje tekst. De schakelaar "Mijn team-kaart met balk" is weg.
+- Lijntjes tussen de menurijen: 1 pt wit op 13%.
+- Live-markering (zeegroene pil) bij Competitie als er een live teamwedstrijd van je team loopt, en bij Wedstrijd volgen met het aantal wedstrijden dat je volgt.
 
 ## Lichte modus — warm licht (10 oktober 2026)
 
@@ -114,9 +137,9 @@ De compacte webmockup bevat kleinere onderschriften (9–11 px). Neem die niet b
 
 ## Componenten
 
-- **Kaarten:** radius 16 pt/dp, rand 1 pt/dp, binnenruimte 16. Mijn team en beide actietegels delen exact dezelfde vulling, rand en afronding. Geen schaduw of decoratieve baanlijnen.
-- **Coach en Scheidsrechter:** twee even brede en hoge tegels; circa 110 hoog als startmaat. Oranje icoon boven gecentreerde titel. Onderschriften: “Start met coachen” en “Start met fluiten”. Geen pijltjes. De hele tegel is klikbaar. Beide acties zijn even belangrijk.
-- **Mijn team:** links uitgelijnde inhoud, label, teamnaam, stand/gespeeld/punten en volgende wedstrijd. Geen pijltje. De hele kaart opent het teamoverzicht. Bij ontbrekende gegevens geen fictieve cijfers tonen; bied een compacte koppelmogelijkheid of lege toestand.
+- **Kaarten:** radius 16 pt/dp, binnenruimte 16. Sinds A3 (1 november 2026) zijn de tegels een stap zwaarder dan de teamkaart: tegels vulling 15% en rand 1,5 pt op 70%, teamkaart vulling 7% en rand 1 pt op 25%. Geen schaduw of decoratieve baanlijnen.
+- **Coach en Scheidsrechter:** twee even brede en hoge tegels; circa 110 hoog als startmaat. Oranje icoon (32) boven gecentreerde titel. Onderschriften: “Start met coachen” en “Start met fluiten”. Geen pijltjes, geen kop erboven. De hele tegel is klikbaar. Beide acties zijn even belangrijk.
+- **Mijn team:** links uitgelijnde inhoud, label, teamnaam met de stand als badge, gespeeld/punten en de volgende wedstrijd in een getinte balk. Geen pijltje. De hele kaart opent het teamoverzicht. Bij ontbrekende gegevens geen fictieve cijfers tonen; bied een compacte koppelmogelijkheid of lege toestand.
 - **Menurijen:** oranje icoon links, tekst en eventueel een chevron rechts. De verwijderde pijltjes gelden voor de teamkaart en de twee actietegels, niet voor alle navigatie.
 - **Iconen:** consistente eenvoudige symbolen. Clipboard voor Coach, fluitje voor Scheidsrechter, historie, spelers en medaille. Clipboard, fluitje, spelers, beker, delen en medaille tekent de app zelf als lijnicoon (`OutlineIcons.swift`, 24-raster, lijn 1,8), zodat iPhone en Android hetzelfde tonen (keuze 11 oktober 2026); de overige symbolen gebruiken de platformimplementaties via `AppSymbol`. Geen emoji als bedieningsicoon.
 

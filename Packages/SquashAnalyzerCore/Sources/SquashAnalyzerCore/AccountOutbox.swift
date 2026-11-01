@@ -35,7 +35,9 @@ public struct AccountOutboxEntry: Codable, Equatable, Sendable {
     public var key: String {
         let code = recipient?.code ?? ""
         let path = recipient?.sbnPath ?? ""
-        return "\(match.matchId)|\(code)|\(path)"
+        let team = recipient?.team ?? ""
+        let name = recipient?.name ?? ""
+        return "\(match.matchId)|\(code)|\(path)|\(team)|\(name)"
     }
 }
 

@@ -10,6 +10,9 @@ public struct PlayerProfileFields: View {
     /// The player's id once it exists: shows the switch "In mijn team"
     private let playerId: String?
     @AppStorage(TeamRoster.storageKey) private var rosterRaw = ""
+    /// 4.0: which SBN player this is (PlayerSBNLinks); read here so the view follows changes
+    @AppStorage(PlayerSBNLinks.storageKey) private var sbnLinksRaw = ""
+    @State private var choosingSbnPlayer = false
 
     public init(name: Binding<String>, focus: Binding<[String]>, notes: Binding<String>, playerId: String? = nil) {
         _name = name
@@ -40,6 +43,9 @@ public struct PlayerProfileFields: View {
                     Text("Spelers in je team staan bovenaan als je een partij van een teamwedstrijd invult.", bundle: textBundle)
                         .font(SharedFonts.system(12))
                         .foregroundColor(SharedColors.textMuted)
+                }
+                if Features.shared.playerAccount {
+                    sbnPlayerPart(playerId)
                 }
             }
             VStack(alignment: .leading, spacing: 12) {
@@ -78,6 +84,60 @@ public struct PlayerProfileFields: View {
         }
         .font(SharedFonts.system(16, design: .rounded))
         .foregroundColor(SharedColors.textPrimary)
+    }
+
+    /// 4.0: who this is in SBN. Matches you coach then go to that player's
+    /// account, whatever name you use here ("Gerd Lasso").
+    private func sbnPlayerPart(_ playerId: String) -> some View {
+        let teamPlayers = PlayerAccount.mijnTeamPlayers()
+        let linked: String? = sbnLinksRaw.isEmpty ? nil : PlayerSBNLinks.path(for: playerId)
+        let linkedName = teamPlayers.first { player in player.id == linked }?.name
+        return VStack(alignment: .leading, spacing: 8) {
+            caption(loc("SBN-SPELER"))
+            if teamPlayers.isEmpty && linked == nil {
+                Text("Kies eerst je team bij Mijn team. Dan kun je hier aangeven wie dit in SBN is.", bundle: textBundle)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textMuted)
+            } else {
+                Button {
+                    choosingSbnPlayer.toggle()
+                } label: {
+                    HStack {
+                        Text(linkedName ?? (linked == nil ? loc("Niet gekoppeld") : loc("Gekoppeld")))
+                            .foregroundColor(linked == nil ? SharedColors.textSecondary : SharedColors.textPrimary)
+                        Spacer()
+                        Text(choosingSbnPlayer ? loc("Klaar") : loc("Kies"))
+                            .font(SharedFonts.system(14, weight: .semibold))
+                            .foregroundColor(SharedColors.accent)
+                    }
+                    .padding()
+                    .background(SharedColors.tint(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+                if choosingSbnPlayer {
+                    ForEach(teamPlayers) { player in
+                        Button {
+                            PlayerSBNLinks.set(player.id == linked ? nil : player.id, for: playerId)
+                            sbnLinksRaw = UserDefaults.standard.string(forKey: PlayerSBNLinks.storageKey) ?? ""
+                            choosingSbnPlayer = false
+                        } label: {
+                            HStack {
+                                Text(player.name).font(SharedFonts.system(14))
+                                Spacer()
+                                if player.id == linked { AppSymbol("star.fill", size: 12, color: SharedColors.accent) }
+                            }
+                            .foregroundColor(player.id == linked ? SharedColors.accent : SharedColors.textPrimary)
+                            .padding(.vertical, 6)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                Text("Wedstrijden die je met deze speler invult, komen bij die speler terecht als die een account heeft. Hier mag je een andere naam gebruiken dan in SBN.", bundle: textBundle)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textMuted)
+            }
+        }
     }
 
     private func caption(_ title: String) -> some View {

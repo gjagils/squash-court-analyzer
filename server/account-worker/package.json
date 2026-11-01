@@ -5,7 +5,9 @@
   "scripts": {
     "test": "vitest run",
     "dev": "wrangler dev",
-    "local": "node dev/local.mjs"
+    "local": "node dev/local.mjs",
+    "reset-test": "node dev/reset-test.mjs",
+    "deploy-test": "wrangler d1 migrations apply squash-account-test --env test --remote && wrangler deploy --env test"
   },
   "license": "UNLICENSED",
   "devDependencies": {

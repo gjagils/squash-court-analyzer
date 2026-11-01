@@ -38,6 +38,21 @@ Een 4.0-debugbuild die deze opstelling gebruikt:
 Een wedstrijd in een postvak leggen zoals een coach dat doet:
 `node dev/send-match.mjs <spelerscode> [naam afzender]`.
 
+## Testomgeving
+
+Een tweede Worker met een eigen database, zodat testen nooit data in de echte
+zet: `squash-account-test` op `test-account.squashanalyzer.com` (`[env.test]` in
+`wrangler.toml`). 4.0-testbuilds wijzen erheen met `SQUASH_ACCOUNT_SERVER=test`
+(iOS) of `-PsquashAccountServer=test` (Android). Zelfde Firebase-project.
+
+- Eenmalig: `npx wrangler d1 create squash-account-test --jurisdiction eu`, het
+  `database_id` in `[[env.test.d1_databases]]`.
+- Uitrollen (migraties en Worker): `npm run deploy-test`.
+- Leegmaken: `npm run reset-test` (vraagt eerst; alleen de testdatabase).
+- Nep-coach: `node dev/send-match.mjs --test …` (zie de kop van het script).
+
+Het draaiboek staat in `docs/testplan-4.0-koppelen.md`.
+
 ## Voor de eerste uitrol (Gerd-Jan)
 
 1. Database in de EU aanmaken: gedaan op 1 november 2026

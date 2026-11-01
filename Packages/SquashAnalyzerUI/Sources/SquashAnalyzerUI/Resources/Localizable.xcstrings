@@ -11665,24 +11665,6 @@
         }
       }
     },
-    "Geef deze code aan je coach of de scheidsrechter. Dan kunnen ze wedstrijden naar je sturen.": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Give this code to your coach or the referee. Then they can send matches to you."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geef deze code aan je coach of de scheidsrechter. Dan kunnen ze wedstrijden naar je sturen."
-          }
-        }
-      }
-    },
     "Geen wedstrijden die op je antwoord wachten.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -11841,24 +11823,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je naam"
-          }
-        }
-      }
-    },
-    "Je spelerscode": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your player code"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Je spelerscode"
           }
         }
       }
@@ -12111,6 +12075,510 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gereed"
+          }
+        }
+      }
+    },
+    "BEWAREN": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SAVE"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BEWAREN"
+          }
+        }
+      }
+    },
+    "Ben jij \"%@\"?": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you \"%@\"?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ben jij \"%@\"?"
+          }
+        }
+      }
+    },
+    "DAT BEN IK": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "THAT'S ME"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DAT BEN IK"
+          }
+        }
+      }
+    },
+    "Een teamgenoot heeft deze wedstrijden ingevuld met een naam die nog niet gekoppeld is. Ben jij het, dan telt de wedstrijd voor jou.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A teammate entered these matches with a name that is not linked yet. If it is you, the match counts for you."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een teamgenoot heeft deze wedstrijden ingevuld met een naam die nog niet gekoppeld is. Ben jij het, dan telt de wedstrijd voor jou."
+          }
+        }
+      }
+    },
+    "Gekoppeld": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linked"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gekoppeld"
+          }
+        }
+      }
+    },
+    "In SBN: %@": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In SBN: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In SBN: %@"
+          }
+        }
+      }
+    },
+    "Kies": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kies"
+          }
+        }
+      }
+    },
+    "Kies eerst je team bij Mijn team. Dan kun je hier aangeven wie dit in SBN is.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose your team under My team first. Then you can say here who this is in SBN."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kies eerst je team bij Mijn team. Dan kun je hier aangeven wie dit in SBN is."
+          }
+        }
+      }
+    },
+    "NIET IK": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NOT ME"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NIET IK"
+          }
+        }
+      }
+    },
+    "Naam wijzigen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change name"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naam wijzigen"
+          }
+        }
+      }
+    },
+    "Niet gekoppeld": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not linked"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet gekoppeld"
+          }
+        }
+      }
+    },
+    "SBN-SPELER": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SBN PLAYER"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SBN-SPELER"
+          }
+        }
+      }
+    },
+    "Speel je in een SBN-team? Kies je team bij Mijn team; dan kun je hier zeggen wie je bent.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do you play in an SBN team? Choose your team under My team; then you can say here who you are."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speel je in een SBN-team? Kies je team bij Mijn team; dan kun je hier zeggen wie je bent."
+          }
+        }
+      }
+    },
+    "Uit je team": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From your team"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uit je team"
+          }
+        }
+      }
+    },
+    "Wedstrijden die je coach of de scheidsrechter met jou invult, komen hier binnen. Ook als ze je in hun app anders noemen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Matches your coach or the referee enters with you arrive here, even if they call you something else in their app."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wedstrijden die je coach of de scheidsrechter met jou invult, komen hier binnen. Ook als ze je in hun app anders noemen."
+          }
+        }
+      }
+    },
+    "Wedstrijden die je met deze speler invult, komen bij die speler terecht als die een account heeft. Hier mag je een andere naam gebruiken dan in SBN.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Matches you enter with this player reach that player once they have an account. You may use a different name here than in SBN."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wedstrijden die je met deze speler invult, komen bij die speler terecht als die een account heeft. Hier mag je een andere naam gebruiken dan in SBN."
+          }
+        }
+      }
+    },
+    "Wie ben jij in Mijn team? Kies jezelf, dan komen wedstrijden met jou vanzelf hier binnen. Dit kan één keer.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Who are you in My team? Choose yourself and matches with you arrive here by themselves. You can do this once."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie ben jij in Mijn team? Kies jezelf, dan komen wedstrijden met jou vanzelf hier binnen. Dit kan één keer."
+          }
+        }
+      }
+    },
+    "gekoppeld": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "linked"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gekoppeld"
+          }
+        }
+      }
+    },
+    "Stuur naar speler": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send to player"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stuur naar speler"
+          }
+        }
+      }
+    },
+    "Je deelt een link. Wie hem in de app opent, krijgt de wedstrijd in zijn account. Spelers uit Mijn team krijgen hun wedstrijden vanzelf.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You share a link. Whoever opens it in the app gets the match in their account. Players from My team get their matches automatically."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je deelt een link. Wie hem in de app opent, krijgt de wedstrijd in zijn account. Spelers uit Mijn team krijgen hun wedstrijden vanzelf."
+          }
+        }
+      }
+    },
+    "NAAR %@": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TO %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NAAR %@"
+          }
+        }
+      }
+    },
+    "%@, hier is onze wedstrijd voor je Squash Analyzer-account. Open de link op je telefoon: %@": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, here is our match for your Squash Analyzer account. Open the link on your phone: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, hier is onze wedstrijd voor je Squash Analyzer-account. Open de link op je telefoon: %@"
+          }
+        }
+      }
+    },
+    "Wedstrijd voor je account": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Match for your account"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wedstrijd voor je account"
+          }
+        }
+      }
+    },
+    "De wedstrijd staat in je account en telt mee.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The match is in your account and counts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De wedstrijd staat in je account en telt mee."
+          }
+        }
+      }
+    },
+    "Iemand heeft een wedstrijd met jou gedeeld. Voeg hem toe, dan telt hij mee voor je badges.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Someone shared a match with you. Add it and it counts for your badges."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iemand heeft een wedstrijd met jou gedeeld. Voeg hem toe, dan telt hij mee voor je badges."
+          }
+        }
+      }
+    },
+    "TOEVOEGEN AAN MIJN ACCOUNT": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ADD TO MY ACCOUNT"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TOEVOEGEN AAN MIJN ACCOUNT"
+          }
+        }
+      }
+    },
+    "Log eerst in of maak een account. Daarna kun je de wedstrijd hier toevoegen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in or create an account first. Then you can add the match here."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log eerst in of maak een account. Daarna kun je de wedstrijd hier toevoegen."
+          }
+        }
+      }
+    },
+    "Deze wedstrijd is al toegevoegd, of de link is verlopen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This match was already added, or the link has expired."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze wedstrijd is al toegevoegd, of de link is verlopen."
           }
         }
       }

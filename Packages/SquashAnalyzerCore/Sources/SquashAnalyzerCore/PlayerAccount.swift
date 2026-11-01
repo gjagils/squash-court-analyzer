@@ -50,6 +50,10 @@ public final class PlayerAccount {
     /// `profile` was asked for since signing in, so nil means "no account yet"
     public private(set) var profileChecked = false
     public private(set) var inbox: [AccountServerMatch] = []
+    /// Matches of the own team that wait for a name ("Ben jij dit?")
+    public private(set) var teamInbox: [AccountServerMatch] = []
+    /// A "Stuur naar speler" link that was opened (`AccountClaimLink`): the app shows it until handled
+    public var pendingClaim: String? = nil
     private var device: AccountDevice? = nil
     private var sending = false
 
@@ -70,6 +74,7 @@ public final class PlayerAccount {
         profile = nil
         profileChecked = false
         inbox = []
+        teamInbox = []
     }
 
     // MARK: Signing in
@@ -106,6 +111,7 @@ public final class PlayerAccount {
         profile = nil
         profileChecked = false
         inbox = []
+        teamInbox = []
         storeSecrets()
     }
 
@@ -146,8 +152,32 @@ public final class PlayerAccount {
         var path: String? = nil
         if let sbnPath, !sbnPath.isEmpty { path = sbnPath }
         profile = try await client().createAccount(token: token, AccountCreation(name: trimmed, birthYear: birthYear,
-                                                                                 sbnPath: path, consent: true))
+                                                                                 sbnPath: path, teamKey: AccountSending.ownTeamKey(),
+                                                                                 consent: true))
         profileChecked = true
+    }
+
+    /// A typo in the name, or "Dit ben ik" (the SBN player, once) chosen later.
+    /// The team follows Mijn team.
+    public func updateAccount(name: String? = nil, sbnPath: String? = nil) async throws {
+        var cleanName: String? = nil
+        if let name {
+            let trimmed = name.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            if trimmed.isEmpty { throw AccountError.missingName }
+            cleanName = trimmed
+        }
+        var path: String? = nil
+        if let sbnPath, !sbnPath.isEmpty { path = sbnPath }
+        let token = try await validToken()
+        profile = try await client().updateAccount(token: token, AccountUpdate(name: cleanName, sbnPath: path,
+                                                                                teamKey: AccountSending.ownTeamKey()))
+    }
+
+    /// The account's team follows Mijn team on this phone (set or changed since)
+    func followOwnTeam() async {
+        guard let current = profile, let team = AccountSending.ownTeamKey(), current.teamKey != team,
+              let token = try? await validToken() else { return }
+        if let updated = try? await client().updateAccount(token: token, AccountUpdate(teamKey: team)) { profile = updated }
     }
 
     /// Deletes the account and everything on the server, then the Firebase user.
@@ -168,9 +198,32 @@ public final class PlayerAccount {
 
     // MARK: The inbox
 
+    /// The inbox and the team's matches that wait for a name
     public func loadInbox() async throws {
         let token = try await validToken()
+        await followOwnTeam()
         inbox = try await client().inbox(token: token)
+        teamInbox = try await client().teamMatches(token: token)
+    }
+
+    /// "Dat ben ik": the team match counts at once
+    public func claimTeamMatch(_ match: AccountServerMatch) async throws {
+        let token = try await validToken()
+        _ = try await client().claimTeamMatch(token: token, matchId: match.matchId, name: match.name ?? "")
+        teamInbox = teamInbox.filter { other in other.matchId != match.matchId }
+        // Other matches of that coach for that name may have moved to the inbox
+        inbox = try await client().inbox(token: token)
+    }
+
+    /// "Niet ik": hidden on this phone only, the match stays for the teammate it is for
+    public func hideTeamMatch(_ match: AccountServerMatch) {
+        teamInbox = teamInbox.filter { other in other.matchId != match.matchId }
+    }
+
+    /// A match from a shared link: it counts at once
+    public func claimLink(_ claimToken: String) async throws -> AccountServerMatch {
+        let token = try await validToken()
+        return try await client().claimLink(token: token, claimToken: claimToken)
     }
 
     /// Gebruiken, Niet gebruiken, or Blokkeren (not use, and refuse that phone from now on)
@@ -251,6 +304,24 @@ public final class PlayerAccount {
                 return
             }
         }
+    }
+
+    /// What teammates' claims taught this phone, into `PlayerSBNLinks`. Only
+    /// with a device key (a phone that sent something); returns how many players got linked.
+    @discardableResult
+    public func learnLinks(players: [PlayerProfile]) async -> Int {
+        guard isConfigured, let device, let api = try? client(),
+              let learned = try? await api.learnedLinks(device: device) else { return 0 }
+        return PlayerSBNLinks.learn(learned, players: players, teamKey: AccountSending.ownTeamKey())
+    }
+
+    /// Sends one finished match to whoever opens the link; the token for the link comes back
+    public func shareLink(_ match: AccountMatchUpload, senderName: String) async throws -> String {
+        let key = try await deviceKey()
+        let result = try await client().submit(device: key, AccountSubmission(match: match, to: AccountRecipient(link: true),
+                                                                               senderName: senderName))
+        guard let token = result?.claimToken else { throw AccountError.invalidResponse }
+        return token
     }
 
     /// The Worker refused the match itself (400): sending it again will not help

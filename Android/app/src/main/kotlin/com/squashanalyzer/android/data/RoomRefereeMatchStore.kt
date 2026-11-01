@@ -1,5 +1,7 @@
 package com.squashanalyzer.android.data
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import skip.foundation.Date
 import skip.foundation.UUID
 import skip.lib.Array as SwiftArray
@@ -23,6 +25,10 @@ class RoomRefereeMatchStore(
         badgeAwardStore.inTransaction {
             store.upsert(snapshot)
             syncBadges(match)
+        }
+        // 4.0: a finished match goes to its players' accounts (nothing with the switch off)
+        if (Features.shared.playerAccount && match.isMatchOver) {
+            withContext(Dispatchers.Main) { AccountSending.queueFinished(match) }
         }
     }
 

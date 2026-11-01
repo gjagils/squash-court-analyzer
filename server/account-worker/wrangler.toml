@@ -31,3 +31,27 @@ crons = ["17 3 * * *"]
 
 [observability]
 enabled = true
+
+# The test Worker (README "Testomgeving"): the same code with its own
+# database, so testing never puts data in the real one. Same Firebase project:
+# test logins are e-mail addresses with +test. Deploy: npx wrangler deploy --env test
+[env.test]
+name = "squash-account-test"
+workers_dev = false
+routes = [{ pattern = "test-account.squashanalyzer.com", custom_domain = true }]
+
+[env.test.vars]
+FIREBASE_PROJECT_ID = "squash-analyzer-18fb3"
+PENDING_DAYS = "90"
+# Testing with one phone sends many matches in a day
+SUBMISSIONS_PER_DAY = "200"
+DEVICES_PER_HOUR = "20"
+
+[[env.test.d1_databases]]
+binding = "DB"
+database_name = "squash-account-test"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[env.test.triggers]
+crons = ["17 3 * * *"]

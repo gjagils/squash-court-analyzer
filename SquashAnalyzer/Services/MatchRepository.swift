@@ -76,6 +76,8 @@ final class SwiftDataMatchRepository: MatchRepository {
             try context.save()
             match.updatedAt = saved.updatedAt
             match.status = saved.matchStatus
+            // 4.0: a finished match goes to its players' accounts (nothing with the switch off)
+            AccountSending.queueFinished(match)
         } catch {
             context.rollback()
             throw PersistenceError.saveFailed(error)

@@ -438,6 +438,13 @@ public struct AndroidHomeView: View {
                 }) { welcomeSeen() }
             }
         }
+        // 4.0: a match someone shared for your account ("Stuur naar speler")
+        .sheet(isPresented: Binding(get: { PlayerAccount.shared.pendingClaim != nil },
+                                    set: { open in if !open { PlayerAccount.shared.pendingClaim = nil } })) {
+            if let token = PlayerAccount.shared.pendingClaim {
+                SharedAccountClaimSheet(token: token) { PlayerAccount.shared.pendingClaim = nil }
+            }
+        }
         .sheet(isPresented: $showingLiveFollow) {
             SharedLiveFollowView { showingLiveFollow = false }
         }

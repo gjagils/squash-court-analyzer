@@ -23,6 +23,8 @@ public struct RefereeScoringView: View {
     /// game end, or the same one after an undo and a new point, shows it again
     @State private var hiddenResult: String? = nil
     @State private var showingBadges = false
+    /// 4.0: "Stuur naar speler" (a link to the match for the player's account)
+    @State private var showingSendLink = false
     /// Namen aanpassen: the sheet with the two names (tap the names above the scores)
     @State private var editingNames = false
 
@@ -128,6 +130,7 @@ public struct RefereeScoringView: View {
                 result: MatchResult.refereeMatch(match),
                 player1Photo: photo(Player.player1), player2Photo: photo(Player.player2),
                 badgeEarnings: badgeEarnings, onBadges: { showingBadges = true },
+                secondary: sendLinkButtons,
                 primary: shareText == nil ? ResultButton(loc("Sluiten")) { close() }
                     : ResultButton(loc("Deel score")) { hiddenResult = resultKey; sharingNow = true },
                 outlined: shareText == nil ? nil : ResultButton(loc("Sluiten")) { close() },
@@ -135,6 +138,13 @@ public struct RefereeScoringView: View {
             )
             .sheet(isPresented: $showingBadges) {
                 SharedMatchBadgesSheet(earnings: badgeEarnings) { showingBadges = false }
+            }
+            .sheet(isPresented: $showingSendLink) {
+                if let shareText {
+                    SharedSendToPlayerSheet(names: [Player.player1: match.player1Name, Player.player2: match.player2Name],
+                                            upload: { side in match.accountUpload(for: side) },
+                                            shareText: shareText) { showingSendLink = false }
+                }
             }
         } else {
             MatchResultOverlay(
@@ -148,6 +158,11 @@ public struct RefereeScoringView: View {
                 link: ResultButton(loc("Bekijk stand")) { hiddenResult = resultKey }
             )
         }
+    }
+
+    private var sendLinkButtons: [ResultButton] {
+        guard Features.shared.playerAccount, shareText != nil, !PracticeMatches.shared.contains(match.id) else { return [] }
+        return [ResultButton(loc("Stuur naar speler"), icon: "person.crop.circle") { showingSendLink = true }]
     }
 
     /// Save and send the new state to live viewers

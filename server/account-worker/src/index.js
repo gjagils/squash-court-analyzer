@@ -272,17 +272,17 @@ async function updateAccount(request, env, caller) {
   const playerId = caller.account.player_id;
   const player = await env.DB.prepare('SELECT * FROM players WHERE id = ?').bind(playerId).first();
   const steps = [];
-  if (body.name !== undefined) {
+  if (body.name != null) {
     const name = cleanText(body.name, LIMITS.name);
     if (!name) return json(400, { error: 'name' });
     steps.push(env.DB.prepare('UPDATE players SET name = ? WHERE id = ?').bind(name, playerId));
   }
-  if (body.teamKey !== undefined) {
+  if (body.teamKey != null) {
     const teamKey = cleanText(body.teamKey, LIMITS.teamKey) || null;
     steps.push(env.DB.prepare('UPDATE players SET team_key = ? WHERE id = ?').bind(teamKey, playerId));
   }
   let newPath = null;
-  if (body.sbnPath !== undefined) {
+  if (body.sbnPath != null) {
     const sbnPath = cleanText(body.sbnPath, LIMITS.sbnPath);
     if (!sbnPath) return json(400, { error: 'sbnPath' });
     if (sbnPath !== player.sbn_path) {

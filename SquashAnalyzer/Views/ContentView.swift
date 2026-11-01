@@ -164,6 +164,11 @@ struct ContentView: View {
         }
         // A player card link (website or squashanalyzer://kaart#…)
         .onOpenURL { url in
+            // 4.0: a match someone shared for your account ("Stuur naar speler")
+            if Features.shared.playerAccount, let token = AccountClaimLink.token(from: url.absoluteString) {
+                PlayerAccount.shared.pendingClaim = token
+                return
+            }
             // A live link: follow the match on the lock screen
             if url.absoluteString.hasPrefix("squashanalyzer://volg") {
                 pendingLiveFollow = url.absoluteString
@@ -186,6 +191,14 @@ struct ContentView: View {
                 presentPendingCard()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { presentPendingLiveFollow() }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { presentPendingTeam() }
+            }
+        }
+        .sheet(isPresented: Binding(get: { PlayerAccount.shared.pendingClaim != nil },
+                                    set: { open in if !open { PlayerAccount.shared.pendingClaim = nil } })) {
+            if let token = PlayerAccount.shared.pendingClaim {
+                SharedAccountClaimSheet(token: token, providers: AppleAccountSignIn.providers) {
+                    PlayerAccount.shared.pendingClaim = nil
+                }
             }
         }
         .sheet(item: $liveFollow) { request in

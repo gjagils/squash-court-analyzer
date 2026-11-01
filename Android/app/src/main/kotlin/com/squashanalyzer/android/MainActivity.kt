@@ -36,6 +36,7 @@ import squash.analyzer.core.LeagueTeamFetcher
 import skip.foundation.URL
 import squash.analyzer.core.AICoachClient
 import squash.analyzer.core.LiveShare
+import squash.analyzer.core.AccountClaimLink
 import squash.analyzer.core.AccountEndpoints
 import squash.analyzer.core.AccountOutbox
 import squash.analyzer.core.PlayerAccount
@@ -267,6 +268,13 @@ class MainActivity : AppCompatActivity() {
     private fun receiveCardLink(intent: Intent?) {
         if (intent?.action != Intent.ACTION_VIEW) return
         val link = intent.dataString ?: return
+        // 4.0: a match someone shared for your account ("Stuur naar speler")
+        if (Features.shared.playerAccount) {
+            AccountClaimLink.token(from = link)?.let { token ->
+                PlayerAccount.shared.pendingClaim = token
+                return
+            }
+        }
         // A live match to follow on the lock screen (squashanalyzer://volg#<id>)
         if (link.startsWith("squashanalyzer://volg")) {
             val target = LiveFollowLink.parse(link)

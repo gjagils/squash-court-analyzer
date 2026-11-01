@@ -9,17 +9,21 @@ import Foundation
 public struct AccountProfile: Codable, Equatable, Sendable {
     public let playerId: String
     public let name: String
-    /// The player code to hand out, so others can send matches (also as QR)
+    /// The player code (older builds sent to it; the screens no longer show it)
     public let code: String
+    /// The SBN player ("/league/<uuid>/player/<n>"), set once
     public let sbnPath: String?
+    /// The SBN team (`LeagueTeamLink.accountKey`): its matches that wait for a name show up
+    public let teamKey: String?
     public let birthYear: Int
     public let createdAt: Int64
 
-    public init(playerId: String, name: String, code: String, sbnPath: String?, birthYear: Int, createdAt: Int64) {
+    public init(playerId: String, name: String, code: String, sbnPath: String?, teamKey: String? = nil, birthYear: Int, createdAt: Int64) {
         self.playerId = playerId
         self.name = name
         self.code = code
         self.sbnPath = sbnPath
+        self.teamKey = teamKey
         self.birthYear = birthYear
         self.createdAt = createdAt
     }
@@ -42,12 +46,14 @@ public struct AccountCreation: Codable, Equatable, Sendable {
     public var name: String
     public var birthYear: Int
     public var sbnPath: String?
+    public var teamKey: String?
     public var consent: Bool
 
-    public init(name: String, birthYear: Int, sbnPath: String?, consent: Bool) {
+    public init(name: String, birthYear: Int, sbnPath: String?, teamKey: String? = nil, consent: Bool) {
         self.name = name
         self.birthYear = birthYear
         self.sbnPath = sbnPath
+        self.teamKey = teamKey
         self.consent = consent
     }
 
@@ -55,7 +61,21 @@ public struct AccountCreation: Codable, Equatable, Sendable {
     public static func latestBirthYear(in year: Int) -> Int { year - 16 }
 }
 
-/// A match on the server: waiting in the inbox, or accepted
+/// PATCH /api/v1/me: only what is set changes (a name with a typo, "Dit ben ik" later)
+public struct AccountUpdate: Codable, Equatable, Sendable {
+    public var name: String?
+    public var sbnPath: String?
+    public var teamKey: String?
+
+    public init(name: String? = nil, sbnPath: String? = nil, teamKey: String? = nil) {
+        self.name = name
+        self.sbnPath = sbnPath
+        self.teamKey = teamKey
+    }
+}
+
+/// A match on the server: waiting in the inbox, accepted, or (with `name`)
+/// one of the own team that waits for "dat ben ik"
 public struct AccountServerMatch: Codable, Equatable, Sendable, Identifiable {
     public let matchId: String
     /// "pending" or "accepted"
@@ -69,11 +89,13 @@ public struct AccountServerMatch: Codable, Equatable, Sendable, Identifiable {
     public let summary: AccountMatchSummary
     /// Only for accepted matches (the inbox leaves them out)
     public let rallies: [AccountGame]?
+    /// A team match waiting for a name: the name the sender used ("Gerd Lasso")
+    public let name: String?
 
     public var id: String { matchId }
 
     public init(matchId: String, status: String, senderName: String, fromDevice: String?, playedAt: Int64, receivedAt: Int64,
-                teamKey: String?, opponent: String, summary: AccountMatchSummary, rallies: [AccountGame]?) {
+                teamKey: String?, opponent: String, summary: AccountMatchSummary, rallies: [AccountGame]?, name: String? = nil) {
         self.matchId = matchId
         self.status = status
         self.senderName = senderName
@@ -84,6 +106,7 @@ public struct AccountServerMatch: Codable, Equatable, Sendable, Identifiable {
         self.opponent = opponent
         self.summary = summary
         self.rallies = rallies
+        self.name = name
     }
 
     public var playedDate: Date { Date(timeIntervalSince1970: Double(playedAt) / 1000.0) }
@@ -155,15 +178,61 @@ public struct AccountDevice: Codable, Equatable, Sendable {
     var header: String { "Device \(deviceId).\(deviceKey)" }
 }
 
-/// Who a match is sent to: a player code, or the SBN player path in a team match
+/// Who a match is sent to: an SBN player, the name the sender uses in an SBN
+/// team ("Gerd Lasso" in team 3, for teammates to claim), whoever opens a
+/// shared link, or a player code (older builds)
 public struct AccountRecipient: Codable, Equatable, Sendable {
     public var code: String?
     public var sbnPath: String?
+    /// `LeagueTeamLink.accountKey`, with `name`
+    public var team: String?
+    public var name: String?
+    public var link: Bool?
 
-    public init(code: String? = nil, sbnPath: String? = nil) {
+    public init(code: String? = nil, sbnPath: String? = nil, team: String? = nil, name: String? = nil, link: Bool? = nil) {
         self.code = code
         self.sbnPath = sbnPath
+        self.team = team
+        self.name = name
+        self.link = link
     }
+}
+
+/// The answer to a submission; a link submission carries the token for the link
+public struct AccountSubmitResult: Codable, Equatable, Sendable {
+    public let received: String
+    public let claimToken: String?
+
+    public init(received: String, claimToken: String?) {
+        self.received = received
+        self.claimToken = claimToken
+    }
+}
+
+/// What a teammate's claim taught this phone: its name for a player in that team is this SBN player
+public struct AccountLearnedLink: Codable, Equatable, Sendable {
+    public let teamKey: String
+    /// Lowercased, single spaces (the Worker's name key)
+    public let name: String
+    public let sbnPath: String
+
+    public init(teamKey: String, name: String, sbnPath: String) {
+        self.teamKey = teamKey
+        self.name = name
+        self.sbnPath = sbnPath
+    }
+}
+
+struct AccountLinkList: Codable {
+    let links: [AccountLearnedLink]
+}
+
+struct AccountClaimName: Codable {
+    let name: String
+}
+
+struct AccountClaimToken: Codable {
+    let token: String
 }
 
 /// POST /api/v1/submissions: the match fields at the top, with who it is for and from
@@ -245,6 +314,13 @@ public struct AccountClient: Sendable {
         return value
     }
 
+    public func updateAccount(token: String, _ update: AccountUpdate) async throws -> AccountProfile {
+        let response = try await send("PATCH", "/api/v1/me", auth: "Bearer \(token)", body: try JSONEncoder().encode(update))
+        try check(response)
+        guard let value = try? JSONDecoder().decode(AccountProfile.self, from: response.body) else { throw AccountError.invalidResponse }
+        return value
+    }
+
     /// Everything of the player goes, at once. Revoke the Apple token before this.
     public func deleteAccount(token: String) async throws {
         let response = try await send("DELETE", "/api/v1/me", auth: "Bearer \(token)", body: nil)
@@ -268,6 +344,32 @@ public struct AccountClient: Sendable {
             try check(response)
             return nil
         }
+        try check(response)
+        guard let value = try? JSONDecoder().decode(AccountServerMatch.self, from: response.body) else { throw AccountError.invalidResponse }
+        return value
+    }
+
+    /// Matches of the own team that wait for a name (without rallies)
+    public func teamMatches(token: String) async throws -> [AccountServerMatch] {
+        let response = try await send("GET", "/api/v1/me/team", auth: "Bearer \(token)", body: nil)
+        try check(response)
+        guard let value = try? JSONDecoder().decode(AccountMatchList.self, from: response.body) else { throw AccountError.invalidResponse }
+        return value.matches
+    }
+
+    /// "Dat ben ik": the match counts at once and comes back with its rallies
+    public func claimTeamMatch(token: String, matchId: String, name: String) async throws -> AccountServerMatch {
+        let body = try JSONEncoder().encode(AccountClaimName(name: name))
+        let response = try await send("POST", "/api/v1/me/team/\(matchId)", auth: "Bearer \(token)", body: body)
+        try check(response)
+        guard let value = try? JSONDecoder().decode(AccountServerMatch.self, from: response.body) else { throw AccountError.invalidResponse }
+        return value
+    }
+
+    /// A match from a shared link: it counts at once
+    public func claimLink(token: String, claimToken: String) async throws -> AccountServerMatch {
+        let body = try JSONEncoder().encode(AccountClaimToken(token: claimToken))
+        let response = try await send("POST", "/api/v1/me/claim", auth: "Bearer \(token)", body: body)
         try check(response)
         guard let value = try? JSONDecoder().decode(AccountServerMatch.self, from: response.body) else { throw AccountError.invalidResponse }
         return value
@@ -315,9 +417,19 @@ public struct AccountClient: Sendable {
 
     /// Puts a match in a player's inbox. The answer is the same whether or not
     /// the player exists; `AccountError.signInAgain` means the device key is no longer known.
-    public func submit(device: AccountDevice, _ submission: AccountSubmission) async throws {
+    @discardableResult
+    public func submit(device: AccountDevice, _ submission: AccountSubmission) async throws -> AccountSubmitResult? {
         let response = try await send("POST", "/api/v1/submissions", auth: device.header, body: try JSONEncoder().encode(submission))
         try check(response)
+        return try? JSONDecoder().decode(AccountSubmitResult.self, from: response.body)
+    }
+
+    /// The names this phone uses that a teammate's claim linked to an SBN player
+    public func learnedLinks(device: AccountDevice) async throws -> [AccountLearnedLink] {
+        let response = try await send("GET", "/api/v1/devices/links", auth: device.header, body: nil)
+        try check(response)
+        guard let value = try? JSONDecoder().decode(AccountLinkList.self, from: response.body) else { throw AccountError.invalidResponse }
+        return value.links
     }
 
     // MARK: Plumbing

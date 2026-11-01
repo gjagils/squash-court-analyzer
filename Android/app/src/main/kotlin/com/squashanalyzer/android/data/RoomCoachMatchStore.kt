@@ -1,5 +1,7 @@
 package com.squashanalyzer.android.data
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import skip.foundation.Date
 import skip.foundation.UUID
@@ -19,6 +21,10 @@ class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardS
         badgeAwardStore.inTransaction {
             store.upsert(snapshot)
             syncBadges(match)
+        }
+        // 4.0: a finished match goes to its players' accounts (nothing with the switch off)
+        if (Features.shared.playerAccount && match.isMatchOver) {
+            withContext(Dispatchers.Main) { AccountSending.queueFinished(match) }
         }
         match.status = CoreStatus.init(rawValue = snapshot.status)!!
         match.updatedAt = date(snapshot.updatedAt)

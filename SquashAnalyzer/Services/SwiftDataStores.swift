@@ -183,6 +183,8 @@ final class SwiftDataRefereeMatchStore: RefereeMatchStore {
                 playerNames: [.player1: match.player1Name, .player2: match.player2Name], input: match.badgeInput)
             try context.save()
             RefereeInProgressStore.clear()
+            // 4.0: a finished match goes to its players' accounts (nothing with the switch off)
+            AccountSending.queueFinished(match)
         } else {
             // Undo after the last rally: no longer finished, so out of the list again
             if let existing {

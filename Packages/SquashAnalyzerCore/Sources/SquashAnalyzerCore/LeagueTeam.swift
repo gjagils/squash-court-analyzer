@@ -10,6 +10,9 @@ public struct LeagueTeamLink: Equatable, Sendable {
     public let leagueID: String
     public let teamID: String
     public var url: URL { URL(string: "https://sbn.toernooi.nl/league/\(leagueID)/team/\(teamID)")! }
+    /// The team on the account server ("<league uuid>/<team number>"): its
+    /// players see the team's matches that wait for a name
+    public var accountKey: String { "\(leagueID)/\(teamID)" }
 
     public init(_ value: String) throws {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)

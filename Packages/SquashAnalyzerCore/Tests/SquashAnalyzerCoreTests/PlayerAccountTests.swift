@@ -31,6 +31,9 @@ final class PlayerAccountTests: XCTestCase {
         XCTAssertEqual(production.accountURL, AccountEndpoints.productionAccountURL)
         XCTAssertEqual(production.tokenURL, "https://securetoken.googleapis.com/v1")
         XCTAssertEqual(production.apiKey, "abc")
+        let test = AccountEndpoints.from(server: "test", apiKey: "abc", defaultHost: "localhost")
+        XCTAssertEqual(test.accountURL, AccountEndpoints.testAccountURL)
+        XCTAssertEqual(test.identityURL, production.identityURL)
     }
 
     // MARK: - Firebase
@@ -435,6 +438,11 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
     var submissions: [String] = []
     var ownMatchCalls = 0
     var pending: [String] = []
+    /// Team matches waiting for a name: (match id, name)
+    var teamPending: [(String, String)] = []
+    var claimed: [String] = []
+    var learned = "[]"
+    var patches: [String] = []
     private var profile: String? = nil
     private var refreshes = 1
 
@@ -463,7 +471,13 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
             if submitStatus == 202 {
                 if let sent = try? JSONDecoder().decode(AccountSubmission.self, from: body ?? Data()) { submissions.append(sent.matchId) }
             }
+            if submitStatus == 202, String(data: body ?? Data(), encoding: String.Encoding.utf8)?.contains("\"link\":true") == true {
+                return reply(202, "{\"received\":\"x\",\"claimToken\":\"tok123\"}")
+            }
             return reply(submitStatus, submitStatus == 401 ? "{\"error\":\"device\"}" : "{\"received\":\"x\"}")
+        }
+        if path == "/api/v1/devices/links" {
+            return reply(200, "{\"links\":\(learned)}")
         }
         if path == "/api/v1/me" {
             if method == "GET" {
@@ -474,8 +488,24 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
                 profile = "{\"playerId\":\"p-1\",\"name\":\"Peter\",\"code\":\"ABCDEFGHJK\",\"sbnPath\":null,\"birthYear\":1990,\"createdAt\":1}"
                 return reply(201, profile ?? "")
             }
+            if method == "PATCH" {
+                patches.append(String(data: body ?? Data(), encoding: String.Encoding.utf8) ?? "")
+                profile = "{\"playerId\":\"p-1\",\"name\":\"Gerd-Jan\",\"code\":\"ABCDEFGHJK\",\"sbnPath\":\"/league/x/player/1\",\"teamKey\":\"T/1\",\"birthYear\":1990,\"createdAt\":1}"
+                return reply(200, profile ?? "")
+            }
             profile = nil
             return reply(204, "")
+        }
+        if path == "/api/v1/me/team" {
+            var items: [String] = []
+            for (id, name) in teamPending { items.append(FakeAccountTransport.serverMatch(id, status: "pending", name: name)) }
+            return reply(200, "{\"matches\":[\(items.joined(separator: ","))]}")
+        }
+        if path.hasPrefix("/api/v1/me/team/") || path == "/api/v1/me/claim" {
+            let id = path.hasPrefix("/api/v1/me/team/") ? String(path.dropFirst("/api/v1/me/team/".count)) : "linked"
+            claimed.append(id)
+            teamPending = teamPending.filter { item in item.0 != id }
+            return reply(200, FakeAccountTransport.serverMatch(id, status: "accepted", name: nil))
         }
         if path == "/api/v1/me/matches" && method == "POST" {
             ownMatchCalls += 1
@@ -494,6 +524,12 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
         return reply(404, "{\"error\":\"not found\"}")
     }
 
+
+    static func serverMatch(_ id: String, status: String, name: String?) -> String {
+        let named = name.map { value in ",\"name\":\"\(value)\"" } ?? ""
+        let rallies = status == "accepted" ? ",\"rallies\":[{\"winner\":1,\"duration\":60.5,\"rallies\":[\"1|Winner|Achter Links|Drive|150||1\"]}]" : ""
+        return "{\"matchId\":\"\(id)\",\"status\":\"\(status)\",\"senderName\":\"Coach Peter\",\"fromDevice\":\"dev-1\",\"playedAt\":1,\"receivedAt\":2,\"teamKey\":null,\"opponent\":\"Mark\",\"summary\":{\"v\":1,\"kind\":\"coach\",\"me\":1,\"p1\":\"Gerd Lasso\",\"p2\":\"Mark\",\"gamesToWin\":3,\"gamesBefore\":[0,0],\"gamesWon\":[3,1],\"winner\":1,\"scores\":[[11,7]],\"duration\":60.5,\"recordsPointTypes\":true}\(rallies)\(named)}"
+    }
 
     private func reply(_ status: Int, _ text: String) -> AITransportResponse {
         AITransportResponse(status: status, body: text.data(using: String.Encoding.utf8) ?? Data())

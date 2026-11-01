@@ -246,6 +246,8 @@ public struct CoachScoringView: View {
     @State private var analysedGame: Game?
     @State private var showingAnalysis = false
     @State private var showingShare = false
+    /// 4.0: "Stuur naar speler" (a link to the match for the player's account)
+    @State private var showingSendLink = false
     @State private var showingBadges = false
     /// De coachkaart of the game just finished, from the result card
     @State private var showingCard = false
@@ -664,6 +666,9 @@ public struct CoachScoringView: View {
         secondary.append(ResultButton(loc("Coachkaart"), icon: "list.bullet.clipboard") { showingCard = true })
         if shareText != nil {
             secondary.append(ResultButton(loc("Deel score"), icon: "square.and.arrow.up") { showingShare = true })
+            if Features.shared.playerAccount && match.isMatchOver && !PracticeMatches.shared.contains(match.id) {
+                secondary.append(ResultButton(loc("Stuur naar speler"), icon: "person.crop.circle") { showingSendLink = true })
+            }
         }
         let primary: ResultButton
         // "Sluiten" next to "Nieuwe wedstrijd": the card covers Stop, so without
@@ -703,6 +708,13 @@ public struct CoachScoringView: View {
         }
         .sheet(isPresented: $showingBadges) {
             SharedMatchBadgesSheet(earnings: badgeEarnings) { showingBadges = false }
+        }
+        .sheet(isPresented: $showingSendLink) {
+            if let shareText {
+                SharedSendToPlayerSheet(names: [Player.player1: match.player1Name, Player.player2: match.player2Name],
+                                        upload: { side in match.accountUpload(for: side) },
+                                        shareText: shareText) { showingSendLink = false }
+            }
         }
     }
 

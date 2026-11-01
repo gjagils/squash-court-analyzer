@@ -73,6 +73,25 @@ Releasenotes `release-notes/3.1-3.md` en `android-3.1-3.md`; website testen, hom
   - Inloggen met Apple (iOS, native): sinds 1 november aan (entitlement
     `com.apple.developer.applesignin`, `SQUASH_APPLE_SIGN_IN=YES`; de knop staat alleen in Mijn
     account, dus alleen met de vlag aan). Google en Apple op Android zijn nog niet gebouwd.
+- **Koppelen zonder spelerscode** (1 november 2026, op vraag van Gerd-Jan: "liever geen code die
+  mensen moeten doorgeven"). Alleen met de vlag aan. Draaiboek: `docs/testplan-4.0-koppelen.md`.
+  - Spelers: regel **SBN-speler** (gedeeld scherm `PlayerProfileFields`); spelers uit Mijn team
+    worden vanzelf gekoppeld als de naam gelijk is (`PlayerSBNLinks`, in de instellingen zoals
+    `TeamRoster`, geen SwiftData- of Room-migratie).
+  - Een afgelopen wedstrijd (coach en scheidsrechter, geen oefenpartij) gaat bij het opslaan in de
+    wachtrij (`AccountSending.queueFinished`): naar de SBN-speler, of als "deze naam in mijn team".
+    De eigen kant van de ingelogde speler telt meteen.
+  - Mijn account: geen spelerscode meer; **Naam wijzigen**; "Dit ben ik" kan ook later (één keer);
+    **Uit je team → Ben jij "Gerd Lasso"? → Dat ben ik / Niet ik**. Na een claim leert de telefoon
+    van de coach de koppeling (`GET /devices/links`).
+  - **Stuur naar speler** op het eindscherm: een link `squashanalyzer.com/wedstrijd#<token>`;
+    openen in de app voegt de wedstrijd toe (`SharedAccountClaimSheet`). De webpagina en de
+    app-link (`/wedstrijd` in apple-app-site-association) staan op de branch
+    `claude/wedstrijd-link-site`: publiceren pas na akkoord van Gerd-Jan.
+  - Worker: migratie `0002_open_matches.sql` (open_matches, learned_links, team_key), `PATCH /me`,
+    `/me/team`, `/me/claim`. Test-Worker `squash-account-test` (`[env.test]`), nep-coach
+    `dev/send-match.mjs --test`, `npm run reset-test`. Build setting `SQUASH_ACCOUNT_SERVER=test`.
+  - Tests: Worker 28 (9 nieuw), Core 395 (10 nieuw).
 - **Ingericht door Gerd-Jan (1 november 2026):** Firebase e-mail/wachtwoord (mails in het
   Nederlands) en Apple (Services ID `com.squashanalyzer.app.signin`, sleutel `W76A7C25SX` in
   `~/.squash-keys/`), iOS-app aangemeld in Firebase; D1 `squash-account` in de EU (EEUR),

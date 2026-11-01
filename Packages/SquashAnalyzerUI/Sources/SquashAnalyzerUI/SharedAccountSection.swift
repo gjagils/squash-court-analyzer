@@ -5,9 +5,11 @@ import SquashAnalyzerCore
 // Instellingen → Mijn account, on iOS and Android. It opens under its row like
 // the other parts of Instellingen. Signed out: sign in or make a Firebase login.
 // Signed in without an account: "Dit ben ik", birth year (16+) and consent.
-// With an account: the player code to hand out, the inbox (Gebruiken, Niet
-// gebruiken, Blokkeren), signing out and deleting the account. With the switch
-// off the row is not there at all; nothing here runs.
+// With an account: the name (to correct), who you are in SBN, the inbox
+// (Gebruiken, Niet gebruiken, Blokkeren), the team's matches that wait for a
+// name ("Ben jij dit?"), signing out and deleting the account. No player code:
+// coaches send to your SBN player or to the name they use in your team. With
+// the switch off the row is not there at all; nothing here runs.
 
 /// Signing in with Apple (iOS) or Google: supplied by the platform, nil hides the button
 public struct AccountProviderSignIn: Identifiable {
@@ -60,6 +62,9 @@ public struct SharedAccountSection: View {
     @State private var confirmDelete = false
     @State private var confirmBlock = false
     @State private var blockMatchId = ""
+    // Correcting the name
+    @State private var editingName = false
+    @State private var newName = ""
     #if os(iOS) && !SKIP
     /// The number pad has no return key: "Gereed" above it closes it
     @FocusState private var typingYear: Bool
@@ -81,6 +86,7 @@ public struct SharedAccountSection: View {
             } else if let profile = account.profile {
                 accountPart(profile)
                 inboxPart
+                teamPart
                 endPart
             } else if account.profileChecked {
                 makeAccountPart
@@ -221,26 +227,66 @@ public struct SharedAccountSection: View {
 
     private func accountPart(_ profile: AccountProfile) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(profile.name)
-                .font(SharedFonts.system(16, weight: .semibold))
-                .foregroundColor(SharedColors.textPrimary)
+            if editingName {
+                field(loc("Je naam"), text: $newName)
+                HStack(spacing: 8) {
+                    ActionButton(loc("BEWAREN"), style: .filled, color: SharedColors.accent,
+                                 disabled: busy || newName.trimmingCharacters(in: .whitespaces).isEmpty) { saveName() }
+                    ActionButton(loc("ANNULEREN"), style: .outlined, color: SharedColors.textSecondary, disabled: busy) {
+                        editingName = false
+                    }
+                }
+            } else {
+                HStack {
+                    Text(profile.name)
+                        .font(SharedFonts.system(16, weight: .semibold))
+                        .foregroundColor(SharedColors.textPrimary)
+                    Spacer()
+                    Button(loc("Naam wijzigen")) {
+                        newName = profile.name
+                        editingName = true
+                    }
+                    .font(SharedFonts.system(13, weight: .semibold))
+                    .foregroundColor(SharedColors.accent)
+                }
+            }
             if let session = account.session, !session.email.isEmpty {
                 Text(session.email)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
             }
-            Text("Je spelerscode", bundle: textBundle)
-                .font(SharedFonts.system(12))
-                .foregroundColor(SharedColors.textSecondary)
-                .padding(.top, 6)
-            Text(AccountProfile.spaced(profile.code))
-                .font(SharedFonts.system(22, weight: .bold, design: .monospaced))
-                .foregroundColor(SharedColors.accent)
-                #if !SKIP
-                .textSelection(.enabled)
-                #endif
-            note(loc("Geef deze code aan je coach of de scheidsrechter. Dan kunnen ze wedstrijden naar je sturen."))
+            sbnPart(profile)
         }
+    }
+
+    /// Who you are in SBN: set once, from Mijn team
+    private func sbnPart(_ profile: AccountProfile) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if let path = profile.sbnPath {
+                let chosen = teamPlayers.first { player in player.id == path }?.name ?? loc("gekoppeld")
+                Text(loc("In SBN: \(chosen)"))
+                    .font(SharedFonts.system(13))
+                    .foregroundColor(SharedColors.textPrimary)
+                note(loc("Wedstrijden die je coach of de scheidsrechter met jou invult, komen hier binnen. Ook als ze je in hun app anders noemen."))
+            } else if !teamPlayers.isEmpty {
+                note(loc("Wie ben jij in Mijn team? Kies jezelf, dan komen wedstrijden met jou vanzelf hier binnen. Dit kan één keer."))
+                ForEach(teamPlayers) { player in
+                    Button {
+                        chooseSbnPlayer(player)
+                    } label: {
+                        Text(player.name)
+                            .font(SharedFonts.system(14))
+                            .foregroundColor(SharedColors.textPrimary)
+                            .padding(.vertical, 6)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(busy)
+                }
+            } else {
+                note(loc("Speel je in een SBN-team? Kies je team bij Mijn team; dan kun je hier zeggen wie je bent."))
+            }
+        }
+        .padding(.top, 6)
     }
 
     private var inboxPart: some View {
@@ -288,6 +334,44 @@ public struct SharedAccountSection: View {
             .font(SharedFonts.system(12))
             .foregroundColor(SharedColors.error)
             .disabled(busy)
+        }
+        .padding(12)
+        .background(SharedColors.cardTint)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    /// Matches of your team for a name nobody claimed yet: a teammate may know you as "Gerd Lasso"
+    @ViewBuilder
+    private var teamPart: some View {
+        if !account.teamInbox.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Uit je team", bundle: textBundle)
+                    .font(SharedFonts.system(14, weight: .semibold))
+                    .foregroundColor(SharedColors.textPrimary)
+                    .padding(.top, 10)
+                note(loc("Een teamgenoot heeft deze wedstrijden ingevuld met een naam die nog niet gekoppeld is. Ben jij het, dan telt de wedstrijd voor jou."))
+                ForEach(account.teamInbox) { match in
+                    teamCard(match)
+                }
+            }
+        }
+    }
+
+    private func teamCard(_ match: AccountServerMatch) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            let called = match.name ?? ""
+            Text(loc("Ben jij \"\(called)\"?"))
+                .font(SharedFonts.system(14, weight: .semibold))
+                .foregroundColor(SharedColors.textPrimary)
+            Text("\(match.inboxTitle) · \(match.inboxDetail)")
+                .font(SharedFonts.system(12))
+                .foregroundColor(SharedColors.textSecondary)
+            HStack(spacing: 8) {
+                ActionButton(loc("DAT BEN IK"), style: .filled, color: SharedColors.accent, disabled: busy) { claim(match) }
+                ActionButton(loc("NIET IK"), style: .outlined, color: SharedColors.textSecondary, disabled: busy) {
+                    account.hideTeamMatch(match)
+                }
+            }
         }
         .padding(12)
         .background(SharedColors.cardTint)
@@ -402,6 +486,27 @@ public struct SharedAccountSection: View {
         run(loc("Je account is gemaakt.")) {
             try await account.createAccount(name: chosenName, birthYear: year, sbnPath: chosenPath, consent: given)
             try await account.loadInbox()
+        }
+    }
+
+    private func saveName() {
+        let typed = newName
+        run(nil) {
+            try await account.updateAccount(name: typed)
+            editingName = false
+        }
+    }
+
+    private func chooseSbnPlayer(_ player: LeaguePlayer) {
+        run(nil) {
+            try await account.updateAccount(sbnPath: player.id)
+            try await account.loadInbox()
+        }
+    }
+
+    private func claim(_ match: AccountServerMatch) {
+        run(loc("De wedstrijd telt mee.")) {
+            try await account.claimTeamMatch(match)
         }
     }
 

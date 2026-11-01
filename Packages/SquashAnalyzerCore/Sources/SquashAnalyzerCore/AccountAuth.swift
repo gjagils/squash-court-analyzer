@@ -29,8 +29,11 @@ public struct AccountEndpoints: Equatable, Sendable {
     /// The Worker's address once it is deployed (server/account-worker/README.md)
     public static let productionAccountURL = "https://account.squashanalyzer.com"
 
-    public static func production(apiKey: String) -> AccountEndpoints {
-        AccountEndpoints(accountURL: AccountEndpoints.productionAccountURL,
+    /// The test Worker with its own database, for 4.0 test builds (README "Testomgeving")
+    public static let testAccountURL = "https://test-account.squashanalyzer.com"
+
+    public static func production(apiKey: String, accountURL: String = AccountEndpoints.productionAccountURL) -> AccountEndpoints {
+        AccountEndpoints(accountURL: accountURL,
                          identityURL: "https://identitytoolkit.googleapis.com/v1",
                          tokenURL: "https://securetoken.googleapis.com/v1",
                          apiKey: apiKey)
@@ -48,7 +51,8 @@ public struct AccountEndpoints: Equatable, Sendable {
     }
 
     /// From the build settings: "local" (or "local:<host>") for the test setup on
-    /// the Mac, anything else the deployed Worker. `defaultHost` is the Mac as the
+    /// the Mac, "test" for the test Worker (real Firebase, its own database),
+    /// anything else the deployed Worker. `defaultHost` is the Mac as the
     /// simulator or emulator sees it.
     public static func from(server: String?, apiKey: String?, defaultHost: String) -> AccountEndpoints {
         let value = (server ?? "").trimmingCharacters(in: CharacterSet.whitespaces)
@@ -57,6 +61,7 @@ public struct AccountEndpoints: Equatable, Sendable {
             let host = value.replacingOccurrences(of: "local:", with: "")
             return AccountEndpoints.local(host: host.isEmpty ? defaultHost : host)
         }
+        if value == "test" { return AccountEndpoints.production(apiKey: apiKey ?? "", accountURL: AccountEndpoints.testAccountURL) }
         return AccountEndpoints.production(apiKey: apiKey ?? "")
     }
 }

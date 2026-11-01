@@ -133,7 +133,10 @@ public enum TeamRosterSync {
     @MainActor @discardableResult
     public static func run(_ snapshot: LeagueTeamSnapshot, store: any PlayerProfileStore,
                            in defaults: UserDefaults = UserDefaults.standard) async -> Int {
-        guard needsSync(snapshot, in: defaults) else { return 0 }
+        guard needsSync(snapshot, in: defaults) else {
+            await linkAccounts(snapshot, store: store, in: defaults)
+            return 0
+        }
         guard var known = try? await store.loadPlayers() else { return 0 }
         var ids = TeamRoster.ids(in: defaults)
         var added = 0
@@ -158,6 +161,16 @@ public enum TeamRosterSync {
         }
         TeamRoster.replace(ids, in: defaults)
         defaults.set(snapshot.source.absoluteString, forKey: syncedKey)
+        await linkAccounts(snapshot, store: store, in: defaults)
         return added
+    }
+
+    /// 4.0: players in Spelers with the name of an SBN team player get linked
+    /// to that SBN player, and what teammates' claims taught this phone comes in
+    @MainActor
+    static func linkAccounts(_ snapshot: LeagueTeamSnapshot, store: any PlayerProfileStore, in defaults: UserDefaults) async {
+        guard Features.shared.playerAccount, let known = try? await store.loadPlayers() else { return }
+        PlayerSBNLinks.fill(from: snapshot.players, players: known, in: defaults)
+        await PlayerAccount.shared.learnLinks(players: known)
     }
 }

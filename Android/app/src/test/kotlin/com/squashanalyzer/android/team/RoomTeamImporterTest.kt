@@ -14,15 +14,12 @@ import squash.analyzer.core.AppLanguageOverride
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import skip.foundation.Data
-import skip.foundation.URL
-import squash.analyzer.core.TeamDownloader
 import squash.analyzer.core.TeamImportError
 import java.io.ByteArrayOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-/** Spelers → Team via link on Android: same rules as iOS' TeamImportService (photos: TeamPhotoImportTest on a device) */
+/** The team zip import on Android (now only the sample players): same rules as iOS' TeamImportService (photos: TeamPhotoImportTest on a device) */
 @RunWith(RobolectricTestRunner::class)
 class RoomTeamImporterTest {
     // The assertions are in Dutch; Core's texts follow the device language
@@ -52,23 +49,13 @@ class RoomTeamImporterTest {
         return out.toByteArray()
     }
 
-    private class Fake(val bytes: ByteArray) : TeamDownloader {
-        var asked: String? = null
-        override suspend fun download(url: URL): Data {
-            asked = url.absoluteString
-            return Data(platformValue = bytes)
-        }
-    }
-
-    @Test fun aLinkAddsPlayersFromAWrappedFolder() = runTest {
+    @Test fun aZipAddsPlayersFromAWrappedFolder() = runTest {
         val json = """{"team":"All Inn","players":[
             {"name":"Gerd-Jan","focus":["backhand","Conditie"],"notes":"Linkshandig"},
             {"name":"Paul"}]}"""
-        val fake = Fake(zip("team/team.json" to json.toByteArray()))
-        val result = RoomTeamImporter(db, fake).importTeam(" https://squashanalyzer.com/teams/k7f3/team.zip ")
+        val result = RoomTeamImporter(db).importZip(zip("team/team.json" to json.toByteArray()))
 
         assertEquals("All Inn · 2 nieuw · 0 bijgewerkt · 0 foto's", result.summary)
-        assertEquals("https://squashanalyzer.com/teams/k7f3/team.zip", fake.asked)
         val players = db.playerDao().all()
         assertEquals(listOf("Gerd-Jan", "Paul"), players.map { it.name })
         assertEquals("[\"Backhand\",\"Conditie\"]", players[0].coachingFocusAreas)
@@ -105,15 +92,5 @@ class RoomTeamImporterTest {
             assertTrue(error.message.contains("nope.jpg"))
         }
         assertTrue(db.playerDao().all().isEmpty())
-    }
-
-    @Test fun onlySquashAnalyzerTeamLinksAreDownloaded() = runTest {
-        val fake = Fake(ByteArray(0))
-        try {
-            RoomTeamImporter(db, fake).importTeam("https://example.com/teams/x/team.zip")
-            fail("other sites are refused")
-        } catch (error: TeamImportError) {
-            assertNull(fake.asked)
-        }
     }
 }

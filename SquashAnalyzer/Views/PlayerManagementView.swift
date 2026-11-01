@@ -28,12 +28,6 @@ struct PlayerManagementView: View {
     @State private var playerToEdit: SavedPlayer? = nil
     @State private var playerForBadges: SavedPlayer? = nil
     @State private var showingBadgeCatalog = false
-    @State private var showingTeamImporter = false
-    @State private var teamImportMessage: String? = nil
-    @State private var showingTeamLink = false
-    @State private var teamLink = ""
-    @State private var importingTeam = false
-    @State private var showingTeamImportResult = false
 
     var isPickerMode: Bool { onSelectPlayer != nil }
 
@@ -74,26 +68,6 @@ struct PlayerManagementView: View {
                                     .foregroundColor(AppColors.accentGold)
                             }
                             .accessibilityLabel(appText("Alle badges"))
-
-                            Menu {
-                                Button { showingTeamImporter = true } label: {
-                                    Label(appText("Uit bestand (zip)"), systemImage: "doc.zipper")
-                                }
-                                Button { teamLink = ""; showingTeamLink = true } label: {
-                                    Label(appText("Via link"), systemImage: "link")
-                                }
-                            } label: {
-                                if importingTeam {
-                                    ProgressView()
-                                        .tint(AppColors.warmOrange)
-                                } else {
-                                    Image(systemName: "square.and.arrow.down")
-                                        .font(SharedFonts.system(20))
-                                        .foregroundColor(AppColors.warmOrange)
-                                }
-                            }
-                            .disabled(importingTeam)
-                            .accessibilityLabel(appText("Importeer team"))
 
                             Button(action: { showingAddPlayer = true }) {
                                 Image(systemName: "plus.circle")
@@ -181,57 +155,7 @@ struct PlayerManagementView: View {
                     try? modelContext.save()
                 }
             }
-            .fileImporter(isPresented: $showingTeamImporter, allowedContentTypes: [.zip]) { result in
-                importTeam(result)
-            }
-            .alert(Text(appText("Team via link")), isPresented: $showingTeamLink) {
-                TextField("https://squashanalyzer.com/teams/…", text: $teamLink)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .keyboardType(.URL)
-                Button(appText("Annuleren"), role: .cancel) { }
-                Button(appText("Importeren")) { importTeam(link: teamLink) }
-            } message: {
-                Text(appText("Plak de teamlink die je hebt gekregen."))
-            }
-            .alert(Text(appText("Team importeren")), isPresented: $showingTeamImportResult) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(teamImportMessage ?? "")
-            }
         }
-    }
-
-    // MARK: - Team import (zip with team.json + photos, see TeamImportService)
-
-    private func importTeam(link: String) {
-        importingTeam = true
-        Task {
-            do {
-                let imported = try await TeamImportService.importTeam(link: link, context: modelContext)
-                teamImportMessage = appText("Geïmporteerd: \(imported.summary)")
-            } catch {
-                teamImportMessage = error.localizedDescription
-            }
-            importingTeam = false
-            showingTeamImportResult = true
-        }
-    }
-
-    private func importTeam(_ result: Result<URL, Error>) {
-        do {
-            let url = try result.get()
-            guard url.startAccessingSecurityScopedResource() else {
-                throw CocoaError(.fileReadNoPermission)
-            }
-            defer { url.stopAccessingSecurityScopedResource() }
-            let data = try Data(contentsOf: url)
-            let imported = try TeamImportService.importTeam(zipData: data, context: modelContext)
-            teamImportMessage = appText("Geïmporteerd: \(imported.summary)")
-        } catch {
-            teamImportMessage = error.localizedDescription
-        }
-        showingTeamImportResult = true
     }
 }
 

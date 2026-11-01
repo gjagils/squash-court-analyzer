@@ -1,3 +1,5 @@
+> **Archief (1 november 2026).** De knop Team in Spelers en de teamlinks op squashanalyzer.com/teams zijn in 3.1 build 5 verwijderd (backlog S3): Mijn team zet de spelers van je team zelf in Spelers. Het zip-formaat hieronder wordt alleen nog intern gebruikt voor de voorbeeldspelers Bob en Wim (`SamplePlayers`).
+
 # Team importeren (spelers met foto)
 
 Maak een map met een `team.json` en een map `photos/`, zip die map, en kies het zip-bestand in de app via **Spelers → importeer-icoon** (het pijltje naast +).

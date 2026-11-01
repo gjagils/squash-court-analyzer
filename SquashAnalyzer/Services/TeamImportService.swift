@@ -5,43 +5,16 @@ import SwiftData
 
 // The format, the checks and the summary are shared with Android
 // (SquashAnalyzerCore's `TeamImport`); this file unzips, scales the photos
-// (`PlayerPhoto`) and writes SwiftData. Format: docs/team-import/README.md.
+// (`PlayerPhoto`) and writes SwiftData. Since 3.1 build 5 only for the sample
+// players and the screenshot scenarios: the Team button and the
+// squashanalyzer.com/teams links are gone (backlog S3). Format:
+// docs/archief/team-import/README.md.
 
 extension TeamImportError: @retroactive LocalizedError {
     public var errorDescription: String? { message }
 }
 
-/// Downloads a team zip from squashanalyzer.com/teams (Android: HttpTeamDownloader)
-struct URLSessionTeamDownloader: TeamDownloader {
-    func download(_ url: URL) async throws -> Data {
-        let config = URLSessionConfiguration.ephemeral
-        config.timeoutIntervalForRequest = 30
-        config.timeoutIntervalForResource = 120
-        let (data, response) = try await URLSession(configuration: config).data(from: url)
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw TeamImportError.unavailable }
-        guard data.count <= TeamImport.maxBytes else { throw TeamImportError.tooLarge }
-        guard TeamImport.looksLikeZip(data) else { throw TeamImportError.notAZip }
-        return data
-    }
-}
-
 enum TeamImportService {
-    /// Downloads the team behind a squashanalyzer.com/teams link and imports it
-    @MainActor
-    static func importTeam(link text: String, context: ModelContext,
-                           downloader: any TeamDownloader = URLSessionTeamDownloader()) async throws -> TeamImportResult {
-        guard let url = TeamImport.link(from: text) else { throw TeamImportError.invalidLink }
-        let data: Data
-        do {
-            data = try await downloader.download(url)
-        } catch let error as TeamImportError {
-            throw error
-        } catch {
-            throw TeamImportError.unavailable
-        }
-        return try importTeam(zipData: data, context: context)
-    }
-
     /// Bob and Wim for everyone (SquashAnalyzerUI's SamplePlayers): once per
     /// install, also next to existing players, which they never change (a real
     /// "Wim" keeps his photo). Not during tests.

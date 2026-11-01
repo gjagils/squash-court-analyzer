@@ -12,9 +12,13 @@ import Foundation
 //   { "team": "Squash Club 1",
 //     "players": [ { "name": "Niels", "photo": "photos/niels.jpg", "focus": ["Backhand"], "notes": "" } ] }
 //
-// Only `name` is required. Shared by iOS and Android: the platforms unzip,
-// download and scale photos; the rules (what is valid, which player is
-// updated, the summary) live here. Format docs: docs/team-import/README.md.
+// Only `name` is required. Shared by iOS and Android: the platforms unzip and
+// scale photos; the rules (what is valid, which player is updated, the
+// summary) live here. Since 3.1 build 5 (1 November 2026) only the sample
+// players (SquashAnalyzerUI's `SamplePlayers`) come in this way: the Team
+// button in Spelers and the squashanalyzer.com/teams links are gone (backlog
+// S3); Mijn team puts the team's players in Spelers itself. Format docs:
+// docs/archief/team-import/README.md.
 
 public struct TeamImportFile: Codable, Sendable {
     public let team: String?
@@ -172,36 +176,4 @@ public enum TeamImport {
         }
         return nil
     }
-
-    /// A team link the app may download: only HTTPS zips under
-    /// squashanalyzer.com/teams/, where Gerd-Jan publishes teams
-    public static func link(from text: String) -> URL? {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let url = URL(string: trimmed), url.scheme?.lowercased() == "https",
-              let host = url.host?.lowercased(), host == "squashanalyzer.com" || host == "www.squashanalyzer.com" else { return nil }
-        let path = url.path
-        guard path.hasPrefix("/teams/"), path.lowercased().hasSuffix(".zip"), !path.contains("..") else { return nil }
-        return url
-    }
-
-    /// Whether downloaded bytes start like a zip file ("PK")
-    public static func looksLikeZip(_ data: Data) -> Bool {
-        guard data.count >= 2 else { return false }
-        // Compared as data: byte literals differ between Swift and Kotlin
-        return data.subdata(in: 0..<2) == "PK".data(using: String.Encoding.utf8)!
-    }
-}
-
-/// Downloads a team zip: URLSession on iOS, HttpURLConnection on Android
-public protocol TeamDownloader: Sendable {
-    func download(_ url: URL) async throws -> Data
-}
-
-/// Imports the team behind a squashanalyzer.com/teams link into the player
-/// list; Android's Spelers screen gets one (download, unzip, photos, Room).
-/// iOS has its own `TeamImportService` with SwiftData.
-public protocol TeamLinkImporter: Sendable {
-    func importTeam(link: String) async throws -> TeamImportResult
-    /// A team zip picked from the phone's files
-    func importTeam(zip: Data) async throws -> TeamImportResult
 }

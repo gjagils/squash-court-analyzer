@@ -176,35 +176,6 @@ final class TeamImportTests: XCTestCase {
         XCTAssertEqual(try container.mainContext.fetch(FetchDescriptor<SavedPlayer>()).count, 0)
     }
 
-    // MARK: - Via link
-
-    private struct FakeDownloader: TeamDownloader {
-        let data: Data
-        func download(_ url: URL) async throws -> Data { data }
-    }
-
-    @MainActor
-    func testImportViaLinkDownloadsAndImports() async throws {
-        let container = try makeContainer()
-        let zip = makeZip([("team.json", Data("{\"team\":\"All Inn\",\"players\":[{\"name\":\"Niels\"}]}".utf8), false)])
-        let result = try await TeamImportService.importTeam(link: "https://squashanalyzer.com/teams/k7f3/team.zip",
-                                                            context: container.mainContext, downloader: FakeDownloader(data: zip))
-        XCTAssertEqual(result.summary, "All Inn · 1 nieuw · 0 bijgewerkt · 0 foto's")
-        XCTAssertEqual(try container.mainContext.fetch(FetchDescriptor<SavedPlayer>()).map(\.name), ["Niels"])
-    }
-
-    @MainActor
-    func testImportViaLinkRefusesOtherSites() async throws {
-        let container = try makeContainer()
-        do {
-            _ = try await TeamImportService.importTeam(link: "https://example.com/teams/x/team.zip", context: container.mainContext,
-                                                       downloader: FakeDownloader(data: Data()))
-            XCTFail("a link outside squashanalyzer.com/teams must be refused")
-        } catch let error as TeamImportError {
-            XCTAssertEqual(error, TeamImportError.invalidLink)
-        }
-    }
-
     // MARK: - Backup
 
     @MainActor

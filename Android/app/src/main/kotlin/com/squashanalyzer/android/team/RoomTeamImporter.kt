@@ -6,41 +6,24 @@ import com.squashanalyzer.android.data.PlayerEntity
 import org.json.JSONArray
 import skip.foundation.Data
 import skip.lib.Array as SwiftArray
-import squash.analyzer.core.TeamDownloader
 import squash.analyzer.core.TeamImport
 import squash.analyzer.core.TeamImportEntry
 import squash.analyzer.core.TeamImportError
 import squash.analyzer.core.TeamImportResult
-import squash.analyzer.core.TeamLinkImporter
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 import java.util.zip.ZipInputStream
 
 /**
- * Android's team import (Spelers → Team via link), the counterpart of iOS'
- * `TeamImportService`: the checks come from Core's `TeamImport`; this class
- * unzips, scales photos with `PhotoScaler` (like iOS' `PlayerPhoto`), and
- * writes Room in one transaction after every player and photo was checked.
+ * Imports a team zip into Room, the counterpart of iOS' `TeamImportService`:
+ * the checks come from Core's `TeamImport`; this class unzips, scales photos
+ * with `PhotoScaler` (like iOS' `PlayerPhoto`), and writes Room in one
+ * transaction after every player and photo was checked. Since 3.1 build 5 only
+ * for the sample players (`SamplePlayers`): the Team button in Spelers and the
+ * squashanalyzer.com/teams links are gone (backlog S3).
  */
-class RoomTeamImporter(
-    private val db: AppDatabase,
-    private val downloader: TeamDownloader = HttpTeamDownloader(),
-) : TeamLinkImporter {
-
-    override suspend fun importTeam(link: String): TeamImportResult {
-        val url = TeamImport.link(from = link) ?: throw TeamImportError.invalidLink
-        val zip = try {
-            downloader.download(url)
-        } catch (error: TeamImportError) {
-            throw error
-        } catch (error: Exception) {
-            throw TeamImportError.unavailable
-        }
-        return importZip(zip.platformValue)
-    }
-
-    override suspend fun importTeam(zip: Data): TeamImportResult = importZip(zip.platformValue)
+class RoomTeamImporter(private val db: AppDatabase) {
 
     /** With [addOnly] a player whose name already exists is left as it is (the sample players) */
     suspend fun importZip(bytes: ByteArray, addOnly: Boolean = false): TeamImportResult {

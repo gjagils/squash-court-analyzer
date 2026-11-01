@@ -162,15 +162,12 @@ public struct PlayerDirectoryView: View {
     @State private var showingError = false
     @State private var badgesForPlayer: PlayerProfile? = nil
     @State private var showingCatalog = false
-    @State private var showingTeamImport = false
     @State private var photos: [String: Data] = [:]
     @AppStorage(TeamRoster.storageKey) private var rosterRaw = ""
 
     private let shareText: (String) -> Void
     /// Reloads after a card link was imported while this screen was open
     private let cardInbox: CardInbox
-    /// Spelers → Team: import a team from a squashanalyzer.com/teams link or a zip
-    private let teamImporter: (any TeamLinkImporter)?
     /// Player photos (Android: Room); nil shows initials only
     private let photoStore: (any PlayerPhotoStore)?
     /// The system photo and file pickers
@@ -181,11 +178,10 @@ public struct PlayerDirectoryView: View {
     private let historyStore: (any MatchHistoryStore)?
 
     public init(store: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
-                shareText: @escaping (String) -> Void, cardInbox: CardInbox, teamImporter: (any TeamLinkImporter)? = nil,
+                shareText: @escaping (String) -> Void, cardInbox: CardInbox,
                 photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil,
                 shareCard: ((CardSnapshot, String) -> Void)? = nil, historyStore: (any MatchHistoryStore)? = nil) {
         self.historyStore = historyStore
-        self.teamImporter = teamImporter
         self.photoStore = photoStore
         self.filePicker = filePicker
         self.store = store
@@ -209,17 +205,6 @@ public struct PlayerDirectoryView: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(loc("Alle badges"))
-                    if teamImporter != nil {
-                        Button { showingTeamImport = true } label: {
-                            // AppSymbol: Skip's Label(systemImage:) draws a warning triangle for this symbol
-                            HStack(spacing: 6) {
-                                AppSymbol("square.and.arrow.down", size: 18, color: SharedColors.accent)
-                                Text("Team").lineLimit(1)
-                            }
-                        }
-                        .accessibilityLabel(loc("Team importeren"))
-                        .disabled(isLoading || isDeleting || loadFailed)
-                    }
                     Button { editing = PlayerProfile() } label: {
                         Label(loc("Toevoegen"), systemImage: "plus")
                             .lineLimit(1)
@@ -337,11 +322,6 @@ public struct PlayerDirectoryView: View {
             SharedBadgeCatalogView()
         }
         .task(id: cardInbox.importCount) { await reload() }
-        .sheet(isPresented: $showingTeamImport) {
-            if let teamImporter {
-                SharedTeamImportView(importer: teamImporter, filePicker: filePicker, onImported: { await reload() }) { showingTeamImport = false }
-            }
-        }
         .sheet(item: $editing) { player in
             PlayerProfileEditor(player: player, store: store, photo: photos[player.id], photoStore: photoStore,
                                 filePicker: filePicker) { await reload() }

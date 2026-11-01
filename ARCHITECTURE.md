@@ -166,7 +166,8 @@ outside Room, in a JSON file (`JSONFileTeamMatchStore`).
 De Android-port is beschikbaar voor testers als 0.5 (5). De app gebruikt
 Swift/SwiftUI via Skip, met gedeelde schermen in SquashAnalyzerUI en regels in
 SquashAnalyzerCore. Coach- en scheidsrechtermodus, spelers met foto's, badges,
-kaartlinks, geschiedenis, analyse, delen, Mijn team en teamimport zijn aanwezig.
+kaartlinks, geschiedenis, analyse, delen en Mijn team zijn aanwezig (de teamimport via
+squashanalyzer.com/teams is in 3.1 build 5 verwijderd, backlog S3).
 Competitie en live teamwedstrijden staan op main voor de nog niet geüploade
 build 19 / Android 0.6 (6).
 

@@ -58,19 +58,7 @@ final class TeamImportTests: XCTestCase {
         XCTAssertNil(TeamImport.matchIndex(for: entry, in: ["Paul"]))
     }
 
-    func testOnlySquashAnalyzerTeamZipsAreLinks() {
-        XCTAssertNotNil(TeamImport.link(from: " https://squashanalyzer.com/teams/k7f3x9/team.zip "))
-        XCTAssertNotNil(TeamImport.link(from: "https://www.squashanalyzer.com/teams/abc/All-Inn.zip"))
-        XCTAssertNil(TeamImport.link(from: "http://squashanalyzer.com/teams/abc/team.zip"))
-        XCTAssertNil(TeamImport.link(from: "https://example.com/teams/abc/team.zip"))
-        XCTAssertNil(TeamImport.link(from: "https://squashanalyzer.com/kaart/team.zip"))
-        XCTAssertNil(TeamImport.link(from: "https://squashanalyzer.com/teams/abc/team.json"))
-        XCTAssertNil(TeamImport.link(from: "https://squashanalyzer.com/teams/../privacy.zip"))
-    }
-
-    func testSummaryAndZipCheck() {
+    func testSummary() {
         XCTAssertEqual(TeamImportResult(team: "Club", added: 2, updated: 1, photos: 3).summary, "Club · 2 nieuw · 1 bijgewerkt · 3 foto's")
-        XCTAssertTrue(TeamImport.looksLikeZip("PK..rest".data(using: String.Encoding.utf8)!))
-        XCTAssertFalse(TeamImport.looksLikeZip("<html>".data(using: String.Encoding.utf8)!))
     }
 }

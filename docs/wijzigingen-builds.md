@@ -8,7 +8,14 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.1 build 5)
+## Volgende build (na 3.1 build 6)
+
+## 3.1 build 6 (geüpload 1 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
+
+Releasenotes `release-notes/3.1-6.md` en `android-3.1-6.md`; testen, homepage (nl/en), handleiding (nl/en,
+met nieuwe afbeeldingen van beginscherm, coach, scheidsrechter, analyse en wedstrijden op iPhone en het
+beginscherm op Android) gepubliceerd. Suites: Core 399 tests, iOS-tests, Android-unittests, Worker 78 tests
+en lint groen. Gecontroleerd op de iPhone 17 Pro Max-simulator (donker en licht) en de Android-emulator.
 
 - **Ontwerpreview en steunkleur (1 november 2026, gedeeld iOS en Android).** Alle schermen bekeken in
   donker en warm licht (canvas "SquashAnalyzer ontwerpreview"); besluit Gerd-Jan: één steunkleur en één

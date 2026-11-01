@@ -125,5 +125,5 @@ const answer = await fetch(`${base}/api/v1/submissions`, {
 const text = await answer.text();
 console.log(`${answer.status} ${text}`);
 const claimToken = (() => { try { return JSON.parse(text).claimToken; } catch { return null; } })();
-if (claimToken) console.log(`Link: https://squashanalyzer.com/w/${claimToken}`);
+if (claimToken) console.log(`Link: https://squashanalyzer.com/wedstrijd#${claimToken}  (in de app: squashanalyzer://wedstrijd#${claimToken})`);
 console.log(`Naar ${base}. Staat klaar voor de speler (de server zegt bewust niet of die bestaat).`);

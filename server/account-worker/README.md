@@ -40,11 +40,13 @@ Een wedstrijd in een postvak leggen zoals een coach dat doet:
 
 ## Voor de eerste uitrol (Gerd-Jan)
 
-1. Database in de EU aanmaken (de jurisdictie kan alleen bij het aanmaken):
-   `npx wrangler d1 create squash-account --jurisdiction eu`, en het
-   `database_id` in `wrangler.toml` zetten.
+1. Database in de EU aanmaken: gedaan op 1 november 2026
+   (`npx wrangler d1 create squash-account --jurisdiction eu`, regio EEUR);
+   het `database_id` staat in `wrangler.toml`.
 2. Migraties: `npx wrangler d1 migrations apply squash-account --remote`.
-3. Een route kiezen (bijv. `account.squashanalyzer.com`) en `wrangler deploy`.
+3. `npx wrangler deploy`. De route `account.squashanalyzer.com` (eigen
+   domein) staat in `wrangler.toml`; Cloudflare maakt het DNS-record zelf.
+   CI rolt deze Worker niet uit, alleen de tests draaien daar.
 
 ## Nog niet gebouwd
 

@@ -1,13 +1,14 @@
 # Squash Analyzer 4.0: the player account (docs/voorstel-spelersaccount-4.0.md).
-# Not deployed yet. Before the first deploy, Gerd-Jan creates the database in
-# the EU (the jurisdiction can only be set at creation):
-#   npx wrangler d1 create squash-account --jurisdiction eu
-# and puts its database_id below. No route yet: the app only talks to this
+# The database was created in the EU on 1 November 2026 (the jurisdiction can
+# only be set at creation): npx wrangler d1 create squash-account --jurisdiction eu.
+# Deployed by hand from the Mac (README), not by CI. The app only talks to this
 # Worker in 4.0 test builds (Features.playerAccount).
 name = "squash-account"
 main = "src/index.js"
 compatibility_date = "2025-10-01"
 workers_dev = false
+# The address in the app (AccountEndpoints.productionAccountURL)
+routes = [{ pattern = "account.squashanalyzer.com", custom_domain = true }]
 
 [vars]
 # The Firebase project whose ID tokens are accepted (aud and iss of the token)
@@ -21,7 +22,7 @@ DEVICES_PER_HOUR = "5"
 [[d1_databases]]
 binding = "DB"
 database_name = "squash-account"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "47df8ba1-503e-41b1-810b-aa57affa8a8b"
 migrations_dir = "migrations"
 
 [triggers]

@@ -168,3 +168,18 @@ Gebruikers → zoeken op `+speler` / `+coach` → verwijderen.
 - Inloggen met Google, en Apple op Android.
 - "Dit ben ik niet" melden bij Gerd-Jan als iemand anders jouw wedstrijd claimde.
 - Een herinnering (push) als er iets in je Postvak staat.
+
+## Stand van de tests (1 november 2026)
+
+| Scenario | Stand | Opmerking |
+|---|---|---|
+| A. Teamgenoot onder een andere naam | **Geslaagd** (A13) | Gerd Lasso – Paul van Rijn; claim → geaccepteerd; de A13 leerde *Gerd Lasso = Gerd-Jan van Gils* |
+| B. Gekoppelde speler zonder account | Klaar om te testen | Paul van Rijn (SBN 942) heeft een wedstrijd die wacht; login `satest+speler2@gerdjan.nl` |
+| C. De deellink | **Geslaagd** (A13) | Toevoegen werkt; een tweede keer: "al toegevoegd, of de link is verlopen" |
+| D. Niet ik | **Geslaagd** (A13) | Verdwijnt bij jou, blijft op de server staan voor de echte Kees. Let op: "Niet ik" onthoudt de app nog niet na een herstart |
+| E. Naam wijzigen en verwijderen | Deels | Naam wijzigen werkt (simulator, lokaal); verwijderen nog niet op de testserver |
+| F. Zonder netwerk | Nog niet | |
+
+Onderweg gevonden en hersteld: Opslaan onbereikbaar bij een nieuwe speler op Android (nu bovenaan),
+"Ongeldig antwoord" na account maken (veld status ontbrak in Uit je team), en "Log opnieuw in"
+zonder knop bij een sessie die de Worker weigert (nu uitloggen en het inlogscherm).

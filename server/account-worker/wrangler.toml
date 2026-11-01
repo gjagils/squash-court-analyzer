@@ -50,7 +50,7 @@ DEVICES_PER_HOUR = "20"
 [[env.test.d1_databases]]
 binding = "DB"
 database_name = "squash-account-test"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "63c7d65a-16fa-4443-ae97-11decb6453bb"
 migrations_dir = "migrations"
 
 [env.test.triggers]

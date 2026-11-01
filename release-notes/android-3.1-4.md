@@ -1,0 +1,1 @@
+Build 4: de Mijn team-kaart op het beginscherm is compacter (stand, gespeeld en punten op één regel), zodat alles weer op één scherm past. Bij Speler toevoegen en bewerken staan Annuleren en Opslaan nu bovenaan, ook als het formulier langer is dan je scherm. Uitleg: squashanalyzer.com/testen

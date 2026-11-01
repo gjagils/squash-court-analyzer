@@ -111,12 +111,12 @@ public struct SharedMatchShareView: View {
                 Button { storedChoice = option.rawValue } label: {
                     Text(option.title)
                         .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
-                        .foregroundColor(active ? SharedColors.background : SharedColors.gold)
+                        .foregroundColor(active ? SharedColors.onAccent : SharedColors.accent)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(active ? SharedColors.gold : SharedColors.gold.opacity(0.10))
+                        .background(active ? SharedColors.accent : SharedColors.accent.opacity(0.10))
                         .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(SharedColors.gold.opacity(active ? 0.0 : 0.3), lineWidth: 1))
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(SharedColors.accent.opacity(active ? 0.0 : 0.3), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
             }

@@ -41,8 +41,8 @@ public struct SharedCardImportView: View {
                         Section {
                             Button { importCard(to: linked.id) } label: {
                                 HStack(spacing: 8) {
-                                    AppSymbol("arrow.triangle.2.circlepath", size: 16, color: SharedColors.gold)
-                                    Text("Bijwerken bij \(linked.name)", bundle: textBundle).foregroundColor(SharedColors.gold)
+                                    AppSymbol("arrow.triangle.2.circlepath", size: 16, color: SharedColors.accent)
+                                    Text("Bijwerken bij \(linked.name)", bundle: textBundle).foregroundColor(SharedColors.accent)
                                 }
                             }
                             .disabled(isImporting)
@@ -51,8 +51,8 @@ public struct SharedCardImportView: View {
                         Section(loc("Koppel aan")) {
                             Button { importCard(to: nil) } label: {
                                 HStack(spacing: 8) {
-                                    AppSymbol("person.badge.plus", size: 16, color: SharedColors.gold)
-                                    Text("Nieuwe speler \(snapshot.name)", bundle: textBundle).foregroundColor(SharedColors.gold)
+                                    AppSymbol("person.badge.plus", size: 16, color: SharedColors.accent)
+                                    Text("Nieuwe speler \(snapshot.name)", bundle: textBundle).foregroundColor(SharedColors.accent)
                                 }
                             }
                             .disabled(isImporting)

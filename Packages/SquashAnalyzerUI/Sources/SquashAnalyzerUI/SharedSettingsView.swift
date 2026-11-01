@@ -154,12 +154,8 @@ public struct SharedSettingsView: View {
                     SettingsDivider()
                     SettingsRow(loc("Weergave"), icon: "circle.lefthalf.filled", open: openPart == "theme") { toggle("theme") }
                     if openPart == "theme" {
-                        VStack(alignment: .leading, spacing: 12) {
-                            AppearancePicker(showsTitle: false)
-                            // 3.1 test round: two home cards, the testers choose (Gerd-Jan, 1 November 2026)
-                            HomeTeamCardStyleToggle()
-                        }
-                        .padding(.bottom, 16)
+                        AppearancePicker(showsTitle: false)
+                            .padding(.bottom, 16)
                     }
                     SettingsDivider()
                     // Telefoon, Nederlands or English; the host follows the choice (Android: the app's locale)
@@ -247,7 +243,7 @@ public struct SharedSettingsView: View {
             if let message {
                 Text(message)
                     .font(SharedFonts.system(12))
-                    .foregroundColor(messageIsError ? SharedColors.error : SharedColors.positive)
+                    .foregroundColor(messageIsError ? SharedColors.error : SharedColors.support)
             }
         }
     }
@@ -338,7 +334,7 @@ public struct SharedSettingsView: View {
             }
             HStack(spacing: 8) {
                 Circle()
-                    .fill(hasKey ? SharedColors.positive : SharedColors.error)
+                    .fill(hasKey ? SharedColors.support : SharedColors.error)
                     .frame(width: 8, height: 8)
                 Text(keyMessage ?? (hasKey ? loc("API key geconfigureerd") : loc("Geen API key ingesteld")))
                     .font(SharedFonts.system(12))
@@ -389,7 +385,7 @@ public struct SharedSettingsView: View {
             if let backupMessage {
                 Text(backupMessage)
                     .font(SharedFonts.system(12))
-                    .foregroundColor(backupIsError ? SharedColors.error : SharedColors.positive)
+                    .foregroundColor(backupIsError ? SharedColors.error : SharedColors.support)
             }
         }
         .alert(loc("Back-up terugzetten?"), isPresented: $askingRestore) {

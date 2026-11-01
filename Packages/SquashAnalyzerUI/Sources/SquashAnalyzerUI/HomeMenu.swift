@@ -66,11 +66,10 @@ public struct HomeMenuHeader: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: HomeMenuHeader.logoSize)
             }
-            // Outlined like the other blocks on the home screen; no fill, so
-            // the logo keeps the page background it was made for
+            // No frame: logo, name and tagline straight on the background, so
+            // only real buttons look like cards (A3, 1 November 2026)
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 12)
@@ -88,11 +87,16 @@ public struct HomeMenuTiles: View {
     private let onCompetition: (() -> Void)?
     /// Wedstrijd volgen (live score op het vergrendelscherm); only where the platform supports it
     private let onLiveFollow: (() -> Void)?
+    /// A live team match of the own team is running: the Competitie row shows LIVE
+    private let competitionLive: Bool
+    /// How many matches this phone follows on its lock screen, read when the screen appears
+    @State private var followingCount = 0
 
     public init(onCoach: @escaping () -> Void, onReferee: @escaping () -> Void,
                 onHistory: @escaping () -> Void, onPlayers: @escaping () -> Void, onBadges: @escaping () -> Void,
-                onCompetition: (() -> Void)? = nil, onLiveFollow: (() -> Void)? = nil) {
+                onCompetition: (() -> Void)? = nil, onLiveFollow: (() -> Void)? = nil, competitionLive: Bool = false) {
         self.onLiveFollow = onLiveFollow
+        self.competitionLive = competitionLive
         self.onCoach = onCoach
         self.onReferee = onReferee
         self.onHistory = onHistory
@@ -102,39 +106,46 @@ public struct HomeMenuTiles: View {
     }
 
     public var body: some View {
+        // No heading above the tiles since A3 (1 November 2026): the tiles say
+        // "Start met fluiten" and "Start met coachen" themselves, and the 30 pt
+        // saved let the team card with its bar fit on an iPhone 15/16
         VStack(alignment: .leading, spacing: 12) {
-            Text("Klaar om te spelen?", bundle: textBundle)
-                .font(SharedFonts.system(14, weight: .semibold))
-                .foregroundColor(SharedColors.textPrimary)
             HStack(spacing: 12) {
                 HomeMenuTile(title: loc("Scheidsrechter"), subtitle: loc("Start met fluiten"), icon: .referee, action: onReferee)
                 HomeMenuTile(title: loc("Coach"), subtitle: loc("Start met coachen"), icon: .coach, action: onCoach)
             }
             VStack(spacing: 0) {
                 menuRow(loc("Afgeronde wedstrijden"), icon: .history, action: onHistory)
-                Divider().overlay(SharedColors.line(0.09))
+                Divider().overlay(SharedColors.line(0.13))
                 if let onCompetition {
-                    menuRow(loc("Competitie"), icon: .competition, action: onCompetition)
-                    Divider().overlay(SharedColors.line(0.09))
+                    menuRow(loc("Competitie"), icon: .competition, live: competitionLive ? "LIVE" : nil, action: onCompetition)
+                    Divider().overlay(SharedColors.line(0.13))
                 }
                 if let onLiveFollow {
-                    menuRow(loc("Wedstrijd volgen"), icon: .liveFollow, action: onLiveFollow)
-                    Divider().overlay(SharedColors.line(0.09))
+                    menuRow(loc("Wedstrijd volgen"), icon: .liveFollow,
+                            live: followingCount > 0 ? "\(followingCount) LIVE" : nil, action: onLiveFollow)
+                    Divider().overlay(SharedColors.line(0.13))
                 }
                 menuRow(loc("Spelers"), icon: .players, action: onPlayers)
-                Divider().overlay(SharedColors.line(0.09))
+                Divider().overlay(SharedColors.line(0.13))
                 menuRow(loc("Badges"), icon: .badges, action: onBadges)
             }
         }
         .padding(.horizontal, 24)
+        .onAppear { followingCount = LiveFollow.shared.following.count }
     }
 
-    private func menuRow(_ title: String, icon: HomeTileIcon, action: @escaping () -> Void) -> some View {
+    /// `live`: the text of a sea-green LIVE pill on the right ("LIVE", "2 LIVE");
+    /// the support colour marks everything live (1 November 2026)
+    private func menuRow(_ title: String, icon: HomeTileIcon, live: String? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 12) {
                 HomeTileIconView(icon: icon, color: SharedColors.accent, size: 23)
                 Text(title).font(SharedFonts.system(14))
                 Spacer()
+                if let live {
+                    LivePill(text: live)
+                }
                 AppSymbol("chevron.right", size: 12, color: SharedColors.textPrimary)
             }
             .foregroundColor(SharedColors.textPrimary)
@@ -152,9 +163,6 @@ public struct HomeMenuTiles: View {
 /// Identical home team presentation for both native hosts; loading and navigation stay with the host.
 public struct HomeTeamSummary: View {
     private let snapshot: LeagueTeamSnapshot
-    /// Test round 3.1 build 5 (Gerd-Jan, 1 November 2026): the next match in a
-    /// tinted bar (variant 3d) or under a line (3c); Instellingen → Weergave
-    @AppStorage(HomeTeamCardStyle.barKey) private var barStyle = false
     public init(snapshot: LeagueTeamSnapshot) { self.snapshot = snapshot }
 
     public var body: some View {
@@ -186,33 +194,28 @@ public struct HomeTeamSummary: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     LeagueRankBadge(rank: snapshot.rank, filled: true)
                 }
-                if let next {
-                    if !barStyle {
-                        Divider().overlay(SharedColors.line(0.15))
-                        fixtureRow(next, inBar: false)
-                    }
-                }
             }
             .padding(14)
+            // The next match in a tinted bar (variant 3d): the testers' and
+            // Gerd-Jan's choice on 1 November 2026; the variant under a line is gone
             if let next {
-                if barStyle {
-                    fixtureRow(next, inBar: true)
-                        .padding(EdgeInsets(top: 10, leading: 14, bottom: 12, trailing: 14))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(SharedColors.accent.opacity(0.10))
-                }
+                fixtureRow(next)
+                    .padding(EdgeInsets(top: 10, leading: 14, bottom: 12, trailing: 14))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(SharedColors.accent.opacity(0.07))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        // A step lighter than the two tiles below (A3)
         .background(SharedColors.brandCard)
         .clipShape(RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.brandCardStroke, lineWidth: 1))
         .foregroundColor(SharedColors.textPrimary)
     }
 
     /// The next match: date block, "Thuis ·" or "Uit ·" with the opponent, the
     /// last result against them, and their stand as an outlined badge
-    private func fixtureRow(_ next: LeagueFixture, inBar: Bool) -> some View {
+    private func fixtureRow(_ next: LeagueFixture) -> some View {
         let ownIsHome = TeamMatch.sameTeam(next.home, snapshot.name)
         let info = snapshot.opponent(in: next)
         let opponentName = info?.name ?? (ownIsHome ? next.away : next.home)
@@ -220,7 +223,7 @@ public struct HomeTeamSummary: View {
         let previous = LeagueOpponentText.previousLine(info)
         return HStack(spacing: 12) {
             // In the bar the block takes the card colour, so it still stands out
-            LeagueDateBlock(date: next.date, fill: inBar ? SharedColors.brandCard : SharedColors.accent.opacity(0.12))
+            LeagueDateBlock(date: next.date, fill: SharedColors.brandCard)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text("\(side) ·").font(SharedFonts.system(13)).foregroundColor(SharedColors.textSecondary)
@@ -256,7 +259,7 @@ private struct HomeMenuTile: View {
     var body: some View {
         Button(action: action) {
             VStack(spacing: 10) {
-                HomeTileIconView(icon: icon, color: color, size: 30)
+                HomeTileIconView(icon: icon, color: color, size: 32)
                 Text(title.uppercased())
                     .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                     .tracking(1)
@@ -273,9 +276,10 @@ private struct HomeMenuTile: View {
             .padding(.horizontal, 8)
             .frame(maxWidth: .infinity)
             .frame(minHeight: 110)
-            .background(SharedColors.brandCard)
+            // A step heavier than the team card above: the tiles carry the emphasis (A3)
+            .background(SharedColors.tileCard)
             .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(color.opacity(0.35), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.tileStroke, lineWidth: SharedColors.tileStrokeWidth))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(title)
@@ -566,5 +570,25 @@ public struct AndroidHomeView: View {
             }
         }
         .preferredColorScheme(SharedColors.preferredScheme)
+    }
+}
+
+/// A small outlined pill in the support colour: "LIVE", "2 LIVE". The one
+/// marker for everything live on the home screen (1 November 2026).
+struct LivePill: View {
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Circle().fill(SharedColors.support).frame(width: 6, height: 6)
+            Text(text)
+                .font(SharedFonts.system(11, weight: .bold, design: .rounded))
+                .tracking(1)
+                .foregroundColor(SharedColors.support)
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 4)
+        .overlay(Capsule().stroke(SharedColors.support.opacity(0.45), lineWidth: 1))
+        .accessibilityLabel(loc("Live"))
     }
 }

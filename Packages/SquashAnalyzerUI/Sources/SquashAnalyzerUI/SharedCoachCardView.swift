@@ -122,9 +122,9 @@ public struct SharedCoachCardView: View {
 
     private func markColor(_ point: CoachCardPoint) -> Color {
         switch point.mark {
-        case .new: return point.item.tone == AdviceTone.success ? SharedColors.positive : SharedColors.accent
+        case .new: return point.item.tone == AdviceTone.success ? SharedColors.support : SharedColors.accent
         case .stillThere: return SharedColors.warmRed
-        case .improved: return SharedColors.positive
+        case .improved: return SharedColors.support
         case .pickUpAgain: return SharedColors.gold
         }
     }

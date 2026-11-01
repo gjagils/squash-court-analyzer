@@ -5095,24 +5095,6 @@
         }
       }
     },
-    "Klaar om te spelen?": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ready to play?"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Klaar om te spelen?"
-          }
-        }
-      }
-    },
     "Knop LIVE bij Scheidsrechter en Coach": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -5829,24 +5811,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mijn team laden…"
-          }
-        }
-      }
-    },
-    "Mijn team-kaart met balk": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "My team card with a bar"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mijn team-kaart met balk"
           }
         }
       }
@@ -9897,24 +9861,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nr. %lld"
-          }
-        }
-      }
-    },
-    "Voor de testronde: de volgende wedstrijd in een getinte balk onderaan de kaart op het beginscherm, of onder een lijn. Laat ons weten wat je het mooist vindt.": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "For the test round: the next match in a tinted bar at the bottom of the card on the home screen, or under a line. Tell us which one you like best."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Voor de testronde: de volgende wedstrijd in een getinte balk onderaan de kaart op het beginscherm, of onder een lijn. Laat ons weten wat je het mooist vindt."
           }
         }
       }

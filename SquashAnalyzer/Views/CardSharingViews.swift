@@ -130,7 +130,7 @@ struct CardImportSheet: View {
                             link(to: linkedPlayer)
                         } label: {
                             Label(appText("Bijwerken bij \(linkedPlayer.name)"), systemImage: "arrow.triangle.2.circlepath")
-                                .foregroundColor(AppColors.accentGold)
+                                .foregroundColor(AppColors.warmOrange)
                         }
                         .listRowBackground(SharedColors.tint(0.05))
                     }
@@ -140,7 +140,7 @@ struct CardImportSheet: View {
                             link(to: nil)
                         } label: {
                             Label(appText("Nieuwe speler \(snapshot.name)"), systemImage: "person.badge.plus")
-                                .foregroundColor(AppColors.accentGold)
+                                .foregroundColor(AppColors.warmOrange)
                         }
                         .listRowBackground(SharedColors.tint(0.05))
 

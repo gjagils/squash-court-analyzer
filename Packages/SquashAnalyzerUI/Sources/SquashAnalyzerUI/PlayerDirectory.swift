@@ -246,7 +246,7 @@ public struct PlayerDirectoryView: View {
                                     // Tap the player for their badges, as on iOS
                                     Button { badgesForPlayer = player } label: {
                                         HStack(spacing: 12) {
-                                            PlayerPhotoView(photo: photos[player.id], name: player.name, size: 44, color: SharedColors.gold)
+                                            PlayerPhotoView(photo: photos[player.id], name: player.name, size: 44, color: SharedColors.textSecondary)
                                             VStack(alignment: .leading, spacing: 5) {
                                                 HStack(spacing: 8) {
                                                     Text(player.name).font(.headline)
@@ -273,7 +273,7 @@ public struct PlayerDirectoryView: View {
                                                 if !player.coachingFocusAreas.isEmpty {
                                                     HStack(spacing: 6) {
                                                         ForEach(player.coachingFocusAreas, id: \.self) { tag in
-                                                            TagChip(tag, color: SharedColors.gold, size: 10, fillOpacity: 0.15)
+                                                            TagChip(tag, color: SharedColors.textSecondary, size: 10, fillOpacity: 0.15)
                                                         }
                                                     }
                                                 } else if !player.coachingNotes.isEmpty {
@@ -397,10 +397,10 @@ struct PlayerProfileEditor: View {
             // Tap the avatar to pick a photo, as on iOS (camera badge bottom right)
             Button { pickPhoto() } label: {
                 ZStack(alignment: .bottomTrailing) {
-                    PlayerPhotoView(photo: photo, name: player.name.isEmpty ? "?" : player.name, size: 96, color: SharedColors.gold)
-                    AppSymbol("camera.fill", size: 13, color: SharedColors.background)
+                    PlayerPhotoView(photo: photo, name: player.name.isEmpty ? "?" : player.name, size: 96, color: SharedColors.textSecondary)
+                    AppSymbol("camera.fill", size: 13, color: SharedColors.onAccent)
                         .frame(width: 28, height: 28)
-                        .background(SharedColors.gold)
+                        .background(SharedColors.accent)
                         .clipShape(Circle())
                 }
             }

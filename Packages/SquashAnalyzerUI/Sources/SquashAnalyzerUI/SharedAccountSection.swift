@@ -99,7 +99,7 @@ public struct SharedAccountSection: View {
             if let message {
                 Text(message)
                     .font(SharedFonts.system(12))
-                    .foregroundColor(messageIsError ? SharedColors.error : SharedColors.positive)
+                    .foregroundColor(messageIsError ? SharedColors.error : SharedColors.support)
             }
         }
         .onAppear { refresh() }

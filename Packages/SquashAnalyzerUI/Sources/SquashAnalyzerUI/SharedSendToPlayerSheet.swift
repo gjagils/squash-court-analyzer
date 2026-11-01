@@ -115,7 +115,7 @@ public struct SharedAccountClaimSheet: View {
                 if done {
                     Text("De wedstrijd staat in je account en bij Afgeronde wedstrijden, en telt mee.", bundle: textBundle)
                         .font(SharedFonts.system(14))
-                        .foregroundColor(SharedColors.positive)
+                        .foregroundColor(SharedColors.support)
                 } else if account.profile != nil {
                     Text("Iemand heeft een wedstrijd met jou gedeeld. Voeg hem toe, dan telt hij mee voor je badges.", bundle: textBundle)
                         .font(SharedFonts.system(13))

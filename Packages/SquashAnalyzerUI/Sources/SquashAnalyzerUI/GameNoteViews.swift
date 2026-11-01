@@ -124,7 +124,7 @@ struct ServiceReturnCard: View {
     }
 
     private func trendColor(_ trend: String) -> Color {
-        if trend.hasPrefix("▲") { return SharedColors.positive }
+        if trend.hasPrefix("▲") { return SharedColors.support }
         if trend.hasPrefix("▼") { return SharedColors.error }
         return SharedColors.textMuted
     }

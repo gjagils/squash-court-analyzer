@@ -13,7 +13,7 @@ public struct ZoneProfileTable: View {
 
     private static var text: Color { SharedColors.textPrimary }
     private static var muted: Color { SharedColors.textMuted }
-    private static var green: Color { SharedColors.positive }
+    private static var green: Color { SharedColors.support }
     private static var orange: Color { SharedColors.accent }
     private static var red: Color { SharedColors.error }
 

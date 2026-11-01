@@ -240,7 +240,7 @@ public struct RefereeScoringView: View {
                         .truncationMode(.tail)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                     Text("\(match.player1GamesWon) – \(match.player2GamesWon)")
-                        .font(SharedFonts.system(22, weight: .bold, design: .monospaced))
+                        .font(SharedFonts.system(22, weight: .bold, design: .rounded))
                         .foregroundColor(SharedColors.textPrimary)
                         .fixedSize()
                     Text(match.player2Name)
@@ -339,9 +339,11 @@ public struct RefereeScoringView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(color.opacity(isServer ? 0.10 : 0.05))
+                // The receiver's card keeps a visible edge in its colour, so both
+                // players have an equally solid place to tap (1 November 2026)
+                .background(color.opacity(isServer ? 0.12 : 0.06))
                 .clipShape(RoundedRectangle(cornerRadius: 16))
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(color.opacity(isServer ? 0.35 : 0.12), lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(color.opacity(isServer ? 0.5 : 0.3), lineWidth: 1))
             }
             .buttonStyle(.plain)
             .disabled(match.isGameOver)
@@ -448,11 +450,11 @@ struct RefereeTimers: View {
     var body: some View {
         let _ = now
         return HStack {
-            AppSymbol("timer", size: 12, color: SharedColors.gold.opacity(0.5))
+            AppSymbol("timer", size: 12, color: SharedColors.textMuted)
             timer("MATCH", match.matchDuration, alignment: .leading)
             Spacer()
             timer("GAME", match.currentGameDuration, alignment: .trailing)
-            AppSymbol("timer", size: 12, color: SharedColors.gold.opacity(0.5))
+            AppSymbol("timer", size: 12, color: SharedColors.textMuted)
         }
         .padding(.horizontal, 24)
         .task(id: match.isMatchOver) {
@@ -472,7 +474,10 @@ struct RefereeTimers: View {
                 .tracking(1)
                 .foregroundColor(SharedColors.textMuted)
             Text(text)
-                .font(SharedFonts.system(16, weight: .bold, design: .monospaced))
+                .font(SharedFonts.system(16, weight: .bold, design: .rounded))
+                #if !SKIP
+                .monospacedDigit()
+                #endif
                 .foregroundColor(SharedColors.textSecondary)
         }
         .accessibilityLabel(label == "MATCH" ? loc("Wedstrijdtijd \(text)") : loc("Gametijd \(text)"))

@@ -162,7 +162,7 @@ public struct MatchSetupView: View {
                     ForEach(players) { player in
                         Button { choose(player) } label: {
                             HStack(spacing: 12) {
-                                PlayerPhotoView(photo: photos[player.id], name: player.name, size: 36, color: SharedColors.gold)
+                                PlayerPhotoView(photo: photos[player.id], name: player.name, size: 36, color: SharedColors.textSecondary)
                                 Text(player.name).foregroundColor(SharedColors.textPrimary)
                                 Spacer()
                             }
@@ -336,9 +336,9 @@ public struct MatchSetupView: View {
                 HStack(spacing: 4) {
                     Text(moreSummary)
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
-                        .foregroundColor(hasHeadStart ? SharedColors.gold : SharedColors.textSecondary)
+                        .foregroundColor(hasHeadStart ? SharedColors.accent : SharedColors.textSecondary)
                     AppSymbol(showMore ? "chevron.up" : "chevron.down", size: 12,
-                              color: hasHeadStart ? SharedColors.gold : SharedColors.textSecondary)
+                              color: hasHeadStart ? SharedColors.accent : SharedColors.textSecondary)
                 }
             }
             .buttonStyle(.plain)
@@ -421,9 +421,9 @@ public struct MatchSetupView: View {
                          ? loc("Start bij game \(1 + gamesBefore1 + gamesBefore2) · stand \(gamesBefore1) – \(gamesBefore2)")
                          : (lateStart ? loc("Later instappen") : loc("Later instappen?")))
                         .font(SharedFonts.system(14, weight: .medium, design: .rounded))
-                        .foregroundColor(hasHeadStart ? SharedColors.gold : SharedColors.textSecondary)
+                        .foregroundColor(hasHeadStart ? SharedColors.accent : SharedColors.textSecondary)
                     AppSymbol(lateStart ? "chevron.up" : "chevron.down", size: 12,
-                              color: hasHeadStart ? SharedColors.gold : SharedColors.textSecondary)
+                              color: hasHeadStart ? SharedColors.accent : SharedColors.textSecondary)
                 }
             }
             .buttonStyle(.plain)

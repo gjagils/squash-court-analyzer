@@ -108,7 +108,7 @@ public struct MatchResultOverlay: View {
                 if let note = result.savedNote {
                     HStack(spacing: 6) {
                         Circle()
-                            .fill(SharedColors.positive)
+                            .fill(SharedColors.support)
                             .frame(width: 8, height: 8)
                         Text(note)
                             .font(SharedFonts.system(11, weight: .medium, design: .rounded))
@@ -214,7 +214,7 @@ public struct MatchResultOverlay: View {
     private func caption(_ line: ResultCaptionLine) -> some View {
         HStack(spacing: 5) {
             if line.showsTimer {
-                AppSymbol("timer", size: 11, color: SharedColors.gold.opacity(0.6))
+                AppSymbol("timer", size: 11, color: SharedColors.textMuted)
             }
             Text(line.text)
                 .font(SharedFonts.system(12, weight: .medium, design: .rounded))

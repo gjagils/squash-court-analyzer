@@ -85,35 +85,6 @@ enum LeagueOpponentText {
     }
 }
 
-/// Instellingen → Weergave: the home card with the next match in a tinted bar
-/// (true) or under a line (false). Both for the 3.1 test round; the testers
-/// choose (Gerd-Jan, 1 November 2026).
-public enum HomeTeamCardStyle {
-    public static let barKey = "homeTeamCardBar"
-}
-
-/// The switch under Weergave in Instellingen, on iOS (its own SettingsView)
-/// and in the shared SharedSettingsView alike
-public struct HomeTeamCardStyleToggle: View {
-    @AppStorage(HomeTeamCardStyle.barKey) private var teamCardBar = false
-
-    public init() {}
-
-    public var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Toggle(isOn: $teamCardBar) {
-                Text("Mijn team-kaart met balk", bundle: textBundle)
-                    .font(SharedFonts.system(14))
-                    .foregroundColor(SharedColors.textPrimary)
-            }
-            .tint(SharedColors.accent)
-            Text("Voor de testronde: de volgende wedstrijd in een getinte balk onderaan de kaart op het beginscherm, of onder een lijn. Laat ons weten wat je het mooist vindt.", bundle: textBundle)
-                .font(SharedFonts.system(12))
-                .foregroundColor(SharedColors.textMuted)
-        }
-    }
-}
-
 /// "8e" in Dutch, "8th" in English; "–" without a stand
 enum LeagueOrdinal {
     static func text(_ rank: Int?) -> String {

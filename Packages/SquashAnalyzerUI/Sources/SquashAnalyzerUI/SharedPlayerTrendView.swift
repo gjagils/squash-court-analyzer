@@ -35,7 +35,7 @@ public struct SharedPlayerTrendView: View {
                     Text("De wedstrijden konden niet worden geladen.", bundle: textBundle)
                         .foregroundColor(SharedColors.textSecondary)
                     Button(loc("Opnieuw laden")) { Task { await load() } }
-                        .tint(SharedColors.gold)
+                        .tint(SharedColors.accent)
                 }
             } else {
                 content(summary)
@@ -88,7 +88,7 @@ public struct SharedPlayerTrendView: View {
 
     private func header(_ summary: PlayerTrendSummary) -> some View {
         HStack(spacing: 14) {
-            PlayerPhotoView(photo: photo, name: playerName, size: 56, color: SharedColors.gold)
+            PlayerPhotoView(photo: photo, name: playerName, size: 56, color: SharedColors.textSecondary)
             VStack(alignment: .leading, spacing: 4) {
                 Text(playerName)
                     .font(SharedFonts.system(20, weight: .bold, design: .rounded))
@@ -114,7 +114,7 @@ public struct SharedPlayerTrendView: View {
     private func card<Content: View>(_ title: String, icon: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 6) {
-                AppSymbol(icon, size: 13, color: SharedColors.gold)
+                AppSymbol(icon, size: 13, color: SharedColors.accent)
                 Text(title)
                     .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                     .tracking(1.5)
@@ -165,10 +165,10 @@ public struct SharedPlayerTrendView: View {
         let winners = summary.winnersPerGame
         let errors = summary.errorsPerGame
         return card(loc("WINNERS EN FOUTEN PER GAME"), icon: "chart.bar.xaxis") {
-            TrendLines(first: winners, second: errors, firstColor: SharedColors.positive, secondColor: SharedColors.error)
+            TrendLines(first: winners, second: errors, firstColor: SharedColors.support, secondColor: SharedColors.error)
                 .frame(height: 110)
             HStack(spacing: 14) {
-                legend("Winners", SharedColors.positive)
+                legend("Winners", SharedColors.support)
                 legend("Unforced errors", SharedColors.error)
             }
             if let change = PlayerTrendSummary.change(errors) {
@@ -197,7 +197,7 @@ public struct SharedPlayerTrendView: View {
     private func trendLine(_ text: String, better: Bool) -> some View {
         Text(text)
             .font(SharedFonts.system(13, weight: .semibold))
-            .foregroundColor(better ? SharedColors.positive : SharedColors.textPrimary)
+            .foregroundColor(better ? SharedColors.support : SharedColors.textPrimary)
     }
 
     private func shotsCard(_ summary: PlayerTrendSummary) -> some View {
@@ -221,14 +221,14 @@ public struct SharedPlayerTrendView: View {
 
     private func shotRow(_ item: PlayerTrendShot, most: Int) -> some View {
         HStack(spacing: 10) {
-            AppSymbol(item.shot.icon, size: 14, color: SharedColors.gold)
+            AppSymbol(item.shot.icon, size: 14, color: SharedColors.textSecondary)
                 .frame(width: 20)
             Text(item.shot.rawValue)
                 .font(SharedFonts.system(14, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
                 .frame(width: 64, alignment: .leading)
             GeometryReader { geometry in
-                SharedColors.gold.opacity(0.7)
+                SharedColors.textSecondary.opacity(0.6)
                     .frame(width: max(4.0, geometry.size.width * Double(item.count) / Double(max(1, most))), height: 8)
                     .clipShape(RoundedRectangle(cornerRadius: 2))
                     .frame(maxHeight: .infinity, alignment: .center)
@@ -247,7 +247,7 @@ public struct SharedPlayerTrendView: View {
             if let strong = summary.strongestArea {
                 Text("Wint de meeste punten \(strong).", bundle: textBundle)
                     .font(SharedFonts.system(13))
-                    .foregroundColor(SharedColors.positive)
+                    .foregroundColor(SharedColors.support)
             }
             if let weak = summary.weakestArea {
                 Text("Verliest de meeste punten \(weak).", bundle: textBundle)
@@ -265,7 +265,7 @@ public struct SharedPlayerTrendView: View {
                     .foregroundColor(SharedColors.textSecondary)
             } else {
                 HStack(spacing: 10) {
-                    tempoBox(loc("Gewonnen"), summary.averageRallyWon, SharedColors.positive)
+                    tempoBox(loc("Gewonnen"), summary.averageRallyWon, SharedColors.support)
                     tempoBox(loc("Verloren"), summary.averageRallyLost, SharedColors.accent)
                 }
                 Text("Gemiddelde rallyduur, inclusief de tijd voor de service.", bundle: textBundle)
@@ -307,7 +307,7 @@ public struct SharedPlayerTrendView: View {
                         Spacer()
                         Text("\(opponent.won)-\(opponent.lost)")
                             .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
-                            .foregroundColor(opponent.won >= opponent.lost ? SharedColors.positive : SharedColors.accent)
+                            .foregroundColor(opponent.won >= opponent.lost ? SharedColors.support : SharedColors.accent)
                     }
                     .accessibilityLabel(loc("Tegen \(opponent.name) \(opponent.won) gewonnen, \(opponent.lost) verloren"))
                 }

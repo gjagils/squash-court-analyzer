@@ -47,7 +47,7 @@ public struct SharedScoreboardView: View {
                 .foregroundColor(SharedColors.textMuted)
                 .tracking(2)
             Text("\(match?.player1GamesWon ?? 0) – \(match?.player2GamesWon ?? 0)")
-                .font(SharedFonts.system(22, weight: .bold, design: .monospaced))
+                .font(SharedFonts.system(22, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
             Text("GAMES")
                 .font(SharedFonts.system(8, weight: .medium, design: .rounded))
@@ -387,8 +387,6 @@ public struct CoachScoringView: View {
 
             bottomActions
                 .padding(.horizontal, 24)
-            lastPointLine
-                .padding(.horizontal, 24)
 
             Spacer(minLength: 0)
         }
@@ -507,9 +505,13 @@ public struct CoachScoringView: View {
         switch game.scoringStep {
         case .selectPlayer:
             VStack {
-                Spacer(minLength: 0)
                 if !game.isStarted && !game.isGameOver && !match.isMatchOver {
+                    Spacer(minLength: 0)
                     startButton
+                } else if !game.points.isEmpty {
+                    // The last three points as a quiet list in the empty middle,
+                    // instead of one line under the buttons (1 November 2026)
+                    lastPointsPanel
                 }
                 Spacer(minLength: 0)
             }
@@ -721,25 +723,40 @@ public struct CoachScoringView: View {
     // MARK: - Rally timer, last point, let and stop
 
 
-    /// "Gerard: Winner · Volley drop · Voor Links" (Core's Point.summary, as on iOS)
-    private var lastPointLine: some View {
-        Group {
-            // Coloured dot and hidden while a point is entered, as on iOS
-            if let last = game.points.last, game.selectedPlayer == nil {
-                HStack(spacing: 6) {
+    /// The last three points, newest first: a dot in the scorer's colour,
+    /// "Gerard · Winner · Volley drop · Voor Links" (Core's Point.summary) and
+    /// the score after that point
+    private var lastPointsPanel: some View {
+        let rows = LastPointRow.rows(of: game, count: 3)
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("LAATSTE PUNTEN", bundle: textBundle)
+                .font(SharedFonts.system(10, weight: .semibold, design: .rounded))
+                .tracking(1.8)
+                .foregroundColor(SharedColors.textSecondary)
+            ForEach(0..<rows.count, id: \.self) { index in
+                let row = rows[index]
+                HStack(spacing: 10) {
                     Circle()
-                        .fill(last.scorer == Player.player1 ? SharedColors.accent : SharedColors.steelBlue)
-                        .frame(width: 6, height: 6)
-                    Text("\(game.name(for: last.scorer)): \(last.summary)")
+                        .fill(row.scorer == Player.player1 ? SharedColors.accent : SharedColors.steelBlue)
+                        .frame(width: 8, height: 8)
+                    Text(row.text)
+                        .font(SharedFonts.system(13))
+                        .foregroundColor(index == 0 ? SharedColors.textPrimary : SharedColors.textSecondary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    Spacer(minLength: 4)
+                    Text(row.score)
+                        .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
+                        #if !SKIP
+                        .monospacedDigit()
+                        #endif
+                        .foregroundColor(index == 0 ? SharedColors.textPrimary : SharedColors.textSecondary)
                 }
-            } else {
-                Text(" ")
             }
         }
-        .font(SharedFonts.system(11))
-        .foregroundColor(SharedColors.textMuted)
-        .lineLimit(1)
-        .frame(height: 16)
+        .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 14))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.line(0.12), lineWidth: 1))
     }
 
     /// "Wie vraagt de let?", as iOS' LetSelectorOverlay: tapping beside it cancels
@@ -752,7 +769,7 @@ public struct CoachScoringView: View {
                 Text("LET")
                     .font(SharedFonts.system(22, weight: .bold, design: .rounded))
                     .tracking(3)
-                    .foregroundColor(SharedColors.gold)
+                    .foregroundColor(SharedColors.textPrimary)
                 Text("Wie vraagt de let?", bundle: textBundle)
                     .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textSecondary)
@@ -779,7 +796,7 @@ public struct CoachScoringView: View {
             .padding(24)
             .background(SharedColors.surface)
             .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.gold.opacity(0.3), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.line(0.15), lineWidth: 1))
             .padding(.horizontal, 40)
         }
     }
@@ -965,14 +982,17 @@ struct RallyClock: View {
         let seconds = Int(game.rallySeconds(at: now))
         let text = (seconds / 60 < 10 ? "0" : "") + "\(seconds / 60):" + (seconds % 60 < 10 ? "0" : "") + "\(seconds % 60)"
         return HStack(spacing: 6) {
-            AppSymbol("timer", size: 12, color: SharedColors.gold.opacity(0.5))
+            AppSymbol("timer", size: 12, color: SharedColors.textMuted)
             VStack(alignment: .leading, spacing: 1) {
             Text("RALLY")
                 .font(SharedFonts.system(8, weight: .medium, design: .rounded))
                 .tracking(1)
                 .foregroundColor(SharedColors.textMuted)
             Text(text)
-                .font(SharedFonts.system(14, weight: .bold, design: .monospaced))
+                .font(SharedFonts.system(14, weight: .bold, design: .rounded))
+                #if !SKIP
+                .monospacedDigit()
+                #endif
                 .foregroundColor(SharedColors.textSecondary)
             }
         }
@@ -1000,7 +1020,7 @@ struct CompactScoreBar: View {
         HStack(spacing: 8) {
             side(Player.player1)
             Text("\(match.player1GamesWon)–\(match.player2GamesWon)")
-                .font(SharedFonts.system(13, weight: .bold, design: .monospaced))
+                .font(SharedFonts.system(13, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.textMuted)
                 .lineLimit(1)
             side(Player.player2)
@@ -1059,5 +1079,31 @@ struct FitOrScroll<Content: View>: View {
                     .frame(minHeight: geometry.size.height)
             }
         }
+    }
+}
+
+/// One row of the coach screen's "Laatste punten": who scored, how, and the
+/// score right after that point
+struct LastPointRow {
+    let scorer: Player
+    let text: String
+    let score: String
+
+    /// The newest `count` points, newest first
+    static func rows(of game: Game, count: Int) -> [LastPointRow] {
+        var all: [LastPointRow] = []
+        var p1 = 0
+        var p2 = 0
+        for point in game.points {
+            if point.scorer == Player.player1 { p1 += 1 } else { p2 += 1 }
+            all.append(LastPointRow(scorer: point.scorer, text: "\(game.name(for: point.scorer)) · \(point.summary)", score: "\(p1)–\(p2)"))
+        }
+        var rows: [LastPointRow] = []
+        var index = all.count - 1
+        while index >= 0 && rows.count < count {
+            rows.append(all[index])
+            index -= 1
+        }
+        return rows
     }
 }

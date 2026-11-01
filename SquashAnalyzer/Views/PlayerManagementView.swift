@@ -177,15 +177,16 @@ struct PlayerRowView: View {
         HStack(spacing: 14) {
             // Avatar: photo when set, otherwise the initial
             if let data = player.photoData, let image = UIImage(data: data) {
-                PlayerAvatarImage(photo: image, color: AppColors.accentGold, size: 42)
+                PlayerAvatarImage(photo: image, color: AppColors.textSecondary, size: 42)
             } else {
+                // Neutral, not gold: gold is for badges (1 November 2026)
                 Circle()
-                    .fill(AppColors.accentGold.opacity(0.2))
+                    .fill(AppColors.textSecondary.opacity(0.15))
                     .frame(width: 42, height: 42)
                     .overlay(
                         Text(String(player.name.prefix(1)).uppercased())
                             .font(AppFonts.title(18))
-                            .foregroundColor(AppColors.accentGold)
+                            .foregroundColor(AppColors.textSecondary)
                     )
             }
 
@@ -222,11 +223,11 @@ struct PlayerRowView: View {
                             ForEach(player.coachingFocusAreas, id: \.self) { tag in
                                 Text(tag)
                                     .font(AppFonts.caption(10))
-                                    .foregroundColor(AppColors.accentGold)
+                                    .foregroundColor(AppColors.textSecondary)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 3)
                                     .background(
-                                        Capsule().fill(AppColors.accentGold.opacity(0.15))
+                                        Capsule().fill(AppColors.textSecondary.opacity(0.15))
                                     )
                             }
                         }
@@ -333,12 +334,12 @@ struct PlayerEditSheet: View {
         VStack(spacing: 10) {
             PhotosPicker(selection: $pickedPhoto, matching: .images) {
                 ZStack(alignment: .bottomTrailing) {
-                    PlayerAvatarImage(photo: photoImage, color: AppColors.accentGold, size: 96)
+                    PlayerAvatarImage(photo: photoImage, color: AppColors.textSecondary, size: 96)
                     Image(systemName: "camera")
                         .font(SharedFonts.system(12, weight: .semibold))
-                        .foregroundColor(AppColors.backgroundDark)
+                        .foregroundColor(SharedColors.onAccent)
                         .padding(7)
-                        .background(Circle().fill(AppColors.accentGold))
+                        .background(Circle().fill(AppColors.warmOrange))
                 }
             }
             .buttonStyle(.plain)

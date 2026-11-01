@@ -41,25 +41,27 @@ public struct LiveShareButton: View {
 
     private func button(isLive: Bool) -> some View {
         let newLink = isLive && live.linkChanged
-        let red = SharedColors.warmRed
-        // Not live yet: grey, so red always means viewers can follow along
+        // Live is the support colour, sea green (since 1 November 2026; red is
+        // for errors). Not live yet: grey, so green always means viewers can follow along
+        let liveColor = SharedColors.support
+        let onLive = SharedColors.onAccent
         let grey = SharedColors.textSecondary
         return Button(action: tap) {
             HStack(spacing: 5) {
                 Circle()
-                    .fill(isLive ? Color.white : grey)
+                    .fill(isLive ? onLive : grey)
                     .frame(width: 7, height: 7)
                 Text(busy ? "…" : (newLink ? loc("NIEUWE LINK") : "LIVE"))
                     .font(SharedFonts.system(11, weight: .bold, design: .rounded))
                     .tracking(1)
-                    .foregroundColor(isLive ? Color.white : grey)
+                    .foregroundColor(isLive ? onLive : grey)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             // .background(colour) + clipShape: filled shapes behind text misbehave on Android
-            .background(isLive ? red : grey.opacity(0.10))
+            .background(isLive ? liveColor : grey.opacity(0.10))
             .clipShape(Capsule())
-            .overlay(Capsule().stroke(isLive ? red.opacity(0.6) : grey.opacity(0.5), lineWidth: 1))
+            .overlay(Capsule().stroke(isLive ? liveColor.opacity(0.6) : grey.opacity(0.5), lineWidth: 1))
             .opacity(live.offline && isLive ? 0.6 : 1.0)
         }
         .buttonStyle(.plain)

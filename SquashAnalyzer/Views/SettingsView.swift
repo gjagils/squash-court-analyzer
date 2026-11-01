@@ -67,12 +67,8 @@ struct SettingsView: View {
                         SettingsDivider()
                         SettingsRow(appText("Weergave"), icon: "circle.lefthalf.filled", open: openPart == "theme") { toggle("theme") }
                         if openPart == "theme" {
-                            VStack(alignment: .leading, spacing: 12) {
-                                AppearancePicker(showsTitle: false)
-                                // 3.1 test round: two home cards, the testers choose (Gerd-Jan, 1 November 2026)
-                                HomeTeamCardStyleToggle()
-                            }
-                            .padding(.bottom, 16)
+                            AppearancePicker(showsTitle: false)
+                                .padding(.bottom, 16)
                         }
                         SettingsDivider()
                         // Telefoon, Nederlands or English, for the whole app at once
@@ -170,7 +166,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            if let teamSaveMessage { Text(teamSaveMessage).font(AppFonts.caption(12)).foregroundColor(teamSaved ? AppColors.positive : AppColors.warmRed) }
+            if let teamSaveMessage { Text(teamSaveMessage).font(AppFonts.caption(12)).foregroundColor(teamSaved ? AppColors.support : AppColors.warmRed) }
         }
     }
 
@@ -362,14 +358,14 @@ struct SettingsView: View {
 
             // Save Button
             ActionButton(showingSaveConfirmation ? appText("OPGESLAGEN!") : appText("BEWAAR API KEY"), style: .filled,
-                         color: showingSaveConfirmation ? SharedColors.positive : AppColors.warmOrange) {
+                         color: showingSaveConfirmation ? SharedColors.support : AppColors.warmOrange) {
                 saveAPIKey()
             }
 
             // Status indicator
             HStack(spacing: 8) {
                 Circle()
-                    .fill(APIKeyManager.shared.hasOpenAIKey ? AppColors.positive : AppColors.warmRed)
+                    .fill(APIKeyManager.shared.hasOpenAIKey ? AppColors.support : AppColors.warmRed)
                     .frame(width: 8, height: 8)
                 Text(APIKeyManager.shared.hasOpenAIKey ? appText("API key geconfigureerd") : appText("Geen API key ingesteld"))
                     .font(AppFonts.caption(12))
@@ -383,7 +379,7 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(systemName: "info.circle")
-                    .foregroundColor(AppColors.steelBlue)
+                    .foregroundColor(AppColors.textSecondary)
                 Text(appText("Over AI Coach"))
                     .font(AppFonts.label(16))
                     .foregroundColor(AppColors.textPrimary)

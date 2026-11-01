@@ -137,10 +137,11 @@ public struct SharedCoachDashboardView: View {
                     Button { shareText(GameSummaryText.text(for: game)) } label: {
                         Text("Deel", bundle: textBundle)
                             .font(SharedFonts.system(13, weight: .semibold))
-                            .foregroundColor(SharedColors.gold)
+                            .foregroundColor(SharedColors.support)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
-                            .background(SharedColors.tint(0.1)).clipShape(Capsule())
+                            .background(SharedColors.support.opacity(0.10)).clipShape(Capsule())
+                            .overlay(Capsule().stroke(SharedColors.support.opacity(0.45), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(loc("Deel game-analyse"))
@@ -165,7 +166,7 @@ public struct SharedCoachDashboardView: View {
             if let winner = game.winner {
                 Text("\(game.name(for: winner)) wint!", bundle: textBundle)
                     .font(SharedFonts.system(14))
-                    .foregroundColor(SharedColors.gold)
+                    .foregroundColor(color(for: winner))
             }
         }
     }
@@ -178,7 +179,7 @@ public struct SharedCoachDashboardView: View {
         HStack(spacing: 8) {
             playerButton(Player.player1, score: game.player1Score)
             Text("-")
-                .font(SharedFonts.system(30, weight: .bold, design: .monospaced))
+                .font(SharedFonts.system(30, weight: .bold, design: .rounded))
                 .foregroundColor(SharedColors.textMuted)
             playerButton(Player.player2, score: game.player2Score)
         }
@@ -193,7 +194,7 @@ public struct SharedCoachDashboardView: View {
                     .lineLimit(1)
                     .foregroundColor(selected ? color(for: side) : SharedColors.textSecondary)
                 Text("\(score)")
-                    .font(SharedFonts.system(34, weight: .bold, design: .monospaced))
+                    .font(SharedFonts.system(34, weight: .bold, design: .rounded))
                     .foregroundColor(selected ? color(for: side) : SharedColors.textPrimary)
             }
             .frame(maxWidth: .infinity)
@@ -215,10 +216,11 @@ public struct SharedCoachDashboardView: View {
                             .font(SharedFonts.system(11))
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
-                            .foregroundColor(index == gameIndex ? SharedColors.textPrimary : SharedColors.textMuted)
+                            // The chosen game as a filled orange pill (gold at 30% went khaki)
+                            .foregroundColor(index == gameIndex ? SharedColors.onAccent : SharedColors.textMuted)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(index == gameIndex ? SharedColors.gold.opacity(0.3) : SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 8))
+                            .background(index == gameIndex ? SharedColors.accent : SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     .buttonStyle(.plain)
                 }
@@ -274,24 +276,25 @@ public struct SharedCoachDashboardView: View {
         let won = game.averageDurationWon(by: player)
         let lost = game.averageDurationLost(by: player)
         return HStack(spacing: 8) {
-            stat(loc("Gewonnen"), won.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", SharedColors.positive, icon: "timer")
+            stat(loc("Gewonnen"), won.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", SharedColors.support, icon: "timer")
             stat(loc("Verloren"), lost.map { seconds in CoachAdvice.formatDuration(seconds) } ?? "-", SharedColors.warmRed, icon: "timer")
-            stat(loc("Beste zone"), game.bestZone(for: player)?.title ?? "-", SharedColors.gold, icon: "mappin")
+            // Facts, not verdicts: plain text with a grey icon (1 November 2026)
+            stat(loc("Beste zone"), game.bestZone(for: player)?.title ?? "-", SharedColors.textPrimary, icon: "mappin", iconTint: SharedColors.textSecondary)
             if !simple {
-                stat(loc("Beste slag"), game.bestShotType(for: player)?.rawValue ?? "-", SharedColors.accent, icon: "star.fill",
-                     shot: game.bestShotType(for: player))
+                stat(loc("Beste slag"), game.bestShotType(for: player)?.rawValue ?? "-", SharedColors.textPrimary, icon: "star.fill",
+                     shot: game.bestShotType(for: player), iconTint: SharedColors.textSecondary)
             }
         }
     }
 
     /// With an icon on top, as iOS' QuickStatBadge
-    private func stat(_ label: String, _ value: String, _ tint: Color, icon: String, shot: ShotType? = nil) -> some View {
+    private func stat(_ label: String, _ value: String, _ tint: Color, icon: String, shot: ShotType? = nil, iconTint: Color? = nil) -> some View {
         VStack(spacing: 4) {
             if let shot {
-                ShotIconView(type: shot, color: tint, size: 14)
+                ShotIconView(type: shot, color: iconTint ?? tint, size: 14)
                     .frame(height: 14)
             } else {
-                AppSymbol(icon, size: 12, color: tint)
+                AppSymbol(icon, size: 12, color: iconTint ?? tint)
             }
             Text(value)
                 .font(SharedFonts.system(13, weight: .bold))
@@ -326,7 +329,7 @@ public struct SharedCoachDashboardView: View {
                         ForEach(0..<rows[row].count, id: \.self) { column in
                             let count = game.pointsWon(by: player, in: rows[row][column])
                             ZStack {
-                                Rectangle().fill(SharedColors.positive.opacity(0.2 + Double(count) / Double(highest) * 0.6))
+                                Rectangle().fill(SharedColors.support.opacity(0.2 + Double(count) / Double(highest) * 0.6))
                                 Text("\(count)")
                                     .font(SharedFonts.system(10))
                                     .foregroundColor(SharedColors.textPrimary)
@@ -376,7 +379,7 @@ public struct SharedCoachDashboardView: View {
     /// Icon, name, a small bar and the count, as on iOS
     private func shotRow(_ item: ShotCount, most: Int) -> some View {
         HStack(spacing: 6) {
-            ShotIconView(type: item.shot, color: SharedColors.gold, size: 14)
+            ShotIconView(type: item.shot, color: SharedColors.textSecondary, size: 14)
                 .frame(width: 14, height: 14)
             Text(item.name)
                 .font(SharedFonts.system(10))
@@ -385,7 +388,7 @@ public struct SharedCoachDashboardView: View {
             Spacer(minLength: 2)
             HStack(spacing: 0) {
                 RoundedRectangle(cornerRadius: 2)
-                    .fill(SharedColors.gold.opacity(0.6))
+                    .fill(SharedColors.textSecondary.opacity(0.6))
                     .frame(width: max(CGFloat(4), CGFloat(40) * CGFloat(item.count) / CGFloat(most)), height: 8)
                 Spacer(minLength: 0)
             }
@@ -401,12 +404,12 @@ public struct SharedCoachDashboardView: View {
         VStack(alignment: .leading, spacing: 10) {
             sectionTitle(loc("Puntverdeling"), icon: "chart.pie.fill")
             HStack(spacing: 8) {
-                countBadge(loc("Winners"), game.winners(by: player).count, SharedColors.positive)
-                countBadge(loc("Druk"), game.forcedErrors(by: player).count, SharedColors.gold)
-                countBadge(loc("Service"), game.servicePoints(by: player).count, SharedColors.accent)
+                countBadge(loc("Winners"), game.winners(by: player).count, SharedColors.support)
+                countBadge(loc("Druk"), game.forcedErrors(by: player).count, SharedColors.support)
+                countBadge(loc("Service"), game.servicePoints(by: player).count, SharedColors.support)
             }
             HStack(spacing: 8) {
-                countBadge(loc("Cadeautjes"), game.unforcedErrors(by: player).count, SharedColors.steelBlueLight)
+                countBadge(loc("Cadeautjes"), game.unforcedErrors(by: player).count, SharedColors.support)
                 countBadge(loc("Eigen fouten"), game.unforcedErrors(by: player.opponent).count, SharedColors.warmRed)
                 countBadge(loc("Strokes"), game.strokes(by: player).count, SharedColors.warmRed)
             }
@@ -425,7 +428,7 @@ public struct SharedCoachDashboardView: View {
     private var volleys: some View {
         let count = game.volleysWon(by: player).count
         return HStack(spacing: 12) {
-            AppSymbol("bolt.fill", size: 18, color: SharedColors.gold)
+            AppSymbol("bolt.fill", size: 18, color: SharedColors.textSecondary)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Uit de lucht", bundle: textBundle)
                     .font(SharedFonts.system(12, weight: .semibold))
@@ -437,7 +440,7 @@ public struct SharedCoachDashboardView: View {
             Spacer()
             Text("\(count)")
                 .font(SharedFonts.system(22, weight: .bold, design: .rounded))
-                .foregroundColor(count > 0 ? SharedColors.gold : SharedColors.textMuted)
+                .foregroundColor(count > 0 ? SharedColors.textPrimary : SharedColors.textMuted)
         }
         .padding(14)
         .background(SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 12))
@@ -459,10 +462,10 @@ public struct SharedCoachDashboardView: View {
         .background(tint.opacity(0.10)).clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
-    /// Gold icon and the title, as on iOS
+    /// Orange icon and the title, like the rows on the home screen
     private func sectionTitle(_ title: String, icon: String) -> some View {
         HStack(spacing: 8) {
-            AppSymbol(icon, size: 15, color: SharedColors.gold)
+            AppSymbol(icon, size: 15, color: SharedColors.accent)
             Text(title)
                 .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
@@ -525,9 +528,9 @@ public struct SharedCoachDashboardView: View {
 
     private func toneColor(_ tone: AdviceTone) -> Color {
         switch tone {
-        case .success: return SharedColors.positive
+        case .success: return SharedColors.support
         case .warning: return SharedColors.accent
-        case .info: return SharedColors.steelBlueLight
+        case .info: return SharedColors.support
         }
     }
 
@@ -552,7 +555,7 @@ public struct SharedCoachDashboardView: View {
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.accent)
                 Button(loc("Opnieuw proberen")) { requestAdvice() }
-                    .foregroundColor(SharedColors.steelBlueLight)
+                    .foregroundColor(SharedColors.support)
             } else if loadingAI {
                 HStack(spacing: 10) {
                     ProgressView()
@@ -564,10 +567,10 @@ public struct SharedCoachDashboardView: View {
                 Button { requestAdvice() } label: {
                     Text(hasKey ? loc("Vraag AI Coach om advies") : loc("Stel je API key in bij Instellingen"))
                         .font(SharedFonts.system(13, weight: .semibold))
-                        .foregroundColor(hasKey ? SharedColors.steelBlueLight : SharedColors.textMuted)
+                        .foregroundColor(hasKey ? SharedColors.support : SharedColors.textMuted)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(hasKey ? SharedColors.steelBlueLight.opacity(0.2) : SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 8))
+                        .background(hasKey ? SharedColors.support.opacity(0.15) : SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 8))
                 }
                 .buttonStyle(.plain)
                 .disabled(!hasKey)
@@ -584,14 +587,14 @@ public struct SharedCoachDashboardView: View {
                 .font(SharedFonts.system(13))
                 .foregroundColor(SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
-            bulletList(loc("Sterke punten:"), advice.sterktePunten, SharedColors.positive)
+            bulletList(loc("Sterke punten:"), advice.sterktePunten, SharedColors.support)
             bulletList(loc("Werkpunten:"), advice.werkPunten, SharedColors.accent)
             Text(advice.focusVolgendeGame)
                 .font(SharedFonts.system(12, weight: .semibold))
                 .foregroundColor(SharedColors.textPrimary)
                 .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(SharedColors.gold.opacity(0.15)).clipShape(RoundedRectangle(cornerRadius: 8))
+                .background(SharedColors.accent.opacity(0.12)).clipShape(RoundedRectangle(cornerRadius: 8))
         }
     }
 

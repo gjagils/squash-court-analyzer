@@ -140,6 +140,12 @@ public struct CourtView: View {
     // MARK: - Court Floor
     private func courtFloor(size: CGSize) -> some View {
         ZStack {
+            // Warm light: a sand floor, so the zones and lines stay visible
+            // on the light background (1 November 2026)
+            if SharedColors.isLight {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(SharedColors.courtSand.opacity(0.5))
+            }
             RoundedRectangle(cornerRadius: 6)
                 .fill(
                     LinearGradient(
@@ -168,7 +174,8 @@ public struct CourtView: View {
 
     // MARK: - Court Markings (no arcs)
     private func courtMarkings(size: CGSize, scale: CGFloat) -> some View {
-        let lineColor = SharedColors.gold.opacity(0.62)
+        // Gold lines on the dark floor; the court line colour on the sand floor of the light theme
+        let lineColor = SharedColors.isLight ? SharedColors.courtLine.opacity(0.85) : SharedColors.gold.opacity(0.62)
         let lineWidth: CGFloat = 1.5
 
         let shortLineY = shortLineDistance * scale
@@ -293,9 +300,9 @@ private struct ZoneTapArea: View {
             RoundedRectangle(cornerRadius: 6)
                 .fill(playerColor.opacity(isPressed ? 0.28 : 0.08))
 
-            // Border
+            // Border; stronger on the light theme's sand floor
             RoundedRectangle(cornerRadius: 6)
-                .stroke(playerColor.opacity(isPressed ? 0.85 : 0.28), lineWidth: 1)
+                .stroke(playerColor.opacity(isPressed ? 0.85 : (SharedColors.isLight ? 0.5 : 0.28)), lineWidth: 1)
         }
         .scaleEffect(isPressed ? 0.96 : 1.0)
         .onTapGesture {

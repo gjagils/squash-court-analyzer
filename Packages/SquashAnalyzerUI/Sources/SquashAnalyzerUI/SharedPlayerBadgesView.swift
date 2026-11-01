@@ -92,11 +92,11 @@ public struct SharedPlayerBadgesView: View {
                                 SharedPlayerTrendView(playerId: playerId, playerName: playerName, photo: photo, historyStore: historyStore)
                             } label: {
                                 HStack(spacing: 10) {
-                                    AppSymbol("chart.bar.xaxis", size: 16, color: SharedColors.gold)
+                                    AppSymbol("chart.bar.xaxis", size: 16, color: SharedColors.accent)
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("PROFIEL", bundle: textBundle)
                                             .font(ActionButton.font)
-                                            .foregroundColor(SharedColors.gold)
+                                            .foregroundColor(SharedColors.accent)
                                         Text("Vorm, winners en fouten over de wedstrijden", bundle: textBundle)
                                             .font(SharedFonts.system(12))
                                             .foregroundColor(SharedColors.textSecondary)
@@ -186,7 +186,7 @@ public struct SharedPlayerBadgesView: View {
 
     private var header: some View {
         HStack(spacing: 14) {
-            PlayerAvatarPlaceholder(color: SharedColors.gold, size: 52, photo: photo)
+            PlayerAvatarPlaceholder(color: SharedColors.textSecondary, size: 52, photo: photo)
             VStack(alignment: .leading, spacing: 4) {
                 Text(playerName)
                     .font(SharedFonts.system(18, weight: .bold, design: .rounded))

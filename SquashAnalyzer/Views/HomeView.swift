@@ -21,8 +21,16 @@ struct HomeView: View {
     @State private var showingPlayerManagement = false
     @State private var showingBadgeCatalog = false
     @State private var showingCompetition = false
+    /// A live team match of the own team is running (LIVE on the Competitie row)
+    @State private var competitionLive = false
     @Environment(\.modelContext) private var modelContext
 
+
+    /// A team match on the server (shared live, or joined with a code) that is not finished yet
+    private static func hasLiveTeamMatch() async -> Bool {
+        let matches = (try? await TeamMatchStorage.store.loadAll()) ?? []
+        return matches.contains { match in match.liveId != nil && !match.isComplete }
+    }
 
     var body: some View {
         ZStack {
@@ -39,13 +47,16 @@ struct HomeView: View {
                         onPlayers: { showingPlayerManagement = true },
                         onBadges: { showingBadgeCatalog = true },
                         onCompetition: { showingCompetition = true },
-                        onLiveFollow: onLiveFollow
+                        onLiveFollow: onLiveFollow,
+                        competitionLive: competitionLive
                     )
                 }
                 .padding(.top, 8)
                 .padding(.bottom, 32)
             }
         }
+        // LIVE on the Competitie row while a team match of the own team is live
+        .task { competitionLive = await Self.hasLiveTeamMatch() }
         .sheet(isPresented: $showingPlayerManagement) {
             PlayerManagementView()
         }

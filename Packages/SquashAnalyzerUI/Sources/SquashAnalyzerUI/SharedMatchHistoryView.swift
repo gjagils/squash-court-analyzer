@@ -82,7 +82,7 @@ public struct SharedMatchHistoryView: View {
                         if let message {
                             Text(message)
                                 .font(SharedFonts.system(12))
-                                .foregroundColor(SharedColors.gold)
+                                .foregroundColor(SharedColors.textSecondary)
                         }
                         if shown.isEmpty {
                             Text("Geen wedstrijden met dit filter", bundle: textBundle)
@@ -281,10 +281,11 @@ public struct SharedMatchHistoryView: View {
     private func shareButton(_ entry: MatchHistorySummary) -> some View {
         Button { share(entry) } label: {
             HStack(spacing: 4) {
-                AppSymbol("square.and.arrow.up", size: 12, color: SharedColors.steelBlue)
+                // A neutral action in the support colour; steel blue means player 2
+                AppSymbol("square.and.arrow.up", size: 12, color: SharedColors.support)
                 Text("Delen", bundle: textBundle)
                     .font(SharedFonts.system(11, weight: .medium, design: .rounded))
-                    .foregroundColor(SharedColors.steelBlue)
+                    .foregroundColor(SharedColors.support)
             }
         }
         .buttonStyle(.plain)
@@ -414,7 +415,7 @@ public struct SharedMatchHistoryView: View {
                             Spacer()
                             if entry.hasBadges { medal }
                             Text("\(entry.player1Games)-\(entry.player2Games)")
-                                .font(SharedFonts.system(16, weight: .bold, design: .monospaced))
+                                .font(SharedFonts.system(16, weight: .bold, design: .rounded))
                                 .foregroundColor(SharedColors.textPrimary)
                         }
                         HStack(spacing: 8) {
@@ -450,7 +451,7 @@ public struct SharedMatchHistoryView: View {
         .padding(14)
         .background(SharedColors.tint(0.05))
         .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(SharedColors.gold.opacity(0.15), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(SharedColors.line(0.10), lineWidth: 1))
     }
 
     // MARK: Actions

@@ -30,7 +30,7 @@ public struct LeagueClubFinder: View {
                 HStack(spacing: 8) {
                     Text(loc("Mijn team is nu \(picked.name)"))
                         .font(SharedFonts.system(14, weight: .semibold))
-                        .foregroundColor(SharedColors.positive)
+                        .foregroundColor(SharedColors.support)
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer()
                     Button(loc("Ander team")) { self.picked = nil }

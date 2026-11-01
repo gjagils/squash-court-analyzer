@@ -8,7 +8,19 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.1 build 3)
+## Volgende build (na 3.1 build 4)
+
+## 3.1 build 4 (geüpload 1 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
+
+Releasenotes `release-notes/3.1-4.md` en `android-3.1-4.md`; testen, homepage (nl/en) en handleiding
+bijgewerkt. 4.0 staat uit in deze build (alleen het Sign in with Apple-entitlement zit erin).
+
+- **Mijn team-kaart compacter (1 november 2026, gedeeld iOS en Android).** Op vraag van Gerd-Jan: het
+  beginscherm paste niet meer op een gewone iPhone. De kop "Jouw team / Competitie" boven de kaart en
+  de drie grote cijfers vervallen; MIJN TEAM met "Competitie ›" rechts, de teamnaam (twee regels mag),
+  "Nr. 1 · 5 gespeeld · 69 punten" op één regel, daaronder Volgende en de tegenstander.
+- **Speler toevoegen en bewerken: Annuleren en Opslaan bovenaan** (iOS en Android). Op Android scrolde
+  het formulier niet mee en viel Opslaan onder het scherm.
 
 ## 3.1 build 3 (geüpload 31 oktober 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 

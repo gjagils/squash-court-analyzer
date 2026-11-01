@@ -136,7 +136,14 @@ public final class PlayerAccount {
     /// Asks the Worker for the account (nil profile: none made yet)
     public func loadProfile() async throws {
         let token = try await validToken()
-        profile = try await client().me(token: token)
+        do {
+            profile = try await client().me(token: token)
+        } catch let error as AccountError {
+            // The Worker refuses this session (another Firebase project, a
+            // deleted user): sign out here, so the screen offers signing in again
+            if error == AccountError.signInAgain { signOut() }
+            throw error
+        }
         profileChecked = true
     }
 

@@ -443,6 +443,8 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
     var claimed: [String] = []
     var learned = "[]"
     var patches: [String] = []
+    /// Set to 401 to make GET /me refuse the session
+    var meStatus = 0
     private var profile: String? = nil
     private var refreshes = 1
 
@@ -481,6 +483,7 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
         }
         if path == "/api/v1/me" {
             if method == "GET" {
+                if meStatus != 0 { return reply(meStatus, "{\"error\":\"sign in\"}") }
                 guard let profile else { return reply(404, "{\"error\":\"no account\"}") }
                 return reply(200, profile)
             }

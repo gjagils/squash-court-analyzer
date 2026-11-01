@@ -176,4 +176,20 @@ final class AccountLinkingTests: XCTestCase {
         XCTAssertNil(AccountClaimLink.token(from: "https://squashanalyzer.com/wedstrijd#short"))
         XCTAssertNil(AccountClaimLink.token(from: "https://squashanalyzer.com/wedstrijd#abc/../DEF123456"))
     }
+
+    @MainActor
+    func testASessionTheWorkerRefusesSignsOut() async throws {
+        let transport = FakeAccountTransport()
+        let account = PlayerAccount()
+        account.configure(endpoints: endpoints(), transport: transport, secrets: MemoryAccountSecrets())
+        try await account.signIn(email: "a@b.nl", password: "geheim1")
+        transport.meStatus = 401
+        do {
+            try await account.loadProfile()
+            XCTFail("a refused session throws")
+        } catch let error as AccountError {
+            XCTAssertEqual(error, AccountError.signInAgain)
+        }
+        XCTAssertFalse(account.isSignedIn, "the screen shows signing in again")
+    }
 }

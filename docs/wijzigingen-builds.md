@@ -8,7 +8,17 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.1 build 8)
+## Volgende build (na 3.1 build 9)
+
+## 3.1 build 9 = RELEASE 3.1 (1 november 2026: TestFlight Squashteam, Play internal/alpha/Google Group, ingediend bij App Review en uitgerold in Play-productie; website zonder testversie gepubliceerd)
+
+Releasenotes `release-notes/3.1-9.md` en `android-3.1-9.md`; storeteksten `release-notes/store-3.1/` (App Store
+nl/en, via `scripts/asc_version.py --build 9 --submit`) en `release-notes/android-3.1-production.md` (Play, via
+`scripts/play_upload.py --production`); Play-listing bijgewerkt met `scripts/play_listing.py` (tekst zonder
+team-import; screenshots nog van 3.0). Dezelfde code als build 8 plus "Nieuw in 3.1" en de rondleiding.
+Website: homepage (nl/en) op versie 3.1, handleiding "beschrijft versie 3.1", `testen.html` zegt dat de
+testronde is afgerond. Na goedkeuring: homepage-label en testen.html op "in de stores" zetten,
+`docs/opleveren-en-hosting.md` ("in productie staat iOS 3.1 / Android 3.1") en de screenshots in de Play-listing.
 
 - **"Nieuw in 3.1" in de app (1 november 2026, akkoord Gerd-Jan):** `WhatsNew.currentVersion` 2, vijf
   punten (Mijn team zonder link, Eenvoudig coachen, Teamwedstrijd zonder gedoe, Oefenpartij, Nieuwe look),

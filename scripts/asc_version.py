@@ -54,6 +54,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--version", required=True)
     ap.add_argument("--build", help="build number to attach, e.g. 7 (must be processed)")
+    ap.add_argument("--submit", action="store_true", help="submit the version for App Review (release after approval)")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     folder = os.path.join(os.path.dirname(__file__), "..", "release-notes", f"store-{args.version}")
@@ -123,7 +124,37 @@ def main():
         asc.patch(f"/v1/appStoreVersions/{version_id}/relationships/build",
                   {"data": {"type": "builds", "id": build["id"]}})
         print(f"  build {args.version} ({args.build}) attached")
-    print("Done. Nothing was submitted for review.")
+    if args.submit:
+        submit(app, version_id)
+        print("Done. Submitted for review.")
+    else:
+        print("Done. Nothing was submitted for review.")
+
+
+def submit(app, version_id):
+    """One review submission with this version as its item, then submitted;
+    the version releases after approval (AFTER_APPROVAL, as 3.0)"""
+    asc.patch(f"/v1/appStoreVersions/{version_id}", {"data": {
+        "type": "appStoreVersions", "id": version_id, "attributes": {"releaseType": "AFTER_APPROVAL"}}})
+    open_ones = asc.get("/v1/reviewSubmissions", {"filter[app]": app, "filter[platform]": "IOS",
+                                                  "filter[state]": "READY_FOR_REVIEW,WAITING_FOR_REVIEW,IN_REVIEW,UNRESOLVED_ISSUES"})["data"]
+    if open_ones:
+        sys.exit(f"There is already an open review submission ({open_ones[0]['attributes']['state']}); finish or cancel it in App Store Connect")
+    submission = asc.post("/v1/reviewSubmissions", {"data": {
+        "type": "reviewSubmissions",
+        "attributes": {"platform": "IOS"},
+        "relationships": {"app": {"data": {"type": "apps", "id": app}}},
+    }})["data"]
+    asc.post("/v1/reviewSubmissionItems", {"data": {
+        "type": "reviewSubmissionItems",
+        "relationships": {
+            "reviewSubmission": {"data": {"type": "reviewSubmissions", "id": submission["id"]}},
+            "appStoreVersion": {"data": {"type": "appStoreVersions", "id": version_id}},
+        },
+    }})
+    done = asc.patch(f"/v1/reviewSubmissions/{submission['id']}", {"data": {
+        "type": "reviewSubmissions", "id": submission["id"], "attributes": {"submitted": True}}})["data"]
+    print(f"  review submission {submission['id']}: {done['attributes']['state']}")
 
 
 if __name__ == "__main__":

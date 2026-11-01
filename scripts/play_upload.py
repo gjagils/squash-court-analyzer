@@ -167,10 +167,10 @@ def upload(token: str, aab: str, notes: str, name: str, tracks: list) -> None:
     print("Uitgerold naar:", ", ".join(tracks))
 
 
-def production_draft(token: str, code: int, notes: str, name: str) -> None:
-    """A production release as a draft with a bundle that is already uploaded
-    (to a test track): visible in Play Console under Production, not rolled
-    out. Gerd-Jan presses the button himself (1 November 2026)."""
+def production_release(token: str, code: int, notes: str, name: str, status: str) -> None:
+    """A production release with a bundle that is already uploaded (to a test
+    track): `draft` is visible in Play Console under Production and not rolled
+    out; `completed` rolls it out to every country (3.1, 1 November 2026)."""
     edit = call(token, "POST", f"{API}/edits", body={})
     edit_id = edit["id"]
     call(token, "PUT", f"{API}/edits/{edit_id}/tracks/production", body={
@@ -178,12 +178,15 @@ def production_draft(token: str, code: int, notes: str, name: str) -> None:
         "releases": [{
             "name": name,
             "versionCodes": [str(code)],
-            "status": "draft",
+            "status": status,
             "releaseNotes": [{"language": "nl-NL", "text": notes}],
         }],
     })
     call(token, "POST", f"{API}/edits/{edit_id}:commit")
-    print(f"Conceptrelease voor productie klaargezet: {name} (versionCode {code}); niet uitgerold.")
+    if status == "completed":
+        print(f"Productierelease uitgerold: {name} (versionCode {code}), alle landen; Google beoordeelt hem nog.")
+    else:
+        print(f"Conceptrelease voor productie klaargezet: {name} (versionCode {code}); niet uitgerold.")
 
 
 def main() -> None:
@@ -191,6 +194,8 @@ def main() -> None:
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--production-draft", action="store_true",
                         help="geen upload: zet de versionCode uit het project als conceptrelease in productie (met --notes)")
+    parser.add_argument("--production", action="store_true",
+                        help="geen upload: rol de versionCode uit het project uit in productie, alle landen (met --notes)")
     parser.add_argument("--aab", default=os.path.join(os.path.dirname(__file__), "..", "Android", "app",
                                                       "build", "outputs", "bundle", "release", "app-release.aab"))
     parser.add_argument("--notes", help="file with the Dutch release notes (max 500 characters)")
@@ -211,8 +216,9 @@ def main() -> None:
     version, build = versions.read_ios()
     name = args.name or versions.android_name(version, build)
     print("Release:", name, "(versionCode", versions.android_code(version, build), "in de app)")
-    if args.production_draft:
-        production_draft(token, versions.android_code(version, build), notes, args.name or version)
+    if args.production_draft or args.production:
+        production_release(token, versions.android_code(version, build), notes, args.name or version,
+                           status="completed" if args.production else "draft")
         return
     upload(token, args.aab, notes, name, [t.strip() for t in args.tracks.split(",") if t.strip()])
 

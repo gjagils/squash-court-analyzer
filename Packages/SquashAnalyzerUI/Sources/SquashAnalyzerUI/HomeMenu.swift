@@ -155,55 +155,50 @@ public struct HomeTeamSummary: View {
     public init(snapshot: LeagueTeamSnapshot) { self.snapshot = snapshot }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        // Compacter since 1 November 2026 (Gerd-Jan): the whole home screen fits
+        // on a standard iPhone again. MIJN TEAM stays; a long team name may take
+        // two lines; stand, played and points in one line.
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Jouw team", bundle: textBundle).font(SharedFonts.system(14, weight: .semibold))
-                Spacer()
-                Text("Competitie", bundle: textBundle).font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
-            }
-            VStack(alignment: .leading, spacing: 10) {
                 Text("MIJN TEAM", bundle: textBundle).font(SharedFonts.system(11, weight: .semibold))
                     .tracking(1.4).foregroundColor(SharedColors.accent)
-                Text(snapshot.name).font(SharedFonts.system(20, weight: .semibold, design: .rounded))
-                    .fixedSize(horizontal: false, vertical: true)
-                HStack(spacing: 28) {
-                    stat(loc("STAND"), snapshot.rank)
-                    stat(loc("GESPEELD"), snapshot.played)
-                    stat(loc("PUNTEN"), snapshot.points)
+                Spacer()
+                Text("Competitie ›", bundle: textBundle).font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
+            }
+            Text(snapshot.name).font(SharedFonts.system(18, weight: .semibold, design: .rounded))
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(loc("Nr. \(number(snapshot.rank)) · \(number(snapshot.played)) gespeeld · \(number(snapshot.points)) punten"))
+                .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
+                .foregroundColor(SharedColors.accent)
+            if let next = snapshot.nextFixture() {
+                Text("Volgende · \(LeagueDates.day(next.date))", bundle: textBundle)
+                    .font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
+                    .padding(.top, 2)
+                // The own team lighter and bolder, so you see at a glance which side you are
+                HStack(spacing: 4) {
+                    LeagueTeamName(name: next.home, own: snapshot.name)
+                    Text("–").foregroundColor(SharedColors.textMuted)
+                    LeagueTeamName(name: next.away, own: snapshot.name)
                 }
-                if let next = snapshot.nextFixture() {
-                    Divider().overlay(SharedColors.line(0.15))
-                    Text("Volgende · \(LeagueDates.day(next.date))", bundle: textBundle)
-                        .font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
-                    // The own team lighter and bolder, so you see at a glance which side you are
-                    HStack(spacing: 4) {
-                        LeagueTeamName(name: next.home, own: snapshot.name)
-                        Text("–").foregroundColor(SharedColors.textMuted)
-                        LeagueTeamName(name: next.away, own: snapshot.name)
-                    }
-                    .font(SharedFonts.system(13))
-                    let opponent = LeagueOpponentText.line(snapshot.opponent(in: next))
-                    if !opponent.isEmpty {
-                        Text(opponent)
-                            .font(SharedFonts.system(11)).foregroundColor(SharedColors.textMuted)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                .font(SharedFonts.system(13))
+                let opponent = LeagueOpponentText.line(snapshot.opponent(in: next))
+                if !opponent.isEmpty {
+                    Text(opponent)
+                        .font(SharedFonts.system(11)).foregroundColor(SharedColors.textMuted)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .padding(16).frame(maxWidth: .infinity, alignment: .leading)
-            .background(SharedColors.brandCard)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
         }
+        .padding(14).frame(maxWidth: .infinity, alignment: .leading)
+        .background(SharedColors.brandCard)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
         .foregroundColor(SharedColors.textPrimary)
     }
 
-    private func stat(_ title: String, _ value: Int?) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(value.map { String($0) } ?? "–")
-                .font(SharedFonts.system(24, weight: .bold, design: .rounded)).foregroundColor(SharedColors.accent)
-            Text(title).font(SharedFonts.system(10)).foregroundColor(SharedColors.textSecondary)
-        }
+    private func number(_ value: Int?) -> String {
+        value.map { String($0) } ?? "–"
     }
 }
 

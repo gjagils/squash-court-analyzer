@@ -12582,6 +12582,42 @@
           }
         }
       }
+    },
+    "Nr. %@ · %@ gespeeld · %@ punten": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No. %@ · %@ played · %@ points"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nr. %@ · %@ gespeeld · %@ punten"
+          }
+        }
+      }
+    },
+    "Competitie ›": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Competition ›"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Competitie ›"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

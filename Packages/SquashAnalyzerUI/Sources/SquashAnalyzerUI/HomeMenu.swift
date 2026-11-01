@@ -152,49 +152,90 @@ public struct HomeMenuTiles: View {
 /// Identical home team presentation for both native hosts; loading and navigation stay with the host.
 public struct HomeTeamSummary: View {
     private let snapshot: LeagueTeamSnapshot
+    /// Test round 3.1 build 5 (Gerd-Jan, 1 November 2026): the next match in a
+    /// tinted bar (variant 3d) or under a line (3c); Instellingen → Weergave
+    @AppStorage(HomeTeamCardStyle.barKey) private var barStyle = false
     public init(snapshot: LeagueTeamSnapshot) { self.snapshot = snapshot }
 
     public var body: some View {
-        // Compacter since 1 November 2026 (Gerd-Jan): the whole home screen fits
-        // on a standard iPhone again. MIJN TEAM stays; a long team name may take
-        // two lines; stand, played and points in one line.
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("MIJN TEAM", bundle: textBundle).font(SharedFonts.system(11, weight: .semibold))
-                    .tracking(1.4).foregroundColor(SharedColors.accent)
-                Spacer()
-                Text("Competitie ›", bundle: textBundle).font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
-            }
-            Text(snapshot.name).font(SharedFonts.system(18, weight: .semibold, design: .rounded))
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
-            Text(loc("Nr. \(number(snapshot.rank)) · \(number(snapshot.played)) gespeeld · \(number(snapshot.points)) punten"))
-                .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
-                .foregroundColor(SharedColors.accent)
-            if let next = snapshot.nextFixture() {
-                Text("Volgende · \(LeagueDates.day(next.date))", bundle: textBundle)
-                    .font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
-                    .padding(.top, 2)
-                // The own team lighter and bolder, so you see at a glance which side you are
-                HStack(spacing: 4) {
-                    LeagueTeamName(name: next.home, own: snapshot.name)
-                    Text("–").foregroundColor(SharedColors.textMuted)
-                    LeagueTeamName(name: next.away, own: snapshot.name)
+        // Since 1 November 2026 (Gerd-Jan; design "Mijn team-kaart varianten",
+        // 3c and 3d): MIJN TEAM with Competitie › on top, the team name with
+        // the stand as a badge on the right, and the next match as one row: a
+        // date block, home or away and the opponent, and the opponent's stand
+        // in the same badge, outlined. With the home screen on one page of a
+        // regular iPhone; the three big numbers of 3.0 did not leave room for
+        // the opponent.
+        let next = snapshot.nextFixture()
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("MIJN TEAM", bundle: textBundle).font(SharedFonts.system(11, weight: .semibold))
+                        .tracking(1.4).foregroundColor(SharedColors.accent)
+                    Spacer()
+                    Text("Competitie ›", bundle: textBundle).font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
                 }
-                .font(SharedFonts.system(13))
-                let opponent = LeagueOpponentText.line(snapshot.opponent(in: next))
-                if !opponent.isEmpty {
-                    Text(opponent)
-                        .font(SharedFonts.system(11)).foregroundColor(SharedColors.textMuted)
-                        .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(snapshot.name).font(SharedFonts.system(18, weight: .semibold, design: .rounded))
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(loc("\(number(snapshot.played)) gespeeld · \(number(snapshot.points)) punten"))
+                            .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
+                            .foregroundColor(SharedColors.accent)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    LeagueRankBadge(rank: snapshot.rank, filled: true)
+                }
+                if let next {
+                    if !barStyle {
+                        Divider().overlay(SharedColors.line(0.15))
+                        fixtureRow(next, inBar: false)
+                    }
+                }
+            }
+            .padding(14)
+            if let next {
+                if barStyle {
+                    fixtureRow(next, inBar: true)
+                        .padding(EdgeInsets(top: 10, leading: 14, bottom: 12, trailing: 14))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(SharedColors.accent.opacity(0.10))
                 }
             }
         }
-        .padding(14).frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(SharedColors.brandCard)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
         .foregroundColor(SharedColors.textPrimary)
+    }
+
+    /// The next match: date block, "Thuis ·" or "Uit ·" with the opponent, the
+    /// last result against them, and their stand as an outlined badge
+    private func fixtureRow(_ next: LeagueFixture, inBar: Bool) -> some View {
+        let ownIsHome = TeamMatch.sameTeam(next.home, snapshot.name)
+        let info = snapshot.opponent(in: next)
+        let opponentName = info?.name ?? (ownIsHome ? next.away : next.home)
+        let side = ownIsHome ? loc("Thuis") : loc("Uit")
+        let previous = LeagueOpponentText.previousLine(info)
+        return HStack(spacing: 12) {
+            // In the bar the block takes the card colour, so it still stands out
+            LeagueDateBlock(date: next.date, fill: inBar ? SharedColors.brandCard : SharedColors.accent.opacity(0.12))
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text("\(side) ·").font(SharedFonts.system(13)).foregroundColor(SharedColors.textSecondary)
+                    Text(opponentName).font(SharedFonts.system(13, weight: .semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if !previous.isEmpty {
+                    Text(previous).font(SharedFonts.system(11)).foregroundColor(SharedColors.textMuted)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if let standing = info?.standing {
+                LeagueRankBadge(rank: standing.rank, filled: false)
+            }
+        }
     }
 
     private func number(_ value: Int?) -> String {
@@ -320,8 +361,6 @@ public struct AndroidHomeView: View {
     private let aiCoach: AICoachContext?
     /// Backups in Instellingen (Android supplies Room and the file pickers)
     private let backup: BackupContext?
-    /// Spelers → Team via link or zip (Android supplies download, unzip and Room)
-    private let teamImporter: (any TeamLinkImporter)?
     /// Player photos and the system pickers (Android)
     private let photoStore: (any PlayerPhotoStore)?
     private let filePicker: (any PlayerFilePicker)?
@@ -342,14 +381,13 @@ public struct AndroidHomeView: View {
                 shareText: @escaping (String) -> Void,
                 cardInbox: CardInbox, cardImportStore: any CardImportStore,
                 leagueTeamFetcher: LeagueTeamFetcher, aiCoach: AICoachContext? = nil, backup: BackupContext? = nil,
-                teamImporter: (any TeamLinkImporter)? = nil, photoStore: (any PlayerPhotoStore)? = nil,
+                photoStore: (any PlayerPhotoStore)? = nil,
                 filePicker: (any PlayerFilePicker)? = nil, shareCard: ((CardSnapshot, String) -> Void)? = nil,
                 teamMatchStore: (any TeamMatchStore)? = nil, testDataStore: (any TestDataCleanupStore)? = nil,
                 onLanguage: ((String) -> Void)? = nil) {
         self.onLanguage = onLanguage
         self.teamMatchStore = teamMatchStore
         self.testDataStore = testDataStore
-        self.teamImporter = teamImporter
         self.photoStore = photoStore
         self.filePicker = filePicker
         self.leagueTeamFetcher = leagueTeamFetcher
@@ -370,7 +408,7 @@ public struct AndroidHomeView: View {
         NavigationStack {
             homeContent
                 .navigationDestination(isPresented: $showingPlayers) {
-                    PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox, teamImporter: teamImporter,
+                    PlayerDirectoryView(store: playerStore, badgeStore: badgeStore, shareText: shareText, cardInbox: cardInbox,
                                         photoStore: photoStore, filePicker: filePicker, shareCard: shareCard, historyStore: historyStore)
                 }
                 .navigationDestination(isPresented: $showingCoach) {

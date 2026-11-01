@@ -73,6 +73,24 @@
         }
       }
     },
+    "%@ gespeeld · %@ punten": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ played · %2$@ points"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ gespeeld · %@ punten"
+          }
+        }
+      }
+    },
     "%@ serveert eerst": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -5815,6 +5833,24 @@
         }
       }
     },
+    "Mijn team-kaart met balk": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My team card with a bar"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn team-kaart met balk"
+          }
+        }
+      }
+    },
     "Mijn team: %@": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -9861,6 +9897,78 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nr. %lld"
+          }
+        }
+      }
+    },
+    "Voor de testronde: de volgende wedstrijd in een getinte balk onderaan de kaart op het beginscherm, of onder een lijn. Laat ons weten wat je het mooist vindt.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For the test round: the next match in a tinted bar at the bottom of the card on the home screen, or under a line. Tell us which one you like best."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voor de testronde: de volgende wedstrijd in een getinte balk onderaan de kaart op het beginscherm, of onder een lijn. Laat ons weten wat je het mooist vindt."
+          }
+        }
+      }
+    },
+    "Vorige keer %lld-%lld gelijk": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drew %1$lld-%2$lld last time"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorige keer %lld-%lld gelijk"
+          }
+        }
+      }
+    },
+    "Vorige keer %lld-%lld gewonnen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Won %1$lld-%2$lld last time"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorige keer %lld-%lld gewonnen"
+          }
+        }
+      }
+    },
+    "Vorige keer %lld-%lld verloren": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lost %1$lld-%2$lld last time"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorige keer %lld-%lld verloren"
           }
         }
       }

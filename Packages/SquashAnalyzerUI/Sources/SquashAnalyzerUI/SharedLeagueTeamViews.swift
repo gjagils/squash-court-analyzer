@@ -16,6 +16,16 @@ enum LeagueDates {
         format(date, "HH:mm")
     }
 
+    /// "6", for the date block on the home card
+    static func dayNumber(_ date: Date) -> String {
+        format(date, "d")
+    }
+
+    /// "NOV": the month in capitals without the Dutch full stop ("nov.")
+    static func monthShort(_ date: Date) -> String {
+        format(date, "MMM").replacingOccurrences(of: ".", with: "").uppercased()
+    }
+
     private static func format(_ date: Date, _ pattern: String) -> String {
         let formatter = DateFormatter()
         formatter.locale = displayLocale
@@ -60,6 +70,112 @@ enum LeagueOpponentText {
             }
         }
         return parts.joined(separator: " · ")
+    }
+
+    /// "Vorige keer 7-8 verloren" as a line of its own (the home card shows the
+    /// opponent's stand in a badge); "" without an earlier result
+    static func previousLine(_ info: LeagueOpponentInfo?) -> String {
+        guard let previous = info?.previous else { return "" }
+        if previous.won {
+            return loc("Vorige keer \(previous.ownGames)-\(previous.theirGames) gewonnen")
+        } else if previous.lost {
+            return loc("Vorige keer \(previous.ownGames)-\(previous.theirGames) verloren")
+        }
+        return loc("Vorige keer \(previous.ownGames)-\(previous.theirGames) gelijk")
+    }
+}
+
+/// Instellingen → Weergave: the home card with the next match in a tinted bar
+/// (true) or under a line (false). Both for the 3.1 test round; the testers
+/// choose (Gerd-Jan, 1 November 2026).
+public enum HomeTeamCardStyle {
+    public static let barKey = "homeTeamCardBar"
+}
+
+/// The switch under Weergave in Instellingen, on iOS (its own SettingsView)
+/// and in the shared SharedSettingsView alike
+public struct HomeTeamCardStyleToggle: View {
+    @AppStorage(HomeTeamCardStyle.barKey) private var teamCardBar = false
+
+    public init() {}
+
+    public var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Toggle(isOn: $teamCardBar) {
+                Text("Mijn team-kaart met balk", bundle: textBundle)
+                    .font(SharedFonts.system(14))
+                    .foregroundColor(SharedColors.textPrimary)
+            }
+            .tint(SharedColors.accent)
+            Text("Voor de testronde: de volgende wedstrijd in een getinte balk onderaan de kaart op het beginscherm, of onder een lijn. Laat ons weten wat je het mooist vindt.", bundle: textBundle)
+                .font(SharedFonts.system(12))
+                .foregroundColor(SharedColors.textMuted)
+        }
+    }
+}
+
+/// "8e" in Dutch, "8th" in English; "–" without a stand
+enum LeagueOrdinal {
+    static func text(_ rank: Int?) -> String {
+        guard let rank else { return "–" }
+        if textLanguage == "nl" { return "\(rank)e" }
+        let tens = rank % 100
+        let suffix: String
+        if tens >= 11 && tens <= 13 {
+            suffix = "th"
+        } else {
+            switch rank % 10 {
+            case 1: suffix = "st"
+            case 2: suffix = "nd"
+            case 3: suffix = "rd"
+            default: suffix = "th"
+            }
+        }
+        return "\(rank)\(suffix)"
+    }
+}
+
+/// The stand as a 52-point badge: "8e" with STAND under it; filled for the
+/// own team, outlined for the opponent (home card, 1 November 2026)
+struct LeagueRankBadge: View {
+    let rank: Int?
+    let filled: Bool
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Text(LeagueOrdinal.text(rank))
+                .font(SharedFonts.system(20, weight: .bold, design: .rounded))
+                .foregroundColor(SharedColors.accent)
+            Text("STAND", bundle: textBundle)
+                .font(SharedFonts.system(10)).tracking(1)
+                .foregroundColor(SharedColors.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .frame(width: 52, height: 52)
+        .background(filled ? SharedColors.accent.opacity(0.12) : Color.clear)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.accent.opacity(filled ? 0.0 : 0.35), lineWidth: 1))
+    }
+}
+
+/// The day of the next match as a block the size of the badge: "6" over "NOV"
+struct LeagueDateBlock: View {
+    let date: Date
+    let fill: Color
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Text(LeagueDates.dayNumber(date))
+                .font(SharedFonts.system(20, weight: .bold, design: .rounded))
+                .foregroundColor(SharedColors.textPrimary)
+            Text(LeagueDates.monthShort(date))
+                .font(SharedFonts.system(10, weight: .semibold)).tracking(1)
+                .foregroundColor(SharedColors.accent)
+        }
+        .frame(width: 52, height: 52)
+        .background(fill)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 

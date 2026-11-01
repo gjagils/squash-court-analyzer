@@ -66,7 +66,14 @@ struct SettingsView: View {
                         if openPart == "team" { teamSection.padding(.bottom, 16) }
                         SettingsDivider()
                         SettingsRow(appText("Weergave"), icon: "circle.lefthalf.filled", open: openPart == "theme") { toggle("theme") }
-                        if openPart == "theme" { AppearancePicker(showsTitle: false).padding(.bottom, 16) }
+                        if openPart == "theme" {
+                            VStack(alignment: .leading, spacing: 12) {
+                                AppearancePicker(showsTitle: false)
+                                // 3.1 test round: two home cards, the testers choose (Gerd-Jan, 1 November 2026)
+                                HomeTeamCardStyleToggle()
+                            }
+                            .padding(.bottom, 16)
+                        }
                         SettingsDivider()
                         // Telefoon, Nederlands or English, for the whole app at once
                         SettingsRow(appText("Taal"), icon: "globe", open: openPart == "language") { toggle("language") }

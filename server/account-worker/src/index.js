@@ -7,12 +7,17 @@
 //
 //   GET    /health
 //   POST   /api/v1/devices                   new device key (no account)
+//   GET    /api/v1/devices/links             names this phone uses that a claim linked to an SBN player
 //   POST   /api/v1/submissions               a match for a player (device key)
 //   GET    /api/v1/me                        own account and player
 //   POST   /api/v1/me                        make the account (16+, consent)
+//   PATCH  /api/v1/me                        { name?, sbnPath?, teamKey? }
 //   DELETE /api/v1/me                        delete the account and everything
 //   GET    /api/v1/me/inbox                  matches waiting for an answer
 //   POST   /api/v1/me/inbox/:id              { use: true | false, block?: true }
+//   GET    /api/v1/me/team                   matches of the own team that wait for a name
+//   POST   /api/v1/me/team/:id               { name }: "dat ben ik", counts at once
+//   POST   /api/v1/me/claim                  { token }: a match from a shared link, counts at once
 //   GET    /api/v1/me/matches?since=         accepted matches
 //   POST   /api/v1/me/matches                own matches, counted at once (batch)
 //   GET    /api/v1/me/awards
@@ -98,14 +103,51 @@ async function createDevice(request, env) {
   return json(201, { deviceId: id, deviceKey: key });
 }
 
-/** The player a submission is for: by player code or by SBN player path */
-async function recipient(env, to) {
+/** A name as a key: the same name with other capitals or spaces is the same name */
+function nameKey(name) {
+  return name.toLowerCase().replace(/\s+/g, ' ');
+}
+
+/**
+ * Who a submission is for: `{ player }` when the player has an account,
+ * `{ target, name }` for a match that waits until someone claims it, or null.
+ *   { code }            the player code (kept for older builds)
+ *   { sbnPath }         an SBN player
+ *   { team, name }      the name the sender uses in an SBN team; a claim
+ *                       taught this phone that name before, the SBN player
+ *   { link: true }      whoever opens the link the app shares
+ */
+async function recipient(env, to, deviceId) {
   if (!to || typeof to !== 'object') return null;
   const code = cleanText(to.code, 20).toUpperCase();
-  if (code) return env.DB.prepare('SELECT id FROM players WHERE code = ?').bind(code).first();
-  const path = cleanText(to.sbnPath, LIMITS.sbnPath);
-  if (path) return env.DB.prepare('SELECT id FROM players WHERE sbn_path = ?').bind(path).first();
+  if (code) {
+    const player = await env.DB.prepare('SELECT id FROM players WHERE code = ?').bind(code).first();
+    return player ? { player } : null;
+  }
+  let path = cleanText(to.sbnPath, LIMITS.sbnPath);
+  const team = cleanText(to.team, LIMITS.teamKey);
+  const name = cleanText(to.name, LIMITS.name);
+  if (!path && team && name) {
+    const learned = await env.DB.prepare('SELECT sbn_path FROM learned_links WHERE device_id = ? AND team_key = ? AND name = ?')
+      .bind(deviceId, team, nameKey(name)).first();
+    if (!learned) return { target: `team:${team}`, name };
+    path = learned.sbn_path;
+  }
+  if (path) {
+    const player = await env.DB.prepare('SELECT id FROM players WHERE sbn_path = ?').bind(path).first();
+    return player ? { player } : { target: `sbn:${path}`, name: '' };
+  }
+  if (to.link === true) return { target: 'link:', name: '' };
   return null;
+}
+
+/** Matches this phone sent in the last day, also the ones that still wait for a player */
+async function sentToday(env, deviceId, now) {
+  const counts = await env.DB.batch([
+    env.DB.prepare('SELECT COUNT(*) AS n FROM matches WHERE device_id = ? AND received_at > ?').bind(deviceId, now - DAY),
+    env.DB.prepare('SELECT COUNT(*) AS n FROM open_matches WHERE device_id = ? AND received_at > ?').bind(deviceId, now - DAY),
+  ]);
+  return counts.reduce((sum, result) => sum + (result.results[0]?.n || 0), 0);
 }
 
 async function submit(request, env) {
@@ -115,12 +157,30 @@ async function submit(request, env) {
   const { match, error } = readMatch(body);
   if (error) return json(400, { error });
   const now = deps.now();
-  const sent = await env.DB.prepare('SELECT COUNT(*) AS n FROM matches WHERE device_id = ? AND received_at > ?')
-    .bind(deviceId, now - DAY).first();
-  if ((sent?.n || 0) >= config(env).submissionsPerDay) return json(429, { error: 'too many matches today' });
+  if (await sentToday(env, deviceId, now) >= config(env).submissionsPerDay) {
+    return json(429, { error: 'too many matches today' });
+  }
   // The same answer whether or not the player exists or blocked this phone:
   // a sender cannot find out who has an account
-  const player = await recipient(env, body.to);
+  const to = await recipient(env, body.to, deviceId);
+  const senderName = cleanText(body.senderName, LIMITS.name);
+  if (to && to.target) {
+    // Waits for a claim. A link gets a token only the sender's link carries.
+    let target = to.target;
+    let token = null;
+    if (target === 'link:') {
+      token = randomText(24);
+      target = `link:${await sha256(token)}`;
+    }
+    await env.DB.prepare(
+      `INSERT OR IGNORE INTO open_matches
+         (id, target, name, device_id, sender_name, played_at, received_at, team_key, opponent, summary, rallies)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).bind(match.id, target, to.name, deviceId, senderName, match.playedAt, now,
+      match.teamKey, match.opponent, match.summary, match.rallies).run();
+    return json(202, token ? { received: match.id, claimToken: token } : { received: match.id });
+  }
+  const player = to && to.player;
   if (player) {
     const blocked = await env.DB.prepare('SELECT 1 FROM blocks WHERE player_id = ? AND device_id = ?')
       .bind(player.id, deviceId).first();
@@ -130,7 +190,7 @@ async function submit(request, env) {
         `INSERT OR IGNORE INTO matches
            (player_id, id, status, device_id, sender_name, played_at, received_at, team_key, opponent, summary, rallies)
          VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)`,
-      ).bind(player.id, match.id, deviceId, cleanText(body.senderName, LIMITS.name), match.playedAt, now,
+      ).bind(player.id, match.id, deviceId, senderName, match.playedAt, now,
         match.teamKey, match.opponent, match.summary, match.rallies).run();
     }
   }
@@ -145,6 +205,7 @@ function playerView(player, account) {
     name: player.name,
     code: player.code,
     sbnPath: player.sbn_path || null,
+    teamKey: player.team_key || null,
     birthYear: account.birth_year,
     createdAt: account.created_at,
   };
@@ -172,18 +233,70 @@ async function createAccount(request, env, caller) {
     const taken = await env.DB.prepare('SELECT 1 FROM players WHERE sbn_path = ?').bind(sbnPath).first();
     if (taken) return json(409, { error: 'sbnPath taken' });
   }
+  const teamKey = cleanText(body.teamKey, LIMITS.teamKey) || null;
   const playerId = crypto.randomUUID();
   let code = randomText(10);
   while (await env.DB.prepare('SELECT 1 FROM players WHERE code = ?').bind(code).first()) code = randomText(10);
   await env.DB.batch([
-    env.DB.prepare('INSERT INTO players (id, name, code, sbn_path, created_at) VALUES (?, ?, ?, ?, ?)')
-      .bind(playerId, name, code, sbnPath, now),
+    env.DB.prepare('INSERT INTO players (id, name, code, sbn_path, team_key, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+      .bind(playerId, name, code, sbnPath, teamKey, now),
     env.DB.prepare('INSERT INTO accounts (uid, player_id, birth_year, consent_at, created_at) VALUES (?, ?, ?, ?, ?)')
       .bind(caller.uid, playerId, birthYear, now, now),
   ]);
+  if (sbnPath) await adoptWaiting(env, playerId, sbnPath);
   const account = await env.DB.prepare('SELECT * FROM accounts WHERE uid = ?').bind(caller.uid).first();
   const player = await env.DB.prepare('SELECT * FROM players WHERE id = ?').bind(playerId).first();
   return json(201, playerView(player, account));
+}
+
+/** Matches sent for this SBN player before the account existed: into the inbox */
+async function adoptWaiting(env, playerId, sbnPath) {
+  const target = `sbn:${sbnPath}`;
+  await env.DB.batch([
+    env.DB.prepare(
+      `INSERT OR IGNORE INTO matches
+         (player_id, id, status, device_id, sender_name, played_at, received_at, team_key, opponent, summary, rallies)
+       SELECT ?, id, 'pending', device_id, sender_name, played_at, received_at, team_key, opponent, summary, rallies
+         FROM open_matches WHERE target = ?
+           AND (device_id IS NULL OR device_id NOT IN (SELECT device_id FROM blocks WHERE player_id = ?))`,
+    ).bind(playerId, target, playerId),
+    env.DB.prepare('DELETE FROM open_matches WHERE target = ?').bind(target),
+  ]);
+}
+
+/** A typo in the name, or "Dit ben ik" chosen later: the SBN player can be set once, the team changed */
+async function updateAccount(request, env, caller) {
+  if (!caller.account) return json(404, { error: 'no account' });
+  const body = await readJson(request);
+  if (!body || typeof body !== 'object') return json(400, { error: 'body' });
+  const playerId = caller.account.player_id;
+  const player = await env.DB.prepare('SELECT * FROM players WHERE id = ?').bind(playerId).first();
+  const steps = [];
+  if (body.name !== undefined) {
+    const name = cleanText(body.name, LIMITS.name);
+    if (!name) return json(400, { error: 'name' });
+    steps.push(env.DB.prepare('UPDATE players SET name = ? WHERE id = ?').bind(name, playerId));
+  }
+  if (body.teamKey !== undefined) {
+    const teamKey = cleanText(body.teamKey, LIMITS.teamKey) || null;
+    steps.push(env.DB.prepare('UPDATE players SET team_key = ? WHERE id = ?').bind(teamKey, playerId));
+  }
+  let newPath = null;
+  if (body.sbnPath !== undefined) {
+    const sbnPath = cleanText(body.sbnPath, LIMITS.sbnPath);
+    if (!sbnPath) return json(400, { error: 'sbnPath' });
+    if (sbnPath !== player.sbn_path) {
+      // Once set it stays: otherwise anyone could hop from player to player and collect their matches
+      if (player.sbn_path) return json(409, { error: 'sbnPath set' });
+      const taken = await env.DB.prepare('SELECT 1 FROM players WHERE sbn_path = ?').bind(sbnPath).first();
+      if (taken) return json(409, { error: 'sbnPath taken' });
+      steps.push(env.DB.prepare('UPDATE players SET sbn_path = ? WHERE id = ?').bind(sbnPath, playerId));
+      newPath = sbnPath;
+    }
+  }
+  if (steps.length > 0) await env.DB.batch(steps);
+  if (newPath) await adoptWaiting(env, playerId, newPath);
+  return me(env, caller);
 }
 
 /** Everything of the player, at once. The Apple token is revoked by the app before it calls this. */
@@ -194,6 +307,8 @@ async function deleteAccount(env, caller) {
     env.DB.prepare('DELETE FROM matches WHERE player_id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM awards WHERE player_id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM blocks WHERE player_id = ?').bind(playerId),
+    // What claims taught other phones about this player goes too
+    env.DB.prepare('DELETE FROM learned_links WHERE sbn_path = (SELECT sbn_path FROM players WHERE id = ?)').bind(playerId),
     env.DB.prepare('DELETE FROM players WHERE id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM accounts WHERE uid = ?').bind(caller.uid),
   ]);
@@ -242,6 +357,91 @@ async function answer(request, env, playerId, matchId) {
   }
   await env.DB.batch(steps);
   return json(204);
+}
+
+/** A match waiting in open_matches becomes the player's, counted at once */
+async function takeOpen(env, playerId, row) {
+  const now = deps.now();
+  await env.DB.batch([
+    env.DB.prepare(
+      `INSERT INTO matches
+         (player_id, id, status, device_id, sender_name, played_at, received_at, decided_at, team_key, opponent, summary, rallies)
+       VALUES (?, ?, 'accepted', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT (player_id, id) DO UPDATE SET status = 'accepted', decided_at = excluded.decided_at`,
+    ).bind(playerId, row.id, row.device_id, row.sender_name, row.played_at, row.received_at, now,
+      row.team_key, row.opponent, row.summary, row.rallies),
+    env.DB.prepare('DELETE FROM open_matches WHERE id = ? AND target = ? AND name = ?').bind(row.id, row.target, row.name),
+  ]);
+  return matchView({ ...row, status: 'accepted' }, true);
+}
+
+/**
+ * Matches of the own team for a name nobody claimed yet ("Gerd Lasso", as a
+ * teammate calls you). Only the result, the date and who sent it: the rallies
+ * come after "dat ben ik".
+ */
+async function teamOpen(env, playerId) {
+  const player = await env.DB.prepare('SELECT team_key FROM players WHERE id = ?').bind(playerId).first();
+  if (!player || !player.team_key) return json(200, { matches: [] });
+  const { results } = await env.DB.prepare(
+    `SELECT * FROM open_matches WHERE target = ?
+       AND id NOT IN (SELECT id FROM matches WHERE player_id = ?)
+       AND (device_id IS NULL OR device_id NOT IN (SELECT device_id FROM blocks WHERE player_id = ?))
+     ORDER BY played_at DESC`,
+  ).bind(`team:${player.team_key}`, playerId, playerId).all();
+  return json(200, {
+    matches: results.map((row) => ({ ...matchView(row, false), name: row.name })),
+  });
+}
+
+async function claimTeam(request, env, playerId, matchId) {
+  const body = await readJson(request);
+  const name = cleanText(body && body.name, LIMITS.name);
+  if (!name) return json(400, { error: 'name' });
+  const player = await env.DB.prepare('SELECT team_key, sbn_path FROM players WHERE id = ?').bind(playerId).first();
+  if (!player || !player.team_key) return json(404, { error: 'not found' });
+  const row = await env.DB.prepare('SELECT * FROM open_matches WHERE id = ? AND target = ? AND name = ?')
+    .bind(matchId, `team:${player.team_key}`, name).first();
+  if (!row) return json(404, { error: 'not found' });
+  const view = await takeOpen(env, playerId, row);
+  // The sending phone learns that its name for this player is this SBN player,
+  // and the rest of its matches for that name come along
+  if (player.sbn_path && row.device_id) {
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO learned_links (device_id, team_key, name, sbn_path, created_at) VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT (device_id, team_key, name) DO UPDATE SET sbn_path = excluded.sbn_path, created_at = excluded.created_at`,
+      ).bind(row.device_id, player.team_key, nameKey(name), player.sbn_path, deps.now()),
+      env.DB.prepare(
+        `INSERT OR IGNORE INTO matches
+           (player_id, id, status, device_id, sender_name, played_at, received_at, team_key, opponent, summary, rallies)
+         SELECT ?, id, 'pending', device_id, sender_name, played_at, received_at, team_key, opponent, summary, rallies
+           FROM open_matches WHERE target = ? AND name = ? AND device_id = ?`,
+      ).bind(playerId, row.target, row.name, row.device_id),
+      env.DB.prepare('DELETE FROM open_matches WHERE target = ? AND name = ? AND device_id = ?')
+        .bind(row.target, row.name, row.device_id),
+    ]);
+  }
+  return json(200, view);
+}
+
+async function claimLink(request, env, playerId) {
+  const body = await readJson(request);
+  const token = cleanText(body && body.token, 64);
+  if (!token) return json(400, { error: 'token' });
+  const row = await env.DB.prepare('SELECT * FROM open_matches WHERE target = ?')
+    .bind(`link:${await sha256(token)}`).first();
+  if (!row) return json(404, { error: 'not found' });
+  return json(200, await takeOpen(env, playerId, row));
+}
+
+/** The names this phone uses that a claim linked to an SBN player */
+async function deviceLinks(request, env) {
+  const deviceId = await device(request, env);
+  if (!deviceId) return json(401, { error: 'device' });
+  const { results } = await env.DB.prepare('SELECT team_key, name, sbn_path FROM learned_links WHERE device_id = ?')
+    .bind(deviceId).all();
+  return json(200, { links: results.map((row) => ({ teamKey: row.team_key, name: row.name, sbnPath: row.sbn_path })) });
 }
 
 async function acceptedMatches(env, playerId, url) {
@@ -321,6 +521,7 @@ async function handle(request, env) {
 
   if (path === '/health' && method === 'GET') return json(200, { ok: true });
   if (path === '/api/v1/devices' && method === 'POST') return createDevice(request, env);
+  if (path === '/api/v1/devices/links' && method === 'GET') return deviceLinks(request, env);
   if (path === '/api/v1/submissions' && method === 'POST') return submit(request, env);
 
   if (path === '/api/v1/me' || path.startsWith('/api/v1/me/')) {
@@ -329,6 +530,7 @@ async function handle(request, env) {
     if (path === '/api/v1/me') {
       if (method === 'GET') return me(env, caller);
       if (method === 'POST') return createAccount(request, env, caller);
+      if (method === 'PATCH') return updateAccount(request, env, caller);
       if (method === 'DELETE') return deleteAccount(env, caller);
       return json(405, { error: 'method' });
     }
@@ -337,6 +539,10 @@ async function handle(request, env) {
     if (path === '/api/v1/me/inbox' && method === 'GET') return inbox(env, playerId);
     const answerMatch = /^\/api\/v1\/me\/inbox\/([A-Za-z0-9-]{8,64})$/.exec(path);
     if (answerMatch && method === 'POST') return answer(request, env, playerId, answerMatch[1]);
+    if (path === '/api/v1/me/team' && method === 'GET') return teamOpen(env, playerId);
+    const teamMatch = /^\/api\/v1\/me\/team\/([A-Za-z0-9-]{8,64})$/.exec(path);
+    if (teamMatch && method === 'POST') return claimTeam(request, env, playerId, teamMatch[1]);
+    if (path === '/api/v1/me/claim' && method === 'POST') return claimLink(request, env, playerId);
     if (path === '/api/v1/me/matches' && method === 'GET') return acceptedMatches(env, playerId, url);
     if (path === '/api/v1/me/matches' && method === 'POST') return addOwnMatches(request, env, playerId);
     if (path === '/api/v1/me/awards' && method === 'GET') return awards(env, playerId);
@@ -348,8 +554,12 @@ async function handle(request, env) {
 /** Requests nobody answered within PENDING_DAYS */
 export async function wipeOldRequests(env) {
   const cutoff = deps.now() - config(env).pendingDays * DAY;
-  const result = await env.DB.prepare("DELETE FROM matches WHERE status = 'pending' AND received_at < ?").bind(cutoff).run();
-  return result.meta?.changes || 0;
+  const results = await env.DB.batch([
+    env.DB.prepare("DELETE FROM matches WHERE status = 'pending' AND received_at < ?").bind(cutoff),
+    env.DB.prepare('DELETE FROM open_matches WHERE received_at < ?').bind(cutoff),
+    env.DB.prepare('DELETE FROM learned_links WHERE created_at < ?').bind(cutoff),
+  ]);
+  return results.reduce((sum, result) => sum + (result.meta?.changes || 0), 0);
 }
 
 export default {

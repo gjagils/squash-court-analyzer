@@ -124,3 +124,6 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
   Skips projectsjabloon (`-keeppackagenames **`, `skip.**`, …) en de getranspileerde
   pakketten `squash.analyzer.**` in `Android/app/proguard-rules.pro`; test elke
   wijziging daaraan met de release-APK op de emulator (16 oktober).
+- **Een `TimeInterval` met een geheel product (`2 * 60 * 60`) wordt in Kotlin een `Int`** en de
+  Kotlin-build faalt met "expected 'Double', actual 'Int'" (iOS merkt niets). Schrijf
+  `2.0 * 60.0 * 60.0` (`TeamMatch.liveIdleInterval`, 1 november 2026).

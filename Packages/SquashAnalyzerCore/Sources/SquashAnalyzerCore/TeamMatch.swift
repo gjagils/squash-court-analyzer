@@ -569,7 +569,7 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     /// update of any partij; the phone keeps its key until Live stoppen or a
     /// confirmed "gone". Until then this says whether the page can still be
     /// there: live, not complete, and changed within that window.
-    public static let liveIdleInterval: TimeInterval = 2 * 60 * 60
+    public static let liveIdleInterval: TimeInterval = 2.0 * 60.0 * 60.0  // Double literals: Skip makes 2 * 60 * 60 an Int
     public func isProbablyLive(now: Date = Date()) -> Bool {
         isLive && !isComplete && now.timeIntervalSince(updatedAt) < TeamMatch.liveIdleInterval
     }

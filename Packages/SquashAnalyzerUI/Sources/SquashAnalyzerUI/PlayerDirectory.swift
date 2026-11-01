@@ -438,6 +438,25 @@ struct PlayerProfileEditor: View {
         }
     }
 
+    private func save() {
+        isSaving = true
+        Task {
+            do {
+                var normalized = player
+                normalized.name = player.trimmedName
+                try await store.savePlayer(normalized)
+                if photoChanged, let photoStore {
+                    try await photoStore.setPhoto(photo, for: normalized.id)
+                }
+                await onSaved()
+                dismiss()
+            } catch {
+                isSaving = false
+                showingError = true
+            }
+        }
+    }
+
     private func pickPhoto() {
         Task {
             do {
@@ -465,44 +484,38 @@ struct PlayerProfileEditor: View {
     var body: some View {
         ZStack {
             SharedColors.background.ignoresSafeArea()
-            ScrollView {
-                VStack(spacing: 24) {
+            VStack(spacing: 0) {
+                // Annuleren and Opslaan stay at the top: the form is longer than
+                // a phone screen (Gerd-Jan, 1 November 2026)
+                HStack(spacing: 12) {
+                    Button(loc("Annuleren")) { dismiss() }
+                        .foregroundColor(SharedColors.textSecondary)
+                        .disabled(isSaving)
+                    Spacer()
                     Text(isNew ? loc("SPELER TOEVOEGEN") : loc("SPELER BEWERKEN"))
-                        .font(SharedFonts.system(18, weight: .bold, design: .rounded)).tracking(2)
-                    if photoStore != nil && filePicker != nil {
-                        photoSection
-                    }
-                    PlayerProfileFields(name: $player.name, focus: $player.coachingFocusAreas, notes: $player.coachingNotes, playerId: player.id)
-                    HStack(spacing: 16) {
-                        Button(loc("Annuleren")) { dismiss() }.disabled(isSaving)
-                        Spacer()
-                        Button(isSaving ? loc("Opslaan…") : loc("Opslaan")) {
-                            isSaving = true
-                            Task {
-                                do {
-                                    var normalized = player
-                                    normalized.name = player.trimmedName
-                                    try await store.savePlayer(normalized)
-                                    if photoChanged, let photoStore {
-                                        try await photoStore.setPhoto(photo, for: normalized.id)
-                                    }
-                                    await onSaved()
-                                    dismiss()
-                                } catch {
-                                    isSaving = false
-                                    showingError = true
-                                }
-                            }
-                        }
+                        .font(SharedFonts.system(14, weight: .bold, design: .rounded)).tracking(1)
+                        .lineLimit(1)
+                        .fixedSize()
+                    Spacer()
+                    Button(isSaving ? loc("Opslaan…") : loc("Opslaan")) { save() }
                         .buttonStyle(.borderedProminent)
                         .tint(SharedColors.accent)
                         .disabled(!player.isValid || isSaving)
-                    }
                 }
-                .foregroundColor(SharedColors.textPrimary)
-                .padding(24)
-                .disabled(isSaving)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                ScrollView {
+                    VStack(spacing: 24) {
+                        if photoStore != nil && filePicker != nil {
+                            photoSection
+                        }
+                        PlayerProfileFields(name: $player.name, focus: $player.coachingFocusAreas, notes: $player.coachingNotes, playerId: player.id)
+                    }
+                    .padding(24)
+                    .disabled(isSaving)
+                }
             }
+            .foregroundColor(SharedColors.textPrimary)
         }
         .interactiveDismissDisabled(isSaving)
         .alert(loc("Deze foto kon niet worden gebruikt"), isPresented: $photoFailed) {

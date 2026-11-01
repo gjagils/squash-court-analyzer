@@ -390,7 +390,8 @@ async function teamOpen(env, playerId) {
      ORDER BY played_at DESC`,
   ).bind(`team:${player.team_key}`, playerId, playerId).all();
   return json(200, {
-    matches: results.map((row) => ({ ...matchView(row, false), name: row.name })),
+    // open_matches has no status column: 'open' says it waits for a name
+    matches: results.map((row) => ({ ...matchView({ ...row, status: 'open' }, false), name: row.name })),
   });
 }
 

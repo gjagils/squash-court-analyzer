@@ -441,58 +441,64 @@ struct PlayerEditSheet: View {
         ZStack {
             AppBackground()
 
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Title
-                    Text(player == nil ? appText("SPELER TOEVOEGEN") : appText("SPELER BEWERKEN"))
-                        .font(AppFonts.title(18))
-                        .foregroundColor(AppColors.textPrimary)
-                        .tracking(3)
-                        .padding(.top, 32)
-
-                    photoSection
-
-                    PlayerProfileFields(
-                        name: $name,
-                        focus: Binding(
-                            get: { Array(selectedFocusAreas).sorted() },
-                            set: { selectedFocusAreas = Set($0) }
-                        ),
-                        notes: $notes,
-                        playerId: player?.id.uuidString
-                    )
-                    .padding(.horizontal, 24)
-
-                    // Save / Cancel
-                    HStack(spacing: 16) {
-                        Button(action: { dismiss() }) {
-                            Text(appText("Annuleren"))
-                                .font(AppFonts.label(14))
-                                .foregroundColor(AppColors.textSecondary)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(RoundedRectangle(cornerRadius: 10).fill(SharedColors.tint(0.07)))
-                        }
-
-                        Button(action: {
-                            guard !name.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-                            onSave(name.trimmingCharacters(in: .whitespaces), Array(selectedFocusAreas), notes, photoData)
-                            dismiss()
-                        }) {
-                            Text(appText("Opslaan"))
-                                .font(AppFonts.label(14))
-                                .foregroundColor(AppColors.backgroundDark)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(RoundedRectangle(cornerRadius: 10).fill(AppColors.warmOrange))
-                        }
-                        .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+            VStack(spacing: 0) {
+                // Annuleren and Opslaan stay at the top: the form is longer than a
+                // phone screen (Gerd-Jan, 1 November 2026)
+                HStack(spacing: 12) {
+                    Button(action: { dismiss() }) {
+                        Text(appText("Annuleren"))
+                            .font(AppFonts.label(14))
+                            .foregroundColor(AppColors.textSecondary)
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 32)
+                    Spacer()
+                    Text(player == nil ? appText("SPELER TOEVOEGEN") : appText("SPELER BEWERKEN"))
+                        .font(AppFonts.title(15))
+                        .foregroundColor(AppColors.textPrimary)
+                        .tracking(2)
+                        .lineLimit(1)
+                    Spacer()
+                    Button(action: save) {
+                        Text(appText("Opslaan"))
+                            .font(AppFonts.label(14))
+                            .foregroundColor(AppColors.backgroundDark)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(RoundedRectangle(cornerRadius: 10).fill(AppColors.warmOrange))
+                    }
+                    .disabled(trimmedName.isEmpty)
+                    .opacity(trimmedName.isEmpty ? 0.5 : 1)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+
+                ScrollView {
+                    VStack(spacing: 24) {
+                        photoSection
+                            .padding(.top, 8)
+
+                        PlayerProfileFields(
+                            name: $name,
+                            focus: Binding(
+                                get: { Array(selectedFocusAreas).sorted() },
+                                set: { selectedFocusAreas = Set($0) }
+                            ),
+                            notes: $notes,
+                            playerId: player?.id.uuidString
+                        )
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 32)
+                    }
                 }
             }
         }
+    }
+
+    private var trimmedName: String { name.trimmingCharacters(in: .whitespaces) }
+
+    private func save() {
+        guard !trimmedName.isEmpty else { return }
+        onSave(trimmedName, Array(selectedFocusAreas), notes, photoData)
+        dismiss()
     }
 }
 

@@ -53,7 +53,7 @@ describe('a match for a name in a team', () => {
     expect((await call('GET', '/api/v1/me/team', { auth: stranger.auth })).json.matches).toHaveLength(0);
     const open = await call('GET', '/api/v1/me/team', { auth: me.auth });
     expect(open.json.matches).toHaveLength(1);
-    expect(open.json.matches[0]).toMatchObject({ matchId: match.matchId, name: 'Gerd Lasso', opponent: 'Mark' });
+    expect(open.json.matches[0]).toMatchObject({ matchId: match.matchId, status: 'open', name: 'Gerd Lasso', opponent: 'Mark' });
     expect(open.json.matches[0].rallies).toBeUndefined();
     expect((await call('POST', `/api/v1/me/team/${match.matchId}`, { auth: me.auth, body: { name: 'Iemand' } })).status).toBe(404);
     const claimed = await call('POST', `/api/v1/me/team/${match.matchId}`, { auth: me.auth, body: { name: 'Gerd Lasso' } });

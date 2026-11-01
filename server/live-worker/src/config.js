@@ -13,6 +13,9 @@ export function readConfig(env) {
     maxSessions: number('MAX_SESSIONS', 200),
     // A session nobody updates for this long is removed (lost phone, no network)
     idleMs: number('IDLE_MINUTES', 120) * 60 * 1000,
+    // A team match stays readable longer: teammates who did not open the app
+    // during the evening still get the partijen the next day (1 November 2026)
+    teamIdleMs: number('TEAM_IDLE_MINUTES', 1440) * 60 * 1000,
     // Session creations per IP per minute, and in total
     createsPerMinute: number('CREATES_PER_MINUTE', 10),
     globalCreatesPerMinute: number('GLOBAL_CREATES_PER_MINUTE', 60),

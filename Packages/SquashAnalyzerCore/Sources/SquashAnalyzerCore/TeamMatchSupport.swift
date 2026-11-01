@@ -249,3 +249,68 @@ public enum TeamMatchSupport {
         return nil
     }
 }
+
+public extension TeamMatchSupport {
+    /// Lowercased, trimmed, common accents dropped ("João" and "Joao" are one player)
+    static func plainName(_ name: String) -> String {
+        var value = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let folds: [(String, String)] = [("á", "a"), ("à", "a"), ("â", "a"), ("ä", "a"), ("ã", "a"), ("é", "e"), ("è", "e"), ("ê", "e"), ("ë", "e"),
+                                         ("í", "i"), ("ì", "i"), ("î", "i"), ("ï", "i"), ("ó", "o"), ("ò", "o"), ("ô", "o"), ("ö", "o"), ("õ", "o"),
+                                         ("ú", "u"), ("ù", "u"), ("û", "u"), ("ü", "u"), ("ç", "c"), ("ñ", "n")]
+        for (accented, plain) in folds { value = value.replacingOccurrences(of: accented, with: plain) }
+        return value
+    }
+
+    /// The first name, lowercased, for matching a tracked match to a partij
+    static func firstName(_ name: String) -> String {
+        let plain = plainName(name)
+        return plain.components(separatedBy: " ").first ?? plain
+    }
+
+    /// The same player: the same full name, or the same first name when one
+    /// side only has a first name (the live page, a quick start)
+    static func samePlayer(_ a: String, _ b: String) -> Bool {
+        let first = plainName(a)
+        let second = plainName(b)
+        if first == second { return true }
+        let singleWord = !first.contains(" ") || !second.contains(" ")
+        return singleWord && firstName(first) == firstName(second)
+    }
+
+    /// Links finished matches from Afgeronde wedstrijden (tracked here, or
+    /// shared to this phone with "Stuur naar speler") to the empty partijen of
+    /// a team match of the same evening with the same players, so a partij a
+    /// teammate refereed lands in the team match by itself. Returns the slots
+    /// that were linked. A match already linked to a partij is left alone.
+    static func autoLink(_ match: inout TeamMatch, history: [MatchHistorySummary], now: Date = Date()) -> [Int] {
+        var linked: [Int] = []
+        var taken: [String] = []
+        for partij in match.partijen { if let id = partij.linkedMatchId { taken.append(id) } }
+        for index in 0..<match.partijen.count {
+            let partij = match.partijen[index]
+            guard !partij.hasEntry, partij.trackingMatchId == nil, !partij.ownPlayer.isEmpty else { continue }
+            let own = partij.ownPlayer
+            let opponent = partij.opponentPlayer.trimmingCharacters(in: .whitespacesAndNewlines)
+            for summary in history {
+                guard summary.status == "completed", !taken.contains(summary.id),
+                      abs(summary.updatedAt.timeIntervalSince(match.date)) < 36.0 * 60.0 * 60.0 else { continue }
+                let ownIsPlayer1: Bool
+                if samePlayer(summary.player1Name, own) && (opponent.isEmpty || samePlayer(summary.player2Name, opponent)) {
+                    ownIsPlayer1 = true
+                } else if samePlayer(summary.player2Name, own) && (opponent.isEmpty || samePlayer(summary.player1Name, opponent)) {
+                    ownIsPlayer1 = false
+                } else {
+                    continue
+                }
+                var changed = partij
+                changed.link(summary, ownIsPlayer1: ownIsPlayer1)
+                match.partijen[index] = changed
+                taken.append(summary.id)
+                linked.append(partij.slot)
+                break
+            }
+        }
+        if !linked.isEmpty { match.updatedAt = now }
+        return linked
+    }
+}

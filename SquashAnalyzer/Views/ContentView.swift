@@ -158,6 +158,8 @@ struct ContentView: View {
                 presentPendingTeam()
                 // A live final score that could not be sent (no network) goes now
                 Task { await LiveShare.shared.retryPending() }
+                // What teammates put on the live pages while the app was away
+                Task { _ = await TeamLiveSync.pull(store: TeamMatchStorage.store) }
                 Task { await AppUsage.shared.appOpened() }
                 Task { @MainActor in TeamLive.shared.retryPending() }
                 // 4.0: the matches in your account come to Afgeronde wedstrijden

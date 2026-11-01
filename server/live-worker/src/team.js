@@ -21,6 +21,11 @@ const SLOT_KEYS = ['1', '2', '3', '4'];
 const photoKey = (slot, index) => `photo:${slot}:${index}`;
 
 export class TeamSession extends ViewerSession {
+  /** A team match is removed `TEAM_IDLE_MINUTES` (a day) after the last update, not `IDLE_MINUTES` */
+  async scheduleIdleAlarm(now) {
+    await this.ctx.storage.setAlarm(now + this.config.teamIdleMs);
+  }
+
   /** Creates the session; false when this id is already in use */
   async create(key, ownerKey, team, id, lang = 'nl') {
     if (await this.ctx.storage.get('key')) return false;

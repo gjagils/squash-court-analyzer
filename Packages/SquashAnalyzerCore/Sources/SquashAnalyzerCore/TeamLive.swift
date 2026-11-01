@@ -415,7 +415,7 @@ public enum TeamLiveError: Error, Equatable {
     case noTransport
     case noConnection
     case refused(status: Int)
-    /// The live team match is gone (two hours after the last update, or stopped)
+    /// The live team match is gone (a day after the last update, or stopped)
     case gone
     /// The server does not know this key: a mistyped invitation, or one for another evening
     case keyRejected

@@ -2,7 +2,7 @@ Nieuw in 3.1
 
 MIJN TEAM
 • Zoek je club en tik je team: de stand, je volgende wedstrijd en de stand van je tegenstander op het beginscherm, zonder een link te kopiëren.
-• In een teamwedstrijd kies je de spelers van de tegenstander met één tik.
+• In een teamwedstrijd kies je de spelers van de tegenstander met één tik, en de uitslag haal je zo nodig op bij SBN.
 
 COACHEN
 • Eenvoudig coachen: tik alleen wie het punt maakt en waar op de baan; de analyse laat zien waar punten gewonnen en verloren worden.

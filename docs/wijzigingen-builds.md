@@ -8,7 +8,28 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.1 build 6)
+## Volgende build (na 3.1 build 7)
+
+- **Partijen van teamgenoten komen vanzelf (1 november 2026, naar aanleiding van de teamwedstrijd van
+  30 oktober: E1 en E3 bleven leeg op Gerd-Jans telefoon).** Oorzaak: alleen het scherm Teamwedstrijd las
+  de livepagina, en de server wist die twee uur na de laatste update. Nu: `TeamLiveSync.pull(store:)`
+  (Core) leest alle live teamwedstrijden en voegt samen; aangeroepen bij het openen van Competitie, bij
+  terugkeer naar de voorgrond (iOS `ContentView`, Android `MainActivity.onResume`) en vanuit het
+  beginscherm (iOS, vóór de LIVE-markering). Worker: `TEAM_IDLE_MINUTES` (standaard 1440) voor
+  teamwedstrijden, `TeamSession.scheduleIdleAlarm`; `TeamMatch.liveIdleInterval` 24 uur; privacy
+  (nl/en), handleiding en `team.html` zeggen nu een dag. Bij "weg" noemt de app de partijen die niet
+  binnenkwamen. `TeamMatchSupport.autoLink`: afgeronde wedstrijden van dezelfde avond (bijgehouden of
+  naar je gedeeld) met de spelers van een lege partij koppelen zelf (`TeamPartij.fromSBN`,
+  `LeagueTeamMatchTests`).
+- **Uitslag ophalen bij SBN.** `LeagueTeamMatch.swift`: parser van de SBN-teamwedstrijdpagina
+  (`/team-match/<n>`, de link van elke wedstrijd in het programma): per partij spelers, winnaar en
+  gamestanden; `LeagueTeamFetcher.fetchTeamMatch`, `TeamMatch.fill(fromSBN:)` (lege partijen vullen,
+  onbekende punten aanvullen als de winnaars per game kloppen, verschillen melden, gekoppelde partijen
+  ongemoeid) en `TeamMatch.from(fixture:ownTeam:sbn:)`. Schermen: knop "Uitslag van SBN ophalen" in een
+  niet-complete teamwedstrijd (ook automatisch bij openen van een gespeelde, niet-live wedstrijd) en
+  onder Competitie de sectie "Gespeeld, nog niet in de app" met "Ophalen bij SBN" voor gespeelde
+  wedstrijden uit het programma zonder teamwedstrijd. Android: de LIVE-markering bij Competitie op het
+  beginscherm is er alleen op iOS (de Android-host geeft `competitionLive` nog niet mee).
 
 - **Beginscherm: het icoon van een rij met LIVE-markering kleurt mee in zeegroen** (Gerd-Jan zag in
   build 6 de pil wel en het icoon niet; `HomeMenu.menuRow`).

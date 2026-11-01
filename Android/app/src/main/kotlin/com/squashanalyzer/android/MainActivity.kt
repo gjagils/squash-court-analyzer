@@ -33,6 +33,7 @@ import skip.ui.PresentationRoot
 import skip.ui.UIApplication
 import squash.analyzer.core.CardInbox
 import squash.analyzer.core.LeagueTeamFetcher
+import squash.analyzer.core.TeamLiveSync
 import skip.foundation.URL
 import squash.analyzer.core.AICoachClient
 import squash.analyzer.core.LiveShare
@@ -100,6 +101,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var autoBackup: AutoBackup
     /** For Pionier at every resume (BadgeSeason); set in onCreate */
     private var badges: BadgeAwardStore? = null
+    /// Competitie's store, for the live sync when the app comes back
+    private var teamMatches: BackgroundTeamMatchStore? = null
 
     /** Live score on the lock screen: the notification permission, asked when following (Android 13+) */
     private var notificationAnswer: CompletableDeferred<Boolean>? = null
@@ -144,6 +147,7 @@ class MainActivity : AppCompatActivity() {
         // Competitie: team matches in one JSON file in the app's files directory (Core's file, off the main thread)
         val teamDirectory = URL(fileURLWithPath = filesDir.absolutePath, isDirectory = true)
         val teamMatchStore = BackgroundTeamMatchStore(directory = teamDirectory)
+        teamMatches = teamMatchStore
         // The coach's notes per game live next to the team matches (GameNotes)
         GameNotes.shared.configure(directory = teamDirectory)
         // Oefenpartijen (no badges, not in the profile) in the same folder
@@ -237,6 +241,8 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         lifecycleScope.launch { LiveShare.shared.retryPending() }
         lifecycleScope.launch { TeamLive.shared.retryPending() }
+        // What teammates put on the live pages while the app was away
+        teamMatches?.let { store -> lifecycleScope.launch { runCatching { TeamLiveSync.pull(store = store) } } }
         lifecycleScope.launch { AppUsage.shared.appOpened() }
         // Pionier after the badge reset, also for a card from before it imported since
         badges?.let { store -> lifecycleScope.launch { runCatching { store.grantPioneers() } } }

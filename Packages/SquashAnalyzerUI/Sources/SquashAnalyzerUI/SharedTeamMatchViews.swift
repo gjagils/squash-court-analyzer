@@ -135,6 +135,8 @@ public struct SharedTeamMatchesView: View {
     /// Opened right after creating it shared: its share screen opens too
     @State private var shareOnOpen = false
     @State private var message: String? = nil
+    /// The fixture whose SBN result is being fetched ("Ophalen bij SBN")
+    @State private var fetchingFixture: String? = nil
 
     public init(store: any TeamMatchStore, tools: TeamMatchTools, team: LeagueTeamSnapshot? = nil) {
         self.store = store
@@ -176,6 +178,13 @@ public struct SharedTeamMatchesView: View {
                             TeamMatchCard(match: match) { shareOnOpen = false; opened = match }
                         }
                     }
+                    if !isLoading && !unloggedFixtures.isEmpty {
+                        // Played, result at SBN, not in the app: one tap brings it in (1 November 2026)
+                        SectionHeader(loc("GESPEELD, NOG NIET IN DE APP"))
+                        ForEach(unloggedFixtures) { fixture in
+                            unloggedRow(fixture)
+                        }
+                    }
                     if let message {
                         Text(message).font(SharedFonts.system(12)).foregroundColor(SharedColors.error)
                     }
@@ -187,6 +196,8 @@ public struct SharedTeamMatchesView: View {
         .task {
             await load()
             await AppUsage.shared.used(AppUsagePart.competition)
+            // What teammates put on the live pages since the last look
+            if TeamLiveSync.changed(await TeamLiveSync.pull(store: store)) { await load() }
         }
         .sheet(isPresented: $creating) {
             NewTeamMatchSheet(team: team, existing: matches) { match, share in
@@ -225,6 +236,76 @@ public struct SharedTeamMatchesView: View {
 
     private var sharedMatches: [TeamMatch] { matches.filter { match in match.isLive } }
     private var ownMatches: [TeamMatch] { matches.filter { match in !match.isLive } }
+
+    /// Fixtures of Mijn team that were played (SBN shows a score) and have no team match here
+    private var unloggedFixtures: [LeagueFixture] {
+        guard let team, tools.leagueFetcher != nil else { return [] }
+        var taken: [String] = []
+        for match in matches { if let id = match.fixtureId { taken.append(id) } }
+        let now = Date()
+        var result: [LeagueFixture] = []
+        for fixture in team.fixtures where fixture.date < now && fixture.score != nil && !taken.contains(fixture.id) {
+            result.append(fixture)
+        }
+        return result.sorted { a, b in a.date > b.date }
+    }
+
+    /// Date, the two teams with the SBN score, and "Ophalen bij SBN"
+    private func unloggedRow(_ fixture: LeagueFixture) -> some View {
+        let own = team?.name ?? ""
+        let atHome = TeamMatch.sameTeam(fixture.home, own)
+        return VStack(alignment: .leading, spacing: 8) {
+            Text(TeamMatchReport.dayText(fixture.date))
+                .font(SharedFonts.system(11, weight: .medium, design: .rounded))
+                .foregroundColor(SharedColors.textSecondary)
+            HStack(spacing: 8) {
+                Text(fixture.home)
+                    .font(SharedFonts.system(14, weight: atHome ? .bold : .regular, design: .rounded))
+                    .foregroundColor(atHome ? SharedColors.accent : SharedColors.textPrimary)
+                    .lineLimit(1)
+                Text(fixture.score ?? "")
+                    .font(SharedFonts.system(14, weight: .bold, design: .rounded))
+                    .foregroundColor(SharedColors.textPrimary)
+                Text(fixture.away)
+                    .font(SharedFonts.system(14, weight: atHome ? .regular : .bold, design: .rounded))
+                    .foregroundColor(atHome ? SharedColors.textPrimary : SharedColors.accent)
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            ActionButton(fetchingFixture == fixture.id ? loc("Even geduld…") : loc("Ophalen bij SBN"), icon: "arrow.down.circle",
+                         color: SharedColors.support, disabled: fetchingFixture != nil) {
+                Task { await importFromSBN(fixture) }
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(SharedColors.tint(0.05))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(SharedColors.line(0.10), lineWidth: 1))
+    }
+
+    /// Reads the SBN team-match page and keeps the match with the result in it
+    private func importFromSBN(_ fixture: LeagueFixture) async {
+        guard let fetcher = tools.leagueFetcher, let team else { return }
+        fetchingFixture = fixture.id
+        message = nil
+        do {
+            let result = try await fetcher.fetchTeamMatch(fixture.url)
+            guard result.hasResult else {
+                message = loc("SBN heeft nog geen uitslag van deze wedstrijd.")
+                fetchingFixture = nil
+                return
+            }
+            let match = TeamMatch.from(fixture: fixture, ownTeam: team.name, sbn: result)
+            try await store.save(match)
+            await load()
+        } catch let error as LeagueTeamError {
+            message = error.message
+        } catch {
+            message = LeagueTeamError.unavailable.message
+        }
+        fetchingFixture = nil
+    }
 
     /// A new team match: kept, shared with the team when asked (a failure leaves it
     /// as an own team match; its screen says so), then opened
@@ -325,6 +406,9 @@ public struct SharedTeamMatchView: View {
     private let openShare: Bool
     @State private var liveBusy = false
     @State private var confirmStopLive = false
+    /// "Uitslag van SBN ophalen": busy, and what it did (not an error)
+    @State private var sbnBusy = false
+    @State private var sbnMessage: String? = nil
     /// A tracked match being played for a partij (full screen)
     @State private var tracking: TeamTrackRequest? = nil
     /// Asked for in the editor; opens as soon as the editor sheet is gone
@@ -353,6 +437,17 @@ public struct SharedTeamMatchView: View {
                     header
                     TeamShareBanner(match: match)
                     partijenList
+                    if sbnFixture != nil && (!match.isComplete || match.hasUnknownPoints) {
+                        // The back-up for a live page that is gone, and for partijen nobody tracked
+                        ActionButton(sbnBusy ? loc("Even geduld…") : loc("Uitslag van SBN ophalen"), icon: "arrow.down.circle",
+                                     color: SharedColors.support, disabled: sbnBusy) {
+                            Task { await fetchFromSBN(announce: true) }
+                        }
+                    }
+                    if let sbnMessage {
+                        Text(sbnMessage).font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     TeamLiveCard(match: match, busy: liveBusy, canShare: tools.shareText != nil,
                                  problem: liveProblem,
                                  onGoLive: { Task { await goLive() } },
@@ -377,6 +472,11 @@ public struct SharedTeamMatchView: View {
                 opponentRoster = await LeagueOpponentStorage.names(for: link, fetcher: fetcher)
             }
             await syncFromLive(showGone: false)
+            await autoLinkHistory()
+            // A played match that is still not complete: SBN may have the rest
+            if match.date < Date() && (!match.isComplete || match.hasUnknownPoints) && !match.isLive {
+                await fetchFromSBN(announce: false)
+            }
             if openShare {
                 if match.isLive {
                     sharingTeam = true
@@ -442,6 +542,60 @@ public struct SharedTeamMatchView: View {
             return loc("Geen verbinding: je partij staat nog niet op de livepagina. Tik op Vernieuwen zodra je weer internet hebt.")
         }
         return nil
+    }
+
+    /// The SBN fixture of this team match, when it came from the programme and SBN can be read
+    private var sbnFixture: LeagueFixture? {
+        guard tools.leagueFetcher != nil, let team, let id = match.fixtureId else { return nil }
+        return team.fixtures.first { fixture in fixture.id == id }
+    }
+
+    /// Finished matches of this evening (tracked here, or shared to this phone)
+    /// with the players of an empty partij are linked by themselves
+    private func autoLinkHistory() async {
+        guard let history = try? await tools.historyStore.loadHistory() else { return }
+        var changed = match
+        let linked = TeamMatchSupport.autoLink(&changed, history: history)
+        guard !linked.isEmpty else { return }
+        try? await store.save(changed)
+        match = changed
+        onChange(changed)
+    }
+
+    /// Reads the SBN team-match page into this match; `announce` says what it
+    /// did even when nothing changed (the button), the automatic run only when it did
+    private func fetchFromSBN(announce: Bool) async {
+        guard let fetcher = tools.leagueFetcher, let fixture = sbnFixture else { return }
+        sbnBusy = true
+        do {
+            let result = try await fetcher.fetchTeamMatch(fixture.url)
+            var changed = match
+            let outcome = changed.fill(fromSBN: result)
+            if outcome.changedAnything {
+                try await store.save(changed)
+                match = changed
+                onChange(changed)
+            }
+            var lines: [String] = []
+            if !outcome.filled.isEmpty {
+                lines.append(loc("Van SBN overgenomen: \(LeagueFillOutcome.labels(outcome.filled))."))
+            }
+            if !outcome.completed.isEmpty {
+                lines.append(loc("Gamestanden aangevuld: \(LeagueFillOutcome.labels(outcome.completed))."))
+            }
+            if !outcome.differences.isEmpty {
+                lines.append(loc("Anders dan op deze telefoon (niet gewijzigd): ") + outcome.differences.joined(separator: "; "))
+            }
+            if lines.isEmpty && announce {
+                lines.append(result.hasResult ? loc("Alles stond er al.") : loc("SBN heeft nog geen uitslag van deze wedstrijd."))
+            }
+            if !lines.isEmpty { sbnMessage = lines.joined(separator: " ") }
+        } catch let error as LeagueTeamError {
+            if announce { sbnMessage = error.message }
+        } catch {
+            if announce { sbnMessage = LeagueTeamError.unavailable.message }
+        }
+        sbnBusy = false
     }
 
     /// "Vernieuwen": send our partijen again (what failed earlier), then read what teammates put there
@@ -719,7 +873,13 @@ public struct SharedTeamMatchView: View {
                 // opening the screen, so the LIVE marker on the home screen
                 // follows the server (Gerd-Jan, 1 November 2026)
                 await clearLive()
-                message = loc("De livepagina is afgelopen (2 uur na de laatste update) en wordt niet meer bijgewerkt.")
+                var missing: [String] = []
+                for partij in match.partijen where !partij.hasEntry { missing.append(partij.label) }
+                if missing.isEmpty {
+                    message = loc("De livepagina is afgelopen (een dag na de laatste update) en wordt niet meer bijgewerkt.")
+                } else {
+                    message = loc("De livepagina is afgelopen (een dag na de laatste update). Niet binnengekomen: \(missing.joined(separator: ", ")). Haal de uitslag op bij SBN of vul ze in.")
+                }
             } else if showGone {
                 message = loc("Geen verbinding om de livepagina te lezen.")
             }

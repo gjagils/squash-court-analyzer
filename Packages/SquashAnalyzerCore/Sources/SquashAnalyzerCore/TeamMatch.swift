@@ -84,6 +84,8 @@ public struct TeamPartij: Codable, Equatable, Sendable {
     public var bestOf: Int
     /// Taken over from the live page (another phone's partij); a local edit makes it ours
     public var fromLive: Bool?
+    /// Filled in from the SBN team-match page (the back-up for a live page that is gone)
+    public var fromSBN: Bool?
     /// A coach or referee match started for this partij that is not finished
     /// yet (its id), and whether our player is its Speler 1: resuming that
     /// match picks the coupling up again. Cleared when the result is linked.
@@ -565,11 +567,11 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
 
     public var isLive: Bool { liveId != nil && liveKey != nil }
 
-    /// The Worker removes a live team match `IDLE_MINUTES` (120) after the last
-    /// update of any partij; the phone keeps its key until Live stoppen or a
-    /// confirmed "gone". Until then this says whether the page can still be
+    /// The Worker removes a live team match `TEAM_IDLE_MINUTES` (a day) after
+    /// the last update of any partij; the phone keeps its key until Live
+    /// stoppen or a "gone". Until then this says whether the page can still be
     /// there: live, not complete, and changed within that window.
-    public static let liveIdleInterval: TimeInterval = 2.0 * 60.0 * 60.0  // Double literals: Skip makes 2 * 60 * 60 an Int
+    public static let liveIdleInterval: TimeInterval = 24.0 * 60.0 * 60.0  // Double literals: Skip makes 24 * 60 * 60 an Int
     public func isProbablyLive(now: Date = Date()) -> Bool {
         isLive && !isComplete && now.timeIntervalSince(updatedAt) < TeamMatch.liveIdleInterval
     }

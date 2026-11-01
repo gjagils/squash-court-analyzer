@@ -12,6 +12,8 @@ routes = [
 [vars]
 PUBLIC_URL = "https://live.squashanalyzer.com"
 IDLE_MINUTES = "120"
+# A live team match stays a day after its last update, so every teammate's app can still read the partijen
+TEAM_IDLE_MINUTES = "1440"
 MAX_SESSIONS = "200"
 CREATES_PER_MINUTE = "10"
 GLOBAL_CREATES_PER_MINUTE = "60"

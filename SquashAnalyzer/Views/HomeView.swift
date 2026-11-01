@@ -29,6 +29,8 @@ struct HomeView: View {
     /// A team match on the server (shared live, or joined with a code) that can
     /// still be live: not finished, and updated within the server's two-hour window
     private static func hasLiveTeamMatch() async -> Bool {
+        // First what teammates put on the live pages, then the marker
+        _ = await TeamLiveSync.pull(store: TeamMatchStorage.store)
         let matches = (try? await TeamMatchStorage.store.loadAll()) ?? []
         return matches.contains { match in match.isProbablyLive() }
     }

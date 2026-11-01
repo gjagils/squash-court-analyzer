@@ -2,7 +2,7 @@ New in 3.1
 
 MY TEAM
 • Find your club and tap your team: the standings, your next match and your opponent's standing on the home screen, without copying a link.
-• In a team match, pick the opposing players with one tap.
+• In a team match, pick the opposing players with one tap, and fetch the result from SBN when needed.
 
 COACHING
 • Simple coaching: just tap who won the point and where on the court; the analysis shows where points are won and lost.

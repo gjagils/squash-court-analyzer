@@ -2557,24 +2557,6 @@
         }
       }
     },
-    "De livepagina is afgelopen (2 uur na de laatste update) en wordt niet meer bijgewerkt.": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The live page has ended (2 hours after the last update) and is no longer updated."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De livepagina is afgelopen (2 uur na de laatste update) en wordt niet meer bijgewerkt."
-          }
-        }
-      }
-    },
     "De livepagina is meteen weg voor iedereen. Je teamwedstrijd blijft in de app staan.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -12669,6 +12651,186 @@
           "stringUnit": {
             "state": "translated",
             "value": "De wedstrijd staat in je account en bij Afgeronde wedstrijden, en telt mee."
+          }
+        }
+      }
+    },
+    "GESPEELD, NOG NIET IN DE APP": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PLAYED, NOT IN THE APP YET"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GESPEELD, NOG NIET IN DE APP"
+          }
+        }
+      }
+    },
+    "Ophalen bij SBN": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fetch from SBN"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ophalen bij SBN"
+          }
+        }
+      }
+    },
+    "SBN heeft nog geen uitslag van deze wedstrijd.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SBN has no result for this match yet."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SBN heeft nog geen uitslag van deze wedstrijd."
+          }
+        }
+      }
+    },
+    "Uitslag van SBN ophalen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fetch result from SBN"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uitslag van SBN ophalen"
+          }
+        }
+      }
+    },
+    "De livepagina is afgelopen (een dag na de laatste update) en wordt niet meer bijgewerkt.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The live page has ended (a day after the last update) and is no longer updated."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De livepagina is afgelopen (een dag na de laatste update) en wordt niet meer bijgewerkt."
+          }
+        }
+      }
+    },
+    "De livepagina is afgelopen (een dag na de laatste update). Niet binnengekomen: %@. Haal de uitslag op bij SBN of vul ze in.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The live page has ended (a day after the last update). Not received: %@. Fetch the result from SBN or enter them."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De livepagina is afgelopen (een dag na de laatste update). Niet binnengekomen: %@. Haal de uitslag op bij SBN of vul ze in."
+          }
+        }
+      }
+    },
+    "Van SBN overgenomen: %@.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taken from SBN: %@."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Van SBN overgenomen: %@."
+          }
+        }
+      }
+    },
+    "Gamestanden aangevuld: %@.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Game scores completed: %@."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gamestanden aangevuld: %@."
+          }
+        }
+      }
+    },
+    "Anders dan op deze telefoon (niet gewijzigd): ": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Different from this phone (not changed): "
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anders dan op deze telefoon (niet gewijzigd): "
+          }
+        }
+      }
+    },
+    "Alles stond er al.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything was already there."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles stond er al."
           }
         }
       }

@@ -52,13 +52,12 @@ final class KeychainAccountSecrets: AccountSecretStore {
     }
 }
 
-/// Sign in with Apple for Mijn account. Needs the "Sign in with Apple"
-/// capability on the App ID and in the entitlements (not set yet: Gerd-Jan's
-/// list in docs/wijzigingen-builds.md), so the button only shows with
-/// SQUASH_APPLE_SIGN_IN=YES.
+/// Sign in with Apple for Mijn account. The capability is on the App ID and in
+/// the entitlements since 1 November 2026; SQUASH_APPLE_SIGN_IN=NO hides the
+/// button again if it ever has to go.
 @MainActor
 enum AppleAccountSignIn {
-    /// Only once the capability is there: SQUASH_APPLE_SIGN_IN=YES (Info.plist SquashAppleSignIn)
+    /// SQUASH_APPLE_SIGN_IN=YES (Info.plist SquashAppleSignIn)
     static var isAvailable: Bool {
         Features.isOn(Bundle.main.infoDictionary?["SquashAppleSignIn"] as? String)
     }

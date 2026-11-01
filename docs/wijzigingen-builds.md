@@ -70,8 +70,15 @@ Releasenotes `release-notes/3.1-3.md` en `android-3.1-3.md`; website testen, hom
     `account-outbox.json` naast de teamwedstrijden. Oefenpartijen gaan nooit mee. De wachtrij
     wordt nog niet gevuld: het koppelen van spelers bij de coach komt later.
   - Instellingen → Mijn account (gedeeld scherm `SharedAccountSection`), alleen met de vlag aan.
-  - Inloggen met Apple (iOS, native) is gebouwd maar staat uit tot het entitlement er is
-    (`SQUASH_APPLE_SIGN_IN=YES`). Google en Apple op Android zijn nog niet gebouwd.
+  - Inloggen met Apple (iOS, native): sinds 1 november aan (entitlement
+    `com.apple.developer.applesignin`, `SQUASH_APPLE_SIGN_IN=YES`; de knop staat alleen in Mijn
+    account, dus alleen met de vlag aan). Google en Apple op Android zijn nog niet gebouwd.
+- **Ingericht door Gerd-Jan (1 november 2026):** Firebase e-mail/wachtwoord (mails in het
+  Nederlands) en Apple (Services ID `com.squashanalyzer.app.signin`, sleutel `W76A7C25SX` in
+  `~/.squash-keys/`), iOS-app aangemeld in Firebase; D1 `squash-account` in de EU (EEUR),
+  migratie gedaan, Worker uitgerold op `account.squashanalyzer.com` (`/health` geeft ok). De
+  Firebase-sleutel (Android key, geen app-beperking) gaat bij een iOS-testbuild mee als
+  `SQUASH_FIREBASE_API_KEY` uit `~/.android-keys/google-services.json`.
   - Build settings: iOS `SQUASH_ACCOUNT_SERVER` (`local` = de Mac), `SQUASH_FIREBASE_API_KEY`,
     `SQUASH_APPLE_SIGN_IN`; Android `-PsquashAccountServer=local` (de Firebase-sleutel komt uit
     google-services.json). Lokaal testen: `npm run local` in `server/account-worker`.

@@ -131,20 +131,43 @@ def main():
         print("Done. Nothing was submitted for review.")
 
 
+def complete_age_rating(app):
+    """Apple added questions to the age rating in 2025 (socialMedia); an
+    unanswered one blocks the submission. The app has no social media
+    features, so it is "no". Only the declaration being prepared is touched."""
+    for info in asc.get(f"/v1/apps/{app}/appInfos")["data"]:
+        if info["attributes"].get("state") != "PREPARE_FOR_SUBMISSION":
+            continue
+        declaration = asc.get(f"/v1/appInfos/{info['id']}/ageRatingDeclaration")["data"]
+        if declaration["attributes"].get("socialMedia") is None:
+            asc.patch(f"/v1/ageRatingDeclarations/{declaration['id']}", {"data": {
+                "type": "ageRatingDeclarations", "id": declaration["id"], "attributes": {"socialMedia": False}}})
+            print("  age rating: socialMedia set to no")
+
+
 def submit(app, version_id):
     """One review submission with this version as its item, then submitted;
-    the version releases after approval (AFTER_APPROVAL, as 3.0)"""
+    the version releases after approval (AFTER_APPROVAL, as 3.0). An open
+    submission without items (a half-done earlier run) is reused."""
     asc.patch(f"/v1/appStoreVersions/{version_id}", {"data": {
         "type": "appStoreVersions", "id": version_id, "attributes": {"releaseType": "AFTER_APPROVAL"}}})
+    complete_age_rating(app)
     open_ones = asc.get("/v1/reviewSubmissions", {"filter[app]": app, "filter[platform]": "IOS",
                                                   "filter[state]": "READY_FOR_REVIEW,WAITING_FOR_REVIEW,IN_REVIEW,UNRESOLVED_ISSUES"})["data"]
-    if open_ones:
-        sys.exit(f"There is already an open review submission ({open_ones[0]['attributes']['state']}); finish or cancel it in App Store Connect")
-    submission = asc.post("/v1/reviewSubmissions", {"data": {
-        "type": "reviewSubmissions",
-        "attributes": {"platform": "IOS"},
-        "relationships": {"app": {"data": {"type": "apps", "id": app}}},
-    }})["data"]
+    submission = None
+    for candidate in open_ones:
+        state = candidate["attributes"]["state"]
+        items = asc.get(f"/v1/reviewSubmissions/{candidate['id']}/items")["data"]
+        if state == "READY_FOR_REVIEW" and not items:
+            submission = candidate
+        else:
+            sys.exit(f"There is already an open review submission ({state}, {len(items)} items); finish or cancel it in App Store Connect")
+    if submission is None:
+        submission = asc.post("/v1/reviewSubmissions", {"data": {
+            "type": "reviewSubmissions",
+            "attributes": {"platform": "IOS"},
+            "relationships": {"app": {"data": {"type": "apps", "id": app}}},
+        }})["data"]
     asc.post("/v1/reviewSubmissionItems", {"data": {
         "type": "reviewSubmissionItems",
         "relationships": {

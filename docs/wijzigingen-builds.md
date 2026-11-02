@@ -10,7 +10,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.1 build 9)
 
-## 3.1 build 9 = RELEASE 3.1 (1 november 2026: TestFlight Squashteam, Play internal/alpha/Google Group, ingediend bij App Review en uitgerold in Play-productie; website zonder testversie gepubliceerd)
+## 3.1 build 9 = RELEASE 3.1 (ingediend 1 november 2026, live in App Store en Google Play op 2 november 2026; website zonder testversie gepubliceerd)
 
 Releasenotes `release-notes/3.1-9.md` en `android-3.1-9.md`; storeteksten `release-notes/store-3.1/` (App Store
 nl/en, via `scripts/asc_version.py --build 9 --submit`) en `release-notes/android-3.1-production.md` (Play, via

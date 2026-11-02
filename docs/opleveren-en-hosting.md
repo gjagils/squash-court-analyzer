@@ -127,10 +127,11 @@ Regels voor tests op toestellen:
 ## 4. Opleveren naar testers
 
 **Er wordt niets geüpload naar TestFlight of Google Play zonder dat
-Gerd-Jan dat zegt.** Stand 1 november 2026: **3.1 (build 9) is ingediend**: bij Apple in
-App Review (`scripts/asc_version.py --version 3.1 --build 9 --submit`, release na goedkeuring)
-en in Google Play uitgerold in productie (`scripts/play_upload.py --production`, in beoordeling).
-Tot de goedkeuring geldt de stand hieronder. Stand 23 oktober 2026: in productie staat **iOS 3.0**
+Gerd-Jan dat zegt.** Stand 2 november 2026: **in productie staat 3.1 (build 9) op iOS en
+Android** (App Store en Google Play, ingediend op 1 november met `scripts/asc_version.py
+--version 3.1 --build 9 --submit` en `scripts/play_upload.py --production`, beide binnen een dag
+goedgekeurd). De volgende testronde begint met `scripts/version.py set 3.2` en `upload` voor build
+1. De oudere stand hieronder blijft staan als geschiedenis. Stand 23 oktober 2026: in productie staat **iOS 3.0**
 (App Store, versie 3.0 zichtbaar op de storepagina op 23 oktober; dat is 3.0
 build 6 van 22 oktober). **Android heeft nog niets in productie**: 3.0 build 6
 staat in de Play-testtracks (internal, alpha, Google Group testers), de

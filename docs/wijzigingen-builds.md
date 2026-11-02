@@ -15,7 +15,8 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 Releasenotes `release-notes/3.1-9.md` en `android-3.1-9.md`; storeteksten `release-notes/store-3.1/` (App Store
 nl/en, via `scripts/asc_version.py --build 9 --submit`) en `release-notes/android-3.1-production.md` (Play, via
 `scripts/play_upload.py --production`); Play-listing bijgewerkt met `scripts/play_listing.py` (tekst zonder
-team-import; screenshots nog van 3.0). Dezelfde code als build 8 plus "Nieuw in 3.1" en de rondleiding.
+team-import; op 2 november ook zeven nieuwe screenshots van 3.1 van de emulator, 1080×2160, zonder Spelers
+omdat dat scherm de namen van teamgenoten toont). Dezelfde code als build 8 plus "Nieuw in 3.1" en de rondleiding.
 Website: homepage (nl/en) op versie 3.1, handleiding "beschrijft versie 3.1", `testen.html` zegt dat de
 testronde is afgerond. Na goedkeuring: homepage-label en testen.html op "in de stores" zetten,
 `docs/opleveren-en-hosting.md` ("in productie staat iOS 3.1 / Android 3.1") en de screenshots in de Play-listing.

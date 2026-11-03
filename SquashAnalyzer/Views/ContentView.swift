@@ -81,6 +81,7 @@ struct ContentView: View {
                                photoStore: players, shareText: { IOSShare.text($0) },
                                settings: iosSettings,
                                teamMatchStore: TeamMatchStorage.store,
+                               historyStore: SwiftDataMatchHistoryStore(context: modelContext),
                                onExit: { showingReferee = false })
         }
         .fullScreenCover(isPresented: $showingHistory) {

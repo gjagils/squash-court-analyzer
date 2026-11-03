@@ -24,6 +24,11 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   dezelfde wedstrijden als de badges zelf (niet van vóór de badgereset, geen oefenpartijen). Core
   `BadgeProgress.swift` (tests `BadgeProgressTests`), de opslag geeft de geschiedenis via
   `PlayerBadgeSummaryStore.careerHistory` (iOS `SwiftDataBadgeSummaryStore`, Android `BadgeAwardStore`).
+- **Onderlinge stand bij Kies speler (3 november 2026):** staat er al een naam in het andere vak, dan toont
+  Kies speler achter elke speler die daar eerder tegen speelde de stand, bijvoorbeeld "3-1 tegen Bas"
+  (gewonnen-verloren, afgeronde wedstrijden op deze telefoon, coach en scheidsrechter). Vergeleken op de
+  namen zoals bij de wedstrijd bewaard, zonder hoofdletters. Core `HeadToHead.swift` (tests
+  `HeadToHeadTests`); de wedstrijdopzet krijgt de geschiedenis nu ook in de scheidsrechtersmodus.
 
 ## 3.2 build 1 (geüpload 3 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 

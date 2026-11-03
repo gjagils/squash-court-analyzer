@@ -80,6 +80,7 @@ public struct CoachSessionView: View {
                 MatchSetupView(playerStore: playerStore, mode: .coach, photoStore: photoStore, filePicker: filePicker,
                                initialPlayer1Name: activeTarget?.player1Name ?? "", initialPlayer2Name: activeTarget?.player2Name ?? "",
                                teamMatchStore: activeTarget == nil ? teamMatchStore : nil,
+                               historyStore: historyStore,
                                onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }

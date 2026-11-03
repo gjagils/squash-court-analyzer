@@ -426,7 +426,7 @@ public struct AndroidHomeView: View {
                 .navigationDestination(isPresented: $showingReferee) {
                     RefereeSessionView(store: refereeMatchStore, playerStore: playerStore, photoStore: photoStore, filePicker: filePicker, shareText: shareText,
                                        settings: settingsContext,
-                                       teamMatchStore: teamMatchStore, onExit: { showingReferee = false })
+                                       teamMatchStore: teamMatchStore, historyStore: historyStore, onExit: { showingReferee = false })
                         .navigationBarBackButtonHidden(true)
                 }
                 .navigationDestination(isPresented: $showingBadges) {

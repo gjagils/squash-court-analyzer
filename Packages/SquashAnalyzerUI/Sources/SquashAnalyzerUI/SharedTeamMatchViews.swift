@@ -631,7 +631,7 @@ public struct SharedTeamMatchView: View {
         if request.kind == "referee" {
             RefereeSessionView(store: tools.refereeStore, playerStore: tools.playerStore, photoStore: tools.photoStore,
                                filePicker: tools.filePicker, shareText: tools.shareText,
-                               teamMatchStore: store, teamTarget: target,
+                               teamMatchStore: store, teamTarget: target, historyStore: tools.historyStore,
                                onExit: { trackingDone() })
         } else {
             CoachSessionView(store: tools.coachStore, playerStore: tools.playerStore, photoStore: tools.photoStore,

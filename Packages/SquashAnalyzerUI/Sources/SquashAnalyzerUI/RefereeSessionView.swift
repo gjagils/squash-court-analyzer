@@ -21,6 +21,8 @@ public struct RefereeSessionView: View {
     let teamMatchStore: (any TeamMatchStore)?
     /// Instellingen from the referee header (nil hides the gear), as in `CoachSessionView`
     let settings: SettingsContext?
+    /// The finished matches, for the head-to-head at Kies speler (nil shows none)
+    let historyStore: (any MatchHistoryStore)?
     @State private var showingSettings = false
     /// A match started for a partij of a team match (see `CoachSessionView`)
     @State private var activeTarget: TeamTarget?
@@ -36,7 +38,9 @@ public struct RefereeSessionView: View {
     public init(store: any RefereeMatchStore, playerStore: any PlayerProfileStore, photoStore: (any PlayerPhotoStore)? = nil, filePicker: (any PlayerFilePicker)? = nil, shareText: ((String) -> Void)? = nil,
                 settings: SettingsContext? = nil,
                 teamMatchStore: (any TeamMatchStore)? = nil, teamTarget: TeamTarget? = nil,
+                historyStore: (any MatchHistoryStore)? = nil,
                 onExit: @escaping @MainActor () -> Void) {
+        self.historyStore = historyStore
         self.settings = settings
         self.teamMatchStore = teamMatchStore
         _activeTarget = State(initialValue: teamTarget)
@@ -68,6 +72,7 @@ public struct RefereeSessionView: View {
                 MatchSetupView(playerStore: playerStore, mode: .referee, photoStore: photoStore, filePicker: filePicker,
                                initialPlayer1Name: activeTarget?.player1Name ?? "", initialPlayer2Name: activeTarget?.player2Name ?? "",
                                teamMatchStore: activeTarget == nil ? teamMatchStore : nil,
+                               historyStore: historyStore,
                                onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }

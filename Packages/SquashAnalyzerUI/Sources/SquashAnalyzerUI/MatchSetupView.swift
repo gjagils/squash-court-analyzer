@@ -63,6 +63,9 @@ public struct MatchSetupView: View {
     /// Competitie: when given and there is a team match to play for, the setup offers
     /// Teamwedstrijd as the kind of match
     let teamMatchStore: (any TeamMatchStore)?
+    /// The finished matches, for the head-to-head at Kies speler ("3-1 tegen Bas"); nil shows none
+    let historyStore: (any MatchHistoryStore)?
+    @State private var history: [MatchHistorySummary] = []
     @State private var teamCandidates: [TeamMatch] = []
     @State private var inTeam = false
     @State private var pickedTeam: UUID? = nil
@@ -96,10 +99,11 @@ public struct MatchSetupView: View {
 
     public init(playerStore: any PlayerProfileStore, mode: MatchSetupMode, photoStore: (any PlayerPhotoStore)? = nil,
                 filePicker: (any PlayerFilePicker)? = nil, initialPlayer1Name: String = "", initialPlayer2Name: String = "",
-                teamMatchStore: (any TeamMatchStore)? = nil,
+                teamMatchStore: (any TeamMatchStore)? = nil, historyStore: (any MatchHistoryStore)? = nil,
                 onCancel: (() -> Void)? = nil,
                 onStart: @escaping (MatchSetupChoice) -> Void) {
         self.teamMatchStore = teamMatchStore
+        self.historyStore = historyStore
         _player1Name = State(initialValue: initialPlayer1Name)
         _player2Name = State(initialValue: initialPlayer2Name)
         self.prefilled = !initialPlayer1Name.isEmpty || !initialPlayer2Name.isEmpty
@@ -149,6 +153,7 @@ public struct MatchSetupView: View {
             restoreLastChoice()
             await reloadPlayers()
             if let teamMatchStore { teamCandidates = await TeamMatchSupport.candidates(store: teamMatchStore) }
+            if let historyStore { history = (try? await historyStore.loadHistory()) ?? [] }
         }
         .sheet(isPresented: pickerIsPresented) {
             NavigationStack {
@@ -165,6 +170,12 @@ public struct MatchSetupView: View {
                                 PlayerPhotoView(photo: photos[player.id], name: player.name, size: 36, color: SharedColors.textSecondary)
                                 Text(player.name).foregroundColor(SharedColors.textPrimary)
                                 Spacer()
+                                if let record = headToHeadText(player) {
+                                    Text(record)
+                                        .font(SharedFonts.system(12, weight: .medium, design: .rounded))
+                                        .foregroundColor(SharedColors.textSecondary)
+                                        .lineLimit(1)
+                                }
                             }
                         }
                     }
@@ -622,6 +633,14 @@ public struct MatchSetupView: View {
         if wanted.isEmpty { return nil }
         for candidate in players where candidate.name.trimmingCharacters(in: .whitespaces).lowercased() == wanted { return candidate }
         return nil
+    }
+
+    /// "3-1 tegen Bas": this player against the one in the other slot, when they played before
+    private func headToHeadText(_ player: PlayerProfile) -> String? {
+        guard pickingSlot == 1 || pickingSlot == 2 else { return nil }
+        let other = (pickingSlot == 1 ? player2Name : player1Name).trimmingCharacters(in: .whitespaces)
+        let record = HeadToHead.record(of: player.name, against: other, in: history)
+        return record.played > 0 ? record.text(against: other) : nil
     }
 
     /// From "Kies speler" the tapped player goes into the slot; from the players

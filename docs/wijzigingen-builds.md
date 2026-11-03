@@ -29,6 +29,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   (gewonnen-verloren, afgeronde wedstrijden op deze telefoon, coach en scheidsrechter). Vergeleken op de
   namen zoals bij de wedstrijd bewaard, zonder hoofdletters. Core `HeadToHead.swift` (tests
   `HeadToHeadTests`); de wedstrijdopzet krijgt de geschiedenis nu ook in de scheidsrechtersmodus.
+- **Scouting (C6, 3 november 2026):** in de wedstrijdopzet staat onder een gekozen speler `Profiel bekijken`
+  (het spelersprofiel met vorm en trend, vóór de wedstrijd). In een teamwedstrijd staat onder de partijen
+  `TEGENSTANDERS` met de spelers van de tegenpartij (uit de SBN-selectie of de partijen) die ook in Spelers
+  staan, elk met `Profiel bekijken`. Een tegenstander die niet in Spelers staat heeft nog geen profiel.
 
 ## 3.2 build 1 (geüpload 3 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 

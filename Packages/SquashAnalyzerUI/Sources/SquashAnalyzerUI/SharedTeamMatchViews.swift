@@ -416,6 +416,8 @@ public struct SharedTeamMatchView: View {
     @State private var players: [PlayerProfile] = []
     /// The opponent's players from SBN, for a team match from the programme
     @State private var opponentRoster: [String] = []
+    /// Scouting (3.2): the profile of an opponent who is a saved player
+    @State private var scouting: PlayerProfile? = nil
     @AppStorage(TeamRoster.storageKey) private var rosterRaw = ""
     @Environment(\.dismiss) private var dismiss
 
@@ -437,6 +439,7 @@ public struct SharedTeamMatchView: View {
                     header
                     TeamShareBanner(match: match)
                     partijenList
+                    opponentScouting
                     if sbnFixture != nil && (!match.isComplete || match.hasUnknownPoints) {
                         // The back-up for a live page that is gone, and for partijen nobody tracked
                         ActionButton(sbnBusy ? loc("Even geduld…") : loc("Uitslag van SBN ophalen"), icon: "arrow.down.circle",
@@ -607,6 +610,60 @@ public struct SharedTeamMatchView: View {
     }
 
     /// Our players to pick from: "In mijn team" first, then Mijn team
+    /// Opponents (SBN roster and the partijen) who are saved players, for scouting
+    private var scoutablePlayers: [PlayerProfile] {
+        var names: [String] = []
+        for name in opponentRoster { names.append(name.trimmingCharacters(in: .whitespaces).lowercased()) }
+        for partij in match.partijen {
+            let name = partij.opponentPlayer.trimmingCharacters(in: .whitespaces).lowercased()
+            if !name.isEmpty { names.append(name) }
+        }
+        var result: [PlayerProfile] = []
+        for player in players where names.contains(player.name.trimmingCharacters(in: .whitespaces).lowercased()) {
+            result.append(player)
+        }
+        return result
+    }
+
+    /// "Tegenstanders": open the profile of an opponent you have matches of (3.2, scouting)
+    @ViewBuilder
+    private var opponentScouting: some View {
+        let opponents = scoutablePlayers
+        if !opponents.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                SectionHeader(loc("TEGENSTANDERS"))
+                ForEach(opponents) { player in
+                    Button { scouting = player } label: {
+                        HStack(spacing: 10) {
+                            Text(player.name)
+                                .font(SharedFonts.system(14, weight: .medium, design: .rounded))
+                                .foregroundColor(SharedColors.textPrimary)
+                            Spacer()
+                            Text("Profiel bekijken", bundle: textBundle)
+                                .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
+                                .foregroundColor(SharedColors.steelBlueLight)
+                            AppSymbol("chevron.right", size: 12, color: SharedColors.textMuted)
+                        }
+                        .padding(12)
+                        .background(SharedColors.tint(0.04))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .sheet(item: $scouting) { player in
+                NavigationStack {
+                    SharedPlayerTrendView(playerId: player.id, playerName: player.name, historyStore: tools.historyStore)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                CloseButton { scouting = nil }
+                            }
+                        }
+                }
+            }
+        }
+    }
+
     private var rosterNames: [String] {
         TeamMatchSupport.rosterNames(players: players, team: team, rosterRaw: rosterRaw)
     }

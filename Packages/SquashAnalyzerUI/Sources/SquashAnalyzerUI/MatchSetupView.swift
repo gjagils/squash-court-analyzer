@@ -66,6 +66,8 @@ public struct MatchSetupView: View {
     /// The finished matches, for the head-to-head at Kies speler ("3-1 tegen Bas"); nil shows none
     let historyStore: (any MatchHistoryStore)?
     @State private var history: [MatchHistorySummary] = []
+    /// Scouting (3.2): the profile of a picked player, opened from below their name
+    @State private var scouting: PlayerProfile? = nil
     @State private var teamCandidates: [TeamMatch] = []
     @State private var inTeam = false
     @State private var pickedTeam: UUID? = nil
@@ -154,6 +156,18 @@ public struct MatchSetupView: View {
             await reloadPlayers()
             if let teamMatchStore { teamCandidates = await TeamMatchSupport.candidates(store: teamMatchStore) }
             if let historyStore { history = (try? await historyStore.loadHistory()) ?? [] }
+        }
+        .sheet(item: $scouting) { player in
+            NavigationStack {
+                if let historyStore {
+                    SharedPlayerTrendView(playerId: player.id, playerName: player.name, photo: photos[player.id], historyStore: historyStore)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                CloseButton { scouting = nil }
+                            }
+                        }
+                }
+            }
         }
         .sheet(isPresented: pickerIsPresented) {
             NavigationStack {
@@ -244,6 +258,19 @@ public struct MatchSetupView: View {
                     .foregroundColor(SharedColors.textPrimary)
                 Button(loc("Kies speler")) { pickingSlot = slot }
                     .foregroundColor(color)
+            }
+            // Scouting (3.2): the profile of the picked player before the match
+            if historyStore != nil, let picked = slot == 1 ? player1Pick : player2Pick,
+               pickedId(picked, currentName: name.wrappedValue) != nil {
+                Button { scouting = picked } label: {
+                    HStack(spacing: 6) {
+                        AppSymbol("chart.bar.xaxis", size: 12, color: color)
+                        Text("Profiel bekijken", bundle: textBundle)
+                            .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
+                            .foregroundColor(color)
+                    }
+                }
+                .buttonStyle(.plain)
             }
             // Coaching focus only matters when coaching, as on iOS
             if isCoach && !focus.isEmpty {

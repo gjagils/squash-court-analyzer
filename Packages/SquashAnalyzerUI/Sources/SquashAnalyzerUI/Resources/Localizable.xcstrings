@@ -7309,6 +7309,24 @@
         }
       }
     },
+    "Profiel bekijken": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View profile"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profiel bekijken"
+          }
+        }
+      }
+    },
     "Profiel laden…": {
       "extractionState": "manual",
       "generatesSymbol": false,

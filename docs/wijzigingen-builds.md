@@ -8,7 +8,16 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.1 build 9)
+## Volgende build (na 3.1 build 9) — eerste 3.2-ronde
+
+- **Stand in de linkpreview van een losse wedstrijd (3 november 2026, uit Hoeveelishet; patroon gekopieerd,
+  geen code gedeeld):** `/l/<id>` krijgt als titel `🔴 Live: Jansen 2 – 1 Vries` en als beschrijving
+  `Game 4 · 7–5 · volg live in SquashAnalyzer` (Engels `· follow live`); inspelen `Inspelen`, afgelopen
+  `Uitslag: …` met `Eindstand · 11–8, 9–11, …`. Regels in `server/live-worker/src/preview.js`, tests in
+  `test/preview.test.js`. Alleen de Worker verandert, dus het werkt na de uitrol ook met oudere apps.
+  WhatsApp en iMessage halen de preview één keer op: het is de stand van het moment van delen.
+- **Clublogo's bij een teamwedstrijd:** uitgewerkt en lokaal getoond (3 november 2026), op verzoek van
+  Gerd-Jan niet overgenomen.
 
 ## 3.1 build 9 = RELEASE 3.1 (ingediend 1 november 2026, live in App Store en Google Play op 2 november 2026; website zonder testversie gepubliceerd)
 

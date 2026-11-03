@@ -1,0 +1,1 @@
+Build 1 van 3.2, de nieuwe testronde. In de app gelijk aan 3.1. Nieuw: deel je een wedstrijd live, dan staat de stand in het voorbeeld van de link in WhatsApp (games en lopende game, na afloop de uitslag). Probeer het halverwege een wedstrijd. Wat er te testen is: squashanalyzer.com/testen.html

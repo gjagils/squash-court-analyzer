@@ -234,7 +234,7 @@ describe('team sessions', () => {
     expect(page.text).not.toContain('{{');
     // The lock screen button opens the app with the team match
     expect(page.text).toContain('Volg op je vergrendelscherm');
-    expect(page.text).toContain("'squashanalyzer://volg#team/' + id");
+    expect(page.text).toContain("'https://squashanalyzer.com/volg/#team/' + id");
     // Unknown or odd ids: the "afgelopen" page, never an echo of the id
     const gone = await call('GET', '/t/aaaaaaaaaaaa');
     expect(gone.text).toContain('<title>SquashAnalyzer · teamwedstrijd</title>');

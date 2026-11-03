@@ -283,6 +283,8 @@ GitHub-secrets.
 
 ## 5. Open punten (voor wie verder wil)
 
+- **Volg-knop op iOS direct naar de app (3 november 2026):** zet `/volg` en `/volg/*` in de AASA zodra de build met
+  de `/volg`-link een tijdje in de App Store staat, en publiceer de website. Reden en stand: `docs/bewuste-keuzes.md`.
 - **Feature freeze sinds 11 oktober 2026**: geen nieuwe features meer, alleen bugfixes, fouten en
   afronding richting de productie-uitrol van 3.0 (besluit Gerd-Jan). Iets nieuws alleen op zijn
   expliciete vraag; ideeën gaan op de backlog.

@@ -106,3 +106,8 @@ De eerste versie kan dus zonder app-update live, omdat de Worker vanuit
 
 Een club toevoegen: sleutel maken met `openssl rand -base64 24 | tr '+/' '-_'`, de lijst aanvullen en vanuit
 `server/live-worker` `npx wrangler secret put CLUB_WALLS`. Let op: dat zet de hele lijst opnieuw.
+
+**Stand 3 november 2026:** aan voor All Inn Squash (id 2), als gratis proef. De secret staat op `squash-live-beta`, de lijst
+met de sleutel lokaal op de Mac van Gerd-Jan in `~/.squash-keys/club-walls.json` (nooit in de repo). In productie
+getest met een testteamwedstrijd: op het scherm na aanmaken, stand komt door, weg na stoppen. Nog niet op een echte tv
+of op een competitieavond gezien. Privacybeleid (nl/en) is bijgewerkt en gepubliceerd.

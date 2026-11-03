@@ -541,6 +541,24 @@
         }
       }
     },
+    "15 seconden": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 seconds"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 seconden"
+          }
+        }
+      }
+    },
     "1e": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -4339,6 +4357,24 @@
         }
       }
     },
+    "Half-time: wissel van kant": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Half-time: change sides"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Half-time: wissel van kant"
+          }
+        }
+      }
+    },
     "Handleiding": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -4551,6 +4587,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "INCOMPLEET"
+          }
+        }
+      }
+    },
+    "INSPELEN": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WARM-UP"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "INSPELEN"
           }
         }
       }
@@ -5923,6 +5977,24 @@
         }
       }
     },
+    "Na 2 minuten wisselen van kant": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change sides after 2 minutes"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Na 2 minuten wisselen van kant"
+          }
+        }
+      }
+    },
     "Naam %@": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -7021,6 +7093,24 @@
         }
       }
     },
+    "PAUZE TUSSEN GAMES": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BREAK BETWEEN GAMES"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PAUZE TUSSEN GAMES"
+          }
+        }
+      }
+    },
     "PROFIEL": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -8029,6 +8119,24 @@
         }
       }
     },
+    "Spelers klaar voor de start": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Players ready to start"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spelers klaar voor de start"
+          }
+        }
+      }
+    },
     "Spelers konden niet worden bijgewerkt": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -8169,6 +8277,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Start bij game %lld · stand %lld – %lld"
+          }
+        }
+      }
+    },
+    "Start inspelen · 4:00": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start warm-up · 4:00"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start inspelen · 4:00"
           }
         }
       }
@@ -8457,6 +8583,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "TIK = PUNT"
+          }
+        }
+      }
+    },
+    "TOT DE START": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TO THE START"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TOT DE START"
           }
         }
       }
@@ -8997,6 +9141,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tik op jouw partij en zet er een wedstrijd op. Wat jij invult, zien je teamgenoten ook."
+          }
+        }
+      }
+    },
+    "Time": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
           }
         }
       }

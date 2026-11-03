@@ -57,6 +57,7 @@ public struct RefereeScoringView: View {
                 gameHeader
                 playerColumns
                 actionGrid
+                RefereeIntervalBar(match: match)
                 RefereeTimers(match: match)
                 undoButton
             }
@@ -438,6 +439,121 @@ public struct RefereeScoringView: View {
     /// "Even opslaan…" and the retry card can show (no own dismiss here)
     @MainActor private func close() {
         onExit()
+    }
+}
+
+/// The official intervals (3.2): "Start inspelen" before the first rally,
+/// then the warm-up, the minute to the start of play and the 2 minutes
+/// between games, counting down with "Half-time", "15 seconden" and "Time"
+/// (`RefereeInterval`). The phone vibrates at each call. Ticks on its own, like
+/// `RefereeTimers`.
+struct RefereeIntervalBar: View {
+    let match: RefereeMatch
+    @State private var now = Date()
+    /// The last call that vibrated, so each call vibrates once
+    @State private var calledKey = ""
+
+    var body: some View {
+        let interval = match.runningInterval(at: now)
+        let call = interval?.call(at: now)
+        var key = ""
+        if let interval, let call { key = interval.kind.rawValue + "|" + call.rawValue }
+        return Group {
+            if let interval {
+                running(interval, call: call)
+            } else if match.isBeforeFirstRally && !match.isMatchOver {
+                Button {
+                    match.warmupStartedAt = Date()
+                    now = Date()
+                } label: {
+                    HStack(spacing: 8) {
+                        AppSymbol("timer", size: 13, color: SharedColors.accent)
+                        Text("Start inspelen · 4:00", bundle: textBundle)
+                            .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
+                            .foregroundColor(SharedColors.accent)
+                    }
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
+                    .background(SharedColors.accent.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 24)
+            }
+        }
+        .sensoryFeedback(.warning, trigger: calledKey)
+        // Vibrate once at each call ("Half-time", "15 seconden", "Time")
+        .task(id: key) { if !key.isEmpty { calledKey = key } }
+        .task(id: match.isMatchOver) {
+            while !Task.isCancelled && !match.isMatchOver {
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                now = Date()
+            }
+        }
+    }
+
+    private func running(_ interval: RefereeInterval, call: RefereeCall?) -> some View {
+        let left = interval.remaining(at: now)
+        return HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title(interval.kind))
+                    .font(SharedFonts.system(9, weight: .semibold, design: .rounded))
+                    .tracking(1.2)
+                    .foregroundColor(SharedColors.textMuted)
+                Text(callText(call, kind: interval.kind))
+                    .font(SharedFonts.system(13, weight: .bold, design: .rounded))
+                    .foregroundColor(call == nil ? SharedColors.textSecondary : SharedColors.accent)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            Spacer(minLength: 4)
+            Text(RefereeInterval.clockText(left))
+                .font(SharedFonts.system(26, weight: .bold, design: .rounded))
+                #if !SKIP
+                .monospacedDigit()
+                #endif
+                .foregroundColor(left <= 15 ? SharedColors.accent : SharedColors.textPrimary)
+            if interval.kind == RefereeIntervalKind.warmup {
+                Button {
+                    // Warm-up done early: the minute to the start begins now
+                    match.warmupStartedAt = Date().addingTimeInterval(-Double(RefereeIntervalKind.warmup.length))
+                    now = Date()
+                } label: {
+                    Text("Klaar", bundle: textBundle)
+                        .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
+                        .foregroundColor(SharedColors.accent)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(SharedColors.accent.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(SharedColors.tint(0.05))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 24)
+    }
+
+    private func title(_ kind: RefereeIntervalKind) -> String {
+        switch kind {
+        case .warmup: return loc("INSPELEN")
+        case .toStart: return loc("TOT DE START")
+        case .betweenGames: return loc("PAUZE TUSSEN GAMES")
+        }
+    }
+
+    private func callText(_ call: RefereeCall?, kind: RefereeIntervalKind) -> String {
+        guard let call else {
+            return kind == RefereeIntervalKind.warmup ? loc("Na 2 minuten wisselen van kant") : loc("Spelers klaar voor de start")
+        }
+        switch call {
+        case .halfTime: return loc("Half-time: wissel van kant")
+        case .fifteenSeconds: return loc("15 seconden")
+        case .time: return loc("Time")
+        }
     }
 }
 

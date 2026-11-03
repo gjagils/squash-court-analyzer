@@ -10,6 +10,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.2 build 1)
 
+- **Officiële timers voor de scheidsrechter (R2, 3 november 2026):** vóór de eerste rally staat
+  `Start inspelen · 4:00`; dan telt de app het inspelen af (na 2 minuten "Half-time: wissel van kant",
+  `Klaar` beëindigt het eerder), daarna 1 minuut tot de start, en na elke game 2 minuten pauze vanaf de
+  laatste rally. Bij "Half-time", "15 seconden" en "Time" trilt de telefoon. De eerste rally stopt de
+  timer. Tijden uit de WSF-regels 2025 (regel 4.1 en 7.1, PDF op squash.nl). Logica in
+  `RefereeInterval.swift` (Core, tests `RefereeIntervalTests`), de balk in `RefereeScoring.swift`.
+  Nog niet op een toestel bekeken.
+
 ## 3.2 build 1 (geüpload 3 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 
 Begin van de testronde 3.2. De app is gelijk aan 3.1 build 9 (alleen versie en buildnummer); het nieuwe zit op de

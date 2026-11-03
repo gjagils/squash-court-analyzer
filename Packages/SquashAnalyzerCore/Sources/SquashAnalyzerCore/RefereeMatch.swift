@@ -72,6 +72,10 @@ public class RefereeMatch: Identifiable {
     public var matchStartedAt: Date
     public var gameStartedAt: Date
     public var lastPointAt: Date?
+    /// "Start inspelen" was tapped (`RefereeInterval`); only on this screen, not saved
+    public var warmupStartedAt: Date?
+    /// When the last game ended, for the 2 minutes between games; nil once a rally is played
+    public var intervalStartedAt: Date?
 
     private var undoStack: [RefereeAction] = []
     /// Who served the first rally of this game, and from which box. Kept with
@@ -223,6 +227,8 @@ public class RefereeMatch: Identifiable {
 
     public func confirmNextGame() {
         guard let winner = currentGameWinner else { return }
+        // The 2 minutes between games run from the last rally of the game
+        intervalStartedAt = lastPointAt ?? now()
         completedGames.append(CompletedRefereeGame(number: currentGameNumber, player1Score: player1Score, player2Score: player2Score, winner: winner, duration: currentGameDuration, points: pointHistory))
         currentGameNumber += 1
         player1Score = 0

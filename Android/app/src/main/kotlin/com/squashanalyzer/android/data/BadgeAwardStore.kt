@@ -193,7 +193,7 @@ class BadgeAwardStore(
             val badges = mutableSetOf<BadgeKind>()
             earnedByPlayer[player]?.let { earned -> for (badge in earned) badges.add(badge) }
             if (input.matchWinner != null) {
-                val career = engine.careerBadges(matchUuid, SwiftArray(careerHistory(playerId)), SwiftSet(onceBadges(cardId, matchId)))
+                val career = engine.careerBadges(matchUuid, SwiftArray(careerMatches(playerId)), SwiftSet(onceBadges(cardId, matchId)))
                 for (badge in career) badges.add(badge)
             }
             for (badge in badges) {
@@ -233,7 +233,10 @@ class BadgeAwardStore(
      * `BadgeAwarder.history(of:)` builds them: only matches with a winner, the
      * head start counted, and the opponent keyed by id or lowercased name.
      */
-    private suspend fun careerHistory(playerId: String): List<CareerMatch> {
+    /** The player's finished matches, for the progress to the next tier of a career badge (BadgeProgress) */
+    override suspend fun careerHistory(forPlayer: String): SwiftArray<CareerMatch> = SwiftArray(careerMatches(forPlayer))
+
+    private suspend fun careerMatches(playerId: String): List<CareerMatch> {
         val coach = matchStore.history().mapNotNull { match ->
             val slot = slot(playerId, match.player1Id, match.player2Id) ?: return@mapNotNull null
             val gamesToWin = match.bestOf / 2 + 1

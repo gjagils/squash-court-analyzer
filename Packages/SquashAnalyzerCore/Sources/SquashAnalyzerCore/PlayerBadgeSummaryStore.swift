@@ -38,4 +38,8 @@ public protocol PlayerBadgeSummaryStore: Sendable {
 
     /// Marks one earned moment deleted
     func deleteMoment(_ id: String) async throws
+
+    /// The player's finished matches on this device, for the progress to the
+    /// next tier of a career badge (`BadgeProgress`, 3.2)
+    func careerHistory(forPlayer playerId: String) async throws -> [BadgeEngine.CareerMatch]
 }

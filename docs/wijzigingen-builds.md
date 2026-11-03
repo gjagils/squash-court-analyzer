@@ -17,6 +17,13 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   timer. Tijden uit de WSF-regels 2025 (regel 4.1 en 7.1, PDF op squash.nl). Logica in
   `RefereeInterval.swift` (Core, tests `RefereeIntervalTests`), de balk in `RefereeScoring.swift`.
   Nog niet op een toestel bekeken.
+- **Voortgang naar de volgende badgetrede (3 november 2026):** bij Spelers → badges staat onder de
+  carrièrebadges hoeveel er nog nodig is, bijvoorbeeld "Nog 3 tot zilver": Veteran (wedstrijden), Ten out
+  of ten (overwinningen), Centurion (gewonnen punten) en Hat trick (overwinningen op rij). Badges binnen één
+  wedstrijd of game hebben geen lopende telling; Nemesis telt per tegenstander en doet niet mee. Telt
+  dezelfde wedstrijden als de badges zelf (niet van vóór de badgereset, geen oefenpartijen). Core
+  `BadgeProgress.swift` (tests `BadgeProgressTests`), de opslag geeft de geschiedenis via
+  `PlayerBadgeSummaryStore.careerHistory` (iOS `SwiftDataBadgeSummaryStore`, Android `BadgeAwardStore`).
 
 ## 3.2 build 1 (geüpload 3 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 

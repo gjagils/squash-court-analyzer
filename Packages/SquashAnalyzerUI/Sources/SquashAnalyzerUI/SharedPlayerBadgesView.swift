@@ -26,6 +26,8 @@ public struct SharedPlayerBadgesView: View {
     let historyStore: (any MatchHistoryStore)?
 
     @State private var moments: [BadgeMoment] = []
+    /// "Nog 3 tot zilver" for the career badges (`BadgeProgress`)
+    @State private var progress: [BadgeProgress] = []
     @State private var isLoading = true
     @State private var shareFailed = false
 
@@ -224,8 +226,21 @@ public struct SharedPlayerBadgesView: View {
                     .multilineTextAlignment(.center)
                     .lineLimit(3)
             }
+            if let next = progressText(family) {
+                Text(next)
+                    .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
+                    .foregroundColor(SharedColors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .top)
+    }
+
+    /// "Nog 3 tot zilver" when the family counts over all matches and has a tier left
+    private func progressText(_ family: BadgeKind) -> String? {
+        for item in progress where item.family == family { return item.text }
+        return nil
     }
 
     /// "Goud · 3×" for a tier, "3×" for a badge without tiers
@@ -258,6 +273,7 @@ public struct SharedPlayerBadgesView: View {
     private func load() async {
         isLoading = moments.isEmpty
         moments = (try? await badgeStore.moments(forPlayer: playerId)) ?? []
+        progress = BadgeProgress.of(history: (try? await badgeStore.careerHistory(forPlayer: playerId)) ?? [])
         isLoading = false
     }
 }

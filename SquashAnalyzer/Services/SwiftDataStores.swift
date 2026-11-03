@@ -549,6 +549,13 @@ final class SwiftDataBadgeSummaryStore: PlayerBadgeSummaryStore, @unchecked Send
         }
     }
 
+    nonisolated func careerHistory(forPlayer playerId: String) async throws -> [BadgeEngine.CareerMatch] {
+        try await MainActor.run {
+            guard let uuid = UUID(uuidString: playerId) else { return [] }
+            return try BadgeAwarder(context: context).history(of: uuid)
+        }
+    }
+
     nonisolated func deleteMoment(_ id: String) async throws {
         try await MainActor.run {
             guard let uuid = UUID(uuidString: id),

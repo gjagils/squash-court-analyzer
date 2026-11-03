@@ -146,6 +146,12 @@ public struct CourtView: View {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(SharedColors.courtSand.opacity(0.5))
             }
+            #if SKIP
+            // One flat floor on Android: the two gradients drew the court in
+            // steps on a slower phone (Samsung A13, 1 November 2026)
+            RoundedRectangle(cornerRadius: 6)
+                .fill(SharedColors.tint(0.05))
+            #else
             RoundedRectangle(cornerRadius: 6)
                 .fill(
                     LinearGradient(
@@ -168,6 +174,7 @@ public struct CourtView: View {
                         endRadius: size.height * 0.65
                     )
                 )
+            #endif
         }
         .frame(width: size.width, height: size.height)
     }

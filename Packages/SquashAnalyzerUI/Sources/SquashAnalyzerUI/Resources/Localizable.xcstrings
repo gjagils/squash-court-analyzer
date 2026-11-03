@@ -91,6 +91,24 @@
         }
       }
     },
+    "%@ serveert": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ serves"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ serveert"
+          }
+        }
+      }
+    },
     "%@ serveert eerst": {
       "extractionState": "manual",
       "generatesSymbol": false,

@@ -304,8 +304,11 @@ public struct CoachScoringView: View {
             GlowBackground()
 
             GeometryReader { geometry in
+                // A short screen keeps the one-line scoreboard for the whole game:
+                // switching between the full board and the line twice per point
+                // made the screen jump (Samsung A13, 1 November 2026)
                 screenColumn(compact: geometry.size.height < Self.compactEntryHeight
-                             && game.selectedPlayer != nil && !game.isGameOver && !match.isMatchOver,
+                             && !game.isGameOver && !match.isMatchOver,
                              narrow: geometry.size.width < Self.narrowWidth)
                     .frame(width: geometry.size.width, height: geometry.size.height)
             }
@@ -360,6 +363,11 @@ public struct CoachScoringView: View {
             if compact {
                 CompactScoreBar(game: game, match: match) { player in handleScoreTap(player) }
                     .padding(.horizontal, 20)
+                // The service box of the full board, while no point is being entered
+                if game.selectedPlayer == nil {
+                    compactServiceSide
+                        .padding(.horizontal, 24)
+                }
             } else {
                 SharedScoreboardView(game: game, match: match, photos: photos, onServiceChanged: { matchChanged() }) { player in handleScoreTap(player) }
                     .padding(.horizontal, 20)
@@ -391,6 +399,25 @@ public struct CoachScoringView: View {
             Spacer(minLength: 0)
         }
         .padding(.vertical, 8)
+    }
+
+    /// Who serves from which box, under the one-line scoreboard of a short screen
+    private var compactServiceSide: some View {
+        let server = game.currentServer
+        let color = server == Player.player1 ? SharedColors.accent : SharedColors.steelBlue
+        return HStack(spacing: 10) {
+            Text(loc("\(game.name(for: server)) serveert"))
+                .font(SharedFonts.system(12, weight: .medium, design: .rounded))
+                .foregroundColor(SharedColors.textSecondary)
+                .lineLimit(1)
+            Spacer(minLength: 4)
+            ServiceSideSelector(side: game.serverSide, preferredSide: game.preferredSide(for: server), color: color,
+                                compact: true, disabled: game.isGameOver) { side in
+                game.overrideSide(to: side)
+                matchChanged()
+            }
+            .frame(maxWidth: 180)
+        }
     }
 
     /// Correct a name during the match (a typo, or the real name after a quick
@@ -603,7 +630,7 @@ public struct CoachScoringView: View {
     /// the warm-up and the break between games never count as a rally
     private var startButton: some View {
         Button(action: {
-            withAnimation(.easeInOut(duration: 0.2)) {
+            stepChange {
                 game.start()
             }
             matchChanged()
@@ -921,9 +948,19 @@ public struct CoachScoringView: View {
 
     // MARK: - Handlers (mirror ContentView.swift's coach handlers)
 
+    /// One step of entering a point. Animated on iOS; on Android at once, since
+    /// the animation made the screen jump on a slower phone (Samsung A13, 1 November 2026)
+    private func stepChange(_ change: () -> Void) {
+        #if SKIP
+        change()
+        #else
+        withAnimation(.easeInOut(duration: 0.2)) { change() }
+        #endif
+    }
+
     private func handleScoreTap(_ player: Player) {
         guard !game.isGameOver else { return }
-        withAnimation(.easeInOut(duration: 0.2)) {
+        stepChange {
             if game.selectedPlayer == player {
                 game.clearSelection()
             } else {
@@ -937,7 +974,7 @@ public struct CoachScoringView: View {
     }
 
     private func selectPointType(_ pointType: PointType) {
-        withAnimation(.easeInOut(duration: 0.2)) {
+        stepChange {
             game.selectPointType(pointType)
         }
         if game.scoringStep == .selectPlayer {
@@ -946,7 +983,7 @@ public struct CoachScoringView: View {
     }
 
     private func handleErrorKind(_ kind: ErrorKind?) {
-        withAnimation(.easeInOut(duration: 0.2)) {
+        stepChange {
             game.selectErrorKind(kind)
         }
         matchChanged()
@@ -954,7 +991,7 @@ public struct CoachScoringView: View {
 
     private func handleZoneTap(_ zone: CourtZone) {
         guard game.selectedPlayer != nil else { return }
-        withAnimation(.easeInOut(duration: 0.2)) {
+        stepChange {
             game.selectZone(zone)
         }
         if game.scoringStep == .selectPlayer {
@@ -963,7 +1000,7 @@ public struct CoachScoringView: View {
     }
 
     private func handleShotTypeSelect(_ shotType: ShotType) {
-        withAnimation(.easeInOut(duration: 0.2)) {
+        stepChange {
             game.addPoint(shotType: shotType, isVolley: volley)
         }
         volley = false

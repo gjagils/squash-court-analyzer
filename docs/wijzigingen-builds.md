@@ -33,6 +33,12 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   (het spelersprofiel met vorm en trend, vóór de wedstrijd). In een teamwedstrijd staat onder de partijen
   `TEGENSTANDERS` met de spelers van de tegenpartij (uit de SBN-selectie of de partijen) die ook in Spelers
   staan, elk met `Profiel bekijken`. Een tegenstander die niet in Spelers staat heeft nog geen profiel.
+- **Coachscherm rustiger op een kort scherm en op Android (S5, 3 november 2026):** op een scherm lager dan
+  740 punt (Samsung A13, grote schermzoom, iPhone SE) blijft het scorebord de hele game de compacte balk;
+  het wisselde eerst twee keer per punt tussen groot en klein. Onder de balk staat zolang er geen punt
+  ingevoerd wordt wie serveert, met de keuze links/rechts. Op Android gaan de stappen van een punt zonder
+  animatie en is de baanvloer één vlakke kleur in plaats van twee verlopen. Nog niet op de A13 bekeken
+  (de emulator was in gebruik door een andere sessie).
 
 ## 3.2 build 1 (geüpload 3 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 

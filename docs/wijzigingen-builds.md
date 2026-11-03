@@ -8,7 +8,14 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.1 build 9) — eerste 3.2-ronde
+## Volgende build (na 3.2 build 1)
+
+## 3.2 build 1 (geüpload 3 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
+
+Begin van de testronde 3.2. De app is gelijk aan 3.1 build 9 (alleen versie en buildnummer); het nieuwe zit op de
+live-Worker, die met de push van 3 november is uitgerold. Releasenotes `release-notes/3.2-1.md` en `android-3.2-1.md`;
+`website/testen.html` op 3.2 build 1, handleiding (iPhone en Android) noemt de stand in het linkvoorbeeld. Geen nieuwe
+App Store-screenshots: er is niets aan de schermen veranderd.
 
 - **Stand in de linkpreview van een losse wedstrijd (3 november 2026, uit Hoeveelishet; patroon gekopieerd,
   geen code gedeeld):** `/l/<id>` krijgt als titel `🔴 Live: Jansen 2 – 1 Vries` en als beschrijving

@@ -124,6 +124,11 @@ of track kiezen.
   buildconfiguraties, Android unit tests met beide `buildConfigField`s. De
   connected-tests op de emulator draaien alleen in de stand van de volgende
   upload.
+- **Stand 3 november 2026:** de CI draait de iOS-tests en de Android-unittests in
+  beide standen (`SQUASH_PLAYER_ACCOUNT=YES`, `-PsquashPlayerAccount=true`); lokaal
+  beide iOS-runs groen. De Core-tests zetten de vlag zelf in de tests die ervan
+  afhangen (`AccountSyncTests`), dus daar is geen tweede run nodig. De iOS-stap in
+  CI heeft nu `set -o pipefail`: zonder dat verborg `| tail -40` een mislukte test.
 
 ## Werkwijze
 

@@ -86,6 +86,8 @@ jobs:
         run: sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
       - name: Test on an iPhone simulator
         run: |
+          # Without pipefail a failing xcodebuild is hidden behind `| tail`
+          set -o pipefail
           UDID=$(xcrun simctl list devices available -j | python3 -c '
           import json, sys
           for runtime, devices in sorted(json.load(sys.stdin)["devices"].items(), reverse=True):
@@ -99,6 +101,13 @@ jobs:
             -only-testing:SquashAnalyzerTests \
             -skipPackagePluginValidation -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO | tail -40
+          # 4.0 sits behind a switch on main (docs/releaseplan-3x-4.0.md): the
+          # iOS tests also run with it on, like the Android unit tests
+          xcodebuild test -project SquashAnalyzer.xcodeproj -scheme SquashAnalyzer \
+            -destination "platform=iOS Simulator,id=$UDID" \
+            -only-testing:SquashAnalyzerTests \
+            -skipPackagePluginValidation -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO SQUASH_PLAYER_ACCOUNT=YES | tail -40
 
   android:
     name: Android-unittests

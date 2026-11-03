@@ -10,6 +10,13 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.2 build 2)
 
+- **Let en stroke als label onder het scorevak (3 november 2026, keuze Gerd-Jan):** het zwarte vlak met
+  `STROKE -> NAAM` is weg. Een stroke staat nu onder het scorevak van wie hem krijgt, in die spelerkleur:
+  "Stroke voor / Anna · +1". Een let staat in het midden: "Let · rally over". Het label blijft tot de volgende
+  rally of Undo. `RefereeMatch.lastDecision` (Core) vervangt `lastCallText`.
+- **Knoppen springen niet meer bij de timers:** de timerbalk neemt de plek van de MATCH/GAME-klok in, op een
+  vaste hoogte. In build 2 schoven alle knoppen zo'n 44 punt omlaag zodra de eerste rally werd gespeeld.
+
 - **Clubscherm voor de tv (alleen server, 3 november 2026):** `/c/<SBN-club-id>?k=<sleutel>` toont alle live
   teamwedstrijden van een club op één scherm. Geheime link per club, clubs in de secret `CLUB_WALLS`; zonder
   die secret bestaat er geen scherm. Geen app-update nodig. Aan voor All Inn Squash sinds 3 november 2026, privacybeleid

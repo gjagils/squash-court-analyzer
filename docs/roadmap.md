@@ -25,7 +25,7 @@ lopen staat in het [releaseplan](releaseplan-3x-4.0.md).
 | De vlag `Features.playerAccount` (uit) en de tests in beide standen | [releaseplan](releaseplan-3x-4.0.md) |
 
 **Naast 3.2, alleen op de server:** het clubscherm voor de tv, als gratis proef
-met een geheime link ([voorstel](voorstel-clubscherm.md)).
+met een geheime link ([voorstel](voorstel-clubscherm.md)). **Gebouwd 3 november 2026.**
 
 ## 3.3
 

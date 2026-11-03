@@ -49,6 +49,12 @@ class_name = "TeamSession"
 name = "STATS"
 class_name = "StatsCounter"
 
+# The club screen (club.js): one object per club in the secret CLUB_WALLS
+# (`npx wrangler secret put CLUB_WALLS`); without that secret no screen exists
+[[durable_objects.bindings]]
+name = "CLUB"
+class_name = "ClubWall"
+
 # SQLite-backed objects: the kind the free plan allows
 [[migrations]]
 tag = "v1"
@@ -63,6 +69,11 @@ new_sqlite_classes = ["TeamSession"]
 [[migrations]]
 tag = "v3"
 new_sqlite_classes = ["StatsCounter"]
+
+# The club screen (3 November 2026)
+[[migrations]]
+tag = "v4"
+new_sqlite_classes = ["ClubWall"]
 
 [observability]
 enabled = true

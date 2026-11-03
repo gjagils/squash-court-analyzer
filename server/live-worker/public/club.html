@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>{{TITLE}}</title>
+<meta property="og:title" content="{{TITLE}}">
+<meta property="og:description" content="{{DESCRIPTION}}">
+<meta property="og:url" content="{{URL}}">
+<meta property="og:image" content="{{IMAGE}}">
+<meta name="theme-color" content="#000000">
+<style>
+  /* The club screen for the TV in the canteen: Huisstijl "Clubhuis" (docs/style/README.md),
+     dark and without buttons. Sizes follow the screen, so it reads from across the room. */
+  :root {
+    --bg: #000000; --card: #180E04; --line: rgba(242,140,38,0.35); --gold: #F28C26; --orange: #F28C26;
+    --blue-light: #8094AD; --text-1: #F2EDE6; --text-2: #B3ADA6; --text-3: #8C8680;
+    --border: rgba(255,255,255,0.09); --live: #3DBDA9; color-scheme: dark;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--text-1); overflow: hidden;
+         font-family: "SF Pro Rounded", ui-rounded, -apple-system, "Segoe UI", Roboto, sans-serif;
+         display: flex; flex-direction: column; padding: 1.6vmin 2vmin; gap: 1.6vmin; }
+  header { display: flex; align-items: center; gap: 1.6vmin; flex: none; }
+  header img { width: 5vmin; height: 5vmin; border-radius: 1vmin; }
+  #club { font-size: 4vmin; font-weight: 700; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #clock { font-size: 4vmin; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-2); }
+  .badge { font-size: 1.8vmin; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: .7vmin 1.6vmin;
+           border-radius: 99px; border: 1px solid var(--border); color: var(--text-2); }
+  .badge.live { color: #0B1F1B; background: var(--live); border-color: var(--live); }
+  #grid { flex: 1; min-height: 0; display: grid; gap: 1.6vmin; }
+  #grid.one { grid-template: 1fr / 1fr; }
+  #grid.two { grid-template: 1fr / 1fr 1fr; }
+  #grid.four { grid-template: 1fr 1fr / 1fr 1fr; }
+  @media (orientation: portrait) {
+    #grid.two { grid-template: 1fr 1fr / 1fr; }
+    #grid.four { grid-template: repeat(4, 1fr) / 1fr; }
+  }
+  /* --u is the unit inside a card: the fewer team matches, the larger everything */
+  #grid.one { --u: 2vmin; } #grid.two { --u: 1.55vmin; } #grid.four { --u: 1vmin; }
+  .match { background: var(--card); border: 1px solid var(--line); border-radius: 1.6vmin; padding: calc(1.4 * var(--u)) calc(2 * var(--u));
+           display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .teams { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: calc(1.6 * var(--u)); flex: none; min-height: calc(9.7 * var(--u)); }
+  .tname { font-size: calc(2.8 * var(--u)); font-weight: 700; line-height: 1.15; }
+  .tname.home { color: var(--orange); }
+  .tname.away { color: var(--blue-light); text-align: right; }
+  .stand { font-size: calc(5.6 * var(--u)); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .summary { text-align: center; font-size: calc(1.7 * var(--u)); font-weight: 600; color: var(--gold); flex: none; min-height: calc(2.2 * var(--u)); }
+  .partijen { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-top: calc(.6 * var(--u)); }
+  .partij { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center;
+            gap: calc(1.2 * var(--u)); border-top: 1px solid var(--border); }
+  .pleft { display: flex; align-items: center; gap: calc(1.2 * var(--u)); min-width: 0; }
+  .slot { flex: none; font-size: calc(1.7 * var(--u)); font-weight: 700; letter-spacing: .08em; color: var(--gold); }
+  .pname { font-size: calc(2.4 * var(--u)); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
+  .pname.a { text-align: right; }
+  .playing .pname.h { color: var(--orange); } .playing .pname.a { color: var(--blue-light); }
+  .pscore { font-size: calc(2.8 * var(--u)); font-weight: 700; font-variant-numeric: tabular-nums; text-align: center; white-space: nowrap; color: var(--text-2); }
+  .playing .pscore { color: var(--text-1); }
+  .playing .slot { color: var(--live); }
+  /* The running game under the games, in the same middle as the team stand */
+  .pscore small { display: block; font-size: calc(1.8 * var(--u)); font-weight: 600; color: var(--live); line-height: 1.1; }
+  .open { color: var(--text-3); font-weight: 500; }
+  #empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2vmin; }
+  #empty h1 { font-size: 6vmin; font-weight: 700; }
+  #empty p { font-size: 3vmin; color: var(--text-2); max-width: 80vw; }
+  footer { flex: none; display: flex; align-items: center; justify-content: center; gap: 1vmin; min-height: 1.4vmin; }
+  .dot { width: 1.1vmin; height: 1.1vmin; border-radius: 50%; background: var(--border); }
+  .dot.on { background: var(--gold); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <img src="/logo.png" alt="">
+  <div id="club"></div>
+  <div class="badge" id="badge"></div>
+  <div id="clock"></div>
+</header>
+<main id="grid" class="one" hidden></main>
+<div id="empty" hidden>
+  <h1 id="emptyTitle"></h1>
+  <p id="emptyText"></p>
+</div>
+<footer id="pages"></footer>
+<script>
+(function () {
+  'use strict';
+  var club = {{ID_JSON}};
+  var key = new URLSearchParams(location.search).get('k') || '';
+  var english = !/^nl/i.test(navigator.language || 'nl');
+  function T(nl, en) { return english ? en : nl; }
+  function $(id) { return document.getElementById(id); }
+  var PER_PAGE = 4;
+  var PAGE_SECONDS = 12;
+  var matches = [];
+  var page = 0;
+
+  $('club').textContent = club.name;
+  $('emptyTitle').textContent = T('Nog geen live wedstrijden', 'No live matches yet');
+  $('emptyText').textContent = T('Deel je teamwedstrijd live in SquashAnalyzer, dan staat hij hier.',
+    'Share your team match live in SquashAnalyzer and it shows up here.');
+
+  /** Decided: as src/push.js and the team page */
+  function isDecided(p) {
+    if (!p) return false;
+    return p.winner === 1 || p.winner === 2 || p.status === 'finished' || p.end === 'retired' || p.end === 'walkover';
+  }
+  function partijWinner(p) {
+    if (p.winner === 1 || p.winner === 2) return p.winner;
+    return p.gamesWon[0] > p.gamesWon[1] ? 1 : p.gamesWon[1] > p.gamesWon[0] ? 2 : 0;
+  }
+  function teamWinner(partijen) {
+    var won = [0, 0], full = [true, true], games = [0, 0], points = [0, 0];
+    for (var slot = 1; slot <= 4; slot++) {
+      var p = partijen[slot];
+      var w = partijWinner(p);
+      if (w) won[w - 1]++;
+      if (p.end === 'walkover' && w) full[2 - w] = false;
+      games[0] += p.gamesWon[0];
+      games[1] += p.gamesWon[1];
+      (p.games || []).forEach(function (g) { points[0] += g[0]; points[1] += g[1]; });
+    }
+    if (won[0] !== won[1]) return won[0] > won[1] ? 1 : 2;
+    if (full[0] !== full[1]) return full[0] ? 1 : 2;
+    if (games[0] !== games[1]) return games[0] > games[1] ? 1 : 2;
+    if (points[0] !== points[1]) return points[0] > points[1] ? 1 : 2;
+    return partijWinner(partijen[1]);
+  }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function partijRow(slot, p, team) {
+    var decided = isDecided(p);
+    var row = el('div', 'partij' + (p && !decided ? ' playing' : ''));
+    var left = el('div', 'pleft');
+    left.appendChild(el('div', 'slot', 'E' + slot));
+    row.appendChild(left);
+    if (!p) {
+      left.appendChild(el('div', 'pname h open', T('Nog niet begonnen', 'Not started')));
+      row.appendChild(el('div', 'pscore open', '–'));
+      row.appendChild(el('div', 'pname a'));
+      return row;
+    }
+    left.appendChild(el('div', 'pname h', p.p1 || team.home));
+    var score = el('div', 'pscore', p.gamesWon[0] + '–' + p.gamesWon[1]);
+    if (!decided) score.appendChild(el('small', '', p.score[0] + '–' + p.score[1]));
+    row.appendChild(score);
+    row.appendChild(el('div', 'pname a', p.p2 || team.away));
+    return row;
+  }
+
+  function matchCard(match) {
+    var partijen = match.partijen || {};
+    var won = [0, 0], decided = 0, played = 0;
+    for (var s = 1; s <= 4; s++) {
+      var p = partijen[s];
+      if (!p) continue;
+      played++;
+      if (isDecided(p)) {
+        decided++;
+        var w = partijWinner(p);
+        if (w) won[w - 1]++;
+      }
+    }
+    var card = el('section', 'match');
+    var teams = el('div', 'teams');
+    teams.appendChild(el('div', 'tname home', match.team.home));
+    teams.appendChild(el('div', 'stand', won[0] + ' – ' + won[1]));
+    teams.appendChild(el('div', 'tname away', match.team.away));
+    card.appendChild(teams);
+    var summary = T('Nog niet begonnen', 'Not started');
+    if (decided === 4) {
+      var winner = teamWinner(partijen);
+      summary = winner === 0 ? T('Gelijkspel', 'Draw') : (winner === 1 ? match.team.home : match.team.away) + T(' wint', ' wins');
+    } else if (played) {
+      summary = T(decided + ' van 4 partijen klaar', decided + ' of 4 matches done');
+    }
+    card.appendChild(el('div', 'summary', summary));
+    var list = el('div', 'partijen');
+    for (var slot = 1; slot <= 4; slot++) list.appendChild(partijRow(slot, partijen[slot], match.team));
+    card.appendChild(list);
+    return card;
+  }
+
+  function draw() {
+    var pages = Math.max(1, Math.ceil(matches.length / PER_PAGE));
+    if (page >= pages) page = 0;
+    var shown = matches.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
+    var grid = $('grid');
+    grid.hidden = matches.length === 0;
+    $('empty').hidden = matches.length !== 0;
+    grid.className = shown.length <= 1 ? 'one' : shown.length === 2 ? 'two' : 'four';
+    grid.textContent = '';
+    shown.forEach(function (match) { grid.appendChild(matchCard(match)); });
+    var dots = $('pages');
+    dots.textContent = '';
+    if (pages > 1) for (var i = 0; i < pages; i++) dots.appendChild(el('div', 'dot' + (i === page ? ' on' : '')));
+  }
+
+  // More team matches than fit: the pages take turns
+  setInterval(function () {
+    if (matches.length > PER_PAGE) { page++; draw(); }
+  }, PAGE_SECONDS * 1000);
+
+  function clock() {
+    var now = new Date();
+    $('clock').textContent = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+  }
+  clock();
+  setInterval(clock, 5000);
+
+  function setBadge(live) {
+    $('badge').className = 'badge' + (live ? ' live' : '');
+    $('badge').textContent = live ? 'Live' : T('Verbinden…', 'Connecting…');
+  }
+  setBadge(false);
+
+  // A TV stays on all evening: EventSource comes back by itself after a lost
+  // connection, and a stream that the server closed is opened again
+  function connect() {
+    var source = new EventSource('/api/club/' + encodeURIComponent(club.id) + '/events?k=' + encodeURIComponent(key));
+    source.addEventListener('state', function (e) {
+      try {
+        matches = JSON.parse(e.data).matches || [];
+        setBadge(true);
+        draw();
+      } catch (err) {}
+    });
+    source.onerror = function () {
+      setBadge(false);
+      if (source.readyState === EventSource.CLOSED) setTimeout(connect, 5000);
+    };
+  }
+  draw();
+  connect();
+})();
+</script>
+</body>
+</html>

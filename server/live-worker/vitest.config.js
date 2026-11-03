@@ -29,6 +29,17 @@ export default defineConfig({
         test: { name: 'limits', include: ['test/limits.test.js'] },
       },
       {
+        plugins: [worker({
+          PUBLIC_URL: '', LIVE_JURISDICTION: '', IDLE_MINUTES: '120',
+          CLUB_WALLS: JSON.stringify([
+            { id: '101', name: 'All Inn Squash', key: 'all-inn-test-key-0123456789abcdef' },
+            { id: '202', name: 'Squash Delft', key: 'delft-test-key-0123456789abcdefgh' },
+            { id: '303', name: 'Te Korte Sleutel', key: 'kort' },
+          ]),
+        })],
+        test: { name: 'club', include: ['test/club.test.js'] },
+      },
+      {
         plugins: [worker({ PUBLIC_URL: '', LIVE_JURISDICTION: '', STATS_KEY: 'test-stats-key' })],
         test: { name: 'stats', include: ['test/stats.test.js'] },
       },

@@ -16,6 +16,7 @@
 import { ViewerSession, sameKey } from './viewer-session.js';
 import { teamAlert, teamContentState, teamDecided } from './push.js';
 import { LANGS } from './validate.js';
+import { clubWalls, wallFor, wallsOfTeam } from './club.js';
 
 const SLOT_KEYS = ['1', '2', '3', '4'];
 const photoKey = (slot, index) => `photo:${slot}:${index}`;
@@ -35,6 +36,7 @@ export class TeamSession extends ViewerSession {
     // `lang` is the starter's language, for the link preview.
     await this.ctx.storage.put({ key, ownerKey, team, id, partijen: {}, updatedAt: now, lang });
     await this.scheduleIdleAlarm(now);
+    await this.reportToClubs(team, {}, now, id);
     return true;
   }
 
@@ -73,13 +75,53 @@ export class TeamSession extends ViewerSession {
     await this.ctx.storage.put({ ...extra, updatedAt: now });
     await this.scheduleIdleAlarm(now);
     this.broadcast('state', await this.state());
+    const [team, partijen, id] = await Promise.all([
+      this.ctx.storage.get('team'), this.ctx.storage.get('partijen'), this.ctx.storage.get('id'),
+    ]);
+    await this.reportToClubs(team, partijen || {}, now, id);
+  }
+
+  // ---- The club screen (club.js) ---------------------------------------------
+
+  /** The screens of this team match get the new stand. A failing screen never fails the write. */
+  async reportToClubs(team, partijen, updatedAt, id) {
+    for (const wall of wallsOfTeam(team, clubWalls(this.env))) {
+      try {
+        await wallFor(this.env, this.config, wall.id).setMatch(id, team, partijen, updatedAt);
+      } catch (error) {
+        console.error('club screen error', error && error.message);
+      }
+    }
+  }
+
+  /** These screens no longer show this team match (it stopped, or its team names changed) */
+  async leaveClubs(team, id, stillOn = []) {
+    for (const wall of wallsOfTeam(team, clubWalls(this.env))) {
+      if (stillOn.some((other) => other.id === wall.id)) continue;
+      try {
+        await wallFor(this.env, this.config, wall.id).removeMatch(id);
+      } catch (error) {
+        console.error('club screen error', error && error.message);
+      }
+    }
+  }
+
+  /** Gone from the club screens first, then everything else (Live stoppen, idle alarm) */
+  async end(reason) {
+    const [team, id] = await Promise.all([this.ctx.storage.get('team'), this.ctx.storage.get('id')]);
+    await this.leaveClubs(team, id);
+    return super.end(reason);
   }
 
   /** 404 unknown, 401 wrong key (the owner key is needed), 204 done */
   async setTeam(given, team) {
     if (!(await this.ctx.storage.get('key'))) return 404;
     if (!(await this.ownerEquals(given))) return 401;
-    const partijen = (await this.ctx.storage.get('partijen')) || {};
+    const [before, id, stored] = await Promise.all([
+      this.ctx.storage.get('team'), this.ctx.storage.get('id'), this.ctx.storage.get('partijen'),
+    ]);
+    const partijen = stored || {};
+    await this.leaveClubs(before, id, wallsOfTeam(team, clubWalls(this.env)));
     await this.touch({ team });
     await this.pushUpdate(team, partijen, partijen);
     return 204;

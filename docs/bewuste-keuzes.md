@@ -111,3 +111,7 @@ die geen `CF-Connecting-IP` meegeeft. Zonder `TRUST_PROXY` telt alleen het
 socket-adres, zodat niemand de limiet omzeilt met een verzonnen header; daar
 is een test voor. De productieversie is de Worker, die alleen
 `cf-connecting-ip` gebruikt.
+
+- **Clubscherm zonder schakelaar in de app** (Gerd-Jan, 3 november 2026): een live teamwedstrijd van een club met een
+  scherm staat er vanzelf op, ook die van de tegenstander. De bescherming is de geheime link per club; het staat in het
+  privacybeleid. Een teamwedstrijd hoort bij een club op de teamnaam, niet op een club-id, omdat de app geen club-id stuurt.

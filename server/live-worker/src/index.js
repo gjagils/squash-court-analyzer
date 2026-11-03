@@ -13,6 +13,8 @@ import {
 } from './validate.js';
 import { readConfig } from './config.js';
 import { previewLines } from './preview.js';
+import { clubWalls, wallFor } from './club.js';
+import { sameKey } from './viewer-session.js';
 import { partijDecided, partijWinner, pushAvailability, validateFollower } from './push.js';
 import { cleanParts, clubName, isSampleMatch, isTestTeam, totalsOf } from './stats.js';
 
@@ -20,6 +22,7 @@ export { LiveSession } from './session.js';
 export { LiveLimiter } from './limiter.js';
 export { TeamSession } from './team.js';
 export { StatsCounter } from './stats.js';
+export { ClubWall } from './club.js';
 
 /** A follower registration: an FCM token may be up to 4096 characters */
 const FOLLOWER_BODY_BYTES = 8192;
@@ -158,6 +161,29 @@ function photoResponse(photo) {
   });
 }
 
+/**
+ * The club screen, /c/<SBN club id>?k=<key> and its data under /api/club/<id>
+ * (club.js). Without the right key the screen does not exist: 404, the same as
+ * a club without a screen. The preview says nothing about the club.
+ */
+async function handleClub(request, env, config, parts, url) {
+  const clubId = parts[0] === 'c' ? parts[1] : parts[2];
+  const given = url.searchParams.get('k') || '';
+  const club = clubWalls(env).find((wall) => wall.id === clubId && sameKey(given, wall.key));
+  if (!club || request.method !== 'GET') return send(404, 'Not found');
+  const wall = wallFor(env, config, club.id);
+  if (parts[0] === 'c') {
+    const template = await (await env.ASSETS.fetch(new Request(new URL('/club.html', request.url)))).text();
+    const base = baseUrl(request, config);
+    return renderPage(request, template, 'SquashAnalyzer · clubscherm', 'Alle live wedstrijden op één scherm',
+      base, `${base}/logo.png`, JSON.stringify({ id: club.id, name: club.name }));
+  }
+  if (parts.length === 4 && parts[3] === 'events') {
+    return wall.fetch(new Request(new URL('/events', request.url), { headers: request.headers, signal: request.signal }));
+  }
+  return parts.length === 3 ? send(200, await wall.state()) : send(404, 'Not found');
+}
+
 async function handle(request, env) {
   const config = readConfig(env);
   const url = new URL(request.url);
@@ -195,6 +221,9 @@ async function handle(request, env) {
     const state = pageId ? await teamFor(pageId).state() : null;
     const lang = state ? await teamFor(pageId).lang() : 'nl';
     return teamPage(request, env, config, pageId, state, lang);
+  }
+  if ((parts[0] === 'c' && parts.length === 2) || (parts[0] === 'api' && parts[1] === 'club' && parts.length >= 3)) {
+    return handleClub(request, env, config, parts, url);
   }
   if (parts[0] === 'api' && parts[1] === 'team') return handleTeam(request, env, config, parts, limiter, teamFor, count);
 

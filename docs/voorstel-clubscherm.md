@@ -1,5 +1,8 @@
 # Voorstel: clubscherm met alle live wedstrijden (31 oktober 2026)
 
+> **Gebouwd op 3 november 2026**, zie "Wat er gebouwd is" onderaan. Keuzes van Gerd-Jan:
+> een geheime link per club, en de club uit de SBN-clubzoeker.
+
 Idee van Gerd-Jan: een pagina per club die alle live wedstrijden van die
 club op één scherm laat zien. All Inn Squash zet die pagina tijdens de
 competitieavond op de tv in de kantine, en iedereen ziet de stand van elke
@@ -78,3 +81,28 @@ uit Mijn team.
 
 De eerste versie kan dus zonder app-update live, omdat de Worker vanuit
 `main` automatisch wordt uitgerold.
+
+## Wat er gebouwd is (3 november 2026)
+
+- **Pagina**: `/c/<SBN-club-id>?k=<sleutel>` (`public/club.html`), voor een tv: per teamwedstrijd de
+  teamnamen, de stand in partijen en E1-E4 met games en de lopende game. Maximaal vier teamwedstrijden
+  per pagina; zijn het er meer, dan wisselen de pagina's elke 12 seconden. Zonder live wedstrijden staat er
+  "Nog geen live wedstrijden". Geen knoppen, altijd donker. De QR-code naar de app uit het voorstel zit er nog niet in.
+- **Toegang**: zonder de juiste sleutel is het antwoord 404, net als bij een club zonder scherm. De linkpreview
+  noemt de club niet.
+- **Clubregister**: de Worker-secret `CLUB_WALLS` (niet in de publieke repo), JSON:
+  `[{"id":"2","name":"All Inn Squash","key":"…"}]`, met id en officiële naam uit de clubzoeker en een sleutel
+  van minstens 24 tekens. Zonder die secret bestaat er geen enkel scherm. All Inn Squash is id 2 (opgezocht op
+  3 november 2026 in de zoeker van SBN Competitie 2026-2027); het id hoort bij dit seizoen en is bij een nieuw
+  seizoen opnieuw na te kijken.
+- **Koppeling**: een live teamwedstrijd kent alleen teamnamen, geen club-id. Hij hoort bij een club als een
+  teamnaam met de officiële naam begint, als hele woorden ("All Inn Squash 8", "All Inn Squash Dames 1"). Daardoor
+  is er geen app-update nodig en werkt het ook met 3.1. Teamnamen uit het programma van Mijn team zijn de namen van
+  SBN; een met de hand anders getypte naam komt niet op het scherm.
+- **Opslag**: `ClubWall` (Durable Object per club, `src/club.js`, migratie v4) houdt een kopie van de teamnamen, de
+  dag en de partijen (voornamen en stand, geen foto's). Weg bij Live stoppen, en anders 2 uur na de laatste update
+  (`IDLE_MINUTES`), in dezelfde jurisdictie als de teamwedstrijden.
+- **Niet gedaan**: losse wedstrijden, een schakelaar in de app, de QR-code, en een account of abonnement.
+
+Een club toevoegen: sleutel maken met `openssl rand -base64 24 | tr '+/' '-_'`, de lijst aanvullen en vanuit
+`server/live-worker` `npx wrangler secret put CLUB_WALLS`. Let op: dat zet de hele lijst opnieuw.

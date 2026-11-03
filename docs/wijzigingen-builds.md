@@ -10,6 +10,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.2 build 2)
 
+- **Clubscherm voor de tv (alleen server, 3 november 2026):** `/c/<SBN-club-id>?k=<sleutel>` toont alle live
+  teamwedstrijden van een club op één scherm. Geheime link per club, clubs in de secret `CLUB_WALLS`; zonder
+  die secret bestaat er geen scherm. Geen app-update nodig. Zie `docs/voorstel-clubscherm.md`.
+
 ## 3.2 build 2 (geüpload 3 november 2026: TestFlight Squashteam, bètareview wacht tot build 1 klaar is; Play internal, alpha, Google Group; website gepubliceerd)
 
 Releasenotes `release-notes/3.2-2.md` en `android-3.2-2.md`; `website/testen.html`, handleiding (iPhone en

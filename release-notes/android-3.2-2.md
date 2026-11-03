@@ -1,0 +1,1 @@
+Build 2 van 3.2. Scheidsrechter: officiële timers (inspelen 4 min, 1 min tot start, 2 min tussen games, trillen bij Half-time, 15 seconden en Time). Badges: "Nog 3 tot zilver". Kies speler: onderlinge stand. Scouting: profiel van je tegenstander bekijken. SquashLevels-link per speler. Rustiger coachscherm. Meer: squashanalyzer.com/testen

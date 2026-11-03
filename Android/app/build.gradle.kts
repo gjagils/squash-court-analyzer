@@ -10,8 +10,8 @@ plugins {
 // an internal delivery to a phone adds -PsquashInternal=N (3.1 build 4.1) and
 // so counts up from the last upload, which the versionCode needs.
 val squashVersion = "3.2"
-val squashBuild = 1
-val squashCode = 3020100
+val squashBuild = 2
+val squashCode = 3020200
 val squashInternal = (findProperty("squashInternal") as String?)?.toInt() ?: 0
 // 4.0 behind a switch (docs/releaseplan-3x-4.0.md): only a 4.0 test build adds
 // -PsquashPlayerAccount=true

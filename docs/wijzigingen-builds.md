@@ -8,7 +8,14 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.2 build 1)
+## Volgende build (na 3.2 build 2)
+
+## 3.2 build 2 (geüpload 3 november 2026: TestFlight Squashteam, bètareview wacht tot build 1 klaar is; Play internal, alpha, Google Group; website gepubliceerd)
+
+Releasenotes `release-notes/3.2-2.md` en `android-3.2-2.md`; `website/testen.html`, handleiding (iPhone en
+Android) en privacy (nl/en, SquashLevels) bijgewerkt. Geüpload op verzoek van Gerd-Jan met lokaal groene suites
+(Core, iOS met de vlag uit en aan, Android); de CI-run brak Core en iOS af zonder testresultaat. Geen nieuwe
+App Store-screenshots.
 
 - **Officiële timers voor de scheidsrechter (R2, 3 november 2026):** vóór de eerste rally staat
   `Start inspelen · 4:00`; dan telt de app het inspelen af (na 2 minuten "Half-time: wissel van kant",

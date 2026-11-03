@@ -2,6 +2,88 @@ import Foundation
 import SwiftUI
 import SquashAnalyzerCore
 
+/// "SQUASHLEVELS" in the player editor (3.2): the player's SquashLevels id, from
+/// a pasted link or typed in, saved at once with its own button like the team
+/// switch above it (`SquashLevelsLinks`). The app never fetches SquashLevels.
+struct SquashLevelsField: View {
+    let playerId: String
+    @State private var text = ""
+    @State private var saved: String? = nil
+    @State private var message: String? = nil
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("SQUASHLEVELS")
+                .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
+                .tracking(1)
+                .foregroundColor(SharedColors.textMuted)
+            HStack(spacing: 8) {
+                TextField(loc("Link of speler-ID"), text: $text)
+                    .accessibilityLabel(loc("SquashLevels-profiel"))
+                    .textFieldStyle(.plain)
+                    #if os(iOS) || SKIP
+                    .keyboardType(.URL)
+                    .textInputAutocapitalization(.never)
+                    #endif
+                    .autocorrectionDisabled()
+                    .padding()
+                    .background(SharedColors.tint(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                Button(loc("Bewaar")) { save() }
+                    .foregroundColor(SharedColors.accent)
+                    .disabled(text.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+            Text("Plak de link naar de speler op SquashLevels (bijvoorbeeld uit de ranglijst), of vul het speler-ID in. De app haalt zelf niets op; de knop op het badgescherm opent de website.", bundle: textBundle)
+                .font(SharedFonts.system(12))
+                .foregroundColor(SharedColors.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+            if let saved {
+                HStack(spacing: 8) {
+                    Text(loc("Gekoppeld: speler-ID \(saved)"))
+                        .font(SharedFonts.system(12, weight: .medium))
+                        .foregroundColor(SharedColors.support)
+                    Spacer()
+                    Button(loc("Verwijder koppeling")) { remove() }
+                        .font(SharedFonts.system(12, weight: .medium))
+                        .foregroundColor(SharedColors.textSecondary)
+                }
+            }
+            if let message {
+                Text(message)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.error)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .onAppear { saved = SquashLevelsLinks.shared.levelsId(forPlayer: playerId) }
+    }
+
+    private func save() {
+        guard let id = SquashLevels.playerId(from: text) else {
+            message = loc("Dit is geen SquashLevels-link of speler-ID. Plak de link uit de browser of typ alleen de cijfers.")
+            return
+        }
+        do {
+            try SquashLevelsLinks.shared.set(id, forPlayer: playerId)
+            saved = id
+            text = ""
+            message = nil
+        } catch {
+            message = loc("Opslaan is niet gelukt.")
+        }
+    }
+
+    private func remove() {
+        do {
+            try SquashLevelsLinks.shared.set(nil, forPlayer: playerId)
+            saved = nil
+            message = nil
+        } catch {
+            message = loc("Opslaan is niet gelukt.")
+        }
+    }
+}
+
 /// Also embedded by iOS's editor, which retains its photo picker and save flow.
 public struct PlayerProfileFields: View {
     @Binding private var name: String
@@ -47,6 +129,7 @@ public struct PlayerProfileFields: View {
                 if Features.shared.playerAccount {
                     sbnPlayerPart(playerId)
                 }
+                SquashLevelsField(playerId: playerId)
             }
             VStack(alignment: .leading, spacing: 12) {
                 caption("COACHING FOCUS")

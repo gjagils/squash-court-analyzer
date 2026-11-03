@@ -41,6 +41,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   (de emulator was in gebruik door een andere sessie).
 - **Tests in beide standen van de 4.0-vlag (3 november 2026):** CI draait de iOS-tests ook met
   `SQUASH_PLAYER_ACCOUNT=YES` en de iOS-stap faalt nu echt bij een mislukte test (`set -o pipefail`).
+- **SquashLevels bij een speler (3 november 2026):** in de spelereditor het blok SQUASHLEVELS: plak de
+  link uit de ranglijst of typ het speler-ID; op het badgescherm opent `Bekijk op SquashLevels` de
+  SBN-ranglijst met de speler gemarkeerd. De app haalt zelf niets op bij SquashLevels. Opslag in
+  `squashlevels.json`, mee in de back-up. Details in `docs/plan-squashlevels-profiel.md`.
 
 ## 3.2 build 1 (geüpload 3 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 

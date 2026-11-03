@@ -28,6 +28,8 @@ public struct FullBackup: Codable, Equatable, Sendable {
     public var gameNotes: [GameNote]? = nil
     /// The ids of the oefenpartijen (`PracticeMatches`); left out when there are none
     public var practiceMatchIds: [String]? = nil
+    /// Each saved player's SquashLevels id (`SquashLevelsLinks`, 3.2); left out when there are none
+    public var squashLevelsLinks: [SquashLevelsLink]? = nil
 
     public init(version: Int, backupDate: Date, players: [PlayerBackupData], matches: [MatchExportData],
                 standaloneGames: [GameExportData], badgeAwards: [BadgeAwardBackupData]? = nil,

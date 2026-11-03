@@ -68,6 +68,9 @@ public enum TeamBackup {
         // And which matches are oefenpartijen (PracticeMatches)
         let practice = PracticeMatchFile.read(in: directory)
         if !practice.isEmpty { result.practiceMatchIds = practice }
+        // And the players' SquashLevels ids (SquashLevelsLinks)
+        let levels = SquashLevelsFile.read(in: directory)
+        if !levels.isEmpty { result.squashLevelsLinks = levels }
         return result
     }
 
@@ -107,6 +110,11 @@ public enum TeamBackup {
             ids.append(contentsOf: incoming)
             try PracticeMatchFile.write(ids, in: directory)
             PracticeMatches.shared.reload()
+        }
+        if let incoming = backup.squashLevelsLinks {
+            let links = SquashLevelsFile.merged(incoming, into: SquashLevelsFile.read(in: directory), replacing: replacing)
+            try SquashLevelsFile.write(links, in: directory)
+            SquashLevelsLinks.shared.reload()
         }
         if let ids = backup.teamPlayerIds {
             var merged: [String] = replacing ? [] : TeamRoster.ids()

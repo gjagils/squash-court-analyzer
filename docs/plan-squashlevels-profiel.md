@@ -1,7 +1,7 @@
 # Backlog: SquashLevels-profiel openen vanuit Spelers
 
-Status: afgesproken op 6 oktober 2026, nog niet gebouwd. Geen buildnummer
-toegekend. Dit is een kleine, afzonderlijke feature voor iOS en Android.
+Status: **gebouwd op 3 november 2026 voor 3.2** (zie "Wat er gebouwd is" onderaan).
+Afgesproken op 6 oktober 2026. Dit is een kleine, afzonderlijke feature voor iOS en Android.
 Backlog: [Wijzigingen per build](wijzigingen-builds.md#backlog).
 
 Aanvulling van Gerd-Jan: iedere opgeslagen speler krijgt een eigen link;
@@ -143,3 +143,23 @@ SquashLevels/SBN nodig is.
 De bestaande **Mijn team**-koppeling haalt gegevens van `sbn.toernooi.nl`
 op; dat is een andere dienst en geeft geen automatische toegang tot
 SquashLevels. Deze feature verandert Mijn team niet.
+
+## Wat er gebouwd is (3 november 2026)
+
+- **Linkvorm**: gecontroleerd met de link die Gerd-Jan uit zijn browser kopieerde,
+  `https://sbn.squashlevels.com/speelsterkte_ranking?all&page=sbn_rankings&country=8&highlight=286855&show=last10`.
+  De app bewaart alleen het ID (`highlight=` of `player=`, of de cijfers zelf) en opent
+  precies die ranglijst met de speler gemarkeerd (`SquashLevels.url(forPlayerId:)`).
+  Alleen https op `sbn.squashlevels.com`, `www.squashlevels.com` of `squashlevels.com`,
+  zonder poort of inlog in de link. Een aparte profielpagina (`/player_detail`) is niet
+  gecontroleerd en wordt niet geopend.
+- **Opslag**: `squashlevels.json` naast de teamwedstrijden (`SquashLevelsFile`,
+  `SquashLevelsLinks`), geen schemawijziging. In de volledige back-up als
+  `squashLevelsLinks` (formaat 4 blijft; oudere apps negeren het veld). Voeg toe houdt een
+  bestaande koppeling, Vervang alles neemt die van het bestand.
+- **Bediening**: in de spelereditor (iOS en Android, `PlayerProfileFields`) het blok
+  SQUASHLEVELS met `Bewaar` en `Verwijder koppeling`; het bewaart direct, net als de
+  schakelaar "In mijn team", dus Annuleren van de editor draait het niet terug. Op het
+  badgescherm van de speler `Bekijk op SquashLevels` (opent de browser).
+- **Niet gedaan**: de team-zip (de teamimport is in 3.1 build 5 verwijderd); de koppeling
+  opruimen als een speler verwijderd wordt (een losse koppeling zonder speler doet niets).

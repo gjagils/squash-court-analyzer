@@ -113,6 +113,23 @@ public struct SharedPlayerBadgesView: View {
                             .buttonStyle(.plain)
                             .accessibilityLabel(loc("Profiel van \(playerName)"))
                         }
+                        // 3.2: the player on SquashLevels, when linked in the editor
+                        if let levelsId = SquashLevelsLinks.shared.levelsId(forPlayer: playerId),
+                           let levelsURL = SquashLevels.url(forPlayerId: levelsId) {
+                            Link(destination: levelsURL) {
+                                HStack(spacing: 10) {
+                                    AppSymbol("globe", size: 16, color: SharedColors.accent)
+                                    Text("Bekijk op SquashLevels", bundle: textBundle)
+                                        .font(ActionButton.font)
+                                        .foregroundColor(SharedColors.accent)
+                                    Spacer(minLength: 0)
+                                }
+                                .padding(14)
+                                .background(SharedColors.cardTint)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                            .accessibilityLabel(loc("Bekijk \(playerName) op SquashLevels, opent de browser"))
+                        }
                         section(loc("BADGES · \(earnedFamilies) VAN \(BadgeKind.collection.count)")) {
                             // Rows of three, not a LazyVGrid: on Android that becomes a
                             // scroll area of its own inside the page

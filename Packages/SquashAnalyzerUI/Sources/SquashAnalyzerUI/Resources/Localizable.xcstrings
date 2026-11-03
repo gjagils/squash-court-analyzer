@@ -1693,6 +1693,24 @@
         }
       }
     },
+    "Bekijk %@ op SquashLevels, opent de browser": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View %@ on SquashLevels, opens the browser"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekijk %@ op SquashLevels, opent de browser"
+          }
+        }
+      }
+    },
     "Bekijk analyse": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -1725,6 +1743,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bekijk badges"
+          }
+        }
+      }
+    },
+    "Bekijk op SquashLevels": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View on SquashLevels"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekijk op SquashLevels"
           }
         }
       }
@@ -3223,6 +3259,24 @@
         }
       }
     },
+    "Dit is geen SquashLevels-link of speler-ID. Plak de link uit de browser of typ alleen de cijfers.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is not a SquashLevels link or player ID. Paste the link from the browser or type the digits only."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit is geen SquashLevels-link of speler-ID. Plak de link uit de browser of typ alleen de cijfers."
+          }
+        }
+      }
+    },
     "Dit is geen geldige link of code van een teamwedstrijd.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -4263,6 +4317,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gekoppeld aan een scheidsrechterwedstrijd uit Afgeronde wedstrijden."
+          }
+        }
+      }
+    },
+    "Gekoppeld: speler-ID %@": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linked: player ID %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gekoppeld: speler-ID %@"
           }
         }
       }
@@ -5379,6 +5451,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Link of code"
+          }
+        }
+      }
+    },
+    "Link of speler-ID": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link or player ID"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link of speler-ID"
           }
         }
       }
@@ -7273,6 +7363,24 @@
         }
       }
     },
+    "Plak de link naar de speler op SquashLevels (bijvoorbeeld uit de ranglijst), of vul het speler-ID in. De app haalt zelf niets op; de knop op het badgescherm opent de website.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste the link to the player on SquashLevels (for example from the ranking), or enter the player ID. The app fetches nothing itself; the button on the badge screen opens the website."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plak de link naar de speler op SquashLevels (bijvoorbeeld uit de ranglijst), of vul het speler-ID in. De app haalt zelf niets op; de knop op het badgescherm opent de website."
+          }
+        }
+      }
+    },
     "Plak de teamlink die je hebt gekregen, zoals https://squashanalyzer.com/teams/…/team.zip. Spelers met dezelfde naam worden bijgewerkt, nieuwe worden toegevoegd.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -8241,6 +8349,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Spelerskaart"
+          }
+        }
+      }
+    },
+    "SquashLevels-profiel": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SquashLevels profile"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SquashLevels-profiel"
           }
         }
       }
@@ -9825,6 +9951,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Verwijder %@ – %@"
+          }
+        }
+      }
+    },
+    "Verwijder koppeling": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove link"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwijder koppeling"
           }
         }
       }

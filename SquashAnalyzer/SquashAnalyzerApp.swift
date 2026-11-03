@@ -45,6 +45,7 @@ struct SquashAnalyzerApp: App {
         GameNotes.shared.configure(directory: TeamMatchStorage.directory)
         // Oefenpartijen (no badges, not in the profile) in the same folder
         PracticeMatches.shared.configure(directory: TeamMatchStorage.directory)
+        SquashLevelsLinks.shared.configure(directory: TeamMatchStorage.directory)
         // Explicitly disable SwiftData's CloudKit mirroring: the store stays local.
         // iCloud Drive holds the file backups (ExportService); player cards are
         // shared as links (CardSnapshot), not through CloudKit.

@@ -12,6 +12,7 @@ import {
   validateSnapshot, validateTeamHeader,
 } from './validate.js';
 import { readConfig } from './config.js';
+import { previewLines } from './preview.js';
 import { partijDecided, partijWinner, pushAvailability, validateFollower } from './push.js';
 import { cleanParts, clubName, isSampleMatch, isTestTeam, totalsOf } from './stats.js';
 
@@ -77,12 +78,10 @@ async function renderPage(request, template, title, description, pageUrl, imageU
  */
 const PREVIEW = {
   nl: {
-    live: 'Volg de wedstrijd live in SquashAnalyzer', liveOver: 'Deze livewedstrijd is afgelopen.',
     teamTitle: 'SquashAnalyzer · teamwedstrijd', team: 'Volg de teamwedstrijd live in SquashAnalyzer',
     teamOver: 'Deze teamwedstrijd is afgelopen.', partijen: 'partijen',
   },
   en: {
-    live: 'Follow the match live in SquashAnalyzer', liveOver: 'This live match has ended.',
     teamTitle: 'SquashAnalyzer · team match', team: 'Follow the team match live in SquashAnalyzer',
     teamOver: 'This team match has ended.', partijen: 'matches',
   },
@@ -96,9 +95,8 @@ function requestLang(body, url) {
 
 async function viewerPage(request, env, config, id, state, lang = 'nl') {
   const template = await (await env.ASSETS.fetch(new Request(new URL('/live.html', request.url)))).text();
-  const words = PREVIEW[lang] || PREVIEW.nl;
-  const title = state ? `🔴 Live: ${state.snapshot.p1} – ${state.snapshot.p2}` : 'SquashAnalyzer · live';
-  const description = state ? words.live : words.liveOver;
+  // The stand of the moment of sharing: the preview does not follow the match (preview.js)
+  const { title, description } = previewLines(state ? state.snapshot : null, lang);
   const base = baseUrl(request, config);
   return renderPage(request, template, title, description, `${base}/l/${id}`, `${base}/logo.png`, JSON.stringify(id));
 }

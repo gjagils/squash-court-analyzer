@@ -131,25 +131,25 @@ describe('sessions', () => {
 
   it('the link preview follows the language the share was started in; Dutch by default', async () => {
     const dutch = await call('POST', '/api/live', snapshot);
-    expect((await call('GET', `/l/${dutch.json.id}`)).text).toMatch(/Volg de wedstrijd live in SquashAnalyzer/);
+    expect((await call('GET', `/l/${dutch.json.id}`)).text).toMatch(/Game 2 · 3–2 · volg live in SquashAnalyzer/);
     const english = await call('POST', '/api/live', { ...snapshot, lang: 'en' });
     expect(english.status).toBe(201);
     const page = await call('GET', `/l/${english.json.id}`);
-    expect(page.text).toMatch(/Follow the match live in SquashAnalyzer/);
-    expect(page.text).toMatch(/<title>🔴 Live: Jan – Piet<\/title>/);
+    expect(page.text).toMatch(/Game 2 · 3–2 · follow live/);
+    expect(page.text).toMatch(/<title>🔴 Live: Jan 1 – 0 Piet<\/title>/);
     // The language is not part of the stand the viewers get
     expect((await call('GET', `/api/live/${english.json.id}`)).json.snapshot.lang).toBeUndefined();
     const query = await call('POST', '/api/live?lang=en', snapshot);
-    expect((await call('GET', `/l/${query.json.id}`)).text).toMatch(/Follow the match live/);
+    expect((await call('GET', `/l/${query.json.id}`)).text).toMatch(/follow live/);
     const odd = await call('POST', '/api/live', { ...snapshot, lang: 'fr' });
-    expect((await call('GET', `/l/${odd.json.id}`)).text).toMatch(/Volg de wedstrijd live/);
+    expect((await call('GET', `/l/${odd.json.id}`)).text).toMatch(/volg live in SquashAnalyzer/);
   });
 
   it('the viewer page shows the names in the link preview and escapes them', async () => {
     const created = await call('POST', '/api/live', { ...snapshot, p2: "O'Neil" });
     const page = await call('GET', `/l/${created.json.id}`);
     expect(page.status).toBe(200);
-    expect(page.text).toMatch(/<title>🔴 Live: Jan – O&#39;Neil<\/title>/);
+    expect(page.text).toMatch(/<title>🔴 Live: Jan 1 – 0 O&#39;Neil<\/title>/);
     expect(page.text).toMatch(/og:url" content="https:\/\/live\.test\/l\/[a-z0-9]{12}"/);
     expect(page.headers.get('content-security-policy')).toMatch(/default-src 'self'/);
     // The way to the lock screen: the app link, built in the page for this host

@@ -19,7 +19,7 @@ export default defineConfig({
     projects: [
       {
         plugins: [worker({ PUBLIC_URL: '', LIVE_JURISDICTION: '' })],
-        test: { name: 'api', include: ['test/api.test.js', 'test/team.test.js'] },
+        test: { name: 'api', include: ['test/api.test.js', 'test/team.test.js', 'test/preview.test.js'] },
       },
       {
         plugins: [worker({

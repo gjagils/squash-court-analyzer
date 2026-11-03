@@ -179,7 +179,7 @@ struct ContentView: View {
                 return
             }
             // A live link: follow the match on the lock screen
-            if url.absoluteString.hasPrefix("squashanalyzer://volg") {
+            if LiveFollowLink.isFollowLink(url.absoluteString) {
                 pendingLiveFollow = url.absoluteString
                 presentPendingLiveFollow()
                 return

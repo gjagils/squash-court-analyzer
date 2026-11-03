@@ -289,8 +289,8 @@ class MainActivity : AppCompatActivity() {
                 return
             }
         }
-        // A live match to follow on the lock screen (squashanalyzer://volg#<id>)
-        if (link.startsWith("squashanalyzer://volg")) {
+        // A live match to follow on the lock screen (https://squashanalyzer.com/volg/#<id>, squashanalyzer://volg#<id>)
+        if (LiveFollowLink.isFollowLink(link)) {
             val target = LiveFollowLink.parse(link)
             if (target == null) showNewerAppNeeded() else followLive(target)
             return

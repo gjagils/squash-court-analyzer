@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Weergave before the first paint: Donker unless Licht or Systeem was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
+  <title>Volg de stand – SquashAnalyzer</title>
+  <meta name="description" content="Volg de stand van een squashwedstrijd op je vergrendelscherm met de SquashAnalyzer-app." />
+  <meta name="robots" content="noindex" />
+  <meta property="og:title" content="Volg de stand op je vergrendelscherm – SquashAnalyzer" />
+  <meta property="og:description" content="Installeer de SquashAnalyzer-app en tik daarna opnieuw op de link." />
+  <meta property="og:image" content="https://www.squashanalyzer.com/logo.png?v=4" />
+  <link rel="stylesheet" href="../style.css?v=20261025b" />
+  <script src="../theme.js?v=20261011" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png?v=5" />
+  <link rel="icon" type="image/png" sizes="256x256" href="../favicon.png?v=5" />
+  <link rel="apple-touch-icon" href="../logo.png?v=4" />
+  <style>
+    .follow-page { max-width: 480px; margin: 0 auto; padding: 32px 20px 56px; }
+    .card { background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+    .label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+    h1 { font-size: 24px; margin: 8px 0 12px; }
+    .actions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+    .actions a { display: block; text-align: center; padding: 14px; border-radius: 12px; font-weight: 600; }
+    .get-app { background: var(--btn); color: var(--on-btn); }
+    .open-app { background: var(--surface); border: 1px solid var(--line); color: var(--text-1); }
+    .note { margin-top: 20px; font-size: 13px; color: var(--text-3); }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="follow-page">
+    <div class="card">
+      <div class="label" data-en="Live score">Live stand</div>
+      <h1 id="title" data-en="Follow the score on your lock screen">Volg de stand op je vergrendelscherm</h1>
+      <p id="text" data-en="You need the SquashAnalyzer app for this. Install the app, then tap the link again.">Daarvoor heb je de SquashAnalyzer-app nodig. Installeer de app en tik daarna opnieuw op de link.</p>
+    </div>
+    <div class="actions">
+      <a class="get-app" href="https://apps.apple.com/app/squash-analyzer/id6758676921" target="_blank" rel="noopener" data-en="iPhone: get it from the App Store">iPhone: download in de App Store</a>
+      <a class="get-app" href="https://play.google.com/store/apps/details?id=com.squashanalyzer.android" target="_blank" rel="noopener" data-en="Android: get it from Google Play">Android: download in Google Play</a>
+      <!-- An app from before the https link (Android stays in the browser) still opens with the app link -->
+
+      <a class="open-app" id="open-app" href="#" hidden data-en="Already have the app? Open it">Heb je de app al? Open hem</a>
+    </div>
+    <p class="note" data-en="Rather no app? The score stays live in your browser, on the page of the match.">Liever geen app? De stand blijft live te zien in je browser, op de pagina van de wedstrijd.</p>
+    <div class="page-foot"><div data-theme-choice-slot></div></div>
+  </main>
+
+  <script>
+    (function () {
+      // English when the browser is not set to Dutch, as on the viewer page
+      var en = !!navigator.language && !/^nl/i.test(navigator.language);
+      if (en) {
+        document.documentElement.lang = "en";
+        var marked = document.querySelectorAll("[data-en]");
+        for (var i = 0; i < marked.length; i++) marked[i].textContent = marked[i].getAttribute("data-en");
+      }
+      // After the #: [team/]<id>[@<host>], 12 characters of a-z and 0-9. The app checks the host itself.
+      var fragment = (location.hash || "").slice(1);
+      if (/^(team\/)?[a-z0-9]{12}(@[a-z0-9.-]+)?$/.test(fragment)) {
+        var open = document.getElementById("open-app");
+        open.href = "squashanalyzer://volg#" + fragment;
+        open.hidden = false;
+      } else {
+        document.getElementById("title").textContent = en ? "This link is not right" : "Deze link klopt niet";
+        document.getElementById("text").textContent = en
+          ? "Go back to the page of the match and tap Follow on your lock screen again. You need the SquashAnalyzer app for this."
+          : "Ga terug naar de pagina van de wedstrijd en tik opnieuw op Volg op je vergrendelscherm. Daarvoor heb je de SquashAnalyzer-app nodig.";
+      }
+    })();
+  </script>
+</body>
+</html>

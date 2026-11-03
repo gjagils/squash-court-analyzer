@@ -17,6 +17,14 @@ Android) en privacy (nl/en, SquashLevels) bijgewerkt. Geüpload op verzoek van G
 (Core, iOS met de vlag uit en aan, Android); de CI-run brak Core en iOS af zonder testresultaat. Geen nieuwe
 App Store-screenshots.
 
+- **Volg-knop ook voor wie de app nog niet heeft (3 november 2026, naar aanleiding van Hoeveelishet):** de knop
+  "Volg op je vergrendelscherm" op de kijkpagina en de teampagina wijst nu naar
+  `https://squashanalyzer.com/volg/#<id>` (team `#team/<id>`, andere server `@<host>`) in plaats van naar
+  `squashanalyzer://volg#…`. Met de app opent de link de app (`/volg` in de AASA en het Android-manifest,
+  `LiveFollowLink` in Core leest hem); zonder app komt de kijker op `website/volg/` met de winkels. Daar staat ook
+  `Heb je de app al? Open hem` (de oude schema-link), voor apps van vóór deze build. Het id staat in het
+  fragment, net als bij `/kaart/#` en `/team/#`: de statische site geeft op `/volg/<id>` een 404. Publiceer de
+  website vóór de Worker uitrolt, anders wijst de knop naar een 404.
 - **Officiële timers voor de scheidsrechter (R2, 3 november 2026):** vóór de eerste rally staat
   `Start inspelen · 4:00`; dan telt de app het inspelen af (na 2 minuten "Half-time: wissel van kant",
   `Klaar` beëindigt het eerder), daarna 1 minuut tot de start, en na elke game 2 minuten pauze vanaf de

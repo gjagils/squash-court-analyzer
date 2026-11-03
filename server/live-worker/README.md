@@ -179,8 +179,10 @@ Teamwedstrijd op het vergrendelscherm (zelfde branch, nog niet in productie):
   op games zoals de teampagina; tekst `All Inn 8 – Delft 8 · partijen 3–1`). Geen
   melding per rally of per game.
 - De teampagina heeft de knop "Volg op je vergrendelscherm" naar
-  `squashanalyzer://volg#team/<id>` (met `@<host>` buiten live.squashanalyzer.com),
-  verborgen als alle partijen klaar zijn of de wedstrijd voorbij is.
+  `https://squashanalyzer.com/volg/#team/<id>` (met `@<host>` buiten live.squashanalyzer.com),
+  verborgen als alle partijen klaar zijn of de wedstrijd voorbij is. Met de app
+  opent de link de app; zonder app komt de kijker op `website/volg/` met de
+  winkels. De losse wedstrijd doet hetzelfde met `/volg/#<id>`.
 
 Instellingen in `wrangler.toml` onder `[vars]`: `PUBLIC_URL`, `IDLE_MINUTES`
 (120), `MAX_SESSIONS` (200), `CREATES_PER_MINUTE` (10),

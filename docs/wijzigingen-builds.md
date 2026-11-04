@@ -10,6 +10,19 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.2 build 2)
 
+- **Focus tegen de cijfers (C7, 4 november 2026):** heeft de speler bij Spelers een coachingfocus (Backhand,
+  Serve, Conditie…), dan staat in de analyse boven het tactisch advies de kaart **Focus van <naam>**: per
+  focus-tag één regel met wat deze game erover zegt. Backhand en Voorhand = linker- en rechterkant van de baan,
+  zoals bij een rechtshandige speler; de regel noemt de kant, want de app weet niet wie linkshandig is
+  (`docs/bewuste-keuzes.md`) (gewonnen, verloren, beste slag daar); Serve = punten op eigen service, servicepunten en servicefouten; Volley,
+  Drop en Boast = de punten met die slag (en die van de tegenstander); Achterwand = achterin; Conditie = lange
+  tegen korte rally's en de langste rally; Snelheid = punten verloren onder druk en de korte rally's; Beweging =
+  lets mee en tegen, strokes tegen; Mentaal = eigen fouten, waarvan vanaf een stand van 8, en de langste reeks
+  verloren punten; Tactiek = beste zone, beste slag en het aantal verschillende slagen. Cijfers, geen advies: het
+  advies staat eronder. Bij Eenvoudig coachen vervallen de regels die slagen of fouten nodig hebben
+  ("Niet vastgelegd bij Eenvoudig coachen"). `FocusInsights` in Core, `FocusInsightsTests`; iOS en Android via het
+  gedeelde dashboard. De Engelse vertaling van "app" in de SBN-vergelijking (`LeagueTeamMatch`) ontbrak en is
+  toegevoegd.
 - **Let en stroke als label onder het scorevak (3 november 2026, keuze Gerd-Jan):** het zwarte vlak met
   `STROKE -> NAAM` is weg. Een stroke staat nu onder het scorevak van wie hem krijgt, in die spelerkleur:
   "Stroke voor / Anna · +1". Een let staat in het midden: "Let · rally over". Het label blijft tot de volgende

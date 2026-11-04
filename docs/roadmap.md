@@ -31,7 +31,7 @@ met een geheime link ([voorstel](voorstel-clubscherm.md)). **Gebouwd 3 november 
 
 | Punt | Bron |
 |---|---|
-| Coachingfocus koppelen aan cijfers | C7 |
+| Coachingfocus koppelen aan cijfers | C7 — **gebouwd 4 november 2026** (op `main`, in de volgende 3.2-build) |
 
 ## 4.0
 

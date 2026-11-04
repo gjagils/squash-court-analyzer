@@ -103,6 +103,14 @@ plaats.
 
 ## Servers
 
+### Focus Backhand en Voorhand: linker- en rechterkant, geen vinkje Linkshandig (4 november 2026)
+
+`FocusInsights.sideText` toont bij de focus Backhand de linkerkant van de baan en bij Voorhand de rechterkant. Dat
+klopt voor een rechtshandige speler. De app weet niet wie linkshandig is: Gerd-Jan besloot op 1 oktober geen vinkje
+Linkshandig te maken, omdat de coach links en rechts zelf kan lezen (`docs/archief/plan-lokaal-advies.md`). De regel
+noemt daarom de kant ("Linkerkant: 4 gewonnen, 6 verloren"), niet het woord backhand. Komt er ooit een vinkje, dan
+draait alleen deze koppeling om; dat is een veld bij de speler, dus schema V8 en Room 10.
+
 ### AASA: `/volg` alleen als testlink tot de App Store-release (3 november 2026)
 
 `website/.well-known/apple-app-site-association` heeft voor `/volg` alleen de regel met `?test=1`, terwijl de

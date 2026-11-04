@@ -35,6 +35,9 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
   (`startingServer` ↔ `setStartingServer`).
 - **Een argumentlabel gelijk aan een property verbergt die property**
   (`func start(matchId id:)`): schrijf `self.` voor de property.
+- **Twee gelijke argumentlabels in één functie** (`text(for tag:, in:, for player:)`) worden in Kotlin
+  twee parameters `for_` ("Conflicting declarations", 4 november 2026, `FocusInsights`): Skip gebruikt het
+  label als parameternaam. Geef één van beide een ander label of laat het weg (`line(_ tag:, in:, for:)`).
 - **Statics worden van boven naar beneden geïnitialiseerd**: een
   `static let shared = X()` staat onder de statics die de init gebruikt.
 - **`@Observable` vraagt `import Observation` in het bestand zelf.**

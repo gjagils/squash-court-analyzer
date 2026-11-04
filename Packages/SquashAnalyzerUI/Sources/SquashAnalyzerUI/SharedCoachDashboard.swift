@@ -98,6 +98,10 @@ public struct SharedCoachDashboardView: View {
                     if !simple {
                         volleys
                     }
+                    // The player's focus (Spelers) against this game's numbers (C7)
+                    if !match.coachingFocus(for: player).isEmpty {
+                        focusCard
+                    }
                     localAdvice
                     // Only with an OpenAI key (Instellingen); without one the local advice is it
                     if hasKey {
@@ -470,6 +474,35 @@ public struct SharedCoachDashboardView: View {
                 .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
         }
+    }
+
+    // MARK: Focus
+
+    /// One line per focus tag of the player, what the game says about it
+    /// (Core's FocusInsights). Only when the player has a focus.
+    private var focusCard: some View {
+        let insights = FocusInsights.make(in: game, for: player, focus: match.coachingFocus(for: player), simpleInput: simple)
+        return VStack(alignment: .leading, spacing: 10) {
+            sectionTitle(loc("Focus van \(game.name(for: player))"), icon: "target")
+            Text("Wat deze game zegt over de aandachtspunten uit Spelers.", bundle: textBundle)
+                .font(SharedFonts.system(11))
+                .foregroundColor(SharedColors.textMuted)
+            ForEach(insights) { insight in
+                HStack(alignment: .top, spacing: 8) {
+                    // A fixed column, so the lines start at the same place
+                    TagChip(insight.tag.title, color: color(for: player))
+                        .frame(width: 92, alignment: .leading)
+                    Text(insight.text)
+                        .font(SharedFonts.system(12, weight: .medium, design: .rounded))
+                        .foregroundColor(SharedColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 3)
+                }
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(SharedColors.cardTint).clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     // MARK: Advice

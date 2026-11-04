@@ -1,6 +1,6 @@
 import Foundation
 
-public enum CoachingFocusTag: String, CaseIterable {
+public enum CoachingFocusTag: String, CaseIterable, Sendable {
     case conditie = "Conditie"
     case voorhand = "Voorhand"
     case backhand = "Backhand"

@@ -44,7 +44,7 @@ tussen games) en in het vervolg na de wedstrijd.
 | C4 | **Service en return**: punten gewonnen op eigen service versus bij hand-out, per speler | Data is er al (`Point.server`); zegt veel over druk zetten | S | **Gebouwd 12 oktober** |
 | C5 | **Verslag voor de speler** (pdf of plaatje) met analyse, advies en de profiellijn | Nu deel je de score; de analyse zelf blijft op de telefoon van de coach | M | **Na 4.0** ([roadmap](roadmap.md)) |
 | C6 | **Scouting**: profiel van een tegenstander (als die opgeslagen is) vóór een wedstrijd, ook vanuit het programma van Mijn team | Het profiel werkt al voor iedere gekozen speler; alleen de ingang ontbreekt | S | **3.2** ([roadmap](roadmap.md)) |
-| C7 | **Coachingfocus koppelen aan cijfers** (focus "Backhand" → hoe vaak won/verloor je links achter) | De focus-tags staan nu los van de analyse | M | **3.3** ([roadmap](roadmap.md)) |
+| C7 | **Coachingfocus koppelen aan cijfers** (focus "Backhand" → hoe vaak won/verloor je links achter) | De focus-tags staan nu los van de analyse | M | **Gebouwd 4 november 2026** (kaart *Focus van <naam>* in de analyse, één regel per focus-tag met de cijfers van de game; was 3.3, naar voren gehaald op verzoek van Gerd-Jan) |
 | C8 | **Trainingsmodus** (oefenpartij zonder badges en zonder telling in het profiel) | Staat al als vroeg idee op de lijst | M | **3.1** ([roadmap](roadmap.md)) |
 
 ## Scheidsrechter

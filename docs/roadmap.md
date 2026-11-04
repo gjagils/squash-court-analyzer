@@ -42,6 +42,7 @@ met een geheime link ([voorstel](voorstel-clubscherm.md)). **Gebouwd 3 november 
 | Badgecategorie Teamspeler | T7 |
 | Melding als een teamgenoot een partij invult tijdens een live teamwedstrijd (verplaatst van 3.3 op 4 november 2026) | T6 |
 | Losse melding bij een gewonnen game, partij of einduitslag als je live volgt (verplaatst van 3.3 op 4 november 2026) | buildbacklog |
+| Vinkje Linkshandig bij een speler, zodat de focus Backhand en Voorhand de juiste kant van de baan toont (gekozen op 4 november 2026) | [bewuste keuzes](bewuste-keuzes.md) |
 
 ## Na 4.0
 

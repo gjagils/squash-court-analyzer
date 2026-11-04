@@ -70,6 +70,11 @@ App Store-screenshots.
   (de emulator was in gebruik door een andere sessie).
 - **Tests in beide standen van de 4.0-vlag (3 november 2026):** CI draait de iOS-tests ook met
   `SQUASH_PLAYER_ACCOUNT=YES` en de iOS-stap faalt nu echt bij een mislukte test (`set -o pipefail`).
+  Daardoor kwam boven dat de Keychain-test van `APIKeyManager` op de GitHub-runner al sinds oktober
+  faalde (de simulator daar weigert elke Keychain-schrijfactie, OSStatus -34018, geen entitlement
+  zonder code signing, ook lokaal met `CODE_SIGNING_ALLOWED=NO`); die test slaat zichzelf nu over als
+  een proefschrijfactie wordt geweigerd en controleert in Xcode, met code signing, nog steeds de echte
+  Keychain (4 november 2026).
 - **SquashLevels bij een speler (3 november 2026):** in de spelereditor het blok SQUASHLEVELS: plak de
   link uit de ranglijst of typ het speler-ID; op het badgescherm opent `Bekijk op SquashLevels` de
   SBN-ranglijst met de speler gemarkeerd. De app haalt zelf niets op bij SquashLevels. Opslag in

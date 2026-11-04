@@ -1,4 +1,5 @@
 import XCTest
+import Security
 import SwiftData
 @testable import SquashAnalyzer
 import SquashAnalyzerCore
@@ -544,7 +545,8 @@ final class ScoringAndPersistenceTests: XCTestCase {
 
     /// §6 punt 5: the OpenAI key lives in the Keychain, is replaced in place and can be removed
     @MainActor
-    func testTheAPIKeyIsSavedReplacedAndRemoved() {
+    func testTheAPIKeyIsSavedReplacedAndRemoved() throws {
+        try skipUnlessTheKeychainWrites()
         let manager = APIKeyManager.shared
         let before = manager.openAIAPIKey
         defer { _ = manager.setOpenAIKey(before) }
@@ -555,6 +557,24 @@ final class ScoringAndPersistenceTests: XCTestCase {
         XCTAssertTrue(manager.setOpenAIKey(nil))
         XCTAssertNil(manager.openAIAPIKey)
         XCTAssertTrue(manager.setOpenAIKey(""), "removing what is not there is not an error")
+    }
+
+    /// A simulator build without code signing (CI, or `CODE_SIGNING_ALLOWED=NO` locally)
+    /// has no keychain-access-groups entitlement and the Keychain refuses every write with
+    /// errSecMissingEntitlement (-34018); that is the build, not the app, so the test is
+    /// skipped there and still checks the real Keychain when run from Xcode.
+    private func skipUnlessTheKeychainWrites() throws {
+        let probe: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: "com.squashanalyzer.tests.keychain-probe",
+            kSecAttrAccount as String: "probe",
+            kSecValueData as String: Data("probe".utf8)
+        ]
+        let status = SecItemAdd(probe as CFDictionary, nil)
+        SecItemDelete(probe as CFDictionary)
+        if status != errSecSuccess && status != errSecDuplicateItem {
+            throw XCTSkip("Keychain refuses writes in this simulator (OSStatus \(status)), as on a hosted CI runner")
+        }
     }
 
     /// B10: the lists are always written, also empty, so the file is format 4 and

@@ -22,7 +22,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   die secret bestaat er geen scherm. Geen app-update nodig. Aan voor All Inn Squash sinds 3 november 2026, privacybeleid
   gepubliceerd. Zie `docs/voorstel-clubscherm.md`.
 
-## 3.2 build 2 (geüpload 3 november 2026: TestFlight Squashteam, bètareview wacht tot build 1 klaar is; Play internal, alpha, Google Group; website gepubliceerd)
+## 3.2 build 2 (geüpload 3 november 2026, ingediend voor de TestFlight-bètareview op 4 november 2026, groep Squashteam; Play internal, alpha, Google Group; website gepubliceerd; 3.2 build 1 en 3.1 build 9 op TestFlight laten vervallen)
 
 Releasenotes `release-notes/3.2-2.md` en `android-3.2-2.md`; `website/testen.html`, handleiding (iPhone en
 Android) en privacy (nl/en, SquashLevels) bijgewerkt. Geüpload op verzoek van Gerd-Jan met lokaal groene suites

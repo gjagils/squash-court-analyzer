@@ -10,9 +10,17 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.2 build 2)
 
+- **Let en stroke als label onder het scorevak (3 november 2026, keuze Gerd-Jan):** het zwarte vlak met
+  `STROKE -> NAAM` is weg. Een stroke staat nu onder het scorevak van wie hem krijgt, in die spelerkleur:
+  "Stroke voor / Anna · +1". Een let staat in het midden: "Let · rally over". Het label blijft tot de volgende
+  rally of Undo. `RefereeMatch.lastDecision` (Core) vervangt `lastCallText`.
+- **Knoppen springen niet meer bij de timers:** de timerbalk neemt de plek van de MATCH/GAME-klok in, op een
+  vaste hoogte. In build 2 schoven alle knoppen zo'n 44 punt omlaag zodra de eerste rally werd gespeeld.
+
 - **Clubscherm voor de tv (alleen server, 3 november 2026):** `/c/<SBN-club-id>?k=<sleutel>` toont alle live
   teamwedstrijden van een club op één scherm. Geheime link per club, clubs in de secret `CLUB_WALLS`; zonder
-  die secret bestaat er geen scherm. Geen app-update nodig. Zie `docs/voorstel-clubscherm.md`.
+  die secret bestaat er geen scherm. Geen app-update nodig. Aan voor All Inn Squash sinds 3 november 2026, privacybeleid
+  gepubliceerd. Zie `docs/voorstel-clubscherm.md`.
 - **Volg-knop ook voor wie de app nog niet heeft (3 november 2026, naar aanleiding van Hoeveelishet):** de knop
   "Volg op je vergrendelscherm" op de kijkpagina en de teampagina wijst nu naar
   `https://squashanalyzer.com/volg/#<id>` (team `#team/<id>`, andere server `@<host>`) in plaats van naar
@@ -24,7 +32,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   de statische site geeft op `/volg/<id>` een 404. Publiceer de website vóór de Worker uitrolt, anders wijst de knop
   naar een 404.
 
-## 3.2 build 2 (geüpload 3 november 2026: TestFlight Squashteam, bètareview wacht tot build 1 klaar is; Play internal, alpha, Google Group; website gepubliceerd)
+## 3.2 build 2 (geüpload 3 november 2026, ingediend voor de TestFlight-bètareview op 4 november 2026, groep Squashteam; Play internal, alpha, Google Group; website gepubliceerd; 3.2 build 1 en 3.1 build 9 op TestFlight laten vervallen)
 
 Releasenotes `release-notes/3.2-2.md` en `android-3.2-2.md`; `website/testen.html`, handleiding (iPhone en
 Android) en privacy (nl/en, SquashLevels) bijgewerkt. Geüpload op verzoek van Gerd-Jan met lokaal groene suites

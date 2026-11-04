@@ -58,7 +58,6 @@ public struct RefereeScoringView: View {
                 playerColumns
                 actionGrid
                 RefereeIntervalBar(match: match)
-                RefereeTimers(match: match)
                 undoButton
             }
             .padding(.bottom, 20)
@@ -80,13 +79,6 @@ public struct RefereeScoringView: View {
                 .frame(width: 0, height: 0)
                 .task(id: match.isMatchOver) { badgeEarnings = computeBadgeEarnings() }
 
-            if let call = match.lastCallText {
-                callFlash(call)
-                    .task(id: call) {
-                        try? await Task.sleep(nanoseconds: call.hasPrefix("LET") ? UInt64(2_000_000_000) : UInt64(1_500_000_000))
-                        if match.lastCallText == call { match.clearCallText() }
-                    }
-            }
         }
         .sheet(isPresented: $editingNames) {
             PlayerNamesEditor(player1Name: match.player1Name, player2Name: match.player2Name,
@@ -279,15 +271,75 @@ public struct RefereeScoringView: View {
     }
 
     private var playerColumns: some View {
-        HStack(alignment: .top, spacing: 0) {
-            playerColumn(.player1)
-            timeline
-            playerColumn(.player2)
+        ZStack(alignment: .top) {
+            HStack(alignment: .top, spacing: 0) {
+                playerColumn(.player1)
+                timeline
+                playerColumn(.player2)
+            }
+            if match.lastDecision == RefereeDecision.letCall {
+                letLabel
+            }
         }
         .frame(maxHeight: .infinity)
     }
 
+    /// A let belongs to neither player: in the middle, at the height just under
+    /// the score boxes. An invisible copy of the column top sets that height.
+    private var letLabel: some View {
+        VStack(spacing: 8) {
+            columnTop(.player1)
+                .fixedSize(horizontal: false, vertical: true)
+                .opacity(0.0)
+                .accessibilityHidden(true)
+            decisionLabel(loc("Let · rally over"), second: nil, color: SharedColors.textPrimary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .allowsHitTesting(false)
+    }
+
+    /// The referee's last let or stroke, until the next rally or undo. It covers
+    /// nothing, so it can stay (it was a full-width black banner until 3.2).
+    private func decisionLabel(_ first: String, second: String?, color: Color) -> some View {
+        VStack(spacing: 1) {
+            Text(first)
+                .lineLimit(1)
+            if let second {
+                Text(second)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+        }
+        .font(SharedFonts.system(12, weight: .bold, design: .rounded))
+        .foregroundColor(color)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(color.opacity(0.12))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.45), lineWidth: 1))
+    }
+
     private func playerColumn(_ player: Player) -> some View {
+        let isServer = match.currentServer == player
+        let color = player == .player1 ? SharedColors.accent : SharedColors.steelBlue
+        return VStack(spacing: 8) {
+            // Its full height: the label below must not squeeze the score box
+            columnTop(player)
+                .fixedSize(horizontal: false, vertical: true)
+            if match.lastDecision == RefereeDecision.stroke(player) {
+                decisionLabel(loc("Stroke voor"), second: "\(match.name(for: player)) · +1",
+                              color: player == .player1 ? SharedColors.accent : SharedColors.steelBlueLight)
+                    .padding(.horizontal, 6)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.vertical, 12)
+        .background(isServer ? color.opacity(0.05) : Color.clear)
+    }
+
+    /// Photo, name, service box and score box of a player
+    private func columnTop(_ player: Player) -> some View {
         let isServer = match.currentServer == player
         let color = player == .player1 ? SharedColors.accent : SharedColors.steelBlue
         let score = player == .player1 ? match.player1Score : match.player2Score
@@ -351,9 +403,6 @@ public struct RefereeScoringView: View {
             .accessibilityLabel(loc("Punt voor \(match.name(for: player))"))
             .padding(.horizontal, 10)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .padding(.vertical, 12)
-        .background(isServer ? color.opacity(0.05) : Color.clear)
     }
 
     private var timeline: some View {
@@ -424,17 +473,6 @@ public struct RefereeScoringView: View {
         .padding(.horizontal, 16)
     }
 
-    private func callFlash(_ text: String) -> some View {
-        Text(text)
-            .font(SharedFonts.system(28, weight: .bold, design: .rounded))
-            .foregroundColor(.white)
-            .tracking(3)
-            .padding(.horizontal, 28)
-            .padding(.vertical, 18)
-            .background(Color.black.opacity(0.85)).clipShape(RoundedRectangle(cornerRadius: 16))
-            .transition(.scale.combined(with: .opacity))
-    }
-
     /// Only tells the session view; it closes once the save is done, so
     /// "Even opslaan…" and the retry card can show (no own dismiss here)
     @MainActor private func close() {
@@ -446,7 +484,8 @@ public struct RefereeScoringView: View {
 /// then the warm-up, the minute to the start of play and the 2 minutes
 /// between games, counting down with "Half-time", "15 seconden" and "Time"
 /// (`RefereeInterval`). The phone vibrates at each call. Ticks on its own, like
-/// `RefereeTimers`.
+/// `RefereeTimers`, whose place it takes: one row of a fixed height, so the
+/// buttons above it stay where they are when an interval starts or ends.
 struct RefereeIntervalBar: View {
     let match: RefereeMatch
     @State private var now = Date()
@@ -479,8 +518,11 @@ struct RefereeIntervalBar: View {
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 24)
+            } else {
+                RefereeTimers(match: match)
             }
         }
+        .frame(height: 52)
         .sensoryFeedback(.warning, trigger: calledKey)
         // Vibrate once at each call ("Half-time", "15 seconden", "Time")
         .task(id: key) { if !key.isEmpty { calledKey = key } }
@@ -531,7 +573,7 @@ struct RefereeIntervalBar: View {
             }
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 8)
+        .padding(.vertical, 4)
         .background(SharedColors.tint(0.05))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal, 24)

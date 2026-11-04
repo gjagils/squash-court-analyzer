@@ -5419,6 +5419,24 @@
         }
       }
     },
+    "Let · rally over": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let · replay the rally"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let · rally over"
+          }
+        }
+      }
+    },
     "Lets deze game: %lld": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -8601,6 +8619,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stoppen met volgen"
+          }
+        }
+      }
+    },
+    "Stroke voor": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stroke to"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stroke voor"
           }
         }
       }

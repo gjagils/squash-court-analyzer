@@ -1,4 +1,11 @@
 import Foundation
+
+/// A decision of the referee that the screen shows: a let (a rally replayed, for
+/// neither player), or a stroke awarded to a player, who gets the point
+public enum RefereeDecision: Equatable {
+    case letCall
+    case stroke(Player)
+}
 import Observation
 
 /// A single undo-able action during a referee game.
@@ -67,7 +74,9 @@ public class RefereeMatch: Identifiable {
     public var pointHistory: [RefereePointEntry] = []
     public var player1PreferredSide: ServerSide?
     public var player2PreferredSide: ServerSide?
-    public var lastCallText: String?
+    /// The referee's last let or stroke, shown under the score box until the next
+    /// rally or undo. For the screen only, not saved with the match.
+    public var lastDecision: RefereeDecision?
     /// Moved forward when a stopped match is resumed (`skipClosedTime`)
     public var matchStartedAt: Date
     public var gameStartedAt: Date
@@ -155,7 +164,7 @@ public class RefereeMatch: Identifiable {
         serverSide = next.side
         let scorerScore = scorer == .player1 ? player1Score : player2Score
         pointHistory.append(RefereePointEntry(scorer: scorer, score: scorerScore, side: serverSide, isStroke: isStroke))
-        lastCallText = nil
+        lastDecision = nil
     }
 
     public func overrideSide(to side: ServerSide) {
@@ -172,14 +181,14 @@ public class RefereeMatch: Identifiable {
         if player == .player1 { player1PreferredSide = side } else { player2PreferredSide = side }
     }
 
-    public func callLet() { lastCallText = "LET" }
+    public func callLet() { lastDecision = RefereeDecision.letCall }
 
-    public func clearCallText() { lastCallText = nil }
-
-    /// After the point: `awardPoint` clears the banner, so setting it first lost it
+    /// A stroke goes to the player it is awarded to (the striker who was hindered,
+    /// WSF rule 8): that player gets the point. Set after the point: `awardPoint`
+    /// clears the decision.
     public func callStroke(to player: Player) {
         awardPoint(to: player, isStroke: true)
-        lastCallText = "STROKE -> \(name(for: player).uppercased())"
+        lastDecision = RefereeDecision.stroke(player)
     }
 
     public func undo() {
@@ -199,7 +208,7 @@ public class RefereeMatch: Identifiable {
                 pointHistory[pointHistory.count - 1].side = prevSide
             }
         }
-        lastCallText = nil
+        lastDecision = nil
     }
 
     /// After resuming a saved match: undo again works for every rally of the
@@ -237,7 +246,7 @@ public class RefereeMatch: Identifiable {
         undoStack.removeAll()
         openingServer = nil
         openingSide = nil
-        lastCallText = nil
+        lastDecision = nil
         gameStartedAt = now()
         lastPointAt = nil
         currentServer = winner

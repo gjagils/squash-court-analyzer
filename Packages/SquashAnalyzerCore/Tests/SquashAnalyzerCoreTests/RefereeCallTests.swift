@@ -12,25 +12,43 @@ final class RefereeCallTests: XCTestCase {
         AppLanguageOverride.shared.language = AppLanguage.dutch
     }
 
-    func testStrokeShowsTheBannerWithTheName() {
+    func testStrokeRemembersWhoGotIt() {
         let match = RefereeMatch(player1Name: "Jan", player2Name: "Piet", bestOf: 5, startingServer: Player.player1)
         match.callStroke(to: Player.player2)
         XCTAssertEqual(match.player2Score, 1)
-        XCTAssertEqual(match.lastCallText, "STROKE -> PIET")
+        XCTAssertEqual(match.lastDecision, RefereeDecision.stroke(Player.player2))
         XCTAssertEqual(match.pointHistory.last?.isStroke, true)
     }
 
-    func testLetShowsTheBannerWithoutAPoint() {
+    func testLetIsADecisionWithoutAPoint() {
         let match = RefereeMatch(player1Name: "Jan", player2Name: "Piet", bestOf: 5, startingServer: Player.player1)
         match.callLet()
-        XCTAssertEqual(match.lastCallText, "LET")
+        XCTAssertEqual(match.lastDecision, RefereeDecision.letCall)
         XCTAssertEqual(match.player1Score + match.player2Score, 0)
     }
 
-    func testTheNextRallyClearsTheBanner() {
+    func testTheNextRallyClearsTheDecision() {
         let match = RefereeMatch(player1Name: "Jan", player2Name: "Piet", bestOf: 5, startingServer: Player.player1)
         match.callStroke(to: Player.player1)
         match.awardPoint(to: Player.player2)
-        XCTAssertNil(match.lastCallText)
+        XCTAssertNil(match.lastDecision)
+    }
+
+    func testAStrokeGivesThePointToThePlayerItIsAwardedTo() {
+        let match = RefereeMatch(player1Name: "Jan", player2Name: "Piet", bestOf: 5, startingServer: Player.player1)
+        match.callStroke(to: Player.player2)
+        XCTAssertEqual(match.player1Score, 0)
+        XCTAssertEqual(match.player2Score, 1)
+        XCTAssertEqual(match.currentServer, Player.player2)
+    }
+
+    func testTheDecisionStaysUntilTheNextRallyOrUndo() {
+        let match = RefereeMatch(player1Name: "Jan", player2Name: "Piet", bestOf: 5, startingServer: Player.player1)
+        match.callLet()
+        XCTAssertEqual(match.lastDecision, RefereeDecision.letCall)
+        match.callStroke(to: Player.player1)
+        XCTAssertEqual(match.lastDecision, RefereeDecision.stroke(Player.player1))
+        match.undo()
+        XCTAssertNil(match.lastDecision)
     }
 }

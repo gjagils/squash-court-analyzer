@@ -89,7 +89,7 @@ final class PlayerRenameTests: XCTestCase {
         XCTAssertEqual(match.liveSnapshot.p2, "Speler")
 
         match.callStroke(to: Player.player1)
-        XCTAssertEqual(match.lastCallText, "STROKE -> BAS")
+        XCTAssertEqual(match.lastDecision, RefereeDecision.stroke(Player.player1))
     }
 
     func testRefereeSameNameKeepsThePickedPlayer() {

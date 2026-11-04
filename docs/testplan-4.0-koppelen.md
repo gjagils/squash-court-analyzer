@@ -164,7 +164,7 @@ Gebruikers → zoeken op `+speler` / `+coach` → verwijderen.
 
 ## Wat nog niet in deze ronde zit
 
-- Badges uit geaccepteerde wedstrijden uitrekenen en tonen (synchroniseren).
+- Synchroniseren is gebouwd maar nog niet op een telefoon gezien: zie [de overdracht](overdracht-4.0-spelersaccount.md).
 - Inloggen met Google, en Apple op Android.
 - "Dit ben ik niet" melden bij Gerd-Jan als iemand anders jouw wedstrijd claimde.
 - Een herinnering (push) als er iets in je Postvak staat.

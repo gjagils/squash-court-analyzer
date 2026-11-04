@@ -40,7 +40,8 @@ final class SwiftDataMatchRepository: MatchRepository {
             saved.player2Name = match.player2Name
             saved.matchStartingServer = match.matchStartingServer.rawValue
             saved.bestOf = match.bestOf
-            saved.updatedAt = Date()
+            // A match from the account keeps the date it was played (AccountSync)
+            saved.updatedAt = match.playedAt ?? Date()
             saved.matchStatus = match.isMatchOver ? .completed : match.status
             saved.player1CoachingFocus = match.player1CoachingFocus
             saved.player2CoachingFocus = match.player2CoachingFocus
@@ -124,8 +125,8 @@ final class SwiftDataMatchRepository: MatchRepository {
             player2Name: match.player2Name,
             matchStartingServer: match.matchStartingServer,
             bestOf: match.bestOf,
-            savedAt: Date(),
-            updatedAt: Date(),
+            savedAt: match.playedAt ?? Date(),
+            updatedAt: match.playedAt ?? Date(),
             status: match.status
         )
         context.insert(saved)

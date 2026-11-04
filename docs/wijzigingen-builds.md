@@ -10,6 +10,12 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.2 build 2)
 
+- **4.0 synchroniseren, gevonden op de A13 (4 november 2026, achter de vlag):** de app haalt je wedstrijden nu ook
+  meteen na het inloggen op. `since` staat als tekst in `accountImportedSinceMillis`: milliseconden passen niet in
+  Android's 32-bits `Int` (de app stuurde `since=-1766382246` en haalde steeds alles op). Een wedstrijd uit je
+  account houdt de datum waarop hij gespeeld is (`Match.playedAt`, iOS en Android) in plaats van de datum van
+  binnenkomst. Je eigen speler is nu eerst de speler met je accountnaam, daarna de speler aan wie je SBN-speler
+  gekoppeld is (keuze Gerd-Jan): een bijnaam op je telefoon trekt je badges niet meer weg en houdt zijn koppeling.
 - **Focus tegen de cijfers (C7, 4 november 2026):** heeft de speler bij Spelers een coachingfocus (Backhand,
   Serve, Conditie…), dan staat in de analyse boven het tactisch advies de kaart **Focus van <naam>**: per
   focus-tag één regel met wat deze game erover zegt. Backhand en Voorhand = linker- en rechterkant van de baan,

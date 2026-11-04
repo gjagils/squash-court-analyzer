@@ -449,7 +449,10 @@ public struct SharedAccountSection: View {
                 try await account.signIn(email: typedEmail, password: typedPassword)
             }
             password = ""
-            if account.profile != nil { try await account.loadInbox() }
+            if account.profile != nil {
+                try await account.loadInbox()
+                await AccountSync.shared.run()
+            }
         }
     }
 
@@ -458,7 +461,10 @@ public struct SharedAccountSection: View {
             guard let token else { return }
             run(nil) {
                 try await account.signIn(providerId: token.providerId, idToken: token.idToken, nonce: token.nonce)
-                if account.profile != nil { try await account.loadInbox() }
+                if account.profile != nil {
+                    try await account.loadInbox()
+                    await AccountSync.shared.run()
+                }
             }
         }
     }

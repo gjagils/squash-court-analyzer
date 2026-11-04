@@ -13,6 +13,8 @@ public class Match: Identifiable {
     public let id: UUID
     public var status: MatchStatus = .inProgress
     public var updatedAt: Date = Date()
+    /// When a match from the account was played: the stores date it by this, not by the moment it arrived
+    public var playedAt: Date? = nil
     // MARK: - Properties
     public var player1Name: String = "Speler 1"
     public var player2Name: String = "Speler 2"

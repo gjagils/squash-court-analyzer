@@ -63,10 +63,12 @@ class RoomCoachMatchStore(private val store: MatchStore, private val badgeAwardS
 
     private fun capture(match: Match): MatchRecord {
         val now = System.currentTimeMillis()
+        // A match from the account keeps the date it was played (AccountSync)
+        val played = match.playedAt?.let { millis(it) }
         return MatchRecord(
             id = match.id.uuidString, player1Name = match.player1Name, player2Name = match.player2Name,
             matchStartingServer = match.matchStartingServer.rawValue, bestOf = match.bestOf,
-            savedAt = millis(match.updatedAt), updatedAt = now,
+            savedAt = played ?: millis(match.updatedAt), updatedAt = played ?: now,
             status = if (match.isMatchOver) MatchStatus.COMPLETED else match.status.rawValue,
             player1CoachingFocus = match.player1CoachingFocus.toList(),
             player2CoachingFocus = match.player2CoachingFocus.toList(),

@@ -12,7 +12,8 @@ import Foundation
 /// The ids of the matches that came from the account, and how far the sync got
 public enum AccountImports {
     public static let idsKey = "accountImportedMatches"
-    public static let sinceKey = "accountImportedSince"
+    /// Kept as text: milliseconds do not fit Android's 32-bit Int
+    public static let sinceKey = "accountImportedSinceMillis"
 
     public static func ids(in defaults: UserDefaults = UserDefaults.standard) -> [String] {
         TeamRoster.parse(defaults.string(forKey: AccountImports.idsKey) ?? "")
@@ -33,11 +34,11 @@ public enum AccountImports {
 
     /// Milliseconds since 1970 of the newest decision seen; 0 for everything
     public static func since(in defaults: UserDefaults = UserDefaults.standard) -> Int64 {
-        Int64(defaults.integer(forKey: AccountImports.sinceKey))
+        Int64(defaults.string(forKey: AccountImports.sinceKey) ?? "") ?? Int64(0)
     }
 
     static func setSince(_ value: Int64, in defaults: UserDefaults) {
-        defaults.set(Int(value), forKey: AccountImports.sinceKey)
+        defaults.set("\(value)", forKey: AccountImports.sinceKey)
     }
 
     /// Signing out or deleting the account: the next account starts from the beginning
@@ -51,7 +52,7 @@ public extension AccountMatch {
     /// A referee's match comes along the same way (it has no slagen or vakken,
     /// like eenvoudig coachen). `ownPlayerId` goes on the side that is you.
     /// Nil without rallies (an inbox entry) or with an id that is not a UUID.
-    static func match(from server: AccountServerMatch, ownPlayerId: String?, now: Date = Date()) -> Match? {
+    static func match(from server: AccountServerMatch, ownPlayerId: String?) -> Match? {
         guard let rallies = server.rallies, let id = UUID(uuidString: server.matchId) else { return nil }
         let summary = server.summary
         let match = Match(id: id)
@@ -116,7 +117,9 @@ public extension AccountMatch {
         match.games = games
         match.currentGameIndex = games.count - 1
         match.status = MatchStatus.completed
-        match.updatedAt = now
+        let played = Date(timeIntervalSince1970: Double(server.playedAt) / 1000.0)
+        match.playedAt = played
+        match.updatedAt = played
         return match
     }
 }
@@ -192,21 +195,24 @@ public final class AccountSync {
         return false
     }
 
-    /// You in Spelers: the player linked to your SBN player, else the one with
-    /// your account name, else a new player with that name (linked from now on)
+    /// You in Spelers: the player with your account name, else the one linked to
+    /// your SBN player, else a new player with that name (linked from now on).
+    /// The name goes first (Gerd-Jan, 4 November 2026): a nickname on this phone
+    /// may hold your SBN link, and it keeps that link so its matches still reach you.
     static func ownPlayerId(_ profile: AccountProfile, store: any PlayerProfileStore,
                             in defaults: UserDefaults) async -> String? {
         guard let known = try? await store.loadPlayers() else { return nil }
-        if let path = profile.sbnPath {
-            for (id, linked) in PlayerSBNLinks.all(in: defaults) where linked == path {
-                if known.contains(where: { player in player.id.lowercased() == id.lowercased() }) { return id }
-            }
-        }
+        let links = PlayerSBNLinks.all(in: defaults)
         for player in known where TeamMatch.sameTeam(player.name, profile.name) {
-            if let path = profile.sbnPath, PlayerSBNLinks.path(for: player.id, in: defaults) == nil {
+            if let path = profile.sbnPath, !links.values.contains(path), PlayerSBNLinks.path(for: player.id, in: defaults) == nil {
                 PlayerSBNLinks.set(path, for: player.id, in: defaults)
             }
             return player.id
+        }
+        if let path = profile.sbnPath {
+            for (id, linked) in links where linked == path {
+                if known.contains(where: { player in player.id.lowercased() == id.lowercased() }) { return id }
+            }
         }
         let made = PlayerProfile(name: profile.name)
         guard (try? await store.savePlayer(made)) != nil else { return nil }

@@ -103,6 +103,42 @@ final class AccountSyncTests: XCTestCase {
         XCTAssertEqual(history.coach.count, 1)
     }
 
+    func testAMatchFromTheAccountKeepsItsPlayedDate() throws {
+        let server = try serverCopy(of: coachMatch(), me: Player.player1)
+        let copy = try XCTUnwrap(AccountMatch.match(from: server, ownPlayerId: nil))
+        let played = Date(timeIntervalSince1970: Double(server.playedAt) / 1000.0)
+        XCTAssertEqual(copy.playedAt, played)
+        XCTAssertEqual(copy.updatedAt, played)
+    }
+
+    func testSinceKeepsMillisecondsWhole() {
+        // 1 November 2026 in milliseconds: too large for Android's 32-bit Int
+        let store = defaults()
+        let millis: Int64 = 1_793_529_947_482
+        XCTAssertEqual(AccountImports.since(in: store), 0)
+        AccountImports.setSince(millis, in: store)
+        XCTAssertEqual(AccountImports.since(in: store), millis)
+        AccountImports.reset(in: store)
+        XCTAssertEqual(AccountImports.since(in: store), 0)
+    }
+
+    @MainActor
+    func testYourAccountNameGoesBeforeANicknameWithYourLink() async throws {
+        let store = defaults()
+        let path = "/league/x/player/940"
+        let nickname = PlayerProfile(id: "8F1E2C9A-0000-4000-8000-000000000002", name: "Gerd Lasso")
+        let own = PlayerProfile(id: "8F1E2C9A-0000-4000-8000-000000000003", name: "Gerd-Jan van Gils")
+        PlayerSBNLinks.set(path, for: nickname.id, in: store)
+        let profile = AccountProfile(playerId: "p", name: "Gerd-Jan van Gils", code: "X", sbnPath: path,
+                                     teamKey: nil, birthYear: 1990, createdAt: 1)
+        let id = await AccountSync.ownPlayerId(profile, store: SyncPlayerStore([nickname, own]), in: store)
+        XCTAssertEqual(id, own.id)
+        XCTAssertEqual(PlayerSBNLinks.path(for: nickname.id, in: store), path, "the nickname keeps the link")
+        // Without a player by that name, the link still finds you
+        let viaLink = await AccountSync.ownPlayerId(profile, store: SyncPlayerStore([nickname]), in: store)
+        XCTAssertEqual(viaLink, nickname.id)
+    }
+
     @MainActor
     func testWithoutYouInSpelersYouAreAddedAndLinked() async throws {
         let store = defaults()

@@ -41,6 +41,40 @@ final class LiveFollowTests: XCTestCase {
         XCTAssertEqual(LiveFollowLink.parse(dev.appLink), dev)
     }
 
+    func testParsesTheWebsiteLinkOfTheViewerPageButton() {
+        let live = LiveFollowTarget(id: "abcdefgh2345", server: "https://live.squashanalyzer.com")
+        XCTAssertEqual(LiveFollowLink.parse("https://squashanalyzer.com/volg/#abcdefgh2345"), live)
+        XCTAssertEqual(LiveFollowLink.parse("https://squashanalyzer.com/volg#abcdefgh2345"), live)
+        XCTAssertEqual(LiveFollowLink.parse("https://www.squashanalyzer.com/volg/#abcdefgh2345"), live)
+        // The test link for TestFlight (the only /volg rule in the AASA until the App Store has the new build)
+        XCTAssertEqual(LiveFollowLink.parse("https://squashanalyzer.com/volg/?test=1#abcdefgh2345"), live)
+        XCTAssertEqual(LiveFollowLink.parse("https://squashanalyzer.com/volg/#abcdefgh2345@beta.squashanalyzer.com"),
+                       LiveFollowTarget(id: "abcdefgh2345", server: "https://beta.squashanalyzer.com"))
+        XCTAssertEqual(LiveFollowLink.parse("https://squashanalyzer.com/volg/#team/abcdefgh2345"),
+                       LiveFollowTarget(id: "abcdefgh2345", server: "https://live.squashanalyzer.com", kind: "team"))
+        XCTAssertEqual(LiveFollowLink.parse("https://squashanalyzer.com/volg/#team/abcdefgh2345@squash-live-dev.gerdjan.workers.dev"),
+                       LiveFollowTarget(id: "abcdefgh2345", server: "https://squash-live-dev.gerdjan.workers.dev", kind: "team"))
+    }
+
+    func testRefusesAWebsiteLinkWithAnUnknownServerOrWithoutAnId() {
+        XCTAssertNil(LiveFollowLink.parse("https://squashanalyzer.com/volg/#abcdefgh2345@evil.example.com"))
+        XCTAssertNil(LiveFollowLink.parse("https://squashanalyzer.com/volg/#ABC"))
+        XCTAssertNil(LiveFollowLink.parse("https://squashanalyzer.com/volg/"))
+        XCTAssertNil(LiveFollowLink.parse("https://squashanalyzer.com/volgende#abcdefgh2345"))
+        XCTAssertNil(LiveFollowLink.parse("https://evil.example.com/volg/#abcdefgh2345"))
+    }
+
+    func testRecognisesFollowLinksForTheApp() {
+        XCTAssertTrue(LiveFollowLink.isFollowLink("squashanalyzer://volg#abcdefgh2345"))
+        XCTAssertTrue(LiveFollowLink.isFollowLink("https://squashanalyzer.com/volg/#abcdefgh2345"))
+        XCTAssertTrue(LiveFollowLink.isFollowLink("https://www.squashanalyzer.com/volg#team/abcdefgh2345"))
+        XCTAssertTrue(LiveFollowLink.isFollowLink("https://squashanalyzer.com/volg"))
+        XCTAssertFalse(LiveFollowLink.isFollowLink("https://squashanalyzer.com/volgende"))
+        XCTAssertFalse(LiveFollowLink.isFollowLink("https://squashanalyzer.com/kaart/#abcdefgh2345"))
+        XCTAssertFalse(LiveFollowLink.isFollowLink("https://evil.example.com/volg/#abcdefgh2345"))
+        XCTAssertFalse(LiveFollowLink.isFollowLink("https://live.squashanalyzer.com/l/abcdefgh2345"))
+    }
+
     @MainActor
     func testFollowShowsTheStateAndRegistersTheToken() async throws {
         let transport = FakeFollowTransport()

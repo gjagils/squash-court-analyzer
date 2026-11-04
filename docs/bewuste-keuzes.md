@@ -103,6 +103,14 @@ plaats.
 
 ## Servers
 
+### AASA: `/volg` alleen als testlink tot de App Store-release (3 november 2026)
+
+`website/.well-known/apple-app-site-association` heeft voor `/volg` alleen de regel met `?test=1`, terwijl de
+knop op de kijkpagina naar `/volg/#<id>` wijst. De AASA geldt per app-ID, dus ook voor de App Store-versie zonder
+deze link: die zou hem openen en melden dat er een nieuwere versie nodig is, en volgen via de knop zou niet meer
+lukken. Zonder de regel komt de kijker op `website/volg/`, waar `Heb je de app al? Open hem` elke versie opent.
+Zet `/volg` en `/volg/*` erin zodra de nieuwe build een tijdje in de App Store staat; advies is een week of twee.
+
 ### Node-reserve: `X-Forwarded-For` als terugvaloptie (7 oktober 2026)
 
 `server/live/server.js`, `clientIp`. Alleen met `TRUST_PROXY=1`. De README

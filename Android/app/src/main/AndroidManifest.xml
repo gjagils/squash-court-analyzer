@@ -44,6 +44,9 @@
                 <data android:pathPrefix="/kaart/" />
                 <data android:path="/team" />
                 <data android:pathPrefix="/team/" />
+                <!-- Live score on the lock screen, the button on the viewer page: /volg/#<id>[@<host>] -->
+                <data android:path="/volg" />
+                <data android:pathPrefix="/volg/" />
                 <!-- 4.0: a match shared for the player's account (#token) -->
                 <data android:path="/wedstrijd" />
             </intent-filter>

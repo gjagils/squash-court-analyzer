@@ -37,7 +37,8 @@ public struct LiveFollowTarget: Codable, Equatable, Hashable, Sendable {
 
 /// Reads a live link: the viewer page (https://live.squashanalyzer.com/l/<id>,
 /// a team match /t/<id>), the app link (squashanalyzer://volg#<id>, #team/<id>,
-/// each with an optional @<host>) or the bare id.
+/// each with an optional @<host>), the same on the website (the button on the
+/// viewer page: https://squashanalyzer.com/volg/#<id>) or the bare id.
 /// Only known servers are accepted: the app sends a push token there.
 public enum LiveFollowLink {
     /// The same as `LiveFollowLink.defaultServer` (that one is MainActor-bound)
@@ -94,30 +95,67 @@ public enum LiveFollowLink {
         return nil
     }
 
+    /// A link the app opens as "follow this match": the app link or the website
+    /// link. `parse` still decides whether what it points at can be followed.
+    public static func isFollowLink(_ link: String) -> Bool {
+        if link.hasPrefix("squashanalyzer://volg") { return true }
+        return websiteFollowFragment(link) != nil
+    }
+
+    /// What follows the # of a website link (https://squashanalyzer.com/volg/#<id>),
+    /// empty without one; nil for any other link
+    private static func websiteFollowFragment(_ link: String) -> String? {
+        guard link.hasPrefix("https://") else { return nil }
+        let host = host(of: link).lowercased()
+        guard host == "squashanalyzer.com" || host == "www.squashanalyzer.com" else { return nil }
+        let path = String(link.dropFirst(8 + host.count))
+        guard path.hasPrefix("/volg") else { return nil }
+        let rest = String(path.dropFirst(5))
+        guard rest.isEmpty || rest.hasPrefix("/") || rest.hasPrefix("#") || rest.hasPrefix("?") else { return nil }
+        var fragment = ""
+        var inFragment = false
+        for character in rest {
+            if inFragment {
+                fragment += String(character)
+            } else if character == "#" {
+                inFragment = true
+            }
+        }
+        return fragment
+    }
+
+    /// <id>, team/<id>, each with an optional @<host>
+    private static func parseFollowFragment(_ fragment: String) -> LiveFollowTarget? {
+        var rest = fragment
+        var kind: String? = nil
+        if rest.hasPrefix("team/") {
+            kind = "team"
+            rest = String(rest.dropFirst(5))
+        }
+        var id = ""
+        var host = ""
+        var inHost = false
+        for character in rest {
+            if character == "@" {
+                inHost = true
+            } else if inHost {
+                host += String(character)
+            } else {
+                id += String(character)
+            }
+        }
+        guard isValidId(id) else { return nil }
+        if !inHost { return LiveFollowTarget(id: id, server: LiveFollowLink.defaultServer, kind: kind) }
+        guard isAllowedHost(host) else { return nil }
+        return LiveFollowTarget(id: id, server: "https://" + host.lowercased(), kind: kind)
+    }
+
     private static func parseWord(_ word: String) -> LiveFollowTarget? {
         if word.hasPrefix("squashanalyzer://volg#") {
-            var rest = String(word.dropFirst(22))
-            var kind: String? = nil
-            if rest.hasPrefix("team/") {
-                kind = "team"
-                rest = String(rest.dropFirst(5))
-            }
-            var id = ""
-            var host = ""
-            var inHost = false
-            for character in rest {
-                if character == "@" {
-                    inHost = true
-                } else if inHost {
-                    host += String(character)
-                } else {
-                    id += String(character)
-                }
-            }
-            guard isValidId(id) else { return nil }
-            if !inHost { return LiveFollowTarget(id: id, server: LiveFollowLink.defaultServer, kind: kind) }
-            guard isAllowedHost(host) else { return nil }
-            return LiveFollowTarget(id: id, server: "https://" + host.lowercased(), kind: kind)
+            return parseFollowFragment(String(word.dropFirst(22)))
+        }
+        if let fragment = websiteFollowFragment(word) {
+            return parseFollowFragment(fragment)
         }
         if word.hasPrefix("https://") {
             let host = host(of: word)

@@ -136,7 +136,8 @@ een losse wedstrijd en bij een beslist partij. Ondertekende build voor een toest
 ## Hoe het werkt
 
 1. App leest de link (`LiveFollowLink.parse` in Core): `https://live.squashanalyzer.com/l/<id>`,
-   `squashanalyzer://volg#<id>` of `squashanalyzer://volg#<id>@<host>`. Alleen
+   `squashanalyzer://volg#<id>` of `squashanalyzer://volg#<id>@<host>`, of hetzelfde op
+   de website (`https://squashanalyzer.com/volg/#<id>`, de knop op de kijkpagina). Alleen
    bekende servers: live./beta.squashanalyzer.com en `squash-live-dev.*.workers.dev`.
 2. `LiveFollow.follow` haalt de stand op (`GET /api/live/:id`) en laat het platform
    (`LiveFollowPresenter`) de kaart tonen.

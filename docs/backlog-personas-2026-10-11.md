@@ -91,7 +91,7 @@ opstelling, geen seizoensoverzicht.
 | T3 | **Vergelijken met de SBN-uitslag** na de wedstrijd (staat al op de lijst) | Fouten in de invoer bij SBN vallen dan op | M | **Na 4.0** ([roadmap](roadmap.md)) |
 | T4 | **Opstelling plannen**: wie speelt E1–E4 volgende week, met beschikbaarheid via de teamlink | Captains regelen dit nu in de groepsapp | L | **Na 4.0** ([roadmap](roadmap.md)) |
 | T5 | **Tegenstander bekijken**: de vorige uitslag tegen dit team en hun stand, vanuit het programma | De gegevens staan al op de SBN-pagina's die de app leest | S | **3.1** ([roadmap](roadmap.md)) |
-| T6 | **Melding als een teamgenoot een partij invult** tijdens een live teamwedstrijd | Nu moet je op Vernieuwen tikken | L (vraagt push) | **3.3** ([roadmap](roadmap.md)) |
+| T6 | **Melding als een teamgenoot een partij invult** tijdens een live teamwedstrijd | Nu moet je op Vernieuwen tikken | L (vraagt push) | **4.0** ([roadmap](roadmap.md), verplaatst van 3.3 op 4 november 2026) |
 | T7 | **Badgecategorie Teamspeler** (staat al op de lijst) | Beloont meedoen aan de competitie | M | **4.0** ([roadmap](roadmap.md)) |
 | T8 | **Koppeling met toernooi.nl** (idee Gerd-Jan, 12 oktober): uitslagen, opstelling en spelers rechtstreeks van het competitiesysteem, in plaats van de openbare teampagina | Maakt T2–T5 eenvoudiger; de opstelling komt dan ook in beeld | L | **Na 4.0** ([roadmap](roadmap.md)) |
 

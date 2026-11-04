@@ -1214,7 +1214,7 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       met rust (niet verwijderen, niet markeren); pas bij een nieuw seizoen
       synchroniseren we opnieuw.
 
-- [ ] **Meldingen bij live meekijken** (deels gedaan: volgen op het vergrendelscherm en in de meldingen met APNs en FCM zit in 3.0, zie `server/live-worker/src/push.js`; open: een losse melding bij een gewonnen game, partij of einduitslag; idee Gerd-Jan, 7 oktober; **3.1 of
+- [ ] **Meldingen bij live meekijken** (deels gedaan: volgen op het vergrendelscherm en in de meldingen met APNs en FCM zit in 3.0, zie `server/live-worker/src/push.js`; open: een losse melding bij een gewonnen game, partij of einduitslag, **gepland voor 4.0** (roadmap, 4 november 2026); idee Gerd-Jan, 7 oktober; **3.1 of
       later**, niet voor 3.0: te ingrijpend, eerst releasen). Gekozen route:
       **2, pushmeldingen in de app**. Wie een live wedstrijd of live teamwedstrijd volgt, krijgt
       een melding op de telefoon bij een gewonnen game, een gewonnen partij en

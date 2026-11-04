@@ -1,6 +1,6 @@
 # Roadmap per release
 
-Gekozen door Gerd-Jan op 31 oktober 2026. De bronnen zijn de
+Gekozen door Gerd-Jan op 31 oktober 2026; de twee meldingen zijn op 4 november 2026 van 3.3 naar 4.0 verplaatst. De bronnen zijn de
 [persona-backlog](backlog-personas-2026-10-11.md), de
 [backlog van 21 oktober](backlog-2026-10-21.md) en de
 [buildbacklog](wijzigingen-builds.md#backlog). Hoe 3.x en 4.0 naast elkaar
@@ -32,8 +32,6 @@ met een geheime link ([voorstel](voorstel-clubscherm.md)). **Gebouwd 3 november 
 | Punt | Bron |
 |---|---|
 | Coachingfocus koppelen aan cijfers | C7 |
-| Melding als een teamgenoot een partij invult tijdens een live teamwedstrijd | T6 |
-| Losse melding bij een gewonnen game, partij of einduitslag als je live volgt | buildbacklog |
 
 ## 4.0
 
@@ -42,6 +40,8 @@ met een geheime link ([voorstel](voorstel-clubscherm.md)). **Gebouwd 3 november 
 | Spelersaccount met centrale badges, kaart, vorm en trend | [voorstel](voorstel-spelersaccount-4.0.md) |
 | Seizoensoverzicht per teamlid | T2 |
 | Badgecategorie Teamspeler | T7 |
+| Melding als een teamgenoot een partij invult tijdens een live teamwedstrijd (verplaatst van 3.3 op 4 november 2026) | T6 |
+| Losse melding bij een gewonnen game, partij of einduitslag als je live volgt (verplaatst van 3.3 op 4 november 2026) | buildbacklog |
 
 ## Na 4.0
 

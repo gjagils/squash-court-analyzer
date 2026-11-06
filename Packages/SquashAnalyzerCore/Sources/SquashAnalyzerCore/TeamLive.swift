@@ -383,6 +383,18 @@ public extension TeamMatch {
         return match
     }
 
+    /// A joined copy takes its match from the programme of Mijn team (same
+    /// day, same two teams): the live page does not carry the fixture, and
+    /// without it the SBN page and "already has a team match" do not work
+    public mutating func adoptFixture(from fixtures: [LeagueFixture]) {
+        guard fixtureId == nil else { return }
+        for fixture in fixtures where Calendar.current.isDate(fixture.date, inSameDayAs: date)
+            && TeamMatch.sameTeam(fixture.home, home) && TeamMatch.sameTeam(fixture.away, away) {
+            fixtureId = fixture.id
+            return
+        }
+    }
+
     /// Whether this phone already has the evening an invitation is for
     /// (same day, same two teams) as a match of its own
     public static func twin(of state: TeamLiveState, in all: [TeamMatch]) -> TeamJoinTwin {

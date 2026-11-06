@@ -126,15 +126,25 @@ public enum LeagueOpponent {
     /// in the standings of the poule; nil when it is not there (a cup match)
     public static func link(for fixture: LeagueFixture, in team: LeagueTeamSnapshot) -> LeagueTeamLink? {
         let opponent = TeamMatch.sameTeam(fixture.home, team.name) ? fixture.away : fixture.home
-        guard let row = team.standings.first(where: { row in TeamMatch.sameTeam(row.name, opponent) }) else { return nil }
-        return try? LeagueTeamLink("https://sbn.toernooi.nl" + row.id)
+        return link(opponentNamed: opponent, in: team)
     }
 
-    /// The opponent's team page for a team match made from the programme
+    /// The opponent's team page for a team match: through its match in the
+    /// programme, else by its team names. A team match joined with a link
+    /// has no fixture of its own (the live page does not carry it).
     public static func link(for match: TeamMatch, in team: LeagueTeamSnapshot?) -> LeagueTeamLink? {
-        guard let team, let id = match.fixtureId,
-              let fixture = team.fixtures.first(where: { fixture in fixture.id == id }) else { return nil }
-        return link(for: fixture, in: team)
+        guard let team else { return nil }
+        if let id = match.fixtureId, let fixture = team.fixtures.first(where: { fixture in fixture.id == id }) {
+            return link(for: fixture, in: team)
+        }
+        if TeamMatch.sameTeam(match.home, team.name) { return link(opponentNamed: match.away, in: team) }
+        if TeamMatch.sameTeam(match.away, team.name) { return link(opponentNamed: match.home, in: team) }
+        return nil
+    }
+
+    private static func link(opponentNamed name: String, in team: LeagueTeamSnapshot) -> LeagueTeamLink? {
+        guard let row = team.standings.first(where: { row in TeamMatch.sameTeam(row.name, name) }) else { return nil }
+        return try? LeagueTeamLink("https://sbn.toernooi.nl" + row.id)
     }
 }
 

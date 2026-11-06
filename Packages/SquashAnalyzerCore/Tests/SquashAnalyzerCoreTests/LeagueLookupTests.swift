@@ -108,6 +108,36 @@ final class LeagueLookupTests: XCTestCase {
         XCTAssertNil(LeagueOpponent.link(for: match, in: nil))
     }
 
+    /// Joined with a link: the live page gives the team names, not the SBN match
+    private func joined(home: String, away: String, on date: Date = Date()) -> TeamMatch {
+        TeamMatch(date: date, home: home, away: away, ownSide: TeamSide.away)
+    }
+
+    func testTheOpponentOfAJoinedMatchIsFoundByName() {
+        let team = snapshot()
+        XCTAssertEqual(LeagueOpponent.link(for: joined(home: "Squash Delft 8", away: "all inn squash 8"), in: team)?.url.absoluteString,
+                       "\(base)/team/120", "our team away")
+        XCTAssertEqual(LeagueOpponent.link(for: joined(home: "All Inn Squash 8", away: "Squash Delft 8"), in: team)?.url.absoluteString,
+                       "\(base)/team/120", "our team home")
+        XCTAssertNil(LeagueOpponent.link(for: joined(home: "All Inn Squash 8", away: "Bekerteam"), in: team), "not in the poule")
+        XCTAssertNil(LeagueOpponent.link(for: joined(home: "Squash Delft 8", away: "Bevo 3"), in: team), "not Mijn team's match")
+    }
+
+    func testAJoinedMatchTakesItsFixtureFromTheProgramme() {
+        let team = snapshot()
+        var match = joined(home: "squash delft 8", away: "All Inn Squash 8")
+        match.adoptFixture(from: team.fixtures)
+        XCTAssertEqual(match.fixtureId, team.fixtures[0].id)
+
+        var otherDay = joined(home: "Squash Delft 8", away: "All Inn Squash 8", on: Date().addingTimeInterval(7.0 * 24.0 * 3600.0))
+        otherDay.adoptFixture(from: team.fixtures)
+        XCTAssertNil(otherDay.fixtureId, "the return match is another evening")
+
+        var own = TeamMatch.from(fixture: team.fixtures[1], ownTeam: team.name)
+        own.adoptFixture(from: team.fixtures)
+        XCTAssertEqual(own.fixtureId, team.fixtures[1].id, "a fixture of its own stays")
+    }
+
     func testOpponentNamesAreKeptForADay() async throws {
         let defaults = UserDefaults(suiteName: "opponents-\(UUID().uuidString)")!
         let link = try LeagueTeamLink("\(base)/team/120")

@@ -388,6 +388,7 @@ public struct SharedTeamJoinView: View {
                                                  ownerKey: existing.liveOwnerKey)
                 }
                 _ = existing.mergeLive(fetched)
+                existing.adoptFixture(from: team?.fixtures ?? [])
                 try await store.save(existing)
                 busy = false
                 onJoined(existing)
@@ -396,7 +397,8 @@ public struct SharedTeamJoinView: View {
             // The same evening made by hand here: no second copy
             switch TeamMatch.twin(of: fetched, in: all) {
             case TeamJoinTwin.empty(let own):
-                let linked = own.linked(to: fetched, invite: invite)
+                var linked = own.linked(to: fetched, invite: invite)
+                linked.adoptFixture(from: team?.fixtures ?? [])
                 try await store.save(linked)
                 busy = false
                 onJoined(linked)
@@ -412,7 +414,8 @@ public struct SharedTeamJoinView: View {
             case TeamJoinTwin.none:
                 break
             }
-            let match = TeamMatch.joining(fetched, invite: invite, ownSide: ownSide)
+            var match = TeamMatch.joining(fetched, invite: invite, ownSide: ownSide)
+            match.adoptFixture(from: team?.fixtures ?? [])
             try await store.save(match)
             busy = false
             onJoined(match)

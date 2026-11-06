@@ -8,7 +8,7 @@
 // Cloudflare's edge, and a session is gone two hours after its last update.
 
 import {
-  cleanLang, cleanPhoto, escapeHtml, ID_PATTERN, MAX_PHOTO_BYTES, newSessionId, newWriteKey, readJson, SLOTS, validatePartij,
+  cleanLang, cleanPhoto, cleanRefereeSlots, escapeHtml, ID_PATTERN, MAX_PHOTO_BYTES, newSessionId, newWriteKey, readJson, SLOTS, validatePartij,
   validateSnapshot, validateTeamHeader,
 } from './validate.js';
 import { readConfig } from './config.js';
@@ -368,13 +368,19 @@ async function handleTeam(request, env, config, parts, limiter, teamFor, count) 
     let newId = newSessionId();
     const key = newWriteKey();
     const ownerKey = newWriteKey();
+    // 4.0: a key for the opponent, only for the partijen they referee
+    const refereeSlots = cleanRefereeSlots(body.refereeSlots);
+    const referee = refereeSlots ? { key: newWriteKey(), slots: refereeSlots } : null;
     if (!(await limiter.register(`t:${newId}`))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
-    while (!(await teamFor(newId).create(key, ownerKey, team, newId, lang))) {
+    while (!(await teamFor(newId).create(key, ownerKey, team, newId, lang, referee))) {
       newId = newSessionId();
       if (!(await limiter.register(`t:${newId}`))) return send(503, { error: 'Even geen ruimte voor nieuwe livewedstrijden' });
     }
-    await count('team', { platform: body.platform, lang, club: clubName(team.home), test: isTestTeam(team.home, team.away) });
-    return send(201, { id: newId, writeKey: key, ownerKey, url: `${baseUrl(request, config)}/t/${newId}` });
+    await count(team.clubScreen === false ? 'team-only' : 'team',
+      { platform: body.platform, lang, club: clubName(team.home), test: isTestTeam(team.home, team.away) });
+    const created = { id: newId, writeKey: key, ownerKey, url: `${baseUrl(request, config)}/t/${newId}` };
+    if (referee) created.refereeKey = referee.key;
+    return send(201, created);
   }
 
   if (!id || !ID_PATTERN.test(id) || parts.length > 6) return send(404, 'Not found');
@@ -392,12 +398,13 @@ async function handleTeam(request, env, config, parts, limiter, teamFor, count) 
     return handleFollowers(request, env, config, session, 'Onbekende teamwedstrijd', count, 'follower-team');
   }
 
-  // GET /api/team/:id/verify: does this key work, and what may it do ("owner" or "writer")
+  // GET /api/team/:id/verify: does this key work, and what may it do ("owner",
+  // "writer", or "referee" with the slots it may write)
   if (request.method === 'GET' && parts[3] === 'verify' && parts.length === 4) {
-    const role = await session.role(bearer(request));
-    if (role === 404) return send(404, { error: 'Onbekende teamwedstrijd' });
-    if (role === 401) return send(401, { error: 'Geen toegang' });
-    return send(200, { role });
+    const access = await session.access(bearer(request));
+    if (access === 404) return send(404, { error: 'Onbekende teamwedstrijd' });
+    if (access === 401) return send(401, { error: 'Geen toegang' });
+    return send(200, typeof access === 'string' ? { role: access } : access);
   }
 
   // GET /api/team/:id/events: Server-Sent Events for viewers
@@ -438,6 +445,15 @@ async function handleTeam(request, env, config, parts, limiter, teamFor, count) 
     const partij = validatePartij(await readJson(request));
     if (!partij) return send(400, { error: 'Ongeldige partij' });
     return answer(await session.setPartij(key, slot, partij));
+  }
+  // PUT /api/team/:id/referee: which partijen the opponent referees (owner key)
+  if (request.method === 'PUT' && parts[3] === 'referee' && parts.length === 4) {
+    const body = await readJson(request);
+    const slots = cleanRefereeSlots(body && body.slots);
+    if (!slots) return send(400, { error: 'Ongeldige partijen' });
+    const status = await session.setRefereeSlots(key, slots);
+    if (status === 409) return send(409, { error: 'Geen tegenstander' });
+    return answer(status);
   }
   if (parts.length !== 3) return send(404, 'Not found');
 

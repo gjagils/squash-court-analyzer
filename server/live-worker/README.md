@@ -35,6 +35,17 @@ is reserve.
   teamnamen te wijzigen (`PUT`). `GET /api/team/:id/verify` (Bearer) zegt of een sleutel werkt
   en wat hij mag (`owner` of `writer`), zodat een verkeerd getypte code bij Deelnemen opvalt.
   De Worker weigert een partij met meer games dan nodig om te winnen.
+- **4.0, teamwedstrijd vinden** ([voorstel](../../docs/voorstel-teamwedstrijd-vinden-4.0.md)),
+  beide velden optioneel, zonder werkt alles zoals voorheen:
+  - `clubScreen: false` in de kop (`POST` en `PUT /api/team/:id`): de teamwedstrijd
+    blijft van het clubscherm tot de eigenaar hem met `clubScreen: true` (of zonder het
+    veld) opnieuw `PUT`. Zo'n sessie telt in de gebruikscijfers als `team-only`.
+  - `refereeSlots: [2, 3]` bij `POST /api/team`: het antwoord heeft dan ook een
+    `refereeKey`, de **tegenstandersleutel**. Die schrijft alleen de partijen (en hun
+    foto's) in `refereeSlots`; anders 401. `verify` geeft `{ "role": "referee", "slots":
+    [2, 3] }`. `PUT /api/team/:id/referee` `{ "slots": [3] }` met de eigenaarssleutel
+    past de partijen aan (`[]` = geen); 409 als de sessie geen tegenstandersleutel heeft.
+    De uitnodigingssleutel blijft alle partijen schrijven.
 - De limiter bewaart apart IP-adressen en tijdstippen. De sessietermijn van
   twee uur geldt niet voor die administratie; oude verzoeken worden bij
   volgende aanmaakverzoeken gefilterd, zonder afzonderlijk verwijderalarm.

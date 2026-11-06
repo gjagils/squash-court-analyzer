@@ -4,8 +4,13 @@
 // the owner key, which stays on the phone that started the live page, may
 // change the team names or end it. Viewers get everything over
 // Server-Sent Events. Like LiveSession: state in storage, an alarm removes it
-// `IDLE_MINUTES` after the last update of any partij (so two hours after the
-// last partij), nothing else is kept.
+// `TEAM_IDLE_MINUTES` after the last update of any partij (a day, see
+// scheduleIdleAlarm), nothing else is kept.
+//
+// 4.0 (docs/voorstel-teamwedstrijd-vinden-4.0.md): a session can carry a
+// referee key for the opponent, which writes only the partijen they referee
+// (`refereeSlots`, set by the owner), and a header with `clubScreen: false`
+// stays off the club screens until Live delen is on.
 //
 // Photos: per slot a thumbnail of the home and the away player
 // ("photo:<slot>:1" / ":2"), with flags next to them so a state does not read
@@ -27,14 +32,18 @@ export class TeamSession extends ViewerSession {
     await this.ctx.storage.setAlarm(now + this.config.teamIdleMs);
   }
 
-  /** Creates the session; false when this id is already in use */
-  async create(key, ownerKey, team, id, lang = 'nl') {
+  /**
+   * Creates the session; false when this id is already in use. `referee`
+   * ({ key, slots }) lets the opponent write the partijen they referee.
+   */
+  async create(key, ownerKey, team, id, lang = 'nl', referee = null) {
     if (await this.ctx.storage.get('key')) return false;
     const now = Date.now();
     // The id is kept in storage too: the limiter is released by it, and the
     // name of a jurisdiction object id must not be what that depends on.
     // `lang` is the starter's language, for the link preview.
-    await this.ctx.storage.put({ key, ownerKey, team, id, partijen: {}, updatedAt: now, lang });
+    const extra = referee ? { refereeKey: referee.key, refereeSlots: referee.slots } : {};
+    await this.ctx.storage.put({ key, ownerKey, team, id, partijen: {}, updatedAt: now, lang, ...extra });
     await this.scheduleIdleAlarm(now);
     await this.reportToClubs(team, {}, now, id);
     return true;
@@ -62,12 +71,46 @@ export class TeamSession extends ViewerSession {
     return sameKey(given, owner || (await this.ctx.storage.get('key')));
   }
 
-  /** 404 unknown, 401 wrong key, else what this key may do: "owner" or "writer" */
+  /** 404 unknown, 401 wrong key, else what this key may do: "owner", "writer" or "referee" */
   async role(given) {
     if (!(await this.ctx.storage.get('key'))) return 404;
     if (await this.ownerEquals(given)) return 'owner';
     if (await this.keyEquals(given)) return 'writer';
+    if (await this.refereeEquals(given)) return 'referee';
     return 401;
+  }
+
+  /** The opponent's key (none on a session made without one) */
+  async refereeEquals(given) {
+    const referee = await this.ctx.storage.get('refereeKey');
+    return Boolean(referee) && sameKey(given, referee);
+  }
+
+  /** The slots the opponent referees; [] when there are none */
+  async refereeSlots() {
+    return (await this.ctx.storage.get('refereeSlots')) || [];
+  }
+
+  /** What /verify answers: the role, and for the referee key its slots */
+  async access(given) {
+    const role = await this.role(given);
+    if (role !== 'referee') return role;
+    return { role, slots: await this.refereeSlots() };
+  }
+
+  /** May this key write this slot: the team key any, the referee key only its own */
+  async maySlot(given, slot) {
+    if (await this.keyEquals(given)) return true;
+    return (await this.refereeEquals(given)) && (await this.refereeSlots()).includes(slot);
+  }
+
+  /** The owner changes which partijen the opponent referees (none: []): 404, 401, 409 without a referee key, 204 */
+  async setRefereeSlots(given, slots) {
+    if (!(await this.ctx.storage.get('key'))) return 404;
+    if (!(await this.ownerEquals(given))) return 401;
+    if (!(await this.ctx.storage.get('refereeKey'))) return 409;
+    await this.ctx.storage.put({ refereeSlots: slots });
+    return 204;
   }
 
   async touch(extra) {
@@ -130,7 +173,7 @@ export class TeamSession extends ViewerSession {
   /** One slot (1-4) gets this partij, or is cleared (`{ empty: true }`, its photos too) */
   async setPartij(given, slot, partij) {
     if (!(await this.ctx.storage.get('key'))) return 404;
-    if (!(await this.keyEquals(given))) return 401;
+    if (!(await this.maySlot(given, slot))) return 401;
     const [stored, team] = await Promise.all([this.ctx.storage.get('partijen'), this.ctx.storage.get('team')]);
     const previous = stored || {};
     const partijen = { ...previous };
@@ -147,10 +190,11 @@ export class TeamSession extends ViewerSession {
 
   // ---- Photos -------------------------------------------------------------------
 
-  /** The home and away thumbnail of a slot (Uint8Array or null each), team or owner key: 404, 401, 204 */
+  /** The home and away thumbnail of a slot (Uint8Array or null each), team or owner key, or the referee key on its slots: 404, 401, 204 */
   async setPhotos(given, slot, photo1, photo2) {
     const role = await this.role(given);
     if (role === 404 || role === 401) return role;
+    if (role === 'referee' && !(await this.refereeSlots()).includes(slot)) return 401;
     const flags = (await this.ctx.storage.get('photoFlags')) || {};
     const version = ((await this.ctx.storage.get('photoVersion')) || 0) + 1;
     if (photo1) await this.ctx.storage.put(photoKey(slot, 1), photo1); else await this.ctx.storage.delete(photoKey(slot, 1));

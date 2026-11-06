@@ -67,6 +67,8 @@ describe('input', () => {
     const odd = validateTeamHeader({ home: 'A', away: 'B', date: 12 });
     expect(Math.abs(odd.date - Date.now())).toBeLessThan(5000);
     expect(validateTeamHeader({ home: 'A', away: 'B', date: '2026-10-30T19:00:00Z' }).date).toBe(DAY);
+    expect(validateTeamHeader({ ...header, clubScreen: false }).clubScreen).toBe(false);
+    expect(validateTeamHeader({ ...header, clubScreen: true }).clubScreen).toBeUndefined();
   });
 
   it('a partij: first names, or none; scores optional for a hand-filled one', () => {
@@ -183,6 +185,40 @@ describe('team sessions', () => {
     expect((await call('GET', `/api/team/${id}/verify`, undefined, 'nope')).status).toBe(401);
     expect((await call('GET', `/api/team/${id}/verify`)).status).toBe(401);
     expect((await call('GET', '/api/team/aaaaaaaaaaaa/verify', undefined, writeKey)).status).toBe(404);
+  });
+
+  it('the referee key writes only the partijen the opponent referees (4.0)', async () => {
+    const { id, writeKey, ownerKey, refereeKey } = (await call('POST', '/api/team', { ...header, refereeSlots: [3, 2] })).json;
+    expect(refereeKey).toBeTruthy();
+    expect([writeKey, ownerKey]).not.toContain(refereeKey);
+    expect((await call('GET', `/api/team/${id}/verify`, undefined, refereeKey)).json).toEqual({ role: 'referee', slots: [2, 3] });
+    // Its own partijen, and their photos; not the others, not the header, not the end
+    expect((await call('PUT', `/api/team/${id}/partij/2`, partij, refereeKey)).status).toBe(204);
+    expect((await call('PUT', `/api/team/${id}/partij/1`, partij, refereeKey)).status).toBe(401);
+    expect((await call('PUT', `/api/team/${id}/partij/4/photos`, { p1: null, p2: null }, refereeKey)).status).toBe(401);
+    expect((await call('PUT', `/api/team/${id}/partij/3/photos`, { p1: null, p2: null }, refereeKey)).status).toBe(204);
+    expect((await call('PUT', `/api/team/${id}`, header, refereeKey)).status).toBe(401);
+    expect((await call('DELETE', `/api/team/${id}`, undefined, refereeKey)).status).toBe(401);
+    // The team key still writes every partij
+    expect((await call('PUT', `/api/team/${id}/partij/3`, partij, writeKey)).status).toBe(204);
+    // The owner moves a partij back to the own team, or takes them all away
+    expect((await call('PUT', `/api/team/${id}/referee`, { slots: [3] }, writeKey)).status).toBe(401);
+    expect((await call('PUT', `/api/team/${id}/referee`, { slots: [5] }, ownerKey)).status).toBe(400);
+    expect((await call('PUT', `/api/team/${id}/referee`, { slots: [3] }, ownerKey)).status).toBe(204);
+    expect((await call('PUT', `/api/team/${id}/partij/2`, partij, refereeKey)).status).toBe(401);
+    expect((await call('PUT', `/api/team/${id}/referee`, { slots: [] }, ownerKey)).status).toBe(204);
+    expect((await call('GET', `/api/team/${id}/verify`, undefined, refereeKey)).json).toEqual({ role: 'referee', slots: [] });
+    expect((await call('PUT', `/api/team/${id}/partij/3`, partij, refereeKey)).status).toBe(401);
+    // Viewers never see the key or the slots
+    expect((await call('GET', `/api/team/${id}`)).text).not.toContain(refereeKey);
+  });
+
+  it('without referee slots there is no referee key, as before', async () => {
+    const created = (await call('POST', '/api/team', header)).json;
+    expect(created.refereeKey).toBeUndefined();
+    expect((await call('PUT', `/api/team/${created.id}/referee`, { slots: [1] }, created.ownerKey)).status).toBe(409);
+    const odd = (await call('POST', '/api/team', { ...header, refereeSlots: [1, 1] })).json;
+    expect(odd.refereeKey).toBeUndefined();
   });
 
   it('a partij cannot show more games than it takes to win', async () => {

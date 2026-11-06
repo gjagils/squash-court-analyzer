@@ -185,7 +185,26 @@ export function validateTeamHeader(input) {
   let date = typeof input.date === 'number' ? input.date : Date.parse(String(input.date || ''));
   const now = Date.now();
   if (!Number.isFinite(date) || Math.abs(date - now) > 2 * 365 * 24 * 3600 * 1000) date = now;
-  return { home, away, date: Math.round(date) };
+  const header = { home, away, date: Math.round(date) };
+  // 4.0 (docs/voorstel-teamwedstrijd-vinden-4.0.md): a team match only the team
+  // and the opponent see stays off the club screens until Live delen is on.
+  // Left out (older apps) it is on the screen, as before.
+  if (input.clubScreen === false) header.clubScreen = false;
+  return header;
+}
+
+/**
+ * The partijen the opponent referees and may write with the referee key: a
+ * list of slots 1-4, each once. Null when it is not a list (no referee key).
+ */
+export function cleanRefereeSlots(value) {
+  if (!Array.isArray(value) || value.length > 4) return null;
+  const slots = [];
+  for (const item of value) {
+    if (!SLOTS.includes(item) || slots.includes(item)) return null;
+    slots.push(item);
+  }
+  return slots.sort();
 }
 
 /**

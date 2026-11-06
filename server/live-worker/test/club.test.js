@@ -96,6 +96,29 @@ describe('team matches on the screen', () => {
     expect(await wallIds('101', ALL_INN)).not.toContain(id);
   });
 
+  it('a team match for the team only stays off the screen until Live delen (4.0)', async () => {
+    const teamOnly = { ...header('All Inn Squash 7', 'Squash Delft 7'), clubScreen: false };
+    const { id, writeKey, ownerKey } = (await call('POST', '/api/team', teamOnly)).json;
+    expect((await call('PUT', `/api/team/${id}/partij/1`, partij, writeKey)).status).toBe(204);
+    expect(await wallIds('101', ALL_INN)).not.toContain(id);
+    expect(await wallIds('202', DELFT)).not.toContain(id);
+    // Live delen: on both screens
+    expect((await call('PUT', `/api/team/${id}`, { ...teamOnly, clubScreen: true }, ownerKey)).status).toBe(204);
+    expect(await wallIds('101', ALL_INN)).toContain(id);
+    expect(await wallIds('202', DELFT)).toContain(id);
+    // Live delen off again: off the screens, the team match stays
+    expect((await call('PUT', `/api/team/${id}`, teamOnly, ownerKey)).status).toBe(204);
+    expect(await wallIds('101', ALL_INN)).not.toContain(id);
+    expect(await wallIds('202', DELFT)).not.toContain(id);
+    expect((await call('GET', `/api/team/${id}`)).json.partijen['1']).toBeTruthy();
+  });
+
+  it('wallsOfTeam leaves out a team match for the team only', () => {
+    const walls = clubWalls(env);
+    expect(wallsOfTeam({ home: 'All Inn Squash 8', away: 'Utrecht 1' }, walls).length).toBe(1);
+    expect(wallsOfTeam({ home: 'All Inn Squash 8', away: 'Utrecht 1', clubScreen: false }, walls)).toEqual([]);
+  });
+
   it('a team match without a club screen works as before', async () => {
     const created = await call('POST', '/api/team', header('Kampong 1', 'Utrecht 4'));
     expect(created.status).toBe(201);

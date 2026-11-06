@@ -7,7 +7,7 @@
 
 import { DurableObject } from 'cloudflare:workers';
 
-export const KINDS = ['live', 'team', 'viewer-live', 'viewer-team', 'follower-live', 'follower-team'];
+export const KINDS = ['live', 'team', 'team-only', 'viewer-live', 'viewer-team', 'follower-live', 'follower-team'];
 /**
  * The daily usage count of the app itself (3.1 and later, docs/voorstel-gebruikstelling-app.md):
  * `app` = opened that day, `app-first` = the first report of an installation, and per part of

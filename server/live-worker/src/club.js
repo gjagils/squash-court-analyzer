@@ -44,7 +44,8 @@ function sameClub(team, wall) {
 
 /** The screens a team match belongs on: home's and away's club (once when they are the same) */
 export function wallsOfTeam(team, walls) {
-  if (!team) return [];
+  // Off the screens until Live delen is on (validateTeamHeader)
+  if (!team || team.clubScreen === false) return [];
   return walls.filter((wall) => sameClub(team.home, wall) || sameClub(team.away, wall));
 }
 

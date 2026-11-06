@@ -175,7 +175,7 @@ Drie routes, alleen met een account:
 |---|---|
 | `GET /api/v1/me/team/lives?fixtures=<f1>,<f2>` | **Eigen team** (`team_key` van de beller): alle lopende rijen, met `liveId`, `writeKey`, `starterName`. **Andere teams**: alleen rijen voor de gevraagde wedstrijden (de app stuurt de wedstrijden van vandaag uit zijn eigen programma), met `liveId`, `teamName` en `refereeKey`, **nooit de schrijfsleutel**. De `refereeKey` alleen als de league in de wedstrijdlink dezelfde is als die in de teamsleutel van de beller (`/league/<uuid>/…`). Verlopen rijen telt hij niet mee |
 | `PUT /api/v1/me/team/lives` `{ fixture, teamName, liveId, writeKey, refereeKey?, replaces? }` | Aanmelden voor het eigen team. Bestaat er al een rij voor deze wedstrijd en dit team, dan geeft hij die terug (409) en verandert hij niets. `replaces` met het `liveId` van de bestaande rij vervangt die: voor als de app zag dat die sessie weg is |
-| `DELETE /api/v1/me/team/lives/:fixture` | Afmelden (schakelaar uit, teamwedstrijd verwijderd), alleen door wie hem aanmeldde |
+| `DELETE /api/v1/me/team/lives?fixture=<f>` | Afmelden (schakelaar uit, teamwedstrijd verwijderd), alleen door wie hem aanmeldde |
 
 De teamsleutel komt altijd uit het account van de beller, nooit uit het
 verzoek. Aanmelden is één `INSERT … ON CONFLICT DO NOTHING` met daarna een
@@ -183,7 +183,8 @@ verzoek. Aanmelden is één `INSERT … ON CONFLICT DO NOTHING` met daarna een
 krijgt de ander de bestaande terug. Verlopen rijen worden bij elke aanmelding
 gewist (`DELETE … WHERE expires_at < ?`) en tellen bij het lezen niet mee.
 
-`expires_at` is het einde van de dag na de speeldag (Europe/Amsterdam). De
+`expires_at` is het begin van de tweede dag na de speeldag (00:00 UTC, dus
+01:00 of 02:00 in Nederland; `teamLiveExpiry`). De
 `TeamSession` zelf verdwijnt een dag na de laatste update; een rij waarvan de
 sessie al weg is, ziet de app aan een 404 en vervangt hij met `replaces`.
 

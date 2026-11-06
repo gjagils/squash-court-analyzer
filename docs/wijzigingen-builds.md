@@ -10,6 +10,16 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.2 build 2)
 
+- **4.0 teamwedstrijd vinden zonder uitnodiging (6 november 2026, achter de vlag; keuzes Gerd-Jan):** een nieuwe
+  teamwedstrijd uit het programma van Mijn team is met een account vanzelf zichtbaar voor teamgenoten met een
+  account en voor de tegenstander, maar staat niet op het clubscherm en heeft nog geen kijkerslink. Dat komt pas
+  met **Live delen** op de deelkaart. Competitie toont **Lopende teamwedstrijden** met *Meedoen*. Maakt een teamgenoot
+  dezelfde wedstrijd aan, dan doet zijn telefoon mee met de bestaande in plaats van een tweede te maken. De
+  tegenstander kijkt mee en zet de partijen die hij fluit op de teampagina (standaard: thuis fluit E4 en E1, uit
+  E2 en E3); de eigenaar past dat per partij aan. Server: `clubScreen` en een tegenstandersleutel in de live-Worker
+  (staat live, oude apps merken niets), tabel `team_lives` in de account-Worker (nog uit te rollen). Core:
+  `TeamFinding`, `TeamFindingTests`. Nog niet op een telefoon geprobeerd. Plan:
+  `docs/voorstel-teamwedstrijd-vinden-4.0.md`.
 - **4.0 synchroniseren, gevonden op de A13 (4 november 2026, achter de vlag):** de app haalt je wedstrijden nu ook
   meteen na het inloggen op. `since` staat als tekst in `accountImportedSinceMillis`: milliseconden passen niet in
   Android's 32-bits `Int` (de app stuurde `since=-1766382246` en haalde steeds alles op). Een wedstrijd uit je

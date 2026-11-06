@@ -1,6 +1,8 @@
 # Teamwedstrijd vinden zonder uitnodiging (4.0)
 
-Stand 6 november 2026. Voorstel, nog niets van gebouwd. Vraag van Gerd-Jan:
+Stand 6 november 2026. **Gebouwd** achter de 4.0-vlag: live-Worker en account-Worker op `main`
+(`ca020ec`, `eadf937`; de account-Worker is nog niet uitgerold), de app in PR #17. Nog niet gebouwd: de
+kaart op Mijn team, de handleiding en de privacypagina. Nog niet op een telefoon geprobeerd. Vraag van Gerd-Jan:
 "Als ik een competitiewedstrijd aanmaak, kunnen teamleden die SquashAnalyzer
 gebruiken die dan zien als ze dezelfde wedstrijd starten?" Nu niet, ook niet
 in 4.0 zoals het gepland stond. Dit voorstel maakt het mogelijk voor

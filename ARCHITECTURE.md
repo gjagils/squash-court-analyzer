@@ -151,6 +151,15 @@ the team match screen pushes changed partijen on save and pulls/merges
 match to a team match ("Onderdeel van een teamwedstrijd"). The Node server
 `server/live` (NAS reserve) has no team endpoints.
 All participants share the same write key; the server does not enforce ownership per phone or slot.
+**4.0, finding a team match** (behind `Features.shared.playerAccount`, `docs/voorstel-teamwedstrijd-vinden-4.0.md`):
+a team match from the programme of Mijn team is made with `clubScreen: false` (off the club screens until Live
+delen, `TeamLive.setClubScreen`) and `refereeSlots` (the opponent's partijen: home keeps → E2/E3, away keeps →
+E1/E4), which gives a third key, the referee key, that writes only those slots (`PUT /api/team/:id/referee`
+changes them, owner key). The account Worker keeps a pointer per team and SBN match (`team_lives`: live id,
+invitation key, referee key; gone after the day after the match day). `TeamFinding` (Core) joins a teammate's
+instead of making a second one, offers running ones in Competitie, and joins the opponent's with the referee key
+(`TeamMatch.refereeSlots`, `mayWriteLive`: only those partijen go up from that phone). Neither server checks that
+an account really plays in the team it names (the team key comes from Mijn team).
 Later: SBN comparison, badge category Teamspeler.
 
 ## Android port

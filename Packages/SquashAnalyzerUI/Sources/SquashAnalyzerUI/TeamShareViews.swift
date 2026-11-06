@@ -30,12 +30,21 @@ struct TeamShareBanner: View {
 
     private var title: String {
         if !match.isLive { return loc("Alleen op deze telefoon") }
+        if match.isOpponentCopy { return loc("Meekijken als tegenstander") }
         return match.isLiveOwner ? loc("Gedeeld met je team · jij bent de eigenaar") : loc("Gedeeld met je team")
     }
 
     private var detail: String {
         if !match.isLive {
             return loc("Teamgenoten zien deze teamwedstrijd niet. Tik op Deel met mijn team om samen te werken.")
+        }
+        if match.isOpponentCopy {
+            let keeping = match.ownSide == TeamSide.home ? match.away : match.home
+            let slots = match.refereeSlots ?? []
+            if slots.isEmpty {
+                return loc("Je kijkt mee met \(keeping). Jullie fluiten geen partijen.")
+            }
+            return loc("Je kijkt mee met \(keeping). Jullie fluiten \(TeamLiveCard.labels(slots)): die partijen zet je op de teampagina.")
         }
         if match.needsOwnPartij {
             return loc("Tik op jouw partij en zet er een wedstrijd op. Wat jij invult, zien je teamgenoten ook.")

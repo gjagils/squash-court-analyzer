@@ -16,6 +16,12 @@ struct TeamLiveCard: View {
     let canShare: Bool
     /// What is wrong with sending (a refused key, no connection), or nil
     var problem: String? = nil
+    /// 4.0, owner of a team-only live team match: the partijen the opponent referees now (nil: unknown)
+    var refereeSlots: [Int]? = nil
+    /// 4.0: Live delen on a team-only live team match (club screen and viewers' link)
+    var onGoPublic: () -> Void = {}
+    /// 4.0, owner: a partij moves between "wij fluiten" and "tegenstander fluit"
+    var onToggleReferee: (Int) -> Void = { _ in }
     /// "Deel met mijn team" on a team match that is not shared yet
     let onGoLive: () -> Void
     /// Opens the share screen (viewers' link and invitation)
@@ -27,7 +33,16 @@ struct TeamLiveCard: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 SectionHeader(loc("DELEN"))
-                if match.isLive {
+                if match.isTeamOnly {
+                    Text(loc("TEAM"))
+                        .font(SharedFonts.system(10, weight: .bold, design: .rounded))
+                        .tracking(1)
+                        .foregroundColor(SharedColors.background)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 4)
+                        .background(SharedColors.support)
+                        .clipShape(Capsule())
+                } else if match.isLive {
                     HStack(spacing: 5) {
                         Circle().fill(Color.white).frame(width: 7, height: 7)
                         Text("LIVE")
@@ -42,7 +57,44 @@ struct TeamLiveCard: View {
                 }
                 Spacer()
             }
-            if match.isLive {
+            if match.isOpponentCopy {
+                Text("Je ziet alle partijen van deze teamwedstrijd. De partijen die jullie fluiten zet je erop door ze bij te houden of in te vullen.", bundle: textBundle)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let problem {
+                    Text(problem)
+                        .font(SharedFonts.system(12))
+                        .foregroundColor(SharedColors.error)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack(spacing: 10) {
+                    ActionButton(loc("Vernieuwen"), icon: "arrow.counterclockwise", disabled: busy, action: onRefresh)
+                    ActionButton(loc("Live verlaten"), color: SharedColors.textSecondary, disabled: busy, action: onStop)
+                }
+            } else if match.isTeamOnly {
+                Text("Je team en de tegenstander zien deze teamwedstrijd in de app. Niet op het clubscherm en zonder kijkerslink, tot je Live delen aanzet.", bundle: textBundle)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if match.isLiveOwner {
+                    ActionButton(busy ? loc("Even geduld…") : loc("Live delen"), style: .filled, disabled: busy, action: onGoPublic)
+                    if let refereeSlots {
+                        refereeRow(refereeSlots)
+                    }
+                }
+                if let problem {
+                    Text(problem)
+                        .font(SharedFonts.system(12))
+                        .foregroundColor(SharedColors.error)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack(spacing: 10) {
+                    ActionButton(loc("Vernieuwen"), icon: "arrow.counterclockwise", disabled: busy, action: onRefresh)
+                    ActionButton(match.isLiveOwner ? loc("Live stoppen") : loc("Live verlaten"), color: SharedColors.textSecondary,
+                                 disabled: busy, action: onStop)
+                }
+            } else if match.isLive {
                 Text("Kijkers volgen de hele teamavond op één pagina. Teamgenoten die de uitnodiging openen, zetten hun eigen partij erop. 2 uur na de laatste update wordt alles gewist.", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
@@ -74,6 +126,49 @@ struct TeamLiveCard: View {
         .background(SharedColors.tint(0.04))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
+
+    /// "Tegenstander fluit": E1–E4, a tap moves a partij between us and them
+    private func refereeRow(_ slots: [Int]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Tegenstander fluit en vult in:", bundle: textBundle)
+                .font(SharedFonts.system(12, weight: .semibold))
+                .foregroundColor(SharedColors.textPrimary)
+            HStack(spacing: 8) {
+                ForEach(TeamLiveCard.slotItems) { item in
+                    refereeChip(item.slot, selected: slots.contains(item.slot))
+                }
+            }
+        }
+    }
+
+    private func refereeChip(_ slot: Int, selected: Bool) -> some View {
+        Button { onToggleReferee(slot) } label: {
+            Text("E\(slot)")
+                .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
+                .foregroundColor(selected ? SharedColors.background : SharedColors.accent)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(selected ? SharedColors.accent : SharedColors.accent.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .disabled(busy)
+    }
+
+    static let slotItems: [TeamSlotItem] = [TeamSlotItem(slot: 1), TeamSlotItem(slot: 2), TeamSlotItem(slot: 3), TeamSlotItem(slot: 4)]
+
+    /// "E2, E3"
+    static func labels(_ slots: [Int]) -> String {
+        var parts: [String] = []
+        for slot in slots.sorted() { parts.append("E\(slot)") }
+        return parts.joined(separator: ", ")
+    }
+}
+
+/// One of E1–E4 for a `ForEach` (no `indices`: Skip)
+struct TeamSlotItem: Identifiable {
+    let slot: Int
+    var id: Int { slot }
 }
 
 /// The texts that go to the group app

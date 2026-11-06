@@ -137,6 +137,9 @@ public struct SharedTeamMatchesView: View {
     @State private var message: String? = nil
     /// The fixture whose SBN result is being fetched ("Ophalen bij SBN")
     @State private var fetchingFixture: String? = nil
+    /// 4.0: live team matches of the team and the opponent this phone does not follow yet
+    @State private var offers: [TeamLiveListing] = []
+    @State private var joiningOffer: String? = nil
 
     public init(store: any TeamMatchStore, tools: TeamMatchTools, team: LeagueTeamSnapshot? = nil) {
         self.store = store
@@ -155,6 +158,12 @@ public struct SharedTeamMatchesView: View {
                         .fixedSize(horizontal: false, vertical: true)
                     ActionButton(loc("Nieuwe teamwedstrijd"), style: .filled) { creating = true }
                     ActionButton(loc("Deelnemen met link of code")) { joining = true }
+                    if !offers.isEmpty {
+                        SectionHeader(loc("LOPENDE TEAMWEDSTRIJDEN"))
+                        ForEach(offers) { offer in
+                            offerRow(offer)
+                        }
+                    }
                     if isLoading {
                         ProgressView().frame(maxWidth: .infinity)
                     } else if matches.isEmpty {
@@ -198,6 +207,7 @@ public struct SharedTeamMatchesView: View {
             await AppUsage.shared.used(AppUsagePart.competition)
             // What teammates put on the live pages since the last look
             if TeamLiveSync.changed(await TeamLiveSync.pull(store: store)) { await load() }
+            await loadOffers()
         }
         .sheet(isPresented: $creating) {
             NewTeamMatchSheet(team: team, existing: matches) { match, share in
@@ -232,6 +242,89 @@ public struct SharedTeamMatchesView: View {
             message = loc("De teamwedstrijden konden niet worden geladen.")
         }
         isLoading = false
+    }
+
+    /// 4.0: what teammates and the opponent made that this phone can join
+    private func loadOffers() async {
+        guard let context = await PlayerAccount.shared.teamFindingContext() else {
+            offers = []
+            return
+        }
+        offers = await TeamFinding.offers(context: context, fixtures: team?.fixtures ?? [], matches: matches)
+    }
+
+    /// "Kees heeft … aangemaakt" or "Squash City 2 houdt deze wedstrijd bij", with Meedoen
+    private func offerRow(_ offer: TeamLiveListing) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(offerTitle(offer))
+                .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
+                .foregroundColor(SharedColors.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(offerDetail(offer))
+                .font(SharedFonts.system(12))
+                .foregroundColor(SharedColors.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            ActionButton(joiningOffer == offer.id ? loc("Even geduld…") : loc("Meedoen"), style: .filled,
+                         color: SharedColors.support, disabled: joiningOffer != nil) {
+                Task { await join(offer) }
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(SharedColors.tint(0.05))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(SharedColors.line(0.10), lineWidth: 1))
+    }
+
+    private func offerFixture(_ offer: TeamLiveListing) -> LeagueFixture? {
+        guard let team else { return nil }
+        for fixture in team.fixtures where TeamFinding.normalizedFixture(fixture.id) == offer.fixture { return fixture }
+        return nil
+    }
+
+    private func offerTitle(_ offer: TeamLiveListing) -> String {
+        if offer.own {
+            return loc("\(offer.starterName) heeft een teamwedstrijd aangemaakt")
+        }
+        return loc("\(offer.teamName) houdt deze wedstrijd bij")
+    }
+
+    private func offerDetail(_ offer: TeamLiveListing) -> String {
+        let fixture = offerFixture(offer)
+        var teams = offer.teamName
+        if let fixture { teams = "\(fixture.home) – \(fixture.away)" }
+        if offer.own {
+            return loc("\(teams). Doe mee en zet je eigen partij erop.")
+        }
+        guard let fixture else { return loc("\(teams). Kijk mee.") }
+        let keepingSide: TeamSide = TeamMatch.sameTeam(fixture.away, offer.teamName) ? TeamSide.away : TeamSide.home
+        let slots = TeamLiveCard.labels(TeamFinding.opponentRefereeSlots(keepingSide: keepingSide))
+        return loc("\(teams). Kijk mee en zet de partijen erop die jullie fluiten (\(slots)).")
+    }
+
+    private func join(_ offer: TeamLiveListing) async {
+        joiningOffer = offer.id
+        message = nil
+        do {
+            let joined = try await TeamFinding.join(offer, ownTeamName: team?.name ?? "", fixtures: team?.fixtures ?? [], store: store)
+            await load()
+            offers = offers.filter { other in other.id != offer.id }
+            shareOnOpen = false
+            opened = joined
+        } catch let error as TeamFindingError {
+            switch error {
+            case TeamFindingError.gone:
+                message = loc("Deze teamwedstrijd is afgelopen of de link klopt niet.")
+                offers = offers.filter { other in other.id != offer.id }
+            case TeamFindingError.sharedElsewhere:
+                message = loc("Je hebt deze teamwedstrijd al, maar gekoppeld aan een andere livepagina. Stop die eerst of gebruik die.")
+            default:
+                message = loc("Deelnemen is niet gelukt.")
+            }
+        } catch {
+            message = loc("Deelnemen is niet gelukt.")
+        }
+        joiningOffer = nil
     }
 
     private var sharedMatches: [TeamMatch] { matches.filter { match in match.isLive } }
@@ -314,6 +407,22 @@ public struct SharedTeamMatchesView: View {
             var created = match
             try await store.save(created)
             if share {
+                // 4.0: a match from the programme becomes visible for the team (and the opponent), not public
+                if let context = await PlayerAccount.shared.teamFindingContext(), TeamFinding.canShare(created, context: context) {
+                    if let found = try? await TeamFinding.makeVisible(created, context: context, store: store) {
+                        created = found.match
+                        switch found.outcome {
+                        case TeamFindingOutcome.joined(let starter):
+                            message = loc("\(starter) had deze teamwedstrijd al aangemaakt: je doet mee met die.")
+                        case TeamFindingOutcome.started:
+                            break
+                        }
+                    }
+                    await load()
+                    shareOnOpen = false
+                    opened = created
+                    return
+                }
                 if let live = try? await TeamMatchSupport.goLive(created, store: store) { created = live }
             }
             await load()
@@ -406,6 +515,8 @@ public struct SharedTeamMatchView: View {
     private let openShare: Bool
     @State private var liveBusy = false
     @State private var confirmStopLive = false
+    /// 4.0, owner of a team-only live team match: the partijen the opponent referees now
+    @State private var refereeSlotsNow: [Int]? = nil
     /// "Uitslag van SBN ophalen": busy, and what it did (not an error)
     @State private var sbnBusy = false
     @State private var sbnMessage: String? = nil
@@ -453,6 +564,9 @@ public struct SharedTeamMatchView: View {
                     }
                     TeamLiveCard(match: match, busy: liveBusy, canShare: tools.shareText != nil,
                                  problem: liveProblem,
+                                 refereeSlots: refereeSlotsNow,
+                                 onGoPublic: { Task { await goPublic() } },
+                                 onToggleReferee: { slot in Task { await toggleReferee(slot) } },
                                  onGoLive: { Task { await goLive() } },
                                  onShare: { sharingTeam = true },
                                  onRefresh: { Task { await refreshLive() } },
@@ -475,6 +589,9 @@ public struct SharedTeamMatchView: View {
                 opponentRoster = await LeagueOpponentStorage.names(for: link, fetcher: fetcher)
             }
             await syncFromLive(showGone: false)
+            if match.isTeamOnly && match.isLiveOwner {
+                refereeSlotsNow = await TeamFinding.currentRefereeSlots(match)
+            }
             await autoLinkHistory()
             // A played match that is still not complete: SBN may have the rest
             if match.date < Date() && (!match.isComplete || match.hasUnknownPoints) && !match.isLive {
@@ -895,17 +1012,57 @@ public struct SharedTeamMatchView: View {
         liveBusy = true
         // Only the phone that started it ends the page for everyone; a phone
         // that joined just leaves it
-        if match.isLiveOwner { await TeamLive.shared.stop(match) }
+        if match.isLiveOwner {
+            await TeamLive.shared.stop(match)
+            // 4.0: teammates and the opponent no longer find it
+            if let context = await PlayerAccount.shared.teamFindingContext() { await TeamFinding.forget(match, context: context) }
+        }
         liveBusy = false
         await clearLive()
     }
 
-    /// The live page is over (stopped, or gone two hours after the last update)
+    /// 4.0: Live delen on a team-only live team match: on the club screen, with the viewers' link
+    private func goPublic() async {
+        liveBusy = true
+        let done = await TeamLive.shared.setClubScreen(match, on: true)
+        liveBusy = false
+        guard done else {
+            message = loc("Delen lukte niet. Controleer de internetverbinding en probeer het opnieuw.")
+            return
+        }
+        var changed = match
+        changed.liveTeamOnly = nil
+        try? await store.save(changed)
+        match = changed
+        onChange(changed)
+        message = nil
+        sharingTeam = true
+    }
+
+    /// 4.0, owner: a partij moves between "wij fluiten" and "tegenstander fluit"
+    private func toggleReferee(_ slot: Int) async {
+        var slots = refereeSlotsNow ?? []
+        if slots.contains(slot) {
+            slots = slots.filter { other in other != slot }
+        } else {
+            slots.append(slot)
+        }
+        slots.sort()
+        liveBusy = true
+        let done = await TeamLive.shared.setRefereeSlots(match, slots: slots)
+        liveBusy = false
+        if done {
+            refereeSlotsNow = slots
+            message = nil
+        } else {
+            message = loc("Geen verbinding om de livepagina te lezen.")
+        }
+    }
+
+    /// The live page is over (stopped, or gone a day after the last update)
     private func clearLive() async {
         var changed = match
-        changed.liveId = nil
-        changed.liveKey = nil
-        changed.liveOwnerKey = nil
+        changed.clearLiveState()
         try? await store.save(changed)
         match = changed
         onChange(changed)
@@ -945,6 +1102,11 @@ public struct SharedTeamMatchView: View {
     }
 
     private func remove() async {
+        // 4.0: a team-only live team match nobody else started goes with it
+        if match.isTeamOnly && match.isLiveOwner {
+            await TeamLive.shared.stop(match)
+            if let context = await PlayerAccount.shared.teamFindingContext() { await TeamFinding.forget(match, context: context) }
+        }
         do {
             try await store.delete(id: match.id)
             onChange(nil)

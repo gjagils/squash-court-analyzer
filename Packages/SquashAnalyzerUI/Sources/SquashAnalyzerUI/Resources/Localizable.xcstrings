@@ -13248,6 +13248,294 @@
           }
         }
       }
+    },
+    "Meekijken als tegenstander": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watching as the opponent"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meekijken als tegenstander"
+          }
+        }
+      }
+    },
+    "Je kijkt mee met %@. Jullie fluiten geen partijen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are watching %@. Your team referees no matches."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je kijkt mee met %@. Jullie fluiten geen partijen."
+          }
+        }
+      }
+    },
+    "Je kijkt mee met %@. Jullie fluiten %@: die partijen zet je op de teampagina.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are watching %@. Your team referees %@: you put those matches on the team page."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je kijkt mee met %@. Jullie fluiten %@: die partijen zet je op de teampagina."
+          }
+        }
+      }
+    },
+    "TEAM": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TEAM"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TEAM"
+          }
+        }
+      }
+    },
+    "Je ziet alle partijen van deze teamwedstrijd. De partijen die jullie fluiten zet je erop door ze bij te houden of in te vullen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You see every match of this team match. Put the matches your team referees on it by tracking them or filling them in."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je ziet alle partijen van deze teamwedstrijd. De partijen die jullie fluiten zet je erop door ze bij te houden of in te vullen."
+          }
+        }
+      }
+    },
+    "Je team en de tegenstander zien deze teamwedstrijd in de app. Niet op het clubscherm en zonder kijkerslink, tot je Live delen aanzet.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your team and the opponent see this team match in the app. Not on the club screen and without a viewers' link until you tap Share live."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je team en de tegenstander zien deze teamwedstrijd in de app. Niet op het clubscherm en zonder kijkerslink, tot je Live delen aanzet."
+          }
+        }
+      }
+    },
+    "Tegenstander fluit en vult in:": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opponent referees and fills in:"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tegenstander fluit en vult in:"
+          }
+        }
+      }
+    },
+    "LOPENDE TEAMWEDSTRIJDEN": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TEAM MATCHES IN PROGRESS"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LOPENDE TEAMWEDSTRIJDEN"
+          }
+        }
+      }
+    },
+    "Meedoen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meedoen"
+          }
+        }
+      }
+    },
+    "%@ heeft een teamwedstrijd aangemaakt": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ started a team match"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ heeft een teamwedstrijd aangemaakt"
+          }
+        }
+      }
+    },
+    "%@ houdt deze wedstrijd bij": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is keeping this match"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ houdt deze wedstrijd bij"
+          }
+        }
+      }
+    },
+    "%@. Doe mee en zet je eigen partij erop.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Join and put your own match on it."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Doe mee en zet je eigen partij erop."
+          }
+        }
+      }
+    },
+    "%@. Kijk mee.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Watch along."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Kijk mee."
+          }
+        }
+      }
+    },
+    "%@. Kijk mee en zet de partijen erop die jullie fluiten (%@).": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Watch along and put on the matches your team referees (%@)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Kijk mee en zet de partijen erop die jullie fluiten (%@)."
+          }
+        }
+      }
+    },
+    "%@ had deze teamwedstrijd al aangemaakt: je doet mee met die.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ had already started this team match: you joined it."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ had deze teamwedstrijd al aangemaakt: je doet mee met die."
+          }
+        }
+      }
+    },
+    "Een wedstrijd uit het programma zien teamgenoten met een account vanzelf, en de tegenstander kijkt mee en vult in wat hij fluit. Niet op het clubscherm: dat doe je later met Live delen. Alleen teamnamen, voornamen en de stand gaan naar de server.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teammates with an account see a match from the schedule by themselves, and the opponent watches along and fills in what they referee. Not on the club screen: you do that later with Share live. Only team names, first names and the score go to the server."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een wedstrijd uit het programma zien teamgenoten met een account vanzelf, en de tegenstander kijkt mee en vult in wat hij fluit. Niet op het clubscherm: dat doe je later met Live delen. Alleen teamnamen, voornamen en de stand gaan naar de server."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

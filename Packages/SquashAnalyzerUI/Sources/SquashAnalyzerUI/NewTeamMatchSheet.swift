@@ -17,6 +17,16 @@ struct NewTeamMatchSheet: View {
     /// "Deel met mijn team": on unless switched off
     @State private var shareWithTeam = true
 
+    /// What sharing does. 4.0 with an account: a match from the programme is
+    /// visible for the team and the opponent, not public (docs/voorstel-teamwedstrijd-vinden-4.0.md)
+    private var shareText: String {
+        if !shareWithTeam { return loc("De teamwedstrijd blijft alleen op deze telefoon. Je kunt hem later nog delen.") }
+        if Features.shared.playerAccount && PlayerAccount.shared.isSignedIn && team != nil {
+            return loc("Een wedstrijd uit het programma zien teamgenoten met een account vanzelf, en de tegenstander kijkt mee en vult in wat hij fluit. Niet op het clubscherm: dat doe je later met Live delen. Alleen teamnamen, voornamen en de stand gaan naar de server.")
+        }
+        return loc("Teamgenoten zetten hun eigen partij erin en supporters kijken mee. Alleen teamnamen, voornamen en de stand gaan naar de server; 2 uur na de laatste update wordt alles gewist.")
+    }
+
     /// Matches of Mijn team without a team match yet, nearest to today first
     private var openFixtures: [LeagueFixture] {
         guard let team else { return [] }
@@ -41,9 +51,7 @@ struct NewTeamMatchSheet: View {
                                     .foregroundColor(SharedColors.textPrimary)
                             }
                             .tint(SharedColors.accent)
-                            Text(shareWithTeam
-                                 ? loc("Teamgenoten zetten hun eigen partij erin en supporters kijken mee. Alleen teamnamen, voornamen en de stand gaan naar de server; 2 uur na de laatste update wordt alles gewist.")
-                                 : loc("De teamwedstrijd blijft alleen op deze telefoon. Je kunt hem later nog delen."))
+                            Text(shareText)
                                 .font(SharedFonts.system(11))
                                 .foregroundColor(SharedColors.textMuted)
                                 .fixedSize(horizontal: false, vertical: true)

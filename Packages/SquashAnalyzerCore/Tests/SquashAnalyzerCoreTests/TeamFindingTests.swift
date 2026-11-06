@@ -75,7 +75,7 @@ final class TeamFindingTests: XCTestCase {
     private var fixture: String { "/league/\(league)/team-match/9001" }
     private var stored: String { "/league/\(league.uppercased())/team-match/9001" }
 
-    private func store() -> JSONFileTeamMatchStore {
+    @MainActor private func store() -> JSONFileTeamMatchStore {
         JSONFileTeamMatchStore(directory: FileManager.default.temporaryDirectory.appendingPathComponent("finding-\(UUID().uuidString)"))
     }
 

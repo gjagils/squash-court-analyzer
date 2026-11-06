@@ -4,9 +4,10 @@ Stand 6 november 2026. Voorstel, nog niets van gebouwd. Vraag van Gerd-Jan:
 "Als ik een competitiewedstrijd aanmaak, kunnen teamleden die SquashAnalyzer
 gebruiken die dan zien als ze dezelfde wedstrijd starten?" Nu niet, ook niet
 in 4.0 zoals het gepland stond. Dit voorstel maakt het mogelijk voor
-teamleden met een spelersaccount, en laat de tegenstander meekijken.
+teamleden met een spelersaccount. De tegenstander kan meekijken en de
+partijen die hij fluit zelf bijhouden.
 
-Gebaseerd op de code van `main` op 6 november (commit `0418679`).
+Gebaseerd op de code van `main` op 6 november (commit `1bd7933`).
 
 ## Besloten (Gerd-Jan, 6 november 2026)
 
@@ -16,6 +17,12 @@ Gebaseerd op de code van `main` op 6 november (commit `0418679`).
    maar **niet op het clubscherm**. Live delen blijft de stap naar buiten:
    clubscherm en kijkerslink voor supporters.
 3. **Zichtbaar tot en met de dag na de speeldag.**
+4. **De tegenstander kijkt standaard mee**, met dezelfde ene schakelaar.
+5. **De tegenstander mag de partijen schrijven die hij fluit.** Standaard
+   fluit het thuisteam wedstrijd 1 en 3 van de avond (posities E4 en E1) en
+   het uitteam wedstrijd 2 en 4 (posities E2 en E3). De tegenstander schrijft
+   dus E2 en E3 als het bijhoudende team thuis speelt, en E1 en E4 als het uit
+   speelt. Alleen die partijen; de andere kan hij alleen bekijken.
 
 ## Hoe het nu werkt
 
@@ -56,8 +63,8 @@ Hij heeft een account. Onder het aanmaken staat één regel met een schakelaar,
 standaard aan:
 
 > **Zichtbaar voor mijn team.** Teamleden met de app en een account zien deze
-> wedstrijd en kunnen hun partij bijhouden. De tegenstander kan meekijken.
-> Niet op het clubscherm.
+> wedstrijd en kunnen hun partij bijhouden. De tegenstander kan meekijken en
+> de partijen bijhouden die hij fluit. Niet op het clubscherm.
 
 Live delen (clubscherm en kijkerslink) staat los daarvan en blijft uit tot hij
 het aanzet.
@@ -78,12 +85,20 @@ nieuwe: "Kees heeft deze wedstrijd al aangemaakt. Meedoen?" Er komt geen
 tweede teamwedstrijd.
 
 **Lisa, van Bevo 3, de tegenstander**, heeft ook een account en Mijn team op
-Bevo 3. Op de speeldag ziet zij: **"Squash City 2 houdt deze wedstrijd bij.
-Meekijken?"** Ze opent de teampagina in de app (alleen kijken, zoals de
-kijkerslink). Tikt ze toch op Nieuwe teamwedstrijd, dan vraagt de app
-"Meekijken bij Squash City 2, of een eigen teamwedstrijd maken?". Een eigen
-teamwedstrijd blijft mogelijk; die is dan op dezelfde manier vindbaar voor
-haar team.
+Bevo 3. Squash City 2 speelt thuis, dus Bevo 3 fluit E2 en E3. Op de speeldag
+ziet zij: **"Squash City 2 houdt deze wedstrijd bij. Meedoen? Jullie fluiten
+E2 en E3."**
+
+1. Ze tikt op *Meedoen*. De teamwedstrijd komt in haar Competitie, gezien van
+   Bevo 3 (haar `ownSide` is uit). Alle vier de partijen ziet ze bijwerken.
+2. Bij E2 en E3 staat *Fluiten*: dat start de scheidsrechtermodus met de namen
+   al ingevuld (thuisspeler is Speler 1, zoals nu bij `TeamTarget`). De stand
+   gaat punt voor punt naar de teampagina, zoals bij een teamlid.
+3. Bij E1 en E4 staat geen knop: die fluit Squash City 2.
+
+Tikt Lisa toch op Nieuwe teamwedstrijd, dan vraagt de app "Meedoen met
+Squash City 2, of een eigen teamwedstrijd maken?". Een eigen teamwedstrijd
+blijft mogelijk; die is dan op dezelfde manier vindbaar voor haar team.
 
 **Zonder account of zonder Mijn team** werkt alles zoals nu: met de
 uitnodiging. Die knop blijft er, ook voor wie wel een account heeft.
@@ -108,6 +123,26 @@ niet op het clubscherm. Daarvoor krijgt de kop één veld:
   (`teamOnly`), zodat "live teamwedstrijden" in het weekrapport blijft
   betekenen wat het nu betekent.
 
+**Een sleutel voor de tegenstander, alleen voor zijn partijen.** Nu mag
+iedereen met de schrijfsleutel elke partij schrijven (`setPartij` in
+`team.js` controleert alleen de sleutel). Daarom krijgt een `TeamSession` een
+derde sleutel:
+
+- `POST /api/team` maakt naast `writeKey` en `ownerKey` een `refereeKey` en
+  neemt `refereeSlots` over uit het verzoek (de app rekent die uit:
+  bijhoudend team thuis → `[2, 3]`, uit → `[1, 4]`). Een oude app stuurt het
+  veld niet mee: dan geen tegenstandersleutel, zoals nu.
+- `setPartij` en `setPhotos` accepteren de `refereeKey` alleen voor een slot
+  in `refereeSlots`; anders 401.
+- `GET /api/team/:id/verify` geeft voor die sleutel `{ role: "referee",
+  slots: [2, 3] }`, zodat de app weet waar hij *Fluiten* toont.
+- `PUT /api/team/:id/referee` `{ slots }` (alleen de eigenaarssleutel) past de
+  partijen aan als het op de avond anders gaat. In de app: bij een partij
+  "Wie fluit: wij / tegenstander". `{ slots: [] }` zet het fluiten door de
+  tegenstander uit.
+- De sleutel en de slots staan in de opslag van de sessie, niet in de kop:
+  kijkers zien ze niet.
+
 De teampagina `/t/<id>` bestaat voor zo'n sessie wel. Het id is willekeurig en
 wordt alleen aan het eigen team en de tegenstander gegeven, net als nu aan wie
 de kijkerslink krijgt.
@@ -124,6 +159,7 @@ CREATE TABLE team_lives (
   team_name TEXT NOT NULL,       -- shown to the opponent ("Squash City 2 houdt deze wedstrijd bij")
   live_id TEXT NOT NULL,         -- TeamSession id on the live Worker
   write_key TEXT NOT NULL,       -- the key of the invitation (never the owner key)
+  referee_key TEXT,              -- for the opponent: only the partijen they referee
   starter_id TEXT NOT NULL,      -- players.id of whoever registered it
   starter_name TEXT NOT NULL,
   created_at INTEGER NOT NULL,
@@ -137,8 +173,8 @@ Drie routes, alleen met een account:
 
 | Route | Wat |
 |---|---|
-| `GET /api/v1/me/team/lives?fixtures=<f1>,<f2>` | **Eigen team** (`team_key` van de beller): alle lopende rijen, met `liveId`, `writeKey`, `starterName`. **Andere teams**: alleen rijen voor de gevraagde wedstrijden (de app stuurt de wedstrijden van vandaag uit zijn eigen programma), met `liveId` en `teamName`, **zonder schrijfsleutel**. Verlopen rijen telt hij niet mee |
-| `PUT /api/v1/me/team/lives` `{ fixture, teamName, liveId, writeKey, replaces? }` | Aanmelden voor het eigen team. Bestaat er al een rij voor deze wedstrijd en dit team, dan geeft hij die terug (409) en verandert hij niets. `replaces` met het `liveId` van de bestaande rij vervangt die: voor als de app zag dat die sessie weg is |
+| `GET /api/v1/me/team/lives?fixtures=<f1>,<f2>` | **Eigen team** (`team_key` van de beller): alle lopende rijen, met `liveId`, `writeKey`, `starterName`. **Andere teams**: alleen rijen voor de gevraagde wedstrijden (de app stuurt de wedstrijden van vandaag uit zijn eigen programma), met `liveId`, `teamName` en `refereeKey`, **nooit de schrijfsleutel**. De `refereeKey` alleen als de league in de wedstrijdlink dezelfde is als die in de teamsleutel van de beller (`/league/<uuid>/…`). Verlopen rijen telt hij niet mee |
+| `PUT /api/v1/me/team/lives` `{ fixture, teamName, liveId, writeKey, refereeKey?, replaces? }` | Aanmelden voor het eigen team. Bestaat er al een rij voor deze wedstrijd en dit team, dan geeft hij die terug (409) en verandert hij niets. `replaces` met het `liveId` van de bestaande rij vervangt die: voor als de app zag dat die sessie weg is |
 | `DELETE /api/v1/me/team/lives/:fixture` | Afmelden (schakelaar uit, teamwedstrijd verwijderd), alleen door wie hem aanmeldde |
 
 De teamsleutel komt altijd uit het account van de beller, nooit uit het
@@ -174,15 +210,25 @@ sessie al weg is, ziet de app aan een 404 en vervangt hij met `replaces`.
 - **Meedoen** (eigen team): met `liveId` en `writeKey` maakt de app dezelfde
   `TeamInvite` als uit een link en gebruikt dezelfde code. De teamkant
   (thuis/uit) volgt uit Mijn team.
-- **Meekijken** (tegenstander): opent de teampagina, zoals een kijkerslink.
-  Lisa kan ook de lockscreen-volger aanzetten (`/followers`), zoals nu.
+- **Meedoen als tegenstander**: met `liveId` en `refereeKey` maakt de app een
+  `TeamInvite` met de rol `referee` en bewaart een teamwedstrijd met de eigen
+  kant (uit Mijn team). Het teamwedstrijdscherm haalt alle partijen op
+  (`mergeLive`), maar stuurt alleen de slots uit `verify`; de andere zijn
+  alleen-lezen. *Fluiten* bij een eigen slot bindt een scheidsrechterwedstrijd
+  met `TeamTarget.bind`, zoals nu. De server beperkt de slots, niet de modus:
+  de app biedt bij die partijen alleen de scheidsrechtermodus aan.
+- **Alleen meekijken** (tegenstander zonder `refereeKey`, of `slots: []`):
+  opent de teampagina, zoals een kijkerslink. De lockscreen-volger
+  (`/followers`) werkt zoals nu.
 - **Schakelaar uit of teamwedstrijd verwijderd**: `DELETE` bij de
   account-Worker. Staat Live delen ook uit, dan ook `DELETE /api/team/:id`.
 
-### Waarom de schrijfsleutel in de database mag
+### Waarom de sleutels in de database mogen
 
-Het is dezelfde sleutel die nu al in de groepsapp gaat. De server geeft hem
-alleen aan een account met dezelfde teamsleutel, nooit aan de tegenstander.
+De schrijfsleutel is dezelfde sleutel die nu al in de groepsapp gaat. De
+server geeft hem alleen aan een account met dezelfde teamsleutel, nooit aan de
+tegenstander. De tegenstandersleutel kan alleen de gefloten partijen
+schrijven.
 De eigenaarssleutel (namen wijzigen, clubscherm, stoppen) komt nooit op de
 server. De rij verdwijnt na de dag na de speeldag.
 
@@ -197,11 +243,16 @@ Dit moet in de documentatie en de privacytekst kloppen (AGENTS.md punt 7):
   naam in je team wachten (`open_matches` met `team:`), en vergelijkbaar met
   een uitnodiging die in een groepsapp rondgaat. Een echte controle kan pas
   met een koppeling met toernooi.nl (T8, na 4.0).
-- **Meekijken als tegenstander is niet gecontroleerd.** Wie de link van een
+- **Tegenstander zijn is niet gecontroleerd.** Wie de link van een
   SBN-wedstrijd kent (die is openbaar), kan met een account vragen of er een
-  teamwedstrijd voor bestaat en die bekijken. Hij krijgt alleen wat de
-  teampagina toont: teamnamen, voornamen en de stand, geen schrijfsleutel.
-- **Iedereen met de schrijfsleutel kan elke partij schrijven**, zoals nu.
+  teamwedstrijd voor bestaat en die bekijken. Zet hij Mijn team op een team
+  in dezelfde league, dan krijgt hij ook de tegenstandersleutel en kan hij de
+  twee gefloten partijen schrijven. De schade blijft beperkt: twee partijen,
+  één dag, en het bijhoudende team ziet het en kan het fluiten uitzetten
+  (`slots: []`).
+- **Iedereen met de schrijfsleutel kan elke partij schrijven**, zoals nu, ook
+  een partij die de tegenstander fluit. Schrijven beide kanten dezelfde
+  partij, dan geldt de laatste, zoals nu tussen twee teamleden.
 - **Namen en stand gaan naar de server zonder Live delen.** Dat is nieuw: nu
   gebeurt dat alleen als de maker Live delen aanzet. De regel bij de
   schakelaar zegt het, en de privacypagina moet het noemen.
@@ -233,9 +284,10 @@ Dit moet in de documentatie en de privacytekst kloppen (AGENTS.md punt 7):
 | Onderdeel | Omvang |
 |---|---|
 | Live-Worker: `clubScreen` in de kop, overslaan in `reportToClubs`/`leaveClubs`, apart tellen, tests (geen clubscherm, later aan, weer uit, oude app zonder veld) | S |
+| Live-Worker: `refereeKey` en `refereeSlots`, controle in `setPartij`/`setPhotos`, rol in `verify`, `PUT …/referee`, tests (eigen slot mag, ander slot 401, slots aanpassen, oude app zonder veld) | S |
 | Account-Worker: migratie `team_lives` en drie routes, met tests (aanmelden, gelijktijdig, vervangen, ander team krijgt geen sleutel, tegenstander alleen voor gevraagde wedstrijd, verlopen) | S |
 | `AccountAPI` en `TeamLive`: de aanroepen; Core-logica "aanmaken of meedoen" met tests (bestaande rij werkt, rij is weg, 409) | M |
-| UI: schakelaar bij aanmaken, Live delen op een bestaande sessie, kaarten "Meedoen?" en "Meekijken?" op Competitie en Mijn team | M |
+| UI: schakelaar bij aanmaken, Live delen op een bestaande sessie, kaarten "Meedoen?" op Competitie en Mijn team, teamwedstrijd als tegenstander (alleen-lezen partijen, *Fluiten*), "Wie fluit" bij een partij | M–L |
 | Handleiding, privacypagina, `ARCHITECTURE.md`, testdraaiboek 4.0 | S |
 
 Achter dezelfde vlag als het account (`Features.shared.playerAccount`). De
@@ -255,8 +307,11 @@ Met de testomgeving uit `docs/overdracht-4.0-spelersaccount.md`
 3. B tikt zelf op Nieuwe teamwedstrijd voor dezelfde wedstrijd: krijgt
    "Meedoen?", er komt geen tweede teamwedstrijd.
 4. A en B maken tegelijk aan: één teamwedstrijd.
-5. Een account van de tegenstander ziet "Meekijken?", opent de teampagina en
-   kan niet schrijven (de app heeft geen sleutel; de server geeft hem niet).
+5. Een account van de tegenstander (bijhoudend team thuis) doet mee, fluit
+   E2: de stand komt op de teampagina. Een PUT met zijn sleutel op E1 geeft
+   401. A zet E2 bij "Wie fluit" op "wij": de tegenstander kan E2 niet meer
+   schrijven.
+5a. Hetzelfde met het bijhoudende team uit: de tegenstander fluit E1 en E4.
 6. Een account van een ander team, zonder deze wedstrijd in zijn programma,
    ziet niets.
 7. A zet de schakelaar uit: de kaart verdwijnt bij B en de tegenstander.
@@ -264,9 +319,9 @@ Met de testomgeving uit `docs/overdracht-4.0-spelersaccount.md`
 
 ## Open vragen voor Gerd-Jan
 
-1. **Tegenstander standaard laten meekijken?** Voorstel: ja, mee met de ene
-   schakelaar "Zichtbaar voor mijn team". Of een tweede schakelaar
-   "Tegenstander mag meekijken"?
-2. **Mag de tegenstander ook schrijven?** Voorstel: nee. Zij houden hun kant
-   bij in hun eigen teamwedstrijd, of vragen de uitnodiging. Twee teams in één
-   sessie maakt "wie is onze speler" en de eigenaarssleutel ingewikkeld.
+1. **Klopt de standaardverdeling?** Gelezen als: thuis fluit E4 en E1
+   (wedstrijd 1 en 3), uit fluit E2 en E3 (wedstrijd 2 en 4). De speelvolgorde
+   zelf (`TeamPartij.playOrder`) vult de app hiermee niet in.
+2. **Teamleden ook beperken?** Nu kan elk teamlid elke partij schrijven, ook
+   die de tegenstander fluit. Voorstel: zo laten, zodat een teamlid kan
+   invallen als de tegenstander geen app heeft.

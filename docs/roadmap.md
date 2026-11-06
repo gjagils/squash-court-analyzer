@@ -38,6 +38,7 @@ met een geheime link ([voorstel](voorstel-clubscherm.md)). **Gebouwd 3 november 
 | Punt | Bron |
 |---|---|
 | Spelersaccount met centrale badges, kaart, vorm en trend | [voorstel](voorstel-spelersaccount-4.0.md) |
+| Teamwedstrijd vinden zonder uitnodiging: teamleden met een account zien een lopende live-teamwedstrijd van hun team en doen mee (gekozen op 6 november 2026) | [voorstel](voorstel-teamwedstrijd-vinden-4.0.md) |
 | Seizoensoverzicht per teamlid | T2 |
 | Badgecategorie Teamspeler | T7 |
 | Melding als een teamgenoot een partij invult tijdens een live teamwedstrijd (verplaatst van 3.3 op 4 november 2026) | T6 |

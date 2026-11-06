@@ -255,7 +255,7 @@ public struct CoachScoringView: View {
     @State private var editingNames = false
     /// 6 or 9 zones, a setting (Instellingen)
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
-    /// Uitgebreid or Eenvoudig (Instellingen → Coachen); a match keeps its own once it has points
+    /// Uitgebreid or Eenvoudig for the next point: the switch on this screen and Instellingen → Coachen
     @AppStorage(CoachInputMode.storageKey) private var inputSetting = CoachInputMode.detailed.rawValue
     /// "Uit de lucht" for the point being entered; off again after every point
     @State private var volley = false
@@ -285,6 +285,8 @@ public struct CoachScoringView: View {
         FontScaleCap { screen }
             // A match played for a partij of a live team match shows on the team page at once, not after the first point
             .task(id: match.id) {
+                // A saved match goes on the way it was left; a new one takes the setting
+                if let mode = match.lastInputMode { inputSetting = mode.rawValue }
                 LiveShareSync.started(matchId: match.id, snapshot: match.liveSnapshot(),
                                       photos: { [photo(Player.player1), photo(Player.player2)] })
             }
@@ -541,6 +543,8 @@ public struct CoachScoringView: View {
                     lastPointsPanel
                 }
                 Spacer(minLength: 0)
+                // Only between points, so a point is never half one way and half the other
+                inputSwitch
             }
             .padding(.horizontal, 24)
         case .selectPointType:
@@ -786,6 +790,34 @@ public struct CoachScoringView: View {
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.line(0.12), lineWidth: 1))
     }
 
+    /// Uitgebreid or Eenvoudig for the next point (Gerd-Jan, 7 November 2026:
+    /// the setting alone was too hidden). Also changes Instellingen → Coachen.
+    private var inputSwitch: some View {
+        HStack(spacing: 8) {
+            Text("Invoer", bundle: textBundle)
+                .font(SharedFonts.system(12, weight: .medium, design: .rounded))
+                .foregroundColor(SharedColors.textSecondary)
+                .lineLimit(1)
+            Spacer(minLength: 4)
+            inputOption(CoachInputMode.detailed)
+            inputOption(CoachInputMode.simple)
+        }
+    }
+
+    private func inputOption(_ mode: CoachInputMode) -> some View {
+        let selected = CoachInputMode.from(stored: inputSetting) == mode
+        return Button { inputSetting = mode.rawValue } label: {
+            Text(mode.title)
+                .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
+                .foregroundColor(selected ? SharedColors.accent : SharedColors.textSecondary)
+                .lineLimit(1)
+                .padding(EdgeInsets(top: 7, leading: 12, bottom: 7, trailing: 12))
+                .background(selected ? SharedColors.accent.opacity(0.12) : SharedColors.tint(0.04))
+                .clipShape(RoundedRectangle(cornerRadius: 9))
+        }
+        .buttonStyle(.plain)
+    }
+
     /// "Wie vraagt de let?", as iOS' LetSelectorOverlay: tapping beside it cancels
     private var letOverlay: some View {
         ZStack {
@@ -966,7 +998,7 @@ public struct CoachScoringView: View {
             } else {
                 game.selectPlayer(player)
                 // Eenvoudig: only who and where, so straight on to the court
-                if match.inputMode(setting: CoachInputMode.from(stored: inputSetting)) == CoachInputMode.simple {
+                if CoachInputMode.from(stored: inputSetting) == CoachInputMode.simple {
                     game.selectPointType(PointType.rally)
                 }
             }

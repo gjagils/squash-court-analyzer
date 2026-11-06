@@ -10,6 +10,23 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.2 build 2)
 
+- **Tegenstanderteam ook als je met een link meedoet (7 november 2026):** de spelers van de tegenstander kwamen alleen
+  op de telefoon die de teamwedstrijd uit het programma maakte; de link geeft de SBN-wedstrijd niet mee, dus wie
+  meedeed zag ze niet. `LeagueOpponent.link(for:in:)` zoekt de tegenstander nu ook op teamnaam (ook voor wie al
+  eerder meedeed), en `TeamMatch.adoptFixture(from:)` geeft de kopie de wedstrijd uit het programma van Mijn team:
+  daarmee werkt ook *Haal op van SBN*, en biedt de app die wedstrijd niet meer aan alsof hij nog geen teamwedstrijd
+  heeft. Zonder Mijn team op de telefoon kent de app de poule niet en blijven de namen leeg. Getest in Core; nog
+  niet op twee telefoons geprobeerd.
+- **Uitgebreid of Eenvoudig wisselen tijdens de wedstrijd (7 november 2026, vraag Gerd-Jan):** onder aan het coachscherm
+  staat tussen de punten door **Invoer: Uitgebreid · Eenvoudig**; niet tijdens het invoeren van een punt. Het geldt
+  vanaf het volgende punt en is dezelfde instelling als Instellingen → Coachen, dus de volgende wedstrijd begint zo.
+  Een opgeslagen wedstrijd gaat verder zoals zijn laatste punt is ingevoerd (`Match.lastInputMode`). Dit vervangt "een
+  wedstrijd houdt de manier waarop hij begon". De analyse kijkt nu per game (`Game.isSimpleInput`): een game zonder
+  eenvoudige punten houdt de volledige analyse, een gemengde game toont het eenvoudige overzicht met "Deels eenvoudig
+  gecoacht". Badges: een wedstrijd met één eenvoudig punt telt niet mee voor badges die slagen of fouten nodig hebben
+  (`recordsPointTypes`), zoals een eenvoudige wedstrijd nu al. **Bij de build:** de zin "Een wedstrijd houdt de manier…" in
+  `website/handleiding/iphone.html` en `android.html` vervangen.
+
 - **4.0 teamwedstrijd vinden zonder uitnodiging (6 november 2026, achter de vlag; keuzes Gerd-Jan):** een nieuwe
   teamwedstrijd uit het programma van Mijn team is met een account vanzelf zichtbaar voor teamgenoten met een
   account en voor de tegenstander, maar staat niet op het clubscherm en heeft nog geen kijkerslink. Dat komt pas

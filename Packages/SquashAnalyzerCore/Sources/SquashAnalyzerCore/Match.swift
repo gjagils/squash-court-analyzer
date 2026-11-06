@@ -282,19 +282,23 @@ public class Match: Identifiable {
         games.flatMap { $0.points }
     }
 
-    /// Entered with simple coaching (only who and where): a match keeps the
-    /// way it was started, also when the setting changes halfway
+    /// Some points were entered with simple coaching (only who and where), so
+    /// the match cannot vouch for its winners and errors (badges). The coach
+    /// can switch during a match; the analysis looks per game (`Game.isSimpleInput`).
     public var isSimpleInput: Bool {
         for point in allPoints where point.pointType == PointType.rally { return true }
         return false
     }
 
-    /// The input for the next point: the match's own once it has points
-    /// (anything but a simple point makes it detailed), else the setting
-    public func inputMode(setting: CoachInputMode) -> CoachInputMode {
-        if isSimpleInput { return CoachInputMode.simple }
-        if !allPoints.isEmpty { return CoachInputMode.detailed }
-        return setting
+    /// How the last point was entered: opening a saved match goes on that way.
+    /// Nil without points. A stroke says nothing: it comes from the let call
+    /// in both modes.
+    public var lastInputMode: CoachInputMode? {
+        var mode: CoachInputMode? = nil
+        for point in allPoints where point.pointType != PointType.stroke {
+            mode = point.pointType == PointType.rally ? CoachInputMode.simple : CoachInputMode.detailed
+        }
+        return mode
     }
 
     /// Total match duration (sum of all rally durations)

@@ -45,18 +45,35 @@ final class SimpleCoachTests: XCTestCase {
         XCTAssertEqual(profile.errors.count(CourtRow.front), 0)
     }
 
-    func testMatchKeepsItsMode() {
+    func testASavedMatchGoesOnTheWayItsLastPointWasEntered() {
         let match = Match()
         match.setupMatch(player1: "Bob", player2: "Wim", startingServer: Player.player1)
-        XCTAssertEqual(match.inputMode(setting: CoachInputMode.simple), CoachInputMode.simple, "no points yet: the setting")
+        XCTAssertNil(match.lastInputMode, "no points yet: the setting decides")
         match.currentGame.addPoint(to: Player.player1, pointType: PointType.rally, at: CourtZone.frontLeft, with: nil)
-        XCTAssertTrue(match.isSimpleInput)
-        XCTAssertEqual(match.inputMode(setting: CoachInputMode.detailed), CoachInputMode.simple, "a simple match stays simple")
+        XCTAssertEqual(match.lastInputMode, CoachInputMode.simple)
+        match.currentGame.addPoint(to: Player.player2, pointType: PointType.stroke, at: nil, with: nil)
+        XCTAssertEqual(match.lastInputMode, CoachInputMode.simple, "a stroke comes from the let call in both modes")
+        match.currentGame.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.frontLeft, with: ShotType.drop)
+        XCTAssertEqual(match.lastInputMode, CoachInputMode.detailed, "switched during the match")
+    }
 
-        let detailed = Match()
-        detailed.setupMatch(player1: "Bob", player2: "Wim", startingServer: Player.player1)
-        detailed.currentGame.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.frontLeft, with: ShotType.drop)
-        XCTAssertEqual(detailed.inputMode(setting: CoachInputMode.simple), CoachInputMode.detailed, "a detailed match stays detailed")
+    func testSwitchingDuringAMatchIsSeenPerGame() {
+        let match = Match()
+        match.setupMatch(player1: "Bob", player2: "Wim", startingServer: Player.player1)
+        let game = match.currentGame
+        game.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.frontLeft, with: ShotType.drop)
+        XCTAssertFalse(game.isSimpleInput)
+        XCTAssertFalse(game.isMixedInput)
+        game.addPoint(to: Player.player1, pointType: PointType.rally, at: CourtZone.frontLeft, with: nil)
+        XCTAssertTrue(game.isSimpleInput)
+        XCTAssertTrue(game.isMixedInput)
+        XCTAssertTrue(match.isSimpleInput, "the match no longer vouches for all its winners and errors")
+
+        let simple = Match()
+        simple.setupMatch(player1: "Bob", player2: "Wim", startingServer: Player.player1)
+        simple.currentGame.addPoint(to: Player.player1, pointType: PointType.rally, at: CourtZone.frontLeft, with: nil)
+        simple.currentGame.addPoint(to: Player.player2, pointType: PointType.stroke, at: nil, with: nil)
+        XCTAssertFalse(simple.currentGame.isMixedInput, "a stroke from the let call does not make it mixed")
     }
 
     func testNoErrorFreeBadgesWithoutErrors() {

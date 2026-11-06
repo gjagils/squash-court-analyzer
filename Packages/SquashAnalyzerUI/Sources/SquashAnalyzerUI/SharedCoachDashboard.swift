@@ -257,13 +257,17 @@ public struct SharedCoachDashboardView: View {
         loadingAI = false
     }
 
-    /// Entered with Eenvoudig coachen (only who and where)
-    private var simple: Bool { match.isSimpleInput }
+    /// This game has points from Eenvoudig coachen (only who and where). Per
+    /// game: the coach can switch during a match, and a detailed game keeps
+    /// its full analysis.
+    private var simple: Bool { game.isSimpleInput }
 
     private var simpleNote: some View {
         HStack(alignment: .top, spacing: 10) {
             AppSymbol("mappin", size: 14, color: SharedColors.accent)
-            Text("Eenvoudig gecoacht: per punt alleen wie en waar. Winners, fouten en slagen zijn niet bijgehouden; de zones laten zien waar punten gemaakt en verloren worden.", bundle: textBundle)
+            Text(game.isMixedInput
+                 ? loc("Deels eenvoudig gecoacht: niet van elk punt zijn winners, fouten en slagen bijgehouden. De zones laten zien waar punten gemaakt en verloren worden.")
+                 : loc("Eenvoudig gecoacht: per punt alleen wie en waar. Winners, fouten en slagen zijn niet bijgehouden; de zones laten zien waar punten gemaakt en verloren worden."))
                 .font(SharedFonts.system(12, weight: .medium, design: .rounded))
                 .foregroundColor(SharedColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)

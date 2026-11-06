@@ -586,7 +586,7 @@ public struct CoachInputModePicker: View {
             Text(CoachInputMode.from(stored: selection).explanation)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
-            Text("Een wedstrijd houdt de manier waarop hij begon.", bundle: textBundle)
+            Text("Wisselen kan ook tijdens een wedstrijd, onder aan het coachscherm.", bundle: textBundle)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
         }

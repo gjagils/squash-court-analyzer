@@ -3493,24 +3493,6 @@
         }
       }
     },
-    "Een wedstrijd houdt de manier waarop hij begon.": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A match keeps the way it started."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Een wedstrijd houdt de manier waarop hij begon."
-          }
-        }
-      }
-    },
     "Eenvoudig gecoacht: per punt alleen wie en waar. Winners, fouten en slagen zijn niet bijgehouden; de zones laten zien waar punten gemaakt en verloren worden.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -13533,6 +13515,60 @@
           "stringUnit": {
             "state": "translated",
             "value": "Een wedstrijd uit het programma zien teamgenoten met een account vanzelf, en de tegenstander kijkt mee en vult in wat hij fluit. Niet op het clubscherm: dat doe je later met Live delen. Alleen teamnamen, voornamen en de stand gaan naar de server."
+          }
+        }
+      }
+    },
+    "Wisselen kan ook tijdens een wedstrijd, onder aan het coachscherm.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can also switch during a match, at the bottom of the coach screen."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wisselen kan ook tijdens een wedstrijd, onder aan het coachscherm."
+          }
+        }
+      }
+    },
+    "Invoer": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entry"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invoer"
+          }
+        }
+      }
+    },
+    "Deels eenvoudig gecoacht: niet van elk punt zijn winners, fouten en slagen bijgehouden. De zones laten zien waar punten gemaakt en verloren worden.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partly simple coaching: winners, errors and shots were not kept for every point. The zones show where points are won and lost."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deels eenvoudig gecoacht: niet van elk punt zijn winners, fouten en slagen bijgehouden. De zones laten zien waar punten gemaakt en verloren worden."
           }
         }
       }

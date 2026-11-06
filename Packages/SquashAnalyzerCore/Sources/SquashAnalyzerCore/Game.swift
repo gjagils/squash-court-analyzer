@@ -208,6 +208,21 @@ public class Game: Identifiable {
         startedByFirstPoint = false
     }
 
+    /// Some points of this game have only who and where (Eenvoudig coachen):
+    /// the analysis then shows only what holds for every point
+    public var isSimpleInput: Bool {
+        for point in points where point.pointType == PointType.rally { return true }
+        return false
+    }
+
+    /// The coach switched during this game: simple points and detailed ones.
+    /// A stroke comes from the let call in both modes, so it does not count.
+    public var isMixedInput: Bool {
+        guard isSimpleInput else { return false }
+        for point in points where point.pointType != PointType.rally && point.pointType != PointType.stroke { return true }
+        return false
+    }
+
     /// Seconds of the rally under way, 0 before the start (`date` nil = now)
     public func rallySeconds(at date: Date? = nil) -> TimeInterval {
         guard startedAt != nil else { return 0.0 }

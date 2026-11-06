@@ -123,6 +123,33 @@ final class LeagueLookupTests: XCTestCase {
         XCTAssertNil(LeagueOpponent.link(for: joined(home: "Squash Delft 8", away: "Bevo 3"), in: team), "not Mijn team's match")
     }
 
+    func testTheHomeCardShowsTodaysTeamMatch() {
+        let day = 24.0 * 3600.0
+        let yesterday = joined(home: "A", away: "B", on: Date().addingTimeInterval(-2.0 * day))
+        let tomorrow = joined(home: "C", away: "D", on: Date().addingTimeInterval(2.0 * day))
+        XCTAssertNil(TeamMatchSupport.homeMatch(in: [yesterday, tomorrow]), "an ordinary day")
+
+        let plain = joined(home: "E", away: "F")
+        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [yesterday, plain, tomorrow])?.home, "E")
+
+        var live = joined(home: "G", away: "H")
+        live.liveId = "abc"
+        live.liveKey = "key"
+        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [plain, live])?.home, "G", "a live one first")
+
+        var decided = joined(home: "I", away: "J")
+        var partijen: [TeamPartij] = []
+        for slot in 1...4 {
+            var partij = TeamPartij(slot: slot)
+            for _ in 0..<partij.gamesToWin { partij.games.append(TeamGame(own: 11, their: 5)) }
+            partijen.append(partij)
+        }
+        decided.partijen = partijen
+        XCTAssertTrue(decided.isComplete)
+        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [decided, plain])?.home, "E", "one still under way first")
+        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [decided])?.home, "I", "the result stays until the end of the day")
+    }
+
     func testAJoinedMatchTakesItsFixtureFromTheProgramme() {
         let team = snapshot()
         var match = joined(home: "squash delft 8", away: "All Inn Squash 8")

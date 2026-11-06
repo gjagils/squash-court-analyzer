@@ -166,32 +166,23 @@ public struct SharedTeamMatchesView: View {
                     }
                     if isLoading {
                         ProgressView().frame(maxWidth: .infinity)
-                    } else if matches.isEmpty {
+                    } else if overview.isEmpty {
                         Text("Nog geen teamwedstrijden.", bundle: textBundle)
                             .font(SharedFonts.system(14))
                             .foregroundColor(SharedColors.textMuted)
                             .frame(maxWidth: .infinity)
                             .padding(.top, 24)
                     } else {
-                        // Two groups when both exist: shared with the team (live) and only on this phone
-                        if !sharedMatches.isEmpty && !ownMatches.isEmpty {
-                            SectionHeader(loc("GEDEELD MET MIJN TEAM"))
+                        // Today and what comes, a line, then the past from old to recent.
+                        // With the whole programme, so every phone shows every match.
+                        ForEach(overview.coming) { entry in
+                            entryRow(entry)
                         }
-                        ForEach(sharedMatches) { match in
-                            TeamMatchCard(match: match) { shareOnOpen = false; opened = match }
+                        if !overview.coming.isEmpty && !overview.past.isEmpty {
+                            Divider().overlay(SharedColors.line(0.25))
                         }
-                        if !sharedMatches.isEmpty && !ownMatches.isEmpty {
-                            SectionHeader(loc("ALLEEN OP MIJN TELEFOON"))
-                        }
-                        ForEach(ownMatches) { match in
-                            TeamMatchCard(match: match) { shareOnOpen = false; opened = match }
-                        }
-                    }
-                    if !isLoading && !unloggedFixtures.isEmpty {
-                        // Played, result at SBN, not in the app: one tap brings it in (1 November 2026)
-                        SectionHeader(loc("GESPEELD, NOG NIET IN DE APP"))
-                        ForEach(unloggedFixtures) { fixture in
-                            unloggedRow(fixture)
+                        ForEach(overview.past) { entry in
+                            entryRow(entry)
                         }
                     }
                     if let message {
@@ -327,24 +318,67 @@ public struct SharedTeamMatchesView: View {
         joiningOffer = nil
     }
 
-    private var sharedMatches: [TeamMatch] { matches.filter { match in match.isLive } }
-    private var ownMatches: [TeamMatch] { matches.filter { match in !match.isLive } }
-
-    /// Fixtures of Mijn team that were played (SBN shows a score) and have no team match here
-    private var unloggedFixtures: [LeagueFixture] {
-        guard let team, tools.leagueFetcher != nil else { return [] }
-        var taken: [String] = []
-        for match in matches { if let id = match.fixtureId { taken.append(id) } }
-        let now = Date()
-        var result: [LeagueFixture] = []
-        for fixture in team.fixtures where fixture.date < now && fixture.score != nil && !taken.contains(fixture.id) {
-            result.append(fixture)
-        }
-        return result.sorted { a, b in a.date > b.date }
+    private var overview: CompetitionOverview {
+        CompetitionOverview.make(matches: matches, fixtures: team?.fixtures ?? [])
     }
 
-    /// Date, the two teams with the SBN score, and "Ophalen bij SBN"
-    private func unloggedRow(_ fixture: LeagueFixture) -> some View {
+    @ViewBuilder
+    private func entryRow(_ entry: CompetitionEntry) -> some View {
+        if let match = entry.match {
+            TeamMatchCard(match: match) { shareOnOpen = false; opened = match }
+        } else if let fixture = entry.fixture {
+            if fixture.score != nil {
+                playedRow(fixture)
+            } else {
+                openRow(fixture)
+            }
+        }
+    }
+
+    /// A match of the programme without a result and without a team match
+    /// here: a coming one starts through Nieuwe teamwedstrijd (with its share
+    /// choice), a past one has no result at SBN
+    private func openRow(_ fixture: LeagueFixture) -> some View {
+        let own = team?.name ?? ""
+        let coming = fixture.date >= Date() || Calendar.current.isDate(fixture.date, inSameDayAs: Date())
+        return Button { if coming { creating = true } } label: {
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(TeamMatchReport.dayText(fixture.date))
+                        .font(SharedFonts.system(11, weight: .medium, design: .rounded))
+                        .foregroundColor(SharedColors.textSecondary)
+                    fixtureTeam(fixture.home, own: TeamMatch.sameTeam(fixture.home, own))
+                    fixtureTeam(fixture.away, own: TeamMatch.sameTeam(fixture.away, own))
+                }
+                Spacer(minLength: 0)
+                if coming {
+                    AppSymbol("chevron.right", size: 12, color: SharedColors.textMuted)
+                } else {
+                    Text("Geen uitslag", bundle: textBundle)
+                        .font(SharedFonts.system(11))
+                        .foregroundColor(SharedColors.textMuted)
+                }
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(SharedColors.tint(0.05))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(SharedColors.line(0.10), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .disabled(!coming)
+    }
+
+    private func fixtureTeam(_ name: String, own: Bool) -> some View {
+        Text(name)
+            .font(SharedFonts.system(14, weight: own ? .bold : .regular, design: .rounded))
+            .foregroundColor(own ? SharedColors.accent : SharedColors.textPrimary)
+            .lineLimit(1)
+    }
+
+    /// Date, the two teams with the SBN score, and "Ophalen bij SBN" (played,
+    /// result at SBN, not in the app: one tap brings it in, 1 November 2026)
+    private func playedRow(_ fixture: LeagueFixture) -> some View {
         let own = team?.name ?? ""
         let atHome = TeamMatch.sameTeam(fixture.home, own)
         return VStack(alignment: .leading, spacing: 8) {
@@ -365,9 +399,11 @@ public struct SharedTeamMatchesView: View {
                     .lineLimit(1)
                 Spacer(minLength: 0)
             }
-            ActionButton(fetchingFixture == fixture.id ? loc("Even geduld…") : loc("Ophalen bij SBN"), icon: "arrow.down.circle",
-                         color: SharedColors.support, disabled: fetchingFixture != nil) {
-                Task { await importFromSBN(fixture) }
+            if tools.leagueFetcher != nil {
+                ActionButton(fetchingFixture == fixture.id ? loc("Even geduld…") : loc("Ophalen bij SBN"), icon: "arrow.down.circle",
+                             color: SharedColors.support, disabled: fetchingFixture != nil) {
+                    Task { await importFromSBN(fixture) }
+                }
             }
         }
         .padding(14)

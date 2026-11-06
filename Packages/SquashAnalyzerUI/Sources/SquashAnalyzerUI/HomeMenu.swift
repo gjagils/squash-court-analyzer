@@ -164,7 +164,18 @@ public struct HomeMenuTiles: View {
 /// Identical home team presentation for both native hosts; loading and navigation stay with the host.
 public struct HomeTeamSummary: View {
     private let snapshot: LeagueTeamSnapshot
-    public init(snapshot: LeagueTeamSnapshot) { self.snapshot = snapshot }
+    /// Today's team match on this phone: it takes the place of the next match
+    private let match: TeamMatch?
+    private let onOpen: () -> Void
+    private let onMatch: (TeamMatch) -> Void
+
+    public init(snapshot: LeagueTeamSnapshot, match: TeamMatch? = nil, onOpen: @escaping () -> Void,
+                onMatch: @escaping (TeamMatch) -> Void = { _ in }) {
+        self.snapshot = snapshot
+        self.match = match
+        self.onOpen = onOpen
+        self.onMatch = onMatch
+    }
 
     public var body: some View {
         // Since 1 November 2026 (Gerd-Jan; design "Mijn team-kaart varianten",
@@ -174,8 +185,39 @@ public struct HomeTeamSummary: View {
         // in the same badge, outlined. With the home screen on one page of a
         // regular iPhone; the three big numbers of 3.0 did not leave room for
         // the opponent.
+        // On the day of a team match the bar is that match (design A, Gerd-Jan,
+        // 7 November 2026): its own button to the team match, the rest to the team.
         let next = snapshot.nextFixture()
         VStack(spacing: 0) {
+            Button(action: onOpen) {
+                VStack(spacing: 0) {
+                    teamPart
+                    if match == nil, let next {
+                        fixtureRow(next)
+                            .padding(EdgeInsets(top: 10, leading: 14, bottom: 12, trailing: 14))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(SharedColors.accent.opacity(0.07))
+                    }
+                }
+                #if !SKIP
+                .contentShape(Rectangle())
+                #endif
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(loc("Mijn team: \(snapshot.name)"))
+            if let match {
+                HomeTeamMatchBar(match: match) { onMatch(match) }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        // A step lighter than the two tiles below (A3)
+        .background(SharedColors.brandCard)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.brandCardStroke, lineWidth: 1))
+        .foregroundColor(SharedColors.textPrimary)
+    }
+
+    private var teamPart: some View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("MIJN TEAM", bundle: textBundle).font(SharedFonts.system(11, weight: .semibold))
@@ -197,22 +239,10 @@ public struct HomeTeamSummary: View {
                 }
             }
             .padding(14)
-            // The next match in a tinted bar (variant 3d): the testers' and
-            // Gerd-Jan's choice on 1 November 2026; the variant under a line is gone
-            if let next {
-                fixtureRow(next)
-                    .padding(EdgeInsets(top: 10, leading: 14, bottom: 12, trailing: 14))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(SharedColors.accent.opacity(0.07))
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        // A step lighter than the two tiles below (A3)
-        .background(SharedColors.brandCard)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.brandCardStroke, lineWidth: 1))
-        .foregroundColor(SharedColors.textPrimary)
     }
+
+    // The next match in a tinted bar (variant 3d): the testers' and
+    // Gerd-Jan's choice on 1 November 2026; the variant under a line is gone
 
     /// The next match: date block, "Thuis ·" or "Uit ·" with the opponent, the
     /// last result against them, and their stand as an outlined badge
@@ -244,6 +274,78 @@ public struct HomeTeamSummary: View {
 
     private func number(_ value: Int?) -> String {
         value.map { String($0) } ?? "–"
+    }
+}
+
+/// Today's team match, seen from the own team: LIVE or Vandaag, home or away
+/// and the opponent, the games won by each, and the four partijen. A tap opens
+/// that team match, where a partij is refereed or coached.
+struct HomeTeamMatchBar: View {
+    let match: TeamMatch
+    let onOpen: () -> Void
+
+    var body: some View {
+        let score = match.score
+        return Button(action: onOpen) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    if match.isProbablyLive() {
+                        LivePill(text: "LIVE")
+                    } else {
+                        Text("Vandaag", bundle: textBundle)
+                            .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
+                            .foregroundColor(SharedColors.support)
+                    }
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Text("\(match.ownSide == TeamSide.home ? loc("Thuis") : loc("Uit")) ·")
+                            .font(SharedFonts.system(13))
+                            .foregroundColor(SharedColors.textSecondary)
+                        Text(match.opponentName)
+                            .font(SharedFonts.system(13, weight: .semibold))
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("\(score.ownGames)–\(score.theirGames)")
+                        .font(SharedFonts.system(18, weight: .bold, design: .rounded))
+                    AppSymbol("chevron.right", size: 12, color: SharedColors.textPrimary)
+                }
+                HStack(spacing: 6) {
+                    ForEach(0..<match.partijen.count, id: \.self) { index in
+                        partijChip(match.partijen[index])
+                    }
+                }
+            }
+            .padding(EdgeInsets(top: 10, leading: 14, bottom: 12, trailing: 14))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(SharedColors.support.opacity(0.12))
+            #if !SKIP
+            .contentShape(Rectangle())
+            #endif
+        }
+        .buttonStyle(.plain)
+        .foregroundColor(SharedColors.textPrimary)
+        .accessibilityLabel(match.title)
+    }
+
+    /// "E1 3-1", won in the support colour; "–" when nothing is entered yet
+    private func partijChip(_ partij: TeamPartij) -> some View {
+        let color: Color = partij.ownWon == true ? SharedColors.support
+            : partij.ownWon == false ? SharedColors.textSecondary
+            : partij.hasEntry ? SharedColors.textPrimary : SharedColors.textMuted
+        return HStack(spacing: 5) {
+            Text(partij.label)
+                .font(SharedFonts.system(12))
+                .foregroundColor(SharedColors.textSecondary)
+            Text(partij.hasEntry ? partij.standText : "–")
+                .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
+                .foregroundColor(color)
+        }
+        .lineLimit(1)
+        .frame(maxWidth: .infinity)
+        .frame(height: 28)
+        .background(SharedColors.tint(0.07))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
 
@@ -377,6 +479,8 @@ public struct AndroidHomeView: View {
     /// MainActivity supplies it); nil hides the row
     private let onLanguage: ((String) -> Void)?
     @State private var showingCompetition = false
+    /// Opened from the bar on the Mijn team card
+    @State private var openedTeamMatch: TeamMatch? = nil
     /// Wedstrijd volgen (live score op het vergrendelscherm), when the app set a presenter
     @State private var showingLiveFollow = false
 
@@ -456,6 +560,15 @@ public struct AndroidHomeView: View {
                                                   refereeStore: refereeMatchStore, photoStore: photoStore, filePicker: filePicker,
                                                   aiCoach: aiCoach, shareText: shareText, leagueFetcher: leagueTeamFetcher),
                             team: TeamMatchSupport.cachedTeam())
+                    }
+                }
+                .navigationDestination(isPresented: Binding(get: { openedTeamMatch != nil }, set: { if !$0 { openedTeamMatch = nil } })) {
+                    if let teamMatchStore, let match = openedTeamMatch {
+                        SharedTeamMatchView(match: match, store: teamMatchStore,
+                                            tools: TeamMatchTools(historyStore: historyStore, playerStore: playerStore, coachStore: matchStore,
+                                                                  refereeStore: refereeMatchStore, photoStore: photoStore, filePicker: filePicker,
+                                                                  aiCoach: aiCoach, shareText: shareText, leagueFetcher: leagueTeamFetcher),
+                                            team: TeamMatchSupport.cachedTeam()) { _ in }
                     }
                 }
         }
@@ -551,7 +664,10 @@ public struct AndroidHomeView: View {
                         SharedLeagueTeamCard(fetcher: leagueTeamFetcher, onTeam: { snapshot in
                             let store = playerStore
                             Task { _ = await TeamRosterSync.run(snapshot, store: store) }
-                        }, onSetup: { settingsOpensTeam = true; showingSettings = true }) { snapshot in
+                        }, onSetup: { settingsOpensTeam = true; showingSettings = true },
+                           teamMatches: teamMatchStore,
+                           matchesPaused: showingCompetition || openedTeamMatch != nil || showingCoach || showingReferee,
+                           onTeamMatch: { match in openedTeamMatch = match }) { snapshot in
                             team = snapshot
                             showingTeam = true
                         }

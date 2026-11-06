@@ -757,24 +757,6 @@
         }
       }
     },
-    "ALLEEN OP MIJN TELEFOON": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ONLY ON MY PHONE"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ALLEEN OP MIJN TELEFOON"
-          }
-        }
-      }
-    },
     "ALLES BEWAREN": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -3885,24 +3867,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "GEDEELD"
-          }
-        }
-      }
-    },
-    "GEDEELD MET MIJN TEAM": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SHARED WITH MY TEAM"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GEDEELD MET MIJN TEAM"
           }
         }
       }
@@ -13051,24 +13015,6 @@
         }
       }
     },
-    "GESPEELD, NOG NIET IN DE APP": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "PLAYED, NOT IN THE APP YET"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GESPEELD, NOG NIET IN DE APP"
-          }
-        }
-      }
-    },
     "Ophalen bij SBN": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -13569,6 +13515,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deels eenvoudig gecoacht: niet van elk punt zijn winners, fouten en slagen bijgehouden. De zones laten zien waar punten gemaakt en verloren worden."
+          }
+        }
+      }
+    },
+    "Vandaag": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vandaag"
+          }
+        }
+      }
+    },
+    "Geen uitslag": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No result"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen uitslag"
           }
         }
       }

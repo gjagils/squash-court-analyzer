@@ -251,6 +251,18 @@ public enum TeamMatchSupport {
         }
         return nil
     }
+
+    /// The team match the home card shows: one of today on this phone, made
+    /// here or joined. A live one first, then one still under way; a decided
+    /// one stays until the end of the day. Nil on an ordinary day.
+    public static func homeMatch(in all: [TeamMatch], now: Date = Date()) -> TeamMatch? {
+        let calendar = Calendar.current
+        var today: [TeamMatch] = []
+        for match in all where calendar.isDate(match.date, inSameDayAs: now) { today.append(match) }
+        for match in today where match.isLive && !match.isComplete { return match }
+        for match in today where !match.isComplete { return match }
+        return today.first
+    }
 }
 
 public extension TeamMatchSupport {

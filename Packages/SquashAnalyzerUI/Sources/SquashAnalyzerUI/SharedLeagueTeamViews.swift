@@ -160,8 +160,14 @@ public struct SharedLeagueTeamCard: View {
     let onTeam: ((LeagueTeamSnapshot) -> Void)?
     /// Opens Instellingen, for the prompt shown while no team link is saved; nil hides that button
     let onSetup: (() -> Void)?
+    /// Where today's team match comes from (nil: the card only shows the team)
+    let teamMatches: (any TeamMatchStore)?
+    /// A screen that changes team matches is open: wait, and read again after it closes
+    let matchesPaused: Bool
+    let onTeamMatch: (TeamMatch) -> Void
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
+    @State private var todayMatch: TeamMatch? = nil
     /// The prompt was closed with the cross: it stays away (Instellingen still has the field)
     @AppStorage("teamPromptDismissed") private var promptDismissed = false
     @State private var snapshot: LeagueTeamSnapshot?
@@ -170,19 +176,28 @@ public struct SharedLeagueTeamCard: View {
 
     public init(fetcher: LeagueTeamFetcher, onTeam: ((LeagueTeamSnapshot) -> Void)? = nil,
                 onSetup: (() -> Void)? = nil,
+                teamMatches: (any TeamMatchStore)? = nil, matchesPaused: Bool = false,
+                onTeamMatch: @escaping (TeamMatch) -> Void = { _ in },
                 onOpen: @escaping (LeagueTeamSnapshot) -> Void) {
         self.fetcher = fetcher
         self.onTeam = onTeam
         self.onSetup = onSetup
+        self.teamMatches = teamMatches
+        self.matchesPaused = matchesPaused
+        self.onTeamMatch = onTeamMatch
         self.onOpen = onOpen
     }
 
     public var body: some View {
         VStack(spacing: 0) {
             if let snapshot {
-                Button { onOpen(snapshot) } label: { card(snapshot) }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(loc("Mijn team: \(snapshot.name)"))
+                HomeTeamSummary(snapshot: snapshot, match: todayMatch, onOpen: { onOpen(snapshot) }, onMatch: onTeamMatch)
+            } else if let todayMatch {
+                // Joined with a link, without Mijn team: the match still gets its place
+                HomeTeamMatchBar(match: todayMatch) { onTeamMatch(todayMatch) }
+                    .background(SharedColors.brandCard)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.brandCardStroke, lineWidth: 1))
             } else if !teamURL.isEmpty {
                 HStack(spacing: 10) {
                     if loading {
@@ -205,6 +220,22 @@ public struct SharedLeagueTeamCard: View {
         }
         .padding(.horizontal, 24)
         .task(id: teamURL) { await load() }
+        .task(id: matchesPaused) { await followTodayMatch() }
+    }
+
+    /// Keeps the bar current while the home screen is in front: the saved
+    /// match each minute, and what teammates put on its live page. Stops while
+    /// a team match screen is open, so it never saves over a change made there.
+    private func followTodayMatch() async {
+        guard let store = teamMatches, !matchesPaused else { return }
+        while !Task.isCancelled {
+            var current = TeamMatchSupport.homeMatch(in: (try? await store.loadAll()) ?? [])
+            if current?.isLive == true, TeamLiveSync.changed(await TeamLiveSync.pull(store: store)) {
+                current = TeamMatchSupport.homeMatch(in: (try? await store.loadAll()) ?? [])
+            }
+            if todayMatch != current { todayMatch = current }
+            try? await Task.sleep(nanoseconds: 60_000_000_000)
+        }
     }
 
     /// Shown while no team link is saved: what Mijn team gives, and where to start
@@ -237,10 +268,6 @@ public struct SharedLeagueTeamCard: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(SharedColors.surfaceRaised).clipShape(RoundedRectangle(cornerRadius: 14))
-    }
-
-    private func card(_ snapshot: LeagueTeamSnapshot) -> some View {
-        HomeTeamSummary(snapshot: snapshot)
     }
 
     private func load() async {
@@ -322,29 +349,16 @@ public struct SharedLeagueTeamDetailView: View {
                         }
                     }
                     section(loc("WEDSTRIJDEN")) {
-                        ForEach(snapshot.fixtures) { fixture in
-                            HStack(spacing: 10) {
-                                Text(LeagueDates.day(fixture.date))
-                                    .font(SharedFonts.system(11))
-                                    .foregroundColor(SharedColors.textMuted)
-                                    .frame(width: 82, alignment: .leading)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    LeagueTeamName(name: fixture.home, own: snapshot.name)
-                                    LeagueTeamName(name: fixture.away, own: snapshot.name)
-                                    // A coming match: who the opponent is in the standings and how it went last time
-                                    let opponent = fixture.score == nil ? LeagueOpponentText.line(snapshot.opponent(in: fixture)) : ""
-                                    if !opponent.isEmpty {
-                                        Text(opponent)
-                                            .font(SharedFonts.system(11))
-                                            .foregroundColor(SharedColors.textMuted)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                    }
-                                }
-                                Spacer()
-                                Text(fixture.score ?? LeagueDates.time(fixture.date))
-                                    .foregroundColor(fixture.score == nil ? SharedColors.textMuted : SharedColors.gold)
-                            }
-                            .padding(.vertical, 5)
+                        // As in Competitie: today and what comes, a line, the past from old to recent
+                        let order = CompetitionOverview.make(matches: [], fixtures: snapshot.fixtures)
+                        ForEach(order.coming) { entry in
+                            fixtureRow(entry)
+                        }
+                        if !order.coming.isEmpty && !order.past.isEmpty {
+                            Divider().overlay(SharedColors.line(0.25)).padding(.vertical, 4)
+                        }
+                        ForEach(order.past) { entry in
+                            fixtureRow(entry)
                         }
                     }
                     section(loc("SPELERS")) {
@@ -399,6 +413,34 @@ public struct SharedLeagueTeamDetailView: View {
     /// The followed team's row: same team page, or else the same name
     private func isOwnTeam(_ row: LeagueStanding) -> Bool {
         row.id == snapshot.source.path || row.name == snapshot.name
+    }
+
+    @ViewBuilder
+    private func fixtureRow(_ entry: CompetitionEntry) -> some View {
+        if let fixture = entry.fixture {
+            HStack(spacing: 10) {
+                Text(LeagueDates.day(fixture.date))
+                    .font(SharedFonts.system(11))
+                    .foregroundColor(SharedColors.textMuted)
+                    .frame(width: 82, alignment: .leading)
+                VStack(alignment: .leading, spacing: 2) {
+                    LeagueTeamName(name: fixture.home, own: snapshot.name)
+                    LeagueTeamName(name: fixture.away, own: snapshot.name)
+                    // A coming match: who the opponent is in the standings and how it went last time
+                    let opponent = fixture.score == nil ? LeagueOpponentText.line(snapshot.opponent(in: fixture)) : ""
+                    if !opponent.isEmpty {
+                        Text(opponent)
+                            .font(SharedFonts.system(11))
+                            .foregroundColor(SharedColors.textMuted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                Spacer()
+                Text(fixture.score ?? LeagueDates.time(fixture.date))
+                    .foregroundColor(fixture.score == nil ? SharedColors.textMuted : SharedColors.gold)
+            }
+            .padding(.vertical, 5)
+        }
     }
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {

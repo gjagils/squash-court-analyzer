@@ -10,6 +10,20 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.2 build 2)
 
+- **Competitie: alle wedstrijden in één volgorde (7 november 2026, vraag Gerd-Jan):** Competitie toonde alleen de
+  teamwedstrijden op die telefoon en gespeelde wedstrijden met een uitslag bij SBN; komende wedstrijden stonden er
+  niet in, dus elke telefoon liet iets anders zien. Nu staat het hele programma van Mijn team erin, samen met de
+  teamwedstrijden: vandaag en de komende op datum, een streep, daarna het verleden van oud naar recent
+  (`CompetitionOverview`). De kopjes "Gedeeld met mijn team", "Alleen op mijn telefoon" en "Gespeeld, nog niet in de
+  app" vervallen; een komende wedstrijd opent Nieuwe teamwedstrijd. De lijst Wedstrijden op het teamscherm heeft
+  dezelfde volgorde. De SBN-inlezer zelf was niet de oorzaak: op vijf teampagina's vond hij alle wedstrijden (7
+  november). Zonder Mijn team blijft het programma leeg.
+- **Teamwedstrijd op het beginscherm (7 november 2026, ontwerp A van Gerd-Jan):** op de dag van een teamwedstrijd op deze
+  telefoon wordt de balk van de Mijn team-kaart die wedstrijd: LIVE of Vandaag, thuis of uit en de tegenstander, de
+  gewonnen games (eigen team eerst) en E1 t/m E4. Een tik opent de teamwedstrijd, waar je een partij fluit of coacht.
+  Zonder Mijn team staat de balk als eigen kaart. Op het beginscherm leest de kaart elke minuut bij
+  (`TeamMatchSupport.homeMatch`, `SharedLeagueTeamCard`); hij wacht als er een scherm open staat dat teamwedstrijden
+  wijzigt, zodat hij daar niet overheen schrijft. Nog niet met een echte avond geprobeerd.
 - **Tegenstanderteam ook als je met een link meedoet (7 november 2026):** de spelers van de tegenstander kwamen alleen
   op de telefoon die de teamwedstrijd uit het programma maakte; de link geeft de SBN-wedstrijd niet mee, dus wie
   meedeed zag ze niet. `LeagueOpponent.link(for:in:)` zoekt de tegenstander nu ook op teamnaam (ook voor wie al

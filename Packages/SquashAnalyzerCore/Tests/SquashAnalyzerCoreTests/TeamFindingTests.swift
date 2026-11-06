@@ -96,12 +96,14 @@ final class TeamFindingTests: XCTestCase {
 
     // MARK: Rules
 
+    @MainActor
     func testTheOpponentRefereesTheOtherHalf() {
         // Home referees match 1 and 3 (E4 and E1), away match 2 and 4 (E2 and E3)
         XCTAssertEqual(TeamFinding.opponentRefereeSlots(keepingSide: TeamSide.home), [2, 3])
         XCTAssertEqual(TeamFinding.opponentRefereeSlots(keepingSide: TeamSide.away), [1, 4])
     }
 
+    @MainActor
     func testTheFixtureIsTheSbnLinkWithTheLeagueInCapitals() {
         XCTAssertEqual(TeamFinding.normalizedFixture(fixture), stored)
         XCTAssertNil(TeamFinding.normalizedFixture("/league/x/team-match/1"))
@@ -109,6 +111,7 @@ final class TeamFindingTests: XCTestCase {
         XCTAssertNil(TeamFinding.normalizedFixture(nil))
     }
 
+    @MainActor
     func testOnlyAMatchOfTheProgrammeInTheOwnLeagueCanBeShared() {
         let transport = FakeFindingTransport()
         XCTAssertTrue(TeamFinding.canShare(ownMatch(), context: context(transport)))

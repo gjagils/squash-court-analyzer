@@ -22,9 +22,14 @@
 //   POST   /api/v1/me/matches                own matches, counted at once (batch)
 //   GET    /api/v1/me/awards
 //   PUT    /api/v1/me/awards                 merge awards, tombstones win
+//   GET    /api/v1/me/team/lives?fixtures=   live team matches of the own team, and of opponents for these matches
+//   PUT    /api/v1/me/team/lives             { fixture, date, teamName, liveId, writeKey, refereeKey?, replaces? }
+//   DELETE /api/v1/me/team/lives?fixture=    the own registration goes
 
 import { randomText, sameText, sha256, verifyIdToken } from './auth.js';
-import { cleanText, latestBirthYear, LIMITS, readMatch } from './validate.js';
+import {
+  cleanFixture, cleanText, latestBirthYear, leagueOf, LIMITS, LIVE_ID_PATTERN, LIVE_KEY_PATTERN, readMatch,
+} from './validate.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 const HOUR = 60 * 60 * 1000;
@@ -307,6 +312,7 @@ async function deleteAccount(env, caller) {
     env.DB.prepare('DELETE FROM matches WHERE player_id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM awards WHERE player_id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM blocks WHERE player_id = ?').bind(playerId),
+    env.DB.prepare('DELETE FROM team_lives WHERE starter_id = ?').bind(playerId),
     // What claims taught other phones about this player goes too
     env.DB.prepare('DELETE FROM learned_links WHERE sbn_path = (SELECT sbn_path FROM players WHERE id = ?)').bind(playerId),
     env.DB.prepare('DELETE FROM players WHERE id = ?').bind(playerId),
@@ -437,6 +443,115 @@ async function claimLink(request, env, playerId) {
   return json(200, await takeOpen(env, playerId, row));
 }
 
+// MARK: - Live team matches to find (docs/voorstel-teamwedstrijd-vinden-4.0.md)
+
+/**
+ * When a registration goes: the start of the second day after the match day
+ * (00:00 UTC, so 01:00 or 02:00 in the Netherlands). The live team match
+ * itself lasts a day after its last update.
+ */
+export function teamLiveExpiry(matchAt) {
+  const day = new Date(matchAt);
+  return Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate() + 2);
+}
+
+function teamLiveView(row, own) {
+  const view = { fixture: row.fixture, teamName: row.team_name, liveId: row.live_id, starterName: row.starter_name, matchAt: row.match_at, own };
+  // The invitation key only for the own team; the opponent gets the referee key
+  if (own) view.writeKey = row.write_key;
+  if (row.referee_key) view.refereeKey = row.referee_key;
+  return view;
+}
+
+/**
+ * The live team matches of the own team, and for the matches asked
+ * (`fixtures`, from the phone's own programme) those of the opponent: without
+ * the invitation key, and the referee key only within the same league.
+ */
+async function teamLives(env, playerId, url) {
+  const player = await env.DB.prepare('SELECT team_key FROM players WHERE id = ?').bind(playerId).first();
+  const teamKey = player && player.team_key;
+  if (!teamKey) return json(200, { lives: [] });
+  const now = deps.now();
+  const asked = [];
+  for (const part of (url.searchParams.get('fixtures') || '').split(',')) {
+    const fixture = cleanFixture(part);
+    if (fixture && !asked.includes(fixture) && asked.length < LIMITS.fixtures) asked.push(fixture);
+  }
+  const own = await env.DB.prepare('SELECT * FROM team_lives WHERE team_key = ? AND expires_at > ? ORDER BY match_at')
+    .bind(teamKey, now).all();
+  const lives = own.results.map((row) => teamLiveView(row, true));
+  if (asked.length > 0) {
+    const others = await env.DB.prepare(
+      `SELECT * FROM team_lives WHERE fixture IN (${asked.map(() => '?').join(',')}) AND team_key != ? AND expires_at > ?
+       ORDER BY match_at`,
+    ).bind(...asked, teamKey, now).all();
+    const league = leagueOf(teamKey);
+    for (const row of others.results) {
+      const view = teamLiveView(row, false);
+      if (!league || leagueOf(row.fixture) !== league) delete view.refereeKey;
+      lives.push(view);
+    }
+  }
+  return json(200, { lives });
+}
+
+/**
+ * Registers the live team match of the own team for an SBN match. One per team
+ * and match: when there is one already, 409 with that one (the phone joins it
+ * instead), unless `replaces` names it (its session was gone on the live Worker).
+ */
+async function registerTeamLive(request, env, playerId) {
+  const body = await readJson(request);
+  if (!body || typeof body !== 'object') return json(400, { error: 'body' });
+  const fixture = cleanFixture(body.fixture);
+  if (!fixture) return json(400, { error: 'fixture' });
+  const teamName = cleanText(body.teamName, LIMITS.teamName);
+  if (!teamName) return json(400, { error: 'teamName' });
+  const liveId = cleanText(body.liveId, 12);
+  if (!LIVE_ID_PATTERN.test(liveId)) return json(400, { error: 'liveId' });
+  const writeKey = cleanText(body.writeKey, 64);
+  if (!LIVE_KEY_PATTERN.test(writeKey)) return json(400, { error: 'writeKey' });
+  const refereeKey = body.refereeKey == null ? null : cleanText(body.refereeKey, 64);
+  if (refereeKey !== null && !LIVE_KEY_PATTERN.test(refereeKey)) return json(400, { error: 'refereeKey' });
+  const now = deps.now();
+  const matchAt = typeof body.date === 'number' && Number.isFinite(body.date) ? Math.floor(body.date) : NaN;
+  // A match of today or the coming weeks; one that is already over cannot be registered
+  if (!(matchAt > now - DAY && matchAt < now + 60 * DAY)) return json(400, { error: 'date' });
+  const player = await env.DB.prepare('SELECT team_key, name FROM players WHERE id = ?').bind(playerId).first();
+  if (!player || !player.team_key) return json(404, { error: 'no team' });
+  if (leagueOf(fixture) !== leagueOf(player.team_key)) return json(400, { error: 'league' });
+  const replaces = body.replaces == null ? null : cleanText(body.replaces, 12);
+
+  const values = [player.team_key, fixture, teamName, liveId, writeKey, refereeKey, playerId, player.name,
+    matchAt, now, teamLiveExpiry(matchAt)];
+  const columns = `(team_key, fixture, team_name, live_id, write_key, referee_key, starter_id, starter_name,
+                    match_at, created_at, expires_at)`;
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM team_lives WHERE expires_at <= ?').bind(now),
+    replaces
+      ? env.DB.prepare(`UPDATE team_lives SET team_name = ?, live_id = ?, write_key = ?, referee_key = ?, starter_id = ?,
+                          starter_name = ?, match_at = ?, created_at = ?, expires_at = ?
+                        WHERE team_key = ? AND fixture = ? AND live_id = ?`)
+        .bind(...values.slice(2), player.team_key, fixture, replaces)
+      : env.DB.prepare('SELECT 1'),
+    env.DB.prepare(`INSERT INTO team_lives ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`)
+      .bind(...values),
+  ]);
+  const row = await env.DB.prepare('SELECT * FROM team_lives WHERE team_key = ? AND fixture = ?')
+    .bind(player.team_key, fixture).first();
+  const view = teamLiveView(row, true);
+  return json(row.live_id === liveId ? 200 : 409, view);
+}
+
+/** The own registration goes (team match removed, or no longer visible); someone else's stays */
+async function removeTeamLive(env, playerId, url) {
+  const fixture = cleanFixture(url.searchParams.get('fixture') || '');
+  if (!fixture) return json(400, { error: 'fixture' });
+  await env.DB.prepare('DELETE FROM team_lives WHERE fixture = ? AND starter_id = ?').bind(fixture, playerId).run();
+  return json(204);
+}
+
 /** The names this phone uses that a claim linked to an SBN player */
 async function deviceLinks(request, env) {
   const deviceId = await device(request, env);
@@ -542,6 +657,12 @@ async function handle(request, env) {
     const answerMatch = /^\/api\/v1\/me\/inbox\/([A-Za-z0-9-]{8,64})$/.exec(path);
     if (answerMatch && method === 'POST') return answer(request, env, playerId, answerMatch[1]);
     if (path === '/api/v1/me/team' && method === 'GET') return teamOpen(env, playerId);
+    if (path === '/api/v1/me/team/lives') {
+      if (method === 'GET') return teamLives(env, playerId, url);
+      if (method === 'PUT') return registerTeamLive(request, env, playerId);
+      if (method === 'DELETE') return removeTeamLive(env, playerId, url);
+      return json(405, { error: 'method' });
+    }
     const teamMatch = /^\/api\/v1\/me\/team\/([A-Za-z0-9-]{8,64})$/.exec(path);
     if (teamMatch && method === 'POST') return claimTeam(request, env, playerId, teamMatch[1]);
     if (path === '/api/v1/me/claim' && method === 'POST') return claimLink(request, env, playerId);
@@ -560,6 +681,7 @@ export async function wipeOldRequests(env) {
     env.DB.prepare("DELETE FROM matches WHERE status = 'pending' AND received_at < ?").bind(cutoff),
     env.DB.prepare('DELETE FROM open_matches WHERE received_at < ?').bind(cutoff),
     env.DB.prepare('DELETE FROM learned_links WHERE created_at < ?').bind(cutoff),
+    env.DB.prepare('DELETE FROM team_lives WHERE expires_at <= ?').bind(deps.now()),
   ]);
   return results.reduce((sum, result) => sum + (result.meta?.changes || 0), 0);
 }

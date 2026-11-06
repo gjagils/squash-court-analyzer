@@ -8,6 +8,8 @@ export const LIMITS = {
   sbnPath: 200,
   matchId: 64,
   teamKey: 80,
+  teamName: 40,
+  fixtures: 20,
   summary: 4 * 1024,
   rallies: 32 * 1024,
   batch: 50,
@@ -51,3 +53,26 @@ export function readMatch(body) {
     },
   };
 }
+
+/**
+ * An SBN match as the app has it (`LeagueFixture.id`, the link on the team
+ * page): "/league/<uuid>/team-match/<n>", with the uuid in capitals like the
+ * team key. '' for anything else.
+ */
+export function cleanFixture(value) {
+  if (typeof value !== 'string') return '';
+  const match = /^\/league\/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})\/team-match\/(\d{1,10})$/
+    .exec(value.trim());
+  return match ? `/league/${match[1].toUpperCase()}/team-match/${match[2]}` : '';
+}
+
+/** The league of a fixture or a team key, in capitals ('' when there is none) */
+export function leagueOf(value) {
+  const match = /([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})/i.exec(value || '');
+  return match ? match[1].toUpperCase() : '';
+}
+
+/** A live team match id (the live Worker's ID_PATTERN) */
+export const LIVE_ID_PATTERN = /^[a-z0-9]{12}$/;
+/** A key of the live Worker: 32 bytes as base64url */
+export const LIVE_KEY_PATTERN = /^[A-Za-z0-9_-]{43}$/;

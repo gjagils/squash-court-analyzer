@@ -55,9 +55,7 @@ public enum TeamBackup {
         if var matches = try? TeamMatchFile.load(in: directory) {
             // The live key of an evening is no use after the evening: not in the file
             for index in 0..<matches.count {
-                matches[index].liveId = nil
-                matches[index].liveKey = nil
-                matches[index].liveOwnerKey = nil
+                matches[index].clearLiveState()
             }
             result.teamMatches = matches
         }

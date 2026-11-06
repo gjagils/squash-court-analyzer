@@ -93,13 +93,22 @@ public struct TeamLiveHeader: Codable, Equatable, Sendable {
     /// "ios" or "android" (`AppPlatform.current`), sent when the live page is
     /// made, for the usage counts of the live service; nil (left out) otherwise
     public var platform: String?
+    /// 4.0: false keeps the live team match off the club screen (only the team
+    /// and the opponent see it, until Live delen); nil (left out) is as before
+    public var clubScreen: Bool?
+    /// 4.0, only when the live page is made: the partijen the opponent
+    /// referees; the answer then has a referee key for them
+    public var refereeSlots: [Int]?
 
-    public init(home: String, away: String, date: Int64, lang: String? = nil, platform: String? = nil) {
+    public init(home: String, away: String, date: Int64, lang: String? = nil, platform: String? = nil,
+                clubScreen: Bool? = nil, refereeSlots: [Int]? = nil) {
         self.home = home
         self.away = away
         self.date = date
         self.lang = lang
         self.platform = platform
+        self.clubScreen = clubScreen
+        self.refereeSlots = refereeSlots
     }
 }
 
@@ -110,16 +119,36 @@ public struct TeamLiveCreated: Codable, Equatable, Sendable {
     /// Stays on this phone: ends the live page
     public let ownerKey: String?
     public let url: String
+    /// 4.0: the opponent's key, when the page was made with `refereeSlots`
+    public let refereeKey: String?
 }
 
 /// What a key may do on the live page
 public enum TeamLiveRole: String, Codable, Sendable {
     case owner
     case writer
+    /// 4.0: the opponent's key, only for the partijen they referee
+    case referee
 }
 
 struct TeamLiveRoleAnswer: Codable {
     var role: TeamLiveRole
+    var slots: [Int]?
+}
+
+/// What a key may do, and for the referee key which partijen it may write
+public struct TeamLiveAccess: Equatable, Sendable {
+    public let role: TeamLiveRole
+    public let slots: [Int]
+
+    public init(role: TeamLiveRole, slots: [Int] = []) {
+        self.role = role
+        self.slots = slots
+    }
+}
+
+struct TeamLiveRefereeSlots: Codable {
+    var slots: [Int]
 }
 
 /// What the server holds: the team match and the partijen by slot ("1"..."4")
@@ -348,7 +377,8 @@ public extension TeamMatch {
     static func joining(_ state: TeamLiveState, invite: TeamInvite, ownSide: TeamSide,
                         id: UUID = UUID(), ownerKey: String? = nil) -> TeamMatch {
         var match = TeamMatch(id: id, date: Date(timeIntervalSince1970: Double(state.team.date) / 1000.0), home: state.team.home,
-                              away: state.team.away, ownSide: ownSide, liveId: invite.id, liveKey: invite.key, liveOwnerKey: ownerKey)
+                              away: state.team.away, ownSide: ownSide, liveId: invite.id, liveKey: invite.key, liveOwnerKey: ownerKey,
+                              liveTeamOnly: state.team.clubScreen == false ? true : nil)
         _ = match.mergeLive(state)
         return match
     }
@@ -377,6 +407,7 @@ public extension TeamMatch {
         match.liveId = invite.id
         match.liveKey = invite.key
         match.liveOwnerKey = nil
+        match.liveTeamOnly = state.team.clubScreen == false ? true : nil
         _ = match.mergeLive(state)
         return match
     }
@@ -542,12 +573,14 @@ public final class TeamLive {
 
     // MARK: De teamwedstrijd
 
-    /// Starts the live page for this team match
-    public func create(_ match: TeamMatch) async throws -> TeamLiveCreated {
+    /// Starts the live page for this team match. 4.0: `teamOnly` keeps it off
+    /// the club screen; `refereeSlots` asks for a key the opponent may write those partijen with.
+    public func create(_ match: TeamMatch, teamOnly: Bool = false, refereeSlots: [Int]? = nil) async throws -> TeamLiveCreated {
         guard let transport = activeTransport else { throw TeamLiveError.noTransport }
         guard let url = URL(string: "\(baseURL)/api/team") else { throw TeamLiveError.noConnection }
         let header = TeamLiveHeader(home: match.home, away: match.away, date: Int64(match.date.timeIntervalSince1970 * 1000.0),
-                                    lang: AppLanguage.current.code, platform: AppPlatform.current)
+                                    lang: AppLanguage.current.code, platform: AppPlatform.current,
+                                    clubScreen: teamOnly ? false : nil, refereeSlots: refereeSlots)
         let body = try JSONEncoder().encode(header)
         let response: AITransportResponse
         do {
@@ -564,7 +597,7 @@ public final class TeamLive {
     /// Puts one partij of this phone on the live page (a hand-filled result or
     /// the final result of a tracked match). False when not live or not sent.
     public func push(_ partij: TeamPartij, in match: TeamMatch) async -> Bool {
-        guard let id = match.liveId, let key = match.liveKey else { return false }
+        guard let id = match.liveId, let key = match.liveKey, match.mayWriteLive(partij.slot) else { return false }
         if let payload = partij.livePayload(in: match) {
             return await put(payload, teamId: id, slot: partij.slot, writeKey: key)
         }
@@ -573,7 +606,7 @@ public final class TeamLive {
 
     /// Every partij with games, e.g. right after "Live delen"
     public func pushAll(_ match: TeamMatch) async {
-        for partij in match.partijen where partij.hasEntry && partij.fromLive != true {
+        for partij in match.partijen where partij.hasEntry && partij.fromLive != true && match.mayWriteLive(partij.slot) {
             _ = await push(partij, in: match)
         }
     }
@@ -598,6 +631,11 @@ public final class TeamLive {
     /// Whether this key works for the live page, and what it may do. Throws
     /// `.gone` (unknown or ended), `.keyRejected` (wrong key) or a connection error.
     public func verify(id: String, key: String) async throws -> TeamLiveRole {
+        try await verifyAccess(id: id, key: key).role
+    }
+
+    /// As `verify`, with the partijen a referee key may write
+    public func verifyAccess(id: String, key: String) async throws -> TeamLiveAccess {
         guard let transport = activeTransport else { throw TeamLiveError.noTransport }
         guard let url = URL(string: "\(baseURL)/api/team/\(id)/verify") else { throw TeamLiveError.noConnection }
         let response: AITransportResponse
@@ -611,12 +649,31 @@ public final class TeamLive {
         guard response.status == 200, let answer = try? JSONDecoder().decode(TeamLiveRoleAnswer.self, from: response.body) else {
             throw TeamLiveError.refused(status: response.status)
         }
-        return answer.role
+        return TeamLiveAccess(role: answer.role, slots: answer.slots ?? [])
+    }
+
+    /// 4.0, owner key: Live delen on (the club screen and the viewers' link) or
+    /// back to the team and the opponent only. False when it did not get through.
+    public func setClubScreen(_ match: TeamMatch, on: Bool) async -> Bool {
+        guard let id = match.liveId, let key = match.liveOwnerKey, let transport = activeTransport,
+              let url = URL(string: "\(baseURL)/api/team/\(id)") else { return false }
+        let header = TeamLiveHeader(home: match.home, away: match.away, date: Int64(match.date.timeIntervalSince1970 * 1000.0),
+                                    clubScreen: on ? nil : false)
+        guard let body = try? JSONEncoder().encode(header) else { return false }
+        return await send(body, to: url, teamId: id, writeKey: key, transport: transport)
+    }
+
+    /// 4.0, owner key: the partijen the opponent referees and may write ([] = none)
+    public func setRefereeSlots(_ match: TeamMatch, slots: [Int]) async -> Bool {
+        guard let id = match.liveId, let key = match.liveOwnerKey, let transport = activeTransport,
+              let url = URL(string: "\(baseURL)/api/team/\(id)/referee"),
+              let body = try? JSONEncoder().encode(TeamLiveRefereeSlots(slots: slots)) else { return false }
+        return await send(body, to: url, teamId: id, writeKey: key, transport: transport)
     }
 
     /// Takes a partij off the live page (it was emptied or unlinked here)
     public func clear(slot: Int, in match: TeamMatch) async -> Bool {
-        guard let id = match.liveId, let key = match.liveKey, let transport = activeTransport,
+        guard let id = match.liveId, let key = match.liveKey, match.mayWriteLive(slot), let transport = activeTransport,
               let url = URL(string: "\(baseURL)/api/team/\(id)/partij/\(slot)"),
               let body = try? JSONEncoder().encode(TeamLiveEmpty(empty: true)) else { return false }
         return await send(body, to: url, teamId: id, writeKey: key, transport: transport)

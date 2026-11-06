@@ -253,6 +253,19 @@ public final class PlayerAccount {
         inbox = inbox.filter { match in match.matchId != matchId }
     }
 
+    // MARK: Finding team matches (4.0, docs/voorstel-teamwedstrijd-vinden-4.0.md)
+
+    /// What `TeamFinding` needs, when the switch is on, someone is signed in
+    /// and the account has a team (Mijn team); nil otherwise
+    public func teamFindingContext() async -> TeamFindingContext? {
+        guard Features.shared.playerAccount, isSignedIn else { return nil }
+        if profile == nil { try? await loadProfile() }
+        await followOwnTeam()
+        guard let teamKey = profile?.teamKey, !teamKey.isEmpty,
+              let token = try? await validToken(), let accountClient = try? client() else { return nil }
+        return TeamFindingContext(client: accountClient, token: token, teamKey: teamKey)
+    }
+
     // MARK: Sending
 
     /// This phone's device key, made once

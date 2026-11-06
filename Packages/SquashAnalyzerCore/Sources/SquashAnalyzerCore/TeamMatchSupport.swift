@@ -60,7 +60,10 @@ public struct TeamTarget: Equatable {
         let ownLabel = label(own, team.defaultOwnName(slot))
         let opponentLabel = label(opponent, team.defaultOpponentName(slot))
         return TeamTarget(teamMatchId: team.id, slot: slot, ownPlayer: own, opponentPlayer: opponent, ownIsPlayer1: ownFirst,
-                          ownSide: team.ownSide, liveId: team.liveId, liveKey: team.liveKey,
+                          ownSide: team.ownSide,
+                          // On the opponent's copy only a refereed partij goes to the live page
+                          liveId: team.mayWriteLive(slot) ? team.liveId : nil,
+                          liveKey: team.mayWriteLive(slot) ? team.liveKey : nil,
                           homeLabel: team.ownSide == TeamSide.home ? ownLabel : opponentLabel,
                           awayLabel: team.ownSide == TeamSide.home ? opponentLabel : ownLabel)
     }

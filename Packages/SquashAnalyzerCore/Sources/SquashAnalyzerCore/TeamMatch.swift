@@ -474,13 +474,28 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     public var liveKey: String?
     /// Only on the phone that started the live page: ends it, changes its team names
     public var liveOwnerKey: String?
+    /// 4.0 (docs/voorstel-teamwedstrijd-vinden-4.0.md): the live team match is
+    /// only for the team and the opponent, not on the club screen and without a
+    /// viewers' link until Live delen. Nil: a live page as before (public).
+    public var liveTeamOnly: Bool?
+    /// 4.0, on the phone that started it: the opponent's key (kept to register
+    /// the live team match again when its registration is replaced)
+    public var liveRefereeKey: String?
+    /// 4.0, on an opponent's phone: joined with the referee key, and these are
+    /// the partijen this phone may write (the ones the team referees). Nil: our
+    /// own team's live team match, every partij may be written.
+    public var refereeSlots: [Int]?
 
     public init(id: UUID = UUID(), date: Date, home: String, away: String, ownSide: TeamSide,
                 fixtureId: String? = nil, partijen: [TeamPartij] = [], updatedAt: Date = Date(),
-                liveId: String? = nil, liveKey: String? = nil, liveOwnerKey: String? = nil) {
+                liveId: String? = nil, liveKey: String? = nil, liveOwnerKey: String? = nil,
+                liveTeamOnly: Bool? = nil, liveRefereeKey: String? = nil, refereeSlots: [Int]? = nil) {
         self.liveId = liveId
         self.liveKey = liveKey
         self.liveOwnerKey = liveOwnerKey
+        self.liveTeamOnly = liveTeamOnly
+        self.liveRefereeKey = liveRefereeKey
+        self.refereeSlots = refereeSlots
         self.id = id
         self.date = date
         self.home = home
@@ -504,7 +519,8 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     public func normalized() -> TeamMatch {
         TeamMatch(id: id, date: date, home: home, away: away, ownSide: ownSide, fixtureId: fixtureId,
                   partijen: partijen, updatedAt: updatedAt, liveId: liveId, liveKey: liveKey,
-                  liveOwnerKey: liveOwnerKey)
+                  liveOwnerKey: liveOwnerKey, liveTeamOnly: liveTeamOnly, liveRefereeKey: liveRefereeKey,
+                  refereeSlots: refereeSlots)
     }
 
     /// A match of Mijn team: our side follows from the team's name
@@ -594,6 +610,28 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     public var needsOwnPartij: Bool { isLive && !isLiveOwner && ownPartijen == 0 }
     /// This phone started the live page (and may end it)
     public var isLiveOwner: Bool { isLive && liveOwnerKey != nil }
+
+    /// 4.0: live for the team and the opponent only (not on the club screen, no viewers' link yet)
+    public var isTeamOnly: Bool { isLive && liveTeamOnly == true }
+    /// 4.0: joined as the opponent, with the referee key
+    public var isOpponentCopy: Bool { isLive && refereeSlots != nil }
+
+    /// Whether this phone may put this partij on the live page: every partij
+    /// of the own team's page, on the opponent's copy only the refereed ones
+    public func mayWriteLive(_ slot: Int) -> Bool {
+        guard let slots = refereeSlots else { return true }
+        return slots.contains(slot)
+    }
+
+    /// The live state ends here (stopped, left, or gone on the server): all keys go
+    public mutating func clearLiveState() {
+        liveId = nil
+        liveKey = nil
+        liveOwnerKey = nil
+        liveTeamOnly = nil
+        liveRefereeKey = nil
+        refereeSlots = nil
+    }
 
     /// The partij a coach or referee match in progress was started for, if any
     public func partijTracking(matchId: String) -> TeamPartij? {

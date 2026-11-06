@@ -290,6 +290,81 @@ struct AccountWorkerError: Codable {
     let error: String
 }
 
+/// 4.0 (docs/voorstel-teamwedstrijd-vinden-4.0.md): a live team match that a
+/// teammate or the opponent registered for an SBN match
+public struct TeamLiveListing: Codable, Equatable, Sendable, Identifiable {
+    /// `LeagueFixture.id` ("/league/<UUID>/team-match/<n>", the league in capitals)
+    public let fixture: String
+    /// The team that keeps it
+    public let teamName: String
+    public let liveId: String
+    /// Only for the own team: the invitation key
+    public let writeKey: String?
+    /// The opponent's key (for the partijen they referee), when it was made with one
+    public let refereeKey: String?
+    public let starterName: String
+    /// Milliseconds since 1970
+    public let matchAt: Int64
+    /// Kept by our own team
+    public let own: Bool
+
+    public var id: String { fixture + "|" + liveId }
+
+    /// Only letters, digits, "-" and "/" (what an SBN match link holds), starting with "/league/"
+    public static func isFixture(_ text: String) -> Bool {
+        if !text.hasPrefix("/league/") || text.count > 120 { return false }
+        let allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/"
+        for character in text where !allowed.contains(character) { return false }
+        return true
+    }
+
+    public init(fixture: String, teamName: String, liveId: String, writeKey: String?, refereeKey: String?,
+                starterName: String, matchAt: Int64, own: Bool) {
+        self.fixture = fixture
+        self.teamName = teamName
+        self.liveId = liveId
+        self.writeKey = writeKey
+        self.refereeKey = refereeKey
+        self.starterName = starterName
+        self.matchAt = matchAt
+        self.own = own
+    }
+}
+
+struct TeamLiveListingList: Codable {
+    let lives: [TeamLiveListing]
+}
+
+/// What `PUT /api/v1/me/team/lives` takes
+public struct TeamLiveRegistration: Codable, Equatable, Sendable {
+    public var fixture: String
+    /// Milliseconds since 1970: the match day
+    public var date: Int64
+    public var teamName: String
+    public var liveId: String
+    public var writeKey: String
+    public var refereeKey: String?
+    /// The live id of a registration whose live team match is gone
+    public var replaces: String?
+
+    public init(fixture: String, date: Int64, teamName: String, liveId: String, writeKey: String,
+                refereeKey: String? = nil, replaces: String? = nil) {
+        self.fixture = fixture
+        self.date = date
+        self.teamName = teamName
+        self.liveId = liveId
+        self.writeKey = writeKey
+        self.refereeKey = refereeKey
+        self.replaces = replaces
+    }
+}
+
+/// The answer to registering: ours, or the one that was there first (the phone joins that one)
+public struct TeamLiveRegistered: Equatable, Sendable {
+    public let listing: TeamLiveListing
+    public let wasThereFirst: Bool
+}
+
 /// The account Worker's API
 public struct AccountClient: Sendable {
     public let baseURL: String
@@ -408,6 +483,38 @@ public struct AccountClient: Sendable {
         try check(response)
         guard let value = try? JSONDecoder().decode(AccountAwardList.self, from: response.body) else { throw AccountError.invalidResponse }
         return value.awards
+    }
+
+    // MARK: Live team matches to find (4.0)
+
+    /// The live team matches of the own team, and of opponents for these SBN matches (`LeagueFixture.id`)
+    public func teamLives(token: String, fixtures: [String]) async throws -> [TeamLiveListing] {
+        // A fixture is letters, digits, "-" and "/": all allowed in a query as they are
+        // (no percent-encoding: CharacterSet is thin in Skip)
+        var query = ""
+        for fixture in fixtures.prefix(20) where TeamLiveListing.isFixture(fixture) {
+            query += (query.isEmpty ? "" : ",") + fixture
+        }
+        let response = try await send("GET", "/api/v1/me/team/lives?fixtures=" + query, auth: "Bearer \(token)", body: nil)
+        try check(response)
+        guard let value = try? JSONDecoder().decode(TeamLiveListingList.self, from: response.body) else { throw AccountError.invalidResponse }
+        return value.lives
+    }
+
+    /// Registers the own team's live team match; when one was there first, that one comes back
+    public func registerTeamLive(token: String, _ registration: TeamLiveRegistration) async throws -> TeamLiveRegistered {
+        let response = try await send("PUT", "/api/v1/me/team/lives", auth: "Bearer \(token)",
+                                      body: try JSONEncoder().encode(registration))
+        if response.status != 409 { try check(response) }
+        guard let value = try? JSONDecoder().decode(TeamLiveListing.self, from: response.body) else { throw AccountError.invalidResponse }
+        return TeamLiveRegistered(listing: value, wasThereFirst: response.status == 409)
+    }
+
+    /// The own registration for this SBN match goes
+    public func removeTeamLive(token: String, fixture: String) async throws {
+        guard TeamLiveListing.isFixture(fixture) else { return }
+        let response = try await send("DELETE", "/api/v1/me/team/lives?fixture=" + fixture, auth: "Bearer \(token)", body: nil)
+        try check(response)
     }
 
     // MARK: Without an account

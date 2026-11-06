@@ -154,7 +154,9 @@ final class TeamFindingTests: XCTestCase {
         XCTAssertEqual(result.match.liveRefereeKey, "R3f3r33R3f3r33R3f3r33R3f3r33")
         XCTAssertTrue(result.match.isTeamOnly)
         let register = transport.requests.first { request in request.method == "PUT" && request.url.contains("/me/team/lives") }
-        XCTAssertTrue(register?.body.contains(stored) == true, register?.body ?? "")
+        // Decoded, not searched: Android's encoder writes "/" as "\/"
+        let sent = try JSONDecoder().decode(TeamLiveRegistration.self, from: Data((register?.body ?? "").utf8))
+        XCTAssertEqual(sent.fixture, stored)
         XCTAssertTrue(register?.body.contains("\"teamName\":\"Squash City 2\"") == true)
         let saved = try await teamStore.loadAll()
         XCTAssertEqual(saved.first?.liveId, "newlive23456")

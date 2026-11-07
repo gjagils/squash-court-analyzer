@@ -30,6 +30,9 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   app" vervallen; een komende wedstrijd opent Nieuwe teamwedstrijd. De lijst Wedstrijden op het teamscherm heeft
   dezelfde volgorde. De SBN-inlezer zelf was niet de oorzaak: op vijf teampagina's vond hij alle wedstrijden (7
   november). Zonder Mijn team blijft het programma leeg.
+- **Teamwedstrijd ververst zelf (7 november 2026, vraag Gerd-Jan):** staat het scherm van een live teamwedstrijd open, dan leest het
+  elke minuut wat teamgenoten op de livepagina zetten, zoals het beginscherm al deed (`followLive`). Niet tijdens het invullen of
+  spelen van een partij. *Vernieuwen* blijft. Een melding als een teamgenoot een partij invult komt in 4.0 (T6).
 - **Niet gezien bij het coachen (7 november 2026, vraag Gerd-Jan):** elke invoerstap heeft naast *Annuleren* de knop *Niet gezien*: het
   punt telt mee voor de score, zonder details. Technisch een `.rally` zonder zone (`Point.isUnseen`), zodat oudere builds en
   back-ups het kunnen lezen. Zo'n punt maakt een game niet "eenvoudig gecoacht" en verandert de invoerstand niet; de analyse meldt hoeveel

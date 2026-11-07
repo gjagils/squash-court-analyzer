@@ -641,6 +641,7 @@ public struct SharedTeamMatchView: View {
                 }
             }
         }
+        .task(id: followPaused) { await followLive() }
         .alert(match.isLiveOwner ? loc("Live stoppen?") : loc("Live verlaten?"), isPresented: $confirmStopLive) {
             Button(match.isLiveOwner ? loc("Stop live") : loc("Verlaat live"), role: .destructive) { Task { await stopLive() } }
             Button(loc("Annuleren"), role: .cancel) { }
@@ -752,6 +753,22 @@ public struct SharedTeamMatchView: View {
             if announce { sbnMessage = LeagueTeamError.unavailable.message }
         }
         sbnBusy = false
+    }
+
+    /// Editing a partij or playing one: no reading in between, so nothing is saved over it
+    private var followPaused: Bool { editing != nil || tracking != nil || liveBusy }
+
+    /// While this screen is open and the match is live: what teammates put on the live
+    /// page, every minute, as the home screen does (Gerd-Jan, 7 November 2026). A
+    /// notification when a teammate fills in a partij comes with accounts (4.0, T6).
+    private func followLive() async {
+        guard !followPaused else { return }
+        while !Task.isCancelled {
+            try? await Task.sleep(nanoseconds: 60_000_000_000)
+            if Task.isCancelled || followPaused { return }
+            guard match.isProbablyLive() else { return }
+            await syncFromLive(showGone: false)
+        }
     }
 
     /// "Vernieuwen": send our partijen again (what failed earlier), then read what teammates put there

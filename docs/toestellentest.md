@@ -33,7 +33,8 @@ scripts/android_devices.py run --only oneplus-nord3,small
   op de emulator. De teamwedstrijd van de test staat alleen op de telefoon: het script stopt als
   *Deel met mijn team* niet uit staat (zie "Wat er misging").
 
-Emulator: `SA_Toestellen`, een eigen AVD met 10 GB data, want `Medium_Phone` zit vol.
+Emulator: `SA_Toestellen`, een eigen AVD met 10 GB data. Het script wist de appgegevens op de
+emulator, dus deze staat los van `Medium_Phone_API_36.1` (sinds 7 november gewist, ook 10 GB).
 
 ```bash
 ~/Library/Android/sdk/emulator/emulator -avd SA_Toestellen -no-window -no-audio -no-snapshot

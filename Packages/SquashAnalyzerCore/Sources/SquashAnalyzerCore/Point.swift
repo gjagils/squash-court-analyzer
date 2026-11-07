@@ -52,8 +52,14 @@ public struct Point: Identifiable {
 }
 
 extension Point {
+    /// "Niet gezien" while coaching (Gerd-Jan, 7 November 2026): the score counts, but the coach
+    /// does not know how. A `.rally` without a zone, so older builds and backups can read it;
+    /// it says nothing about the input mode and nothing about winners, errors or zones.
+    public var isUnseen: Bool { pointType == PointType.rally && zone == nil }
+
     /// "Winner · Volley drop · Voor Links": the last-point line under the coach buttons
     public var summary: String {
+        if isUnseen { return L10n.text("Niet gezien") }
         var parts = [pointType.title]
         if let errorKind { parts.append(errorKind.title) }
         if let shotType { parts.append(shotType.displayName(isVolley: isVolley)) }

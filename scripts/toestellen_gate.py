@@ -38,9 +38,14 @@ def dirty_app_files():
     return [line[3:] for line in git("status", "--porcelain").splitlines() if is_app_file(line[3:])]
 
 
-def write_stamp(report_folder):
+def head():
+    return git("rev-parse", "HEAD")
+
+
+def write_stamp(commit, report_folder):
+    """`commit`: the one tested, taken before the build; HEAD may have moved during the run"""
     with open(stamp_path(), "w") as f:
-        json.dump({"commit": git("rev-parse", "HEAD"), "folder": report_folder}, f)
+        json.dump({"commit": commit, "folder": report_folder}, f)
 
 
 def problem():

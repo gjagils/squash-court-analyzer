@@ -211,8 +211,15 @@ public class Game: Identifiable {
     /// Some points of this game have only who and where (Eenvoudig coachen):
     /// the analysis then shows only what holds for every point
     public var isSimpleInput: Bool {
-        for point in points where point.pointType == PointType.rally { return true }
+        for point in points where point.pointType == PointType.rally && !point.isUnseen { return true }
         return false
+    }
+
+    /// Points that count for the score, but the coach did not see how
+    public var unseenPointCount: Int {
+        var count = 0
+        for point in points where point.isUnseen { count += 1 }
+        return count
     }
 
     /// The coach switched during this game: simple points and detailed ones.
@@ -251,6 +258,13 @@ public class Game: Identifiable {
         let zone = selectedZone
         addPoint(to: player, pointType: pointType, at: zone, with: shotType, isVolley: isVolley,
                  errorKind: pendingErrorKind)
+    }
+
+    /// "Niet gezien": the selected player's point, whatever step the coach was on
+    public func addUnseenPoint() {
+        guard let player = selectedPlayer else { return }
+        addPoint(to: player, pointType: PointType.rally, at: nil, with: nil)
+        clearSelection()
     }
 
     /// Clear the current selection
@@ -559,7 +573,7 @@ public class Game: Identifiable {
     /// service points say nothing about where the ball went, and the opponent's
     /// own errors are the opponent's.
     public func attackingPoints(by player: Player) -> [Point] {
-        points.filter { $0.scorer == player && $0.pointType.isAttacking }
+        points.filter { $0.scorer == player && $0.pointType.isAttacking && !$0.isUnseen }
     }
 
     // MARK: - Duration Analysis

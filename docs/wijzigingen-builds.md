@@ -30,6 +30,11 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   app" vervallen; een komende wedstrijd opent Nieuwe teamwedstrijd. De lijst Wedstrijden op het teamscherm heeft
   dezelfde volgorde. De SBN-inlezer zelf was niet de oorzaak: op vijf teampagina's vond hij alle wedstrijden (7
   november). Zonder Mijn team blijft het programma leeg.
+- **Niet gezien bij het coachen (7 november 2026, vraag Gerd-Jan):** elke invoerstap heeft naast *Annuleren* de knop *Niet gezien*: het
+  punt telt mee voor de score, zonder details. Technisch een `.rally` zonder zone (`Point.isUnseen`), zodat oudere builds en
+  back-ups het kunnen lezen. Zo'n punt maakt een game niet "eenvoudig gecoacht" en verandert de invoerstand niet; de analyse meldt hoeveel
+  punten niet gezien zijn. Badges voor geen unforced errors vallen in die wedstrijd af, want het kan een fout geweest zijn.
+- **Nieuw in 3.2 (7 november 2026, tekst met Gerd-Jan afgestemd):** `WhatsNew.currentVersion` 3, vijf punten, in nl en en.
 - **Kleine punten en toestellentest (7 november 2026):** een geplakte teamlink brengt je na bewaren ook terug. Een lege partij
   toont alleen E1 en *Nog niet ingevuld*. *Badges* past nu op 360 x 740 dp (rijen 46 dp, minder ruimte onder de kop, ook op iOS). De
   Engelse handleidingen noemen *Find your club*. In Firebase Test Lab praat de app niet met de live-server. Toestellentest vast vóór

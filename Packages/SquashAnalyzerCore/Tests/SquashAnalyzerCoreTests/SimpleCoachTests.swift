@@ -27,6 +27,45 @@ final class SimpleCoachTests: XCTestCase {
         XCTAssertNil(point.shotType)
     }
 
+    func testUnseenPointCountsOnlyForTheScore() {
+        let game = Game()
+        game.start()
+        game.selectPlayer(Player.player1)
+        game.selectPointType(PointType.winner)
+        game.addUnseenPoint()
+        XCTAssertEqual(game.player1Score, 1, "the score goes on")
+        XCTAssertEqual(game.scoringStep, Game.ScoringStep.selectPlayer, "nothing left half way")
+        XCTAssertNil(game.selectedPlayer)
+        XCTAssertEqual(game.currentServer, Player.player1, "the scorer serves next")
+        XCTAssertEqual(game.unseenPointCount, 1)
+        XCTAssertEqual(game.points[0].summary, "Niet gezien")
+        XCTAssertEqual(game.winners(by: Player.player1).count, 0)
+        XCTAssertEqual(game.attackingPoints(by: Player.player1).count, 0)
+        game.undoLastPoint()
+        XCTAssertEqual(game.player1Score, 0, "undo as for any point")
+        XCTAssertEqual(game.unseenPointCount, 0)
+    }
+
+    func testUnseenPointLeavesTheInputModeAlone() {
+        let match = Match()
+        let game = match.currentGame
+        game.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.backLeft, with: ShotType.drive)
+        game.addPoint(to: Player.player2, pointType: PointType.rally, at: nil, with: nil)
+        XCTAssertFalse(game.isSimpleInput, "one unseen point keeps the full analysis")
+        XCTAssertFalse(game.isMixedInput)
+        XCTAssertFalse(match.isSimpleInput)
+        XCTAssertEqual(match.lastInputMode, CoachInputMode.detailed)
+        XCTAssertTrue(match.hasUnseenPoints)
+    }
+
+    func testUnseenPointNeverEarnsNoErrorBadges() {
+        let match = Match()
+        match.currentGame.addPoint(to: Player.player1, pointType: PointType.winner, at: CourtZone.backLeft, with: ShotType.drive)
+        XCTAssertTrue(match.badgeInput.recordsPointTypes)
+        match.currentGame.addPoint(to: Player.player2, pointType: PointType.rally, at: nil, with: nil)
+        XCTAssertFalse(match.badgeInput.recordsPointTypes, "it could have been an error: no \"no errors\" badge")
+    }
+
     func testDetailedChoicesLeaveOutTheSimplePoint() {
         XCTAssertFalse(PointType.detailed.contains(PointType.rally))
         XCTAssertEqual(PointType.detailed.count, PointType.allCases.count - 1)

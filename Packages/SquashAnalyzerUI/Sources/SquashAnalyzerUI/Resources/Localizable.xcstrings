@@ -13555,6 +13555,42 @@
         }
       }
     },
+    "Niet gezien": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Didn't see it"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet gezien"
+          }
+        }
+      }
+    },
+    "Niet gezien: %@. Die punten tellen mee in de score, niet in deze cijfers.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Didn't see it: %@. Those points count in the score, not in these numbers."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet gezien: %@. Die punten tellen mee in de score, niet in deze cijfers."
+          }
+        }
+      }
+    },
     "Vandaag": {
       "extractionState": "manual",
       "generatesSymbol": false,

@@ -53,35 +53,35 @@ public enum Onboarding {
     ] }
 }
 
-/// "Nieuw in 3.0": one sheet at the first start of a new version, for
+/// "Nieuw in 3.2": one sheet at the first start of a new version, for
 /// everyone (choice Gerd-Jan, 20 October 2026). "Rondleiding" opens the tour
 /// from there, "Aan de slag" skips it; either way the badge reset and the
 /// cleanup question follow.
 public enum WhatsNew {
     /// The what's-new version this device has seen (0 = none)
     public static let storageKey = "whatsNewVersion"
-    /// 1 = 3.0, 2 = 3.1; raise it with new items for a later version
-    public static let currentVersion = 2
-    public static var title: String { L10n.text("Nieuw in 3.1") }
-    public static var intro: String { L10n.text("Squash Analyzer is op de competitieavond beter geworden. Dit is wat je merkt.") }
+    /// 1 = 3.0, 2 = 3.1, 3 = 3.2; raise it with new items for a later version
+    public static let currentVersion = 3
+    public static var title: String { L10n.text("Nieuw in 3.2") }
+    public static var intro: String { L10n.text("Squash Analyzer is weer een stap verder, op de baan en op de competitieavond. Dit is wat je merkt.") }
 
     public static func shouldShow(seenVersion: Int) -> Bool {
         seenVersion < currentVersion
     }
 
     /// The symbols are the home screen's outline icons (AppSymbol names).
-    /// 3.1 (Gerd-Jan, 1 November 2026): five items, in this order
+    /// 3.2 (Gerd-Jan, 7 November 2026): five items, in this order
     public static var items: [Onboarding.Page] { [
-        Onboarding.Page(symbol: "person.2", title: L10n.text("Mijn team zonder link"),
-                        text: L10n.text("Zoek je club en tik je team: je stand, je volgende wedstrijd en de stand van je tegenstander op het beginscherm.")),
-        Onboarding.Page(symbol: "list.bullet.clipboard", title: L10n.text("Eenvoudig coachen"),
-                        text: L10n.text("Geen tijd voor slagen en punttypes? Tik alleen wie het punt maakt en waar op de baan; de analyse laat zien waar punten gewonnen en verloren worden.")),
-        Onboarding.Page(symbol: "trophy", title: L10n.text("Teamwedstrijd zonder gedoe"),
-                        text: L10n.text("De partijen van je teamgenoten komen vanzelf binnen, en de uitslag haal je zo nodig op bij SBN, ook van een gespeelde wedstrijd die nog niet in de app stond.")),
-        Onboarding.Page(symbol: "whistle", title: L10n.text("Oefenpartij"),
-                        text: L10n.text("Bewaard, maar zonder badges en buiten je spelersprofiel. Je badges blijven over echte wedstrijden gaan.")),
-        Onboarding.Page(symbol: "circle.lefthalf.filled", title: L10n.text("Nieuwe look"),
-                        text: L10n.text("Rustiger beginscherm en één kleur per betekenis: zeegroen voor goed nieuws en alles wat live is, rood alleen voor fouten, goud alleen voor badges.")),
+        Onboarding.Page(symbol: "trophy", title: L10n.text("Teamwedstrijd op je beginscherm"),
+                        text: L10n.text("Doe je mee aan een teamwedstrijd, dan staat die op je beginscherm, met de stand en E1 t/m E4. Eén tik en je fluit of coacht je partij.")),
+        Onboarding.Page(symbol: "whistle", title: L10n.text("Officiële timers"),
+                        text: L10n.text("Inspelen, 1 minuut tot de start en 2 minuten tussen de games. Je telefoon trilt bij het wisselen, bij 15 seconden en bij Time.")),
+        Onboarding.Page(symbol: "list.bullet.clipboard", title: L10n.text("Makkelijker coachen"),
+                        text: L10n.text("Ging het even te snel? Tik op wie scoort en dan op Niet gezien: de score loopt door. Uitgebreid of Eenvoudig kies je nu ook tussen de punten door.")),
+        Onboarding.Page(symbol: "person.2", title: L10n.text("Ken je tegenstander"),
+                        text: L10n.text("Bekijk het profiel van je tegenstander en zie bij Kies speler de onderlinge stand. Met een SquashLevels-link open je ook de ranglijst.")),
+        Onboarding.Page(symbol: "sparkles", title: L10n.text("Kleine verbeteringen"),
+                        text: L10n.text("Op sommige Android-toestellen is de weergave verbeterd, tegenstanders worden beter opgehaald bij competitiewedstrijden en je team toevoegen gaat makkelijker.")),
     ] }
 }
 

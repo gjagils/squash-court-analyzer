@@ -478,6 +478,12 @@ def boot(avd):
         for serial in online_emulators():
             device = Device(serial)
             if device.shell("getprop", "sys.boot_completed").strip() == "1":
+                # A fresh emulator's own "System UI isn't responding" covered the app (Android 17,
+                # 7 November 2026): no system error dialogs on the test emulators. A crash of the app
+                # still shows as a failed step.
+                device.shell("settings", "put", "global", "hide_error_dialogs", "1")
+                time.sleep(20)
+                device.shell("am", "broadcast", "-a", "android.intent.action.CLOSE_SYSTEM_DIALOGS")
                 return device
         time.sleep(5)
     sys.exit(f"Emulator {avd} start niet.")
@@ -496,6 +502,7 @@ def release(skip_build=False):
         sys.exit("Eerst committen: de test geldt voor een commit.")
     if online_emulators():
         sys.exit("Er draait al een emulator; stop die eerst.")
+    tested = toestellen_gate.head()
     apk = os.path.join(ROOT, "Android/app/build/outputs/apk/debug/app-debug.apk")
     if not skip_build:
         studio_java = "/Applications/Android Studio.app/Contents/jbr/Contents/Home"
@@ -520,7 +527,7 @@ def release(skip_build=False):
     print(f"\nKlaar in {int(time.time() - started) // 60} min: {base}")
     if failed:
         sys.exit(f"{failed} mislukte stap(pen): upload blijft dicht.")
-    toestellen_gate.write_stamp(base)
+    toestellen_gate.write_stamp(tested, base)
     print("Upload mag door de poort. Bekijk ook zelf de beelden: de test ziet niet alles.")
 
 

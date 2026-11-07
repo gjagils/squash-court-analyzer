@@ -314,6 +314,7 @@
 /* MARK: Simple coaching (PointType.rally, CoachInputMode) */
 "Punt" = "Point";
 "Alleen wie en waar" = "Only who and where";
+"Niet gezien" = "Didn't see it";
 "Uitgebreid" = "Detailed";
 "Eenvoudig" = "Simple";
 "Per punt: wie, hoe (winner, fout, stroke), waar op de baan en welke slag. De volledige analyse." = "Per point: who, how (winner, error, stroke), where on court and which shot. The full analysis.";
@@ -342,8 +343,20 @@
 "scheidsrechter" = "referee";
 "coach" = "coach";
 
-// Nieuw in 3.1 (1 November 2026)
-"Nieuw in 3.1" = "What's new in 3.1";
+// Nieuw in 3.2 (7 November 2026)
+"Nieuw in 3.2" = "What's new in 3.2";
+"Squash Analyzer is weer een stap verder, op de baan en op de competitieavond. Dit is wat je merkt." = "Squash Analyzer has taken another step, on court and on league night. Here is what you will notice.";
+"Teamwedstrijd op je beginscherm" = "Team match on your home screen";
+"Doe je mee aan een teamwedstrijd, dan staat die op je beginscherm, met de stand en E1 t/m E4. Eén tik en je fluit of coacht je partij." = "When you take part in a team match, it appears on your home screen with the score and E1 to E4. One tap and you referee or coach your match.";
+"Officiële timers" = "Official timers";
+"Inspelen, 1 minuut tot de start en 2 minuten tussen de games. Je telefoon trilt bij het wisselen, bij 15 seconden en bij Time." = "Warm-up, 1 minute to the start and 2 minutes between games. Your phone vibrates at the side change, at 15 seconds and at Time.";
+"Makkelijker coachen" = "Easier coaching";
+"Ging het even te snel? Tik op wie scoort en dan op Niet gezien: de score loopt door. Uitgebreid of Eenvoudig kies je nu ook tussen de punten door." = "Did it go too fast? Tap who scored and then Didn't see it: the score carries on. You can now also choose Detailed or Simple between points.";
+"Ken je tegenstander" = "Know your opponent";
+"Bekijk het profiel van je tegenstander en zie bij Kies speler de onderlinge stand. Met een SquashLevels-link open je ook de ranglijst." = "View your opponent's profile and see the head-to-head record in Choose player. With a SquashLevels link you can also open the ranking.";
+"Kleine verbeteringen" = "Small improvements";
+"Op sommige Android-toestellen is de weergave verbeterd, tegenstanders worden beter opgehaald bij competitiewedstrijden en je team toevoegen gaat makkelijker." = "The display is better on some Android phones, opponents are fetched more reliably for league matches, and adding your team is easier.";
+// Nieuw in 3.1 (1 November 2026): the other texts
 "Squash Analyzer is op de competitieavond beter geworden. Dit is wat je merkt." = "Squash Analyzer got better on league night. This is what you will notice.";
 "Mijn team zonder link" = "My team without a link";
 "Zoek je club en tik je team: je stand, je volgende wedstrijd en de stand van je tegenstander op het beginscherm." = "Find your club and tap your team: your standing, your next match and your opponent's standing on the home screen.";

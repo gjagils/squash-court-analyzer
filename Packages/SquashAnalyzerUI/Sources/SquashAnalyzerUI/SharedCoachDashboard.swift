@@ -82,6 +82,9 @@ public struct SharedCoachDashboardView: View {
                     if simple {
                         simpleNote
                     }
+                    if game.unseenPointCount > 0 {
+                        unseenNote
+                    }
                     quickStats
                     // Eenvoudig coachen keeps no shots, winners or errors: only the
                     // parts that work with who and where
@@ -261,6 +264,15 @@ public struct SharedCoachDashboardView: View {
     /// game: the coach can switch during a match, and a detailed game keeps
     /// its full analysis.
     private var simple: Bool { game.isSimpleInput }
+
+    /// Points the coach did not see: they count for the score, not in these numbers
+    private var unseenNote: some View {
+        Text(loc("Niet gezien: \(String(game.unseenPointCount)). Die punten tellen mee in de score, niet in deze cijfers."))
+            .font(SharedFonts.system(12, weight: .medium, design: .rounded))
+            .foregroundColor(SharedColors.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
 
     private var simpleNote: some View {
         HStack(alignment: .top, spacing: 10) {

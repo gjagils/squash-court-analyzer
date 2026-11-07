@@ -667,17 +667,27 @@ public struct CoachScoringView: View {
                            photos: { [photo(Player.player1), photo(Player.player2)] })
     }
 
+    /// On every step of a point: back out, or count it without knowing how (same height as before)
     private var cancelButton: some View {
-        Button(action: {
-            game.clearSelection()
-            volley = false
-        }) {
-            Text("Annuleren", bundle: textBundle)
-                .font(SharedFonts.system(13, weight: .medium, design: .rounded))
-                .foregroundColor(SharedColors.textMuted)
-                .padding(.vertical, 6)
+        HStack(spacing: 24) {
+            Button(action: {
+                game.clearSelection()
+                volley = false
+            }) {
+                Text("Annuleren", bundle: textBundle)
+                    .font(SharedFonts.system(13, weight: .medium, design: .rounded))
+                    .foregroundColor(SharedColors.textMuted)
+                    .padding(.vertical, 6)
+            }
+            .buttonStyle(.plain)
+            Button(action: { handleUnseenPoint() }) {
+                Text("Niet gezien", bundle: textBundle)
+                    .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
+                    .foregroundColor(playerColor)
+                    .padding(.vertical, 6)
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Game / match over
@@ -1034,6 +1044,14 @@ public struct CoachScoringView: View {
         if game.scoringStep == .selectPlayer {
             matchChanged()
         }
+    }
+
+    private func handleUnseenPoint() {
+        stepChange {
+            game.addUnseenPoint()
+        }
+        volley = false
+        matchChanged()
     }
 
     private func handleShotTypeSelect(_ shotType: ShotType) {

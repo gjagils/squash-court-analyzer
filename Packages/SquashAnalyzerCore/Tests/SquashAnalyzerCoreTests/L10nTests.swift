@@ -43,7 +43,7 @@ final class L10nTests: XCTestCase {
         AppLanguageOverride.shared.language = AppLanguage.dutch
         XCTAssertEqual(BadgeTier.gold.title, "Goud")
         XCTAssertEqual(BadgeKind.pioneer.title, "Pionier")
-        XCTAssertEqual(WhatsNew.title, "Nieuw in 3.1")
+        XCTAssertEqual(WhatsNew.title, "Nieuw in 3.2")
         XCTAssertEqual(L10n.text("%@ wint game %@", "Jan", "2"), "Jan wint game 2")
     }
 
@@ -63,7 +63,7 @@ final class L10nTests: XCTestCase {
         XCTAssertEqual(BadgeKind.dropItGold.tieredTitle, "Drop it like it's hot · Gold")
         XCTAssertEqual(BadgeKind.fiveInARowSilver.detail, "7 points in a row")
         XCTAssertEqual(BadgeKind.Category.career.title, "Across all your matches")
-        XCTAssertEqual(WhatsNew.title, "What's new in 3.1")
+        XCTAssertEqual(WhatsNew.title, "What's new in 3.2")
         XCTAssertEqual(Onboarding.pages[4].title, "League")
         XCTAssertEqual(TestDataGroup.competition.title, "League matches")
         XCTAssertEqual(CourtZone.backLeft.title, "Back left")

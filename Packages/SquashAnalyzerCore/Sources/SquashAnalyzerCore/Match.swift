@@ -286,16 +286,22 @@ public class Match: Identifiable {
     /// the match cannot vouch for its winners and errors (badges). The coach
     /// can switch during a match; the analysis looks per game (`Game.isSimpleInput`).
     public var isSimpleInput: Bool {
-        for point in allPoints where point.pointType == PointType.rally { return true }
+        for point in allPoints where point.pointType == PointType.rally && !point.isUnseen { return true }
+        return false
+    }
+
+    /// Some points were not seen: the match cannot vouch for "no unforced errors" either
+    public var hasUnseenPoints: Bool {
+        for point in allPoints where point.isUnseen { return true }
         return false
     }
 
     /// How the last point was entered: opening a saved match goes on that way.
     /// Nil without points. A stroke says nothing: it comes from the let call
-    /// in both modes.
+    /// in both modes; "Niet gezien" can be tapped in both too.
     public var lastInputMode: CoachInputMode? {
         var mode: CoachInputMode? = nil
-        for point in allPoints where point.pointType != PointType.stroke {
+        for point in allPoints where point.pointType != PointType.stroke && !point.isUnseen {
             mode = point.pointType == PointType.rally ? CoachInputMode.simple : CoachInputMode.detailed
         }
         return mode

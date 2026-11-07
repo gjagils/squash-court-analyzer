@@ -8,7 +8,13 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.2 build 3)
+## Volgende build (na 3.2 build 4)
+
+(nog niets)
+
+## 3.2 build 4 (7 november 2026: TestFlight Squashteam en Play)
+
+Releasenotes: `release-notes/3.2-4.md`, `release-notes/android-3.2-4.md`. Firebase Test Lab deze keer overgeslagen.
 
 - **Mijn team: teamwedstrijden in het programma (7 november 2026, Gerd-Jan):** in het overzicht van Mijn team
   krijgt een wedstrijd met een teamwedstrijd op deze telefoon de stand in games en *LIVE* (of *Bezig*); een tik
@@ -36,7 +42,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   `validate.js` neemt de velden aan, `setTeam` houdt ze bij een `PUT` van een oudere app. Geldt voor
   livepagina's die met deze build gestart worden.
 
-## 3.2 build 3 (geüpload 7 november 2026: TestFlight Squashteam, in bètareview; Play en website nog niet)
+## 3.2 build 3 (geüpload 7 november 2026: TestFlight Squashteam, Play en website)
 
 Toestellentest geslaagd op Android 16 (7 schermmaten) en 17 (3), Firebase Test Lab op A13 en OnePlus Nord CE 3 Lite.
 Releasenotes: `release-notes/3.2-3.md`, `release-notes/android-3.2-3.md`. App Store-screenshots gemaakt maar niet

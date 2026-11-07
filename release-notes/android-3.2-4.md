@@ -1,0 +1,1 @@
+Build 4 van 3.2. Mijn team toont welke wedstrijd live is, met de stand; een tik opent de teamwedstrijd of maakt er een van een komende wedstrijd. Meedoen via een link zet de balk meteen op je beginscherm. Spelers van de tegenstander ook zonder eigen Mijn team. Teamnamen met een komma worden goed herkend. Meer: squashanalyzer.com/testen

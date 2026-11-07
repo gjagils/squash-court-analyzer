@@ -19,6 +19,8 @@ mailing lists or Google Groups per closed test, hence two (--tracks overrides).
 See docs/google-play.md ("Uploaden met het script").
 """
 import argparse
+
+import toestellen_gate
 import base64
 import glob
 import json
@@ -201,7 +203,10 @@ def main() -> None:
     parser.add_argument("--notes", help="file with the Dutch release notes (max 500 characters)")
     parser.add_argument("--name", help="release name (default: versionName from build.gradle.kts, e.g. 3.1 (4))")
     parser.add_argument("--tracks", default=",".join(TRACKS), help="comma-separated tracks (default: all test tracks)")
+    parser.add_argument("--skip-device-test", action="store_true", help="upload without a passed scripts/android_devices.py release")
     args = parser.parse_args()
+    if not (args.check or args.production or args.production_draft):
+        toestellen_gate.require(args.skip_device_test)
     token = access_token()
     if args.check:
         check(token)

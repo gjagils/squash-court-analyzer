@@ -13,6 +13,8 @@ import os
 import re
 import sys
 import time
+
+import toestellen_gate
 import urllib.error
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -64,7 +66,9 @@ def main():
     ap.add_argument("--no-review", action="store_true")
     ap.add_argument("--keep-old", action="store_true", help="do not expire older builds")
     ap.add_argument("--timeout-minutes", type=int, default=45)
+    ap.add_argument("--skip-device-test", action="store_true", help="distribute without a passed scripts/android_devices.py release")
     args = ap.parse_args()
+    toestellen_gate.require(args.skip_device_test)
     if not (args.version and args.build):
         project_version, project_build = versions.read_ios()
         args.version = args.version or project_version

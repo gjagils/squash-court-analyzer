@@ -1,7 +1,17 @@
-# Toestellentest Android (voorstel)
+# Toestellentest Android
 
-Stand 7 november 2026: script gebouwd en één keer over alle profielen gedraaid. **Nog niet
-verplicht in de uploadstap:** dat besluit Gerd-Jan (zie "Te besluiten").
+Vaste stap vóór elke build naar TestFlight of de Play-testtracks (besluit Gerd-Jan, 7 november 2026). De
+uploadscripts stoppen zonder geslaagde run. Niet bij elke PR.
+
+```bash
+scripts/android_devices.py release
+```
+
+Bouwt de debug-APK en draait op **Android 16** (de meest geïnstalleerde: wereldwijd ongeveer 25%, StatCounter, juli 2026; eigen
+cijfers per versie hebben we niet) alle profielen en op **Android 17** (de nieuwste) OnePlus, Klein en Groot. Wachttijd ongeveer
+30 minuten. Lukt alles, dan mag de upload door (`scripts/toestellen_gate.py`); wijzigt de app daarna, dan moet hij opnieuw. Een
+versieverhoging of documentwijziging telt niet. Bekijk de beelden ook zelf. Overslaan kan alleen op verzoek van Gerd-Jan:
+`--skip-device-test`. Bij een nieuwe Android-versie: `ANDROIDS` in het script bijwerken.
 
 ## Waarom
 
@@ -60,13 +70,6 @@ Een nieuw toestel met een klacht wordt een extra regel in `PROFILES`.
   een trage telefoon opvalt. Het is Android 16 op de emulator; de app ondersteunt vanaf Android 9.
 - Live en teamwedstrijden met anderen: de test deelt bewust niets.
 
-## Wanneer
-
-Niet bij elke PR, wel voor elke build die naar testers buiten gaat (keuze Gerd-Jan, 7 november):
-als stap vóór `scripts/play_upload.py`, naast de `ui-check`. Wachttijd **ongeveer 21 minuten** voor
-alle profielen op de Mac; mijn werk daarna is de beelden bekijken, een paar minuten. Niet in GitHub
-Actions: daar is een emulator traag en de Mac heeft alles al.
-
 ## Eerste run, 7 november 2026
 
 Alle route-stappen liepen op alle profielen. Gevonden op de beelden:
@@ -102,13 +105,19 @@ emulator (de echte statusbalk kan hoger zijn; dan zakken de waarden):
 Bij 680 en 700 dp kreeg de A57 het volle scorebord en verdween *Annuleren* bij de baan. De instructie staat nu altijd op
 één regel. Dit blijft een marge van een paar dp: bij een klacht de maat van dat toestel erbij zetten.
 
-## Te besluiten
+## Echte toestellen: Firebase Test Lab
 
-1. **Verplicht maken?** Voorstel: ja, als vaste stap in `docs/opleveren-en-hosting.md`, en
-   `play_upload.py` waarschuwt als er voor deze build geen run is.
-2. Vervallen: zie "Compacte opzet".
-3. **Echte toestellen erbij?** Firebase Test Lab heeft echte telefoons, ook om OxygenOS en One UI te zien.
-   Gratis: 5 runs per dag op fysieke toestellen (samen 30 minuten), daarna 5 dollar per
-   toestel-uur ([prijzen](https://firebase.google.com/docs/test-lab/usage-quotas-pricing)). Welke
-   Samsung- en OnePlus-modellen er zijn, is nog niet nagekeken. Voorstel: pas doen als de emulator
-   een klacht niet kan naspelen; het vraagt een Firebase-project dat Gerd-Jan zelf aanmaakt.
+```bash
+scripts/test_lab.py
+```
+
+Een automatische rondgang (Robo) van maximaal 5 minuten per toestel op een Galaxy A13 (Android 14) en een OnePlus Nord CE 3 Lite
+(Android 14, OxygenOS). Hij ziet wat de emulator mist: de schermen van de fabrikant en echte hardware. Het Firebase-project
+`squash-analyzer-18fb3` heeft geen betaalkoppeling, dus er zijn geen kosten; de grens is 5 runs per dag op echte toestellen
+([prijzen](https://firebase.google.com/docs/test-lab/usage-quotas-pricing)). Elk toestel telt als een run. Inloggen eenmalig met `gcloud auth login`.
+
+Robo tikt op alles, ook op LIVE. Daarom stuurt de app niets naar de live-server als Android `firebase.test.lab` meldt
+(`isFirebaseTestLab` in `MainActivity.kt`). Wie dit nabootst: `svc wifi disable` haalt een emulator niet van het netwerk (7 november
+kwam zo een testwedstrijd "Test A - Test B" op de live-server; meteen gestopt).
+
+Google sluit Test Lab op 30 september 2027; daarna is de opvolger Developer Device Platform (melding van `gcloud`).

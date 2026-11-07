@@ -3,6 +3,7 @@ package com.squashanalyzer.android
 import android.app.Application
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.room.withTransaction
 import androidx.lifecycle.lifecycleScope
 import squash.analyzer.core.AppUsage
@@ -87,7 +88,8 @@ class SquashApplication : Application() {
         ProcessInfo.launch(applicationContext)
         // Live score on the lock screen: pushes arrive also while no screen is open
         FirebaseConfig.initialize(this)
-        LiveFollow.shared.transport = HttpLiveTransport()
+        // Firebase Test Lab taps around at random: it never reaches the live server (docs/toestellentest.md)
+        if (!isFirebaseTestLab(this)) LiveFollow.shared.transport = HttpLiveTransport()
         LiveFollow.shared.presenter = FcmLiveFollowPresenter(applicationContext)
         // "Melding bij elke game" (shared settings screen): sent with every registration
         LiveAlerts.start(applicationContext)
@@ -181,7 +183,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         // Live meekijken: the shared LiveShare sends the state through this (server/live)
-        LiveShare.shared.transport = HttpLiveTransport()
+        // Not in Firebase Test Lab: its random taps must not end up on the live server or a club screen
+        if (!isFirebaseTestLab(this)) LiveShare.shared.transport = HttpLiveTransport()
         // The anonymous daily usage count (AppUsage): only release builds report, never a test run
         AppUsage.shared.version = AppUsage.marketingVersion(from = packageManager.getPackageInfo(packageName, 0).versionName ?: "")
         if (!BuildConfig.DEBUG && !isInstrumentedTest()) AppUsage.shared.transport = HttpLiveTransport()
@@ -367,3 +370,7 @@ class MainActivity : AppCompatActivity() {
         false
     }
 }
+
+/** Set by Firebase Test Lab on its devices: https://firebase.google.com/docs/test-lab/android/android-studio */
+internal fun isFirebaseTestLab(context: android.content.Context): Boolean =
+    Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"

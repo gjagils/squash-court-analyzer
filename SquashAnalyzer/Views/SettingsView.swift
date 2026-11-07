@@ -161,6 +161,7 @@ struct SettingsView: View {
                         teamDraft = teamURL
                         teamSaveMessage = appText("Teamlink opgeslagen")
                         teamSaved = true
+                        isPresented = false
                     } catch {
                         teamSaveMessage = (error as? LeagueTeamError)?.message ?? LeagueTeamError.invalidLink.message
                         teamSaved = false

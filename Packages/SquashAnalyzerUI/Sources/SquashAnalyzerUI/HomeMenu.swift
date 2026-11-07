@@ -72,7 +72,6 @@ public struct HomeMenuHeader: View {
             .padding(.vertical, 12)
         }
         .padding(.horizontal, 24)
-        .padding(.bottom, 12)
     }
 
 }
@@ -139,7 +138,8 @@ public struct HomeMenuTiles: View {
                 AppSymbol("chevron.right", size: 12, color: SharedColors.textPrimary)
             }
             .foregroundColor(SharedColors.textPrimary)
-            .frame(minHeight: 50)
+            // 46, with the header's bottom gap gone: Badges fits on 360 x 740 dp (7 November 2026)
+            .frame(minHeight: 46)
             // Apple only: a no-op in SkipUI, and Compose's clickable already covers the row (docs/bewuste-keuzes.md)
             #if !SKIP
             .contentShape(Rectangle())

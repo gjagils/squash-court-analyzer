@@ -558,6 +558,7 @@ public struct SharedSettingsView: View {
             draft = teamURL
             message = loc("Teamlink opgeslagen")
             messageIsError = false
+            leave()
         } catch {
             message = (error as? LeagueTeamError)?.message ?? LeagueTeamError.invalidLink.message
             messageIsError = true
@@ -570,6 +571,10 @@ public struct SharedSettingsView: View {
         teamURL = team.link.url.absoluteString
         draft = teamURL
         message = nil
+        leave()
+    }
+
+    private func leave() {
         if let onClose {
             onClose()
         } else {

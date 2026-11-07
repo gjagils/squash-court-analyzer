@@ -957,6 +957,9 @@ public struct SharedTeamMatchView: View {
                     .background(partij.hasEntry ? SharedColors.accent : SharedColors.textMuted)
                     .clipShape(Circle())
                 VStack(alignment: .leading, spacing: 4) {
+                    // Nobody filled in: the circle says E1 and the card the teams; "All Inn
+                    // Squash 8 E1 – Squash Delft 8 E1" lost its E on a narrow screen
+                    if partij.hasEntry || !partij.ownPlayer.isEmpty || !partij.opponentPlayer.isEmpty {
                     HStack(spacing: 6) {
                         Text(match.ownDisplayName(partij))
                             .font(SharedFonts.system(14, weight: .semibold))
@@ -967,6 +970,7 @@ public struct SharedTeamMatchView: View {
                             .font(SharedFonts.system(14, weight: .semibold))
                             .foregroundColor(partij.opponentPlayer.isEmpty ? SharedColors.textMuted : SharedColors.steelBlueLight)
                             .lineLimit(1)
+                    }
                     }
                     if partij.hasEntry {
                         HStack(spacing: 6) {

@@ -285,8 +285,9 @@ final class LiveShareTests: XCTestCase {
 
     @MainActor
     private func waitUntil(_ condition: () -> Bool) async throws {
+        // 10 seconds: 2 was too short for the Kotlin run on a busy CI machine (7 November 2026)
         var tries = 0
-        while !condition() && tries < 200 {
+        while !condition() && tries < 1000 {
             tries += 1
             try await Task.sleep(nanoseconds: 10_000_000)
         }

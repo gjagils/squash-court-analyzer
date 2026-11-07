@@ -30,6 +30,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   app" vervallen; een komende wedstrijd opent Nieuwe teamwedstrijd. De lijst Wedstrijden op het teamscherm heeft
   dezelfde volgorde. De SBN-inlezer zelf was niet de oorzaak: op vijf teampagina's vond hij alle wedstrijden (7
   november). Zonder Mijn team blijft het programma leeg.
+- **Kleine punten en toestellentest (7 november 2026):** een geplakte teamlink brengt je na bewaren ook terug. Een lege partij
+  toont alleen E1 en *Nog niet ingevuld*. *Badges* past nu op 360 x 740 dp (rijen 46 dp, minder ruimte onder de kop, ook op iOS). De
+  Engelse handleidingen noemen *Find your club*. In Firebase Test Lab praat de app niet met de live-server. Toestellentest vast vóór
+  elke externe upload, met `scripts/android_devices.py release` (Android 16 en 17), en `scripts/test_lab.py` voor echte toestellen.
 - **Vol scorebord op de OnePlus (7 november 2026):** de grens van de compacte coachopzet ging van 740 naar 705 dp beschikbare
   hoogte; de instructie staat altijd op één regel. Metingen in `docs/toestellentest.md`.
 - **Team kiezen brengt je terug (7 november 2026, bevinding Gerd-Jan):** wie in *Zoek je club* een team tikt, heeft het meteen

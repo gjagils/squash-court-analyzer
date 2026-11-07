@@ -185,6 +185,9 @@ Volgorde bij een externe build:
 1. Alles op `main` en groen (CI, plus lokaal de suites uit 3). De live-Worker
    wordt bij de push automatisch uitgerold; controleer `/health` op
    `https://live.squashanalyzer.com`.
+   Draai daarna de vaste toestellentest: `scripts/android_devices.py release` (ongeveer 30 minuten,
+   [uitleg](toestellentest.md)) en bekijk de beelden. Zonder geslaagde run stoppen
+   `testflight_distribute.py` en `play_upload.py`.
 2. `scripts/version.py upload` (build + 1 voor beide platforms) en committen.
    Een nieuwe testronde begint met `scripts/version.py set 3.1`, daarna
    `upload` voor build 1.

@@ -7,6 +7,7 @@ loopt het script dezelfde schermen af, maakt schermafbeeldingen en zoekt naar wa
 een mens op het eerste gezicht ook ziet: tekst of knoppen die buiten het scherm
 vallen, of onder de systeembalken. Uitkomst: output/toestellen/<datum>/index.html.
 
+    scripts/android_devices.py release                # vaste test vóór een upload: bouwt, beide Android-versies
     scripts/android_devices.py run                    # alle profielen, met de debug-APK
     scripts/android_devices.py run --only oneplus-nord3,small
     scripts/android_devices.py run --apk pad/naar.apk
@@ -26,6 +27,8 @@ import sys
 import time
 import xml.etree.ElementTree as ET
 
+import toestellen_gate
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ADB = os.path.join(os.environ.get("ANDROID_HOME", os.path.expanduser("~/Library/Android/sdk")), "platform-tools", "adb")
 PACKAGE = "com.squashanalyzer.android"
@@ -41,6 +44,15 @@ PROFILES = [
     {"id": "narrow-fold", "label": "Smal (vouwtelefoon dicht, 344 dp)", "w": 904, "h": 2316, "dpi": 420, "font": 1.0, "buttons": False},
     {"id": "big-text", "label": "Middelgroot met grote tekst (1,3)", "w": 1080, "h": 2400, "dpi": 420, "font": 1.3, "buttons": False},
     {"id": "large", "label": "Groot (Pixel Pro XL)", "w": 1344, "h": 2992, "dpi": 480, "font": 1.0, "buttons": False},
+]
+
+# De twee Android-versies van de vaste test vóór een upload (Gerd-Jan, 7 november 2026): de meest
+# geïnstalleerde over alle profielen, de nieuwste over de uitersten. Bij een nieuwe Android-versie
+# hier bijwerken; zie docs/toestellentest.md.
+ANDROIDS = [
+    {"name": "Android 16 (meest geïnstalleerd)", "folder": "android-16", "avd": "SA_Toestellen", "only": None},
+    {"name": "Android 17 (nieuwste)", "folder": "android-17", "avd": "SA_Toestellen_17",
+     "only": ["oneplus-nord3", "small", "large"]},
 ]
 
 
@@ -436,6 +448,81 @@ Een emulator met de maten van het toestel; fabrikantaanpassingen (One UI, Oxygen
     return path, problems, failures
 
 
+def run_all(device, chosen, apk, folder, title):
+    """All chosen profiles on one running emulator; returns (report, layout points, failed steps)"""
+    os.makedirs(folder, exist_ok=True)
+    results = []
+    try:
+        prepare(device, apk)
+        for profile in chosen:
+            print(profile["label"], flush=True)
+            results.append(run_profile(device, profile, folder))
+            report(results, folder, title)  # also after a crash there is a report
+    finally:
+        device.reset()
+    return report(results, folder, title)
+
+
+def online_emulators():
+    lines = subprocess.run([ADB, "devices"], capture_output=True, text=True).stdout.splitlines()
+    return [line.split()[0] for line in lines[1:] if line.startswith("emulator-") and "device" in line]
+
+
+def boot(avd):
+    """Starts `avd` without a window and returns its Device once it has booted"""
+    emulator = os.path.join(os.path.dirname(os.path.dirname(ADB)), "emulator", "emulator")
+    subprocess.Popen([emulator, "-avd", avd, "-no-window", "-no-audio", "-no-snapshot"],
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    end = time.time() + 300
+    while time.time() < end:
+        for serial in online_emulators():
+            device = Device(serial)
+            if device.shell("getprop", "sys.boot_completed").strip() == "1":
+                return device
+        time.sleep(5)
+    sys.exit(f"Emulator {avd} start niet.")
+
+
+def stop(device):
+    device.adb("emu", "kill")
+    end = time.time() + 60
+    while time.time() < end and online_emulators():
+        time.sleep(2)
+
+
+def release(skip_build=False):
+    """The fixed test before an upload: builds, runs both Android versions and leaves the stamp"""
+    if toestellen_gate.dirty_app_files():
+        sys.exit("Eerst committen: de test geldt voor een commit.")
+    if online_emulators():
+        sys.exit("Er draait al een emulator; stop die eerst.")
+    apk = os.path.join(ROOT, "Android/app/build/outputs/apk/debug/app-debug.apk")
+    if not skip_build:
+        studio_java = "/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+        env = dict(os.environ, JAVA_HOME=os.environ.get("JAVA_HOME", studio_java))
+        subprocess.run(["./gradlew", "assembleDebug"], cwd=os.path.join(ROOT, "Android"), env=env, check=True)
+    stamp = datetime.datetime.now().strftime("%Y-%m-%d-%H%M")
+    base = os.path.join(ROOT, "output", "toestellen", stamp)
+    started = time.time()
+    failed = 0
+    for android in ANDROIDS:
+        print(f"\n== {android['name']}", flush=True)
+        chosen = [p for p in PROFILES if android["only"] is None or p["id"] in android["only"]]
+        device = boot(android["avd"])
+        try:
+            path, problems, failures = run_all(device, chosen, apk, os.path.join(base, android["folder"]),
+                                               f"{stamp} {android['name']}")
+        finally:
+            stop(device)
+        print(f"{android['name']}: {problems} lay-outpunt(en), {failures} mislukte stap(pen): {path}", flush=True)
+        failed += failures
+    print(f"\nKlaar in {int(time.time() - started) // 60} min: {base}")
+    if failed:
+        sys.exit(f"{failed} mislukte stap(pen): upload blijft dicht.")
+    toestellen_gate.write_stamp(base)
+    print("Upload mag door de poort. Bekijk ook zelf de beelden: de test ziet niet alles.")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -444,7 +531,12 @@ def main():
     run.add_argument("--apk", default=os.path.join(ROOT, "Android/app/build/outputs/apk/debug/app-debug.apk"))
     run.add_argument("--only", default="")
     run.add_argument("--serial", default="")
+    rel = sub.add_parser("release", help="vaste test vóór een upload: beide Android-versies, opent de poort")
+    rel.add_argument("--skip-build", action="store_true", help="de debug-APK is al van deze commit")
     args = parser.parse_args()
+    if args.command == "release":
+        release(args.skip_build)
+        return
     if args.command == "profiles":
         for profile in PROFILES:
             print(f"{profile['id']:18} {profile['w']}x{profile['h']} @{profile['dpi']} = {profile['w'] * 160 // profile['dpi']} x {profile['h'] * 160 // profile['dpi']} dp  {profile['label']}")
@@ -457,16 +549,7 @@ def main():
     folder = os.path.join(ROOT, "output", "toestellen", stamp)
     os.makedirs(folder, exist_ok=True)
     started = time.time()
-    results = []
-    try:
-        prepare(device, args.apk)
-        for profile in chosen:
-            print(profile["label"], flush=True)
-            results.append(run_profile(device, profile, folder))
-            report(results, folder, stamp)  # also after a crash there is a report
-    finally:
-        device.reset()
-    path, problems, failures = report(results, folder, stamp)
+    path, problems, failures = run_all(device, chosen, args.apk, folder, stamp)
     print(f"\nKlaar in {int(time.time() - started) // 60} min: {path}")
     print(f"{problems} lay-outpunt(en), {failures} mislukte stap(pen)")
     sys.exit(1 if failures else 0)

@@ -99,9 +99,14 @@ public struct TeamLiveHeader: Codable, Equatable, Sendable {
     /// 4.0, only when the live page is made: the partijen the opponent
     /// referees; the answer then has a referee key for them
     public var refereeSlots: [Int]?
+    /// 3.2 build 4: the SBN team pages of both teams (`LeagueTeamLink.accountKey`),
+    /// so a teammate who joins without Mijn team gets the opponent's players;
+    /// nil (left out) when the phone that started it did not know them
+    public var homeTeam: String?
+    public var awayTeam: String?
 
     public init(home: String, away: String, date: Int64, lang: String? = nil, platform: String? = nil,
-                clubScreen: Bool? = nil, refereeSlots: [Int]? = nil) {
+                clubScreen: Bool? = nil, refereeSlots: [Int]? = nil, homeTeam: String? = nil, awayTeam: String? = nil) {
         self.home = home
         self.away = away
         self.date = date
@@ -109,6 +114,8 @@ public struct TeamLiveHeader: Codable, Equatable, Sendable {
         self.platform = platform
         self.clubScreen = clubScreen
         self.refereeSlots = refereeSlots
+        self.homeTeam = homeTeam
+        self.awayTeam = awayTeam
     }
 }
 
@@ -357,6 +364,15 @@ public extension TeamMatch {
     /// the page until someone edits them here). Returns whether anything changed.
     mutating func mergeLive(_ state: TeamLiveState) -> Bool {
         var changed = false
+        // The SBN team pages the starting phone sent (for the opponent's players)
+        if homeSbnTeam == nil, let page = state.team.homeTeam {
+            homeSbnTeam = page
+            changed = true
+        }
+        if awaySbnTeam == nil, let page = state.team.awayTeam {
+            awaySbnTeam = page
+            changed = true
+        }
         for index in 0..<partijen.count {
             let current = partijen[index]
             guard !current.hasEntry || current.fromLive == true else { continue }
@@ -590,9 +606,12 @@ public final class TeamLive {
     public func create(_ match: TeamMatch, teamOnly: Bool = false, refereeSlots: [Int]? = nil) async throws -> TeamLiveCreated {
         guard let transport = activeTransport else { throw TeamLiveError.noTransport }
         guard let url = URL(string: "\(baseURL)/api/team") else { throw TeamLiveError.noConnection }
+        let team = TeamMatchSupport.cachedTeam()
         let header = TeamLiveHeader(home: match.home, away: match.away, date: Int64(match.date.timeIntervalSince1970 * 1000.0),
                                     lang: AppLanguage.current.code, platform: AppPlatform.current,
-                                    clubScreen: teamOnly ? false : nil, refereeSlots: refereeSlots)
+                                    clubScreen: teamOnly ? false : nil, refereeSlots: refereeSlots,
+                                    homeTeam: match.sbnTeam(of: TeamSide.home, in: team),
+                                    awayTeam: match.sbnTeam(of: TeamSide.away, in: team))
         let body = try JSONEncoder().encode(header)
         let response: AITransportResponse
         do {

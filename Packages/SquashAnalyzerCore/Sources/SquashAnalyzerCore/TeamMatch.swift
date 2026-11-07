@@ -485,11 +485,18 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     /// the partijen this phone may write (the ones the team referees). Nil: our
     /// own team's live team match, every partij may be written.
     public var refereeSlots: [Int]?
+    /// The SBN team pages of home and away (`LeagueTeamLink.accountKey`), from
+    /// the live page: the opponent's players without Mijn team on this phone
+    public var homeSbnTeam: String?
+    public var awaySbnTeam: String?
 
     public init(id: UUID = UUID(), date: Date, home: String, away: String, ownSide: TeamSide,
                 fixtureId: String? = nil, partijen: [TeamPartij] = [], updatedAt: Date = Date(),
                 liveId: String? = nil, liveKey: String? = nil, liveOwnerKey: String? = nil,
-                liveTeamOnly: Bool? = nil, liveRefereeKey: String? = nil, refereeSlots: [Int]? = nil) {
+                liveTeamOnly: Bool? = nil, liveRefereeKey: String? = nil, refereeSlots: [Int]? = nil,
+                homeSbnTeam: String? = nil, awaySbnTeam: String? = nil) {
+        self.homeSbnTeam = homeSbnTeam
+        self.awaySbnTeam = awaySbnTeam
         self.liveId = liveId
         self.liveKey = liveKey
         self.liveOwnerKey = liveOwnerKey
@@ -520,7 +527,19 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
         TeamMatch(id: id, date: date, home: home, away: away, ownSide: ownSide, fixtureId: fixtureId,
                   partijen: partijen, updatedAt: updatedAt, liveId: liveId, liveKey: liveKey,
                   liveOwnerKey: liveOwnerKey, liveTeamOnly: liveTeamOnly, liveRefereeKey: liveRefereeKey,
-                  refereeSlots: refereeSlots)
+                  refereeSlots: refereeSlots, homeSbnTeam: homeSbnTeam, awaySbnTeam: awaySbnTeam)
+    }
+
+    /// The SBN team page of one side: kept from the live page, else from Mijn
+    /// team (our own team's link, or the opponent in the standings of its poule)
+    public func sbnTeam(of side: TeamSide, in team: LeagueTeamSnapshot?) -> String? {
+        if let kept = side == TeamSide.home ? homeSbnTeam : awaySbnTeam { return kept }
+        guard let team else { return nil }
+        if side == ownSide {
+            guard TeamMatch.sameTeam(side == TeamSide.home ? self.home : self.away, team.name) else { return nil }
+            return (try? LeagueTeamLink(team.source.absoluteString))?.accountKey
+        }
+        return LeagueOpponent.link(for: self, in: team)?.accountKey
     }
 
     /// A match of Mijn team: our side follows from the team's name

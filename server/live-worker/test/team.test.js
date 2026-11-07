@@ -71,6 +71,16 @@ describe('input', () => {
     expect(validateTeamHeader({ ...header, clubScreen: true }).clubScreen).toBeUndefined();
   });
 
+  it('a header may carry the SBN team pages of both teams, nothing else', () => {
+    const uuid = '0f1e2d3c-4b5a-6978-8a9b-0c1d2e3f4a5b';
+    const both = validateTeamHeader({ ...header, homeTeam: `${uuid}/12`, awayTeam: ` ${uuid.toUpperCase()}/7 ` });
+    expect(both.homeTeam).toBe(`${uuid.toUpperCase()}/12`);
+    expect(both.awayTeam).toBe(`${uuid.toUpperCase()}/7`);
+    const odd = validateTeamHeader({ ...header, homeTeam: 'https://evil.example/x', awayTeam: `${uuid}/12/3` });
+    expect(odd.homeTeam).toBeUndefined();
+    expect(odd.awayTeam).toBeUndefined();
+  });
+
   it('a partij: first names, or none; scores optional for a hand-filled one', () => {
     expect(cleanPartijName('Gerd-Jan van Gils')).toBe('Gerd-Jan');
     expect(cleanPartijName('')).toBe('');
@@ -148,6 +158,19 @@ describe('team sessions', () => {
     expect((await call('DELETE', `/api/team/${id}`, undefined, ownerKey)).status).toBe(204);
     expect((await call('GET', `/api/team/${id}`)).status).toBe(404);
     expect((await call('PUT', `/api/team/${id}/partij/1`, partij, writeKey)).status).toBe(404);
+  });
+
+  it('the SBN team pages go to whoever joins, and stay when an older app renames nothing', async () => {
+    const uuid = '0F1E2D3C-4B5A-6978-8A9B-0C1D2E3F4A5B';
+    const created = await call('POST', '/api/team', { ...header, homeTeam: `${uuid}/12`, awayTeam: `${uuid}/7` });
+    const { id, ownerKey } = created.json;
+    expect((await call('GET', `/api/team/${id}`)).json.team.awayTeam).toBe(`${uuid}/7`);
+    // An app before 3.2 build 4 sends the header without them
+    expect((await call('PUT', `/api/team/${id}`, header, ownerKey)).status).toBe(204);
+    expect((await call('GET', `/api/team/${id}`)).json.team.homeTeam).toBe(`${uuid}/12`);
+    // Another opponent: the old pages no longer fit
+    expect((await call('PUT', `/api/team/${id}`, { ...header, away: 'Delft 7' }, ownerKey)).status).toBe(204);
+    expect((await call('GET', `/api/team/${id}`)).json.team.awayTeam).toBeUndefined();
   });
 
   it('wrong key, wrong slot and odd bodies are refused', async () => {

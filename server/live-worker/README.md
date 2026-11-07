@@ -35,6 +35,10 @@ is reserve.
   teamnamen te wijzigen (`PUT`). `GET /api/team/:id/verify` (Bearer) zegt of een sleutel werkt
   en wat hij mag (`owner` of `writer`), zodat een verkeerd getypte code bij Deelnemen opvalt.
   De Worker weigert een partij met meer games dan nodig om te winnen.
+- **SBN-teampagina's in de kop (3.2 build 4)**, optioneel: `homeTeam` en `awayTeam` als
+  `"<league-uuid>/<teamnummer>"` (`LeagueTeamLink.accountKey`). Wie meedoet zonder Mijn team
+  haalt daarmee de spelers van de tegenstander op. Andere waarden vallen weg. Een `PUT` zonder
+  die velden (oudere app) houdt de bewaarde zolang de teamnamen gelijk blijven.
 - **4.0, teamwedstrijd vinden** ([voorstel](../../docs/voorstel-teamwedstrijd-vinden-4.0.md)),
   beide velden optioneel, zonder werkt alles zoals voorheen:
   - `clubScreen: false` in de kop (`POST` en `PUT /api/team/:id`): de teamwedstrijd

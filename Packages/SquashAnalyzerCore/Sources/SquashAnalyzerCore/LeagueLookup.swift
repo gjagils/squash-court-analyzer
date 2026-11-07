@@ -133,6 +133,11 @@ public enum LeagueOpponent {
     /// programme, else by its team names. A team match joined with a link
     /// has no fixture of its own (the live page does not carry it).
     public static func link(for match: TeamMatch, in team: LeagueTeamSnapshot?) -> LeagueTeamLink? {
+        // The page the starting phone put on the live page (3.2 build 4): also without Mijn team here
+        if let kept = match.ownSide == TeamSide.home ? match.awaySbnTeam : match.homeSbnTeam,
+           let link = LeagueTeamLink.from(accountKey: kept) {
+            return link
+        }
         guard let team else { return nil }
         if let id = match.fixtureId, let fixture = team.fixtures.first(where: { fixture in fixture.id == id }) {
             return link(for: fixture, in: team)

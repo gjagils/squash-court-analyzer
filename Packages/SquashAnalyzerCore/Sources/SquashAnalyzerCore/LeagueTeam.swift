@@ -34,6 +34,14 @@ public struct LeagueTeamLink: Equatable, Sendable {
         teamID = path[3]
     }
 
+    /// From `accountKey` ("<league uuid>/<team number>"), as the live page carries it
+    /// (a function, not an init: Skip has no delegating init for a struct with constants)
+    public static func from(accountKey: String) -> LeagueTeamLink? {
+        let parts = accountKey.components(separatedBy: "/")
+        guard parts.count == 2 else { return nil }
+        return try? LeagueTeamLink("https://sbn.toernooi.nl/league/\(parts[0])/team/\(parts[1])")
+    }
+
     static func isNumber(_ value: String) -> Bool {
         guard !value.isEmpty else { return false }
         for character in value where !"0123456789".contains(character) {

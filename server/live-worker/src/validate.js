@@ -190,7 +190,21 @@ export function validateTeamHeader(input) {
   // and the opponent see stays off the club screens until Live delen is on.
   // Left out (older apps) it is on the screen, as before.
   if (input.clubScreen === false) header.clubScreen = false;
+  // 3.2 build 4: the SBN team pages of both teams ("<league uuid>/<team number>"),
+  // so a teammate who joins without Mijn team still gets the opponent's players.
+  // Public competition data, no person; anything else is left out.
+  const homeTeam = cleanSbnTeam(input.homeTeam);
+  const awayTeam = cleanSbnTeam(input.awayTeam);
+  if (homeTeam) header.homeTeam = homeTeam;
+  if (awayTeam) header.awayTeam = awayTeam;
   return header;
+}
+
+/** An SBN team as "<league uuid>/<team number>" (`LeagueTeamLink.accountKey`), upper case, or null */
+export function cleanSbnTeam(value) {
+  if (typeof value !== 'string') return null;
+  const match = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/([0-9]{1,9})$/i.exec(value.trim());
+  return match ? `${match[1].toUpperCase()}/${match[2]}` : null;
 }
 
 /**

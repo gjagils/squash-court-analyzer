@@ -123,6 +123,28 @@ final class LeagueLookupTests: XCTestCase {
         XCTAssertNil(LeagueOpponent.link(for: joined(home: "Squash Delft 8", away: "Bevo 3"), in: team), "not Mijn team's match")
     }
 
+    /// 3.2 build 4: the starting phone puts both SBN team pages on the live
+    /// page; a phone that joins without Mijn team still finds the opponent
+    func testTheLivePageCarriesTheSbnTeamsToAPhoneWithoutMijnTeam() throws {
+        let team = snapshot()
+        let started = TeamMatch.from(fixture: team.fixtures[0], ownTeam: team.name)
+        let own = try XCTUnwrap(started.sbnTeam(of: TeamSide.away, in: team))
+        let opponent = try XCTUnwrap(started.sbnTeam(of: TeamSide.home, in: team))
+        XCTAssertEqual(LeagueTeamLink.from(accountKey: own)?.url.absoluteString, "\(base)/team/113")
+        XCTAssertEqual(LeagueTeamLink.from(accountKey: opponent)?.url.absoluteString, "\(base)/team/120")
+        XCTAssertNil(started.sbnTeam(of: TeamSide.home, in: nil), "no Mijn team and nothing kept")
+
+        // The header goes over the wire and back, then the joining phone keeps it
+        let header = TeamLiveHeader(home: started.home, away: started.away, date: 1_793_181_600_000,
+                                    homeTeam: opponent, awayTeam: own)
+        let decoded = try JSONDecoder().decode(TeamLiveHeader.self, from: try JSONEncoder().encode(header))
+        let state = TeamLiveState(team: decoded, partijen: [:], updatedAt: 0)
+        let joined = TeamMatch.joining(state, invite: TeamInvite(id: "abcdefghjkmn", key: "K3yK3yK3yK3yK3yK3yK3y_-9"), ownSide: TeamSide.away)
+        XCTAssertEqual(joined.awaySbnTeam, own)
+        XCTAssertEqual(LeagueOpponent.link(for: joined, in: nil)?.url.absoluteString, "\(base)/team/120")
+        XCTAssertNil(LeagueTeamLink.from(accountKey: "nope"))
+    }
+
     func testTheHomeCardShowsTheMatchYouAreActivelyPartOf() {
         let now = Date()
         let hour = 3600.0

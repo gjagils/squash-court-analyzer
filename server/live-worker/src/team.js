@@ -164,6 +164,11 @@ export class TeamSession extends ViewerSession {
       this.ctx.storage.get('team'), this.ctx.storage.get('id'), this.ctx.storage.get('partijen'),
     ]);
     const partijen = stored || {};
+    // An app without the SBN team pages (before 3.2 build 4) keeps those of the page while the teams stay the same
+    if (before && before.home === team.home && before.away === team.away) {
+      if (!team.homeTeam && before.homeTeam) team.homeTeam = before.homeTeam;
+      if (!team.awayTeam && before.awayTeam) team.awayTeam = before.awayTeam;
+    }
     await this.leaveClubs(before, id, wallsOfTeam(team, clubWalls(this.env)));
     await this.touch({ team });
     await this.pushUpdate(team, partijen, partijen);

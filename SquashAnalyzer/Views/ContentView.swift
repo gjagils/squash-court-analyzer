@@ -65,7 +65,7 @@ struct ContentView: View {
                  onViewHistory: { showingHistory = true },
                  onOpenSettings: { settingsOpensTeam = false; showingSettings = true },
                  onFindClub: { settingsOpensTeam = true; showingSettings = true },
-                 onLiveFollow: { liveFollow = LiveFollowRequest(link: "") })
+                 questionsWaiting: anyCoverOpen || welcomeNeeded || testDataCounts != nil)
         .fullScreenCover(isPresented: $showingCoach) {
             let players = SwiftDataPlayerStore(context: modelContext)
             CoachSessionView(store: SwiftDataCoachMatchStore(context: modelContext), playerStore: players, photoStore: players,
@@ -140,7 +140,6 @@ struct ContentView: View {
                 return
             }
             #endif
-            TeamImportService.addSamplePlayersIfNew(context: modelContext)
             // A cold start may already be active before the scene phase changes
             Task { await AppUsage.shared.appOpened() }
             _ = try? BadgeAwarder(context: modelContext).grantPioneers()
@@ -336,7 +335,7 @@ struct ContentView: View {
     #endif
 }
 
-/// A request to show Wedstrijd volgen, with the live link that opened it (empty from the menu)
+/// A request to show Wedstrijd volgen, with the live link that opened it
 struct LiveFollowRequest: Identifiable {
     let id = UUID()
     let link: String

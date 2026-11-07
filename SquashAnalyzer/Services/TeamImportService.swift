@@ -15,18 +15,6 @@ extension TeamImportError: @retroactive LocalizedError {
 }
 
 enum TeamImportService {
-    /// Bob and Wim for everyone (SquashAnalyzerUI's SamplePlayers): once per
-    /// install, also next to existing players, which they never change (a real
-    /// "Wim" keeps his photo). Not during tests.
-    @MainActor
-    static func addSamplePlayersIfNew(context: ModelContext) {
-        guard SamplePlayers.isPending,
-              ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
-        defer { SamplePlayers.markDone() }
-        guard let data = SamplePlayers.zipData() else { return }
-        _ = try? importTeam(zipData: data, context: context, addOnly: true)
-    }
-
     /// Validates the whole file before touching the database, then adds or updates players.
     /// With `addOnly` a player whose name already exists is left as it is.
     @MainActor

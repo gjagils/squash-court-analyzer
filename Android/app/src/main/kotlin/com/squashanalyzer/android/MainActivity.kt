@@ -11,7 +11,6 @@ import squash.analyzer.core.ResultCard
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import squash.analyzer.ui.SamplePlayers
 import androidx.activity.compose.setContent
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.unit.sp
@@ -70,7 +69,6 @@ import kotlinx.coroutines.CompletableDeferred
 import androidx.activity.result.contract.ActivityResultContracts
 import com.squashanalyzer.android.aicoach.KeystoreAPIKeyStore
 import com.squashanalyzer.android.league.HttpLeaguePageLoader
-import com.squashanalyzer.android.team.RoomTeamImporter
 import com.squashanalyzer.android.backup.ActivityPlayerFiles
 import squash.analyzer.ui.AndroidHomeView
 import com.squashanalyzer.android.data.AppDatabase
@@ -162,20 +160,6 @@ class MainActivity : AppCompatActivity() {
         // "Testgegevens opruimen", once after the badge reset (BadgeSeason)
         val testDataStore = RoomTestDataStore(coachMatchStore, refereeMatchDataStore, badgeAwardStore, teamMatchStore,
             backupStore, appVersion, java.io.File(filesDir, "Voor opruimen"))
-        val teamImporter = RoomTeamImporter(db)
-        // Bob and Wim for everyone, as on iOS (SamplePlayers): once per install,
-        // also next to existing players (never changing them), never during instrumented tests
-        if (SamplePlayers.isPending && !isInstrumentedTest()) {
-            lifecycleScope.launch {
-                try {
-                    val zip = SamplePlayers.zipData()
-                    if (zip != null) teamImporter.importZip(zip.platformValue, addOnly = true)
-                } catch (e: Exception) {
-                    android.util.Log.w("SamplePlayers", "Voorbeeldspelers niet toegevoegd", e)
-                }
-                SamplePlayers.markDone()
-            }
-        }
         val playerFiles = ActivityPlayerFiles(this)
         val aiCoach = AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport()))
         // 4.0 behind a switch (docs/releaseplan-3x-4.0.md): -PsquashPlayerAccount=true

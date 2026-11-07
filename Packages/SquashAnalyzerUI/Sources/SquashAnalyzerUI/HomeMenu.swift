@@ -85,17 +85,12 @@ public struct HomeMenuTiles: View {
     private let onBadges: () -> Void
     /// Competitie (teamwedstrijden); the row only shows when the host wires it
     private let onCompetition: (() -> Void)?
-    /// Wedstrijd volgen (live score op het vergrendelscherm); only where the platform supports it
-    private let onLiveFollow: (() -> Void)?
     /// A live team match of the own team is running: the Competitie row shows LIVE
     private let competitionLive: Bool
-    /// How many matches this phone follows on its lock screen, read when the screen appears
-    @State private var followingCount = 0
 
     public init(onCoach: @escaping () -> Void, onReferee: @escaping () -> Void,
                 onHistory: @escaping () -> Void, onPlayers: @escaping () -> Void, onBadges: @escaping () -> Void,
-                onCompetition: (() -> Void)? = nil, onLiveFollow: (() -> Void)? = nil, competitionLive: Bool = false) {
-        self.onLiveFollow = onLiveFollow
+                onCompetition: (() -> Void)? = nil, competitionLive: Bool = false) {
         self.competitionLive = competitionLive
         self.onCoach = onCoach
         self.onReferee = onReferee
@@ -121,18 +116,12 @@ public struct HomeMenuTiles: View {
                     menuRow(loc("Competitie"), icon: .competition, live: competitionLive ? "LIVE" : nil, action: onCompetition)
                     Divider().overlay(SharedColors.line(0.13))
                 }
-                if let onLiveFollow {
-                    menuRow(loc("Wedstrijd volgen"), icon: .liveFollow,
-                            live: followingCount > 0 ? "\(followingCount) LIVE" : nil, action: onLiveFollow)
-                    Divider().overlay(SharedColors.line(0.13))
-                }
                 menuRow(loc("Spelers"), icon: .players, action: onPlayers)
                 Divider().overlay(SharedColors.line(0.13))
                 menuRow(loc("Badges"), icon: .badges, action: onBadges)
             }
         }
         .padding(.horizontal, 24)
-        .onAppear { followingCount = LiveFollow.shared.following.count }
     }
 
     /// `live`: the text of a sea-green LIVE pill on the right ("LIVE", "2 LIVE");
@@ -481,8 +470,6 @@ public struct AndroidHomeView: View {
     @State private var showingCompetition = false
     /// Opened from the bar on the Mijn team card
     @State private var openedTeamMatch: TeamMatch? = nil
-    /// Wedstrijd volgen (live score op het vergrendelscherm), when the app set a presenter
-    @State private var showingLiveFollow = false
 
     public init(playerStore: any PlayerProfileStore, badgeStore: any PlayerBadgeSummaryStore,
                 historyStore: any MatchHistoryStore,
@@ -596,9 +583,6 @@ public struct AndroidHomeView: View {
                 SharedAccountClaimSheet(token: token) { PlayerAccount.shared.pendingClaim = nil }
             }
         }
-        .sheet(isPresented: $showingLiveFollow) {
-            SharedLiveFollowView { showingLiveFollow = false }
-        }
         .sheet(isPresented: Binding(get: { testDataCounts != nil && !welcomeNeeded },
                                     set: { if !$0 { testDataCounts = nil } })) {
             if let counts = testDataCounts, let start = BadgeSeason.start, let testDataStore {
@@ -657,6 +641,7 @@ public struct AndroidHomeView: View {
     private var homeContent: some View {
         ZStack {
             SharedColors.background.ignoresSafeArea()
+            SamplePlayersQuestion(store: playerStore, waiting: welcomeNeeded || testDataCounts != nil)
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 16) {
@@ -677,8 +662,7 @@ public struct AndroidHomeView: View {
                             onHistory: { showingHistory = true },
                             onPlayers: { showingPlayers = true },
                             onBadges: { showingBadges = true },
-                            onCompetition: teamMatchStore == nil ? nil : { showingCompetition = true },
-                            onLiveFollow: LiveFollow.shared.presenter == nil ? nil : { showingLiveFollow = true }
+                            onCompetition: teamMatchStore == nil ? nil : { showingCompetition = true }
                         )
                     }
                     .padding(.top, 8)

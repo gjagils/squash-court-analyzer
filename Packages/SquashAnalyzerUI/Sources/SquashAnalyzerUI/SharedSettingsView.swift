@@ -129,6 +129,7 @@ public struct SharedSettingsView: View {
 
     /// The part that is open; one at a time (Mijn team when opened from "Zoek je club")
     @State private var openPart: String?
+    @State private var showingLiveFollow = false
 
     private func toggle(_ part: String) {
         withAnimation(.easeInOut(duration: 0.2)) { openPart = openPart == part ? nil : part }
@@ -173,6 +174,14 @@ public struct SharedSettingsView: View {
                     SettingsRow(loc("Live meekijken"), icon: "dot.radiowaves.left.and.right", open: openPart == "live") { toggle("live") }
                     if openPart == "live" { liveSection.padding(.bottom, 16) }
                     SettingsDivider()
+                    // Moved here from the home screen (Gerd-Jan, 7 November 2026)
+                    if LiveFollow.shared.presenter != nil {
+                        SettingsRow(loc("Wedstrijd volgen"), icon: "lock.iphone") { showingLiveFollow = true }
+                            .sheet(isPresented: $showingLiveFollow) {
+                                SharedLiveFollowView { showingLiveFollow = false }
+                            }
+                        SettingsDivider()
+                    }
                     if backup != nil {
                         SettingsRow(loc("Back-up"), icon: "icloud.and.arrow.up", open: openPart == "backup") { toggle("backup") }
                         if openPart == "backup" { backupSection.padding(.bottom, 16) }

@@ -15,8 +15,8 @@ struct HomeView: View {
     var onOpenSettings: () -> Void
     /// "Zoek je club" on the competition card: Instellingen with Mijn team open
     var onFindClub: () -> Void
-    /// Wedstrijd volgen (live score op het vergrendelscherm)
-    var onLiveFollow: () -> Void
+    /// A cover or a first-time screen is up: the question about the sample players waits
+    var questionsWaiting = false
 
     @State private var showingPlayerManagement = false
     @State private var showingBadgeCatalog = false
@@ -49,6 +49,7 @@ struct HomeView: View {
     var body: some View {
         ZStack {
             SharedColors.background.ignoresSafeArea()
+            SamplePlayersQuestion(store: SwiftDataPlayerStore(context: modelContext), waiting: questionsWaiting)
 
             ScrollView {
                 VStack(spacing: 16) {
@@ -63,7 +64,6 @@ struct HomeView: View {
                         onPlayers: { showingPlayerManagement = true },
                         onBadges: { showingBadgeCatalog = true },
                         onCompetition: { showingCompetition = true },
-                        onLiveFollow: onLiveFollow,
                         competitionLive: competitionLive
                     )
                 }

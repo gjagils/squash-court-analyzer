@@ -1924,19 +1924,36 @@
         }
       }
     },
-    "Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen op het beginscherm." : {
+    "Wedstrijd volgen" : {
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "While you score, the score of your match is on the lock screen and in the Dynamic Island. You follow someone else's match with Follow a match on the home screen."
+            "value" : "Follow a match"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen op het beginscherm."
+            "value" : "Wedstrijd volgen"
+          }
+        }
+      }
+    },
+    "Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen hier in Instellingen." : {
+      "generatesSymbol" : false,
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "While you score, the score of your match is on the lock screen and in the Dynamic Island. You follow someone else's match with Follow a match here in Settings."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen hier in Instellingen."
           }
         }
       }

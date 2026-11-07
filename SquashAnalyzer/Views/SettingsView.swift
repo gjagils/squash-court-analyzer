@@ -34,6 +34,7 @@ struct SettingsView: View {
     @Environment(\.openURL) private var openURL
     /// The part of Instellingen that is open; one at a time
     @State private var openPart: String? = nil
+    @State private var showingLiveFollow = false
 
     private func toggle(_ part: String) {
         withAnimation(.easeInOut(duration: 0.2)) { openPart = openPart == part ? nil : part }
@@ -90,6 +91,12 @@ struct SettingsView: View {
                         SettingsDivider()
                         SettingsRow(appText("Live meekijken"), icon: "dot.radiowaves.left.and.right", open: openPart == "live") { toggle("live") }
                         if openPart == "live" { liveSection.padding(.bottom, 16) }
+                        SettingsDivider()
+                        // Moved here from the home screen (Gerd-Jan, 7 November 2026)
+                        SettingsRow(appText("Wedstrijd volgen"), icon: "lock.iphone") { showingLiveFollow = true }
+                            .sheet(isPresented: $showingLiveFollow) {
+                                SharedLiveFollowView { showingLiveFollow = false }
+                            }
                         SettingsDivider()
                         SettingsRow(appText("Back-up"), icon: "icloud.and.arrow.up", open: openPart == "backup") { toggle("backup") }
                         if openPart == "backup" { backupSection.padding(.bottom, 16) }
@@ -255,7 +262,7 @@ struct SettingsView: View {
                     .foregroundColor(AppColors.textPrimary)
             }
             .tint(AppColors.warmOrange)
-            Text(appText("Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen op het beginscherm."))
+            Text(appText("Tijdens het scoren staat de stand van je wedstrijd op het vergrendelscherm en in het Dynamic Island. Een wedstrijd van iemand anders volg je via Wedstrijd volgen hier in Instellingen."))
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)

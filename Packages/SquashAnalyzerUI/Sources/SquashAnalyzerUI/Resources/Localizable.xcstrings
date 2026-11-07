@@ -13554,6 +13554,60 @@
           }
         }
       }
+    },
+    "Voorbeeldspelers verwijderen?": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the example players?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voorbeeldspelers verwijderen?"
+          }
+        }
+      }
+    },
+    "Behouden": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Behouden"
+          }
+        }
+      }
+    },
+    "In je spelerslijst staan nog de voorbeeldspelers %@. Die zijn alleen om te proberen. Je wedstrijden blijven bewaard.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your player list still has the example players %@. They are only there to try things out. Your matches are kept."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In je spelerslijst staan nog de voorbeeldspelers %@. Die zijn alleen om te proberen. Je wedstrijden blijven bewaard."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

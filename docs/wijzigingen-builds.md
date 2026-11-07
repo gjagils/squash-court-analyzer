@@ -10,6 +10,13 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.2 build 2)
 
+- **Wedstrijd volgen naar Instellingen (7 november 2026, vraag Gerd-Jan):** de rij staat niet meer op het beginscherm maar
+  in Instellingen, onder Live meekijken, op iOS en Android. Een volglink opent het scherm zoals altijd. De teller "2 LIVE"
+  op die rij is daarmee weg. Handleidingen (nl en en) aangepast.
+- **Bob en Wim weg (7 november 2026, vraag Gerd-Jan):** een nieuwe installatie krijgt geen voorbeeldspelers meer
+  (`voorbeeldspelers.zip` en `SamplePlayers` zijn weg). Staan Bob, Wim, Bombardino of Whiskey nog in de lijst, dan vraagt
+  de app eenmalig of ze weg mogen (`SamplePlayersQuestion`, `SamplePlayerCleanup`). Alleen op naam, dus een speler die
+  "In mijn team" staat wordt niet genoemd. Wedstrijden blijven bewaard.
 - **Competitie: alle wedstrijden in één volgorde (7 november 2026, vraag Gerd-Jan):** Competitie toonde alleen de
   teamwedstrijden op die telefoon en gespeelde wedstrijden met een uitslag bij SBN; komende wedstrijden stonden er
   niet in, dus elke telefoon liet iets anders zien. Nu staat het hele programma van Mijn team erin, samen met de
@@ -38,8 +45,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   wedstrijd houdt de manier waarop hij begon". De analyse kijkt nu per game (`Game.isSimpleInput`): een game zonder
   eenvoudige punten houdt de volledige analyse, een gemengde game toont het eenvoudige overzicht met "Deels eenvoudig
   gecoacht". Badges: een wedstrijd met één eenvoudig punt telt niet mee voor badges die slagen of fouten nodig hebben
-  (`recordsPointTypes`), zoals een eenvoudige wedstrijd nu al. **Bij de build:** de zin "Een wedstrijd houdt de manier…" in
-  `website/handleiding/iphone.html` en `android.html` vervangen.
+  (`recordsPointTypes`), zoals een eenvoudige wedstrijd nu al. Handleiding bijgewerkt (nog niet gepubliceerd, 7 november).
 
 - **4.0 teamwedstrijd vinden zonder uitnodiging (6 november 2026, achter de vlag; keuzes Gerd-Jan):** een nieuwe
   teamwedstrijd uit het programma van Mijn team is met een account vanzelf zichtbaar voor teamgenoten met een

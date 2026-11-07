@@ -120,11 +120,16 @@ def appstore(out, today, optin):
     monthly = load("sales-monthly.json", {})
     month = dt.date.fromisoformat(FIRST_MONTH + "-01")
     this_month = today.replace(day=1)
+
+    def days_of(key):
+        return [units for day, units in daily.items() if day.startswith(key)]
+
     while month < this_month:
         key = month.strftime("%Y-%m")
         if key not in monthly:
             units = sales_report("MONTHLY", key)
-            if units is None:
+            # Apple says "no sales" until the month report exists; the days show whether that is true
+            if units is None or (not units and any(days_of(key))):
                 break
             monthly[key] = units
         month = (month + dt.timedelta(days=32)).replace(day=1)
@@ -133,11 +138,12 @@ def appstore(out, today, optin):
     months = []
     for key in sorted(monthly):
         months.append({"maand": key, "nieuwe_downloads": monthly[key].get("1", 0), "herdownloads": monthly[key].get("3", 0)})
-    current = this_month.strftime("%Y-%m")
-    if current not in monthly:
-        days = [units for key, units in daily.items() if key.startswith(current)]
-        months.append({"maand": current, "nieuwe_downloads": sum(u.get("1", 0) for u in days),
+    while month <= this_month:  # months without a report yet, from the days
+        key = month.strftime("%Y-%m")
+        days = days_of(key)
+        months.append({"maand": key, "nieuwe_downloads": sum(u.get("1", 0) for u in days),
                        "herdownloads": sum(u.get("3", 0) for u in days)})
+        month = (month + dt.timedelta(days=32)).replace(day=1)
     write(out, "appstore-per-maand.json", months)
 
     last = max(daily) if daily else None

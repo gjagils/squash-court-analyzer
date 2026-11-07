@@ -58,9 +58,8 @@ public protocol PlayerPhotoStore {
     func setPhoto(_ image: Data?, for playerId: String) async throws
 }
 
-/// The system pickers the player screens need on Android: a photo from the
-/// gallery and a team zip from the files. Nil when the user cancelled.
+/// The system picker the player screens need on Android: a photo from the
+/// gallery. Nil when the user cancelled.
 public protocol PlayerFilePicker: AnyObject, Sendable {
     func pickPhoto() async throws -> Data?
-    func pickTeamZip() async throws -> Data?
 }

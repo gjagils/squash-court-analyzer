@@ -53,7 +53,7 @@ samengevoegd moest worden. Daarom:
    de ander weggooien.
 6. **Niet committen**: bouwuitvoer en schermafbeeldingen in de root (`output/`,
    `Squashanalyzerscreens/`), `__pycache__`, sleutels, `website/screenshots/`
-   en `website/teams/` (die staan in `.gitignore`).
+   en de oude `website/teams/` (die staan in `.gitignore`).
 7. **Feiten die je in documentatie zet moet je kunnen controleren.** Schrijf
    geen "iedere telefoon schrijft alleen zijn eigen partij" als de server dat
    niet afdwingt; zet erbij wat de code echt doet. Een status ("nog niet
@@ -68,9 +68,9 @@ samengevoegd moest worden. Daarom:
   automatisch uit.
 - **De website publiceren** gaat met `npx wrangler deploy -c
   server/website-worker/wrangler.jsonc` vanaf de Mac (niet via Portainer; de
-  NAS is verouderd). `website/screenshots/` en `website/teams/` staan buiten
-  git en mogen nooit gecommit worden (publieke repo, teamzips bevatten namen
-  en foto's).
+  NAS is verouderd). `website/screenshots/` staat buiten git; de oude
+  `website/teams/` ook en mag nooit gecommit worden (publieke repo, teamzips
+  bevatten namen en foto's; niet meer nodig sinds 7 november 2026).
 - DNS- en Cloudflare-dashboardwijzigingen doet Gerd-Jan zelf.
 - **Nooit `connectedDebugAndroidTest` met zijn Samsung A13 aangesloten** (het
   wist de app-data); gebruik `ANDROID_SERIAL=emulator-5554` en `adb -s`.

@@ -53,6 +53,7 @@ public struct SamplePlayersQuestion: View {
     private func remove(_ players: [PlayerProfile]) async {
         for player in players {
             try? await store.deletePlayer(player.id)
+            SquashLevelsLinks.shared.forget(player: player.id)
         }
     }
 }

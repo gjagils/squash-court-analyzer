@@ -1,6 +1,6 @@
 # Voorstel: rondleiding voor nieuwe gebruikers
 
-Stand: 10 oktober 2026, voorstel, nog niet gebouwd. Aanleiding: testersrapport
+Stand: gebouwd (rondleiding in 3.0, opnieuw te starten via Instellingen; zie `docs/wijzigingen-builds.md`). Oorspronkelijk voorstel van 10 oktober 2026. Aanleiding: testersrapport
 van Testers Community (punt 4, "Lack of User Onboarding Walkthrough"). Besluit
 Gerd-Jan: een rondleiding maken, die ook vanuit Instellingen opnieuw te starten is.
 

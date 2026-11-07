@@ -423,6 +423,7 @@ public struct PlayerDirectoryView: View {
                 Task {
                     do {
                         try await store.deletePlayer(player.id)
+                        SquashLevelsLinks.shared.forget(player: player.id)
                         await reload()
                     } catch { showError(loc("Verwijderen is niet gelukt. Probeer het opnieuw.")) }
                     isDeleting = false

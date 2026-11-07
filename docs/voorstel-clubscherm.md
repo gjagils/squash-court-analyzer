@@ -1,7 +1,8 @@
 # Voorstel: clubscherm met alle live wedstrijden (31 oktober 2026)
 
 > **Gebouwd op 3 november 2026**, zie "Wat er gebouwd is" onderaan. Keuzes van Gerd-Jan:
-> een geheime link per club, en de club uit de SBN-clubzoeker.
+> een geheime link per club, en de club uit de SBN-clubzoeker. Het vervolg (QR-code, losse wedstrijden) loopt
+> parallel aan 4.0 (besluit 7 november 2026, [roadmap](roadmap.md)).
 
 Idee van Gerd-Jan: een pagina per club die alle live wedstrijden van die
 club op één scherm laat zien. All Inn Squash zet die pagina tijdens de

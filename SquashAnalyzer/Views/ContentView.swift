@@ -131,7 +131,6 @@ struct ContentView: View {
         #endif
         .onAppear {
             #if DEBUG
-            ScreenshotScenario.importTeamIfRequested(context: modelContext)
             if let scenario = ScreenshotScenario.current {
                 // A screenshot shows the screen itself, never the welcome tour (a freshly erased simulator)
                 tourSeen = Onboarding.currentVersion

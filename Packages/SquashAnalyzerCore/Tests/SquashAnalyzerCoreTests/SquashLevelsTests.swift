@@ -51,4 +51,18 @@ final class SquashLevelsTests: XCTestCase {
         XCTAssertEqual(SquashLevelsFile.read(in: directory), links)
         try? FileManager.default.removeItem(at: directory)
     }
+
+    func testADeletedPlayerLeavesNoLink() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("levels-" + UUID().uuidString)
+        let store = SquashLevelsLinks()
+        store.configure(directory: directory)
+        try store.set("286855", forPlayer: "A")
+        try store.set("1001", forPlayer: "B")
+        store.forget(player: "A")
+        XCTAssertNil(store.levelsId(forPlayer: "A"))
+        XCTAssertEqual(store.levelsId(forPlayer: "B"), "1001", "the others stay")
+        XCTAssertEqual(SquashLevelsFile.read(in: directory), [SquashLevelsLink(playerId: "B", levelsId: "1001")], "also in the file")
+        store.forget(player: "nobody")
+        try? FileManager.default.removeItem(at: directory)
+    }
 }

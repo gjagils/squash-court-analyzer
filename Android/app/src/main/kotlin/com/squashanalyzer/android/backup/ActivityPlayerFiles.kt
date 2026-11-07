@@ -13,17 +13,14 @@ import skip.foundation.Data
 import squash.analyzer.core.PlayerFilePicker
 
 /**
- * The system pickers for the player screens: a photo from the gallery
- * (Android's photo picker, no permission needed) and a team zip from the
- * files. Must be created in `onCreate`, like `ActivityBackupFiles`.
+ * The system picker for the player screens: a photo from the gallery
+ * (Android's photo picker, no permission needed). Must be created in
+ * `onCreate`, like `ActivityBackupFiles`.
  */
 class ActivityPlayerFiles(private val activity: ComponentActivity) : PlayerFilePicker {
     private var pending: CompletableDeferred<Uri?>? = null
 
     private val photoLauncher = activity.registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        pending?.complete(uri)
-    }
-    private val zipLauncher = activity.registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         pending?.complete(uri)
     }
 
@@ -33,13 +30,6 @@ class ActivityPlayerFiles(private val activity: ComponentActivity) : PlayerFileP
         withContext(Dispatchers.Main) {
             photoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
-        return read(result.await() ?: return null)
-    }
-
-    override suspend fun pickTeamZip(): Data? {
-        val result = CompletableDeferred<Uri?>()
-        pending = result
-        withContext(Dispatchers.Main) { zipLauncher.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")) }
         return read(result.await() ?: return null)
     }
 

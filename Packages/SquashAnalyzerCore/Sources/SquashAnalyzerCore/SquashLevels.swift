@@ -132,6 +132,13 @@ public final class SquashLevelsLinks: @unchecked Sendable {
         links = updated
     }
 
+    /// A deleted player keeps no link (`plan-squashlevels-profiel.md`); a failed write is not
+    /// worth an error after the player is already gone: the link alone does nothing
+    public func forget(player playerId: String) {
+        guard levelsId(forPlayer: playerId) != nil else { return }
+        try? set(nil, forPlayer: playerId)
+    }
+
     /// After a restore wrote the file anew
     public func reload() {
         guard let directory else { return }

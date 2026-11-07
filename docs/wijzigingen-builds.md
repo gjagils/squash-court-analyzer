@@ -30,6 +30,9 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   app" vervallen; een komende wedstrijd opent Nieuwe teamwedstrijd. De lijst Wedstrijden op het teamscherm heeft
   dezelfde volgorde. De SBN-inlezer zelf was niet de oorzaak: op vijf teampagina's vond hij alle wedstrijden (7
   november). Zonder Mijn team blijft het programma leeg.
+- **Opgeruimd (7 november 2026):** de code van de oude teamimport (zip met namen en foto's) is weg op iOS, Android en in
+  Core, met tests en de bestandskiezer voor zips. De SquashLevels-koppeling van een verwijderde speler wordt nu ook opgeruimd.
+  Documenten bijgewerkt: gebouwde punten staan niet meer als open, en de roadmap noemt 4.0 als volgende stap.
 - **Teamwedstrijd ververst zelf (7 november 2026, vraag Gerd-Jan):** staat het scherm van een live teamwedstrijd open, dan leest het
   elke minuut wat teamgenoten op de livepagina zetten, zoals het beginscherm al deed (`followLive`). Niet tijdens het invullen of
   spelen van een partij. *Vernieuwen* blijft. Een melding als een teamgenoot een partij invult komt in 4.0 (T6).
@@ -1276,7 +1279,7 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       (SquashAnalyzerUI), plus de handleidingen (`website/handleiding/`) en
       `docs/team-import/README.md`. Bestaande installaties krijgen ze niet
       opnieuw (`samplePlayersAdded`).
-- [ ] **SquashLevels-profiel bij een speler** (afgesproken 6 oktober,
+- [x] **SquashLevels-profiel bij een speler** (gebouwd 3 november 2026, in 3.2 build 2; koppeling opruimen bij het verwijderen van een speler 7 november; afgesproken 6 oktober,
       nog niet gebouwd; kandidaat voor de definitieve 3.0). Bij Spelers een optioneel
       speler-ID of een profiellink per opgeslagen speler vastleggen (niet in
       algemene Instellingen), met **Bekijk op SquashLevels**
@@ -1427,8 +1430,8 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       iOS `SavedMatch`/`SavedRefereeMatch`). Lijnen tekenen met `Path` zoals de
       heatmap, geen Charts-framework (Skip kent het niet). Een speler zonder
       coachwedstrijden krijgt alleen Vorm en Tegenstanders.
-      *Buiten scope (later):* vergelijken van twee spelers, export als plaatje,
-      AI Coach-advies over de trend (die kan de `PlayerTrendSummary` dan als
+      *Buiten scope (later):* vergelijken van twee spelers en AI Coach-advies over de trend (beide 4.0, besluit
+      Gerd-Jan 7 november 2026), export als plaatje (die kan de `PlayerTrendSummary` dan als
       invoer krijgen).
       *Klaar wanneer:* Core-tests voor de berekeningen (ook met wedstrijden
       zonder punttypes en met "later instappen"), het scherm op iPhone en
@@ -1438,11 +1441,11 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
 Vroege ideeën, nog niet uitgewerkt en zonder build (7 oktober overgenomen uit
 `stand-van-zaken-2026-10-06.md` en `buildplanning-testperiode.md`):
 
-- [ ] Voortgang naar de volgende badgetrede tonen (bijv. "nog 2 tot zilver").
-- [ ] Onderlinge stand bij Kies speler.
-- [ ] Vergelijken met de officiële SBN-uitslag van een teamwedstrijd.
-- [ ] Trainingsmodus.
-- [ ] Clubranglijst (eerste stap: het clubscherm, [voorstel](voorstel-clubscherm.md)).
+- [x] Voortgang naar de volgende badgetrede tonen (bijv. "nog 2 tot zilver"); in 3.2 build 2.
+- [x] Onderlinge stand bij Kies speler; in 3.2 build 2.
+- [ ] Vergelijken met de officiële SBN-uitslag van een teamwedstrijd (na 4.0, [roadmap](roadmap.md); *Uitslag van SBN ophalen* in 3.1 build 7 is een eerste stap).
+- [x] Trainingsmodus (Oefenpartij); in 3.1.
+- [ ] Clubranglijst (eerste stap: het clubscherm, [voorstel](voorstel-clubscherm.md)); het clubscherm loopt parallel aan 4.0.
 
 Notities van Gerd-Jan van 21 oktober (namen aanpassen in een lopende wedstrijd,
 geavanceerde coachmodus, businessmodel): `backlog-2026-10-21.md`.

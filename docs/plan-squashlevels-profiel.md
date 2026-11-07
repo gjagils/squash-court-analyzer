@@ -161,5 +161,5 @@ SquashLevels. Deze feature verandert Mijn team niet.
   SQUASHLEVELS met `Bewaar` en `Verwijder koppeling`; het bewaart direct, net als de
   schakelaar "In mijn team", dus Annuleren van de editor draait het niet terug. Op het
   badgescherm van de speler `Bekijk op SquashLevels` (opent de browser).
-- **Niet gedaan**: de team-zip (de teamimport is in 3.1 build 5 verwijderd); de koppeling
-  opruimen als een speler verwijderd wordt (een losse koppeling zonder speler doet niets).
+- **Niet gedaan**: de team-zip (de teamimport is in 3.1 build 5 verwijderd, de code op 7 november 2026).
+- **Opruimen bij verwijderen** (7 november 2026): `SquashLevelsLinks.forget(player:)` bij het verwijderen van een speler.

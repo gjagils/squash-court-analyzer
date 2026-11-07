@@ -27,7 +27,7 @@ schakelaar "Uit de lucht" voor volleys; nieuw is de slag Kill.
 - [Architectuur](ARCHITECTURE.md)
 - [Android-status, bouwinstructies en resterende stappen](docs/android-port.md)
 - [Google Play: Android-app ondertekenen, uploaden en testen](docs/google-play.md)
-- [Teamimport (archief; verwijderd in 3.1 build 5, het zip-formaat blijft intern voor de voorbeeldspelers)](docs/archief/team-import/README.md)
+- [Teamimport (archief; uit de app sinds 3.1 build 5, code verwijderd op 7 november 2026)](docs/archief/team-import/README.md)
 
 Lokaal Android bouwen (Xcode/Swift, Skip en Android Studio SDK zijn nodig):
 

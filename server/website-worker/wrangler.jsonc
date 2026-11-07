@@ -2,8 +2,8 @@
 // with static assets (the current form of Cloudflare Pages), on
 // squashanalyzer.com and www (custom domains; the NAS copy behind the tunnel
 // is the reserve). website/_headers sets the JSON types for the deep-link
-// files and keeps /teams/ out of search engines. website/screenshots/ and
-// website/teams/ are outside git, so deploy from the Mac, not from CI.
+// files and keeps the old /teams/ out of search engines. website/screenshots/
+// is outside git, so deploy from the Mac, not from CI.
 // Deploy: npx wrangler deploy -c server/website-worker/wrangler.jsonc
 {
   "$schema": "https://unpkg.com/wrangler/config-schema.json",

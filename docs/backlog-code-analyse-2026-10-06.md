@@ -181,7 +181,7 @@ formaat 4), kosten (Workers Paid, door Gerd-Jan aangezet) en EU-opslag.
 
 Nog open:
 
-1. **EU-opslag inschakelen**: `LIVE_JURISDICTION = "eu"` zodra `/health` `"sessions": 0` zegt
+1. ~~**EU-opslag inschakelen**~~: gedaan, `LIVE_JURISDICTION = "eu"` staat in `server/live-worker/wrangler.toml` (de privacytekst niet opnieuw nagekeken op 7 november 2026). Oorspronkelijk: zodra `/health` `"sessions": 0` zegt
    (eigen kleine commit), daarna `website/privacy.html` aanvullen en de website publiceren.
 2. **App Store-privacylabel** bijwerken door Gerd-Jan vóór build 19.
-3. **Teamzip-links** nameten op de iPhone en de A13 (AASA-cache).
+3. ~~**Teamzip-links** nameten~~: vervallen, de teamimport is uit de app (3.1 build 5, code opgeruimd 7 november 2026).

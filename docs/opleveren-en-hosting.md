@@ -21,13 +21,11 @@ Gevolgen van de verhuizing:
 - **De website wordt niet meer via Portainer gepubliceerd.** Actuele
   instructies gebruiken de `wrangler deploy` hierboven. Verwijzingen naar
   Portainer in historische plannen beschrijven de vroegere situatie.
-- **De map `website/screenshots/` en `website/teams/` staan buiten git** (de
-  repo is publiek; teamzips bevatten namen en foto's en mogen nooit gecommit
-  worden). Een deploy moet dus vanaf een checkout waar die mappen staan (de
-  hoofdcheckout van Gerd-Jan), of kopieer ze eerst naar je worktree. Daarom
-  staat de GitHub-workflow voor de website (`deploy-website.yml`) bewust uit
-  (alleen met de hand te starten): hij zou een site zonder screenshots en
-  teamzips uploaden.
+- **De map `website/screenshots/` staat buiten git.** Een deploy moet dus vanaf een checkout waar die map staat (de
+  hoofdcheckout van Gerd-Jan), of kopieer hem eerst naar je worktree. Daarom staat de GitHub-workflow voor de website
+  (`deploy-website.yml`) bewust uit (alleen met de hand te starten): hij zou een site zonder screenshots uploaden.
+  `website/teams/` (teamzips met namen en foto's) is sinds 7 november 2026 niet meer nodig: de teamimport is uit de code.
+  Een deploy zonder die map haalt de oude zips offline; de map blijft in `.gitignore` en mag nooit gecommit worden.
 - **De live-server is losgekoppeld van app-builds.** Hij gaat live zodra een
   wijziging op `main` staat, ook als er nog geen nieuwe build is. Houd de API
   daarom **achterwaarts compatibel** met de builds die testers hebben
@@ -226,7 +224,7 @@ Volgorde bij een externe build:
      per tegel één sectie) en, als er gegevens bij komen, **`privacy.html`**;
    - dan publiceren met `npx wrangler deploy -c server/website-worker/wrangler.jsonc`
      **vanuit de hoofdcheckout** na `git pull --ff-only` (daar staan
-     `website/screenshots/` en `website/teams/`, die buiten git vallen), en
+     `website/screenshots/`, die buiten git valt), en
      controleren op squashanalyzer.com. In het rapport vermelden wat er
      veranderd is.
 8. `docs/wijzigingen-builds.md`: het blok "Volgende build" krijgt de kop met

@@ -499,7 +499,8 @@ def release(skip_build=False):
     apk = os.path.join(ROOT, "Android/app/build/outputs/apk/debug/app-debug.apk")
     if not skip_build:
         studio_java = "/Applications/Android Studio.app/Contents/jbr/Contents/Home"
-        env = dict(os.environ, JAVA_HOME=os.environ.get("JAVA_HOME", studio_java))
+        env = dict(os.environ, JAVA_HOME=os.environ.get("JAVA_HOME", studio_java),
+                   ANDROID_HOME=os.path.dirname(os.path.dirname(ADB)))
         subprocess.run(["./gradlew", "assembleDebug"], cwd=os.path.join(ROOT, "Android"), env=env, check=True)
     stamp = datetime.datetime.now().strftime("%Y-%m-%d-%H%M")
     base = os.path.join(ROOT, "output", "toestellen", stamp)

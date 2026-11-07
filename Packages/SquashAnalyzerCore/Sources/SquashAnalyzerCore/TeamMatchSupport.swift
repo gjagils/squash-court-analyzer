@@ -85,6 +85,15 @@ public struct TeamTarget: Equatable {
 }
 
 public enum TeamMatchSupport {
+    /// A counter in UserDefaults that goes up when a team match arrives from
+    /// outside the screens that pause the Mijn team card (joined with a link):
+    /// the card reads the team matches again at once instead of within a minute
+    public static let revisionKey = "teamMatchesRevision"
+
+    public static func noteChange(in defaults: UserDefaults = UserDefaults.standard) {
+        defaults.set(defaults.integer(forKey: revisionKey) + 1, forKey: revisionKey)
+    }
+
     /// Puts the team match on the live page ("Deel met mijn team"): makes the
     /// page, keeps its keys in the team match and sends what is filled in.
     /// Throws when the page cannot be made; the team match is then unchanged.

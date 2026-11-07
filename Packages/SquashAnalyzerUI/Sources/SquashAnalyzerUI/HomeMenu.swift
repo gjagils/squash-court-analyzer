@@ -546,7 +546,10 @@ public struct AndroidHomeView: View {
                 }
                 .navigationDestination(isPresented: $showingTeam) {
                     if let team {
-                        SharedLeagueTeamDetailView(snapshot: team, fetcher: leagueTeamFetcher)
+                        SharedLeagueTeamDetailView(snapshot: team, fetcher: leagueTeamFetcher, teamMatches: teamMatchStore,
+                                                   tools: TeamMatchTools(historyStore: historyStore, playerStore: playerStore, coachStore: matchStore,
+                                                                         refereeStore: refereeMatchStore, photoStore: photoStore, filePicker: filePicker,
+                                                                         aiCoach: aiCoach, shareText: shareText, leagueFetcher: leagueTeamFetcher))
                     }
                 }
                 .navigationDestination(isPresented: $showingCompetition) {
@@ -661,7 +664,7 @@ public struct AndroidHomeView: View {
                             Task { _ = await TeamRosterSync.run(snapshot, store: store) }
                         }, onSetup: { settingsOpensTeam = true; showingSettings = true },
                            teamMatches: teamMatchStore,
-                           matchesPaused: showingCompetition || openedTeamMatch != nil || showingCoach || showingReferee,
+                           matchesPaused: showingCompetition || openedTeamMatch != nil || showingTeam || showingCoach || showingReferee,
                            onTeamMatch: { match in openedTeamMatch = match }) { snapshot in
                             team = snapshot
                             showingTeam = true

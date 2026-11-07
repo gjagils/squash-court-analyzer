@@ -168,6 +168,8 @@ public struct SharedLeagueTeamCard: View {
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     @State private var activeMatch: TeamMatch? = nil
+    /// Goes up when a team match is joined with a link: read again at once
+    @AppStorage(TeamMatchSupport.revisionKey) private var matchesRevision = 0
     /// The prompt was closed with the cross: it stays away (Instellingen still has the field)
     @AppStorage("teamPromptDismissed") private var promptDismissed = false
     @State private var snapshot: LeagueTeamSnapshot?
@@ -220,7 +222,7 @@ public struct SharedLeagueTeamCard: View {
         }
         .padding(.horizontal, 24)
         .task(id: teamURL) { await load() }
-        .task(id: matchesPaused) { await followActiveMatch() }
+        .task(id: "\(matchesPaused)-\(matchesRevision)") { await followActiveMatch() }
     }
 
     /// Keeps the bar current while the home screen is in front: the saved
@@ -306,10 +308,22 @@ public struct SharedLeagueTeamDetailView: View {
     private let fetcher: LeagueTeamFetcher?
     @State private var refreshing = false
     @State private var refreshError: String?
+    /// The team matches on this phone: a match of the programme shows its
+    /// stand and LIVE, and a tap opens it or makes one (7 November 2026)
+    private let teamMatches: (any TeamMatchStore)?
+    private let tools: TeamMatchTools?
+    @State private var matches: [TeamMatch] = []
+    @State private var opened: TeamMatch? = nil
+    @State private var shareOnOpen = false
+    @State private var creatingFor: LeagueFixture? = nil
+    @State private var matchMessage: String? = nil
 
-    public init(snapshot: LeagueTeamSnapshot, fetcher: LeagueTeamFetcher? = nil) {
+    public init(snapshot: LeagueTeamSnapshot, fetcher: LeagueTeamFetcher? = nil,
+                teamMatches: (any TeamMatchStore)? = nil, tools: TeamMatchTools? = nil) {
         _snapshot = State(initialValue: snapshot)
         self.fetcher = fetcher
+        self.teamMatches = teamMatches
+        self.tools = tools
     }
 
     public var body: some View {
@@ -360,6 +374,12 @@ public struct SharedLeagueTeamDetailView: View {
                         ForEach(order.past) { entry in
                             fixtureRow(entry)
                         }
+                        if let matchMessage {
+                            Text(matchMessage)
+                                .font(SharedFonts.system(12))
+                                .foregroundColor(SharedColors.error)
+                                .padding(.top, 6)
+                        }
                     }
                     section(loc("SPELERS")) {
                         ForEach(snapshot.players) { player in
@@ -393,6 +413,52 @@ public struct SharedLeagueTeamDetailView: View {
             }
         }
         .pageTitle(loc("Mijn team"))
+        .task { await loadMatches() }
+        .sheet(isPresented: Binding(get: { creatingFor != nil }, set: { if !$0 { creatingFor = nil } })) {
+            if let fixture = creatingFor {
+                NewTeamMatchSheet(team: snapshot, existing: matches, fixture: fixture) { match, share in
+                    creatingFor = nil
+                    Task { await create(match, share: share) }
+                } onCancel: { creatingFor = nil }
+            }
+        }
+        .navigationDestination(isPresented: Binding(get: { opened != nil }, set: { if !$0 { opened = nil } })) {
+            if let opened, let teamMatches, let tools {
+                SharedTeamMatchView(match: opened, store: teamMatches, tools: tools, team: snapshot, openShare: shareOnOpen) { _ in
+                    Task { await loadMatches() }
+                }
+            }
+        }
+    }
+
+    private func loadMatches() async {
+        guard let teamMatches else { return }
+        matches = (try? await teamMatches.loadAll()) ?? []
+    }
+
+    private func create(_ match: TeamMatch, share: Bool) async {
+        guard let teamMatches else { return }
+        do {
+            let result = try await TeamMatchCreation.save(match, share: share, store: teamMatches)
+            matchMessage = result.note
+            await loadMatches()
+            shareOnOpen = result.openShare
+            opened = result.match
+        } catch {
+            matchMessage = loc("Opslaan is niet gelukt.")
+        }
+    }
+
+    /// What a tap on a match does: open its team match, or make one for a
+    /// coming match; nil for a past match without a team match here
+    private func tapAction(_ fixture: LeagueFixture, match: TeamMatch?) -> (() -> Void)? {
+        guard teamMatches != nil, tools != nil else { return nil }
+        if let match {
+            return { shareOnOpen = false; opened = match }
+        }
+        let coming = fixture.date >= Date() || Calendar.current.isDate(fixture.date, inSameDayAs: Date())
+        guard coming else { return nil }
+        return { matchMessage = nil; creatingFor = fixture }
     }
 
     private func refresh() async {
@@ -418,6 +484,17 @@ public struct SharedLeagueTeamDetailView: View {
     @ViewBuilder
     private func fixtureRow(_ entry: CompetitionEntry) -> some View {
         if let fixture = entry.fixture {
+            let match = CompetitionOverview.match(for: fixture, in: matches)
+            if let action = tapAction(fixture, match: match) {
+                Button(action: action) { fixtureLine(fixture, match: match, tappable: true) }
+                    .buttonStyle(.plain)
+            } else {
+                fixtureLine(fixture, match: match, tappable: false)
+            }
+        }
+    }
+
+    private func fixtureLine(_ fixture: LeagueFixture, match: TeamMatch?, tappable: Bool) -> some View {
             HStack(spacing: 10) {
                 Text(LeagueDates.day(fixture.date))
                     .font(SharedFonts.system(11))
@@ -436,11 +513,33 @@ public struct SharedLeagueTeamDetailView: View {
                     }
                 }
                 Spacer()
-                Text(fixture.score ?? LeagueDates.time(fixture.date))
-                    .foregroundColor(fixture.score == nil ? SharedColors.textMuted : SharedColors.gold)
+                if let match, fixture.score == nil {
+                    // The team match on this phone: LIVE (or Bezig) and its stand in games
+                    VStack(alignment: .trailing, spacing: 4) {
+                        if match.isProbablyLive() {
+                            LivePill(text: "LIVE")
+                        } else if !match.isComplete {
+                            Text("Bezig", bundle: textBundle)
+                                .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
+                                .foregroundColor(SharedColors.support)
+                        }
+                        Text(match.gamesText)
+                            .font(SharedFonts.system(15, weight: .bold, design: .rounded))
+                            .foregroundColor(SharedColors.textPrimary)
+                    }
+                } else {
+                    Text(fixture.score ?? LeagueDates.time(fixture.date))
+                        .foregroundColor(fixture.score == nil ? SharedColors.textMuted : SharedColors.gold)
+                }
+                if tappable {
+                    AppSymbol("chevron.right", size: 12, color: SharedColors.textMuted)
+                }
             }
             .padding(.vertical, 5)
-        }
+            #if !SKIP
+            // The whole row is the tap target, also the space between the names and the stand
+            .contentShape(Rectangle())
+            #endif
     }
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {

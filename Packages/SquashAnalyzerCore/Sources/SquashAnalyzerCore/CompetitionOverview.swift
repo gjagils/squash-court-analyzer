@@ -60,14 +60,18 @@ public struct CompetitionOverview: Equatable, Sendable {
 
     /// By its SBN match; a copy joined before it took its fixture by day and teams
     static func hasMatch(_ fixture: LeagueFixture, in matches: [TeamMatch]) -> Bool {
+        match(for: fixture, in: matches) != nil
+    }
+
+    /// The team match on this phone for a match of the programme (Mijn team
+    /// shows it with its stand and LIVE), or nil
+    public static func match(for fixture: LeagueFixture, in matches: [TeamMatch]) -> TeamMatch? {
         let calendar = Calendar.current
-        for match in matches {
-            if match.fixtureId == fixture.id { return true }
-            if match.fixtureId == nil && calendar.isDate(match.date, inSameDayAs: fixture.date)
-                && TeamMatch.sameTeam(match.home, fixture.home) && TeamMatch.sameTeam(match.away, fixture.away) {
-                return true
-            }
+        for match in matches where match.fixtureId == fixture.id { return match }
+        for match in matches where match.fixtureId == nil && calendar.isDate(match.date, inSameDayAs: fixture.date)
+            && TeamMatch.sameTeam(match.home, fixture.home) && TeamMatch.sameTeam(match.away, fixture.away) {
+            return match
         }
-        return false
+        return nil
     }
 }

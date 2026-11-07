@@ -354,6 +354,13 @@ public struct SharedTeamJoinView: View {
         busy = false
     }
 
+    /// Kept: the Mijn team card reads the team matches again right away
+    /// (on iOS the join sheet closes onto the home screen, 7 November 2026)
+    private func finishJoin(_ match: TeamMatch) {
+        TeamMatchSupport.noteChange()
+        onJoined(match)
+    }
+
     private func join(_ fetched: TeamLiveState) async {
         guard let invite else { return }
         busy = true
@@ -391,7 +398,7 @@ public struct SharedTeamJoinView: View {
                 existing.adoptFixture(from: team?.fixtures ?? [])
                 try await store.save(existing)
                 busy = false
-                onJoined(existing)
+                finishJoin(existing)
                 return
             }
             // The same evening made by hand here: no second copy
@@ -401,7 +408,7 @@ public struct SharedTeamJoinView: View {
                 linked.adoptFixture(from: team?.fixtures ?? [])
                 try await store.save(linked)
                 busy = false
-                onJoined(linked)
+                finishJoin(linked)
                 return
             case TeamJoinTwin.filled(let own):
                 filledTwin = own
@@ -418,7 +425,7 @@ public struct SharedTeamJoinView: View {
             match.adoptFixture(from: team?.fixtures ?? [])
             try await store.save(match)
             busy = false
-            onJoined(match)
+            finishJoin(match)
         } catch {
             busy = false
             message = loc("Deelnemen is niet gelukt.")
@@ -433,7 +440,7 @@ public struct SharedTeamJoinView: View {
             try await store.save(taken)
             filledTwin = nil
             busy = false
-            onJoined(taken)
+            finishJoin(taken)
         } catch {
             busy = false
             message = loc("Overnemen is niet gelukt.")

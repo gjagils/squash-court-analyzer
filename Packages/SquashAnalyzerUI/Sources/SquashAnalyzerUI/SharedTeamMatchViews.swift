@@ -440,33 +440,49 @@ public struct SharedTeamMatchesView: View {
     /// as an own team match; its screen says so), then opened
     private func save(_ match: TeamMatch, share: Bool) async {
         do {
-            var created = match
-            try await store.save(created)
-            if share {
-                // 4.0: a match from the programme becomes visible for the team (and the opponent), not public
-                if let context = await PlayerAccount.shared.teamFindingContext(), TeamFinding.canShare(created, context: context) {
-                    if let found = try? await TeamFinding.makeVisible(created, context: context, store: store) {
-                        created = found.match
-                        switch found.outcome {
-                        case TeamFindingOutcome.joined(let starter):
-                            message = loc("\(starter) had deze teamwedstrijd al aangemaakt: je doet mee met die.")
-                        case TeamFindingOutcome.started:
-                            break
-                        }
-                    }
-                    await load()
-                    shareOnOpen = false
-                    opened = created
-                    return
-                }
-                if let live = try? await TeamMatchSupport.goLive(created, store: store) { created = live }
-            }
+            let result = try await TeamMatchCreation.save(match, share: share, store: store)
+            if let note = result.note { message = note }
             await load()
-            shareOnOpen = share
-            opened = created
+            shareOnOpen = result.openShare
+            opened = result.match
         } catch {
             message = loc("Opslaan is niet gelukt.")
         }
+    }
+}
+
+/// Keeping a new team match from "Nieuwe teamwedstrijd" (Competitie and
+/// Mijn team): saved, shared with the team when asked (a failure leaves it an
+/// own team match; its screen says so)
+@MainActor enum TeamMatchCreation {
+    struct Result {
+        let match: TeamMatch
+        /// Open the share screen with it (shared on the open live page)
+        let openShare: Bool
+        /// Not an error: a teammate had made it already
+        let note: String?
+    }
+
+    static func save(_ match: TeamMatch, share: Bool, store: any TeamMatchStore) async throws -> Result {
+        var created = match
+        try await store.save(created)
+        guard share else { return Result(match: created, openShare: false, note: nil) }
+        // 4.0: a match from the programme becomes visible for the team (and the opponent), not public
+        if let context = await PlayerAccount.shared.teamFindingContext(), TeamFinding.canShare(created, context: context) {
+            var note: String? = nil
+            if let found = try? await TeamFinding.makeVisible(created, context: context, store: store) {
+                created = found.match
+                switch found.outcome {
+                case TeamFindingOutcome.joined(let starter):
+                    note = loc("\(starter) had deze teamwedstrijd al aangemaakt: je doet mee met die.")
+                case TeamFindingOutcome.started:
+                    break
+                }
+            }
+            return Result(match: created, openShare: false, note: note)
+        }
+        if let live = try? await TeamMatchSupport.goLive(created, store: store) { created = live }
+        return Result(match: created, openShare: true, note: nil)
     }
 }
 

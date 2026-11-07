@@ -10,7 +10,19 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.2 build 3)
 
-(nog niets)
+- **Mijn team: teamwedstrijden in het programma (7 november 2026, Gerd-Jan):** in het overzicht van Mijn team
+  krijgt een wedstrijd met een teamwedstrijd op deze telefoon de stand in games en *LIVE* (of *Bezig*); een tik
+  opent de teamwedstrijd. Een tik op een komende wedstrijd zonder teamwedstrijd opent *Nieuwe teamwedstrijd* met
+  alleen die wedstrijd en *Deel met mijn team*. Opslaan en delen gaat via `TeamMatchCreation`, dezelfde weg als in
+  Competitie; de koppeling wedstrijd–teamwedstrijd via `CompetitionOverview.match(for:in:)`.
+- **Balk op het beginscherm meteen bij meedoen via een link:** de kaart las de teamwedstrijden alleen bij openen en
+  daarna elke minuut, dus na meedoen via de link (iOS: het blad sluit naar het beginscherm) stond de balk er pas
+  later of na herstarten. Meedoen verhoogt nu `TeamMatchSupport.revisionKey`, waarop de kaart meteen opnieuw leest;
+  op iOS ook na het sluiten van het Mijn team-overzicht, op Android pauzeert de kaart zolang dat overzicht open is.
+- **Nog open: namen van de tegenstander op de meedoende telefoon.** De spelers van de tegenstander komen via de
+  stand van de eigen poule in Mijn team (`LeagueOpponent.link(for:in:)`). Zonder (of met een ander) Mijn team op de
+  meedoende telefoon blijven ze leeg. Een oplossing is het SBN-adres van de tegenstander in de kop van de livepagina
+  meesturen; dat vraagt een wijziging in de Worker (`validate.js` bewaart alleen vaste kopvelden).
 
 ## 3.2 build 3 (geüpload 7 november 2026: TestFlight Squashteam, in bètareview; Play en website nog niet)
 

@@ -54,4 +54,25 @@ final class CompetitionOverviewTests: XCTestCase {
         XCTAssertFalse(overview.isEmpty)
         XCTAssertTrue(CompetitionOverview.make(matches: [], fixtures: [], now: now).isEmpty)
     }
+
+    /// Mijn team shows the team match of a match of the programme (7 November 2026)
+    func testTheTeamMatchOfAFixtureIsFound() {
+        let coming = fixture("a", days: 0.0)
+        let other = fixture("b", days: 7.0)
+        let own = TeamMatch.from(fixture: coming, ownTeam: "All Inn 8")
+        // Joined with a link on a phone without Mijn team: no fixture, same day and teams
+        let joined = TeamMatch(date: other.date, home: "all inn 8", away: "Delft 8", ownSide: TeamSide.home)
+        XCTAssertEqual(CompetitionOverview.match(for: coming, in: [joined, own])?.id, own.id)
+        XCTAssertEqual(CompetitionOverview.match(for: other, in: [own, joined])?.id, joined.id)
+        XCTAssertNil(CompetitionOverview.match(for: fixture("c", days: 14.0), in: [own, joined]))
+    }
+
+    /// Joining with a link tells the Mijn team card to read again
+    func testANoteOfChangeRaisesTheRevision() {
+        let defaults = UserDefaults(suiteName: "CompetitionOverviewTests")!
+        defaults.removeObject(forKey: TeamMatchSupport.revisionKey)
+        TeamMatchSupport.noteChange(in: defaults)
+        TeamMatchSupport.noteChange(in: defaults)
+        XCTAssertEqual(defaults.integer(forKey: TeamMatchSupport.revisionKey), 2)
+    }
 }

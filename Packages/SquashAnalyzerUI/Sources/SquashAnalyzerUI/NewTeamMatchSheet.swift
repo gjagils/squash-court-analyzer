@@ -6,6 +6,8 @@ import SquashAnalyzerCore
 struct NewTeamMatchSheet: View {
     let team: LeagueTeamSnapshot?
     let existing: [TeamMatch]
+    /// Opened from a match in Mijn team: only that match, with the share choice
+    var fixture: LeagueFixture? = nil
     /// The new team match and whether it is shared with the team right away
     let onCreate: (TeamMatch, Bool) -> Void
     let onCancel: () -> Void
@@ -60,7 +62,9 @@ struct NewTeamMatchSheet: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(SharedColors.tint(0.04))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                        if let team, !openFixtures.isEmpty {
+                        if let team, let fixture {
+                            chosenFixture(fixture, team: team)
+                        } else if let team, !openFixtures.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
                                 SectionHeader(loc("UIT HET PROGRAMMA VAN \(team.name.uppercased())"))
                                 ForEach(openFixtures) { fixture in
@@ -86,6 +90,7 @@ struct NewTeamMatchSheet: View {
                                 }
                             }
                         }
+                        if fixture == nil {
                         VStack(alignment: .leading, spacing: 8) {
                             SectionHeader(loc("ZELF INVULLEN"))
                             VStack(alignment: .leading, spacing: 10) {
@@ -115,6 +120,7 @@ struct NewTeamMatchSheet: View {
                             .padding(12)
                             .background(SharedColors.tint(0.04)).clipShape(RoundedRectangle(cornerRadius: 12))
                         }
+                        }
                     }
                     .padding(24)
                 }
@@ -128,5 +134,29 @@ struct NewTeamMatchSheet: View {
             .onAppear { if ownTeam.isEmpty, let team { ownTeam = team.name } }
         }
         .preferredColorScheme(SharedColors.preferredScheme)
+    }
+
+    /// The match tapped in Mijn team: its day and teams, and one button
+    private func chosenFixture(_ fixture: LeagueFixture, team: LeagueTeamSnapshot) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(TeamMatchReport.dayText(fixture.date))
+                .font(SharedFonts.system(12, weight: .medium, design: .rounded))
+                .foregroundColor(SharedColors.textSecondary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(fixture.home)
+                    .font(SharedFonts.system(16, weight: TeamMatch.sameTeam(fixture.home, team.name) ? .bold : .regular, design: .rounded))
+                    .foregroundColor(TeamMatch.sameTeam(fixture.home, team.name) ? SharedColors.accent : SharedColors.textPrimary)
+                Text(fixture.away)
+                    .font(SharedFonts.system(16, weight: TeamMatch.sameTeam(fixture.away, team.name) ? .bold : .regular, design: .rounded))
+                    .foregroundColor(TeamMatch.sameTeam(fixture.away, team.name) ? SharedColors.accent : SharedColors.textPrimary)
+            }
+            ActionButton(loc("Maak teamwedstrijd"), style: .filled) {
+                onCreate(TeamMatch.from(fixture: fixture, ownTeam: team.name), shareWithTeam)
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(SharedColors.tint(0.04))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

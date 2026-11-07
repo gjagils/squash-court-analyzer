@@ -15,6 +15,17 @@ struct LeagueTeamCard: View {
     @Environment(\.modelContext) private var modelContext
     @State private var openedTeam: LeagueTeamSnapshot?
 
+    /// As in HomeView: what a team match opened from Mijn team needs
+    private var teamMatchTools: TeamMatchTools {
+        let players = SwiftDataPlayerStore(context: modelContext)
+        return TeamMatchTools(historyStore: SwiftDataMatchHistoryStore(context: modelContext), playerStore: players,
+                              coachStore: SwiftDataCoachMatchStore(context: modelContext),
+                              refereeStore: SwiftDataRefereeMatchStore(context: modelContext),
+                              photoStore: players, filePicker: nil, aiCoach: IOSAICoach.context,
+                              shareText: { text in IOSShare.text(text) },
+                              leagueFetcher: LeagueTeamService.shared)
+    }
+
     var body: some View {
         SharedLeagueTeamCard(fetcher: LeagueTeamService.shared, onTeam: { snapshot in
             // Once per team link: the players of Mijn team into Spelers, marked "In mijn team"
@@ -24,10 +35,13 @@ struct LeagueTeamCard: View {
            onTeamMatch: onTeamMatch) { snapshot in
             openedTeam = snapshot
         }
-        .sheet(isPresented: Binding(get: { openedTeam != nil }, set: { if !$0 { openedTeam = nil } })) {
+        // A team match may be made or changed in it: the card reads again when it closes
+        .sheet(isPresented: Binding(get: { openedTeam != nil }, set: { if !$0 { openedTeam = nil } }),
+               onDismiss: { TeamMatchSupport.noteChange() }) {
             if let team = openedTeam {
                 NavigationStack {
-                    SharedLeagueTeamDetailView(snapshot: team, fetcher: LeagueTeamService.shared)
+                    SharedLeagueTeamDetailView(snapshot: team, fetcher: LeagueTeamService.shared,
+                                               teamMatches: TeamMatchStorage.store, tools: teamMatchTools)
                         .toolbar { CloseToolbarItem { openedTeam = nil } }
                 }
             }

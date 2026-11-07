@@ -123,21 +123,35 @@ final class LeagueLookupTests: XCTestCase {
         XCTAssertNil(LeagueOpponent.link(for: joined(home: "Squash Delft 8", away: "Bevo 3"), in: team), "not Mijn team's match")
     }
 
-    func testTheHomeCardShowsTodaysTeamMatch() {
-        let day = 24.0 * 3600.0
-        let yesterday = joined(home: "A", away: "B", on: Date().addingTimeInterval(-2.0 * day))
-        let tomorrow = joined(home: "C", away: "D", on: Date().addingTimeInterval(2.0 * day))
-        XCTAssertNil(TeamMatchSupport.homeMatch(in: [yesterday, tomorrow]), "an ordinary day")
+    func testTheHomeCardShowsTheMatchYouAreActivelyPartOf() {
+        let now = Date()
+        let hour = 3600.0
+        func match(_ home: String, changed hoursAgo: Double, on date: Date = Date(), live: Bool = false) -> TeamMatch {
+            var match = joined(home: home, away: "X", on: date)
+            if live {
+                match.liveId = "abc"
+                match.liveKey = "key"
+            }
+            match.updatedAt = now.addingTimeInterval(-hoursAgo * hour)
+            return match
+        }
 
-        let plain = joined(home: "E", away: "F")
-        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [yesterday, plain, tomorrow])?.home, "E")
+        XCTAssertNil(TeamMatchSupport.homeMatch(in: [], now: now))
+        XCTAssertNil(TeamMatchSupport.homeMatch(in: [match("Old", changed: 30)], now: now),
+                     "today's date alone is not enough: nothing happened on it")
+        XCTAssertNil(TeamMatchSupport.homeMatch(in: [match("OldLive", changed: 30, live: true)], now: now), "the live page is gone")
 
-        var live = joined(home: "G", away: "H")
-        live.liveId = "abc"
-        live.liveKey = "key"
-        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [plain, live])?.home, "G", "a live one first")
+        let nextWeek = now.addingTimeInterval(7.0 * 24.0 * hour)
+        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [match("Test", changed: 1, on: nextWeek)], now: now)?.home, "Test",
+                       "active on any day, so it can be tried before the match day")
+        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [match("Joined", changed: 1, on: nextWeek, live: true)], now: now)?.home, "Joined")
 
-        var decided = joined(home: "I", away: "J")
+        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [match("Plain", changed: 0), match("Live", changed: 2, live: true)], now: now)?.home,
+                       "Live", "a live one first")
+        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [match("Older", changed: 3), match("Newer", changed: 1)], now: now)?.home,
+                       "Newer", "the latest change")
+
+        var decided = match("Done", changed: 0)
         var partijen: [TeamPartij] = []
         for slot in 1...4 {
             var partij = TeamPartij(slot: slot)
@@ -145,9 +159,11 @@ final class LeagueLookupTests: XCTestCase {
             partijen.append(partij)
         }
         decided.partijen = partijen
+        decided.updatedAt = now
         XCTAssertTrue(decided.isComplete)
-        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [decided, plain])?.home, "E", "one still under way first")
-        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [decided])?.home, "I", "the result stays until the end of the day")
+        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [decided, match("Plain", changed: 1)], now: now)?.home, "Plain", "one under way first")
+        XCTAssertEqual(TeamMatchSupport.homeMatch(in: [decided], now: now)?.home, "Done", "the result stays until the end of the day")
+        XCTAssertNil(TeamMatchSupport.homeMatch(in: [decided], now: now.addingTimeInterval(48.0 * hour)), "and not after that")
     }
 
     func testAJoinedMatchTakesItsFixtureFromTheProgramme() {

@@ -281,7 +281,7 @@ struct HomeTeamMatchBar: View {
                     if match.isProbablyLive() {
                         LivePill(text: "LIVE")
                     } else {
-                        Text("Vandaag", bundle: textBundle)
+                        Text(match.isComplete ? loc("Afgelopen") : loc("Bezig"))
                             .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
                             .foregroundColor(SharedColors.support)
                     }

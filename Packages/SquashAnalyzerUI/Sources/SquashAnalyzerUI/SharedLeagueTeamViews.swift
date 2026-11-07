@@ -167,7 +167,7 @@ public struct SharedLeagueTeamCard: View {
     let onTeamMatch: (TeamMatch) -> Void
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
-    @State private var todayMatch: TeamMatch? = nil
+    @State private var activeMatch: TeamMatch? = nil
     /// The prompt was closed with the cross: it stays away (Instellingen still has the field)
     @AppStorage("teamPromptDismissed") private var promptDismissed = false
     @State private var snapshot: LeagueTeamSnapshot?
@@ -191,10 +191,10 @@ public struct SharedLeagueTeamCard: View {
     public var body: some View {
         VStack(spacing: 0) {
             if let snapshot {
-                HomeTeamSummary(snapshot: snapshot, match: todayMatch, onOpen: { onOpen(snapshot) }, onMatch: onTeamMatch)
-            } else if let todayMatch {
+                HomeTeamSummary(snapshot: snapshot, match: activeMatch, onOpen: { onOpen(snapshot) }, onMatch: onTeamMatch)
+            } else if let activeMatch {
                 // Joined with a link, without Mijn team: the match still gets its place
-                HomeTeamMatchBar(match: todayMatch) { onTeamMatch(todayMatch) }
+                HomeTeamMatchBar(match: activeMatch) { onTeamMatch(activeMatch) }
                     .background(SharedColors.brandCard)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .overlay(RoundedRectangle(cornerRadius: 16).stroke(SharedColors.brandCardStroke, lineWidth: 1))
@@ -220,20 +220,20 @@ public struct SharedLeagueTeamCard: View {
         }
         .padding(.horizontal, 24)
         .task(id: teamURL) { await load() }
-        .task(id: matchesPaused) { await followTodayMatch() }
+        .task(id: matchesPaused) { await followActiveMatch() }
     }
 
     /// Keeps the bar current while the home screen is in front: the saved
     /// match each minute, and what teammates put on its live page. Stops while
     /// a team match screen is open, so it never saves over a change made there.
-    private func followTodayMatch() async {
+    private func followActiveMatch() async {
         guard let store = teamMatches, !matchesPaused else { return }
         while !Task.isCancelled {
             var current = TeamMatchSupport.homeMatch(in: (try? await store.loadAll()) ?? [])
             if current?.isLive == true, TeamLiveSync.changed(await TeamLiveSync.pull(store: store)) {
                 current = TeamMatchSupport.homeMatch(in: (try? await store.loadAll()) ?? [])
             }
-            if todayMatch != current { todayMatch = current }
+            if activeMatch != current { activeMatch = current }
             try? await Task.sleep(nanoseconds: 60_000_000_000)
         }
     }

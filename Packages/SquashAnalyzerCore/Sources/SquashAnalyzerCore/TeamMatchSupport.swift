@@ -252,16 +252,26 @@ public enum TeamMatchSupport {
         return nil
     }
 
-    /// The team match the home card shows: one of today on this phone, made
-    /// here or joined. A live one first, then one still under way; a decided
-    /// one stays until the end of the day. Nil on an ordinary day.
+    /// The team match the home card shows: the one this phone is actively part
+    /// of, made here or joined, whatever its match date (Gerd-Jan, 7 November
+    /// 2026). A live one first, then one on this phone changed in the last
+    /// `TeamMatch.liveIdleInterval`; a decided one stays until the end of the
+    /// day of its last change. The latest change wins. Nil when nothing is going on.
     public static func homeMatch(in all: [TeamMatch], now: Date = Date()) -> TeamMatch? {
         let calendar = Calendar.current
-        var today: [TeamMatch] = []
-        for match in all where calendar.isDate(match.date, inSameDayAs: now) { today.append(match) }
-        for match in today where match.isLive && !match.isComplete { return match }
-        for match in today where !match.isComplete { return match }
-        return today.first
+        var live: TeamMatch? = nil
+        var underWay: TeamMatch? = nil
+        var decided: TeamMatch? = nil
+        for match in all {
+            if match.isComplete {
+                if calendar.isDate(match.updatedAt, inSameDayAs: now), decided == nil || match.updatedAt > decided!.updatedAt { decided = match }
+            } else if match.isProbablyLive(now: now) {
+                if live == nil || match.updatedAt > live!.updatedAt { live = match }
+            } else if !match.isLive, now.timeIntervalSince(match.updatedAt) < TeamMatch.liveIdleInterval {
+                if underWay == nil || match.updatedAt > underWay!.updatedAt { underWay = match }
+            }
+        }
+        return live ?? underWay ?? decided
     }
 }
 

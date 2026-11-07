@@ -30,8 +30,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   app" vervallen; een komende wedstrijd opent Nieuwe teamwedstrijd. De lijst Wedstrijden op het teamscherm heeft
   dezelfde volgorde. De SBN-inlezer zelf was niet de oorzaak: op vijf teampagina's vond hij alle wedstrijden (7
   november). Zonder Mijn team blijft het programma leeg.
-- **Teamwedstrijd op het beginscherm (7 november 2026, ontwerp A van Gerd-Jan):** op de dag van een teamwedstrijd op deze
-  telefoon wordt de balk van de Mijn team-kaart die wedstrijd: LIVE of Vandaag, thuis of uit en de tegenstander, de
+- **Teamwedstrijd op het beginscherm (7 november 2026, ontwerp A van Gerd-Jan):** zodra je actief aan een teamwedstrijd
+  meedoet, op welke datum die ook staat (besluit Gerd-Jan, eerst was het de wedstrijddag), wordt de balk van de Mijn
+  team-kaart die wedstrijd. Actief is: live en niet klaar, of op deze telefoon gewijzigd in de laatste 24 uur; een
+  uitslag blijft tot het eind van de dag van de laatste wijziging. De balk toont LIVE, Bezig of Afgelopen, thuis of uit en de tegenstander, de
   gewonnen games (eigen team eerst) en E1 t/m E4. Een tik opent de teamwedstrijd, waar je een partij fluit of coacht.
   Zonder Mijn team staat de balk als eigen kaart. Op het beginscherm leest de kaart elke minuut bij
   (`TeamMatchSupport.homeMatch`, `SharedLeagueTeamCard`); hij wacht als er een scherm open staat dat teamwedstrijden

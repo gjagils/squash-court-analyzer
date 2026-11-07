@@ -179,7 +179,7 @@ struct AppSymbol: View {
         case "exclamationmark.triangle": return Icons.Outlined.Warning
         case "star": return Icons.Outlined.StarBorder
         case "target": return Icons.Outlined.GpsFixed
-        case "arrow.down.right.circle": return Icons.Outlined.ArrowCircleDown
+        case "arrow.down.right.circle", "arrow.down.circle": return Icons.Outlined.ArrowCircleDown
         case "scope": return Icons.Outlined.CenterFocusStrong
         case "bolt.circle": return Icons.Outlined.OfflineBolt
         case "chart.pie.fill": return Icons.Outlined.PieChart

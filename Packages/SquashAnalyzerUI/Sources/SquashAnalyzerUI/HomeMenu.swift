@@ -513,12 +513,22 @@ public struct AndroidHomeView: View {
                                      teamMatchStore: teamMatchStore,
                                      onExit: { showingCoach = false })
                         .navigationBarBackButtonHidden(true)
+                        // These screens have their own header; without this Android keeps
+                        // an empty bar of 65 dp above it (OnePlus Nord 3, 7 November 2026)
+                        #if SKIP
+                        .toolbar(.hidden, for: .navigationBar)
+                        #endif
                 }
                 .navigationDestination(isPresented: $showingReferee) {
                     RefereeSessionView(store: refereeMatchStore, playerStore: playerStore, photoStore: photoStore, filePicker: filePicker, shareText: shareText,
                                        settings: settingsContext,
                                        teamMatchStore: teamMatchStore, historyStore: historyStore, onExit: { showingReferee = false })
                         .navigationBarBackButtonHidden(true)
+                        // These screens have their own header; without this Android keeps
+                        // an empty bar of 65 dp above it (OnePlus Nord 3, 7 November 2026)
+                        #if SKIP
+                        .toolbar(.hidden, for: .navigationBar)
+                        #endif
                 }
                 .navigationDestination(isPresented: $showingBadges) {
                     SharedBadgeCatalogView()

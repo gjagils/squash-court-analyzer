@@ -10,6 +10,11 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 3.2 build 2)
 
+- **Android: lege balk weg en icoon goed (7 november 2026, gevonden met de toestellentest):** boven Coach en
+  Scheidsrechter stond op elk Android-toestel een lege navigatiebalk van ongeveer 58 dp; dat was de lege band op de
+  schermafbeelding van een OnePlus Nord 3 (`AndroidHomeView`). Via een teamwedstrijd of link geopend is nog niet bekeken. Bij
+  *Ophalen bij SBN* stond een waarschuwingsdriehoek omdat het icoon ontbrak (`AppSymbol`). De test zelf:
+  `scripts/android_devices.py`, voorstel in `docs/toestellentest.md`.
 - **Wedstrijd volgen naar Instellingen (7 november 2026, vraag Gerd-Jan):** de rij staat niet meer op het beginscherm maar
   in Instellingen, onder Live meekijken, op iOS en Android. Een volglink opent het scherm zoals altijd. De teller "2 LIVE"
   op die rij is daarmee weg. Handleidingen (nl en en) aangepast.

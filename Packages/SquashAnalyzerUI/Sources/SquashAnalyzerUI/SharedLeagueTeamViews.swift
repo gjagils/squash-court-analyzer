@@ -484,7 +484,7 @@ public struct SharedLeagueTeamDetailView: View {
     @ViewBuilder
     private func fixtureRow(_ entry: CompetitionEntry) -> some View {
         if let fixture = entry.fixture {
-            let match = CompetitionOverview.match(for: fixture, in: matches)
+            let match = CompetitionOverview.match(for: fixture, in: matches, among: snapshot.fixtures)
             if let action = tapAction(fixture, match: match) {
                 Button(action: action) { fixtureLine(fixture, match: match, tappable: true) }
                     .buttonStyle(.plain)

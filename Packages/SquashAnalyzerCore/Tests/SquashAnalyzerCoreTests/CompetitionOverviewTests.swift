@@ -67,6 +67,28 @@ final class CompetitionOverviewTests: XCTestCase {
         XCTAssertNil(CompetitionOverview.match(for: fixture("c", days: 14.0), in: [own, joined]))
     }
 
+    /// A live team match typed in today belongs to next week's match with the
+    /// same home and away team, not to a played one or a later one
+    func testALiveTeamMatchTypedInOnAnotherDayTakesTheFirstUnplayedMatch() {
+        var played = fixture("p", days: -14.0)
+        played = LeagueFixture(id: played.id, date: played.date, home: played.home, away: played.away, score: "3-1", url: played.url)
+        let nextWeek = fixture("n", days: 7.0)
+        let returnMatch = fixture("r", days: 60.0, home: "Delft 8", away: "All Inn 8")
+        let later = fixture("l", days: 120.0)
+        let programme = [played, nextWeek, returnMatch, later]
+        var typed = TeamMatch(date: now, home: "All Inn 8", away: "delft 8", ownSide: TeamSide.home)
+        // Not live: it stays a match of its own
+        XCTAssertNil(CompetitionOverview.match(for: nextWeek, in: [typed], among: programme))
+        typed.liveId = "abcdefghjkmn"
+        typed.liveKey = "K3yK3yK3yK3yK3yK3yK3y_-9"
+        XCTAssertEqual(CompetitionOverview.match(for: nextWeek, in: [typed], among: programme)?.id, typed.id)
+        XCTAssertNil(CompetitionOverview.match(for: played, in: [typed], among: programme), "played already")
+        XCTAssertNil(CompetitionOverview.match(for: returnMatch, in: [typed], among: programme), "home and away turned")
+        XCTAssertNil(CompetitionOverview.match(for: later, in: [typed], among: programme), "a later one with the same teams")
+        let overview = CompetitionOverview.make(matches: [typed], fixtures: programme, now: now)
+        XCTAssertEqual(overview.coming.count, 3, "next week's fixture is replaced by the live team match")
+    }
+
     /// Joining with a link tells the Mijn team card to read again
     func testANoteOfChangeRaisesTheRevision() {
         let defaults = UserDefaults(suiteName: "CompetitionOverviewTests")!

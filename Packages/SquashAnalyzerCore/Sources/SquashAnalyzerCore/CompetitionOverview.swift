@@ -37,7 +37,7 @@ public struct CompetitionOverview: Equatable, Sendable {
     public static func make(matches: [TeamMatch], fixtures: [LeagueFixture], now: Date = Date()) -> CompetitionOverview {
         var entries: [CompetitionEntry] = []
         for match in matches { entries.append(CompetitionEntry(match: match)) }
-        for fixture in fixtures where !hasMatch(fixture, in: matches) { entries.append(CompetitionEntry(fixture: fixture)) }
+        for fixture in fixtures where match(for: fixture, in: matches, among: fixtures) == nil { entries.append(CompetitionEntry(fixture: fixture)) }
 
         let calendar = Calendar.current
         var coming: [CompetitionEntry] = []
@@ -64,11 +64,25 @@ public struct CompetitionOverview: Equatable, Sendable {
     }
 
     /// The team match on this phone for a match of the programme (Mijn team
-    /// shows it with its stand and LIVE), or nil
-    public static func match(for fixture: LeagueFixture, in matches: [TeamMatch]) -> TeamMatch? {
+    /// shows it with its stand and LIVE), or nil: by its SBN match, else the
+    /// same day and teams. A live team match without its SBN match (typed in on
+    /// another day) belongs to the first coming match not played yet with the
+    /// same home and away team (Gerd-Jan, 7 November 2026); `among` is the whole
+    /// programme, so a later match with the same teams is not taken too.
+    public static func match(for fixture: LeagueFixture, in matches: [TeamMatch],
+                             among fixtures: [LeagueFixture] = []) -> TeamMatch? {
         let calendar = Calendar.current
         for match in matches where match.fixtureId == fixture.id { return match }
         for match in matches where match.fixtureId == nil && calendar.isDate(match.date, inSameDayAs: fixture.date)
+            && TeamMatch.sameTeam(match.home, fixture.home) && TeamMatch.sameTeam(match.away, fixture.away) {
+            return match
+        }
+        guard fixture.score == nil else { return nil }
+        for other in fixtures where other.id != fixture.id && other.score == nil && other.date < fixture.date
+            && TeamMatch.sameTeam(other.home, fixture.home) && TeamMatch.sameTeam(other.away, fixture.away) {
+            return nil
+        }
+        for match in matches where match.fixtureId == nil && match.isLive
             && TeamMatch.sameTeam(match.home, fixture.home) && TeamMatch.sameTeam(match.away, fixture.away) {
             return match
         }

@@ -15,6 +15,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   opent de teamwedstrijd. Een tik op een komende wedstrijd zonder teamwedstrijd opent *Nieuwe teamwedstrijd* met
   alleen die wedstrijd en *Deel met mijn team*. Opslaan en delen gaat via `TeamMatchCreation`, dezelfde weg als in
   Competitie; de koppeling wedstrijd–teamwedstrijd via `CompetitionOverview.match(for:in:)`.
+- **Live teamwedstrijd koppelt op thuis- en uitteam (7 november 2026, Gerd-Jan):** een live teamwedstrijd zonder
+  SBN-wedstrijd (zelf ingevuld, op een andere dag) hoort bij de eerstvolgende nog niet gespeelde wedstrijd uit het
+  programma met dezelfde thuis- en uitploeg, in Mijn team en in Competitie (`CompetitionOverview.match(for:in:among:)`).
+  Een gespeelde wedstrijd, de return (thuis en uit omgedraaid) en een latere met dezelfde teams blijven los.
 - **Balk op het beginscherm meteen bij meedoen via een link:** de kaart las de teamwedstrijden alleen bij openen en
   daarna elke minuut, dus na meedoen via de link (iOS: het blad sluit naar het beginscherm) stond de balk er pas
   later of na herstarten. Meedoen verhoogt nu `TeamMatchSupport.revisionKey`, waarop de kaart meteen opnieuw leest;

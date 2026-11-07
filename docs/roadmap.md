@@ -76,6 +76,16 @@ met een geheime link ([voorstel](voorstel-clubscherm.md)). **Gebouwd 3 november 
 | Punt | Bron |
 |---|---|
 | Vraag om een beoordeling in App Store en Play na een paar wedstrijden ("hoeft niet nu", 7 november 2026) | [persona-backlog](backlog-personas-2026-10-11.md) |
+| Clubranglijst | [wijzigingen](wijzigingen-builds.md) |
+| Spelersprofiel exporteren als plaatje | [wijzigingen](wijzigingen-builds.md) |
+| Na meedoen direct je partij kiezen (eerst een speelavond afwachten) | [voorstel](voorstel-teamwedstrijd-eenvoudiger.md) |
+| Uitleg bij het eerste gebruik van Competitie | [voorstel](voorstel-teamwedstrijd-eenvoudiger.md) |
+| Knop "Clubscherm openen" in de app (mogelijk vervallen door de geheime link) | [voorstel](voorstel-clubscherm.md) |
+| Privacylabels App Store en Play gelijktrekken (Gerd-Jan, in de consoles) | [code-analyse](backlog-code-analyse-2026-10-06.md) |
+| Afspreken wie wekelijks de crashes bekijkt | [persona-backlog](backlog-personas-2026-10-11.md) |
+| `testen.html` omzetten naar downloadlinks na de launch | [persona-backlog](backlog-personas-2026-10-11.md) |
+| Levels en ranglijsten van SquashLevels in de app (vraagt een afspraak met SquashLevels) | [plan](plan-squashlevels-profiel.md) |
+| Nieuw seizoen: historie bewaren en een nieuwe teamlink (S2). **Vóór september 2027**: de seizoenslink staat vast in de app | [backlog](backlog-2026-10-21.md) |
 
 ## Weggehaald
 

@@ -73,7 +73,7 @@ struct SettingsSheet: View {
     private var shared: some View {
         NavigationStack {
             SharedSettingsView(aiCoach: settings.aiCoach, backup: settings.backup, onLanguage: settings.onLanguage,
-                               leagueFetcher: settings.leagueFetcher)
+                               leagueFetcher: settings.leagueFetcher, onClose: { close() })
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         CloseButton { close() }
@@ -92,6 +92,9 @@ public struct SharedSettingsView: View {
     /// per-app language, filled in by MainActivity); nil hides Taal
     let onLanguage: ((String) -> Void)?
     let leagueFetcher: LeagueTeamFetcher?
+    /// Closes the sheet this screen is in; nil when it was pushed (home screen)
+    let onClose: (() -> Void)?
+    @Environment(\.dismiss) private var dismiss
 
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
@@ -119,11 +122,12 @@ public struct SharedSettingsView: View {
     @State private var autoLast: Date?
 
     public init(aiCoach: AICoachContext? = nil, backup: BackupContext? = nil, onLanguage: ((String) -> Void)? = nil,
-                leagueFetcher: LeagueTeamFetcher? = nil, opensTeam: Bool = false) {
+                leagueFetcher: LeagueTeamFetcher? = nil, opensTeam: Bool = false, onClose: (() -> Void)? = nil) {
         self.aiCoach = aiCoach
         self.backup = backup
         self.onLanguage = onLanguage
         self.leagueFetcher = leagueFetcher
+        self.onClose = onClose
         _openPart = State(initialValue: opensTeam ? "team" : nil)
     }
 
@@ -560,12 +564,17 @@ public struct SharedSettingsView: View {
         }
     }
 
-    /// A team picked in Zoek je club
+    /// A team picked in Zoek je club: saved at once, and back to where you came
+    /// from, so nobody stays behind in Instellingen (Gerd-Jan, 7 November 2026)
     private func pick(_ team: LeagueClubTeam) {
         teamURL = team.link.url.absoluteString
         draft = teamURL
-        // The finder says so itself, next to the list
         message = nil
+        if let onClose {
+            onClose()
+        } else {
+            dismiss()
+        }
     }
 
     private func remove() {

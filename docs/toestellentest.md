@@ -75,7 +75,7 @@ Alle route-stappen liepen op alle profielen. Gevonden op de beelden:
 | --- | --- |
 | Lege balk van ongeveer 58 dp boven Coach en Scheidsrechter op elk Android-toestel: de lege band op de schermafbeelding van de OnePlus | Hersteld |
 | Waarschuwingsdriehoek in plaats van het icoon bij *Ophalen bij SBN* (Android) | Hersteld |
-| OnePlus krijgt een ander coachscherm: één regel als scorebord, geen titel | Bewust zo, maar **te besluiten** |
+| OnePlus krijgt een ander coachscherm: één regel als scorebord, geen titel | Grens van 740 naar 705 dp (zie "Compacte opzet"); de titel blijft weg onder 380 dp breed |
 | Op 345-360 dp breed en ongeveer 740 dp hoog valt *Badges* half onder de rand; scrollen kan | Open, klein |
 | Een lege partij heet "All Inn Squash 8 E1"; op smalle schermen valt de E-aanduiding weg (het rondje E1 staat er wel) | Open, klein |
 
@@ -87,13 +87,26 @@ echte live-server, en dus mogelijk op het clubscherm van All Inn. Hij is met *Li
 verwijderd. De gebruikscijfers kunnen er één teamwedstrijd van tellen. Het script controleert dit nu
 vóór het aanmaken en stopt anders.
 
+## Compacte opzet
+
+Het scorebord wordt één regel als de ruimte tussen de systeembalken onder 705 dp is. Gemeten op 7 november op de
+emulator (de echte statusbalk kan hoger zijn; dan zakken de waarden):
+
+| Profiel | Scherm | Boven + onder | Beschikbaar |
+| --- | --- | --- | --- |
+| OnePlus Nord 3, grote weergave | 354 x 792 | 24 + 48 | 720 |
+| Galaxy A57, schermzoom | 346 x 749 | 24 + 24 | 701 |
+| Klein | 360 x 740 | 24 + 48 | 668 |
+| Galaxy A13 | 384 x 856 | 24 + 48 | 784 |
+
+Bij 680 en 700 dp kreeg de A57 het volle scorebord en verdween *Annuleren* bij de baan. De instructie staat nu altijd op
+één regel. Dit blijft een marge van een paar dp: bij een klacht de maat van dat toestel erbij zetten.
+
 ## Te besluiten
 
 1. **Verplicht maken?** Voorstel: ja, als vaste stap in `docs/opleveren-en-hosting.md`, en
    `play_upload.py` waarschuwt als er voor deze build geen run is.
-2. **Compacte opzet:** de grens van 740 dp stamt van vóór het weghalen van de lege balk. Lager
-   (bijvoorbeeld 680 dp) geeft de OnePlus hetzelfde scorebord als de A13, maar minder ruimte voor de baan.
-   Voorstel: proberen op de profielen en dan kiezen.
+2. Vervallen: zie "Compacte opzet".
 3. **Echte toestellen erbij?** Firebase Test Lab heeft echte telefoons, ook om OxygenOS en One UI te zien.
    Gratis: 5 runs per dag op fysieke toestellen (samen 30 minuten), daarna 5 dollar per
    toestel-uur ([prijzen](https://firebase.google.com/docs/test-lab/usage-quotas-pricing)). Welke

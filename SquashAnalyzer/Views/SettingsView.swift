@@ -138,8 +138,10 @@ struct SettingsView: View {
             LeagueClubFinder(fetcher: LeagueTeamService.shared) { team in
                 teamURL = team.link.url.absoluteString
                 teamDraft = teamURL
-                // The finder says so itself, next to the list
                 teamSaveMessage = nil
+                // Saved at once, and back to where you came from, so nobody stays
+                // behind in Instellingen (Gerd-Jan, 7 November 2026)
+                isPresented = false
             }
             Text(appText("Of plak de openbare teamlink van sbn.toernooi.nl:"))
                 .font(AppFonts.body(13)).foregroundColor(AppColors.textSecondary)

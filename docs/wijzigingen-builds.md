@@ -30,6 +30,11 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   app" vervallen; een komende wedstrijd opent Nieuwe teamwedstrijd. De lijst Wedstrijden op het teamscherm heeft
   dezelfde volgorde. De SBN-inlezer zelf was niet de oorzaak: op vijf teampagina's vond hij alle wedstrijden (7
   november). Zonder Mijn team blijft het programma leeg.
+- **Vol scorebord op de OnePlus (7 november 2026):** de grens van de compacte coachopzet ging van 740 naar 705 dp beschikbare
+  hoogte; de instructie staat altijd op één regel. Metingen in `docs/toestellentest.md`.
+- **Team kiezen brengt je terug (7 november 2026, bevinding Gerd-Jan):** wie in *Zoek je club* een team tikt, heeft het meteen
+  bewaard en is terug op het vorige scherm (`SharedSettingsView.pick`, iOS `isPresented`). Een geplakte link
+  blijft met *Bewaar teamlink* en blijft in Instellingen staan.
 - **Teamwedstrijd op het beginscherm (7 november 2026, ontwerp A van Gerd-Jan):** zodra je actief aan een teamwedstrijd
   meedoet, op welke datum die ook staat (besluit Gerd-Jan, eerst was het de wedstrijddag), wordt de balk van de Mijn
   team-kaart die wedstrijd. Actief is: live en niet klaar, of op deze telefoon gewijzigd in de laatste 24 uur; een

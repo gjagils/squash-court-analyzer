@@ -292,11 +292,13 @@ public struct CoachScoringView: View {
             }
     }
 
-    /// Below this height (points) the scoreboard shrinks to one line while a
-    /// point is entered, so the court and the choices keep room. Every current
-    /// iPhone stays above it; a phone with a large display zoom (a Galaxy A57
-    /// at the competitie-avond, 30 October) or an iPhone SE falls below it.
-    static let compactEntryHeight: CGFloat = 740
+    /// Below this height (points, between the system bars) the scoreboard shrinks
+    /// to one line while a point is entered, so the court and the choices keep room.
+    /// Every current iPhone stays above it, and so does a OnePlus Nord 3 at large
+    /// display (720 dp measured); a Galaxy A57 with display zoom (701 dp, competitie-avond
+    /// 30 October) or an iPhone SE falls below it. Taller real status bars only lower
+    /// both, so the value sits just above the A57. Was 740 until 7 November 2026.
+    static let compactEntryHeight: CGFloat = 705
     /// Narrower than this (iPhone mini/SE, large display zoom) the title
     /// "Coach" gives way to Stop and LIVE in the header, which it overlapped
     static let narrowWidth: CGFloat = 380
@@ -521,6 +523,9 @@ public struct CoachScoringView: View {
                 }
             }
         }
+        // One line on every width: a second line took the court's room (Galaxy A57)
+        .lineLimit(1)
+        .minimumScaleFactor(0.75)
     }
 
     private var playerColor: Color {

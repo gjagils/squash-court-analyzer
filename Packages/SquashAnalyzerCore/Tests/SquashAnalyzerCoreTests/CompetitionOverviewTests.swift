@@ -89,6 +89,20 @@ final class CompetitionOverviewTests: XCTestCase {
         XCTAssertEqual(overview.coming.count, 3, "next week's fixture is replaced by the live team match")
     }
 
+    /// SBN writes "Sluipers, RLT & SV De 1"; through the live page the comma is gone
+    func testATeamNameFromTheLivePageIsTheSameTeam() {
+        XCTAssertTrue(TeamMatch.sameTeam("Sluipers, RLT & SV De 1", "Sluipers RLT & SV De 1"))
+        XCTAssertTrue(TeamMatch.sameTeam(" all inn  squash 8", "All Inn Squash 8"))
+        XCTAssertFalse(TeamMatch.sameTeam("All Inn Squash 8", "All Inn Squash 9"))
+        let long = "Squash Vereniging Met Een Heel Lange Naam 12"
+        XCTAssertTrue(TeamMatch.sameTeam(long, String(long.prefix(40))), "the server keeps 40 characters")
+        let fixture = LeagueFixture(id: "s", date: now.addingTimeInterval(6.0 * day), home: "All Inn Squash 8",
+                                    away: "Sluipers, RLT & SV De 1", score: nil, url: URL(string: "https://sbn.toernooi.nl/x")!)
+        var joined = TeamMatch(date: fixture.date, home: "All Inn Squash 8", away: "Sluipers RLT & SV De 1", ownSide: TeamSide.home)
+        joined.adoptFixture(from: [fixture])
+        XCTAssertEqual(joined.fixtureId, "s")
+    }
+
     /// Joining with a link tells the Mijn team card to read again
     func testANoteOfChangeRaisesTheRevision() {
         let defaults = UserDefaults(suiteName: "CompetitionOverviewTests")!

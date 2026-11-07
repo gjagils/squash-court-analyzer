@@ -15,6 +15,11 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   opent de teamwedstrijd. Een tik op een komende wedstrijd zonder teamwedstrijd opent *Nieuwe teamwedstrijd* met
   alleen die wedstrijd en *Deel met mijn team*. Opslaan en delen gaat via `TeamMatchCreation`, dezelfde weg als in
   Competitie; de koppeling wedstrijd–teamwedstrijd via `CompetitionOverview.match(for:in:)`.
+- **Teamnamen via de livepagina herkend (7 november 2026, gevonden op Gerd-Jans iPhone):** de live-server haalt
+  komma's en andere tekens uit teamnamen, dus "Sluipers, RLT & SV De 1" (SBN) kwam binnen als "Sluipers RLT & SV De 1"
+  en `TeamMatch.sameTeam` vond ze verschillend. Daardoor koppelde een meegedane teamwedstrijd niet aan zijn
+  wedstrijd uit het programma (geen LIVE in Mijn team) en vond de app de tegenstander niet. `sameTeam` volgt nu de
+  opschoning van de server (`teamKey`) en negeert hoofdletters, spaties en leestekens.
 - **Live teamwedstrijd koppelt op thuis- en uitteam (7 november 2026, Gerd-Jan):** een live teamwedstrijd zonder
   SBN-wedstrijd (zelf ingevuld, op een andere dag) hoort bij de eerstvolgende nog niet gespeelde wedstrijd uit het
   programma met dezelfde thuis- en uitploeg, in Mijn team en in Competitie (`CompetitionOverview.match(for:in:among:)`).

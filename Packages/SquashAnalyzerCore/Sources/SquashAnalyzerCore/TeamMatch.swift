@@ -548,8 +548,36 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
         return TeamMatch(date: fixture.date, home: fixture.home, away: fixture.away, ownSide: side, fixtureId: fixture.id)
     }
 
+    /// The same team, also when one name came through the live page: the
+    /// server keeps letters, digits, spaces and -'.&()+ and at most 40
+    /// characters ("Sluipers, RLT & SV De 1" arrives as "Sluipers RLT & SV De 1",
+    /// 7 November 2026). Both names go through that, then case, spaces and
+    /// marks are left out of the comparison.
     public static func sameTeam(_ a: String, _ b: String) -> Bool {
-        a.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == b.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        teamKey(a) == teamKey(b)
+    }
+
+    static func teamKey(_ name: String) -> String {
+        // As the live server's cleanTeamName (server/live-worker/src/validate.js)
+        var kept = ""
+        var lastWasSpace = true
+        for character in name {
+            let digit = "0123456789".contains(character)
+            if LiveNames.isLetter(character) || digit || "-'.&()+".contains(character) {
+                kept += String(character)
+                lastWasSpace = false
+            } else if character == " " || character == "\t" || character == "\n" {
+                if !lastWasSpace { kept += " " }
+                lastWasSpace = true
+            }
+        }
+        let trimmed = kept.trimmingCharacters(in: .whitespaces)
+        let cut = String(trimmed.prefix(40))
+        var key = ""
+        for character in cut.lowercased() where LiveNames.isLetter(character) || "0123456789".contains(character) {
+            key += String(character)
+        }
+        return key
     }
 
     public var ownName: String { ownSide == .home ? home : away }

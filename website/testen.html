@@ -9,7 +9,7 @@
     (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
   </script>
   <title>Testen – SquashAnalyzer</title>
-  <meta name="description" content="Meetesten met de bètaversies van SquashAnalyzer voor iPhone (TestFlight) en Android (Google Play)." />
+  <meta name="description" content="Wat er te testen is in de bètaversies van SquashAnalyzer voor iPhone (TestFlight) en Android (Google Play)." />
   <link rel="stylesheet" href="style.css?v=20261025b" />
   <script src="theme.js?v=20261011" defer></script>
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=5" />
@@ -30,14 +30,41 @@
 
   <main class="manual">
     <div class="manual-head">
-      <h1>Testen</h1>
-      <p>De testronde van 3.2 is afgerond: bedankt, Squashteam! Versie 3.2 is op 8 november ingediend bij de <a href="https://apps.apple.com/app/squash-analyzer/id6758676921" target="_blank" rel="noopener">App Store</a> en <a href="https://play.google.com/store/apps/details?id=com.squashanalyzer.android" target="_blank" rel="noopener">Google Play</a> en staat daar na hun goedkeuring voor iedereen. Wat er nieuw is, lees je op de <a href="/#versie-3-2">homepage</a>; hoe alles werkt in de <a href="handleiding/">handleiding</a>.</p>
-      <p class="where">Volgende versie: zodra er weer iets te testen valt, staat het hier.</p>
+      <h1>Wat valt er te <span>testen</span>?</h1>
+      <p>Bedankt dat je meetest! Hier staat wat er nieuw is in de bètaversie. Iets kapot of raar? Stuur een screenshot via TestFlight (schud je telefoon), via de Play Store, met Instellingen &rarr; <span class="ui">Over de app</span> &rarr; <span class="ui">Feedback sturen</span>, of mail <a href="mailto:info@squashanalyzer.com">info@squashanalyzer.com</a>.</p>
+      <p class="where">iPhone en Android 4.0 (build 1) · 8 november 2026</p>
     </div>
+
+    <section class="tile">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">auto_awesome</span></span>Nieuw in 4.0</h2>
+        <p>3.2 is ingediend bij de <a href="https://apps.apple.com/app/squash-analyzer/id6758676921" target="_blank" rel="noopener">App Store</a> en <a href="https://play.google.com/store/apps/details?id=com.squashanalyzer.android" target="_blank" rel="noopener">Google Play</a>, en hier begint de testronde van 4.0. Die draait om het spelersaccount: hield een ander jouw partij bij, dan kan die wedstrijd bij jou terechtkomen en meetellen voor je eigen badges. Een account is nooit verplicht; zonder werkt alles zoals je gewend bent. Wat we van je account bewaren, staat in het <a href="privacy.html">privacybeleid</a>.</p>
+        <h3>Mijn account (build 1)</h3>
+        <p>In Instellingen &rarr; <span class="ui">Mijn account</span> maak je een account met je e-mailadres, of op de iPhone met Apple. Een account kan vanaf 16 jaar: de app vraagt je geboortejaar en je toestemming. Verwijderen kan altijd met <span class="ui">Account verwijderen</span>, of via <a href="account-verwijderen.html">deze pagina</a>.</p>
+        <h3>Dit ben ik (build 1)</h3>
+        <p>Kies jezelf als SBN-speler uit je team. Houdt een coach of scheidsrechter daarna een partij van jou bij met jou als SBN-speler, dan gaat die wedstrijd naar je account.</p>
+        <h3>Postvak en Uit je team (build 1)</h3>
+        <p>Een wedstrijd die iemand voor je instuurt, staat in je <span class="ui">Postvak</span> tot je hem gebruikt of weigert. Vulde een teamgenoot een naam in die nog niet gekoppeld is, dan staat die onder <span class="ui">Uit je team</span> met de vraag <em>Ben jij &hellip;?</em>. Tik je <span class="ui">Dat ben ik</span>, dan telt hij voor jou, en de volgende keer komt zo&rsquo;n wedstrijd meteen bij je.</p>
+        <h3>Stuur naar speler (build 1)</h3>
+        <p>Op het eindscherm van een wedstrijd staat <span class="ui">Stuur naar speler</span>: deel de link met iemand buiten je team. Wie hem opent in de app, voegt de wedstrijd toe aan zijn account.</p>
+        <h3>Je wedstrijden op elke telefoon (build 1)</h3>
+        <p>Wedstrijden uit je account staan in Afgeronde wedstrijden en tellen mee voor je badges, ook na opnieuw inloggen of op een tweede telefoon.</p>
+        <h3>Teamwedstrijd vinden (build 1)</h3>
+        <p>Maakt een teamgenoot met een account een teamwedstrijd van jullie wedstrijd, dan vind je die bij <span class="ui">Nieuwe teamwedstrijd</span> zonder uitnodiging.</p>
+        <h3>Probeer vooral</h3>
+        <ul class="feature-list">
+          <li>Maak een account en kies jezelf als SBN-speler. Ging dat zonder gedoe?</li>
+          <li>Laat een teamgenoot een partij van jou coachen of fluiten. Komt die in je Postvak of onder Uit je team?</li>
+          <li>Gebruik de wedstrijd en kijk bij je badges. Telt hij mee?</li>
+          <li>Stuur na een wedstrijd een link met <span class="ui">Stuur naar speler</span> en open hem op een andere telefoon.</li>
+          <li>Log uit en weer in, of zet de app op een tweede telefoon. Zijn je wedstrijden er nog?</li>
+        </ul>
+      </div>
+    </section>
 
     <section class="tile" id="aanmelden">
       <div>
-        <h2><span class="icon"><span class="ms" aria-hidden="true">install_mobile</span></span>Meedoen met een volgende test</h2>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">install_mobile</span></span>Meedoen met testen</h2>
         <p><strong>iPhone:</strong> installeer TestFlight van Apple en doe mee via <a href="https://testflight.apple.com/join/QrreRemZ" target="_blank" rel="noopener">deze link</a>; je krijgt dan de testversies vóór iedereen.</p>
         <p><strong>Android:</strong> meld je aan met het e-mailadres van je Google-account via <a href="mailto:info@squashanalyzer.com?subject=Aanmelden%20Android-test">info@squashanalyzer.com</a>; je krijgt dan een uitnodiging voor de test in de Play Store.</p>
         <p>Iets kapot of raar in de app? Gebruik <span class="ui">Feedback sturen</span> in Instellingen of mail <a href="mailto:info@squashanalyzer.com">info@squashanalyzer.com</a>.</p>

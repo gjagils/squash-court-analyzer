@@ -225,9 +225,20 @@ def prepare(device, apk):
     print("Installeren…", flush=True)
     device.adb("install", "-r", apk, check=True, timeout=300)
     device.launch()
-    device.tap("Get started", required=False, seconds=10) or device.tap("Aan de slag", required=False, seconds=3)
-    device.tap("Skip", required=False, seconds=4) or device.tap("Overslaan", required=False, seconds=2)
-    device.tap("Settings", seconds=8, required=False) or device.tap("Instellingen", seconds=3)
+    # A cold emulator (Android 17 after a fresh boot) can take well over 10 s for the
+    # first start: wait longer, and launch once more before giving up
+    for attempt in range(2):
+        device.tap("Get started", required=False, seconds=30) or device.tap("Aan de slag", required=False, seconds=3)
+        device.tap("Skip", required=False, seconds=4) or device.tap("Overslaan", required=False, seconds=2)
+        if device.tap("Settings", seconds=10, required=False) or device.tap("Instellingen", seconds=3, required=False):
+            break
+        if attempt == 0:
+            device.launch()
+            continue
+        os.makedirs(os.path.join(ROOT, "output", "toestellen"), exist_ok=True)
+        with open(os.path.join(ROOT, "output", "toestellen", "prepare-fout.png"), "wb") as shot:
+            shot.write(device.adb("exec-out", "screencap", "-p", binary=True))
+        raise LookupError('"Instellingen" staat niet op het scherm (zie output/toestellen/prepare-fout.png)')
     # Taal: Nederlands, whatever the emulator speaks
     if device.tap("Language", seconds=4, required=False):
         device.tap("Nederlands", seconds=6)

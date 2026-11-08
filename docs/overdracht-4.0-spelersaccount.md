@@ -55,6 +55,22 @@ om 11:53, alleen de apparaatsleutel over). Niet opnieuw onderzoeken.
 - Inloggen met Google, en Apple op Android.
 - S1: accountmails in eigen stijl en in de gekozen taal.
 
+## Teksten en formulieren die door het account veranderen (Gerd-Jan, 8 november 2026)
+
+Overal waar nu "geen account" staat, moet dat kloppen met 4.0. Stand 8 november:
+
+| Waar | Wat | Stand |
+|---|---|---|
+| `website/privacy.html`, `website/en/privacy.html` | Onderdeel Spelersaccount: Firebase, D1 in de EU, wat er bewaard wordt, 90 dagen, verwijderen, 30 dagen back-up | Geschreven, nog niet gepubliceerd (met de upload van 4.0 build 1) |
+| `website/account-verwijderen.html`, `website/en/delete-account.html` | Verwijderen buiten de app (Google eist een webadres) | Geschreven, nog niet gepubliceerd |
+| `website/wedstrijd/` + app-link | Pagina voor de link van Stuur naar speler | Op main, nog niet gepubliceerd |
+| Play Console, Gegevensveiligheid | E-mailadres, naam, gebruikers-ID's, app-activiteit (wedstrijden); account met e-mail en wachtwoord; URL account-verwijderen; verwijderen op verzoek | `Android/play/data-safety.csv` bijgewerkt (8 november); insturen via de API (`docs/google-play.md`) nadat de verwijderpagina live staat, vóór de upload naar Play |
+| App Store Connect, App-privacy | Contactgegevens (e-mail), naam, gebruikers-ID, gebruiksgegevens; gekoppeld aan de gebruiker, geen tracking | Vóór de App Store-release van 4.0 (TestFlight vraagt het niet) |
+| Storeteksten (`release-notes/store-4.0/`, `Android/play/listing-*.json`) | "Gratis, zonder advertenties en zonder account" / "Geen account nodig" wordt "account niet verplicht" | Bij de release van 4.0 |
+| Homepage (nl/en) | "gratis, zonder advertenties en zonder account" in het blok Trakteer | Bij de release van 4.0 |
+| Handleidingen (nl/en) | Onderdeel Mijn account | Bij de release van 4.0 |
+| App, "Nieuw in 4.0" (`WhatsNew`) | Nu nog "Nieuw in 3.2" | Vóór de releasebuild van 4.0 |
+
 ## Vóór een 4.0-release
 
 - Echte Worker (`account.squashanalyzer.com`) draait nog migratie 0001 en oude code:

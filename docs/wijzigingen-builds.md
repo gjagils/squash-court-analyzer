@@ -8,9 +8,29 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 3.2 build 4)
+## Volgende build (na 4.0 build 1)
 
 (nog niets)
+
+## 4.0 build 1 (8 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
+
+Releasenotes: `release-notes/4.0-1.md`, `release-notes/android-4.0-1.md`. Toestellentest Android 16 en 17
+groen (0 lay-outpunten, 0 mislukte stappen). TestFlight met `--keep-old`: 3.2 (4) blijft staan, die ligt
+bij Apple in de App Store-review. Firebase Test Lab overgeslagen.
+
+- **Schakelaar om (Gerd-Jan, 8 november 2026):** `Features.shared.playerAccount` staat in de appbuilds
+  standaard aan: `SQUASH_PLAYER_ACCOUNT = YES` in het Xcode-project, `squashPlayerAccount` standaard true
+  in Gradle (`-PsquashPlayerAccount=false` bouwt zonder). De app praat met de echte accountserver
+  (`account.squashanalyzer.com`; migraties 0002 en 0003 en de nieuwe code op 8 november door Gerd-Jan uitgerold).
+  Een iOS-archief heeft `SQUASH_FIREBASE_API_KEY=<uit ~/.android-keys/google-services.json>` op de
+  xcodebuild-regel nodig; het archief is daarop gecontroleerd.
+- **Website (gepubliceerd 8 november):** privacybeleid (nl/en) met het spelersaccount, `account-verwijderen`
+  en `en/delete-account`, de pagina `/wedstrijd` voor Stuur naar speler (branch `claude/wedstrijd-link-site`
+  samengevoegd en opgeruimd), `testen.html` en het testblok op de homepage voor 4.0.
+- **Play Gegevensveiligheid** via de API ingestuurd: account met e-mail en wachtwoord, e-mailadres en
+  gebruikers-ID's, verwijderen op verzoek via squashanalyzer.com/account-verwijderen.
+- **Toestellentest:** wacht langer op de eerste start van een koude emulator en start één keer opnieuw.
+- Nog open voor de release van 4.0: zie `docs/overdracht-4.0-spelersaccount.md`, "Teksten en formulieren".
 
 ## 3.2 build 4 = RELEASE 3.2 (7 november 2026: TestFlight Squashteam en Play; 8 november ingediend bij App Store en Google Play-productie)
 

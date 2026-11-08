@@ -9,13 +9,13 @@ plugins {
 // not by hand. squashCode = 1.000.000 * major + 10.000 * minor + 100 * build;
 // an internal delivery to a phone adds -PsquashInternal=N (3.1 build 4.1) and
 // so counts up from the last upload, which the versionCode needs.
-val squashVersion = "3.2"
-val squashBuild = 4
-val squashCode = 3020400
+val squashVersion = "4.0"
+val squashBuild = 1
+val squashCode = 4000100
 val squashInternal = (findProperty("squashInternal") as String?)?.toInt() ?: 0
-// 4.0 behind a switch (docs/releaseplan-3x-4.0.md): only a 4.0 test build adds
-// -PsquashPlayerAccount=true
-val squashPlayerAccount = (findProperty("squashPlayerAccount") as String?)?.toBoolean() ?: false
+// 4.0 behind a switch (docs/releaseplan-3x-4.0.md): on since 4.0 build 1
+// (8 November 2026); -PsquashPlayerAccount=false builds without it
+val squashPlayerAccount = (findProperty("squashPlayerAccount") as String?)?.toBoolean() ?: true
 // Where a 4.0 build finds the account: empty is the deployed Worker, "local" the
 // test setup on the Mac (server/account-worker: npm run local), seen from the
 // emulator as 10.0.2.2; "local:<ip>" for a phone on the same network

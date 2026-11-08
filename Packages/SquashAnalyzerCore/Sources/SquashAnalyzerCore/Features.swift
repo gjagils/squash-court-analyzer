@@ -8,9 +8,9 @@ public final class Features: @unchecked Sendable {
     public static let shared = Features()
 
     /// 4.0: the player account with central badges
-    /// (docs/voorstel-spelersaccount-4.0.md). On only in 4.0 test builds:
-    /// iOS `xcodebuild … SQUASH_PLAYER_ACCOUNT=YES`, Android
-    /// `./gradlew … -PsquashPlayerAccount=true`.
+    /// (docs/voorstel-spelersaccount-4.0.md). On in the app builds since 4.0
+    /// build 1: iOS `SQUASH_PLAYER_ACCOUNT = YES` in the project, Android
+    /// `squashPlayerAccount` true by default; off here for the package tests.
     public var playerAccount = false
 
     public init() {}

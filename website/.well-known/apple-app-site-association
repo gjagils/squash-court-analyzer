@@ -8,7 +8,8 @@
           { "/": "/kaart/*", "comment": "Player badge cards" },
           { "/": "/team", "comment": "Invitations to a live team match (not /teams/<code>/team.zip)" },
           { "/": "/team/*", "comment": "Invitations to a live team match" },
-          { "/": "/volg/", "?": { "test": "1" }, "comment": "Test link only (TestFlight); /volg and /volg/* follow once the new build is in the App Store, see docs/bewuste-keuzes.md" }
+          { "/": "/volg/", "?": { "test": "1" }, "comment": "Test link only (TestFlight); /volg and /volg/* follow once the new build is in the App Store, see docs/bewuste-keuzes.md" },
+          { "/": "/wedstrijd", "comment": "4.0: a match shared for the player's account (#token)" }
         ]
       }
     ]

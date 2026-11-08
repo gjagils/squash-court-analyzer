@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Weergave before the first paint: Donker unless Licht or Systeem was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
+  <title>Wedstrijd voor je account – SquashAnalyzer</title>
+  <meta name="description" content="Een squashwedstrijd die met je gedeeld is vanuit SquashAnalyzer." />
+  <meta name="robots" content="noindex" />
+  <meta property="og:title" content="Je wedstrijd staat klaar – SquashAnalyzer" />
+  <meta property="og:description" content="Open de link in SquashAnalyzer en voeg de wedstrijd toe aan je account." />
+  <meta property="og:image" content="https://www.squashanalyzer.com/logo.png?v=4" />
+  <link rel="stylesheet" href="../style.css?v=20261025b" />
+  <script src="../theme.js?v=20261011" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png?v=5" />
+  <link rel="icon" type="image/png" sizes="256x256" href="../favicon.png?v=5" />
+  <link rel="apple-touch-icon" href="../logo.png?v=4" />
+  <style>
+    .team-page { max-width: 480px; margin: 0 auto; padding: 32px 20px 56px; }
+    .card { background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+    .label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+    h1 { font-size: 24px; margin: 8px 0 12px; }
+    .code { margin-top: 16px; padding: 12px; border: 1px dashed var(--line); border-radius: 12px; font-family: ui-monospace, Menlo, monospace;
+            font-size: 12px; overflow-wrap: anywhere; color: var(--text-2); }
+    .actions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+    .actions a { display: block; text-align: center; padding: 14px; border-radius: 12px; font-weight: 600; }
+    .open-app { background: var(--btn); color: var(--on-btn); }
+    .get-app { background: var(--surface); border: 1px solid var(--line); color: var(--text-1); }
+    .note { margin-top: 20px; font-size: 13px; color: var(--text-3); }
+    .error { color: var(--text-2); }
+    .update { color: var(--text-2); }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="team-page">
+    <div class="card">
+      <div class="label">Wedstrijd voor je account</div>
+      <h1 id="title">Je wedstrijd staat klaar</h1>
+      <p id="text">Iemand heeft een squashwedstrijd met je gedeeld. Open de link in SquashAnalyzer, dan voeg je hem toe aan je account en telt hij mee voor je badges.</p>
+    </div>
+    <div class="actions" id="actions" hidden>
+      <a class="open-app" id="open-app" href="#">Open in SquashAnalyzer</a>
+      <a class="get-app" href="https://apps.apple.com/app/squash-analyzer/id6758676921" target="_blank" rel="noopener">Download de app (iPhone)</a>
+      <a class="get-app" href="https://play.google.com/store/apps/details?id=com.squashanalyzer.android" target="_blank" rel="noopener">Android: open in Google Play</a>
+    </div>
+    <!-- Accounts come in 4.0: an older app opens this link and does nothing -->
+    <p class="note update" id="update" hidden><strong>Gebeurt er niets?</strong> Je hebt een nieuwere versie van SquashAnalyzer nodig,
+      met Mijn account. Werk de app bij via de App Store of Google Play.</p>
+    <p class="note" id="note">De code staat in de link zelf, achter het #-teken. Deze pagina stuurt niets naar een server en bewaart niets.</p>
+    <div class="page-foot"><div data-theme-choice-slot></div></div>
+  </main>
+  <script>
+    // The token is after the #: 8 to 64 letters and digits (AccountClaimLink in the app)
+    (function () {
+      var token = (location.hash || "").slice(1);
+      if (!/^[A-Za-z0-9]{8,64}$/.test(token)) {
+        document.getElementById("title").textContent = "Deze link klopt niet";
+        document.getElementById("text").textContent = "Vraag degene die de wedstrijd invulde om hem opnieuw te sturen vanuit SquashAnalyzer (Stuur naar speler).";
+        document.getElementById("note").hidden = true;
+        return;
+      }
+      document.getElementById("open-app").href = "squashanalyzer://wedstrijd#" + token;
+      document.getElementById("actions").hidden = false;
+      document.getElementById("update").hidden = false;
+    })();
+  </script>
+</body>
+</html>

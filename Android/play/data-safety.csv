@@ -12,11 +12,11 @@ PSL_ACCOUNT_DELETION_URL,,https://squashanalyzer.com/account-verwijderen,MAYBE_R
 PSL_SUPPORT_DATA_DELETION_BY_USER,DATA_DELETION_YES,true,SINGLE_CHOICE,Bied je gebruikers een mogelijkheid om hun gegevens op verzoek te laten verwijderen?/Ja
 PSL_SUPPORT_DATA_DELETION_BY_USER,DATA_DELETION_NO,,SINGLE_CHOICE,Bied je gebruikers een mogelijkheid om hun gegevens op verzoek te laten verwijderen?/Nee
 PSL_SUPPORT_DATA_DELETION_BY_USER,DATA_DELETION_NO_AUTO_DELETED,,SINGLE_CHOICE,"Bied je gebruikers een mogelijkheid om hun gegevens op verzoek te laten verwijderen?/Nee, maar gebruikersgegevens worden binnen 90 dagen automatisch verwijderd"
-PSL_DATA_DELETION_URL,,,MAYBE_REQUIRED,URL voor gegevensverwijdering
+PSL_DATA_DELETION_URL,,https://squashanalyzer.com/account-verwijderen,MAYBE_REQUIRED,URL voor gegevensverwijdering
 PSL_DATA_COLLECTION_COMPLIES_FAMILY_POLICY,,,OPTIONAL,Beantwoord deze vraag alleen als je hebt aangegeven dat de beoogde leeftijdsgroep van je app kinderen omvat of als je je hebt aangemeld voor het Gemaakt voor gezinnen-programma. In beide gevallen moet je voldoen aan het Gezinsbeleid van Google Play (https://support.google.com/googleplay/android-developer/answer/9893335). Wil je gebruikers hierover informeren in het gedeelte Veiligheid van gegevens bij je Store-vermelding?
 PSL_INDEPENDENTLY_VALIDATED,,,OPTIONAL,"Heeft je app met goed gevolg een onafhankelijke beveiligingsbeoordeling doorlopen, in overeenstemming met het MASA-framework (Mobile Application Security Assessment)? Beantwoord de vraag alleen met Ja als de beoordeling een goede reputatie heeft."
 PSL_UPI_BADGE_OPT_IN,,,OPTIONAL,Wil je deze badge tonen in je Store-vermelding?
-PSL_HAS_OUTSIDE_APP_ACCOUNTS,,false,OPTIONAL,Kunnen gebruikers inloggen bij je app met accounts die buiten de app zijn gemaakt?
+PSL_HAS_OUTSIDE_APP_ACCOUNTS,,,OPTIONAL,Kunnen gebruikers inloggen bij je app met accounts die buiten de app zijn gemaakt?
 PSL_OUTSIDE_APP_ACCOUNT_TYPES,PSL_LOGIN_WITH_OUTSIDE_APP_ID,,MULTIPLE_CHOICE,"Hoe worden deze accounts gemaakt?/Identificatie buiten de app (bijv. sim-binding, serviceabonnement)"
 PSL_OUTSIDE_APP_ACCOUNT_TYPES,PSL_LOGIN_THROUGH_EMPLOYMENT_OR_ENTERPRISE_ACCOUNT,,MULTIPLE_CHOICE,Hoe worden deze accounts gemaakt?/Via werk- of bedrijfsaccounts
 PSL_OUTSIDE_APP_ACCOUNT_TYPES,PSL_OUTSIDE_APP_ACCOUNT_TYPE_OTHER,,MULTIPLE_CHOICE,Hoe worden deze accounts gemaakt?/Overig

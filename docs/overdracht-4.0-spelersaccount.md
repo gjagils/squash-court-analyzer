@@ -61,10 +61,10 @@ Overal waar nu "geen account" staat, moet dat kloppen met 4.0. Stand 8 november:
 
 | Waar | Wat | Stand |
 |---|---|---|
-| `website/privacy.html`, `website/en/privacy.html` | Onderdeel Spelersaccount: Firebase, D1 in de EU, wat er bewaard wordt, 90 dagen, verwijderen, 30 dagen back-up | Geschreven, nog niet gepubliceerd (met de upload van 4.0 build 1) |
-| `website/account-verwijderen.html`, `website/en/delete-account.html` | Verwijderen buiten de app (Google eist een webadres) | Geschreven, nog niet gepubliceerd |
-| `website/wedstrijd/` + app-link | Pagina voor de link van Stuur naar speler | Op main, nog niet gepubliceerd |
-| Play Console, Gegevensveiligheid | E-mailadres, naam, gebruikers-ID's, app-activiteit (wedstrijden); account met e-mail en wachtwoord; URL account-verwijderen; verwijderen op verzoek | `Android/play/data-safety.csv` bijgewerkt (8 november); insturen via de API (`docs/google-play.md`) nadat de verwijderpagina live staat, vóór de upload naar Play |
+| `website/privacy.html`, `website/en/privacy.html` | Onderdeel Spelersaccount: Firebase, D1 in de EU, wat er bewaard wordt, 90 dagen, verwijderen, 30 dagen back-up | Gepubliceerd 8 november |
+| `website/account-verwijderen.html`, `website/en/delete-account.html` | Verwijderen buiten de app (Google eist een webadres) | Gepubliceerd 8 november |
+| `website/wedstrijd/` + app-link | Pagina voor de link van Stuur naar speler | Gepubliceerd 8 november |
+| Play Console, Gegevensveiligheid | E-mailadres, naam, gebruikers-ID's, app-activiteit (wedstrijden); account met e-mail en wachtwoord; URL account-verwijderen; verwijderen op verzoek | Ingestuurd via de API op 8 november (`Android/play/data-safety.csv`) |
 | App Store Connect, App-privacy | Contactgegevens (e-mail), naam, gebruikers-ID, gebruiksgegevens; gekoppeld aan de gebruiker, geen tracking | Vóór de App Store-release van 4.0 (TestFlight vraagt het niet) |
 | Storeteksten (`release-notes/store-4.0/`, `Android/play/listing-*.json`) | "Gratis, zonder advertenties en zonder account" / "Geen account nodig" wordt "account niet verplicht" | Bij de release van 4.0 |
 | Homepage (nl/en) | "gratis, zonder advertenties en zonder account" in het blok Trakteer | Bij de release van 4.0 |

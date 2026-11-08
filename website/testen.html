@@ -9,7 +9,7 @@
     (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
   </script>
   <title>Testen – SquashAnalyzer</title>
-  <meta name="description" content="Wat er te testen is in de bètaversies van SquashAnalyzer voor iPhone (TestFlight) en Android (Google Play), nieuw en uit eerdere versies." />
+  <meta name="description" content="Meetesten met de bètaversies van SquashAnalyzer voor iPhone (TestFlight) en Android (Google Play)." />
   <link rel="stylesheet" href="style.css?v=20261025b" />
   <script src="theme.js?v=20261011" defer></script>
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=5" />
@@ -30,64 +30,14 @@
 
   <main class="manual">
     <div class="manual-head">
-      <h1>Wat valt er te <span>testen</span>?</h1>
-      <p>Bedankt dat je meetest! Hier staat wat er nieuw is in de bètaversie. Iets kapot of raar? Stuur een screenshot via TestFlight (schud je telefoon), via de Play Store, met Instellingen &rarr; <span class="ui">Over de app</span> &rarr; <span class="ui">Feedback sturen</span>, of mail <a href="mailto:info@squashanalyzer.com">info@squashanalyzer.com</a>.</p>
-      <p class="where">iPhone en Android 3.2 (build 4) · 7 november 2026</p>
+      <h1>Testen</h1>
+      <p>De testronde van 3.2 is afgerond: bedankt, Squashteam! Versie 3.2 is op 8 november ingediend bij de <a href="https://apps.apple.com/app/squash-analyzer/id6758676921" target="_blank" rel="noopener">App Store</a> en <a href="https://play.google.com/store/apps/details?id=com.squashanalyzer.android" target="_blank" rel="noopener">Google Play</a> en staat daar na hun goedkeuring voor iedereen. Wat er nieuw is, lees je op de <a href="/#versie-3-2">homepage</a>; hoe alles werkt in de <a href="handleiding/">handleiding</a>.</p>
+      <p class="where">Volgende versie: zodra er weer iets te testen valt, staat het hier.</p>
     </div>
-
-    <section class="tile">
-      <div>
-        <h2><span class="icon"><span class="ms" aria-hidden="true">auto_awesome</span></span>Nieuw in 3.2</h2>
-        <p>3.1 staat sinds 2 november in de <a href="https://apps.apple.com/app/squash-analyzer/id6758676921" target="_blank" rel="noopener">App Store</a> en <a href="https://play.google.com/store/apps/details?id=com.squashanalyzer.android" target="_blank" rel="noopener">Google Play</a>, en hier loopt de testronde van 3.2. Build 4 maakt Mijn team en de teamwedstrijd één geheel.</p>
-        <h3>Live in je programma (build 4)</h3>
-        <p>In Mijn team &rarr; <span class="ui">WEDSTRIJDEN</span> zie je bij een wedstrijd met een teamwedstrijd op je telefoon de stand in games, met <span class="ui">LIVE</span> zolang hij live is. Een tik opent de teamwedstrijd. Ook een teamwedstrijd die op een andere dag is ingevuld, hoort bij de eerstvolgende wedstrijd met dezelfde thuis- en uitploeg.</p>
-        <h3>Teamwedstrijd maken vanuit Mijn team (build 4)</h3>
-        <p>Tik in Mijn team op een komende wedstrijd zonder teamwedstrijd: <span class="ui">Nieuwe teamwedstrijd</span> opent met alleen die wedstrijd en de keuze <span class="ui">Deel met mijn team</span>.</p>
-        <h3>Meedoen gaat sneller (build 4)</h3>
-        <p>Doe je mee via een link, dan staat de balk meteen op je beginscherm. De spelers van de tegenstander staan klaar bij het invullen van een partij, ook als je zelf geen Mijn team hebt ingesteld. Teamnamen met een komma, zoals <em>Sluipers, RLT &amp; SV De 1</em>, worden goed herkend.</p>
-        <h3>Teamwedstrijd op je beginscherm (build 3)</h3>
-        <p>Doe je mee aan een teamwedstrijd, dan wordt de balk van de Mijn team-kaart die wedstrijd: <span class="ui">LIVE</span>, <span class="ui">Bezig</span> of <span class="ui">Afgelopen</span>, de stand en E1 t/m E4. Eén tik en je fluit of coacht je partij. De balk staat er zodra je actief meedoet, op welke datum de wedstrijd ook staat.</p>
-        <h3>De stand van je team komt vanzelf binnen (build 3)</h3>
-        <p>Staat de teamwedstrijd open, dan komen de partijen van je teamgenoten elke minuut binnen; op het beginscherm ook. <span class="ui">Vernieuwen</span> blijft voor wie niet wil wachten.</p>
-        <h3>Niet gezien (build 3)</h3>
-        <p>Ging een punt te snel of was je even afgeleid? Tik op wie scoort en dan op <span class="ui">Niet gezien</span>: de score loopt door, zonder details. In de analyse staat hoeveel punten je niet zag. <span class="ui">Undo</span> haalt zo&rsquo;n punt weer weg.</p>
-        <h3>Wisselen tijdens het coachen (build 3)</h3>
-        <p>Tussen de punten door staat onder aan het coachscherm <span class="ui">Invoer: Uitgebreid / Eenvoudig</span>. De analyse kijkt per game hoe je coachte.</p>
-        <h3>Competitie compleet (build 3)</h3>
-        <p>Het hele programma van je team: eerst vandaag en de komende wedstrijden, dan een streep, daaronder wat er al gespeeld is. Doe je mee via een link, dan haalt de app nu ook de spelers van de tegenstander op.</p>
-        <h3>Kleine verbeteringen (build 3)</h3>
-        <p>Een team kiezen bij Mijn team brengt je meteen terug naar het beginscherm. <span class="ui">Wedstrijd volgen</span> staat nu in Instellingen. De voorbeeldspelers Bob en Wim zijn weg; staan ze nog bij je, dan vraagt de app of ze weg mogen. Op sommige Android-toestellen ziet het coachscherm er beter uit, en bij de eerste start van 3.2 zie je wat er nieuw is.</p>
-        <h3>Officiële timers voor de scheidsrechter (build 2)</h3>
-        <p>Vóór de eerste rally staat onder de knoppen <span class="ui">Start inspelen · 4:00</span>. De app telt het inspelen af en meldt na 2 minuten <em>Half-time: wissel van kant</em>; met <span class="ui">Klaar</span> stop je het inspelen eerder. Daarna loopt 1 minuut tot de start, en na elke game 2 minuten pauze vanaf de laatste rally. Bij <em>Half-time</em>, <em>15 seconden</em> en <em>Time</em> trilt je telefoon. De eerste rally stopt de timer. De tijden komen uit de WSF-regels van 2025.</p>
-        <h3>Hoe ver ben je van zilver? (build 2)</h3>
-        <p>Bij Spelers &rarr; een speler &rarr; badges staat onder Ten out of ten, Veteran, Centurion en Hat trick hoeveel er nog nodig is voor de volgende trede, bijvoorbeeld <em>Nog 3 tot zilver</em>.</p>
-        <h3>Onderlinge stand bij Kies speler (build 2)</h3>
-        <p>Staat er al een speler in het andere vak, dan zie je bij <span class="ui">Kies speler</span> achter elke speler die daar eerder tegen speelde de stand, bijvoorbeeld <em>3-1 tegen Bas</em>.</p>
-        <h3>Scouting (build 2)</h3>
-        <p>Onder een gekozen speler in de wedstrijdopzet staat <span class="ui">Profiel bekijken</span>. In een teamwedstrijd staan onder de partijen de <span class="ui">Tegenstanders</span> die ook in Spelers staan, met hun profiel.</p>
-        <h3>SquashLevels bij een speler (build 2)</h3>
-        <p>In Spelers &rarr; speler bewerken staat <span class="ui">SquashLevels</span>: plak de link uit de SquashLevels-ranglijst of typ het speler-ID. Op het badgescherm opent <span class="ui">Bekijk op SquashLevels</span> de ranglijst met die speler gemarkeerd. De app haalt zelf niets op bij SquashLevels.</p>
-        <h3>Rustiger coachscherm (build 2)</h3>
-        <p>Op een telefoon met een klein scherm of grote tekst blijft het scorebord de hele game een smalle balk, met daaronder wie serveert; het sprong eerst bij elk punt heen en weer. Op Android gaan de stappen zonder animatie.</p>
-        <h3>De stand in de groepsapp (build 1)</h3>
-        <p>Deel je een wedstrijd live, dan staat de stand meteen in het voorbeeld van de link in WhatsApp of iMessage: wie er speelt en de gewonnen games in de titel, bijvoorbeeld <em>Live: Jansen 2 – 1 Vries</em>, en de lopende game eronder, <em>Game 4 · 7–5 · volg live in SquashAnalyzer</em>. Na afloop staat er de uitslag met de gamestanden.</p>
-        <h3>Probeer vooral</h3>
-        <ul class="feature-list">
-          <li>Maak vanuit Mijn team een teamwedstrijd van je volgende wedstrijd en deel hem. Staat hij daarna met <span class="ui">LIVE</span> in je programma?</li>
-          <li>Doe op een tweede telefoon mee via de link. Staat de balk meteen op het beginscherm, en staan de spelers van de tegenstander erbij?</li>
-          <li>Maak een teamwedstrijd, deel hem met een teamgenoot en tel allebei een partij. Komt de stand bij de ander binnen, en staat hij op je beginscherm?</li>
-          <li>Coach een paar punten en gebruik <span class="ui">Niet gezien</span>. Klopt de score en de analyse daarna?</li>
-          <li>Wissel midden in een wedstrijd tussen Uitgebreid en Eenvoudig.</li>
-          <li>Fluit een wedstrijd met de timers: trilt je telefoon op het goede moment?</li>
-          <li>Plak bij jezelf de link uit de SquashLevels-ranglijst en tik op <span class="ui">Bekijk op SquashLevels</span>.</li>
-          <li>Deel halverwege een wedstrijd de livelink in een groepsapp. Klopt de stand in het voorbeeld?</li>
-        </ul>
-      </div>
-    </section>
 
     <section class="tile" id="aanmelden">
       <div>
-        <h2><span class="icon"><span class="ms" aria-hidden="true">install_mobile</span></span>Meedoen met testen</h2>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">install_mobile</span></span>Meedoen met een volgende test</h2>
         <p><strong>iPhone:</strong> installeer TestFlight van Apple en doe mee via <a href="https://testflight.apple.com/join/QrreRemZ" target="_blank" rel="noopener">deze link</a>; je krijgt dan de testversies vóór iedereen.</p>
         <p><strong>Android:</strong> meld je aan met het e-mailadres van je Google-account via <a href="mailto:info@squashanalyzer.com?subject=Aanmelden%20Android-test">info@squashanalyzer.com</a>; je krijgt dan een uitnodiging voor de test in de Play Store.</p>
         <p>Iets kapot of raar in de app? Gebruik <span class="ui">Feedback sturen</span> in Instellingen of mail <a href="mailto:info@squashanalyzer.com">info@squashanalyzer.com</a>.</p>

@@ -12,9 +12,19 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 (nog niets)
 
-## 3.2 build 4 (7 november 2026: TestFlight Squashteam en Play)
+## 3.2 build 4 = RELEASE 3.2 (7 november 2026: TestFlight Squashteam en Play; 8 november ingediend bij App Store en Google Play-productie)
 
 Releasenotes: `release-notes/3.2-4.md`, `release-notes/android-3.2-4.md`. Firebase Test Lab deze keer overgeslagen.
+
+Release (8 november 2026, akkoord Gerd-Jan): storeteksten `release-notes/store-3.2/` (App Store nl/en,
+versie 3.2 aangemaakt met `scripts/asc_version.py --version 3.2 --build 4`, zeven screenshots van 7 november
+met `scripts/upload_screenshots.py --version 3.2`, daarna `--submit`) en `release-notes/android-3.2-production.md`
+(Play, 468 tekens, `scripts/play_upload.py --production`). Play-listing: vier regels over 3.2 erbij, alleen
+de tekst bijgewerkt met de nieuwe optie `scripts/play_listing.py --text-only` (de screenshots in Play blijven).
+Website: homepage (nl/en) met "Nieuw: versie 3.2" en een testblok zonder lopende test, `testen.html` zegt dat
+de testronde is afgerond, handleidingen "beschrijven versie 3.2" (de vervallen zin over de schakelaar voor
+de getinte balk is weg). Na goedkeuring: homepage-tekst en testen.html op "in de stores" zetten,
+en `docs/opleveren-en-hosting.md` bijwerken.
 
 - **Mijn team: teamwedstrijden in het programma (7 november 2026, Gerd-Jan):** in het overzicht van Mijn team
   krijgt een wedstrijd met een teamwedstrijd op deze telefoon de stand in games en *LIVE* (of *Bezig*); een tik

@@ -6,6 +6,7 @@ play_upload.py.
 
     scripts/play_listing.py --dry-run     # show what would be sent
     scripts/play_listing.py               # replace texts and images, commit
+    scripts/play_listing.py --text-only   # replace only the texts (screenshots stay)
 """
 import argparse
 import glob
@@ -24,6 +25,8 @@ LANGUAGE = "nl-NL"
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--text-only", action="store_true",
+                        help="only texts and contact details; the images in Play stay as they are")
     args = parser.parse_args()
     with open(os.path.join(PLAY, f"listing-{LANGUAGE}.json")) as handle:
         listing = json.load(handle)
@@ -54,7 +57,7 @@ def main() -> None:
         "shortDescription": listing["shortDescription"],
         "fullDescription": listing["fullDescription"],
     })
-    for kind, files in images.items():
+    for kind, files in ({} if args.text_only else images).items():
         call(token, "DELETE", f"{API}/edits/{edit}/listings/{LANGUAGE}/{kind}")
         for path in files:
             with open(path, "rb") as handle:

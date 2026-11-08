@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Weergave before the first paint: Donker unless Licht or Systeem was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
+  <title>Account verwijderen – SquashAnalyzer</title>
+  <meta name="description" content="Zo verwijder je je spelersaccount van SquashAnalyzer en alles wat erin staat." />
+  <link rel="stylesheet" href="style.css?v=20261025b" />
+  <script src="theme.js?v=20261011" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=5" />
+  <link rel="icon" type="image/png" sizes="256x256" href="favicon.png?v=5" />
+  <link rel="apple-touch-icon" href="logo.png?v=4" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="index.html" style="text-decoration:none;">
+        <img src="logo.png?v=4" alt="" class="nav-logo-icon">
+        SquashAnalyzer
+      </a>
+      <a class="nav-cta" href="index.html">← Terug</a>
+    </div>
+  </nav>
+
+  <main class="manual">
+    <div class="manual-head">
+      <h1>Account <span>verwijderen</span></h1>
+      <p>Een spelersaccount bij SquashAnalyzer (vanaf versie 4.0) is nooit verplicht. Wil je er niet meer een? Zo verwijder je het, met alles wat erin staat.</p>
+    </div>
+
+    <section class="tile">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">phone_iphone</span></span>In de app</h2>
+        <p>Open Instellingen &rarr; <span class="ui">Mijn account</span> en tik op <span class="ui">Account verwijderen</span>. Heb je met Apple ingelogd, dan vraagt de app je nog één keer in te loggen met Apple, zodat we de toegang bij Apple kunnen intrekken.</p>
+      </div>
+    </section>
+
+    <section class="tile">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">mail</span></span>Zonder de app</h2>
+        <p>Heb je de app niet meer? Stuur een mail vanaf het e-mailadres van je account naar <a href="mailto:info@squashanalyzer.com?subject=Account%20verwijderen">info@squashanalyzer.com</a> met als onderwerp <em>Account verwijderen</em>. Heb je met Apple ingelogd met een verborgen adres, vermeld dan je spelersnaam. We verwijderen het account binnen een week en mailen je als het gedaan is.</p>
+      </div>
+    </section>
+
+    <section class="tile">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">delete</span></span>Wat er weggaat</h2>
+        <ul class="feature-list">
+          <li>Je account en je login bij Firebase (e-mailadres, wachtwoord of Apple-login)</li>
+          <li>Je spelersnaam, je SBN-spelerspagina en team, je geboortejaar en je toestemming</li>
+          <li>Alle wedstrijden en badges in je account, en de verzoeken in je postvak</li>
+          <li>De live teamwedstrijden die je via je account aan je team liet zien</li>
+        </ul>
+        <p>Dat gebeurt direct. In de back-up van de database kan het nog hoogstens 30 dagen staan; daarna is het overal weg. Wat op je eigen telefoon staat, zoals je spelers en wedstrijden, blijft daar staan tot je het zelf verwijdert. Meer in het <a href="privacy.html">privacybeleid</a>.</p>
+      </div>
+    </section>
+  </main>
+
+  <hr class="divider" />
+
+  <footer>
+    <span class="footer-logo">© 2026 SquashAnalyzer</span>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="handleiding/">Handleiding</a>
+      <a href="privacy.html">Privacybeleid</a>
+      <a href="mailto:info@squashanalyzer.com">Contact</a>
+      <a href="https://www.instagram.com/squashanalyzer/" target="_blank" rel="noopener"><svg class="ig-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="var(--gold)" stroke="none"/></svg> Instagram</a>
+      <a href="https://bunq.me/squashanalyzer" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">local_cafe</span> Trakteer</a>
+    </div>
+    <div data-theme-choice-slot></div>
+  </footer>
+
+</body>
+</html>

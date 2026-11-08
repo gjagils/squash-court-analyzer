@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Appearance before the first paint: Dark unless Light or System was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
+  <title>Delete account – SquashAnalyzer</title>
+  <meta name="description" content="How to delete your SquashAnalyzer player account and everything in it." />
+  <link rel="canonical" href="https://www.squashanalyzer.com/en/delete-account" />
+  <link rel="alternate" hreflang="nl" href="https://www.squashanalyzer.com/account-verwijderen" />
+  <link rel="alternate" hreflang="en" href="https://www.squashanalyzer.com/en/delete-account" />
+  <link rel="alternate" hreflang="x-default" href="https://www.squashanalyzer.com/en/delete-account" />
+  <link rel="stylesheet" href="/style.css?v=20261025" />
+  <script src="/theme.js?v=20261021" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=5" />
+  <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=5" />
+  <link rel="apple-touch-icon" href="/logo.png?v=4" />
+</head>
+<body>
+
+  <!-- ── Navigation ───────────────────────────────────────── -->
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="/en/" style="text-decoration:none;">
+        <img src="/logo.png?v=4" alt="" class="nav-logo-icon">
+        SquashAnalyzer
+      </a>
+      <div class="nav-right">
+        <span class="lang-switch"><a href="/privacy.html" hreflang="nl" lang="nl">NL</a> | <span aria-current="page">EN</span></span>
+        <a class="nav-cta" href="/en/">← Back</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="manual">
+    <div class="manual-head">
+      <h1>Delete <span>account</span></h1>
+      <p>A SquashAnalyzer player account (from version 4.0) is never required. Don't want one any more? This is how you delete it, with everything in it.</p>
+    </div>
+
+    <section class="tile">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">phone_iphone</span></span>In the app</h2>
+        <p>Open Settings &rarr; <span class="ui">My account</span> and tap <span class="ui">Delete account</span>. If you signed in with Apple, the app asks you to sign in with Apple once more, so we can revoke the access at Apple.</p>
+      </div>
+    </section>
+
+    <section class="tile">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">mail</span></span>Without the app</h2>
+        <p>No longer have the app? Send an email from your account's email address to <a href="mailto:info@squashanalyzer.com?subject=Delete%20account">info@squashanalyzer.com</a> with the subject <em>Delete account</em>. If you signed in with Apple using a hidden address, mention your player name. We delete the account within a week and email you when it is done.</p>
+      </div>
+    </section>
+
+    <section class="tile">
+      <div>
+        <h2><span class="icon"><span class="ms" aria-hidden="true">delete</span></span>What is deleted</h2>
+        <ul class="feature-list">
+          <li>Your account and your Firebase login (email address, password or Sign in with Apple)</li>
+          <li>Your player name, your SBN player page and team, your birth year and your consent</li>
+          <li>All matches and badges in your account, and the requests in your inbox</li>
+          <li>The live team matches you showed to your team through your account</li>
+        </ul>
+        <p>This happens right away. The database backup may still hold it for at most 30 days; after that it is gone everywhere. What is on your own phone, such as your players and matches, stays there until you delete it yourself. More in the <a href="/en/privacy.html">privacy policy</a>.</p>
+      </div>
+    </section>
+  </main>
+
+  <hr class="divider" />
+
+  <footer>
+    <span class="footer-logo">© 2026 SquashAnalyzer</span>
+    <div class="footer-links">
+      <a href="/en/">Home</a>
+      <a href="/en/guide/">User guide</a>
+      <a href="mailto:info@squashanalyzer.com">Contact</a>
+      <a href="https://www.instagram.com/squashanalyzer/" target="_blank" rel="noopener"><svg class="ig-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="var(--gold)" stroke="none"/></svg> Instagram</a>
+      <a href="https://bunq.me/squashanalyzer" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">local_cafe</span> Buy me a coffee</a>
+    </div>
+    <div data-theme-choice-slot></div>
+  </footer>
+
+</body>
+</html>

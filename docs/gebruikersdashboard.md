@@ -21,6 +21,7 @@ gevraagd: elke dag om 8:00 bijwerken.
 | TestFlight per build | `betaBuildUsages` | App Store Connect-API |
 | Google Play per dag en de 28-dagencijfers | Play Console → Statistieken en dashboard | Chrome (ingelogd op de Play Console) |
 | Live meekijken | `GET /api/stats` van de live-Worker | `STATS_KEY` uit `~/.squash-keys/stats-key.txt` |
+| App-gebruik (3.1 en later) | Dagmelding van de app via `GET /api/stats` (`appRows`), `app-per-dag.json` | Script; Nederland apart van keurders en testtoestellen elders |
 | Week op week | De bronnen hierboven per week (za t/m vr), `per-week.json` | Script; een bron telt alleen in weken waarvan alle dagen binnen zijn |
 | Wat valt op | Drie tot zes zinnen over de verschillen, `wat-valt-op.json` | De geplande taak schrijft ze elke ochtend zelf, na het script |
 

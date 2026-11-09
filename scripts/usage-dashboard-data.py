@@ -11,6 +11,8 @@ Bronnen:
   per dag en per maand. Producttype 1 = nieuwe download, 3 = herdownload, 7 = update.
 - TestFlight: betaBuildUsages per build via dezelfde API.
 - Live-dienst: GET /api/stats met STATS_KEY (uit de omgeving of ~/.squash-keys/stats-key.txt).
+- De app zelf (3.1 en later): één melding per toestel per dag, ook via /api/stats
+  (app-per-dag.json), Nederland apart van keurders en testtoestellen elders.
 - Per week (zaterdag t/m vrijdag): de bronnen hierboven naast elkaar, voor de
   weekvergelijking op het dashboard (per-week.json).
 - Google Play en de opt-in-sessies van App Analytics: alleen in de browser te lezen,
@@ -51,6 +53,8 @@ STATE = pathlib.Path.home() / ".squash-dashboard" / "state"
 FIRST_MONTH = "2026-03"           # eerste maand met App Store-downloads
 PLAY_START = dt.date(2026, 10, 2)  # eerste dag op Google Play
 LIVE_START = dt.date(2026, 10, 23)  # sinds de deploy van de teller
+APP_START = dt.date(2026, 10, 31)   # eerste dagmelding van de app (3.1)
+APP_PARTS = {"referee": "scheidsrechter", "coach": "coach", "analysis": "analyse", "competition": "competitie"}
 APPSTORE_DAYS = 35                 # dagen in de grafiek App Store per dag
 PLAY_DAYS = 60                     # dagen in de grafieken Google Play per dag
 USER_AGENT = "squashanalyzer-dashboard/1.0"  # Cloudflare weigert urllib's standaard user-agent
@@ -215,6 +219,29 @@ def live(out, today):
     for row in rows:
         row["volgers"] = row["volgers_live"] + row["volgers_team"]
     write(out, "live-per-week.json", rows)
+    app_days(out, today, answer.get("appRows", []))
+
+
+def app_days(out, today, app_rows):
+    """The app's own daily report (3.1 and later): devices that opened it, per day, Dutch apart from the rest."""
+    days = {day.isoformat(): {"dag": day.isoformat(), "geopend_nl": 0, "nieuw_nl": 0, "ios_nl": 0, "android_nl": 0,
+                              **{f"{name}_nl": 0 for name in APP_PARTS.values()}, "geopend_elders": 0, "nieuw_elders": 0}
+            for day in days_between(APP_START, today)}
+    for row in app_rows:
+        day = days.get(row["day"])
+        if not day:
+            continue
+        where = "nl" if row.get("country") == "NL" else "elders"
+        kind = row["kind"]
+        if kind == "app":
+            day[f"geopend_{where}"] += row["n"]
+            if where == "nl" and row.get("platform") in ("ios", "android"):
+                day[f"{row['platform']}_nl"] += row["n"]
+        elif kind == "app-first":
+            day[f"nieuw_{where}"] += row["n"]
+        elif where == "nl" and kind[4:] in APP_PARTS:
+            day[f"{APP_PARTS[kind[4:]]}_nl"] += row["n"]
+    write(out, "app-per-dag.json", [days[key] for key in sorted(days)])
 
 
 # ---------------------------------------------------------------- Google Play
@@ -261,6 +288,8 @@ def weeks(out, today):
     play_days = sorted(stored.get("geinstalleerd", {}))
     live_weeks = {row["week_tm"]: row for row in json.loads((out / "live-per-week.json").read_text())} \
         if (out / "live-per-week.json").exists() else {}
+    app = {row["dag"]: row for row in json.loads((out / "app-per-dag.json").read_text())} \
+        if (out / "app-per-dag.json").exists() else {}
     sources = {"appstore": (min(daily), max(daily)) if daily else None,
                "play": (play_days[0], play_days[-1]) if play_days else None}
 
@@ -288,6 +317,10 @@ def weeks(out, today):
         row["wedstrijden"] = week["livewedstrijden"] + week["teamwedstrijden"] if week else None
         row["wedstrijden_nl"] = week["wedstrijden_nl"] if week else None
         row["geopend"] = week["geopend_live"] + week["geopend_team"] if week else None
+        # device-days: a device that opens the app on three days counts three times
+        full = first >= APP_START and all(key in app for key in keys)
+        for col in ("geopend_nl", "nieuw_nl", "geopend_elders"):
+            row[f"app_{col}"] = sum(app[key][col] for key in keys) if full else None
         rows.append(row)
         end += dt.timedelta(days=7)
     write(out, "per-week.json", rows)

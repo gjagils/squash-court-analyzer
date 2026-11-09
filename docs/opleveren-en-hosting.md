@@ -126,7 +126,7 @@ Regels voor tests op toestellen:
 
 **Er wordt niets geüpload naar TestFlight of Google Play zonder dat
 Gerd-Jan dat zegt.** Stand 9 november 2026: **in productie staat 3.2 (build 4) op iOS en Android** (App Store
-en Google Play, beide op 8 november goedgekeurd). 4.0 build 1 wacht in TestFlight op de bètareview van Apple.
+en Google Play; de App Store zette hem op 8 november live, Google Play stond er op 9 november mee). 4.0 build 1 wacht in TestFlight op de bètareview van Apple.
 Stand 8 november 2026 (later): **4.0 build 1** staat in TestFlight (Squashteam) en de Play-testtracks, met het spelersaccount aan. Stand 8 november 2026: **3.2 (build 4) is ingediend** bij de App Store
 (`scripts/asc_version.py --version 3.2 --build 4 --submit`, na `scripts/upload_screenshots.py --version 3.2`)
 en uitgerold in Google Play-productie (`scripts/play_upload.py --production`, Google beoordeelt hem); tot de

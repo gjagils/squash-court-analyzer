@@ -32,7 +32,7 @@ bij Apple in de App Store-review. Firebase Test Lab overgeslagen.
 - **Toestellentest:** wacht langer op de eerste start van een koude emulator en start één keer opnieuw.
 - Nog open voor de release van 4.0: zie `docs/overdracht-4.0-spelersaccount.md`, "Teksten en formulieren".
 
-## 3.2 build 4 = RELEASE 3.2 (7 november 2026: TestFlight Squashteam en Play; 8 november ingediend bij App Store en Google Play-productie, dezelfde dag goedgekeurd; website 9 november bijgewerkt)
+## 3.2 build 4 = RELEASE 3.2 (7 november 2026: TestFlight Squashteam en Play; 8 november ingediend bij App Store en Google Play-productie; op 9 november in beide stores live en website bijgewerkt)
 
 Releasenotes: `release-notes/3.2-4.md`, `release-notes/android-3.2-4.md`. Firebase Test Lab deze keer overgeslagen.
 

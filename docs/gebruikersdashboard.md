@@ -21,10 +21,16 @@ gevraagd: elke dag om 8:00 bijwerken.
 | TestFlight per build | `betaBuildUsages` | App Store Connect-API |
 | Google Play per dag en de 28-dagencijfers | Play Console → Statistieken en dashboard | Chrome (ingelogd op de Play Console) |
 | Live meekijken | `GET /api/stats` van de live-Worker | `STATS_KEY` uit `~/.squash-keys/stats-key.txt` |
+| Week op week | De bronnen hierboven per week (za t/m vr), `per-week.json` | Script; een bron telt alleen in weken waarvan alle dagen binnen zijn |
+| Wat valt op | Drie tot zes zinnen over de verschillen, `wat-valt-op.json` | De geplande taak schrijft ze elke ochtend zelf, na het script |
 
 Play en de opt-in-sessies hebben geen bruikbare API; daarom draait de taak op de
 Mac en niet in de cloud. Is Chrome niet ingelogd, dan blijven die cijfers op de
 vorige stand en zegt de taak dat in zijn melding.
+
+Wedstrijden van buiten Nederland zijn vooral keurders en testtoestellen van Apple en
+Google (Engelse taal, namen als Team A); het dashboard telt Nederland apart. De
+dagelijks actieve gebruikers van Play lopen langer achter dan de installaties.
 
 De stores lopen een tot twee dagen achter: het App Store-dagrapport komt rond
 5:00 de volgende ochtend, Play verwerkt een dag meestal binnen twee dagen.

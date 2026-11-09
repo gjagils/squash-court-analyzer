@@ -11,6 +11,8 @@ Bronnen:
   per dag en per maand. Producttype 1 = nieuwe download, 3 = herdownload, 7 = update.
 - TestFlight: betaBuildUsages per build via dezelfde API.
 - Live-dienst: GET /api/stats met STATS_KEY (uit de omgeving of ~/.squash-keys/stats-key.txt).
+- Per week (zaterdag t/m vrijdag): de bronnen hierboven naast elkaar, voor de
+  weekvergelijking op het dashboard (per-week.json).
 - Google Play en de opt-in-sessies van App Analytics: alleen in de browser te lezen,
   dus als JSON-bestanden meegegeven (--play, --optin). Ontbreekt er een, dan blijven
   de vorige cijfers staan.
@@ -197,7 +199,8 @@ def live(out, today):
     weeks = {}
     for day in days_between(LIVE_START, today):
         end = day + dt.timedelta(days=(4 - day.weekday()) % 7)
-        weeks.setdefault(end.isoformat(), {"week_tm": end.isoformat(), **{col: 0 for col in LIVE_KINDS.values()}})
+        weeks.setdefault(end.isoformat(), {"week_tm": end.isoformat(), **{col: 0 for col in LIVE_KINDS.values()},
+                                           "wedstrijden_nl": 0})
     for row in answer["rows"]:
         if row["test"] or row["kind"] not in LIVE_KINDS:
             continue
@@ -205,6 +208,9 @@ def live(out, today):
         end = (day + dt.timedelta(days=(4 - day.weekday()) % 7)).isoformat()
         if end in weeks:
             weeks[end][LIVE_KINDS[row["kind"]]] += row["n"]
+            # store reviewers and test devices start matches from abroad; Dutch starts are the real use
+            if row["kind"] in ("live", "team") and row.get("country") == "NL":
+                weeks[end]["wedstrijden_nl"] += row["n"]
     rows = [weeks[key] for key in sorted(weeks)]
     for row in rows:
         row["volgers"] = row["volgers_live"] + row["volgers_team"]
@@ -242,6 +248,53 @@ def play(out, fresh):
     return last
 
 
+# ---------------------------------------------------------------- Per week
+
+def friday_of(day):
+    return day + dt.timedelta(days=(4 - day.weekday()) % 7)
+
+
+def weeks(out, today):
+    """Weeks from Saturday to Friday side by side; a source counts only for weeks it fully covers."""
+    daily = load("sales-daily.json", {})
+    stored = load("play.json", {})
+    play_days = sorted(stored.get("geinstalleerd", {}))
+    live_weeks = {row["week_tm"]: row for row in json.loads((out / "live-per-week.json").read_text())} \
+        if (out / "live-per-week.json").exists() else {}
+    sources = {"appstore": (min(daily), max(daily)) if daily else None,
+               "play": (play_days[0], play_days[-1]) if play_days else None}
+
+    def covered(source, first, last):
+        span = sources[source]
+        return bool(span) and span[0] <= first.isoformat() and last.isoformat() <= span[1]
+
+    rows = []
+    end = friday_of(PLAY_START) + dt.timedelta(days=7)  # the first full week on Google Play
+    while end <= friday_of(today):
+        first = end - dt.timedelta(days=6)
+        keys = [day.isoformat() for day in days_between(first, end)]
+        row = {"week_tm": end.isoformat(), "lopend": end >= today}
+        if covered("appstore", first, end):
+            row.update({col: sum(daily[key].get(kind, 0) for key in keys)
+                        for col, kind in (("as_nieuw", "1"), ("as_her", "3"), ("as_updates", "7"))})
+        else:
+            row.update(as_nieuw=None, as_her=None, as_updates=None)
+        if covered("play", first, end):
+            row["play_installaties"] = sum(stored["installaties"].get(key, 0) for key in keys)
+            row["play_geinstalleerd"] = stored["geinstalleerd"].get(end.isoformat())
+        else:
+            row.update(play_installaties=None, play_geinstalleerd=None)
+        week = live_weeks.get(end.isoformat()) if first >= LIVE_START else None
+        row["wedstrijden"] = week["livewedstrijden"] + week["teamwedstrijden"] if week else None
+        row["wedstrijden_nl"] = week["wedstrijden_nl"] if week else None
+        row["geopend"] = week["geopend_live"] + week["geopend_team"] if week else None
+        rows.append(row)
+        end += dt.timedelta(days=7)
+    write(out, "per-week.json", rows)
+    done = [row["week_tm"] for row in rows if not row["lopend"]]
+    return done[-1] if done else None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--out", required=True, help="map voor de JSON-bestanden")
@@ -262,7 +315,8 @@ def main():
     report = {}
     for name, step in [("appstore", lambda: appstore(out, today, optin)), ("testflight", lambda: testflight(out)),
                        ("live", lambda: live(out, today)),
-                       ("play", lambda: play(out, json.loads(pathlib.Path(args.play).read_text()) if args.play else None))]:
+                       ("play", lambda: play(out, json.loads(pathlib.Path(args.play).read_text()) if args.play else None)),
+                       ("weken", lambda: weeks(out, today))]:
         try:
             report[name] = {"ok": True, "laatste_dag": step()}
         except Exception as error:  # one source failing must not stop the others

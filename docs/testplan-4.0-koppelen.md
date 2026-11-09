@@ -3,6 +3,88 @@
 Voor Gerd-Jan, 1 november 2026. Zo test je het spelersaccount met een paar
 telefoons, zonder dat er testdata in de echte database komt.
 
+**Sinds 9 november 2026 test je met 4.0 build 1 uit TestFlight en Play.** Die praat met
+de **echte** server (`account.squashanalyzer.com`), niet met de test-Worker. Gebruik
+daarvoor de afvinklijst hieronder. De scenario's A t/m F verderop horen bij de
+test-Worker en de eigen testbuilds.
+
+## Testronde build 1: afvinklijst (echte server)
+
+Wat je nu doet komt in de echte database. Speel als jezelf met je echte account, en
+verwijder testaccounts aan het eind via de app (ronde 3). Wat nog nooit op een telefoon
+is gezien en dus de meeste aandacht verdient: synchroniseren naar een nieuwe telefoon,
+tokenvernieuwing na een uur, inloggen met Apple in een uitgeleverde build, en de deellink
+via de gepubliceerde pagina `/wedstrijd`.
+
+Noteer per stap: werkte het, hoe lang duurde het, welke tekst was onduidelijk. Bij iets
+vreemds een screenshot met de tijd erbij; Claude kan dan de serverlog meelopen laten
+(`npx wrangler tail` op de echte account-Worker, vanuit `server/account-worker`).
+
+### Ronde 1: thuis, alleen (ongeveer een uur, plus één keer na een uur)
+
+iPhone = jij als speler (build 1 via TestFlight; als interne tester kan dat vóór Apples
+bètareview). A13 = coach, zonder account.
+
+- [ ] **1. Bijwerken over 3.2.** 4.0 op de iPhone installeren zonder iets te wissen.
+  Wedstrijden, spelers en badges staan er nog; zonder account werkt alles als in 3.2.
+- [ ] **2. Account maken met e-mail** (Instellingen → Mijn account) en de tijd noteren.
+  Geboortejaar en toestemming worden gevraagd, daarna ben je ingelogd. E-mail, zodat
+  stap 10 ook op Android kan; Apple komt in stap 11.
+- [ ] **3. Dit ben ik:** jezelf kiezen uit Mijn team. Je SBN-naam staat bij je account.
+- [ ] **4. Postvak, van Android naar iPhone.** A13: best of 1 coachen met jou als
+  SBN-speler, tot het eind. De wedstrijd staat in het Postvak op de iPhone.
+- [ ] **5. Badges.** iPhone: de wedstrijd gebruiken. Hij staat in Afgeronde wedstrijden
+  en telt mee voor je badges.
+- [ ] **6. Ben jij "Gerd Lasso"?** A13: partij met een niet-gekoppelde naam (In mijn team
+  aan). iPhone: onder Uit je team → **Dat ben ik**. Een volgende partij met Gerd Lasso
+  gaat meteen naar het Postvak.
+- [ ] **7. Deellink.** A13: partij met iemand buiten het team → **Stuur naar speler** →
+  via WhatsApp naar jezelf. Op de iPhone opent de link **de app** (niet de browser);
+  Toevoegen werkt; een tweede keer: "al toegevoegd". Herhaal andersom (iPhone-link
+  openen op de A13).
+- [ ] **8. Zonder netwerk.** A13: vliegtuigmodus aan, partij afmaken, app sluiten;
+  netwerk aan, app openen. De wedstrijd komt alsnog aan.
+- [ ] **9. Tokenvernieuwing.** Ruim een uur na stap 2 de app helemaal sluiten en openen.
+  Nog ingelogd, Postvak laadt, geen "Log opnieuw in". Ook op de A13 als je daar ingelogd
+  bent (Android is nog nooit aantoonbaar gezien).
+- [ ] **10. Nieuwe telefoon.** Op de A13 inloggen met het account uit stap 2 (of de app op
+  de iPhone verwijderen, opnieuw installeren en inloggen). Je geaccepteerde wedstrijden
+  staan in Afgeronde wedstrijden en tellen mee voor je badges.
+- [ ] **11. Apple.** Op de iPhone uitloggen en een tweede account maken met **Inloggen met
+  Apple**. Lukt het, dan dit account in ronde 3 verwijderen. (Apple bestaat op Android
+  nog niet.)
+
+### Ronde 2: competitieavond met het team
+
+Spreek vooraf met twee of drie teamgenoten af dat ze build 1 installeren en een account
+maken.
+
+- [ ] **Teamwedstrijd vinden zonder uitnodiging.** Jij maakt vanuit Mijn team een
+  teamwedstrijd van de wedstrijd van die avond. Een teamgenoot met een account ziet hem
+  onder Competitie → Lopende teamwedstrijden en kan **Meedoen**, zonder gedeelde link.
+- [ ] **Elkaar coachen of fluiten.** Iemand houdt jouw partij bij, jij die van een ander.
+  Ieder kijkt of de partij in zijn Postvak of onder Uit je team staat.
+- [ ] **Teamgenoot zonder account.** Jij houdt zijn partij bij; hij maakt de volgende dag
+  een account en kiest zichzelf bij Dit ben ik. De wedstrijd staat meteen in zijn Postvak.
+- [ ] **Navragen:** wat snapte je niet, en wat ontbrak er?
+
+### Ronde 3: randgevallen en opruimen
+
+- [ ] **Niet ik** bij *Ben jij X?*: weg bij jou, een teamgenoot ziet hem nog.
+- [ ] **Blokkeren** vanuit het Postvak: van die telefoon komt daarna niets meer.
+- [ ] **Naam wijzigen** in Mijn account.
+- [ ] **Jonger dan 16** opgeven: de app maakt geen account.
+- [ ] **Account verwijderen**: één testaccount in de app, één via
+  squashanalyzer.com/account-verwijderen. Met dat adres komt daarna niets meer terug.
+
+### Stand testronde build 1
+
+| Stap | Stand | Opmerking |
+|---|---|---|
+| Ronde 1 | Nog niet | |
+| Ronde 2 | Nog niet | |
+| Ronde 3 | Nog niet | |
+
 ## Hoe het werkt (kort)
 
 - Een coach of scheidsrechter vult een wedstrijd in zoals altijd. Aan het eind

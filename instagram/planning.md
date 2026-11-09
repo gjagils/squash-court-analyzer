@@ -11,15 +11,15 @@ Hashtags: Instagram telt er maximaal 5 per post, zet ze onderaan het onderschrif
 | zo 25 okt | Carousel, release 3.0 (geplaatst) | `release-3.0/png/` |
 | di 27 okt | Carousel, Competitie-vrijdag (geplaatst, verhaal in de app) | `competitie-vrijdag/slide-1..3.png`, `story-1..3.png` |
 | vr 30 okt | Carousel, je teamgenoot coachen (geplaatst, verhaal in de app) | `teamcoach/slide-1..5.png`, `story-1..5.png` |
-| za 31 okt | Reel, scheidsen | `reel-scheidsen/reel-scheidsen.mp4` |
-| di 3 nov | Carousel, Coachkaart | `carousel-coachkaart/slide-1..7.png` |
-| za 7 nov | Reel, live-stand op het vergrendelscherm | `reel-live/reel-live.mp4` |
+| za 31 okt | Reel, scheidsen (klaargezet, niet gedeeld) | `reel-scheidsen/reel-scheidsen.mp4` |
+| di 3 nov | Carousel, Coachkaart (geplaatst) | `carousel-coachkaart/slide-1..7.png` |
+| za 7 nov | Reel, live-stand op het vergrendelscherm (klaargezet, niet gedeeld) | `reel-live/reel-live.mp4` |
 | di 10 nov | Carousel, 5 dingen voor de scheids | `carousel-scheids5/slide-1..7.png` |
 | za 14 nov | Reel, coachen en Analyse | `reel-coachen/reel-coachen.mp4` |
 | di 17 nov | Reel, Team Licht of Team Donker | `team-licht-donker/reel-team-licht-donker.mp4` |
 | za 21 nov | Reel, Team Nederlands or Team English | `team-taal/reel-team-taal.mp4` |
 | di 24 nov | Reel, Team Scheids of Team Coach | `team-scheids-coach/reel-team-scheids-coach.mp4` |
-| nog te plannen | Carousel, release 3.2 (klaar 9 nov, datum met Gerd-Jan afspreken) | `release-3.2/slide-1..7.png`, `story-1..7.png` |
+| ma 9 nov | Carousel, release 3.2 (geplaatst, verhaal in de app) | `release-3.2/slide-1..7.png`, `story-1..7.png` |
 
 Van de drie reels bestaat ook een lichte versie (`reel-*-licht.mp4`, de app in
 Licht; scheidsen en live met Bob en Wim). Gebruik die later als herhaling, of
@@ -170,7 +170,7 @@ Sta jij op de stoel of langs de baan? 👇
 
 Eerste reactie: `Scheids of coach, wat doe jij het liefst? 👇`
 
-## Carousel: release 3.2 (nog te plannen)
+## ma 9 nov · Carousel: release 3.2 (geplaatst)
 
 3.2 staat sinds 8 november in de App Store en Google Play. De schermen komen uit 3.2 (4) op de
 simulator, met voorbeeldnamen (Gerard, Thijs, Sanne, Mila); alleen de teamnamen op slide 2

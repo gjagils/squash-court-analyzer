@@ -19,6 +19,7 @@ Hashtags: Instagram telt er maximaal 5 per post, zet ze onderaan het onderschrif
 | di 17 nov | Reel, Team Licht of Team Donker | `team-licht-donker/reel-team-licht-donker.mp4` |
 | za 21 nov | Reel, Team Nederlands or Team English | `team-taal/reel-team-taal.mp4` |
 | di 24 nov | Reel, Team Scheids of Team Coach | `team-scheids-coach/reel-team-scheids-coach.mp4` |
+| nog te plannen | Carousel, release 3.2 (klaar 9 nov, datum met Gerd-Jan afspreken) | `release-3.2/slide-1..7.png`, `story-1..7.png` |
 
 Van de drie reels bestaat ook een lichte versie (`reel-*-licht.mp4`, de app in
 Licht; scheidsen en live met Bob en Wim). Gebruik die later als herhaling, of
@@ -168,6 +169,30 @@ Sta jij op de stoel of langs de baan? 👇
 ```
 
 Eerste reactie: `Scheids of coach, wat doe jij het liefst? 👇`
+
+## Carousel: release 3.2 (nog te plannen)
+
+3.2 staat sinds 8 november in de App Store en Google Play. De schermen komen uit 3.2 (4) op de
+simulator, met voorbeeldnamen (Gerard, Thijs, Sanne, Mila); alleen de teamnamen op slide 2
+(All Inn Squash 7, Squash Utrecht 10) zijn echt, uit de SBN-stand. Opnieuw renderen: `release-3.2/render.sh`.
+
+```
+Squash Analyzer 3.2 is er 🎉
+
+🏆 Je teamwedstrijd op je beginscherm, met de stand en E1 t/m E4
+⏱️ Officiële timers voor de scheids: inspelen, start en pauze, en je telefoon trilt
+👀 Niet gezien bij het coachen: de score loopt gewoon door
+📊 Ken je tegenstander: de onderlinge stand bij Kies speler
+
+En sinds 3.1: Mijn team zonder link, eenvoudig coachen en de oefenpartij.
+
+Update in de App Store of Google Play, of download hem gratis via de link in de bio.
+
+#squash #squashnederland #squashcompetitie #squashcoach #squashapp
+```
+
+Eerste reactie: `Welke probeer jij als eerste? 👇`
+Verhaal (in de app): `story-1..7.png`, op slide 7 een linksticker "Download de app" naar squashanalyzer.com op de oranje tekst onderin.
 
 ## Opnieuw maken
 

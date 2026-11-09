@@ -13,6 +13,8 @@ Bronnen:
 - Live-dienst: GET /api/stats met STATS_KEY (uit de omgeving of ~/.squash-keys/stats-key.txt).
 - De app zelf (3.1 en later): één melding per toestel per dag, ook via /api/stats
   (app-per-dag.json), Nederland apart van keurders en testtoestellen elders.
+- Accounts (4.0): aantal per dag uit de D1-database van de account-Worker, met een
+  alleen-lezen query via wrangler (ingelogd op deze Mac) (accounts-per-dag.json).
 - Per week (zaterdag t/m vrijdag): de bronnen hierboven naast elkaar, voor de
   weekvergelijking op het dashboard (per-week.json).
 - Google Play en de opt-in-sessies van App Analytics: alleen in de browser te lezen,
@@ -39,6 +41,7 @@ import io
 import json
 import os
 import pathlib
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -54,6 +57,9 @@ FIRST_MONTH = "2026-03"           # eerste maand met App Store-downloads
 PLAY_START = dt.date(2026, 10, 2)  # eerste dag op Google Play
 LIVE_START = dt.date(2026, 10, 23)  # sinds de deploy van de teller
 APP_START = dt.date(2026, 10, 31)   # eerste dagmelding van de app (3.1)
+ACCOUNTS_START = dt.date(2026, 11, 1)  # accountdatabase aangemaakt (4.0)
+ACCOUNTS_DB = "squash-account"        # D1-database van de account-Worker, alleen gelezen
+REPO = pathlib.Path(os.environ.get("SQUASH_REPO", pathlib.Path.home() / "Github" / "squash-court-analyzer"))
 APP_PARTS = {"referee": "scheidsrechter", "coach": "coach", "analysis": "analyse", "competition": "competitie"}
 APPSTORE_DAYS = 35                 # dagen in de grafiek App Store per dag
 PLAY_DAYS = 60                     # dagen in de grafieken Google Play per dag
@@ -275,6 +281,32 @@ def play(out, fresh):
     return last
 
 
+# ---------------------------------------------------------------- Accounts (4.0)
+
+def wrangler():
+    """The wrangler of the account Worker's checkout (logged in on this Mac), else via npx."""
+    local = REPO / "server" / "account-worker" / "node_modules" / ".bin" / "wrangler"
+    return [os.environ["WRANGLER"]] if os.environ.get("WRANGLER") else [str(local)] if local.exists() \
+        else ["npx", "--yes", "wrangler@4.156.0"]
+
+
+def accounts(out, today):
+    """Accounts made per day, read from the account database with a read-only query."""
+    sql = "SELECT date(created_at / 1000, 'unixepoch') AS dag, COUNT(*) AS n FROM accounts GROUP BY dag"
+    result = subprocess.run([*wrangler(), "d1", "execute", ACCOUNTS_DB, "--remote", "--json", "--command", sql],
+                            cwd=STATE.parent, capture_output=True, text=True, timeout=180)
+    if result.returncode:
+        raise RuntimeError((result.stderr or result.stdout).strip()[-300:])
+    text = result.stdout
+    made = {row["dag"]: row["n"] for row in json.loads(text[text.index("["):])[0]["results"]}
+    rows, total = [], sum(n for day, n in made.items() if day < ACCOUNTS_START.isoformat())
+    for day in days_between(ACCOUNTS_START, today):
+        total += made.get(day.isoformat(), 0)
+        rows.append({"dag": day.isoformat(), "nieuw": made.get(day.isoformat(), 0), "totaal": total})
+    write(out, "accounts-per-dag.json", rows)
+    return today.isoformat()
+
+
 # ---------------------------------------------------------------- Per week
 
 def friday_of(day):
@@ -290,6 +322,8 @@ def weeks(out, today):
         if (out / "live-per-week.json").exists() else {}
     app = {row["dag"]: row for row in json.loads((out / "app-per-dag.json").read_text())} \
         if (out / "app-per-dag.json").exists() else {}
+    made = {row["dag"]: row for row in json.loads((out / "accounts-per-dag.json").read_text())} \
+        if (out / "accounts-per-dag.json").exists() else {}
     sources = {"appstore": (min(daily), max(daily)) if daily else None,
                "play": (play_days[0], play_days[-1]) if play_days else None}
 
@@ -321,6 +355,9 @@ def weeks(out, today):
         full = first >= APP_START and all(key in app for key in keys)
         for col in ("geopend_nl", "nieuw_nl", "geopend_elders"):
             row[f"app_{col}"] = sum(app[key][col] for key in keys) if full else None
+        known = [key for key in keys if key in made]
+        row["accounts_nieuw"] = sum(made[key]["nieuw"] for key in known) if known and end < today else None
+        row["accounts_totaal"] = made[known[-1]]["totaal"] if known and end < today else None
         rows.append(row)
         end += dt.timedelta(days=7)
     write(out, "per-week.json", rows)
@@ -349,6 +386,7 @@ def main():
     for name, step in [("appstore", lambda: appstore(out, today, optin)), ("testflight", lambda: testflight(out)),
                        ("live", lambda: live(out, today)),
                        ("play", lambda: play(out, json.loads(pathlib.Path(args.play).read_text()) if args.play else None)),
+                       ("accounts", lambda: accounts(out, today)),
                        ("weken", lambda: weeks(out, today))]:
         try:
             report[name] = {"ok": True, "laatste_dag": step()}

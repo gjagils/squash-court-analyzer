@@ -10,6 +10,9 @@ test-Worker en de eigen testbuilds.
 
 ## Testronde build 1: afvinklijst (echte server)
 
+Thuis met twee telefoons en twee accounts: zie de korte versie in
+[testronde-build1-twee-telefoons.md](testronde-build1-twee-telefoons.md).
+
 Wat je nu doet komt in de echte database. Speel als jezelf met je echte account, en
 verwijder testaccounts aan het eind via de app (ronde 3). Wat nog nooit op een telefoon
 is gezien en dus de meeste aandacht verdient: synchroniseren naar een nieuwe telefoon,

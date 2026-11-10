@@ -7,6 +7,8 @@ import SquashAnalyzerUI
 struct SquashAnalyzerApp: App {
     /// Instellingen → Taal ("" = the phone's language)
     @AppStorage(AppLanguage.storageKey) private var appLanguage = ""
+    /// Push notifications of a team match this phone takes part in (4.0, T6)
+    @UIApplicationDelegateAdaptor(SquashAppDelegate.self) private var appDelegate
     let container: ModelContainer
     let persistenceWarning: String?
 
@@ -37,6 +39,9 @@ struct SquashAnalyzerApp: App {
         #endif
         // Live score op het vergrendelscherm: Live Activities (followed matches and the own match)
         ActivityKitLiveFollowPresenter.shared.install()
+        // A live team match this phone takes part in: notifications when a
+        // teammate's partij starts or is decided, and at the result (4.0, T6)
+        IOSTeamAlertPlatform.shared.install()
         #if DEBUG
         LiveActivityDemo.runIfRequested()
         #endif

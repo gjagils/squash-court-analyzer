@@ -62,6 +62,7 @@
 		C1000004 /* LiveScoreActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000003 /* LiveScoreActivityWidget.swift */; };
 		C1000005 /* SquashLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C3000001 /* SquashLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeaderOnCopy, ); }; };
 		C1000006 /* ActivityKitLiveFollowPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000005 /* ActivityKitLiveFollowPresenter.swift */; };
+		D1000077 /* TeamAlertNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2000077 /* TeamAlertNotifications.swift */; };
 		C1000007 /* LiveScoreAttributesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000006 /* LiveScoreAttributesTests.swift */; };
 		C1000008 /* TeamScoreAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000008 /* TeamScoreAttributes.swift */; };
 		C1000009 /* TeamScoreAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000008 /* TeamScoreAttributes.swift */; };
@@ -154,6 +155,7 @@
 		C2000003 /* LiveScoreActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveScoreActivityWidget.swift; sourceTree = "<group>"; };
 		C2000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C2000005 /* ActivityKitLiveFollowPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityKitLiveFollowPresenter.swift; sourceTree = "<group>"; };
+		D2000077 /* TeamAlertNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamAlertNotifications.swift; sourceTree = "<group>"; };
 		C2000007 /* SquashLiveActivity.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SquashLiveActivity.entitlements; sourceTree = "<group>"; };
 		C2000006 /* LiveScoreAttributesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveScoreAttributesTests.swift; sourceTree = "<group>"; };
 		C2000008 /* TeamScoreAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamScoreAttributes.swift; sourceTree = "<group>"; };
@@ -274,6 +276,7 @@
 				A2000024 /* NetworkTransports.swift */,
 				A2000090 /* AccountServices.swift */,
 				C2000005 /* ActivityKitLiveFollowPresenter.swift */,
+				D2000077 /* TeamAlertNotifications.swift */,
 				A2000025 /* APIKeyManager.swift */,
 				A2000031 /* ExportService.swift */,
 				B2000090 /* AutomaticBackup.swift */,
@@ -476,6 +479,7 @@
 				C1000001 /* LiveScoreAttributes.swift in Sources */,
 				C1000008 /* TeamScoreAttributes.swift in Sources */,
 				C1000006 /* ActivityKitLiveFollowPresenter.swift in Sources */,
+				D1000077 /* TeamAlertNotifications.swift in Sources */,
 				A1000001 /* SquashAnalyzerApp.swift in Sources */,
 				A1000002 /* ContentView.swift in Sources */,
 				B1000082 /* HomeView.swift in Sources */,

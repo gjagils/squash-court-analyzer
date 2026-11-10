@@ -1,6 +1,9 @@
 package com.squashanalyzer.android.data
 
+import com.squashanalyzer.android.live.FcmLiveFollowPresenter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import squash.analyzer.core.TeamAlertFollow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -24,13 +27,22 @@ class BackgroundTeamMatchStore(private val directory: URL) : TeamMatchStore {
     /** Called after every save or delete (the competition badges follow the team matches) */
     var onChange: (suspend () -> Unit)? = null
 
+    /**
+     * Every save and delete lets Core follow (or forget) the live team matches
+     * with notifications (4.0, T6) and keeps the competition badges in line (T7)
+     */
     override suspend fun save(match: TeamMatch) {
         io { TeamMatchFile.upsert(match, directory = directory) }
-        onChange?.invoke()
+        changed()
     }
 
     override suspend fun delete(id: UUID) {
         io { TeamMatchFile.remove(id = id, directory = directory) }
+        changed()
+    }
+
+    private suspend fun changed() {
+        FcmLiveFollowPresenter.scope.launch { TeamAlertFollow.shared.refresh() }
         onChange?.invoke()
     }
 

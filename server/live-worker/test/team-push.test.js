@@ -3,7 +3,10 @@
 // fetch, MAX_FOLLOWERS_PER_SESSION 3).
 import { SELF, env, runDurableObjectAlarm, runInDurableObject } from 'cloudflare:test';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { apnsPayload, clearPushTokenCaches, fcmPayload, partijDecided, pushDeps, teamAlert, teamContentState, teamWinner } from '../src/push.js';
+import {
+  alertForFollower, apnsPayload, clearPushTokenCaches, fcmPayload, partijDecided, pushDeps, teamAlert, teamAlerts, teamContentState,
+  teamWinner,
+} from '../src/push.js';
 
 const BASE = 'https://live.test';
 const header = { home: 'All Inn 8', away: 'Delft 8', date: Date.UTC(2026, 9, 30, 19) };
@@ -393,6 +396,145 @@ describe('team pushes', () => {
     const { id, writeKey, ownerKey } = await newTeam();
     await call('PUT', `/api/team/${id}/partij/1`, playing, writeKey);
     await call('DELETE', `/api/team/${id}`, undefined, ownerKey);
+    await pushesDone(id);
+    expect(sent).toEqual([]);
+  });
+});
+
+// 4.0 (T6): the players of a team match follow it with plain notifications
+const DEVICE_A = 'device-aaaa-1111';
+const DEVICE_B = 'device-bbbb-2222';
+const IOS_DEVICE = 'cd'.repeat(32);
+
+async function writeAs(device, id, slot, partij, key) {
+  const headers = { 'Content-Type': 'application/json', 'CF-Connecting-IP': nextIp(), Authorization: `Bearer ${key}` };
+  if (device) headers['X-Squash-Device'] = device;
+  const res = await SELF.fetch(`${BASE}/api/team/${id}/partij/${slot}`, { method: 'PUT', headers, body: JSON.stringify(partij) });
+  await res.arrayBuffer();
+  return res.status;
+}
+
+const apnsRequests = () => sent.filter((r) => r.url.includes('push.apple.com'));
+
+describe('alerts followers', () => {
+  it('register with mode and device; apart from a lock screen follower with the same token; not for a single match', async () => {
+    const { id } = await newTeam();
+    expect((await follow(id, { platform: 'android', token: ANDROID, mode: 'alerts', device: DEVICE_A, lang: 'en' })).status).toBe(201);
+    expect((await follow(id, { platform: 'android', token: ANDROID })).status).toBe(201);
+    const list = await followers(id);
+    expect(list.length).toBe(2);
+    expect(list).toContainEqual({ platform: 'android', token: ANDROID, sandbox: false, alerts: true, lang: 'en', mode: 'alerts', device: DEVICE_A });
+    expect(list).toContainEqual({ platform: 'android', token: ANDROID, sandbox: false, alerts: true, lang: 'nl' });
+    // Forgetting the alerts follower keeps the lock screen one
+    expect((await call('DELETE', `/api/team/${id}/followers`, { platform: 'android', token: ANDROID, mode: 'alerts' })).status).toBe(204);
+    expect(await followers(id)).toEqual([{ platform: 'android', token: ANDROID, sandbox: false, alerts: true, lang: 'nl' }]);
+    // An unknown mode, and alerts on a single match, are refused
+    expect((await follow(id, { platform: 'android', token: ANDROID, mode: 'other' })).status).toBe(400);
+    const live = await call('POST', '/api/live', playing);
+    expect(live.status).toBe(201);
+    expect((await call('POST', `/api/live/${live.json.id}/followers`, { platform: 'android', token: ANDROID, mode: 'alerts' })).status).toBe(400);
+    // A bad device id is left out
+    expect((await follow(id, { platform: 'ios', token: IOS_DEVICE, mode: 'alerts', device: 'bad id!' })).status).toBe(201);
+    expect((await followers(id)).find((f) => f.platform === 'ios').device).toBeUndefined();
+  });
+
+  it("a teammate's partij started and decided, the result; nothing per rally; not about the own partij; no lock screen push", async () => {
+    const { id, writeKey } = await newTeam();
+    await follow(id, { platform: 'ios', token: IOS_DEVICE, sandbox: true, mode: 'alerts', device: DEVICE_A });
+    await follow(id, { platform: 'android', token: ANDROID, mode: 'alerts', device: DEVICE_B, lang: 'en' });
+
+    // Phone A starts E1: B hears about it, A not
+    expect(await writeAs(DEVICE_A, id, 1, playing, writeKey)).toBe(204);
+    await pushesDone(id);
+    expect(apnsRequests()).toEqual([]);
+    const [message] = fcmData();
+    expect(message.data).toEqual({
+      kind: 'alert', id, server: BASE, slot: '1', alertTitle: 'E1 started: Gerd-Jan – Thomas', alertBody: 'All Inn 8 1 – 0 Delft 8',
+    });
+    expect(message.android).toEqual({ priority: 'high', ttl: '600s' });
+
+    // A rally and a game in E1: nothing
+    sent = [];
+    await writeAs(DEVICE_A, id, 1, { ...playing, score: [5, 2] }, writeKey);
+    await writeAs(DEVICE_A, id, 1, { ...playing, gamesWon: [2, 0], status: 'between' }, writeKey);
+    await pushesDone(id);
+    expect(sent).toEqual([]);
+
+    // Phone B starts E2 without names: A hears it, as a plain APNs alert
+    await writeAs(DEVICE_B, id, 2, { ...playing, p1: '', p2: '' }, writeKey);
+    await pushesDone(id);
+    expect(fcmData()).toEqual([]);
+    const [request] = apnsRequests();
+    expect(request.url).toBe(`https://api.sandbox.push.apple.com/3/device/${IOS_DEVICE}`);
+    expect(request.headers['apns-push-type']).toBe('alert');
+    expect(request.headers['apns-topic']).toBe('com.squashanalyzer.app');
+    expect(JSON.parse(request.body)).toEqual({
+      aps: { alert: { title: 'E2 begonnen: All Inn 8 E2 – Delft 8 E2', body: 'All Inn 8 3 – 0 Delft 8' }, sound: 'default', 'thread-id': `team-${id}` },
+      kind: 'team', id, slot: 2,
+    });
+
+    // E1 decided by A: only B; then E2 decided by B: only A
+    sent = [];
+    await writeAs(DEVICE_A, id, 1, won('Gerd-Jan', 'Thomas', [3, 1], 1), writeKey);
+    await pushesDone(id);
+    expect(apnsRequests()).toEqual([]);
+    expect(fcmData()[0].data.alertTitle).toBe('E1: Gerd-Jan wins 3–1');
+    sent = [];
+    await writeAs(DEVICE_B, id, 2, won('', '', [0, 3], 2), writeKey);
+    await pushesDone(id);
+    expect(fcmData()).toEqual([]);
+    expect(JSON.parse(apnsRequests()[0].body).aps.alert.title).toBe('E2: Delft 8 E2 wint 3–0');
+
+    // E3 from a phone without an install id (an app before 4.0): both hear it
+    sent = [];
+    await writeAs(null, id, 3, won('E', 'F', [3, 2], 1), writeKey);
+    await pushesDone(id);
+    expect(apnsRequests().length).toBe(1);
+    expect(fcmData().length).toBe(1);
+
+    // The last one by A: the result for everyone, A too
+    sent = [];
+    await writeAs(DEVICE_A, id, 4, won('G', 'H', [3, 0], 1), writeKey);
+    await pushesDone(id);
+    expect(JSON.parse(apnsRequests()[0].body).aps.alert.title).toBe('Uitslag: All Inn 8 wint 9–6');
+    expect(fcmData()[0].data.alertTitle).toBe('Result: All Inn 8 wins 9–6');
+  });
+
+  it('decided before started; a cleared slot forgets its writers; dead tokens go; no end at Live stoppen', async () => {
+    const { id, writeKey, ownerKey } = await newTeam();
+    await follow(id, { platform: 'android', token: ANDROID, mode: 'alerts', device: DEVICE_B });
+    await writeAs(DEVICE_B, id, 1, playing, writeKey);
+    await pushesDone(id);
+    expect(sent).toEqual([]);
+    // B clears E1; A puts a partij there: B hears it now
+    await writeAs(DEVICE_B, id, 1, { empty: true }, writeKey);
+    await writeAs(DEVICE_A, id, 1, playing, writeKey);
+    await pushesDone(id);
+    expect(fcmData().map((m) => m.data.alertTitle)).toEqual(['E1 begonnen: Gerd-Jan – Thomas']);
+
+    // The order of the list: decided first, then started
+    const list = teamAlerts({ 1: playing }, team, { 1: won('A', 'B', [3, 0], 1), 2: playing });
+    expect(list.map((a) => [a.slot, Boolean(a.started)])).toEqual([[1, false], [2, true]]);
+    expect(alertForFollower({ device: DEVICE_A }, list, { 1: [DEVICE_A] }).slot).toBe(2);
+    expect(alertForFollower({}, list, { 1: [DEVICE_A] }).slot).toBe(1);
+    // The lock screen alert never says "started"
+    expect(teamAlert({}, team, { 2: playing })).toBeNull();
+
+    // FCM says the token is gone: forgotten
+    sent = [];
+    pushDeps.fetch = (url, init) => {
+      sent.push({ url, headers: init.headers, body: init.body });
+      if (url === 'https://oauth2.googleapis.com/token') return new Response(JSON.stringify({ access_token: 'ya29.test' }), { status: 200 });
+      return new Response(JSON.stringify({ error: { status: 'NOT_FOUND', details: [{ errorCode: 'UNREGISTERED' }] } }), { status: 404 });
+    };
+    await writeAs(DEVICE_A, id, 2, playing, writeKey);
+    await pushesDone(id);
+    expect(await followers(id)).toEqual([]);
+
+    pushDeps.fetch = fakeFetch;
+    await follow(id, { platform: 'android', token: ANDROID, mode: 'alerts', device: DEVICE_B });
+    sent = [];
+    expect((await call('DELETE', `/api/team/${id}`, undefined, ownerKey)).status).toBe(204);
     await pushesDone(id);
     expect(sent).toEqual([]);
   });

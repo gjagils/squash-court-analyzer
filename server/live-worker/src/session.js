@@ -94,7 +94,7 @@ export class LiveSession extends ViewerSession {
 
   /** After an update: "update" to the followers, or "end" once when the match is finished */
   async pushUpdate(snapshot, previous = null) {
-    const followers = await this.followers();
+    const followers = await this.lockScreenFollowers();
     if (followers.length === 0) return;
     // Back from finished (a corrected last rally): updates again
     const event = await this.followerEvent(snapshot.status === 'finished');

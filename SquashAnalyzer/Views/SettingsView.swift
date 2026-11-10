@@ -31,6 +31,7 @@ struct SettingsView: View {
     @AppStorage(LiveShare.photosKey) private var livePhotos = true
     @AppStorage(LiveFollow.ownMatchKey) private var lockScreenScore = true
     @AppStorage(LiveFollow.alertsKey) private var liveAlerts = true
+    @AppStorage(TeamAlertFollow.enabledKey) private var teamAlerts = true
     @Environment(\.openURL) private var openURL
     /// The part of Instellingen that is open; one at a time
     @State private var openPart: String? = nil
@@ -280,6 +281,20 @@ struct SettingsView: View {
             }
             .tint(AppColors.warmOrange)
             Text(appText("Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag."))
+                .font(AppFonts.caption(11))
+                .foregroundColor(AppColors.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+            Toggle(isOn: Binding(get: { teamAlerts }, set: { on in
+                teamAlerts = on
+                // 4.0, T6: (un)register the live team matches on this phone at once
+                Task { await TeamAlertFollow.shared.refresh() }
+            })) {
+                Text(appText("Meldingen van je teamwedstrijd"))
+                    .font(AppFonts.label(14))
+                    .foregroundColor(AppColors.textPrimary)
+            }
+            .tint(AppColors.warmOrange)
+            Text(appText("Doe je mee aan een live teamwedstrijd (zelf gestart of meegedaan), dan krijg je een melding als een teamgenoot aan een partij begint, als een partij beslist is en bij de einduitslag. Niet over je eigen partij."))
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)

@@ -44,12 +44,17 @@ final class BackgroundTeamMatchStore: TeamMatchStore {
     var didChange: (() -> Void)?
 
     func loadAll() async throws -> [TeamMatch] { try await io.loadAll() }
+    /// Every save and delete lets `TeamAlertFollow` follow (or forget) the live
+    /// team matches (4.0, T6) and calls `didChange` (the competition badges, T7)
     func save(_ match: TeamMatch) async throws {
         try await io.save(match)
+        TeamAlertFollow.shared.matchesChanged()
         didChange?()
     }
+
     func delete(id: UUID) async throws {
         try await io.delete(id: id)
+        TeamAlertFollow.shared.matchesChanged()
         didChange?()
     }
 }

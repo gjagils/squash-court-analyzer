@@ -175,6 +175,9 @@ public struct SharedLeagueTeamCard: View {
     @State private var snapshot: LeagueTeamSnapshot?
     @State private var errorMessage: String?
     @State private var loading = false
+    /// 4.0: a live team match of a teammate or the opponent, for today or tomorrow
+    @State private var offer: TeamLiveListing? = nil
+    @State private var joiningOffer = false
 
     public init(fetcher: LeagueTeamFetcher, onTeam: ((LeagueTeamSnapshot) -> Void)? = nil,
                 onSetup: (() -> Void)? = nil,
@@ -193,7 +196,8 @@ public struct SharedLeagueTeamCard: View {
     public var body: some View {
         VStack(spacing: 0) {
             if let snapshot {
-                HomeTeamSummary(snapshot: snapshot, match: activeMatch, onOpen: { onOpen(snapshot) }, onMatch: onTeamMatch)
+                HomeTeamSummary(snapshot: snapshot, match: activeMatch, offer: homeOffer(snapshot),
+                                onOpen: { onOpen(snapshot) }, onMatch: onTeamMatch)
             } else if let activeMatch {
                 // Joined with a link, without Mijn team: the match still gets its place
                 HomeTeamMatchBar(match: activeMatch) { onTeamMatch(activeMatch) }
@@ -223,6 +227,59 @@ public struct SharedLeagueTeamCard: View {
         .padding(.horizontal, 24)
         .task(id: teamURL) { await load() }
         .task(id: "\(matchesPaused)-\(matchesRevision)") { await followActiveMatch() }
+        .task(id: "\(snapshot?.source.absoluteString ?? "")-\(matchesPaused)-\(matchesRevision)") { await followOffers() }
+    }
+
+    /// Looks for a team match to join every five minutes, only with an account
+    /// and only around a match of the programme (TeamFinding.offers asks the
+    /// server for today and tomorrow, so most of the week it asks nothing)
+    private func followOffers() async {
+        guard let store = teamMatches, !matchesPaused, let team = snapshot else { return }
+        let soon = team.fixtures.contains { fixture in abs(fixture.date.timeIntervalSinceNow) < 36.0 * 3600.0 }
+        guard soon else {
+            offer = nil
+            return
+        }
+        while !Task.isCancelled {
+            if let context = await PlayerAccount.shared.teamFindingContext() {
+                let matches = (try? await store.loadAll()) ?? []
+                let found = await TeamFinding.offers(context: context, fixtures: team.fixtures, matches: matches)
+                if offer != found.first { offer = found.first }
+            } else if offer != nil {
+                offer = nil
+            }
+            try? await Task.sleep(nanoseconds: 300_000_000_000)
+        }
+    }
+
+    private func homeOffer(_ team: LeagueTeamSnapshot) -> HomeTeamOffer? {
+        guard let offer, activeMatch == nil else { return nil }
+        let title = offer.own ? loc("\(offer.starterName) heeft een teamwedstrijd aangemaakt")
+            : loc("\(offer.teamName) houdt deze wedstrijd bij")
+        var detail = offer.teamName
+        for fixture in team.fixtures where TeamFinding.normalizedFixture(fixture.id) == offer.fixture {
+            let ownIsHome = TeamMatch.sameTeam(fixture.home, team.name)
+            detail = "\(ownIsHome ? loc("Thuis") : loc("Uit")) · \(ownIsHome ? fixture.away : fixture.home)"
+        }
+        return HomeTeamOffer(title: title, detail: detail, joining: joiningOffer) {
+            Task { await join(offer, team: team) }
+        }
+    }
+
+    private func join(_ listing: TeamLiveListing, team: LeagueTeamSnapshot) async {
+        guard let store = teamMatches, !joiningOffer else { return }
+        joiningOffer = true
+        do {
+            let joined = try await TeamFinding.join(listing, ownTeamName: team.name, fixtures: team.fixtures, store: store)
+            offer = nil
+            joiningOffer = false
+            TeamMatchSupport.noteChange()
+            onTeamMatch(joined)
+        } catch {
+            // Gone or not possible: Competitie explains it; the card just drops the offer
+            offer = nil
+            joiningOffer = false
+        }
     }
 
     /// Keeps the bar current while the home screen is in front: the saved
@@ -381,14 +438,27 @@ public struct SharedLeagueTeamDetailView: View {
                                 .padding(.top, 6)
                         }
                     }
-                    section(loc("SPELERS")) {
-                        ForEach(snapshot.players) { player in
-                            HStack {
-                                Text(player.name).foregroundColor(SharedColors.textPrimary)
-                                Spacer()
-                                Text(player.record)
-                                    .font(SharedFonts.system(12))
-                                    .foregroundColor(SharedColors.textSecondary)
+                    // Seizoen per speler (4.0, T2): SBN's record and the team matches in the app
+                    section(loc("SEIZOEN PER SPELER")) {
+                        ForEach(TeamSeason.rows(team: snapshot, matches: matches)) { row in
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack {
+                                    Text(row.name).foregroundColor(SharedColors.textPrimary)
+                                    if !row.onTeamPage {
+                                        Text("invaller", bundle: textBundle)
+                                            .font(SharedFonts.system(11))
+                                            .foregroundColor(SharedColors.textMuted)
+                                    }
+                                    Spacer()
+                                    Text(row.sbnText)
+                                        .font(SharedFonts.system(12, weight: .semibold))
+                                        .foregroundColor(SharedColors.textSecondary)
+                                }
+                                if let app = row.appText {
+                                    Text(app)
+                                        .font(SharedFonts.system(11))
+                                        .foregroundColor(SharedColors.textMuted)
+                                }
                             }
                             .padding(.vertical, 4)
                         }

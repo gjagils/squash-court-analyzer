@@ -155,13 +155,17 @@ public struct HomeTeamSummary: View {
     private let snapshot: LeagueTeamSnapshot
     /// Today's team match on this phone: it takes the place of the next match
     private let match: TeamMatch?
+    /// 4.0: a team match a teammate (or the opponent) made that this phone can
+    /// join; it takes the place of the next match while there is no own match
+    private let offer: HomeTeamOffer?
     private let onOpen: () -> Void
     private let onMatch: (TeamMatch) -> Void
 
-    public init(snapshot: LeagueTeamSnapshot, match: TeamMatch? = nil, onOpen: @escaping () -> Void,
-                onMatch: @escaping (TeamMatch) -> Void = { _ in }) {
+    public init(snapshot: LeagueTeamSnapshot, match: TeamMatch? = nil, offer: HomeTeamOffer? = nil,
+                onOpen: @escaping () -> Void, onMatch: @escaping (TeamMatch) -> Void = { _ in }) {
         self.snapshot = snapshot
         self.match = match
+        self.offer = offer
         self.onOpen = onOpen
         self.onMatch = onMatch
     }
@@ -181,7 +185,7 @@ public struct HomeTeamSummary: View {
             Button(action: onOpen) {
                 VStack(spacing: 0) {
                     teamPart
-                    if match == nil, let next {
+                    if match == nil, offer == nil, let next {
                         fixtureRow(next)
                             .padding(EdgeInsets(top: 10, leading: 14, bottom: 12, trailing: 14))
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -196,6 +200,8 @@ public struct HomeTeamSummary: View {
             .accessibilityLabel(loc("Mijn team: \(snapshot.name)"))
             if let match {
                 HomeTeamMatchBar(match: match) { onMatch(match) }
+            } else if let offer {
+                HomeTeamOfferBar(offer: offer)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -263,6 +269,67 @@ public struct HomeTeamSummary: View {
 
     private func number(_ value: Int?) -> String {
         value.map { String($0) } ?? "–"
+    }
+}
+
+/// A live team match this phone can join from the home card (4.0, teamwedstrijd vinden)
+public struct HomeTeamOffer {
+    /// "Kees heeft een teamwedstrijd aangemaakt" / "Squash City 2 houdt deze wedstrijd bij"
+    public let title: String
+    /// "Thuis · Bevo 3"
+    public let detail: String
+    public let joining: Bool
+    public let onJoin: () -> Void
+
+    public init(title: String, detail: String, joining: Bool, onJoin: @escaping () -> Void) {
+        self.title = title
+        self.detail = detail
+        self.joining = joining
+        self.onJoin = onJoin
+    }
+}
+
+/// The bar of a team match to join: the same place and height as the next
+/// match, in the live colour, with Meedoen on the right
+struct HomeTeamOfferBar: View {
+    let offer: HomeTeamOffer
+
+    var body: some View {
+        Button(action: offer.onJoin) {
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(offer.title)
+                        .font(SharedFonts.system(13, weight: .semibold))
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(offer.detail)
+                        .font(SharedFonts.system(11))
+                        .foregroundColor(SharedColors.textSecondary)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                if offer.joining {
+                    ProgressView()
+                } else {
+                    Text("Meedoen", bundle: textBundle)
+                        .font(SharedFonts.system(13, weight: .semibold))
+                        .foregroundColor(SharedColors.support)
+                        .padding(.horizontal, 12)
+                        .frame(height: 30)
+                        .overlay(Capsule().stroke(SharedColors.support, lineWidth: 1.5))
+                }
+            }
+            .padding(EdgeInsets(top: 10, leading: 14, bottom: 12, trailing: 14))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(SharedColors.support.opacity(0.12))
+            #if !SKIP
+            .contentShape(Rectangle())
+            #endif
+        }
+        .buttonStyle(.plain)
+        .disabled(offer.joining)
+        .foregroundColor(SharedColors.textPrimary)
+        .accessibilityLabel(offer.title)
     }
 }
 

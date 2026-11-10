@@ -7759,6 +7759,24 @@
         }
       }
     },
+    "SEIZOEN PER SPELER": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SEASON PER PLAYER"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SEIZOEN PER SPELER"
+          }
+        }
+      }
+    },
     "SPELERS": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -7773,6 +7791,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "SPELERS"
+          }
+        }
+      }
+    },
+    "invaller": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "substitute"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "invaller"
           }
         }
       }

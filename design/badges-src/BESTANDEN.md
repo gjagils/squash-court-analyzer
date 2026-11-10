@@ -256,3 +256,11 @@
 - [design/badges-src/badge-team-player-silver.png](badge-team-player-silver.png)
 - [Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-team-player-silver.imageset/badge-team-player-silver.png](../../Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-team-player-silver.imageset/badge-team-player-silver.png)
 - [website/badges/team-player-silver.png](../../website/badges/team-player-silver.png)
+
+- [design/badges-src/badge-team-player-gold.png](badge-team-player-gold.png)
+- [Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-team-player-gold.imageset/badge-team-player-gold.png](../../Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-team-player-gold.imageset/badge-team-player-gold.png)
+- [website/badges/team-player-gold.png](../../website/badges/team-player-gold.png)
+
+- [design/badges-src/badge-match-winner.png](badge-match-winner.png)
+- [Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-match-winner.imageset/badge-match-winner.png](../../Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-match-winner.imageset/badge-match-winner.png)
+- [website/badges/match-winner.png](../../website/badges/match-winner.png)

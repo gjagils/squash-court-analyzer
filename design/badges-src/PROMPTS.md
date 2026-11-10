@@ -361,3 +361,11 @@ Toegevoegd 18 oktober 2026, aangeleverd door Gerd-Jan (1254 × 1254, transparant
 Gemaakt met gpt-image-2.5 (ElevenLabs-flow "SquashAnalyzer competitiebadges"), met `website/badges/veteran-bronze.png` als stijlreferentie voor brons en de bronzen uitkomst als referentie voor zilver (alleen cijfer 8 en zilveren rand). De generator gaf 1280 × 720 zonder alfa (dambord of grijs vlak); de cirkel is uitgesneden en daarbuiten transparant gemaakt, daarna 1024, 240 en 180 pixels.
 
 Brons: "Team player" — three stylised squash players standing shoulder to shoulder as one team, one holding a racket raised, laurel branches, black squash ball with exactly two yellow dots, large bold cream-white numeral 3, thin copper bronze rim #B87333, low-poly faceted royal-blue field as the reference.
+
+## badge-team-player-gold.png, badge-match-winner.png (10 november 2026)
+
+Gemaakt met ChatGPT (beeldgenerator, 1254 × 1254 met alfa), met de bronzen en zilveren Teamspeler-badge als bijlage. Rand gecontroleerd, cirkel uitgesneden en verkleind naar 1024, 240 en 180 pixels.
+
+Goud: "The two attached SquashAnalyzer medals are the bronze (numeral 3) and silver (numeral 8) tiers of the same badge. Make the GOLD tier: keep the composition, faceted low-poly royal-blue circular field, illustration and colours exactly identical. Change ONLY: the numeral becomes a large bold cream-white 15 in the same position, readable at 56px; and the thin outer medal rim becomes gold #E8B547 with a few extra small sparks along the rim. No words, no other digits, no other new objects. Circle almost fills the square, transparent outside."
+
+Matchwinnaar: "Use the attached medals as STYLE REFERENCE ONLY: same low-poly faceted illustration, royal-blue circular field, orange/gold angular accents, crisp readable composition at 56px. Badge 'Match winner' (winning the individual match that decides the team competition). Subject: one squash player in the foreground leaping with racket raised high in triumph, two teammates behind cheering with arms up, a small golden trophy cup with orange spark accents, plus the faceted BLACK SQUASH BALL with EXACTLY TWO YELLOW DOTS. NO numeral, no words, no letters, no digits. Thin outer medal rim gold #E8B547. Circle almost fills the square, transparent outside."

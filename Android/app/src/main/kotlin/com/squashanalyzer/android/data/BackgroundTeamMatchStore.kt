@@ -1,6 +1,9 @@
 package com.squashanalyzer.android.data
 
+import com.squashanalyzer.android.live.FcmLiveFollowPresenter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import squash.analyzer.core.TeamAlertFollow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -21,9 +24,20 @@ class BackgroundTeamMatchStore(private val directory: URL) : TeamMatchStore {
 
     override suspend fun loadAll(): SwiftArray<TeamMatch> = io { TeamMatchFile.newestFirst(directory = directory) }
 
-    override suspend fun save(match: TeamMatch) = io { TeamMatchFile.upsert(match, directory = directory) }
+    /** Every save and delete lets Core follow (or forget) the live team matches with notifications (4.0, T6) */
+    override suspend fun save(match: TeamMatch) {
+        io { TeamMatchFile.upsert(match, directory = directory) }
+        changed()
+    }
 
-    override suspend fun delete(id: UUID) = io { TeamMatchFile.remove(id = id, directory = directory) }
+    override suspend fun delete(id: UUID) {
+        io { TeamMatchFile.remove(id = id, directory = directory) }
+        changed()
+    }
+
+    private fun changed() {
+        FcmLiveFollowPresenter.scope.launch { TeamAlertFollow.shared.refresh() }
+    }
 
     private suspend fun <T> io(block: () -> T): T = lock.withLock { withContext(Dispatchers.IO) { block() } }
 }

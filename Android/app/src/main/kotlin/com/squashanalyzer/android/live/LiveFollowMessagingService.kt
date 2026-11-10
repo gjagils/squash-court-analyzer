@@ -6,6 +6,7 @@ import com.google.firebase.messaging.RemoteMessage
 import com.squashanalyzer.android.BuildConfig
 import kotlinx.coroutines.launch
 import squash.analyzer.core.LiveFollow
+import squash.analyzer.core.TeamAlertFollow
 
 /**
  * The live server's pushes: `data = { kind: "live", id, server, event:
@@ -14,6 +15,8 @@ import squash.analyzer.core.LiveFollow
  * followed team match; with `alertTitle` / `alertBody` when a game (partij) is
  * won and at the result. Shows the new state; "end" shows the final score (or
  * removes the notification when there is none) and forgets the match.
+ * `{ kind: "alert", id, server, slot, alertTitle, alertBody }` (4.0, T6) is a
+ * team match this phone takes part in: only the alert, no ongoing notification.
  */
 class LiveFollowMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
@@ -24,12 +27,19 @@ class LiveFollowMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         if (BuildConfig.DEBUG) android.util.Log.d("LiveFollow", "FCM token: $token")
         FcmLiveFollowPresenter.scope.launch { FcmLiveFollowPresenter.tokenChanged(applicationContext, token) }
+        // The team matches this phone takes part in (4.0, T6) get the new token too
+        FcmLiveFollowPresenter.scope.launch { TeamAlertFollow.shared.tokenChanged() }
     }
 
     companion object {
         /** Also the entry point of the debug-only sample broadcast */
         fun handle(context: Context, data: Map<String, String>) {
             val kind = data["kind"]
+            // 4.0, T6: a team match this phone takes part in (no ongoing notification)
+            if (kind == "alert") {
+                AndroidTeamAlertPlatform.show(context, data)
+                return
+            }
             if (kind != "live" && kind != FollowedMatch.TEAM) return
             val match = FollowedMatch.validated(data["id"], data["server"], kind) ?: return
             val followed = FollowedMatches(context)

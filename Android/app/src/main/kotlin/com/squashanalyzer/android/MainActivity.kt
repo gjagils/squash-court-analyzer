@@ -62,6 +62,8 @@ import com.squashanalyzer.android.live.HttpLiveTransport
 import com.squashanalyzer.android.live.FcmLiveFollowPresenter
 import com.squashanalyzer.android.live.LiveAlerts
 import com.squashanalyzer.android.live.FirebaseConfig
+import com.squashanalyzer.android.live.AndroidTeamAlertPlatform
+import squash.analyzer.core.TeamAlertFollow
 import squash.analyzer.core.LiveFollow
 import squash.analyzer.core.LiveFollowError
 import squash.analyzer.core.LiveFollowLink
@@ -93,6 +95,9 @@ class SquashApplication : Application() {
         LiveFollow.shared.presenter = FcmLiveFollowPresenter(applicationContext)
         // "Melding bij elke game" (shared settings screen): sent with every registration
         LiveAlerts.start(applicationContext)
+        // A live team match this phone takes part in: notifications when a
+        // teammate's partij starts or is decided, and at the result (4.0, T6)
+        TeamAlertFollow.shared.platform = AndroidTeamAlertPlatform(applicationContext)
     }
 }
 
@@ -139,6 +144,7 @@ class MainActivity : AppCompatActivity() {
             coachMatchStore, refereeMatchDataStore, badgeInstallId(), transaction = { block -> db.withTransaction { block() } })
         badges = badgeAwardStore
         (LiveFollow.shared.presenter as? FcmLiveFollowPresenter)?.requestNotificationPermission = askNotificationPermission
+        (TeamAlertFollow.shared.platform as? AndroidTeamAlertPlatform)?.requestNotificationPermission = askNotificationPermission
         // Not again after a rotation: the link was already taken in (or dismissed)
         if (savedInstanceState == null) receiveCardLink(intent)
         val matchStore = RoomCoachMatchStore(coachMatchStore, badgeAwardStore)
@@ -149,6 +155,8 @@ class MainActivity : AppCompatActivity() {
         val teamDirectory = URL(fileURLWithPath = filesDir.absolutePath, isDirectory = true)
         val teamMatchStore = BackgroundTeamMatchStore(directory = teamDirectory)
         teamMatches = teamMatchStore
+        // 4.0, T6: the live team matches in it are followed with notifications
+        TeamAlertFollow.shared.store = teamMatchStore
         // The coach's notes per game live next to the team matches (GameNotes)
         GameNotes.shared.configure(directory = teamDirectory)
         // Oefenpartijen (no badges, not in the profile) in the same folder
@@ -251,6 +259,8 @@ class MainActivity : AppCompatActivity() {
         if (ResultImageSharing.share === resultImageShare) ResultImageSharing.share = null
         val presenter = LiveFollow.shared.presenter as? FcmLiveFollowPresenter
         if (presenter?.requestNotificationPermission === askNotificationPermission) presenter.requestNotificationPermission = null
+        val teamAlerts = TeamAlertFollow.shared.platform as? AndroidTeamAlertPlatform
+        if (teamAlerts?.requestNotificationPermission === askNotificationPermission) teamAlerts.requestNotificationPermission = null
         super.onDestroy()
     }
 

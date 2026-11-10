@@ -53,7 +53,7 @@ struct HomeView: View {
 
             ScrollView {
                 VStack(spacing: 16) {
-                    HomeMenuHeader(onSettings: onOpenSettings)
+                    HomeMenuHeader(onSettings: onOpenSettings, accountProviders: AppleAccountSignIn.providers)
                     LeagueTeamCard(onSetup: onFindClub, matchesPaused: showingCompetition || openedTeamMatch != nil) { match in
                         openedTeamMatch = match
                     }

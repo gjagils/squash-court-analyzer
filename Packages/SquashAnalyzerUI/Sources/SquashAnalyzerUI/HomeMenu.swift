@@ -5,9 +5,31 @@ import SquashAnalyzerCore
 /// the host app; iOS keeps its existing destinations and Android adds them in phase 5.
 public struct HomeMenuHeader: View {
     private let onSettings: (() -> Void)?
+    /// Sign in with Apple on iOS, for Mijn account behind the photo top left
+    private let accountProviders: [AccountProviderSignIn]
+    @State private var showingAccount = false
 
-    public init(onSettings: (() -> Void)? = nil) {
+    public init(onSettings: (() -> Void)? = nil, accountProviders: [AccountProviderSignIn] = []) {
         self.onSettings = onSettings
+        self.accountProviders = accountProviders
+    }
+
+    /// Your photo (or the person icon) top left opens Mijn account (4.0, Gerd-Jan 10 November 2026)
+    @ViewBuilder
+    private var accountButton: some View {
+        let account = PlayerAccount.shared
+        if Features.shared.playerAccount && account.isConfigured {
+            Button { showingAccount = true } label: {
+                if let profile = account.profile {
+                    PlayerPhotoView(photo: account.ownAvatar, name: profile.name, size: 30, color: SharedColors.textSecondary)
+                } else {
+                    AppSymbol("person.crop.circle", size: 22, color: SharedColors.textSecondary)
+                }
+            }
+            .frame(width: 36, height: 36)
+            .accessibilityLabel(loc("Mijn account"))
+            .padding(.leading, -4)
+        }
     }
 
     /// The logo and the text block are the same height; the text is centred
@@ -18,6 +40,7 @@ public struct HomeMenuHeader: View {
     public var body: some View {
         VStack(spacing: 0) {
             HStack {
+                accountButton
                 Spacer()
                 if let onSettings {
                     Button(action: onSettings) {
@@ -72,6 +95,9 @@ public struct HomeMenuHeader: View {
             .padding(.vertical, 12)
         }
         .padding(.horizontal, 24)
+        .sheet(isPresented: $showingAccount) {
+            WhatsNewAccountSheet(providers: accountProviders) { showingAccount = false }
+        }
     }
 
 }
@@ -90,6 +116,8 @@ public struct HomeMenuTiles: View {
     private let accountProviders: [AccountProviderSignIn]
     /// "Maak je account" was tapped away
     @AppStorage(HomeAccountNudge.hiddenKey) private var accountNudgeHidden = false
+    /// The Mijn team link: with one, Competitie sits behind the team card
+    @AppStorage(LeagueTeamStorage.linkKey) private var teamLink = ""
 
     public init(onCoach: @escaping () -> Void, onReferee: @escaping () -> Void,
                 onHistory: @escaping () -> Void, onPlayers: @escaping () -> Void, onBadges: @escaping () -> Void,
@@ -120,46 +148,51 @@ public struct HomeMenuTiles: View {
             } else if HomeAccountNudge.shows(hidden: accountNudgeHidden) {
                 HomeAccountNudge(providers: accountProviders) { accountNudgeHidden = true }
             }
-            VStack(spacing: 0) {
-                menuRow(loc("Afgeronde wedstrijden"), icon: .history, action: onHistory)
-                Divider().overlay(SharedColors.line(0.13))
-                if let onCompetition {
-                    menuRow(loc("Competitie"), icon: .competition, live: competitionLive ? "LIVE" : nil, action: onCompetition)
-                    Divider().overlay(SharedColors.line(0.13))
+            // One row of icons instead of four rows (variant 2, Gerd-Jan 10 November
+            // 2026): with Mijn team, Competitie opens from the team card ("Competitie ›")
+            HStack(spacing: 8) {
+                iconButton(loc("Wedstrijden"), accessibility: loc("Afgeronde wedstrijden"), icon: .history, action: onHistory)
+                if let onCompetition, teamLink.isEmpty {
+                    iconButton(loc("Competitie"), accessibility: loc("Competitie"), icon: .competition,
+                               live: competitionLive, action: onCompetition)
                 }
-                menuRow(loc("Spelers"), icon: .players, action: onPlayers)
-                Divider().overlay(SharedColors.line(0.13))
-                menuRow(loc("Badges"), icon: .badges, action: onBadges)
+                iconButton(loc("Spelers"), accessibility: loc("Spelers"), icon: .players, action: onPlayers)
+                iconButton(loc("Badges"), accessibility: loc("Badges"), icon: .badges, action: onBadges)
             }
         }
         .padding(.horizontal, 24)
         .task { await HomeInboxBar.follow() }
     }
 
-    /// `live`: the text of a sea-green LIVE pill on the right ("LIVE", "2 LIVE");
-    /// the support colour marks everything live (1 November 2026)
-    private func menuRow(_ title: String, icon: HomeTileIcon, live: String? = nil, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                // The icon colours along with the LIVE pill (Gerd-Jan, 1 November 2026)
-                HomeTileIconView(icon: icon, color: live == nil ? SharedColors.accent : SharedColors.support, size: 23)
-                Text(title).font(SharedFonts.system(14))
-                Spacer()
-                if let live {
-                    LivePill(text: live)
+    /// A square button in the icon row; `live` colours it sea green with a dot (a live team match)
+    private func iconButton(_ title: String, accessibility: String, icon: HomeTileIcon, live: Bool = false,
+                            action: @escaping () -> Void) -> some View {
+        let tint = live ? SharedColors.support : SharedColors.accent
+        return Button(action: action) {
+            VStack(spacing: 6) {
+                ZStack(alignment: .topTrailing) {
+                    HomeTileIconView(icon: icon, color: tint, size: 24)
+                    if live {
+                        Circle().fill(SharedColors.support).frame(width: 8, height: 8).offset(x: 5, y: -3)
+                    }
                 }
-                AppSymbol("chevron.right", size: 12, color: SharedColors.textPrimary)
+                Text(title)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
-            .foregroundColor(SharedColors.textPrimary)
-            // 46, with the header's bottom gap gone: Badges fits on 360 x 740 dp (7 November 2026)
-            .frame(minHeight: 46)
-            // Apple only: a no-op in SkipUI, and Compose's clickable already covers the row (docs/bewuste-keuzes.md)
+            .frame(maxWidth: .infinity)
+            .frame(height: 66)
+            .background(SharedColors.cardTint)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(tint.opacity(0.25), lineWidth: 1))
             #if !SKIP
             .contentShape(Rectangle())
             #endif
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(title)
+        .accessibilityLabel(live ? accessibility + ", LIVE" : accessibility)
     }
 }
 
@@ -485,6 +518,8 @@ struct HomeInboxBar: View {
             if Features.shared.playerAccount, account.isConfigured, account.isSignedIn {
                 if !account.profileChecked { try? await account.loadProfile() }
                 if account.profile != nil { try? await account.loadInbox() }
+                // Your photo for the button top left
+                if account.profile?.avatarVersion != nil && account.ownAvatar == nil { try? await account.loadOwnAvatar() }
             }
             // Avatars of linked players: AccountAvatars asks at most once an hour
             await AccountSync.shared.syncAvatars()
@@ -912,7 +947,7 @@ public struct AndroidHomeView: View {
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 16) {
-                        HomeMenuHeader { settingsOpensTeam = false; showingSettings = true }
+                        HomeMenuHeader(onSettings: { settingsOpensTeam = false; showingSettings = true })
                         SharedLeagueTeamCard(fetcher: leagueTeamFetcher, onTeam: { snapshot in
                             let store = playerStore
                             Task { _ = await TeamRosterSync.run(snapshot, store: store) }

@@ -8,6 +8,10 @@
 {
   "$schema": "https://unpkg.com/wrangler/config-schema.json",
   "name": "squashanalyzer-site",
+  // Since 10 November 2026 a small script in front: POST /api/vraag answers a
+  // question from the manual with Workers AI (src/help.js); everything else is
+  // served straight from the static files
+  "main": "src/index.js",
   "compatibility_date": "2026-10-01",
   // Only squashanalyzer.com and www: no second hostname for the same pages
   // (and the team zips) on workers.dev
@@ -20,6 +24,15 @@
     "directory": "../../website",
     "html_handling": "auto-trailing-slash",
     // website/404.html
-    "not_found_handling": "404-page"
-  }
+    "not_found_handling": "404-page",
+    "binding": "ASSETS",
+    // Only the API runs the script first; pages and images stay plain static files
+    "run_worker_first": ["/api/*"]
+  },
+  "ai": { "binding": "AI" },
+  // At most 10 questions a minute per IP address
+  "ratelimits": [
+    { "name": "VRAAG_LIMIT", "namespace_id": "1010", "simple": { "limit": 10, "period": 60 } }
+  ],
+  "observability": { "enabled": true }
 }

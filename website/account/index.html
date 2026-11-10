@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <script>
+    // Weergave before the first paint: Donker unless Licht or Systeem was chosen (theme.js)
+    (function(){var c="dark";try{c=localStorage.getItem("sa-theme")||c}catch(e){}if(c!=="light"&&c!=="system")c="dark";var t=c==="system"?(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):c,d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');d.setAttribute("data-theme",t);d.setAttribute("data-theme-choice",c);if(m)m.setAttribute("content",t==="light"?"#F7F3ED":"#000000")})();
+  </script>
+  <title>Mijn account – SquashAnalyzer</title>
+  <meta name="description" content="Bevestig je e-mailadres of kies een nieuw wachtwoord voor je SquashAnalyzer-account." />
+  <meta name="robots" content="noindex" />
+  <!-- The code in the link may not leak to other sites -->
+  <meta name="referrer" content="no-referrer" />
+  <link rel="stylesheet" href="../style.css?v=20261025b" />
+  <script src="../theme.js?v=20261011" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png?v=5" />
+  <link rel="icon" type="image/png" sizes="256x256" href="../favicon.png?v=5" />
+  <link rel="apple-touch-icon" href="../logo.png?v=4" />
+  <style>
+    .team-page { max-width: 480px; margin: 0 auto; padding: 32px 20px 56px; }
+    .brand { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 24px;
+             font-weight: 700; color: var(--text-1); text-decoration: none; }
+    .brand img { width: 36px; height: 36px; border-radius: 9px; }
+    .card { background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+    .label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+    .state { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--gold); color: var(--gold);
+             display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; margin-top: 16px; }
+    h1 { font-size: 24px; margin: 8px 0 12px; }
+    .card p { color: var(--text-2); }
+    .card p strong { color: var(--text-1); }
+    form { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+    form label { font-size: 14px; color: var(--text-2); }
+    form input { width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1px solid var(--line);
+                 background: var(--surface); color: var(--text-1); font: inherit; font-size: 16px; }
+    form input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+    .show { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-2); }
+    .show input { width: auto; }
+    button { padding: 14px; border-radius: 12px; border: 0; font: inherit; font-weight: 600; cursor: pointer;
+             background: var(--btn); color: var(--on-btn); }
+    button:disabled { opacity: .6; cursor: default; }
+    .form-error { color: var(--gold); font-size: 14px; min-height: 1em; margin: 0; }
+    .note { margin-top: 20px; font-size: 13px; color: var(--text-3); text-align: center; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="team-page">
+    <a class="brand" href="../index.html"><img src="../logo.png?v=4" alt="" />SquashAnalyzer</a>
+    <div class="card">
+      <div class="label" id="label">Mijn account</div>
+      <div class="state" aria-hidden="true" id="icon">…</div>
+      <h1 id="title">Even geduld…</h1>
+      <p id="text">We controleren je link.</p>
+      <form id="reset" hidden novalidate>
+        <label for="password" id="password-label">Nieuw wachtwoord</label>
+        <input id="password" type="password" autocomplete="new-password" minlength="6" required />
+        <label class="show"><input type="checkbox" id="show" /> <span id="show-label">Wachtwoord tonen</span></label>
+        <p class="form-error" id="form-error" role="alert"></p>
+        <button type="submit" id="save">Wachtwoord opslaan</button>
+      </form>
+    </div>
+    <p class="note" id="note">Vragen? Mail naar <a href="mailto:info@squashanalyzer.com">info@squashanalyzer.com</a>.</p>
+    <div class="page-foot"><div data-theme-choice-slot></div></div>
+  </main>
+  <script>
+    // Firebase's custom action handler (Authentication → Templates → Actie-URL aanpassen):
+    // the mail links here with ?mode=…&oobCode=…&apiKey=…&lang=…. The page talks to
+    // Firebase's Identity Toolkit directly; nothing goes to our own servers.
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var mode = q.get("mode") || "";
+      var code = q.get("oobCode") || "";
+      var key = q.get("apiKey") || "";
+      var lang = (q.get("lang") || navigator.language || "nl").toLowerCase().indexOf("nl") === 0 ? "nl" : "en";
+      // Keep the code out of the address bar, the history and screenshots
+      try { history.replaceState(null, "", location.pathname); } catch (e) {}
+
+      var T = {
+        nl: {
+          account: "Mijn account", wait: "Even geduld…", checking: "We controleren je link.",
+          verifiedTitle: "Je e-mailadres is bevestigd",
+          verifiedText: "Dank je! Ga terug naar SquashAnalyzer, dan kun je verder.",
+          changedTitle: "Je nieuwe e-mailadres is bevestigd",
+          changedText: "Je logt voortaan in met dit adres. Ga terug naar SquashAnalyzer.",
+          recoveredTitle: "Je e-mailadres is teruggezet",
+          recoveredText: "Je account gebruikt weer <strong>{email}</strong>. Heb je dit niet zelf gewijzigd? Kies dan meteen een nieuw wachtwoord via Wachtwoord vergeten in de app.",
+          resetTitle: "Kies een nieuw wachtwoord",
+          resetText: "Voor het account <strong>{email}</strong>.",
+          passwordLabel: "Nieuw wachtwoord", show: "Wachtwoord tonen", save: "Wachtwoord opslaan",
+          short: "Kies een wachtwoord van minstens 6 tekens.",
+          savedTitle: "Je nieuwe wachtwoord is opgeslagen",
+          savedText: "Ga terug naar SquashAnalyzer en log in met je nieuwe wachtwoord.",
+          expiredTitle: "Deze link is verlopen",
+          expiredText: "Of hij is al gebruikt. Vraag in de app een nieuwe mail aan; alleen de nieuwste link werkt.",
+          badTitle: "Deze link klopt niet",
+          badText: "Open de link uit de laatste mail van SquashAnalyzer, of vraag in de app een nieuwe aan.",
+          goneTitle: "Dit account bestaat niet meer",
+          goneText: "Het is verwijderd of uitgeschakeld. Maak in de app een nieuw account als je dat wilt.",
+          errorTitle: "Dat lukte niet",
+          errorText: "Controleer je internetverbinding en open de link nog een keer.",
+          note: "Vragen? Mail naar <a href=\"mailto:info@squashanalyzer.com\">info@squashanalyzer.com</a>."
+        },
+        en: {
+          account: "My account", wait: "One moment…", checking: "We're checking your link.",
+          verifiedTitle: "Your email address is confirmed",
+          verifiedText: "Thanks! Go back to SquashAnalyzer to carry on.",
+          changedTitle: "Your new email address is confirmed",
+          changedText: "From now on you sign in with this address. Go back to SquashAnalyzer.",
+          recoveredTitle: "Your email address has been restored",
+          recoveredText: "Your account uses <strong>{email}</strong> again. Didn't change it yourself? Choose a new password right away with Forgot password in the app.",
+          resetTitle: "Choose a new password",
+          resetText: "For the account <strong>{email}</strong>.",
+          passwordLabel: "New password", show: "Show password", save: "Save password",
+          short: "Choose a password of at least 6 characters.",
+          savedTitle: "Your new password is saved",
+          savedText: "Go back to SquashAnalyzer and sign in with your new password.",
+          expiredTitle: "This link has expired",
+          expiredText: "Or it has already been used. Request a new email in the app; only the latest link works.",
+          badTitle: "This link isn't right",
+          badText: "Open the link in the latest email from SquashAnalyzer, or request a new one in the app.",
+          goneTitle: "This account no longer exists",
+          goneText: "It was deleted or disabled. Create a new account in the app if you like.",
+          errorTitle: "That didn't work",
+          errorText: "Check your internet connection and open the link again.",
+          note: "Questions? Email <a href=\"mailto:info@squashanalyzer.com\">info@squashanalyzer.com</a>."
+        }
+      }[lang];
+
+      var $ = function (id) { return document.getElementById(id); };
+      function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return "&#" + c.charCodeAt(0) + ";"; }); }
+      function show(icon, title, html) {
+        $("icon").textContent = icon;
+        $("title").textContent = title;
+        $("text").innerHTML = html;
+      }
+
+      document.documentElement.lang = lang;
+      if (lang === "en") document.title = "My account – SquashAnalyzer";
+      $("label").textContent = T.account;
+      $("note").innerHTML = T.note;
+      show("…", T.wait, esc(T.checking));
+
+      function call(method, body) {
+        return fetch("https://identitytoolkit.googleapis.com/v1/accounts:" + method + "?key=" + encodeURIComponent(key), {
+          method: "POST", headers: { "Content-Type": "application/json", "X-Firebase-Locale": lang },
+          body: JSON.stringify(body)
+        }).then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (j) {
+            if (!r.ok) { var e = new Error(((j.error || {}).message) || "NETWORK"); throw e; }
+            return j;
+          });
+        });
+      }
+      function fail(err) {
+        var m = String((err && err.message) || "");
+        if (/EXPIRED_OOB_CODE|INVALID_OOB_CODE/.test(m)) show("!", T.expiredTitle, esc(T.expiredText));
+        else if (/USER_DISABLED|USER_NOT_FOUND/.test(m)) show("!", T.goneTitle, esc(T.goneText));
+        else if (/API key|API_KEY|INVALID_ARGUMENT/.test(m)) show("!", T.badTitle, esc(T.badText));
+        else show("!", T.errorTitle, esc(T.errorText));
+      }
+
+      if (!/^[A-Za-z0-9_-]{20,400}$/.test(code) || !/^AIza[0-9A-Za-z_-]{35}$/.test(key)) {
+        show("!", T.badTitle, esc(T.badText));
+        return;
+      }
+
+      if (mode === "verifyEmail") {
+        call("update", { oobCode: code }).then(function () {
+          show("✓", T.verifiedTitle, esc(T.verifiedText));
+        }, fail);
+      } else if (mode === "verifyAndChangeEmail") {
+        call("update", { oobCode: code }).then(function () {
+          show("✓", T.changedTitle, esc(T.changedText));
+        }, fail);
+      } else if (mode === "recoverEmail") {
+        call("resetPassword", { oobCode: code }).then(function (info) {
+          return call("update", { oobCode: code }).then(function () {
+            show("↺", T.recoveredTitle, T.recoveredText.replace("{email}", esc(info.email || "")));
+          });
+        }).catch(fail);
+      } else if (mode === "resetPassword") {
+        call("resetPassword", { oobCode: code }).then(function (info) {
+          show("*", T.resetTitle, T.resetText.replace("{email}", esc(info.email || "")));
+          $("password-label").textContent = T.passwordLabel;
+          $("show-label").textContent = T.show;
+          $("save").textContent = T.save;
+          $("reset").hidden = false;
+          $("password").focus();
+        }, fail);
+        $("show").addEventListener("change", function () { $("password").type = this.checked ? "text" : "password"; });
+        $("reset").addEventListener("submit", function (ev) {
+          ev.preventDefault();
+          var pw = $("password").value;
+          if (pw.length < 6) { $("form-error").textContent = T.short; return; }
+          $("form-error").textContent = "";
+          $("save").disabled = true;
+          call("resetPassword", { oobCode: code, newPassword: pw }).then(function () {
+            $("reset").hidden = true;
+            show("✓", T.savedTitle, esc(T.savedText));
+          }, function (err) {
+            $("save").disabled = false;
+            if (/WEAK_PASSWORD/.test(String(err.message))) { $("form-error").textContent = T.short; return; }
+            $("reset").hidden = true;
+            fail(err);
+          });
+        });
+      } else {
+        show("!", T.badTitle, esc(T.badText));
+      }
+    })();
+  </script>
+</body>
+</html>

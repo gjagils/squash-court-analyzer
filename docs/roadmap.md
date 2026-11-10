@@ -45,9 +45,9 @@ met een geheime link ([voorstel](voorstel-clubscherm.md)). **Gebouwd 3 november 
 | Punt | Bron |
 |---|---|
 | Spelersaccount met centrale badges, kaart, vorm en trend | [voorstel](voorstel-spelersaccount-4.0.md) |
-| Teamwedstrijd vinden zonder uitnodiging: teamleden met een account zien een lopende live-teamwedstrijd van hun team en doen mee (gekozen op 6 november 2026) | [voorstel](voorstel-teamwedstrijd-vinden-4.0.md) |
-| Seizoensoverzicht per teamlid: in Mijn team, uit de SBN-stand en de teamwedstrijden in de app (keuze Gerd-Jan, 10 november 2026) | T2 |
-| Badgecategorie Teamspeler: een reeks met treden voor gespeelde competitiepartijen, plus de badge Matchwinnaar (keuze Gerd-Jan, 10 november 2026) | T7 |
+| Teamwedstrijd vinden zonder uitnodiging: teamleden met een account zien een lopende live-teamwedstrijd van hun team en doen mee (gekozen op 6 november 2026) | [voorstel](voorstel-teamwedstrijd-vinden-4.0.md) — **gebouwd**, kaart op het beginscherm 10 november; handleiding nog niet |
+| Seizoensoverzicht per teamlid: in Mijn team, uit de SBN-stand en de teamwedstrijden in de app (keuze Gerd-Jan, 10 november 2026) | T2 — **gebouwd 10 november** |
+| Badgecategorie Teamspeler: een reeks met treden voor gespeelde competitiepartijen, plus de badge Matchwinnaar (keuze Gerd-Jan, 10 november 2026) | T7 — **gebouwd 10 november** |
 | Melding als een teamgenoot een partij invult tijdens een live teamwedstrijd: wie maakt of meedoet volgt vanzelf, met een melding bij de start en de uitslag van andermans partij (verplaatst van 3.3 op 4 november 2026; keuze Gerd-Jan, 10 november 2026) | T6 |
 
 Al gebouwd, van de 4.0-lijst gehaald op 10 november 2026: de losse melding bij een gewonnen game, partij of

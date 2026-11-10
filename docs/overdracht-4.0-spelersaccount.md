@@ -74,6 +74,7 @@ Overal waar nu "geen account" staat, moet dat kloppen met 4.0. Stand 8 november:
 | Homepage (nl/en) | "gratis, zonder advertenties en zonder account" in het blok Trakteer | Bij de release van 4.0 |
 | Handleidingen (nl/en) | Onderdeel Mijn account | Bij de release van 4.0 |
 | App, "Nieuw in 4.0" (`WhatsNew`) | Nu nog "Nieuw in 3.2" | Vóór de releasebuild van 4.0 |
+| Badgepagina `website/badges/` (nl/en) en de tellingen "37 badges, 17 in brons, zilver en goud" (homepage, handleidingen, og-tekst) | Categorie Competitie met Teamspeler en Matchwinnaar erbij: 39 badges, 18 met treden (10 november 2026) | Bij de release van 4.0 |
 
 ## Vóór een 4.0-release
 

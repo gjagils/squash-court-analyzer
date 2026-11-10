@@ -10,7 +10,25 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 1)
 
-(nog niets)
+- **Competitiebadges Teamspeler en Matchwinnaar (4.0, T7; keuze Gerd-Jan, 10 november 2026):** nieuwe
+  categorie *Competitie* in de badges. **Teamspeler** brons, zilver en goud voor 3, 8 en 15 gespeelde
+  competitiepartijen; **Matchwinnaar** als je de partij won die de teamwedstrijd besliste (had je hem verloren, dan
+  had je team niet gewonnen; bij een 4-0 is er geen). Ze komen uit de teamwedstrijden op de telefoon, ook de
+  partijen van teamgenoten via de livepagina, en gaan naar de speler in Spelers met dezelfde naam. Een walkover
+  telt niet; een ongedaan gemaakte partij neemt de badge weer mee. Core `TeamBadges` met tests, iOS
+  `BadgeAwarder.syncTeamAwards`, Android `BadgeAwardStore.syncTeamAwards`; de kaartpagina (`website/kaart/`) kent
+  de nieuwe ids. Artwork: zie hieronder. De openbare badgepagina en de tellingen ("37 badges") op de website gaan
+  pas mee bij de release van 4.0.
+- **Seizoen per speler in Mijn team (4.0, T2; keuze Gerd-Jan, 10 november 2026):** het blok *Spelers* in het
+  Mijn team-overzicht heet nu *Seizoen per speler*: per speler de stand van SBN ("SBN 3-1") en daaronder wat de
+  teamwedstrijden in de app zeggen ("In de app: 2 partijen, 1-1 · games 4-3"). Wie in de app een partij speelde
+  maar niet op de SBN-pagina staat, komt erbij als *invaller*. Alleen teamwedstrijden van dit team en dit seizoen.
+  Core `TeamSeason` met tests.
+- **Meedoen vanaf het beginscherm (4.0, teamwedstrijd vinden):** heeft een teamgenoot (of de tegenstander) een
+  teamwedstrijd aangemaakt voor vandaag of morgen, dan toont de Mijn team-kaart in plaats van de volgende wedstrijd
+  "Kees heeft een teamwedstrijd aangemaakt · Thuis · Bevo 3" met *Meedoen*. Een tik doet mee en opent de
+  teamwedstrijd. Alleen met een account; de kaart vraagt het om de vijf minuten en alleen rond een wedstrijd uit het
+  programma. Nog niet op een telefoon geprobeerd.
 
 ## 4.0 build 1 (8 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 
@@ -1376,7 +1394,7 @@ groen (zie `docs/android-port.md`, "Badges met treden"). Vergeleken met iOS
       met rust (niet verwijderen, niet markeren); pas bij een nieuw seizoen
       synchroniseren we opnieuw.
 
-- [x] **Meldingen bij live meekijken** (gedaan in 3.0: volgen op het vergrendelscherm en in de meldingen met APNs en FCM, met een melding bij een gewonnen game, een beslist partij en de einduitslag, zie `scoreAlert` en `teamAlert` in `server/live-worker/src/push.js`; op 10 november 2026 van de 4.0-lijst gehaald omdat het er al was; idee Gerd-Jan, 7 oktober; **3.1 of
+- [x] **Meldingen bij live meekijken** (gedaan in 3.0: volgen op het vergrendelscherm en in de meldingen met APNs en FCM, met een melding bij een gewonnen game, een besliste partij en de einduitslag, zie `scoreAlert` en `teamAlert` in `server/live-worker/src/push.js`; op 10 november 2026 van de 4.0-lijst gehaald omdat het er al was; idee Gerd-Jan, 7 oktober; **3.1 of
       later**, niet voor 3.0: te ingrijpend, eerst releasen). Gekozen route:
       **2, pushmeldingen in de app**. Wie een live wedstrijd of live teamwedstrijd volgt, krijgt
       een melding op de telefoon bij een gewonnen game, een gewonnen partij en

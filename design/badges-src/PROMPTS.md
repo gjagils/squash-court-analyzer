@@ -355,3 +355,9 @@ Use case: stylized-concept. Create ONE new 1024x1024 PNG SquashAnalyzer achievem
 ## badge-pioneer.png
 
 Toegevoegd 18 oktober 2026, aangeleverd door Gerd-Jan (1254 × 1254, transparant) op basis van de voorbeeldprompt in `docs/style/badge-prompt-pioneer.md`. Verkleind naar 1024, 240 en 180 pixels met behoud van alpha.
+
+## badge-team-player-bronze.png, -silver.png (10 november 2026)
+
+Gemaakt met gpt-image-2.5 (ElevenLabs-flow "SquashAnalyzer competitiebadges"), met `website/badges/veteran-bronze.png` als stijlreferentie voor brons en de bronzen uitkomst als referentie voor zilver (alleen cijfer 8 en zilveren rand). De generator gaf 1280 × 720 zonder alfa (dambord of grijs vlak); de cirkel is uitgesneden en daarbuiten transparant gemaakt, daarna 1024, 240 en 180 pixels.
+
+Brons: "Team player" — three stylised squash players standing shoulder to shoulder as one team, one holding a racket raised, laurel branches, black squash ball with exactly two yellow dots, large bold cream-white numeral 3, thin copper bronze rim #B87333, low-poly faceted royal-blue field as the reference.

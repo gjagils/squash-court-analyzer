@@ -248,3 +248,11 @@
 - [design/badges-src/overzicht-nieuw-56px.png](overzicht-nieuw-56px.png)
 - [design/badges-src/PROMPTS.md](PROMPTS.md)
 - [design/badges-src/BESTANDEN.md](BESTANDEN.md)
+
+- [design/badges-src/badge-team-player-bronze.png](badge-team-player-bronze.png)
+- [Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-team-player-bronze.imageset/badge-team-player-bronze.png](../../Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-team-player-bronze.imageset/badge-team-player-bronze.png)
+- [website/badges/team-player-bronze.png](../../website/badges/team-player-bronze.png)
+
+- [design/badges-src/badge-team-player-silver.png](badge-team-player-silver.png)
+- [Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-team-player-silver.imageset/badge-team-player-silver.png](../../Packages/SquashAnalyzerUI/Sources/SquashAnalyzerUI/Resources/Module.xcassets/badge-team-player-silver.imageset/badge-team-player-silver.png)
+- [website/badges/team-player-silver.png](../../website/badges/team-player-silver.png)

@@ -36,6 +36,9 @@ public enum TeamLiveSync {
                 results[match.id] = TeamLiveSyncResult.failed
             }
         }
+        // 4.0, T6: follow the live team matches with notifications, forget the rest
+        let current = (try? await store.loadAll()) ?? matches
+        await TeamAlertFollow.shared.sync(matches: current)
         return results
     }
 

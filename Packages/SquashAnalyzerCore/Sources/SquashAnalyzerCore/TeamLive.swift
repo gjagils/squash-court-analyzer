@@ -581,6 +581,13 @@ public final class TeamLive {
 
     public func isBound(_ matchId: UUID) -> Bool { bindings[matchId] != nil }
 
+    /// The partijen of live team match `teamId` this phone is scoring now
+    public func boundSlots(teamId: String) -> [Int] {
+        var slots: [Int] = []
+        for binding in bindings.values where binding.teamId == teamId { slots.append(binding.slot) }
+        return slots
+    }
+
     /// Called with every new state of a tracked match (nothing when it is not bound)
     public func forward(matchId: UUID, snapshot: LiveSnapshot) {
         guard let binding = bindings[matchId], !goneTeamIds.contains(binding.teamId) else { return }
@@ -736,8 +743,11 @@ public final class TeamLive {
     }
 
     /// One write to a partij of the page; the answer is noted (offline, refused, gone)
+    /// Every write names this phone (`LiveDevice`): the server gives it no
+    /// notification about a partij it wrote itself (4.0, T6)
     private func send(_ body: Data, to url: URL, teamId: String, writeKey: String, transport: any LiveTransport) async -> Bool {
-        guard let status = await LiveWrite.put(body, to: url, key: writeKey, transport: transport) else {
+        guard let status = await LiveWrite.put(body, to: url, key: writeKey, transport: transport,
+                                               extraHeaders: [LiveDevice.header: LiveDevice.id()]) else {
             offline = true
             return false
         }

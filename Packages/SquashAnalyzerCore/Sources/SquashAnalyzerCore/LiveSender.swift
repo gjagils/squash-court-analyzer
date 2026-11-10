@@ -51,11 +51,12 @@ final class LatestValueSender<Value: Sendable> {
 enum LiveWrite {
     /// A JSON PUT with the write key: the HTTP status, or nil when the
     /// request did not get through (no network)
-    static func put(_ body: Data, to url: URL, key: String, transport: any LiveTransport) async -> Int? {
+    static func put(_ body: Data, to url: URL, key: String, transport: any LiveTransport,
+                    extraHeaders: [String: String] = [String: String]()) async -> Int? {
+        var headers: [String: String] = ["Content-Type": "application/json", "Authorization": "Bearer \(key)"]
+        for (name, value) in extraHeaders { headers[name] = value }
         do {
-            let response = try await transport.send(method: "PUT", url: url,
-                                                    headers: ["Content-Type": "application/json", "Authorization": "Bearer \(key)"],
-                                                    body: body)
+            let response = try await transport.send(method: "PUT", url: url, headers: headers, body: body)
             return response.status
         } catch {
             return nil

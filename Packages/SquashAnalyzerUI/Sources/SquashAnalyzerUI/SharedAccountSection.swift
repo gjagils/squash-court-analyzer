@@ -60,6 +60,7 @@ public struct SharedAccountSection: View {
     @State private var birthYear = ""
     @State private var consent = false
     @State private var confirmDelete = false
+    @State private var confirmAvatar = false
     // Correcting the name
     @State private var editingName = false
     @State private var newName = ""
@@ -100,6 +101,12 @@ public struct SharedAccountSection: View {
             }
         }
         .onAppear { refresh() }
+        .alert(loc("Je foto delen?"), isPresented: $confirmAvatar) {
+            Button(loc("Foto kiezen")) { pickAvatar() }
+            Button(loc("Annuleren"), role: .cancel) { }
+        } message: {
+            Text("Wie jou als speler of tegenspeler kiest, ziet deze foto bij jou in de app. Je kunt hem altijd weer verwijderen.", bundle: textBundle)
+        }
         .alert(loc("Account verwijderen?"), isPresented: $confirmDelete) {
             Button(loc("Verwijderen"), role: .destructive) { deleteAccount() }
             Button(loc("Annuleren"), role: .cancel) { }
@@ -247,6 +254,36 @@ public struct SharedAccountSection: View {
                     .foregroundColor(SharedColors.textSecondary)
             }
             sbnPart(profile)
+            avatarPart(profile)
+        }
+    }
+
+    /// Your avatar (4.0, Gerd-Jan 10 November 2026): whoever picks you as a
+    /// player, linked to your SBN player, sees it in their app
+    @ViewBuilder
+    private func avatarPart(_ profile: AccountProfile) -> some View {
+        if account.avatarSource != nil {
+            HStack(spacing: 14) {
+                PlayerPhotoView(photo: account.ownAvatar, name: profile.name, size: 56, color: SharedColors.textSecondary)
+                VStack(alignment: .leading, spacing: 6) {
+                    Button(account.ownAvatar == nil ? loc("Foto kiezen") : loc("Andere foto")) { confirmAvatar = true }
+                        .font(SharedFonts.system(13, weight: .semibold))
+                        .foregroundColor(SharedColors.accent)
+                        .disabled(busy)
+                    if account.ownAvatar != nil {
+                        Button(loc("Foto verwijderen")) { removeAvatar() }
+                            .font(SharedFonts.system(13))
+                            .foregroundColor(SharedColors.textSecondary)
+                            .disabled(busy)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.top, 8)
+            note(profile.sbnPath == nil
+                 ? loc("Je foto: kies eerst wie je in SBN bent, dan zien je teamgenoten en tegenstanders hem bij jou in hun app.")
+                 : loc("Je foto: wie jou als speler of tegenspeler kiest, ziet hem bij jou in zijn app. Verwijderen kan altijd."))
+            .task(id: profile.avatarVersion ?? Int64(0)) { try? await account.loadOwnAvatar() }
         }
     }
 
@@ -410,6 +447,32 @@ public struct SharedAccountSection: View {
         run(nil) {
             try await account.updateAccount(sbnPath: player.id)
             try await account.loadInbox()
+        }
+    }
+
+    private func pickAvatar() {
+        guard let source = account.avatarSource else { return }
+        Task {
+            // Let the question close first: a picker cannot open over a closing alert
+            try? await Task.sleep(nanoseconds: 450_000_000)
+            let picked: Data?
+            do {
+                picked = try await source.pickAvatar()
+            } catch {
+                message = loc("Deze foto kan niet worden gebruikt.")
+                messageIsError = true
+                return
+            }
+            guard let picked else { return }
+            run(loc("Je foto staat bij je account.")) {
+                try await account.setAvatar(picked)
+            }
+        }
+    }
+
+    private func removeAvatar() {
+        run(loc("Je foto is verwijderd.")) {
+            try await account.deleteAvatar()
         }
     }
 

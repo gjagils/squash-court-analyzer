@@ -486,6 +486,8 @@ struct HomeInboxBar: View {
                 if !account.profileChecked { try? await account.loadProfile() }
                 if account.profile != nil { try? await account.loadInbox() }
             }
+            // Avatars of linked players: AccountAvatars asks at most once an hour
+            await AccountSync.shared.syncAvatars()
             try? await Task.sleep(nanoseconds: 300_000_000_000)
         }
     }

@@ -73,6 +73,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.squashanalyzer.android.aicoach.KeystoreAPIKeyStore
 import com.squashanalyzer.android.league.HttpLeaguePageLoader
 import com.squashanalyzer.android.backup.ActivityPlayerFiles
+import com.squashanalyzer.android.backup.AndroidAvatarSource
 import squash.analyzer.ui.AndroidHomeView
 import com.squashanalyzer.android.data.AppDatabase
 import com.squashanalyzer.android.data.RoomPlayerStore
@@ -185,11 +186,15 @@ class MainActivity : AppCompatActivity() {
                 transport = HttpLiveTransport(),
                 secrets = KeystoreAccountSecrets(this),
             )
+            // The avatar in Mijn account: the system photo picker, scaled like a player photo
+            PlayerAccount.shared.avatarSource = AndroidAvatarSource(playerFiles)
             // The matches in your account come to Afgeronde wedstrijden (AccountSync)
-            AccountSync.shared.configure(history = historyStore, players = playerStore)
+            AccountSync.shared.configure(history = historyStore, players = playerStore, photos = playerStore)
             lifecycleScope.launch {
                 PlayerAccount.shared.sendOutbox()
                 AccountSync.shared.run()
+                // Avatars of the players linked to an SBN player (AccountAvatars)
+                AccountSync.shared.syncAvatars()
             }
         }
         // Live meekijken: the shared LiveShare sends the state through this (server/live)

@@ -30,6 +30,17 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   teamwedstrijd. Alleen met een account; de kaart vraagt het **elke minuut** (was vijf minuten; Gerd-Jan zag de
   teamwedstrijd van een teamgenoot op 10 november eerder onder Competitie dan op het beginscherm) en alleen rond
   een wedstrijd uit het programma.
+- **Je foto bij je account (avatar; Gerd-Jan, 10 november 2026):** in Mijn account **Foto kiezen** (systeemkiezer,
+  512 px vierkante JPEG zoals een spelersfoto), met vooraf de vraag *Je foto delen?*: wie jou als speler of
+  tegenspeler kiest, ziet hem. Andere telefoons (ook zonder account, met hun apparaatsleutel) halen hem op bij
+  spelers in Spelers die aan jouw SBN-speler gekoppeld zijn: bij het openen van de app, elk uur vanaf het
+  beginscherm en meteen na nieuwe koppelingen uit Mijn team. Een foto die iemand zelf koos gaat altijd voor; alleen
+  een opgehaalde foto wordt vervangen of verwijderd (herkend aan een checksum). Onder zo'n foto staat *Foto uit het
+  account van deze speler* met **Foto melden**. Server: tabel `avatars` en `avatar_reports` (migratie 0004),
+  `PUT/GET/DELETE /api/v1/me/avatar`, `GET /api/v1/avatars?sbn=…`, `GET /api/v1/avatars/image`,
+  `POST /api/v1/avatars/report`; weg met het account. Core `AccountAvatars` met tests, iOS `IOSAvatarSource`, Android
+  `AndroidAvatarSource`. Privacybeleid (nl/en) en de verwijderpagina's bijgewerkt; Play-gegevensveiligheid had
+  Foto's al (verzameld, optioneel, app-functionaliteit). Apple-privacy bij de release: *Gebruikersinhoud, Foto's*.
 - **Nieuw in 4.0 als carrousel (Gerd-Jan, 10 november 2026):** in plaats van één scherm met een lijstje vier
   pagina's om door te vegen, zoals de rondleiding: *Jouw wedstrijden, jouw badges* · *Maak je account* (knop
   **Account maken** opent Mijn account boven de carrousel; met een account staat er "Je hebt al een account") ·

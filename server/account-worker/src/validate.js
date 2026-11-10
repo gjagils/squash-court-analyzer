@@ -15,6 +15,8 @@ export const LIMITS = {
   batch: 50,
   awards: 500,
   awardValue: 1024,
+  avatarBytes: 300 * 1024,
+  avatarPaths: 50,
 };
 
 /** Trimmed text up to `max` characters, without control characters; '' for anything else */

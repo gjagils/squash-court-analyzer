@@ -351,6 +351,10 @@ struct PlayerEditSheet: View {
                         .foregroundColor(AppColors.textMuted)
                 }
             }
+            // 4.0: a photo from this player's account, with "Foto melden"
+            if let player, photoData != nil, photoData == player.photoData {
+                AccountAvatarReportButton(playerId: player.id.uuidString)
+            }
         }
         .onChange(of: pickedPhoto) { _, item in
             guard let item else { return }

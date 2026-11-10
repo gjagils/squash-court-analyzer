@@ -219,7 +219,8 @@ function playerView(player, account) {
 async function me(env, caller) {
   if (!caller.account) return json(404, { error: 'no account' });
   const player = await env.DB.prepare('SELECT * FROM players WHERE id = ?').bind(caller.account.player_id).first();
-  return json(200, playerView(player, caller.account));
+  const avatar = await env.DB.prepare('SELECT version FROM avatars WHERE player_id = ?').bind(player.id).first();
+  return json(200, { ...playerView(player, caller.account), avatarVersion: avatar ? avatar.version : null });
 }
 
 async function createAccount(request, env, caller) {
@@ -312,6 +313,8 @@ async function deleteAccount(env, caller) {
     env.DB.prepare('DELETE FROM matches WHERE player_id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM awards WHERE player_id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM blocks WHERE player_id = ?').bind(playerId),
+    env.DB.prepare('DELETE FROM avatars WHERE player_id = ?').bind(playerId),
+    env.DB.prepare('DELETE FROM avatar_reports WHERE player_id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM team_lives WHERE starter_id = ?').bind(playerId),
     // What claims taught other phones about this player goes too
     env.DB.prepare('DELETE FROM learned_links WHERE sbn_path = (SELECT sbn_path FROM players WHERE id = ?)').bind(playerId),
@@ -629,6 +632,111 @@ async function mergeAwards(request, env, playerId) {
   return awards(env, playerId);
 }
 
+// MARK: - Avatars (Gerd-Jan, 10 November 2026)
+
+/** The JPEG in base64 when it is one and small enough; null otherwise */
+function readAvatar(value) {
+  if (typeof value !== 'string' || value.length === 0 || value.length > Math.ceil(LIMITS.avatarBytes / 3) * 4 + 4) return null;
+  let bytes;
+  try {
+    bytes = atob(value);
+  } catch {
+    return null;
+  }
+  if (bytes.length > LIMITS.avatarBytes || bytes.length < 100) return null;
+  // A JPEG starts with FF D8 FF
+  if (bytes.charCodeAt(0) !== 0xff || bytes.charCodeAt(1) !== 0xd8 || bytes.charCodeAt(2) !== 0xff) return null;
+  return value;
+}
+
+/** Your own avatar: a new photo (with consent) replaces the old one */
+async function putAvatar(request, env, playerId) {
+  const body = await readJson(request);
+  if (!body || body.consent !== true) return json(400, { error: 'consent' });
+  const image = readAvatar(body.image);
+  if (!image) return json(400, { error: 'image' });
+  const now = deps.now();
+  await env.DB.batch([
+    env.DB.prepare(
+      `INSERT INTO avatars (player_id, image, version, consent_at) VALUES (?, ?, ?, ?)
+       ON CONFLICT (player_id) DO UPDATE SET image = excluded.image, version = excluded.version, consent_at = excluded.consent_at`,
+    ).bind(playerId, image, now, now),
+    // A new photo starts without reports
+    env.DB.prepare('DELETE FROM avatar_reports WHERE player_id = ?').bind(playerId),
+  ]);
+  return json(200, { version: now });
+}
+
+async function getOwnAvatar(env, playerId) {
+  const row = await env.DB.prepare('SELECT image, version FROM avatars WHERE player_id = ?').bind(playerId).first();
+  if (!row) return json(404, { error: 'no avatar' });
+  return json(200, { image: row.image, version: row.version });
+}
+
+async function deleteAvatar(env, playerId) {
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM avatars WHERE player_id = ?').bind(playerId),
+    env.DB.prepare('DELETE FROM avatar_reports WHERE player_id = ?').bind(playerId),
+  ]);
+  return json(204);
+}
+
+/** The SBN paths of a request: ?sbn=a&sbn=b, cleaned, without doubles */
+function avatarPaths(url) {
+  const paths = [];
+  for (const raw of url.searchParams.getAll('sbn')) {
+    const path = cleanText(raw, LIMITS.sbnPath);
+    if (path && !paths.includes(path)) paths.push(path);
+  }
+  return paths;
+}
+
+/** Which of these SBN players have an avatar, and which version (a phone with a device key asks) */
+async function avatarVersions(request, env, url) {
+  if (!(await device(request, env))) return json(401, { error: 'device' });
+  const paths = avatarPaths(url);
+  if (paths.length === 0) return json(200, { avatars: [] });
+  if (paths.length > LIMITS.avatarPaths) return json(400, { error: 'sbn' });
+  const marks = paths.map(() => '?').join(', ');
+  const { results } = await env.DB.prepare(
+    `SELECT p.sbn_path AS sbn_path, a.version AS version FROM avatars a JOIN players p ON p.id = a.player_id
+     WHERE p.sbn_path IN (${marks})`,
+  ).bind(...paths).all();
+  return json(200, { avatars: results.map((row) => ({ sbnPath: row.sbn_path, version: row.version })) });
+}
+
+/** The photo of one SBN player */
+async function avatarImage(request, env, url) {
+  if (!(await device(request, env))) return json(401, { error: 'device' });
+  const [path] = avatarPaths(url);
+  if (!path) return json(400, { error: 'sbn' });
+  const row = await env.DB.prepare(
+    'SELECT a.image AS image, a.version AS version FROM avatars a JOIN players p ON p.id = a.player_id WHERE p.sbn_path = ?',
+  ).bind(path).first();
+  if (!row) return json(404, { error: 'no avatar' });
+  return json(200, { sbnPath: path, image: row.image, version: row.version });
+}
+
+/** "Foto melden": kept for a look by hand; the same phone counts once per photo */
+async function reportAvatar(request, env) {
+  const deviceId = await device(request, env);
+  if (!deviceId) return json(401, { error: 'device' });
+  const body = await readJson(request);
+  const path = body && cleanText(body.sbnPath, LIMITS.sbnPath);
+  if (!path) return json(400, { error: 'sbn' });
+  const row = await env.DB.prepare(
+    'SELECT a.player_id AS player_id, a.version AS version FROM avatars a JOIN players p ON p.id = a.player_id WHERE p.sbn_path = ?',
+  ).bind(path).first();
+  if (row) {
+    await env.DB.prepare(
+      `INSERT INTO avatar_reports (player_id, device_id, version, created_at) VALUES (?, ?, ?, ?)
+       ON CONFLICT (player_id, device_id) DO UPDATE SET version = excluded.version, created_at = excluded.created_at`,
+    ).bind(row.player_id, deviceId, row.version, deps.now()).run();
+  }
+  // The same answer either way: nobody learns from this who has an avatar
+  return json(202, { ok: true });
+}
+
 // MARK: - Routing
 
 async function handle(request, env) {
@@ -640,6 +748,9 @@ async function handle(request, env) {
   if (path === '/api/v1/devices' && method === 'POST') return createDevice(request, env);
   if (path === '/api/v1/devices/links' && method === 'GET') return deviceLinks(request, env);
   if (path === '/api/v1/submissions' && method === 'POST') return submit(request, env);
+  if (path === '/api/v1/avatars' && method === 'GET') return avatarVersions(request, env, url);
+  if (path === '/api/v1/avatars/image' && method === 'GET') return avatarImage(request, env, url);
+  if (path === '/api/v1/avatars/report' && method === 'POST') return reportAvatar(request, env);
 
   if (path === '/api/v1/me' || path.startsWith('/api/v1/me/')) {
     const caller = await signedIn(request, env);
@@ -670,6 +781,12 @@ async function handle(request, env) {
     if (path === '/api/v1/me/matches' && method === 'POST') return addOwnMatches(request, env, playerId);
     if (path === '/api/v1/me/awards' && method === 'GET') return awards(env, playerId);
     if (path === '/api/v1/me/awards' && method === 'PUT') return mergeAwards(request, env, playerId);
+    if (path === '/api/v1/me/avatar') {
+      if (method === 'GET') return getOwnAvatar(env, playerId);
+      if (method === 'PUT') return putAvatar(request, env, playerId);
+      if (method === 'DELETE') return deleteAvatar(env, playerId);
+      return json(405, { error: 'method' });
+    }
   }
   return json(404, { error: 'not found' });
 }

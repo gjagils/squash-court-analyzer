@@ -139,9 +139,21 @@ public final class AccountSync {
 
     public init() {}
 
-    public func configure(history: any MatchHistoryStore, players: any PlayerProfileStore) {
+    private var photos: (any PlayerPhotoStore)? = nil
+
+    public func configure(history: any MatchHistoryStore, players: any PlayerProfileStore,
+                          photos: (any PlayerPhotoStore)? = nil) {
         self.history = history
         self.players = players
+        self.photos = photos
+    }
+
+    /// The avatars of the linked players in Spelers (`AccountAvatars`): at
+    /// most once an hour unless `force`. No account needed.
+    @discardableResult
+    public func syncAvatars(force: Bool = false) async -> Int {
+        guard let players, let photos else { return 0 }
+        return await AccountAvatars.sync(players: players, photos: photos, force: force)
     }
 
     /// Fetches what was decided since the last run and saves the new matches.

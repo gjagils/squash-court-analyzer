@@ -17,8 +17,11 @@ public struct AccountProfile: Codable, Equatable, Sendable {
     public let teamKey: String?
     public let birthYear: Int
     public let createdAt: Int64
+    /// The version of your avatar (milliseconds of the upload); nil without one
+    public let avatarVersion: Int64?
 
-    public init(playerId: String, name: String, code: String, sbnPath: String?, teamKey: String? = nil, birthYear: Int, createdAt: Int64) {
+    public init(playerId: String, name: String, code: String, sbnPath: String?, teamKey: String? = nil, birthYear: Int, createdAt: Int64,
+                avatarVersion: Int64? = nil) {
         self.playerId = playerId
         self.name = name
         self.code = code
@@ -26,6 +29,7 @@ public struct AccountProfile: Codable, Equatable, Sendable {
         self.teamKey = teamKey
         self.birthYear = birthYear
         self.createdAt = createdAt
+        self.avatarVersion = avatarVersion
     }
 
     /// "ABCDE FGHJK": easier to read out and type over
@@ -545,6 +549,73 @@ public struct AccountClient: Sendable {
 
     // MARK: Plumbing
 
+    // MARK: Avatars (Gerd-Jan, 10 November 2026)
+
+    /// Your avatar: a small square JPEG, with consent that whoever picks you as a player may see it
+    @discardableResult
+    public func setAvatar(token: String, jpeg: Data) async throws -> Int64 {
+        let body = try JSONEncoder().encode(AccountAvatarUpload(image: jpeg.base64EncodedString(), consent: true))
+        let response = try await send("PUT", "/api/v1/me/avatar", auth: "Bearer \(token)", body: body)
+        try check(response)
+        guard let value = try? JSONDecoder().decode(AccountAvatarVersion.self, from: response.body) else { throw AccountError.invalidResponse }
+        return value.version
+    }
+
+    /// Your own avatar; nil without one
+    public func ownAvatar(token: String) async throws -> Data? {
+        let response = try await send("GET", "/api/v1/me/avatar", auth: "Bearer \(token)", body: nil)
+        if response.status == 404 { return nil }
+        try check(response)
+        guard let value = try? JSONDecoder().decode(AccountAvatarImage.self, from: response.body) else { throw AccountError.invalidResponse }
+        return Data(base64Encoded: value.image)
+    }
+
+    public func deleteAvatar(token: String) async throws {
+        let response = try await send("DELETE", "/api/v1/me/avatar", auth: "Bearer \(token)", body: nil)
+        try check(response)
+    }
+
+    /// Which of these SBN players have an avatar, and its version
+    public func avatarVersions(device: AccountDevice, sbnPaths: [String]) async throws -> [String: Int64] {
+        var query = ""
+        for path in sbnPaths.prefix(50) where AccountClient.isQuerySafe(path) {
+            query += (query.isEmpty ? "?" : "&") + "sbn=" + path
+        }
+        if query.isEmpty { return [:] }
+        let response = try await send("GET", "/api/v1/avatars" + query, auth: device.header, body: nil)
+        try check(response)
+        guard let value = try? JSONDecoder().decode(AccountAvatarList.self, from: response.body) else { throw AccountError.invalidResponse }
+        var result: [String: Int64] = [:]
+        for item in value.avatars { result[item.sbnPath] = item.version }
+        return result
+    }
+
+    /// The photo of one SBN player; nil without one
+    public func avatar(device: AccountDevice, sbnPath: String) async throws -> Data? {
+        guard AccountClient.isQuerySafe(sbnPath) else { return nil }
+        let response = try await send("GET", "/api/v1/avatars/image?sbn=" + sbnPath, auth: device.header, body: nil)
+        if response.status == 404 { return nil }
+        try check(response)
+        guard let value = try? JSONDecoder().decode(AccountAvatarImage.self, from: response.body) else { throw AccountError.invalidResponse }
+        return Data(base64Encoded: value.image)
+    }
+
+    /// "Foto melden"
+    public func reportAvatar(device: AccountDevice, sbnPath: String) async throws {
+        let body = try JSONEncoder().encode(AccountAvatarReport(sbnPath: sbnPath))
+        let response = try await send("POST", "/api/v1/avatars/report", auth: device.header, body: body)
+        try check(response)
+    }
+
+    /// Letters, digits, "-", "_" and "/": what an SBN path is made of, fine in a query as it is
+    /// (no percent-encoding: CharacterSet is thin in Skip)
+    static func isQuerySafe(_ text: String) -> Bool {
+        if text.isEmpty || text.count > 200 { return false }
+        let allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_/"
+        for character in text where !allowed.contains(character) { return false }
+        return true
+    }
+
     private func send(_ method: String, _ path: String, auth: String?, body: Data?) async throws -> AITransportResponse {
         guard let url = URL(string: baseURL + path) else { throw AccountError.notConfigured }
         var headers: [String: String] = ["Accept": "application/json"]
@@ -575,4 +646,30 @@ public struct AccountClient: Sendable {
         if status == 429 { return AccountError.tooManyRequests }
         return AccountError.server(status: status)
     }
+}
+
+struct AccountAvatarUpload: Codable {
+    let image: String
+    let consent: Bool
+}
+
+struct AccountAvatarVersion: Codable {
+    let version: Int64
+}
+
+struct AccountAvatarImage: Codable {
+    let image: String
+}
+
+struct AccountAvatarItem: Codable {
+    let sbnPath: String
+    let version: Int64
+}
+
+struct AccountAvatarList: Codable {
+    let avatars: [AccountAvatarItem]
+}
+
+struct AccountAvatarReport: Codable {
+    let sbnPath: String
 }

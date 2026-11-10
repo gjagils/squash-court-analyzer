@@ -33,6 +33,13 @@ public struct AccountSecrets: Codable, Equatable, Sendable {
     }
 }
 
+/// The system photo picker for the avatar, on each platform: a centre-cropped
+/// square JPEG of at most 512 px; nil when the user cancelled
+@MainActor
+public protocol AccountAvatarSource: AnyObject {
+    func pickAvatar() async throws -> Data?
+}
+
 @MainActor
 @Observable
 public final class PlayerAccount {
@@ -54,6 +61,10 @@ public final class PlayerAccount {
     public private(set) var teamInbox: [AccountServerMatch] = []
     /// A "Stuur naar speler" link that was opened (`AccountClaimLink`): the app shows it until handled
     public var pendingClaim: String? = nil
+    /// Your own avatar as shown in Mijn account (loaded with `loadOwnAvatar`)
+    public private(set) var ownAvatar: Data? = nil
+    /// Picks a photo for the avatar: set by each platform at start; nil hides "Foto kiezen"
+    public var avatarSource: (any AccountAvatarSource)? = nil
     private var device: AccountDevice? = nil
     private var sending = false
 
@@ -113,6 +124,7 @@ public final class PlayerAccount {
         profileChecked = false
         inbox = []
         teamInbox = []
+        ownAvatar = nil
         storeSecrets()
     }
 
@@ -264,6 +276,50 @@ public final class PlayerAccount {
         guard let teamKey = profile?.teamKey, !teamKey.isEmpty,
               let token = try? await validToken(), let accountClient = try? client() else { return nil }
         return TeamFindingContext(client: accountClient, token: token, teamKey: teamKey)
+    }
+
+    // MARK: Avatar (Gerd-Jan, 10 November 2026)
+
+    /// Your avatar from the server, when the profile says there is one
+    public func loadOwnAvatar() async throws {
+        guard profile?.avatarVersion != nil else {
+            ownAvatar = nil
+            return
+        }
+        let token = try await validToken()
+        ownAvatar = try await client().ownAvatar(token: token)
+    }
+
+    /// Puts a new avatar up (a small square JPEG); whoever picks you as a player may see it
+    public func setAvatar(_ jpeg: Data) async throws {
+        let token = try await validToken()
+        _ = try await client().setAvatar(token: token, jpeg: jpeg)
+        ownAvatar = jpeg
+        profile = try await client().me(token: token)
+    }
+
+    public func deleteAvatar() async throws {
+        let token = try await validToken()
+        try await client().deleteAvatar(token: token)
+        ownAvatar = nil
+        profile = try await client().me(token: token)
+    }
+
+    /// The avatar versions of these SBN players (with this phone's device key; no account needed)
+    public func avatarVersions(sbnPaths: [String]) async throws -> [String: Int64] {
+        let key = try await deviceKey()
+        return try await client().avatarVersions(device: key, sbnPaths: sbnPaths)
+    }
+
+    public func avatar(sbnPath: String) async throws -> Data? {
+        let key = try await deviceKey()
+        return try await client().avatar(device: key, sbnPath: sbnPath)
+    }
+
+    /// "Foto melden"
+    public func reportAvatar(sbnPath: String) async throws {
+        let key = try await deviceKey()
+        try await client().reportAvatar(device: key, sbnPath: sbnPath)
     }
 
     // MARK: Sending

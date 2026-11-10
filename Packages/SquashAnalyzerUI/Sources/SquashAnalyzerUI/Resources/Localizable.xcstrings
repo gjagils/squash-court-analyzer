@@ -13968,6 +13968,258 @@
           }
         }
       }
+    },
+    "Foto kiezen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose photo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto kiezen"
+          }
+        }
+      }
+    },
+    "Je foto: kies eerst wie je in SBN bent, dan zien je teamgenoten en tegenstanders hem bij jou in hun app.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photo: first choose who you are in SBN, then teammates and opponents see it with you in their app."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto: kies eerst wie je in SBN bent, dan zien je teamgenoten en tegenstanders hem bij jou in hun app."
+          }
+        }
+      }
+    },
+    "Je foto: wie jou als speler of tegenspeler kiest, ziet hem bij jou in zijn app. Verwijderen kan altijd.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photo: whoever picks you as a player or opponent sees it with you in their app. You can always remove it."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto: wie jou als speler of tegenspeler kiest, ziet hem bij jou in zijn app. Verwijderen kan altijd."
+          }
+        }
+      }
+    },
+    "Je foto delen?": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share your photo?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto delen?"
+          }
+        }
+      }
+    },
+    "Wie jou als speler of tegenspeler kiest, ziet deze foto bij jou in de app. Je kunt hem altijd weer verwijderen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whoever picks you as a player or opponent sees this photo with you in the app. You can always remove it."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie jou als speler of tegenspeler kiest, ziet deze foto bij jou in de app. Je kunt hem altijd weer verwijderen."
+          }
+        }
+      }
+    },
+    "Deze foto kan niet worden gebruikt.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This photo can't be used."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze foto kan niet worden gebruikt."
+          }
+        }
+      }
+    },
+    "Je foto staat bij je account.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photo is on your account."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto staat bij je account."
+          }
+        }
+      }
+    },
+    "Je foto is verwijderd.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photo was removed."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto is verwijderd."
+          }
+        }
+      }
+    },
+    "Foto uit het account van deze speler": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo from this player's account"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto uit het account van deze speler"
+          }
+        }
+      }
+    },
+    "Gemeld. Dank je!": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reported. Thanks!"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemeld. Dank je!"
+          }
+        }
+      }
+    },
+    "Foto melden": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report photo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto melden"
+          }
+        }
+      }
+    },
+    "Foto melden?": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report photo?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto melden?"
+          }
+        }
+      }
+    },
+    "Melden": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Melden"
+          }
+        }
+      }
+    },
+    "Hoort deze foto hier niet, of is hij niet in orde? Wij kijken ernaar en halen hem zo nodig weg.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doesn't this photo belong here, or isn't it okay? We'll take a look and remove it if needed."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoort deze foto hier niet, of is hij niet in orde? Wij kijken ernaar en halen hem zo nodig weg."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

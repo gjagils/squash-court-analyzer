@@ -27,6 +27,8 @@ struct SquashAnalyzerApp: App {
                                                  defaultHost: "localhost"),
                 transport: URLSessionLiveTransport(),
                 secrets: KeychainAccountSecrets())
+            // The avatar in Mijn account: the system photo picker, scaled like a player photo
+            PlayerAccount.shared.avatarSource = IOSAvatarSource()
             Task { await PlayerAccount.shared.sendOutbox() }
         }
         // Live meekijken: the shared LiveShare sends the state through URLSession (server/live)

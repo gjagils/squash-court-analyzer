@@ -172,9 +172,13 @@ struct ContentView: View {
                 Task { @MainActor in TeamLive.shared.retryPending() }
                 // 4.0: the matches in your account come to Afgeronde wedstrijden
                 if Features.shared.playerAccount {
+                    let players = SwiftDataPlayerStore(context: modelContext)
                     AccountSync.shared.configure(history: SwiftDataMatchHistoryStore(context: modelContext),
-                                                 players: SwiftDataPlayerStore(context: modelContext))
-                    Task { await AccountSync.shared.run() }
+                                                 players: players, photos: players)
+                    Task {
+                        await AccountSync.shared.run()
+                        await AccountSync.shared.syncAvatars()
+                    }
                 }
             }
         }

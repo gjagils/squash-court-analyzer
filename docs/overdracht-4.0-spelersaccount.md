@@ -70,7 +70,7 @@ Overal waar nu "geen account" staat, moet dat kloppen met 4.0. Stand 8 november:
 | `website/account-verwijderen.html`, `website/en/delete-account.html` | Verwijderen buiten de app (Google eist een webadres) | Gepubliceerd 8 november |
 | `website/wedstrijd/` + app-link | Pagina voor de link van Stuur naar speler | Gepubliceerd 8 november |
 | Play Console, Gegevensveiligheid | E-mailadres, naam, gebruikers-ID's, app-activiteit (wedstrijden); account met e-mail en wachtwoord; URL account-verwijderen; verwijderen op verzoek | Ingestuurd via de API op 8 november (`Android/play/data-safety.csv`) |
-| App Store Connect, App-privacy | Contactgegevens (e-mail), naam, gebruikers-ID, gebruiksgegevens; gekoppeld aan de gebruiker, geen tracking | Vóór de App Store-release van 4.0 (TestFlight vraagt het niet) |
+| App Store Connect, App-privacy | Contactgegevens (e-mail), naam, gebruikers-ID, gebruiksgegevens, gebruikersinhoud (foto's: de avatar, sinds build 2); gekoppeld aan de gebruiker, geen tracking | Vóór de App Store-release van 4.0 (TestFlight vraagt het niet) |
 | Storeteksten (`release-notes/store-4.0/`, `Android/play/listing-*.json`) | "Gratis, zonder advertenties en zonder account" / "Geen account nodig" wordt "account niet verplicht" | Bij de release van 4.0 |
 | Homepage (nl/en) | "gratis, zonder advertenties en zonder account" in het blok Trakteer | Bij de release van 4.0 |
 | Handleidingen (nl/en) | Onderdeel Mijn account | Bij de release van 4.0 |

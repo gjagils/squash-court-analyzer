@@ -176,7 +176,9 @@ public enum TeamRosterSync {
     @MainActor
     static func linkAccounts(_ snapshot: LeagueTeamSnapshot, store: any PlayerProfileStore, in defaults: UserDefaults) async {
         guard Features.shared.playerAccount, let known = try? await store.loadPlayers() else { return }
-        PlayerSBNLinks.fill(from: snapshot.players, players: known, in: defaults)
+        let linked = PlayerSBNLinks.fill(from: snapshot.players, players: known, in: defaults)
         await PlayerAccount.shared.learnLinks(players: known)
+        // New links: their avatars come at once
+        if linked > 0 { await AccountSync.shared.syncAvatars(force: true) }
     }
 }

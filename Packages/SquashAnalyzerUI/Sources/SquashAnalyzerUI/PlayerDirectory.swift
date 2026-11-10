@@ -499,6 +499,9 @@ struct PlayerProfileEditor: View {
                     .foregroundColor(SharedColors.textSecondary)
                 }
             }
+            if photo != nil && !photoChanged {
+                AccountAvatarReportButton(playerId: player.id)
+            }
         }
     }
 

@@ -27,6 +27,7 @@ struct ContentView: View {
     @AppStorage(Onboarding.storageKey) private var tourSeen = 0
     /// The "Nieuw in 3.0" version seen; it comes first, with the tour as a choice
     @AppStorage(WhatsNew.storageKey) private var whatsNewSeen = 0
+    @AppStorage(WhatsNew.buildStorageKey) private var whatsNewBuildSeen = ""
     /// "Testgegevens opruimen" was answered (once, after the badge reset)
     @AppStorage(TestDataCleanup.storageKey) private var testDataCleanupDone = false
     /// What the cleanup question offers; set when there is something to clean up
@@ -100,8 +101,9 @@ struct ContentView: View {
         // "Nieuw in 3.0" (with the tour as a choice), or the tour alone once it is raised
         .fullScreenCover(isPresented: Binding(get: { welcomeNeeded && !showingSettings },
                                               set: { if !$0 { welcomeSeen() } })) {
-            if WhatsNew.shouldShow(seenVersion: whatsNewSeen) {
-                SharedWhatsNewView(manual: UserManual.iPhone, onTeamLink: openTeamLinkFromTour) { welcomeSeen() }
+            if whatsNewNeeded {
+                SharedWhatsNewView(manual: UserManual.iPhone, onTeamLink: openTeamLinkFromTour,
+                                   accountProviders: AppleAccountSignIn.providers) { welcomeSeen() }
             } else {
                 SharedOnboardingView(manual: UserManual.iPhone, onTeamLink: openTeamLinkFromTour) { welcomeSeen() }
             }
@@ -135,6 +137,7 @@ struct ContentView: View {
                 // A screenshot shows the screen itself, never the welcome tour (a freshly erased simulator)
                 tourSeen = Onboarding.currentVersion
                 whatsNewSeen = WhatsNew.currentVersion
+                whatsNewBuildSeen = Self.appBuild
                 applyScreenshotScenario(scenario)
                 return
             }
@@ -270,12 +273,25 @@ struct ContentView: View {
 
     /// "Nieuw in 3.0" or the tour still has to show
     private var welcomeNeeded: Bool {
-        WhatsNew.shouldShow(seenVersion: whatsNewSeen) || Onboarding.shouldShow(seenVersion: tourSeen)
+        whatsNewNeeded || Onboarding.shouldShow(seenVersion: tourSeen)
+    }
+
+    /// The app's build, for "Nieuw in 4.0" once per test build ("4.0 (2)")
+    private static var appBuild: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? ""
+        let build = info?["CFBundleVersion"] as? String ?? ""
+        return "\(version) (\(build))"
+    }
+
+    private var whatsNewNeeded: Bool {
+        WhatsNew.shouldShow(seenVersion: whatsNewSeen, seenBuild: whatsNewBuildSeen, build: Self.appBuild)
     }
 
     /// Both seen, whether the tour was chosen or skipped: neither comes back by itself
     private func welcomeSeen() {
         whatsNewSeen = WhatsNew.currentVersion
+        whatsNewBuildSeen = Self.appBuild
         tourSeen = Onboarding.currentVersion
     }
 

@@ -64,7 +64,8 @@ struct HomeView: View {
                         onPlayers: { showingPlayerManagement = true },
                         onBadges: { showingBadgeCatalog = true },
                         onCompetition: { showingCompetition = true },
-                        competitionLive: competitionLive
+                        competitionLive: competitionLive,
+                        accountProviders: AppleAccountSignIn.providers
                     )
                 }
                 .padding(.top, 8)

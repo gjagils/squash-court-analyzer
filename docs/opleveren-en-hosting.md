@@ -232,7 +232,12 @@ Volgorde bij een externe build:
      `website/screenshots/`, die buiten git valt), en
      controleren op squashanalyzer.com. In het rapport vermelden wat er
      veranderd is.
-8. `docs/wijzigingen-builds.md`: het blok "Volgende build" krijgt de kop met
+8. **Nieuw in … (carrousel, `WhatsNew` in `Onboarding.swift`):** tijdens een testronde komt hij bij elke
+   nieuwe build één keer terug (`WhatsNew.perBuild = true`; Gerd-Jan, 10 november 2026). Kijk vóór elke
+   upload of de pagina's nog kloppen. **Voor de build die naar productie gaat** zet je `perBuild` op
+   `false`: dan zien gebruikers hem één keer per versie, zoals Nieuw in 3.2. Bij een nieuwe versie
+   `currentVersion` ophogen en de pagina's vervangen.
+9. `docs/wijzigingen-builds.md`: het blok "Volgende build" krijgt de kop met
    het nummer (bijvoorbeeld "3.0 build 1") en "(geüpload)".
 
 ### Vóór de upload van 3.0 build 4: live score op je vergrendelscherm (klaargezet 16 oktober 2026)

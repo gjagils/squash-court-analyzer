@@ -418,3 +418,15 @@
 "In de app: %@, %@ · games %@" = "In the app: %1$@, %2$@ · games %3$@";
 "1 partij" = "1 match";
 "%@ partijen" = "%@ matches";
+
+// Nieuw in 4.0 (10 November 2026)
+"Nieuw in 4.0" = "What's new in 4.0";
+"Jouw wedstrijden, jouw badges" = "Your matches, your badges";
+"Houdt een teamgenoot of coach jouw partij bij, dan komt die wedstrijd nu bij jou terecht. Hij telt mee voor je eigen badges, je kaart en je vorm." = "When a teammate or coach records your match, it now comes to you. It counts for your own badges, your card and your form.";
+"Maak je account" = "Create your account";
+"Het kost een minuut: je e-mailadres en je kiest jezelf uit je SBN-team. Een account is niet verplicht; zonder werkt alles zoals je gewend bent." = "It takes a minute: your email address, and you pick yourself from your SBN team. An account is optional; without one everything works as before.";
+"Hoe meer teamgenoten, hoe meer badges" = "More teammates, more badges";
+"Elke teamgenoot met de app kan jouw partijen fluiten of coachen. Deel de app met je team, dan krijg je na elke competitieavond je eigen wedstrijden." = "Every teammate with the app can referee or coach your matches. Share the app with your team and you get your own matches after every league night.";
+"Teamwedstrijd zonder gedoe" = "Team matches made easy";
+"Maakt iemand uit je team een teamwedstrijd, dan staat hij op je beginscherm. Eén tik en je doet mee, en je krijgt een melding bij elke uitslag." = "When someone on your team starts a team match, it shows on your home screen. One tap to join, and you get a notification with every result.";
+"Ik houd onze squashwedstrijden bij met Squash Analyzer. Zet hem ook op je telefoon en maak een account: dan tellen de partijen die we van elkaar bijhouden mee voor je eigen badges." = "I keep track of our squash matches with Squash Analyzer. Get it on your phone too and create an account: then the matches we record for each other count for your own badges.";

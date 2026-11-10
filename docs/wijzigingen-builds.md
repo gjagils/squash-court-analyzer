@@ -30,6 +30,16 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   teamwedstrijd. Alleen met een account; de kaart vraagt het **elke minuut** (was vijf minuten; Gerd-Jan zag de
   teamwedstrijd van een teamgenoot op 10 november eerder onder Competitie dan op het beginscherm) en alleen rond
   een wedstrijd uit het programma.
+- **Nieuw in 4.0 als carrousel (Gerd-Jan, 10 november 2026):** in plaats van één scherm met een lijstje vier
+  pagina's om door te vegen, zoals de rondleiding: *Jouw wedstrijden, jouw badges* · *Maak je account* (knop
+  **Account maken** opent Mijn account boven de carrousel; met een account staat er "Je hebt al een account") ·
+  *Hoe meer teamgenoten, hoe meer badges* (knop **Deel met je team**: deelmenu met een berichtje waarom je
+  teamgenoten de app en een account zouden nemen, en beide stores) · *Teamwedstrijd zonder gedoe*. Overslaan kan
+  altijd, de laatste pagina biedt de rondleiding. Tijdens de testronde komt hij bij elke nieuwe build één keer
+  terug (`WhatsNew.perBuild`); voor de productiebuild uitzetten (zie opleveren-en-hosting stap 8).
+- **Maak je account op het beginscherm (4.0):** zonder account staat op de plek van Wedstrijdverzoeken een rustig
+  blok "Maak je account · Dan tellen de partijen die je team bijhoudt mee voor jouw badges". Een tik opent Mijn
+  account; het kruisje haalt het blok voorgoed weg (`accountNudgeHidden`).
 - **Wedstrijdverzoeken op het beginscherm (4.0; keuze Gerd-Jan, 10 november 2026, variant B):** wachten er
   wedstrijden in het Postvak (of teamwedstrijden onder *Ben jij X?*), dan staat onder de tegels Scheidsrechter en
   Coach een zeegroen blok met een brievenbus: "WEDSTRIJDVERZOEKEN · 2 wedstrijden wachten op je · Van Kristian

@@ -28,11 +28,33 @@ final class OnboardingTests: XCTestCase {
     func testWhatsNewShowsOnceForEveryone() {
         XCTAssertTrue(WhatsNew.shouldShow(seenVersion: 0), "a new install, a 2.0 user and a tester alike")
         XCTAssertFalse(WhatsNew.shouldShow(seenVersion: WhatsNew.currentVersion))
-        XCTAssertEqual(WhatsNew.items.count, 5)
+        XCTAssertEqual(WhatsNew.items.count, 4)
         for item in WhatsNew.items {
             XCTAssertFalse(item.title.isEmpty)
             XCTAssertFalse(item.text.isEmpty)
         }
+    }
+
+    func testWhatsNewAsksForAnAccountAndTheTeam() {
+        XCTAssertEqual(WhatsNew.action(onPage: 0), WhatsNew.Action.none)
+        XCTAssertEqual(WhatsNew.action(onPage: WhatsNew.accountPage), WhatsNew.Action.account)
+        XCTAssertEqual(WhatsNew.action(onPage: WhatsNew.sharePage), WhatsNew.Action.shareWithTeam)
+        XCTAssertEqual(WhatsNew.action(onPage: 3), WhatsNew.Action.none)
+        XCTAssertTrue(WhatsNew.shouldShow(seenVersion: 3), "a 3.2 user sees it once")
+    }
+
+    func testWhatsNewComesBackWithEveryTestBuild() {
+        let now = WhatsNew.currentVersion
+        XCTAssertTrue(WhatsNew.shouldShow(seenVersion: 3, seenBuild: "", build: "4.0 (2)"))
+        XCTAssertFalse(WhatsNew.shouldShow(seenVersion: now, seenBuild: "4.0 (2)", build: "4.0 (2)"), "seen in this build")
+        XCTAssertEqual(WhatsNew.shouldShow(seenVersion: now, seenBuild: "4.0 (2)", build: "4.0 (3)"), WhatsNew.perBuild)
+        XCTAssertFalse(WhatsNew.shouldShow(seenVersion: now, seenBuild: "4.0 (2)", build: ""), "no build known: once per version")
+    }
+
+    func testTeamShareTextHasBothStores() {
+        XCTAssertTrue(AppLinks.teamShareText.contains("play.google.com/store/apps/details?id=com.squashanalyzer.android"))
+        XCTAssertTrue(AppLinks.teamShareText.contains("apps.apple.com/app/squash-analyzer/id6758676921"))
+        XCTAssertTrue(AppLinks.teamShareText.contains("account"))
     }
 
     func testShareTextHasBothStores() {

@@ -53,35 +53,64 @@ public enum Onboarding {
     ] }
 }
 
-/// "Nieuw in 3.2": one sheet at the first start of a new version, for
-/// everyone (choice Gerd-Jan, 20 October 2026). "Rondleiding" opens the tour
-/// from there, "Aan de slag" skips it; either way the badge reset and the
-/// cleanup question follow.
+/// "Nieuw in 4.0": at the first start of a new version, for everyone (choice
+/// Gerd-Jan, 20 October 2026). Since 4.0 a carousel like the tour (Gerd-Jan,
+/// 10 November 2026): the more teammates have the app and an account, the more
+/// of your own matches reach you, so two pages ask for exactly that. The
+/// badge reset and the cleanup question follow as before.
 public enum WhatsNew {
     /// The what's-new version this device has seen (0 = none)
     public static let storageKey = "whatsNewVersion"
-    /// 1 = 3.0, 2 = 3.1, 3 = 3.2; raise it with new items for a later version
-    public static let currentVersion = 3
-    public static var title: String { L10n.text("Nieuw in 3.2") }
-    public static var intro: String { L10n.text("Squash Analyzer is weer een stap verder, op de baan en op de competitieavond. Dit is wat je merkt.") }
+    /// 1 = 3.0, 2 = 3.1, 3 = 3.2, 4 = 4.0; raise it with new pages for a later version
+    public static let currentVersion = 4
+    public static var title: String { L10n.text("Nieuw in 4.0") }
+
+    /// What a page's button does
+    public enum Action: Equatable, Sendable {
+        case none
+        /// Opens Mijn account (signing in or making the account)
+        case account
+        /// Shares the app with the team (`AppLinks.teamShareText`)
+        case shareWithTeam
+    }
+
+    /// The page with "Account maken" and the one with "Deel met je team"
+    public static let accountPage = 1
+    public static let sharePage = 2
+
+    public static func action(onPage page: Int) -> Action {
+        if page == accountPage { return Action.account }
+        if page == sharePage { return Action.shareWithTeam }
+        return Action.none
+    }
 
     public static func shouldShow(seenVersion: Int) -> Bool {
         seenVersion < currentVersion
     }
 
-    /// The symbols are the home screen's outline icons (AppSymbol names).
-    /// 3.2 (Gerd-Jan, 7 November 2026): five items, in this order
+    /// During a test round the carousel comes back once with every new build,
+    /// so testers see what it says (Gerd-Jan, 10 November 2026). Set to false
+    /// for the build that goes to production: then it shows once per version,
+    /// like "Nieuw in 3.2". Check the pages before every release.
+    public static let perBuild = true
+    /// The build (app version text) the carousel was last seen in
+    public static let buildStorageKey = "whatsNewBuild"
+
+    public static func shouldShow(seenVersion: Int, seenBuild: String, build: String) -> Bool {
+        if seenVersion < currentVersion { return true }
+        return perBuild && !build.isEmpty && seenBuild != build
+    }
+
+    /// The symbols are the home screen's outline icons (AppSymbol names)
     public static var items: [Onboarding.Page] { [
-        Onboarding.Page(symbol: "trophy", title: L10n.text("Teamwedstrijd op je beginscherm"),
-                        text: L10n.text("Doe je mee aan een teamwedstrijd, dan staat die op je beginscherm, met de stand en E1 t/m E4. Eén tik en je fluit of coacht je partij.")),
-        Onboarding.Page(symbol: "whistle", title: L10n.text("Officiële timers"),
-                        text: L10n.text("Inspelen, 1 minuut tot de start en 2 minuten tussen de games. Je telefoon trilt bij het wisselen, bij 15 seconden en bij Time.")),
-        Onboarding.Page(symbol: "list.bullet.clipboard", title: L10n.text("Makkelijker coachen"),
-                        text: L10n.text("Ging het even te snel? Tik op wie scoort en dan op Niet gezien: de score loopt door. Uitgebreid of Eenvoudig kies je nu ook tussen de punten door.")),
-        Onboarding.Page(symbol: "person.2", title: L10n.text("Ken je tegenstander"),
-                        text: L10n.text("Bekijk het profiel van je tegenstander en zie bij Kies speler de onderlinge stand. Met een SquashLevels-link open je ook de ranglijst.")),
-        Onboarding.Page(symbol: "sparkles", title: L10n.text("Kleine verbeteringen"),
-                        text: L10n.text("Op sommige Android-toestellen is de weergave verbeterd, tegenstanders worden beter opgehaald bij competitiewedstrijden en je team toevoegen gaat makkelijker.")),
+        Onboarding.Page(symbol: "medal", title: L10n.text("Jouw wedstrijden, jouw badges"),
+                        text: L10n.text("Houdt een teamgenoot of coach jouw partij bij, dan komt die wedstrijd nu bij jou terecht. Hij telt mee voor je eigen badges, je kaart en je vorm.")),
+        Onboarding.Page(symbol: "person.crop.circle", title: L10n.text("Maak je account"),
+                        text: L10n.text("Het kost een minuut: je e-mailadres en je kiest jezelf uit je SBN-team. Een account is niet verplicht; zonder werkt alles zoals je gewend bent.")),
+        Onboarding.Page(symbol: "person.2", title: L10n.text("Hoe meer teamgenoten, hoe meer badges"),
+                        text: L10n.text("Elke teamgenoot met de app kan jouw partijen fluiten of coachen. Deel de app met je team, dan krijg je na elke competitieavond je eigen wedstrijden.")),
+        Onboarding.Page(symbol: "trophy", title: L10n.text("Teamwedstrijd zonder gedoe"),
+                        text: L10n.text("Maakt iemand uit je team een teamwedstrijd, dan staat hij op je beginscherm. Eén tik en je doet mee, en je krijgt een melding bij elke uitslag.")),
     ] }
 }
 
@@ -94,6 +123,14 @@ public enum AppLinks {
     /// What "Deel de app" sends: both stores, so it works for every phone
     public static var shareText: String {
         L10n.text("Squash Analyzer: houd squashwedstrijden bij als coach of scheidsrechter.") + "\n"
+            + "Android: \(playStore.absoluteString)\n"
+            + "iPhone: \(appStore.absoluteString)"
+    }
+
+    /// What "Deel met je team" sends (Nieuw in 4.0, the account reminder): why
+    /// teammates should have the app too, and both stores
+    public static var teamShareText: String {
+        L10n.text("Ik houd onze squashwedstrijden bij met Squash Analyzer. Zet hem ook op je telefoon en maak een account: dan tellen de partijen die we van elkaar bijhouden mee voor je eigen badges.") + "\n"
             + "Android: \(playStore.absoluteString)\n"
             + "iPhone: \(appStore.absoluteString)"
     }

@@ -86,10 +86,16 @@ public struct HomeMenuTiles: View {
     private let onCompetition: (() -> Void)?
     /// A live team match of the own team is running: the Competitie row shows LIVE
     private let competitionLive: Bool
+    /// Sign in with Apple on iOS, for the account reminder; empty shows only e-mail
+    private let accountProviders: [AccountProviderSignIn]
+    /// "Maak je account" was tapped away
+    @AppStorage(HomeAccountNudge.hiddenKey) private var accountNudgeHidden = false
 
     public init(onCoach: @escaping () -> Void, onReferee: @escaping () -> Void,
                 onHistory: @escaping () -> Void, onPlayers: @escaping () -> Void, onBadges: @escaping () -> Void,
-                onCompetition: (() -> Void)? = nil, competitionLive: Bool = false) {
+                onCompetition: (() -> Void)? = nil, competitionLive: Bool = false,
+                accountProviders: [AccountProviderSignIn] = []) {
+        self.accountProviders = accountProviders
         self.competitionLive = competitionLive
         self.onCoach = onCoach
         self.onReferee = onReferee
@@ -111,6 +117,8 @@ public struct HomeMenuTiles: View {
             // 4.0: only while matches wait for an answer (option B, Gerd-Jan, 10 November 2026)
             if HomeInboxBar.waiting > 0 {
                 HomeInboxBar()
+            } else if HomeAccountNudge.shows(hidden: accountNudgeHidden) {
+                HomeAccountNudge(providers: accountProviders) { accountNudgeHidden = true }
             }
             VStack(spacing: 0) {
                 menuRow(loc("Afgeronde wedstrijden"), icon: .history, action: onHistory)
@@ -529,6 +537,66 @@ struct HomeInboxBar: View {
     }
 }
 
+/// "Maak je account" (4.0, Gerd-Jan, 10 November 2026): in the place of
+/// Wedstrijdverzoeken while there is no account, until one is made or the
+/// cross taps it away. A tap opens Mijn account.
+struct HomeAccountNudge: View {
+    let providers: [AccountProviderSignIn]
+    let onHide: () -> Void
+
+    @State private var showing = false
+
+    static let hiddenKey = "accountNudgeHidden"
+
+    /// Signed out, or signed in without an account (once that is known)
+    static func shows(hidden: Bool) -> Bool {
+        let account = PlayerAccount.shared
+        guard Features.shared.playerAccount, account.isConfigured, !hidden else { return false }
+        if !account.isSignedIn { return true }
+        return account.profileChecked && account.profile == nil
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button { showing = true } label: {
+                HStack(spacing: 12) {
+                    AppSymbol("person.crop.circle", size: 26, color: SharedColors.accent, weight: .medium)
+                        .frame(width: 30, height: 30)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Maak je account", bundle: textBundle)
+                            .font(SharedFonts.system(13, weight: .semibold))
+                            .foregroundColor(SharedColors.textPrimary)
+                        Text("Dan tellen de partijen die je team bijhoudt mee voor jouw badges.", bundle: textBundle)
+                            .font(SharedFonts.system(11))
+                            .foregroundColor(SharedColors.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                #if !SKIP
+                .contentShape(Rectangle())
+                #endif
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(loc("Maak je account"))
+            Button(action: onHide) {
+                AppSymbol("xmark", size: 12, color: SharedColors.textMuted)
+                    .frame(width: 28, height: 28)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(loc("Niet meer tonen"))
+        }
+        .padding(EdgeInsets(top: 10, leading: 14, bottom: 10, trailing: 8))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(SharedColors.cardTint)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.accent.opacity(0.35), lineWidth: 1))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .sheet(isPresented: $showing) {
+            WhatsNewAccountSheet(providers: providers) { showing = false }
+        }
+    }
+}
+
 /// The Postvak on its own, opened from the Wedstrijdverzoeken block
 struct HomeInboxSheet: View {
     let onClose: () -> Void
@@ -609,6 +677,7 @@ public struct AndroidHomeView: View {
     @AppStorage(Onboarding.storageKey) private var tourSeen = 0
     /// The "Nieuw in 3.0" version seen; it comes first, with the tour as a choice
     @AppStorage(WhatsNew.storageKey) private var whatsNewSeen = 0
+    @AppStorage(WhatsNew.buildStorageKey) private var whatsNewBuildSeen = ""
     /// "Testgegevens opruimen" was answered (once, after the badge reset)
     @AppStorage(TestDataCleanup.storageKey) private var testDataCleanupDone = false
     /// What the cleanup question offers; set when there is something to clean up
@@ -752,7 +821,7 @@ public struct AndroidHomeView: View {
         // "Nieuw in 3.0" (with the tour as a choice), or the tour alone once it is raised
         .trackedCover(isPresented: Binding(get: { welcomeNeeded },
                                            set: { if !$0 { welcomeSeen() } })) {
-            if WhatsNew.shouldShow(seenVersion: whatsNewSeen) {
+            if whatsNewNeeded {
                 SharedWhatsNewView(manual: UserManual.android, onTeamLink: {
                     welcomeSeen()
                     settingsOpensTeam = true
@@ -819,12 +888,18 @@ public struct AndroidHomeView: View {
 
     /// "Nieuw in 3.0" or the tour still has to show
     private var welcomeNeeded: Bool {
-        WhatsNew.shouldShow(seenVersion: whatsNewSeen) || Onboarding.shouldShow(seenVersion: tourSeen)
+        whatsNewNeeded || Onboarding.shouldShow(seenVersion: tourSeen)
+    }
+
+    /// "Nieuw in 4.0" once per test build: the version text holds the build ("Android 4.0 (2)")
+    private var whatsNewNeeded: Bool {
+        WhatsNew.shouldShow(seenVersion: whatsNewSeen, seenBuild: whatsNewBuildSeen, build: backup?.appVersion ?? "")
     }
 
     /// Both seen, whether the tour was chosen or skipped: neither comes back by itself
     private func welcomeSeen() {
         whatsNewSeen = WhatsNew.currentVersion
+        whatsNewBuildSeen = backup?.appVersion ?? ""
         tourSeen = Onboarding.currentVersion
     }
 

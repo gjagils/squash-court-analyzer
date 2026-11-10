@@ -149,16 +149,23 @@ public struct SharedOnboardingView: View {
 public struct AboutAppSection: View {
     let appVersion: String
     let manual: URL
+    /// Sign in with Apple on iOS, for "Account maken" in Nieuw in 4.0
+    let accountProviders: [AccountProviderSignIn]
     @State private var showingTour = false
+    @State private var showingWhatsNew = false
 
-    public init(appVersion: String, manual: URL) {
+    public init(appVersion: String, manual: URL, accountProviders: [AccountProviderSignIn] = []) {
         self.appVersion = appVersion
         self.manual = manual
+        self.accountProviders = accountProviders
     }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             SettingsRow(loc("Rondleiding opnieuw bekijken"), icon: "play.fill") { showingTour = true }
+            SettingsDivider()
+            // The carousel of this version again (Gerd-Jan, 10 November 2026)
+            SettingsRow(WhatsNew.title + " " + loc("bekijken"), icon: "sparkles") { showingWhatsNew = true }
             SettingsDivider()
             ShareLink(item: AppLinks.shareText, subject: Text("Squash Analyzer")) {
                 SettingsRowLabel(loc("Deel de app"), icon: "square.and.arrow.up")
@@ -176,6 +183,9 @@ public struct AboutAppSection: View {
         }
         .trackedCover(isPresented: $showingTour) {
             SharedOnboardingView(manual: manual) { showingTour = false }
+        }
+        .trackedCover(isPresented: $showingWhatsNew) {
+            SharedWhatsNewView(manual: manual, accountProviders: accountProviders) { showingWhatsNew = false }
         }
     }
 }

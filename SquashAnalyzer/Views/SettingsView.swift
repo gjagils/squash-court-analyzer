@@ -111,7 +111,7 @@ struct SettingsView: View {
                             .padding(.bottom, 16)
                         }
                         SettingsDivider()
-                        AboutAppSection(appVersion: Self.appVersion, manual: UserManual.iPhone)
+                        AboutAppSection(appVersion: Self.appVersion, manual: UserManual.iPhone, accountProviders: AppleAccountSignIn.providers)
                     }
                     .padding(.horizontal, 24)
                     .padding(.vertical, 20)

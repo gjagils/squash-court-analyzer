@@ -10,6 +10,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 2)
 
+- **Nieuw in 4.0 bekijken (Gerd-Jan, 10 november 2026):** bij Instellingen → Over de app staat onder *Rondleiding
+  opnieuw bekijken* de regel *Nieuw in 4.0 bekijken*; die opent dezelfde carrousel (met Account maken en Deel met
+  je team). De titel volgt `WhatsNew.title`, dus bij een volgende versie verandert hij vanzelf.
+
 ## 4.0 build 2 (10 november 2026: TestFlight Squashteam beschikbaar, Play internal, alpha, Google Group; account-server met avatars uitgerold; website gepubliceerd)
 
 - **Competitiebadges Teamspeler en Matchwinnaar (4.0, T7; keuze Gerd-Jan, 10 november 2026):** nieuwe

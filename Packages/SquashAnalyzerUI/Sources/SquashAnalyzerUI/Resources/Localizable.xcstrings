@@ -14220,6 +14220,24 @@
           }
         }
       }
+    },
+    "bekijken": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bekijken"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

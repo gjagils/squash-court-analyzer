@@ -45,8 +45,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
     een partij begint, als een partij beslist is en bij de uitslag. Uit te zetten in Instellingen.*
   - Releasenote (en): *Taking part in a live team match? You now get a notification when a teammate's match
     starts, when a match is decided and at the final result. You can turn it off in Settings.*
-  - Nog te doen: testen op echte toestellen (APNs-apparaattoken en FCM),
-    privacytekst (installatie-id en pushtoken per live teamwedstrijd, weg met de sessie), handleiding.
+  - Privacybeleid (nl/en, onderdeel *Meldingen van je teamwedstrijd*) en handleidingen (nl/en, iPhone en
+    Android: seizoen per speler en Meedoen bij Mijn team, Meldingen bij Competitie, de schakelaar bij
+    Instellingen, alles met "vanaf versie 4.0") bijgewerkt op 10 november.
+  - Nog te doen: testen op echte toestellen (APNs-apparaattoken en FCM).
 
 ## 4.0 build 1 (8 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 

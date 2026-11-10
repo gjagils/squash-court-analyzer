@@ -66,6 +66,7 @@ Overal waar nu "geen account" staat, moet dat kloppen met 4.0. Stand 8 november:
 | Waar | Wat | Stand |
 |---|---|---|
 | `website/privacy.html`, `website/en/privacy.html` | Onderdeel Spelersaccount: Firebase, D1 in de EU, wat er bewaard wordt, 90 dagen, verwijderen, 30 dagen back-up | Gepubliceerd 8 november |
+| `website/privacy.html`, `website/en/privacy.html` | Onderdeel Meldingen van je teamwedstrijd (T6): pushtoken, installatiecode, taal, weg met de teamwedstrijd | Bijgewerkt 10 november |
 | `website/account-verwijderen.html`, `website/en/delete-account.html` | Verwijderen buiten de app (Google eist een webadres) | Gepubliceerd 8 november |
 | `website/wedstrijd/` + app-link | Pagina voor de link van Stuur naar speler | Gepubliceerd 8 november |
 | Play Console, Gegevensveiligheid | E-mailadres, naam, gebruikers-ID's, app-activiteit (wedstrijden); account met e-mail en wachtwoord; URL account-verwijderen; verwijderen op verzoek | Ingestuurd via de API op 8 november (`Android/play/data-safety.csv`) |

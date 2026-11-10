@@ -8,7 +8,9 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 4.0 build 1)
+## Volgende build (na 4.0 build 2)
+
+## 4.0 build 2 (10 november 2026: TestFlight Squashteam beschikbaar, Play internal, alpha, Google Group; account-server met avatars uitgerold; website gepubliceerd)
 
 - **Competitiebadges Teamspeler en Matchwinnaar (4.0, T7; keuze Gerd-Jan, 10 november 2026):** nieuwe
   categorie *Competitie* in de badges. **Teamspeler** brons, zilver en goud voor 3, 8 en 15 gespeelde

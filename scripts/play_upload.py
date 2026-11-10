@@ -203,9 +203,10 @@ def main() -> None:
     parser.add_argument("--notes", help="file with the Dutch release notes (max 500 characters)")
     parser.add_argument("--name", help="release name (default: versionName from build.gradle.kts, e.g. 3.1 (4))")
     parser.add_argument("--tracks", default=",".join(TRACKS), help="comma-separated tracks (default: all test tracks)")
-    parser.add_argument("--skip-device-test", action="store_true", help="upload without a passed scripts/android_devices.py release")
+    parser.add_argument("--skip-device-test", action="store_true", help="production without a passed scripts/android_devices.py release")
     args = parser.parse_args()
-    if not (args.check or args.production or args.production_draft):
+    # The device test is for production only (Gerd-Jan, 10 November 2026), not for every test build
+    if args.production or args.production_draft:
         toestellen_gate.require(args.skip_device_test)
     token = access_token()
     if args.check:

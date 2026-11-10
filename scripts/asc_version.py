@@ -19,6 +19,7 @@ import time
 
 sys.path.insert(0, os.path.dirname(__file__))
 import asc_api as asc  # noqa: E402
+import toestellen_gate  # noqa: E402
 
 BUNDLE_ID = "com.squashanalyzer.app"
 LOCALES = ("nl-NL", "en-GB")
@@ -56,7 +57,11 @@ def main():
     ap.add_argument("--build", help="build number to attach, e.g. 7 (must be processed)")
     ap.add_argument("--submit", action="store_true", help="submit the version for App Review (release after approval)")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--skip-device-test", action="store_true", help="submit without a passed scripts/android_devices.py release")
     args = ap.parse_args()
+    # Production: only after a passed device test (Gerd-Jan, 10 November 2026)
+    if args.submit and not args.dry_run:
+        toestellen_gate.require(args.skip_device_test)
     folder = os.path.join(os.path.dirname(__file__), "..", "release-notes", f"store-{args.version}")
 
     app = app_id()

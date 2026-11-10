@@ -1,8 +1,9 @@
-"""De poort voor uploads: geen externe build zonder geslaagde toestellentest.
+"""De poort voor productie: geen release naar de stores zonder geslaagde toestellentest.
 
-`scripts/android_devices.py release` schrijft na een run zonder mislukte stappen
-het teken hieronder. `testflight_distribute.py` en `play_upload.py` controleren
-het. Het teken staat in de gedeelde git-map, zodat het voor elke worktree geldt.
+Sinds 10 november 2026 (Gerd-Jan) alleen vóór productie, niet meer bij elke
+testbuild. `scripts/android_devices.py release` schrijft na een run zonder
+mislukte stappen het teken hieronder. `play_upload.py --production(-draft)` en
+`asc_version.py --submit` controleren het. Het teken staat in de gedeelde git-map, zodat het voor elke worktree geldt.
 Daarna mag de versie nog omhoog en mogen documenten wijzigen; wijzigt de app zelf,
 dan moet de test opnieuw (afspraak Gerd-Jan, 7 november 2026; docs/toestellentest.md).
 """
@@ -74,5 +75,5 @@ def require(skip=False):
     if skip:
         print(f"LET OP: toestellentest overgeslagen ({reason}).", flush=True)
         return
-    sys.exit(f"Upload gestopt: {reason}.\nDraai eerst: scripts/android_devices.py release\n"
+    sys.exit(f"Productierelease gestopt: {reason}.\nDraai eerst: scripts/android_devices.py release\n"
              "Overslaan kan alleen op verzoek van Gerd-Jan: --skip-device-test")

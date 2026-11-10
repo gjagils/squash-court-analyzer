@@ -1,7 +1,7 @@
 # Toestellentest Android
 
-Vaste stap vóór elke build naar TestFlight of de Play-testtracks (besluit Gerd-Jan, 7 november 2026). De
-uploadscripts stoppen zonder geslaagde run. Niet bij elke PR.
+Vaste stap vóór elke **productierelease** (App Store en Google Play-productie). Sinds 10 november 2026 niet
+meer bij elke testbuild (Gerd-Jan; daarvoor vanaf 7 november wel). De productiescripts stoppen zonder geslaagde run.
 
 ```bash
 scripts/android_devices.py release

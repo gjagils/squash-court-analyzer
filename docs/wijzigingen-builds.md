@@ -47,7 +47,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
     starts, when a match is decided and at the final result. You can turn it off in Settings.*
   - Privacybeleid (nl/en, onderdeel *Meldingen van je teamwedstrijd*) en handleidingen (nl/en, iPhone en
     Android: seizoen per speler en Meedoen bij Mijn team, Meldingen bij Competitie, de schakelaar bij
-    Instellingen, alles met "vanaf versie 4.0") bijgewerkt op 10 november.
+    Instellingen, alles met "vanaf versie 4.0") bijgewerkt en gepubliceerd op 10 november.
   - Nog te doen: testen op echte toestellen (APNs-apparaattoken en FCM).
 
 ## 4.0 build 1 (8 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)

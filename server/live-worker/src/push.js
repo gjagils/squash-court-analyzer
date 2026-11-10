@@ -61,21 +61,52 @@ export function pushAvailability(env) {
 const IOS_TOKEN = /^[0-9a-f]{32,512}$/;
 const ANDROID_TOKEN = /^[A-Za-z0-9:_\-.]{1,4096}$/;
 
-/** The body of POST/DELETE /api/live/:id/followers as { platform, token, sandbox }, or null */
+/** A phone's install id (header X-Squash-Device, `device` of an alerts follower): letters, digits and dashes */
+const DEVICE_ID = /^[A-Za-z0-9-]{8,64}$/;
+
+/** The install id, or null when missing or not one */
+export function cleanDevice(value) {
+  return typeof value === 'string' && DEVICE_ID.test(value) ? value : null;
+}
+
+/**
+ * The body of POST/DELETE /api/live/:id/followers as { platform, token,
+ * sandbox, alerts, lang }, or null.
+ *
+ * 4.0 (T6): `mode: "alerts"` is a follower without a lock screen card, a
+ * player of the team match itself: iOS sends a regular APNs device token,
+ * Android its FCM token, and the phone only gets a notification when a
+ * teammate's partij starts or is decided and at the result (pushAlerts).
+ * `device` is the phone's install id; the partijen written with it (header
+ * X-Squash-Device) are its own and give it no alert. Apps before 4.0 never
+ * send `mode`, and their followers look exactly as before.
+ */
 export function validateFollower(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
   if (typeof input.token !== 'string') return null;
+  let follower = null;
   if (input.platform === 'ios') {
     const token = input.token.toLowerCase();
     if (!IOS_TOKEN.test(token)) return null;
-    return { platform: 'ios', token, sandbox: input.sandbox === true, alerts: input.alerts !== false, lang: cleanLang(input.lang) };
-  }
-  if (input.platform === 'android') {
+    follower = { platform: 'ios', token, sandbox: input.sandbox === true, alerts: input.alerts !== false, lang: cleanLang(input.lang) };
+  } else if (input.platform === 'android') {
     if (!ANDROID_TOKEN.test(input.token)) return null;
-    return { platform: 'android', token: input.token, sandbox: false, alerts: input.alerts !== false, lang: cleanLang(input.lang) };
+    follower = { platform: 'android', token: input.token, sandbox: false, alerts: input.alerts !== false, lang: cleanLang(input.lang) };
   }
-  return null;
+  if (!follower) return null;
+  if (input.mode === 'alerts') {
+    follower.mode = 'alerts';
+    follower.alerts = true;
+    const device = cleanDevice(input.device);
+    if (device) follower.device = device;
+  } else if (input.mode !== undefined && input.mode !== null && input.mode !== 'live') {
+    return null;
+  }
+  return follower;
 }
+
+/** A follower that only gets notifications (no lock screen card) */
+export const isAlertFollower = (follower) => Boolean(follower) && follower.mode === 'alerts';
 
 // ---- JWTs -----------------------------------------------------------------
 
@@ -179,11 +210,11 @@ export function clearPushTokenCaches() {
 const ALERT_WORDS = {
   nl: {
     wins: 'wint', result: 'Uitslag', gameFor: 'voor', draw: 'gelijkspel', partijen: 'partijen', done: 'klaar',
-    retired: 'opgave', walkover: 'walkover',
+    retired: 'opgave', walkover: 'walkover', started: 'begonnen',
   },
   en: {
     wins: 'wins', result: 'Result', gameFor: 'to', draw: 'draw', partijen: 'matches', done: 'done',
-    retired: 'retired', walkover: 'walkover',
+    retired: 'retired', walkover: 'walkover', started: 'started',
   },
 };
 
@@ -318,11 +349,33 @@ export function teamWinner(partijen) {
 }
 
 export function teamAlert(previous, team, partijen, lang = 'nl') {
+  for (const alert of teamAlerts(previous, team, partijen, lang)) {
+    if (!alert.started) return { title: alert.title, body: alert.body };
+  }
+  return null;
+}
+
+/** The name of a side of a partij, or "Delft 8 E2" without one */
+function partijName(partij, side, team, slot) {
+  const given = side === 1 ? partij.p1 : partij.p2;
+  return given || `${side === 1 ? team.home : team.away} E${slot}`;
+}
+
+/**
+ * Every notification a team match change can give, most important first, as
+ * [{ slot, title, body, started? }]: the result (slot 0) when all four are
+ * decided now; otherwise each partij decided now, then each partij that
+ * started now ("E2 begonnen: Paul – Jan", `started: true`: a slot without a
+ * partij got one that is not decided yet). `teamAlert` (lock screen
+ * followers) takes the first that is not a start; an alerts follower the
+ * first that is not about its own partij (alertForFollower).
+ */
+export function teamAlerts(previous, team, partijen, lang = 'nl') {
   const words = wordsFor(lang);
   const before = previous || {};
   const [home, away] = teamGames(partijen);
   if (teamDecided(partijen)) {
-    if (teamDecided(before)) return null;
+    if (teamDecided(before)) return [];
     const won = [0, 0];
     for (const slot of TEAM_SLOTS) {
       const winner = partijWinner(partijen[slot]);
@@ -333,21 +386,46 @@ export function teamAlert(previous, team, partijen, lang = 'nl') {
     const title = winner === 0
       ? `${words.result}: ${words.draw} ${home}–${away}`
       : `${words.result}: ${winner === 1 ? team.home : team.away} ${words.wins} ${winner === 1 ? home : away}–${winner === 1 ? away : home}`;
-    return { title, body: `${team.home} – ${team.away} · ${words.partijen} ${won[0]}–${won[1]}` };
+    return [{ slot: 0, title, body: `${team.home} – ${team.away} · ${words.partijen} ${won[0]}–${won[1]}` }];
   }
+  const alerts = [];
+  const score = `${team.home} ${home} – ${away} ${team.away}`;
   for (const slot of TEAM_SLOTS) {
     const partij = partijen[slot];
     if (!partijDecided(partij) || partijDecided(before[slot])) continue;
     const winner = partijWinner(partij);
     let line = words.done;
     if (winner) {
-      const name = (winner === 1 ? partij.p1 : partij.p2) || `${winner === 1 ? team.home : team.away} E${slot}`;
+      const name = partijName(partij, winner, team, slot);
       const [a, b] = partij.gamesWon;
       const how = partij.end === 'retired' ? `(${words.retired})` : partij.end === 'walkover' ? `(${words.walkover})`
         : `${Math.max(a, b)}–${Math.min(a, b)}`;
       line = `${name} ${words.wins} ${how}`;
     }
-    return { title: `E${slot}: ${line}`, body: `${team.home} ${home} – ${away} ${team.away}` };
+    alerts.push({ slot, title: `E${slot}: ${line}`, body: score });
+  }
+  for (const slot of TEAM_SLOTS) {
+    const partij = partijen[slot];
+    if (!partij || before[slot] || partijDecided(partij)) continue;
+    alerts.push({
+      slot, started: true,
+      title: `E${slot} ${words.started}: ${partijName(partij, 1, team, slot)} – ${partijName(partij, 2, team, slot)}`,
+      body: score,
+    });
+  }
+  return alerts;
+}
+
+/**
+ * The notification for an alerts follower: the first of `alerts` (from
+ * teamAlerts) that is not about a partij this phone wrote (`writers`: slot →
+ * install ids), or null. The result is for everyone.
+ */
+export function alertForFollower(follower, alerts, writers = {}) {
+  for (const alert of alerts) {
+    const own = Boolean(alert.slot) && Boolean(follower.device) && Array.isArray(writers[alert.slot])
+      && writers[alert.slot].includes(follower.device);
+    if (!own) return alert;
   }
   return null;
 }
@@ -389,20 +467,45 @@ export function fcmPayload(token, id, server, snapshot, event, alert = null, kin
   };
 }
 
+/**
+ * The APNs body of a plain notification (alerts follower): the alert, and
+ * which team match and partij it is about (the open app does not show a
+ * start or result of the partij it is scoring itself).
+ */
+export function apnsAlertPayload(alert, id, slot) {
+  return {
+    aps: { alert: { title: alert.title, body: alert.body }, sound: 'default', 'thread-id': `team-${id}` },
+    kind: 'team', id, slot,
+  };
+}
+
+/** The FCM body for an alerts follower: a data message with only the alert (kind "alert") */
+export function fcmAlertPayload(token, id, server, alert, slot) {
+  return {
+    message: {
+      token,
+      android: { priority: 'high', ttl: '600s' },
+      data: { kind: 'alert', id, server, slot: String(slot), alertTitle: alert.title, alertBody: alert.body },
+    },
+  };
+}
+
 // ---- Sending --------------------------------------------------------------
 
 /** One APNs push: { result: "ok", "dead" (forget this token) or "error", detail for the log } */
-async function sendApns(settings, follower, payload, nowMs) {
+async function sendApns(settings, follower, payload, nowMs, plain = false) {
   const jwt = await apnsJwt(settings);
   const host = follower.sandbox ? APNS_SANDBOX : APNS_PRODUCTION;
+  // A Live Activity update is stale after a minute; a plain notification
+  // (alerts follower) may wait ten minutes for a phone that is offline
   const response = await pushDeps.fetch(`${host}/3/device/${follower.token}`, {
     method: 'POST',
     headers: {
       authorization: `bearer ${jwt}`,
-      'apns-push-type': 'liveactivity',
-      'apns-topic': `${settings.bundleId}.push-type.liveactivity`,
+      'apns-push-type': plain ? 'alert' : 'liveactivity',
+      'apns-topic': plain ? settings.bundleId : `${settings.bundleId}.push-type.liveactivity`,
       'apns-priority': '10',
-      'apns-expiration': String(Math.floor(nowMs / 1000) + 60),
+      'apns-expiration': String(Math.floor(nowMs / 1000) + (plain ? 600 : 60)),
       'content-type': 'application/json',
     },
     body: JSON.stringify(payload),
@@ -419,11 +522,15 @@ async function sendApns(settings, follower, payload, nowMs) {
 
 /** One FCM push: { result, detail } as sendApns */
 async function sendFcm(account, follower, id, server, snapshot, event, alert, kind) {
+  return sendFcmBody(account, fcmPayload(follower.token, id, server, snapshot, event, alert, kind));
+}
+
+async function sendFcmBody(account, payload) {
   const accessToken = await fcmAccessToken(account);
   const response = await pushDeps.fetch(`https://fcm.googleapis.com/v1/projects/${account.project_id}/messages:send`, {
     method: 'POST',
     headers: { authorization: `Bearer ${accessToken}`, 'content-type': 'application/json' },
-    body: JSON.stringify(fcmPayload(follower.token, id, server, snapshot, event, alert, kind)),
+    body: JSON.stringify(payload),
   });
   if (response.ok) return { result: 'ok', detail: 'fcm 200' };
   const body = await response.json().catch(() => null);
@@ -475,7 +582,9 @@ async function eachLimited(items, limit, task) {
  * `alert`: see alertIn. A follower gets it in the `lang` it registered with
  * (Dutch when it has none).
  */
-export async function pushToFollowers(env, { id, server, snapshot, event, followers, alert = null, kind = 'live', finished }) {
+export async function pushToFollowers(env, job) {
+  if (job.mode === 'alerts') return pushAlerts(env, job);
+  const { id, server, snapshot, event, followers, alert = null, kind = 'live', finished } = job;
   const apns = apnsSettings(env);
   const fcm = fcmServiceAccount(env);
   const nowMs = pushDeps.now();
@@ -506,5 +615,36 @@ export async function pushToFollowers(env, { id, server, snapshot, event, follow
     if (outcome.result === 'dead') dead.push(follower);
   });
   console.log('push', kind, event, JSON.stringify(answers), 'forgotten', dead.length);
+  return dead;
+}
+
+/**
+ * Plain notifications to alerts followers (4.0, T6): `items` is
+ * [{ follower, alert }] with `alert` { slot, title, body } already in the
+ * follower's language. Returns the followers whose token is dead, as
+ * pushToFollowers does.
+ */
+export async function pushAlerts(env, { id, server, items }) {
+  const apns = apnsSettings(env);
+  const fcm = fcmServiceAccount(env);
+  const nowMs = pushDeps.now();
+  const dead = [];
+  const answers = {};
+  await eachLimited(items, PUSH_CONCURRENCY, async ({ follower, alert }) => {
+    let outcome = { result: 'skip', detail: `${follower.platform} off` };
+    try {
+      if (follower.platform === 'ios' && apns) {
+        outcome = await sendApns(apns, follower, apnsAlertPayload(alert, id, alert.slot), nowMs, true);
+      } else if (follower.platform === 'android' && fcm) {
+        outcome = await sendFcmBody(fcm, fcmAlertPayload(follower.token, id, server, alert, alert.slot));
+      }
+    } catch (error) {
+      console.error(`${follower.platform} alert error`, error && error.message);
+      outcome = { result: 'error', detail: `${follower.platform} exception` };
+    }
+    answers[outcome.detail] = (answers[outcome.detail] || 0) + 1;
+    if (outcome.result === 'dead') dead.push(follower);
+  });
+  console.log('push', 'alerts', JSON.stringify(answers), 'forgotten', dead.length);
   return dead;
 }

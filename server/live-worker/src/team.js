@@ -16,14 +16,19 @@
 // ("photo:<slot>:1" / ":2"), with flags next to them so a state does not read
 // them. Followers (lock screen, storage in ViewerSession) get the compact team
 // stand after every change, an alert when a partij is decided and the result
-// when all four are (push.js), and the end once.
+// when all four are (push.js), and the end once. Alerts followers (4.0, the
+// players themselves) only get a notification when a partij starts or is
+// decided and at the result, never about a partij their phone wrote
+// (`slotWriters`: per slot the install ids from X-Squash-Device).
 
 import { ViewerSession, sameKey } from './viewer-session.js';
-import { teamAlert, teamContentState, teamDecided } from './push.js';
-import { LANGS } from './validate.js';
+import { alertForFollower, isAlertFollower, teamAlert, teamAlerts, teamContentState, teamDecided } from './push.js';
+import { cleanLang, LANGS } from './validate.js';
 import { clubWalls, wallFor, wallsOfTeam } from './club.js';
 
 const SLOT_KEYS = ['1', '2', '3', '4'];
+/** Install ids kept per slot as its writers (alerts followers, 4.0) */
+const MAX_WRITERS_PER_SLOT = 6;
 const photoKey = (slot, index) => `photo:${slot}:${index}`;
 
 export class TeamSession extends ViewerSession {
@@ -175,20 +180,33 @@ export class TeamSession extends ViewerSession {
     return 204;
   }
 
-  /** One slot (1-4) gets this partij, or is cleared (`{ empty: true }`, its photos too) */
-  async setPartij(given, slot, partij) {
+  /**
+   * One slot (1-4) gets this partij, or is cleared (`{ empty: true }`, its
+   * photos too). `device` (header X-Squash-Device, 4.0) is the install id of
+   * the phone that wrote it: that phone gets no alert about this partij.
+   */
+  async setPartij(given, slot, partij, device = null) {
     if (!(await this.ctx.storage.get('key'))) return 404;
     if (!(await this.maySlot(given, slot))) return 401;
-    const [stored, team] = await Promise.all([this.ctx.storage.get('partijen'), this.ctx.storage.get('team')]);
+    const [stored, team, storedWriters] = await Promise.all([
+      this.ctx.storage.get('partijen'), this.ctx.storage.get('team'), this.ctx.storage.get('slotWriters'),
+    ]);
     const previous = stored || {};
     const partijen = { ...previous };
+    const writers = { ...(storedWriters || {}) };
     if (partij.empty) {
       delete partijen[slot];
+      delete writers[slot];
       await this.clearPhotos(slot);
     } else {
       partijen[slot] = partij;
+      if (device) {
+        // A few phones per slot at most (a scorer, a correction by hand); the newest kept
+        const list = (writers[slot] || []).filter((other) => other !== device);
+        writers[slot] = [...list, device].slice(-MAX_WRITERS_PER_SLOT);
+      }
     }
-    await this.touch({ partijen });
+    await this.touch({ partijen, slotWriters: writers });
     await this.pushUpdate(team, partijen, previous);
     return 204;
   }
@@ -234,7 +252,10 @@ export class TeamSession extends ViewerSession {
    * The alert: a partij decided now, or the result.
    */
   async pushUpdate(team, partijen, previous) {
-    const followers = await this.followers();
+    const all = await this.followers();
+    if (all.length === 0) return;
+    await this.pushAlertsUpdate(all.filter(isAlertFollower), team, partijen, previous);
+    const followers = all.filter((follower) => !isAlertFollower(follower));
     if (followers.length === 0) return;
     const done = teamDecided(partijen);
     const event = await this.followerEvent(done);
@@ -243,6 +264,27 @@ export class TeamSession extends ViewerSession {
     // The alert in every language; each follower gets its own
     const alert = Object.fromEntries(LANGS.map((lang) => [lang, teamAlert(previous, team, partijen, lang)]));
     this.schedulePush(await this.pushJob(event, followers, content, alert.nl ? alert : null));
+  }
+
+  /**
+   * 4.0 (T6): the players of the team match follow it with plain
+   * notifications: a partij started, a partij decided, the result; never per
+   * rally or game. Each gets the first that is not about a partij its own
+   * phone wrote, in its language; no push when there is none.
+   */
+  async pushAlertsUpdate(followers, team, partijen, previous) {
+    if (followers.length === 0) return;
+    const writers = (await this.ctx.storage.get('slotWriters')) || {};
+    const alerts = Object.fromEntries(LANGS.map((lang) => [lang, teamAlerts(previous, team, partijen, lang)]));
+    if (alerts.nl.length === 0) return;
+    const items = [];
+    for (const follower of followers) {
+      const alert = alertForFollower(follower, alerts[cleanLang(follower.lang)] || alerts.nl, writers);
+      if (alert) items.push({ follower, alert });
+    }
+    if (items.length === 0) return;
+    const [server, id] = await Promise.all([this.ctx.storage.get('pushServer'), this.ctx.storage.get('id')]);
+    this.schedulePush({ mode: 'alerts', id: this.id || id || '', server: server || '', items });
   }
 
   /** The stand for the end the followers get when the session goes (Live stoppen, idle): gone in a minute */

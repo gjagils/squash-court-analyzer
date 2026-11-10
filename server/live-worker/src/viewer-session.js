@@ -14,14 +14,20 @@
 
 import { DurableObject } from 'cloudflare:workers';
 import { readConfig } from './config.js';
-import { pushToFollowers } from './push.js';
+import { isAlertFollower, pushToFollowers } from './push.js';
 
 export const encoder = new TextEncoder();
 
 const FOLLOWER_PREFIX = 'follower:';
 
+/**
+ * The storage key of a follower. An alerts follower (4.0, `mode: "alerts"`)
+ * has its own: on Android the same FCM token may also follow the team match
+ * on the lock screen, and forgetting one must not forget the other.
+ */
 async function followerKey(follower) {
-  const digest = await crypto.subtle.digest('SHA-256', encoder.encode(`${follower.platform}\n${follower.token}`));
+  const mode = isAlertFollower(follower) ? '\nalerts' : '';
+  const digest = await crypto.subtle.digest('SHA-256', encoder.encode(`${follower.platform}\n${follower.token}${mode}`));
   return FOLLOWER_PREFIX + Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
@@ -137,6 +143,11 @@ export class ViewerSession extends DurableObject {
     return Array.from((await this.ctx.storage.list({ prefix: FOLLOWER_PREFIX })).values());
   }
 
+  /** The followers with a card on the lock screen (all but the alerts followers of 4.0) */
+  async lockScreenFollowers() {
+    return (await this.followers()).filter((follower) => !isAlertFollower(follower));
+  }
+
   /**
    * The event for the followers after a change: "end" once when the session is
    * done now, null when that end went out already, else "update" (and a later
@@ -163,7 +174,7 @@ export class ViewerSession extends DurableObject {
 
   /** The end for the followers when the session goes, unless it went out already */
   async finalPushJob() {
-    const [followers, endPushed] = await Promise.all([this.followers(), this.ctx.storage.get('endPushed')]);
+    const [followers, endPushed] = await Promise.all([this.lockScreenFollowers(), this.ctx.storage.get('endPushed')]);
     if (followers.length === 0 || endPushed) return null;
     const content = await this.pushContent();
     if (!content || !content.state) return null;

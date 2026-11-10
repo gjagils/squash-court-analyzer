@@ -170,6 +170,19 @@ Teamwedstrijd op het vergrendelscherm (zelfde branch, nog niet in productie):
 
 - `POST` / `DELETE /api/team/:id/followers`: dezelfde body en antwoorden als bij
   een losse wedstrijd (201, 204, 400, 404, 429, 503).
+- **Alleen meldingen (4.0, T6)**: met `"mode": "alerts"` en `"device": <installatie-id>`
+  in die body is de volger een speler van de teamwedstrijd zelf, zonder kaart op het
+  vergrendelscherm. iOS stuurt dan een gewoon APNs-apparaattoken (push-type `alert`,
+  topic = bundle-id), Android zijn FCM-token (databericht `kind: "alert"` met alleen
+  `alertTitle`/`alertBody`, `id`, `server`, `slot`). Zo'n volger krijgt alleen een
+  melding bij een partij die begint ("E2 begonnen: Paul – Jan" / "E2 started: …"),
+  een partij die beslist is en de uitslag; nooit per rally of game, en geen eindbericht.
+  Een `PUT /api/team/:id/partij/:slot` met de kop `X-Squash-Device: <installatie-id>`
+  maakt dat toestel schrijver van die partij (tot 6 per slot; een geleegde partij
+  vergeet ze): het krijgt geen begin- of beslist-melding van die partij, wel de uitslag.
+  Een alerts-volger heeft een eigen opslagsleutel, dus hetzelfde Android-token kan ook
+  op het vergrendelscherm volgen; de `DELETE` stuurt dezelfde `mode` mee. Een losse
+  wedstrijd weigert `mode: "alerts"` (400). Telt als `follower-team`.
 - `PUT /api/team/:id/partij/:slot/photos` met `{ "p1": thuis, "p2": uit }`
   (base64-JPEG van max 24 KB, of `null`; een ongeldige foto telt als geen foto),
   Bearer uitnodigings- of eigenaarssleutel: 204, 400, 401, 404 (ook bij slot

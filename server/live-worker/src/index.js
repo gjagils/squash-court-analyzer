@@ -15,7 +15,7 @@ import { readConfig } from './config.js';
 import { previewLines } from './preview.js';
 import { clubWalls, wallFor } from './club.js';
 import { sameKey } from './viewer-session.js';
-import { partijDecided, partijWinner, pushAvailability, validateFollower } from './push.js';
+import { cleanDevice, isAlertFollower, partijDecided, partijWinner, pushAvailability, validateFollower } from './push.js';
 import { cleanParts, clubName, isSampleMatch, isTestTeam, totalsOf } from './stats.js';
 
 export { LiveSession } from './session.js';
@@ -127,11 +127,16 @@ async function teamPage(request, env, config, id, state, lang = 'nl') {
 /**
  * POST / DELETE .../followers of a live or team match: { platform, token,
  * sandbox?, alerts?, lang? } (lang "nl" or "en" for the alert texts, Dutch when missing). 400 invalid, 503 platform off (POST), 404 unknown,
- * 429 full, 201 registered, 204 forgotten.
+ * 429 full, 201 registered, 204 forgotten. A team match also takes
+ * `mode: "alerts"` with `device` (4.0: notifications only, see push.js); the
+ * DELETE of such a follower sends the same mode. Counted as follower-team.
  */
 async function handleFollowers(request, env, config, session, unknownText, count, kind) {
   const follower = validateFollower(await readJson(request, FOLLOWER_BODY_BYTES));
-  if (!follower) return send(400, { error: 'Ongeldige pushregistratie' });
+  // Alerts followers (4.0) are the players of a team match; a single match has none
+  if (!follower || (isAlertFollower(follower) && kind !== 'follower-team')) {
+    return send(400, { error: 'Ongeldige pushregistratie' });
+  }
   if (request.method === 'DELETE') {
     const status = await session.removeFollower(follower);
     return status === 404 ? send(404, { error: unknownText }) : send(204);
@@ -444,7 +449,8 @@ async function handleTeam(request, env, config, parts, limiter, teamFor, count) 
     if (!SLOTS.includes(slot)) return send(404, 'Not found');
     const partij = validatePartij(await readJson(request));
     if (!partij) return send(400, { error: 'Ongeldige partij' });
-    return answer(await session.setPartij(key, slot, partij));
+    // 4.0: the writing phone's install id; it gets no alert about its own partij
+    return answer(await session.setPartij(key, slot, partij, cleanDevice(request.headers.get('x-squash-device'))));
   }
   // PUT /api/team/:id/referee: which partijen the opponent referees (owner key)
   if (request.method === 'PUT' && parts[3] === 'referee' && parts.length === 4) {

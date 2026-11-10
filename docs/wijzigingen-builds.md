@@ -10,7 +10,24 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 1)
 
-(nog niets)
+- **Melding als een teamgenoot een partij speelt (T6, keuze Gerd-Jan 10 november 2026: "Vanzelf volgen bij
+  meedoen")**, branch `worktree-agent-acd8c2c3ca78fb9fa`, nog niet op `main` en de Worker niet uitgerold.
+  Wie een live teamwedstrijd start of meedoet (Live delen, zichtbaar voor mijn team, uitnodiging, aanbod in
+  Competitie) volgt hem vanzelf met gewone meldingen, zonder kaart op het vergrendelscherm: "E2 begonnen:
+  Paul – Jan" als een partij van een teamgenoot begint, "E2: Paul wint 3–1" als een partij beslist is, en de
+  einduitslag. Nooit per rally of game en niet over je eigen partij (de server herkent het toestel aan een
+  willekeurige installatie-id bij elke schrijfactie; de open app verbergt ook een melding over de partij die
+  je zelf scoort of invulde). Toestemming voor meldingen wordt één keer gevraagd, bij de eerste
+  teamwedstrijd. Uit te zetten in Instellingen → Live meekijken → **Meldingen van je teamwedstrijd**
+  (standaard aan). Live-Worker: volger met `mode: "alerts"` (achterwaarts compatibel; oudere apps sturen het
+  nooit), APNs push-type `alert` / FCM `kind: "alert"`. Code: `TeamAlertFollow` (Core),
+  `TeamAlertNotifications.swift` (iOS), `AndroidTeamAlertPlatform.kt`.
+  - Releasenote (nl): *Doe je mee aan een live teamwedstrijd, dan krijg je een melding als een teamgenoot aan
+    een partij begint, als een partij beslist is en bij de uitslag. Uit te zetten in Instellingen.*
+  - Releasenote (en): *Taking part in a live team match? You now get a notification when a teammate's match
+    starts, when a match is decided and at the final result. You can turn it off in Settings.*
+  - Nog te doen: Worker uitrollen (push naar `main`), testen op echte toestellen (APNs-apparaattoken en FCM),
+    privacytekst (installatie-id en pushtoken per live teamwedstrijd, weg met de sessie), handleiding.
 
 ## 4.0 build 1 (8 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 

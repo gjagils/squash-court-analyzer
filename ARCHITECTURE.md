@@ -160,6 +160,18 @@ invitation key, referee key; gone after the day after the match day). `TeamFindi
 instead of making a second one, offers running ones in Competitie, and joins the opponent's with the referee key
 (`TeamMatch.refereeSlots`, `mayWriteLive`: only those partijen go up from that phone). Neither server checks that
 an account really plays in the team it names (the team key comes from Mijn team).
+**4.0, T6: notifications for the players** (`TeamAlertFollow` in Core): every live team match on the phone
+(`isProbablyLive`) is registered as an "alerts" follower (`POST /api/team/:id/followers` with `mode: "alerts"`,
+the push token and `device`, the random install id of `LiveDevice`); a match no longer live here (left,
+stopped, deleted, a day old) is forgotten. It syncs after every save/delete of the team match stores (iOS
+`BackgroundTeamMatchStore`, Android's Kotlin store) and at the end of `TeamLiveSync.pull`; the permission is
+asked once, at the first auto-follow. iOS sends a regular APNs device token (`IOSTeamAlertPlatform`,
+`SquashAppDelegate`; push type `alert`), Android its FCM token (`AndroidTeamAlertPlatform`; data message
+`kind: "alert"` shown on the alerts channel without the ongoing notification). The Worker sends such a follower
+only "E2 begonnen: …", "E2: Paul wint 3–1" and the result, never per rally; every partij write carries
+`X-Squash-Device`, and a phone gets no start/decided alert of a slot it wrote (`slotWriters`). The open app
+also hides an alert about a slot it scores (`TeamLive.boundSlots`) or filled in (`shouldShow`). Setting
+`teamMatchAlerts` (Instellingen → Live meekijken), on by default.
 Later: SBN comparison, badge category Teamspeler.
 
 ## Android port

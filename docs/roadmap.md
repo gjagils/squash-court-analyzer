@@ -6,14 +6,14 @@ Gekozen door Gerd-Jan op 31 oktober 2026; de twee meldingen zijn op 4 november 2
 [buildbacklog](wijzigingen-builds.md#backlog). Hoe 3.x en 4.0 naast elkaar
 lopen staat in het [releaseplan](releaseplan-3x-4.0.md).
 
-## 3.1 (nu in test, er komt een build 3)
+## 3.1 (in de stores sinds 2 november 2026, opgevolgd door 3.2)
 
 | Punt | Bron |
 |---|---|
 | Vorige uitslag en stand van de tegenstander vanuit het programma | T5 — **gebouwd 31 oktober** |
 | Trainingsmodus: oefenpartij zonder badges en zonder telling in het profiel | C8 — **gebouwd 31 oktober** |
 
-## 3.2 (alles gebouwd; build 3 nog te uploaden)
+## 3.2 (in de stores: build 4, App Store sinds 8 november 2026)
 
 | Punt | Bron |
 |---|---|

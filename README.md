@@ -40,8 +40,8 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest
 ```
 
-Stand 23 oktober 2026: **iOS 3.0** staat in de App Store (3.0 build 6, geüpload 22
-oktober). **Android 3.0 build 6** staat in de Play-testtracks; de productierelease op
-Google Play is nog niet gedaan. Nummering: `docs/opleveren-en-hosting.md`; wat er per
+Stand 10 november 2026: **3.2 (build 4)** staat in de App Store (sinds 8 november) en in
+Google Play. **4.0 build 1** (met het spelersaccount) staat sinds 8 november in TestFlight
+en de Play-testtracks. Nummering: `docs/opleveren-en-hosting.md`; wat er per
 build veranderde: `docs/wijzigingen-builds.md`.
 Een nieuwe app-upload gebeurt alleen op expliciete opdracht.

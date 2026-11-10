@@ -6,7 +6,11 @@ Waar we staan, zodat een nieuwe sessie zonder voorkennis verder kan. Achtergrond
 
 ## De stand
 
-Alles staat op `main`, achter `Features.shared.playerAccount` (standaard uit).
+Alles staat op `main`, achter `Features.shared.playerAccount`. Die stond op 4 november
+standaard uit; sinds 4.0 build 1 (8 november 2026) staat hij in de appbuilds standaard aan
+en praat de app met de echte accountserver (zie `docs/wijzigingen-builds.md`). De tabel en
+"Eerst doen" hieronder zijn de stand van 4 november; wat er op de echte server nog getest
+moet worden staat in het [testdraaiboek](testplan-4.0-koppelen.md).
 
 | Onderdeel | Stand |
 |---|---|

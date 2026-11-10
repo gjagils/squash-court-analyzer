@@ -1,4 +1,4 @@
-# Opleveren en hosting (stand 6 oktober 2026)
+# Opleveren en hosting (opzet van 6 oktober 2026; stand van de releases bijgewerkt op 10 november 2026)
 
 Dit is het document voor iedereen (mens, Claude Code, Codex) die iets moet
 bouwen, testen, uitrollen of opleveren. Het is bijgewerkt na de verhuizing van
@@ -241,6 +241,11 @@ Met deze build stuurt de app voor het eerst een push-token naar de live-server
 en gaan er per teampartij foto's mee (`docs/plan-live-vergrendelscherm.md`).
 Wat Gerd-Jan met de hand moet doen, naast de volgorde hierboven:
 
+Stand 10 november 2026: deze lijst is geschiedenis. 3.0 build 4 is op 16 oktober geüpload en
+3.0, 3.1 en 3.2 staan sindsdien in de stores, met live volgen erin. De open vinkjes hieronder
+zijn op 10 november niet één voor één nagekeken in App Store Connect en de Play Console, behalve
+waar het erbij staat.
+
 - [x] **Productie-Worker**: de geheimen `APNS_KEY`, `APNS_KEY_ID`, `APNS_TEAM_ID`
       en `FCM_SERVICE_ACCOUNT` staan sinds 16 oktober 2026 op `squash-live-beta`
       (zie `server/live-worker/README.md`); `/api/push` geeft `{"ios":true,"android":true}`.
@@ -265,11 +270,11 @@ Wat Gerd-Jan met de hand moet doen, naast de volgorde hierboven:
       command line lukte dat op 16 oktober niet (zie "Nog open" in het plan):
       eenmaal in Xcode inloggen en een build voor de iPhone maken, of beide in
       het Developer-portaal aanmaken.
-- [ ] **Android-release**: `~/.android-keys/google-services.json` moet er zijn,
+- [x] **Android-release** (het bestand staat er, gezien op 10 november 2026): `~/.android-keys/google-services.json` moet er zijn,
       anders bouwt de app wel, maar zegt Volgen "Deze server kan de stand nog niet
       naar je telefoon sturen" (`FirebaseConfig.isAvailable` is dan false).
-- [ ] **Privacybeleid** (`website/privacy.html`, bijgewerkt op 16 oktober, nog
-      niet gepubliceerd) en de handleiding (sectie *Wedstrijd volgen*) publiceren
+- [x] **Privacybeleid** (`website/privacy.html`, bijgewerkt op 16 oktober; de
+      gepubliceerde pagina is op 10 november 2026 gelijk aan `main`) en de handleiding (sectie *Wedstrijd volgen*) publiceren
       met de `wrangler deploy` uit 1.
 - [ ] **Schermafbeeldingen voor de handleiding** (`website/handleiding/img/…`,
       414 × 900 jpg, staan in git): nog te maken, de sectie *Wedstrijd volgen*
@@ -291,19 +296,19 @@ GitHub-secrets.
 
 - **Volg-knop op iOS direct naar de app (3 november 2026):** zet `/volg` en `/volg/*` in de AASA zodra de build met
   de `/volg`-link een tijdje in de App Store staat, en publiceer de website. Reden en stand: `docs/bewuste-keuzes.md`.
-- **Feature freeze sinds 11 oktober 2026**: geen nieuwe features meer, alleen bugfixes, fouten en
-  afronding richting de productie-uitrol van 3.0 (besluit Gerd-Jan). Iets nieuws alleen op zijn
-  expliciete vraag; ideeën gaan op de backlog.
+- **De feature freeze van 11 oktober 2026 is voorbij** (hij gold tot de productie-uitrol van 3.0).
+  Nieuw werk gaat nu naar 4.0 (besluit Gerd-Jan, 7 november 2026; zie `docs/roadmap.md`).
 - Notities van Gerd-Jan van 21 oktober 2026 (namen aanpassen in een wedstrijd vóór de release;
   geavanceerde coachmodus en businessmodel na de release): `docs/backlog-2026-10-21.md`.
 - **Gebruikscijfers van live meekijken** (gebouwd 23 oktober 2026, zonder herleidbaarheid; zie
   `docs/voorstel-gebruikscijfers.md` en de README van de Worker): de Worker telt per dag; Gerd-Jan
   moet nog `npx wrangler secret put STATS_KEY` zetten om `/api/stats` te kunnen lezen. De app-kant
-  (veld `platform`) staat op de branch `claude/gebruikscijfers-app`, nog te testen op de Mac.
+  (veld `platform`) staat op `main` (`LiveShare.swift`, `LivePlatformTests`); de branch
+  `claude/gebruikscijfers-app` bevat dezelfde wijziging en is niet meer nodig (10 november 2026).
 - **Weekrapport per mail** (sinds 23 oktober 2026): elke zaterdag 07:40 een geplande taak die
   `scripts/weekly-stats.py` draait en het rapport via Cirrux naar info@squashanalyzer.com
   stuurt; zie `docs/weekrapport.md` voor de twee sleutels die Gerd-Jan nog moet zetten.
-- **3.0 staat live op iOS en Android** (stand 25 oktober 2026): App Store sinds 23 oktober,
+- **3.0 stond live op iOS en Android** (stand 25 oktober 2026; inmiddels 3.2, zie 4): App Store sinds 23 oktober,
   Google Play publiek (`com.squashanalyzer.android`, gecontroleerd op 25 oktober). De releasehomepage
   is op 25 oktober `website/index.html` geworden (de map `website/beta/` is weg), met werkende
   Play-knoppen op de NL- en EN-homepage; `testen.html` verwijst nu eerst naar de stores. De gesloten

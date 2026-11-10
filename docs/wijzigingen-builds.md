@@ -10,6 +10,18 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 2)
 
+- **Beginscherm variant 2 (Gerd-Jan, 10 november 2026):** de vier regels onder Scheidsrechter en Coach zijn één rij
+  icoonknoppen: *Wedstrijden*, *Spelers*, *Badges*. Met Mijn team open je Competitie via "Competitie ›" op de kaart;
+  zonder teamlink staat er een vierde knop *Competitie* (zeegroen met een stip bij een live teamwedstrijd). Scheelt
+  ongeveer 130 pt hoogte.
+- **Je foto linksboven (4.0):** linksboven, tegenover het tandwiel: je avatar (of het persoonsicoon zonder
+  account) opent Mijn account in een venster.
+- **Stel een vraag bij de handleiding (website):** bovenaan de vier handleidingen (nl/en, iPhone/Android) een vraagvak.
+  De website-Worker heeft sinds nu een klein script (`server/website-worker/src/`): `POST /api/vraag` kiest de passende
+  stukken handleiding en vraagt Workers AI (`llama-3.3-70b-instruct-fp8-fast`) om een kort antwoord met links. Vragen
+  worden niet bewaard of gelogd; hoogstens 10 per minuut per IP. Tests: `node --test server/website-worker/test/`.
+  Privacybeleid (nl/en) bijgewerkt.
+
 - **Nieuw in 4.0 bekijken (Gerd-Jan, 10 november 2026):** bij Instellingen → Over de app staat onder *Rondleiding
   opnieuw bekijken* de regel *Nieuw in 4.0 bekijken*; die opent dezelfde carrousel (met Account maken en Deel met
   je team). De titel volgt `WhatsNew.title`, dus bij een volgende versie verandert hij vanzelf.

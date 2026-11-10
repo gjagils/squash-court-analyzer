@@ -103,6 +103,7 @@ public struct SharedSettingsView: View {
     @AppStorage(AppUsage.enabledKey) private var usageCounting = true
     @AppStorage(LiveShare.photosKey) private var livePhotos = true
     @AppStorage(LiveFollow.alertsKey) private var liveAlerts = true
+    @AppStorage(TeamAlertFollow.enabledKey) private var teamAlerts = true
     @State private var draft = ""
     @State private var message: String?
     @State private var messageIsError = false
@@ -290,6 +291,19 @@ public struct SharedSettingsView: View {
             }
             .tint(SharedColors.accent)
             Text("Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag.", bundle: textBundle)
+                .font(SharedFonts.system(12))
+                .foregroundColor(SharedColors.textMuted)
+            Toggle(isOn: Binding(get: { teamAlerts }, set: { on in
+                teamAlerts = on
+                // 4.0, T6: (un)register the live team matches on this phone at once
+                Task { await TeamAlertFollow.shared.refresh() }
+            })) {
+                Text("Meldingen van je teamwedstrijd", bundle: textBundle)
+                    .font(SharedFonts.system(14))
+                    .foregroundColor(SharedColors.textPrimary)
+            }
+            .tint(SharedColors.accent)
+            Text("Doe je mee aan een live teamwedstrijd (zelf gestart of meegedaan), dan krijg je een melding als een teamgenoot aan een partij begint, als een partij beslist is en bij de einduitslag. Niet over je eigen partij.", bundle: textBundle)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
             Toggle(isOn: $usageCounting) {

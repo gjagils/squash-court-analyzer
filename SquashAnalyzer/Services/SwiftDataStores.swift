@@ -41,8 +41,18 @@ final class BackgroundTeamMatchStore: TeamMatchStore {
     }
 
     func loadAll() async throws -> [TeamMatch] { try await io.loadAll() }
-    func save(_ match: TeamMatch) async throws { try await io.save(match) }
-    func delete(id: UUID) async throws { try await io.delete(id: id) }
+
+    /// Every save and delete lets `TeamAlertFollow` follow (or forget) the live
+    /// team matches: started, joined, left, stopped or deleted (4.0, T6)
+    func save(_ match: TeamMatch) async throws {
+        try await io.save(match)
+        TeamAlertFollow.shared.matchesChanged()
+    }
+
+    func delete(id: UUID) async throws {
+        try await io.delete(id: id)
+        TeamAlertFollow.shared.matchesChanged()
+    }
 }
 
 /// The system share sheet from anywhere (the shared screens give a text or a

@@ -5797,6 +5797,42 @@
         }
       }
     },
+    "Meldingen van je teamwedstrijd": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications from your team match"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen van je teamwedstrijd"
+          }
+        }
+      }
+    },
+    "Doe je mee aan een live teamwedstrijd (zelf gestart of meegedaan), dan krijg je een melding als een teamgenoot aan een partij begint, als een partij beslist is en bij de einduitslag. Niet over je eigen partij.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When you take part in a live team match (started or joined), you get a notification when a teammate's match starts, when a match is decided and at the final result. Not about your own match."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doe je mee aan een live teamwedstrijd (zelf gestart of meegedaan), dan krijg je een melding als een teamgenoot aan een partij begint, als een partij beslist is en bij de einduitslag. Niet over je eigen partij."
+          }
+        }
+      }
+    },
     "Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.": {
       "extractionState": "manual",
       "generatesSymbol": false,

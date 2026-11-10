@@ -27,8 +27,16 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 - **Meedoen vanaf het beginscherm (4.0, teamwedstrijd vinden):** heeft een teamgenoot (of de tegenstander) een
   teamwedstrijd aangemaakt voor vandaag of morgen, dan toont de Mijn team-kaart in plaats van de volgende wedstrijd
   "Kees heeft een teamwedstrijd aangemaakt · Thuis · Bevo 3" met *Meedoen*. Een tik doet mee en opent de
-  teamwedstrijd. Alleen met een account; de kaart vraagt het om de vijf minuten en alleen rond een wedstrijd uit het
-  programma. Nog niet op een telefoon geprobeerd.
+  teamwedstrijd. Alleen met een account; de kaart vraagt het **elke minuut** (was vijf minuten; Gerd-Jan zag de
+  teamwedstrijd van een teamgenoot op 10 november eerder onder Competitie dan op het beginscherm) en alleen rond
+  een wedstrijd uit het programma.
+- **Wedstrijdverzoeken op het beginscherm (4.0; keuze Gerd-Jan, 10 november 2026, variant B):** wachten er
+  wedstrijden in het Postvak (of teamwedstrijden onder *Ben jij X?*), dan staat onder de tegels Scheidsrechter en
+  Coach een zeegroen blok met een brievenbus: "WEDSTRIJDVERZOEKEN · 2 wedstrijden wachten op je · Van Kristian
+  Koster, 10 nov". Een tik opent het Postvak (Gebruiken, Niet gebruiken, Blokkeren, Dat ben ik). Wacht er niets,
+  dan is het blok weg. Het beginscherm vraagt het Postvak meteen en daarna elke vijf minuten op. Het Postvak zelf
+  is nu een los onderdeel (`SharedAccountInbox`), ook gebruikt in Mijn account; het brievenbus-icoon is getekend
+  in `OutlineIcons` (`mailbox`), naar Gerd-Jans schets.
 - **Melding als een teamgenoot een partij speelt (T6, keuze Gerd-Jan 10 november 2026: "Vanzelf volgen bij
   meedoen")**, op `main` sinds 10 november 2026 (de live-Worker rolt mee uit met die push).
   Wie een live teamwedstrijd start of meedoet (Live delen, zichtbaar voor mijn team, uitnodiging, aanbod in

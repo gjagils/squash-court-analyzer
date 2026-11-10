@@ -230,9 +230,11 @@ public struct SharedLeagueTeamCard: View {
         .task(id: "\(snapshot?.source.absoluteString ?? "")-\(matchesPaused)-\(matchesRevision)") { await followOffers() }
     }
 
-    /// Looks for a team match to join every five minutes, only with an account
-    /// and only around a match of the programme (TeamFinding.offers asks the
-    /// server for today and tomorrow, so most of the week it asks nothing)
+    /// Looks for a team match to join every minute, only with an account and
+    /// only around a match of the programme (TeamFinding.offers asks the
+    /// server for today and tomorrow, so most of the week it asks nothing).
+    /// Every minute since 10 November 2026: with five minutes a teammate's new
+    /// team match was found sooner under Competitie than on the home screen.
     private func followOffers() async {
         guard let store = teamMatches, !matchesPaused, let team = snapshot else { return }
         let soon = team.fixtures.contains { fixture in abs(fixture.date.timeIntervalSinceNow) < 36.0 * 3600.0 }
@@ -248,7 +250,7 @@ public struct SharedLeagueTeamCard: View {
             } else if offer != nil {
                 offer = nil
             }
-            try? await Task.sleep(nanoseconds: 300_000_000_000)
+            try? await Task.sleep(nanoseconds: 60_000_000_000)
         }
     }
 

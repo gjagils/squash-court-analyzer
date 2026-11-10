@@ -108,6 +108,10 @@ public struct HomeMenuTiles: View {
                 HomeMenuTile(title: loc("Scheidsrechter"), subtitle: loc("Start met fluiten"), icon: .referee, action: onReferee)
                 HomeMenuTile(title: loc("Coach"), subtitle: loc("Start met coachen"), icon: .coach, action: onCoach)
             }
+            // 4.0: only while matches wait for an answer (option B, Gerd-Jan, 10 November 2026)
+            if HomeInboxBar.waiting > 0 {
+                HomeInboxBar()
+            }
             VStack(spacing: 0) {
                 menuRow(loc("Afgeronde wedstrijden"), icon: .history, action: onHistory)
                 Divider().overlay(SharedColors.line(0.13))
@@ -121,6 +125,7 @@ public struct HomeMenuTiles: View {
             }
         }
         .padding(.horizontal, 24)
+        .task { await HomeInboxBar.follow() }
     }
 
     /// `live`: the text of a sea-green LIVE pill on the right ("LIVE", "2 LIVE");
@@ -448,6 +453,111 @@ private struct HomeMenuTile: View {
 /// The home tiles' icons, outlines like the sticker: a clipboard (coach), a
 /// whistle (referee), history, a group (players), a medal (badges) and a cup
 /// (competition). The clipboard also marks the coach card, everywhere.
+/// Wedstrijdverzoeken (4.0): under the Scheidsrechter and Coach tiles while
+/// matches wait in the Postvak, or team matches wait for a name ("Ben jij
+/// X?"). A tap opens the Postvak itself; with nothing waiting the block is
+/// gone. Before, the Postvak was only in Instellingen → Mijn account, where
+/// nobody looks by themselves (Gerd-Jan's test, 10 November 2026).
+struct HomeInboxBar: View {
+    @State private var showing = false
+
+    /// Matches that wait for an answer of the signed-in player; 0 without an account
+    static var waiting: Int {
+        let account = PlayerAccount.shared
+        guard Features.shared.playerAccount, account.isSignedIn, account.profile != nil else { return 0 }
+        return account.inbox.count + account.teamInbox.count
+    }
+
+    /// Asks the server for the Postvak while the home screen is up: at once,
+    /// then every five minutes (the bar updates by itself when it changes)
+    @MainActor
+    static func follow() async {
+        while !Task.isCancelled {
+            let account = PlayerAccount.shared
+            if Features.shared.playerAccount, account.isConfigured, account.isSignedIn {
+                if !account.profileChecked { try? await account.loadProfile() }
+                if account.profile != nil { try? await account.loadInbox() }
+            }
+            try? await Task.sleep(nanoseconds: 300_000_000_000)
+        }
+    }
+
+    private var detail: String {
+        let account = PlayerAccount.shared
+        if let first = account.inbox.first { return first.inboxTitle }
+        if let first = account.teamInbox.first { return loc("Ben jij \"\(first.name ?? "")\"?") }
+        return ""
+    }
+
+    var body: some View {
+        let count = HomeInboxBar.waiting
+        Button { showing = true } label: {
+            HStack(spacing: 12) {
+                AppSymbol("mailbox", size: 30, color: SharedColors.support)
+                    .frame(width: 30, height: 30)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("WEDSTRIJDVERZOEKEN", bundle: textBundle)
+                        .font(SharedFonts.system(11, weight: .semibold))
+                        .foregroundColor(SharedColors.support)
+                    Text(count == 1 ? loc("1 wedstrijd wacht op je") : loc("\(count) wedstrijden wachten op je"))
+                        .font(SharedFonts.system(13, weight: .semibold))
+                        .foregroundColor(SharedColors.textPrimary)
+                    if !detail.isEmpty {
+                        Text(detail)
+                            .font(SharedFonts.system(11))
+                            .foregroundColor(SharedColors.textSecondary)
+                            .lineLimit(1)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                AppSymbol("chevron.right", size: 12, color: SharedColors.textPrimary)
+            }
+            .padding(EdgeInsets(top: 10, leading: 14, bottom: 10, trailing: 14))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(SharedColors.support.opacity(0.12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(SharedColors.support, lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            #if !SKIP
+            .contentShape(Rectangle())
+            #endif
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(loc("Wedstrijdverzoeken"))
+        .sheet(isPresented: $showing) {
+            HomeInboxSheet { showing = false }
+        }
+    }
+}
+
+/// The Postvak on its own, opened from the Wedstrijdverzoeken block
+struct HomeInboxSheet: View {
+    let onClose: () -> Void
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    Text("Wedstrijdverzoeken", bundle: textBundle)
+                        .font(SharedFonts.system(18, weight: .semibold))
+                        .foregroundColor(SharedColors.textPrimary)
+                    Spacer()
+                    Button(loc("Sluiten")) { onClose() }
+                        .font(SharedFonts.system(14, weight: .semibold))
+                        .foregroundColor(SharedColors.accent)
+                }
+                Text("Wedstrijden die een coach of scheidsrechter voor jou invulde. Kies per wedstrijd of hij meetelt.", bundle: textBundle)
+                    .font(SharedFonts.system(13))
+                    .foregroundColor(SharedColors.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                SharedAccountInbox()
+            }
+            .padding(20)
+        }
+        .background(SharedColors.background.ignoresSafeArea())
+        .appAppearance()
+    }
+}
+
 enum HomeTileIcon {
     case coach, referee, history, players, badges, competition, liveFollow
 

@@ -92,13 +92,13 @@ meelezen.
 
 | Stap | ✓/✗ | Tijd | Opmerking |
 |---|---|---|---|
-| 0. Klaarzetten | | | |
-| 1. Dit ben ik | | | |
-| 2. A13 → iPhone | | | |
-| 3. iPhone → A13 | | | |
-| 4. Teamwedstrijd zonder link | | | |
-| 5. Deellink | | | |
-| 6. Zonder netwerk | | | |
+| 0. Klaarzetten | ✓ | | 10 nov |
+| 1. Dit ben ik | ✓ | | 10 nov, Gerd-Jan en Kristian |
+| 2. A13 → iPhone | ✓ | | 10 nov |
+| 3. iPhone → A13 | ✓ | | 10 nov; Postvak zit te diep in Instellingen → voorstel blok op het beginscherm |
+| 4. Teamwedstrijd zonder link | ✓ | | 10 nov; aanbod kwam eerder onder Competitie dan op het beginscherm → kaart vraagt nu elke minuut |
+| 5. Deellink | – | | overgeslagen: minder belangrijk zolang spelers zelf een account maken |
+| 6. Zonder netwerk | ✓ | | 10 nov |
 | 7. Na een uur | | | |
 | 8. Opruimen | | | |
 

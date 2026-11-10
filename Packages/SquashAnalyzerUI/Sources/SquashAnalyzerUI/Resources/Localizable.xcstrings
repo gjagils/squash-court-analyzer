@@ -13752,6 +13752,96 @@
           }
         }
       }
+    },
+    "WEDSTRIJDVERZOEKEN": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MATCH REQUESTS"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WEDSTRIJDVERZOEKEN"
+          }
+        }
+      }
+    },
+    "Wedstrijdverzoeken": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Match requests"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wedstrijdverzoeken"
+          }
+        }
+      }
+    },
+    "1 wedstrijd wacht op je": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 match is waiting for you"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 wedstrijd wacht op je"
+          }
+        }
+      }
+    },
+    "%lld wedstrijden wachten op je": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld matches are waiting for you"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld wedstrijden wachten op je"
+          }
+        }
+      }
+    },
+    "Wedstrijden die een coach of scheidsrechter voor jou invulde. Kies per wedstrijd of hij meetelt.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Matches a coach or referee recorded for you. Choose for each match whether it counts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wedstrijden die een coach of scheidsrechter voor jou invulde. Kies per wedstrijd of hij meetelt."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -14,6 +14,7 @@ enum OutlineIcon {
     case trophy
     case share
     case medal
+    case mailbox
 
     /// The icon for an SF Symbol name used in the shared screens, if it is one of ours
     static func named(_ name: String) -> OutlineIcon? {
@@ -24,6 +25,7 @@ enum OutlineIcon {
         case "trophy", "trophy.fill": return .trophy
         case "square.and.arrow.up": return .share
         case "medal", "medal.fill": return .medal
+        case "mailbox", "mailbox.fill": return .mailbox
         default: return nil
         }
     }
@@ -39,8 +41,38 @@ enum OutlineIcon {
         case .trophy: OutlineIcon.drawTrophy(&path, grid)
         case .share: OutlineIcon.drawShare(&path, grid)
         case .medal: OutlineIcon.drawMedal(&path, grid)
+        case .mailbox: OutlineIcon.drawMailbox(&path, grid)
         }
         return path
+    }
+
+    /// An old American mailbox on its post, the flag up (Wedstrijdverzoeken
+    /// on the home screen, after Gerd-Jan's sketch of 10 November 2026)
+    private static func drawMailbox(_ path: inout Path, _ g: IconGrid) {
+        let k: CGFloat = 0.5523
+        // The flag and its pole down to the knob
+        path.move(to: g.pt(15.5, 4.4))
+        path.addLine(to: g.pt(11, 4.4))
+        path.addLine(to: g.pt(11, 1.2))
+        path.addLine(to: g.pt(15.5, 1.2))
+        path.addLine(to: g.pt(15.5, 9.3))
+        path.addEllipse(in: g.rect(14.6, 9.3, 1.8, 1.8))
+        // The box: the top and the rounded back, down to the bottom
+        path.move(to: g.pt(7.4, 6.1))
+        path.addLine(to: g.pt(16.3, 6.1))
+        path.addCurve(to: g.pt(19.2, 9), control1: g.pt(16.3 + 2.9 * k, 6.1), control2: g.pt(19.2, 9 - 2.9 * k))
+        path.addLine(to: g.pt(19.2, 14.8))
+        path.addLine(to: g.pt(4.8, 14.8))
+        // The door: a round top over the front
+        path.addLine(to: g.pt(4.8, 8.7))
+        path.addCurve(to: g.pt(7.4, 6.1), control1: g.pt(4.8, 8.7 - 2.6 * k), control2: g.pt(7.4 - 2.6 * k, 6.1))
+        path.addCurve(to: g.pt(10, 8.7), control1: g.pt(7.4 + 2.6 * k, 6.1), control2: g.pt(10, 8.7 - 2.6 * k))
+        path.addLine(to: g.pt(10, 14.8))
+        // The post
+        path.move(to: g.pt(14.2, 14.8))
+        path.addLine(to: g.pt(14.2, 22.4))
+        path.addLine(to: g.pt(16.8, 22.4))
+        path.addLine(to: g.pt(16.8, 14.8))
     }
 
     /// A referee's whistle: a round body with the mouthpiece to the right,
@@ -63,7 +95,7 @@ enum OutlineIcon {
     /// A clipboard with three bulleted lines, the clip at the top
     private static func drawClipboard(_ path: inout Path, _ g: IconGrid) {
         // The board, with a gap in the top edge under the clip
-        path.move(to: g.pt(15.5, 4))
+        path.move(to: g.pt(15.5, 4.4))
         path.addLine(to: g.pt(18, 4))
         path.addQuadCurve(to: g.pt(20, 6), control: g.pt(20, 4))
         path.addLine(to: g.pt(20, 19))

@@ -1,6 +1,6 @@
 # Roadmap per release
 
-Gekozen door Gerd-Jan op 31 oktober 2026; de twee meldingen zijn op 4 november 2026 van 3.3 naar 4.0 verplaatst; bijgewerkt op 7 november 2026. De bronnen zijn de
+Gekozen door Gerd-Jan op 31 oktober 2026; de twee meldingen zijn op 4 november 2026 van 3.3 naar 4.0 verplaatst; op 10 november 2026 gingen spelers vergelijken en Linkshandig naar 4.1. De bronnen zijn de
 [persona-backlog](backlog-personas-2026-10-11.md), de
 [backlog van 21 oktober](backlog-2026-10-21.md) en de
 [buildbacklog](wijzigingen-builds.md#backlog). Hoe 3.x en 4.0 naast elkaar
@@ -46,12 +46,20 @@ met een geheime link ([voorstel](voorstel-clubscherm.md)). **Gebouwd 3 november 
 |---|---|
 | Spelersaccount met centrale badges, kaart, vorm en trend | [voorstel](voorstel-spelersaccount-4.0.md) |
 | Teamwedstrijd vinden zonder uitnodiging: teamleden met een account zien een lopende live-teamwedstrijd van hun team en doen mee (gekozen op 6 november 2026) | [voorstel](voorstel-teamwedstrijd-vinden-4.0.md) |
-| Seizoensoverzicht per teamlid | T2 |
-| Badgecategorie Teamspeler | T7 |
-| Melding als een teamgenoot een partij invult tijdens een live teamwedstrijd (verplaatst van 3.3 op 4 november 2026) | T6 |
-| Losse melding bij een gewonnen game, partij of einduitslag als je live volgt (verplaatst van 3.3 op 4 november 2026) | buildbacklog |
-| Spelersprofiel: twee spelers vergelijken, en AI Coach-advies over de trend (gekozen op 7 november 2026) | [wijzigingen](wijzigingen-builds.md) |
-| Vinkje Linkshandig bij een speler, zodat de focus Backhand en Voorhand de juiste kant van de baan toont (gekozen op 4 november 2026) | [bewuste keuzes](bewuste-keuzes.md) |
+| Seizoensoverzicht per teamlid: in Mijn team, uit de SBN-stand en de teamwedstrijden in de app (keuze Gerd-Jan, 10 november 2026) | T2 |
+| Badgecategorie Teamspeler: een reeks met treden voor gespeelde competitiepartijen, plus de badge Matchwinnaar (keuze Gerd-Jan, 10 november 2026) | T7 |
+| Melding als een teamgenoot een partij invult tijdens een live teamwedstrijd: wie maakt of meedoet volgt vanzelf, met een melding bij de start en de uitslag van andermans partij (verplaatst van 3.3 op 4 november 2026; keuze Gerd-Jan, 10 november 2026) | T6 |
+
+Al gebouwd, van de 4.0-lijst gehaald op 10 november 2026: de losse melding bij een gewonnen game, partij of
+einduitslag als je live volgt. Die zit sinds 3.0 in de live-Worker (`scoreAlert` en `teamAlert` in
+`server/live-worker/src/push.js`, iOS en Android) en staat uit te zetten in Instellingen → Live meekijken.
+
+## 4.1
+
+| Punt | Bron |
+|---|---|
+| Spelersprofiel: twee spelers vergelijken, en AI Coach-advies over de trend (gekozen op 7 november 2026, naar 4.1 op 10 november 2026) | [wijzigingen](wijzigingen-builds.md) |
+| Vinkje Linkshandig bij een speler, zodat de focus Backhand en Voorhand de juiste kant van de baan toont (gekozen op 4 november 2026, naar 4.1 op 10 november 2026) | [bewuste keuzes](bewuste-keuzes.md) |
 
 ## Na 4.0
 

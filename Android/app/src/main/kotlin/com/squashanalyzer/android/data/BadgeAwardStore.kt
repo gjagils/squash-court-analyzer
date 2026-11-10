@@ -20,6 +20,8 @@ import squash.analyzer.core.PlayerBadgeSummaryStore
 import skip.lib.Dictionary
 import squash.analyzer.core.ScoringEngine
 import squash.analyzer.core.SquashScore
+import squash.analyzer.core.TeamBadges
+import squash.analyzer.core.TeamMatch
 
 private val PLAYER1_RAW = Player.player1.rawValue
 private val PLAYER2_RAW = Player.player2.rawValue
@@ -279,6 +281,51 @@ class BadgeAwardStore(
         val matchId = UUID(uuidString = id) ?: return null
         return CareerMatch(matchId = matchId, date = Date(timeIntervalSince1970 = savedAt.toDouble() / 1000.0),
             won = winner == slot, pointsWon = points, opponentKey = opponent.lowercase())
+    }
+
+    /**
+     * Teamspeler and Matchwinnaar (4.0, T7) from the team matches on this
+     * device, like iOS' `BadgeAwarder.syncTeamAwards`: each award goes to the
+     * card of the player with the partij's name (two players with that name:
+     * nobody); awards of this install the team matches no longer support go, a
+     * deleted one stays deleted, awards from another device are left alone, and
+     * a Teamspeler tier the card already has is not given twice. Returns how
+     * many were added.
+     */
+    suspend fun syncTeamAwards(matches: SwiftArray<TeamMatch>): Int {
+        val awards = TeamBadges.awards(from = matches).toList()
+        val cards = mutableMapOf<String, String>()
+        val doubled = mutableSetOf<String>()
+        for (player in playerDao.all()) {
+            val key = TeamBadges.key(player.name)
+            if (key.isEmpty()) continue
+            if (cards.containsKey(key)) doubled.add(key)
+            cards[key] = player.cardId ?: player.id
+        }
+        val expected = linkedMapOf<String, BadgeAwardEntity>()
+        for (award in awards) {
+            val key = TeamBadges.key(award.playerName)
+            if (doubled.contains(key)) continue
+            val cardId = cards[key] ?: continue
+            val cardUuid = UUID(uuidString = cardId) ?: continue
+            val id = AwardValue.awardId(cardId = cardUuid, badge = award.badge, matchId = award.matchId).uuidString
+            expected[id] = BadgeAwardEntity(
+                id = id, cardId = cardId, badge = award.badge.rawValue, matchId = award.matchId.uuidString,
+                earnedAt = (award.earnedAt.timeIntervalSince1970 * 1000).toLong(),
+                opponentName = award.opponentName, awardedBy = installId,
+            )
+        }
+        val existing = dao.all().filter { row -> BadgeKind.init(rawValue = row.badge)?.isTeamBadge == true }
+        val stale = existing.filter { row -> !expected.containsKey(row.id) && row.deletedAt == null && row.awardedBy == installId }
+        if (stale.isNotEmpty()) dao.deleteByIds(stale.map { it.id })
+        val existingIds = existing.map { it.id }.toSet()
+        val added = expected.values.filter { row ->
+            if (existingIds.contains(row.id)) return@filter false
+            val badge = BadgeKind.init(rawValue = row.badge) ?: return@filter false
+            !(badge.isOnce && existing.any { it.cardId == row.cardId && it.badge == row.badge && shown(it) })
+        }
+        if (added.isNotEmpty()) dao.insertAll(added)
+        return added.size
     }
 
     /** Badges that are not deleted and were earned before `before`, Pionier left out (the badge reset sheet) */

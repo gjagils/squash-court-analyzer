@@ -103,6 +103,11 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
     case clubicoon = "clubicoon"
     case rivalen = "rivalen"
     case handOutHeld = "hand-out-held"
+    /// Competition (4.0, T7): earned from the team matches on this device (`TeamBadges`), not in one match
+    case teamPlayer = "team-player"
+    case teamPlayerSilver = "team-player-silver"
+    case teamPlayerGold = "team-player-gold"
+    case matchWinner = "match-winner"
     /// Not earned in a match: for the cards that had badges before the reset (`BadgeSeason`)
     case pioneer = "pioneer"
 
@@ -130,6 +135,7 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .ironManSilver, .ironManGold: return .ironMan
         case .nemesisSilver, .nemesisGold: return .nemesis
         case .veteranSilver, .veteranGold: return .veteran
+        case .teamPlayerSilver, .teamPlayerGold: return .teamPlayer
         default: return self
         }
     }
@@ -154,6 +160,7 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .ironMan: return [BadgeKind.ironMan, BadgeKind.ironManSilver, BadgeKind.ironManGold]
         case .nemesis: return [BadgeKind.nemesis, BadgeKind.nemesisSilver, BadgeKind.nemesisGold]
         case .veteran: return [BadgeKind.veteran, BadgeKind.veteranSilver, BadgeKind.veteranGold]
+        case .teamPlayer: return [BadgeKind.teamPlayer, BadgeKind.teamPlayerSilver, BadgeKind.teamPlayerGold]
         default: return [family]
         }
     }
@@ -175,6 +182,7 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .tenOutOfTen: return [10, 25, 50]
         case .centurion: return [100, 500, 1000]
         case .veteran: return [25, 50, 100]
+        case .teamPlayer: return [3, 8, 15]
         default: return nil
         }
     }
@@ -268,6 +276,8 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .clubicoon: return L10n.text("Clubicoon")
         case .rivalen: return L10n.text("Rivalen")
         case .handOutHeld: return "Hand-out held"
+        case .teamPlayer: return L10n.text("Teamspeler")
+        case .matchWinner: return L10n.text("Matchwinnaar")
         case .pioneer: return L10n.text("Pionier")
         default: return rawValue
         }
@@ -320,6 +330,8 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .clubicoon: return L10n.text("Speel tegen 10 verschillende tegenstanders")
         case .rivalen: return L10n.text("Speel 10 wedstrijden tegen dezelfde tegenstander")
         case .handOutHeld: return L10n.text("Win 5 rally's achter elkaar op de service van de ander")
+        case .teamPlayer: return L10n.text("Speel %@ competitiepartijen voor je team", String(n))
+        case .matchWinner: return L10n.text("Win de partij die de teamwedstrijd beslist")
         case .pioneer: return L10n.text("Testte SquashAnalyzer mee vóór de release")
         default: return rawValue
         }
@@ -372,6 +384,7 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case game = "In één game"
         case match = "In één wedstrijd"
         case career = "Over al je wedstrijden"
+        case competition = "Competitie"
         case special = "Speciaal"
 
         /// The heading in the badge catalogue (the raw value is the Dutch text)
@@ -383,6 +396,7 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .goingTheDistance, .cleanSweep, .houdini, .doubleTrouble, .fullHouse, .photoFinish, .ironMan,
              .rockSolid, .vetteWinst: return .match
         case .hatTrick, .offTheMark, .centurion, .tenOutOfTen, .nemesis, .veteran, .clubicoon, .rivalen: return .career
+        case .teamPlayer, .matchWinner: return .competition
         case .pioneer: return .special
         default: return .game
         }
@@ -391,10 +405,13 @@ public enum BadgeKind: String, CaseIterable, Identifiable, Codable, Sendable {
     /// Earned once per player card (each tier once); the others can be earned again in every match
     public var isOnce: Bool {
         switch family {
-        case .offTheMark, .centurion, .tenOutOfTen, .veteran, .clubicoon: return true
+        case .offTheMark, .centurion, .tenOutOfTen, .veteran, .clubicoon, .teamPlayer: return true
         default: return false
         }
     }
+
+    /// Earned from the team matches on this device (`TeamBadges`), not from a coach or referee match
+    public var isTeamBadge: Bool { family == BadgeKind.teamPlayer || family == BadgeKind.matchWinner }
 }
 
 /// One rally as the badge rules see it

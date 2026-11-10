@@ -149,6 +149,8 @@ class MainActivity : AppCompatActivity() {
         val teamDirectory = URL(fileURLWithPath = filesDir.absolutePath, isDirectory = true)
         val teamMatchStore = BackgroundTeamMatchStore(directory = teamDirectory)
         teamMatches = teamMatchStore
+        // Teamspeler and Matchwinnaar follow the team matches (4.0, T7)
+        teamMatchStore.onChange = { syncTeamBadges() }
         // The coach's notes per game live next to the team matches (GameNotes)
         GameNotes.shared.configure(directory = teamDirectory)
         // Oefenpartijen (no badges, not in the profile) in the same folder
@@ -231,10 +233,22 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch { LiveShare.shared.retryPending() }
         lifecycleScope.launch { TeamLive.shared.retryPending() }
         // What teammates put on the live pages while the app was away
-        teamMatches?.let { store -> lifecycleScope.launch { runCatching { TeamLiveSync.pull(store = store) } } }
+        teamMatches?.let { store ->
+            lifecycleScope.launch {
+                runCatching { TeamLiveSync.pull(store = store) }
+                syncTeamBadges()
+            }
+        }
         lifecycleScope.launch { AppUsage.shared.appOpened() }
         // Pionier after the badge reset, also for a card from before it imported since
         badges?.let { store -> lifecycleScope.launch { runCatching { store.grantPioneers() } } }
+    }
+
+    /** Competition badges (4.0, T7) in line with the team matches on this device */
+    private suspend fun syncTeamBadges() {
+        val store = teamMatches ?: return
+        val awards = badges ?: return
+        runCatching { awards.syncTeamAwards(store.loadAll()) }
     }
 
     private val resultImageShare: (ResultCard) -> Unit = { card -> shareOffMainThread { ResultImage.shareIntent(this, card) } }

@@ -142,6 +142,8 @@ struct ContentView: View {
             // A cold start may already be active before the scene phase changes
             Task { await AppUsage.shared.appOpened() }
             _ = try? BadgeAwarder(context: modelContext).grantPioneers()
+            Task { await syncTeamBadges() }
+            TeamMatchStorage.store.didChange = { Task { @MainActor in await syncTeamBadges() } }
             offerTestDataCleanup()
             showingStartupPersistenceWarning = startupPersistenceWarning != nil
         }
@@ -158,7 +160,11 @@ struct ContentView: View {
                 // A live final score that could not be sent (no network) goes now
                 Task { await LiveShare.shared.retryPending() }
                 // What teammates put on the live pages while the app was away
-                Task { _ = await TeamLiveSync.pull(store: TeamMatchStorage.store) }
+                Task {
+                    _ = await TeamLiveSync.pull(store: TeamMatchStorage.store)
+                    // Teamspeler and Matchwinnaar from the team matches, teammates' partijen included
+                    await syncTeamBadges()
+                }
                 Task { await AppUsage.shared.appOpened() }
                 Task { @MainActor in TeamLive.shared.retryPending() }
                 // 4.0: the matches in your account come to Afgeronde wedstrijden
@@ -246,6 +252,13 @@ struct ContentView: View {
 
     /// After the badge reset, once: offers to remove the test period's matches
     /// when there are any; with nothing to remove the question is done at once
+    /// Competition badges (4.0, T7) in line with the team matches on this device
+    @MainActor
+    private func syncTeamBadges() async {
+        guard let matches = try? await TeamMatchStorage.store.loadAll() else { return }
+        _ = try? BadgeAwarder(context: modelContext).syncTeamAwards(matches: matches)
+    }
+
     private func offerTestDataCleanup() {
         guard TestDataCleanup.shouldOffer(done: testDataCleanupDone), let start = BadgeSeason.start else { return }
         Task {

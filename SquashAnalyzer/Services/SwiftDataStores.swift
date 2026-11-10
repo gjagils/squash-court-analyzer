@@ -40,9 +40,18 @@ final class BackgroundTeamMatchStore: TeamMatchStore {
         io = TeamMatchFileIO(directory: directory)
     }
 
+    /// Called after every save or delete (the competition badges follow the team matches)
+    var didChange: (() -> Void)?
+
     func loadAll() async throws -> [TeamMatch] { try await io.loadAll() }
-    func save(_ match: TeamMatch) async throws { try await io.save(match) }
-    func delete(id: UUID) async throws { try await io.delete(id: id) }
+    func save(_ match: TeamMatch) async throws {
+        try await io.save(match)
+        didChange?()
+    }
+    func delete(id: UUID) async throws {
+        try await io.delete(id: id)
+        didChange?()
+    }
 }
 
 /// The system share sheet from anywhere (the shared screens give a text or a

@@ -122,6 +122,44 @@ final class BadgeAwardTests: XCTestCase {
         XCTAssertEqual(try awarder.grantPioneers(start: start, now: start.addingTimeInterval(600)), 0)
     }
 
+    /// Teamspeler and Matchwinnaar (4.0, T7) follow the team matches on this device
+    @MainActor
+    func testTeamAwardsFollowTheTeamMatches() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let kees = makePlayer("Kees de Vries", in: context)
+        _ = makePlayer("Paul", in: context)
+        _ = makePlayer("paul", in: context)
+        try context.save()
+        func partij(_ slot: Int, _ name: String, won: Bool) -> TeamPartij {
+            var partij = TeamPartij(slot: slot, ownPlayer: name)
+            for _ in 0..<3 { _ = partij.addGame(TeamGame(own: won ? 11 : 5, their: won ? 5 : 11)) }
+            return partij
+        }
+        // The badge start has passed (23 October 2026): matches after it
+        let day = Date(timeIntervalSince1970: 1_793_000_000)
+        var matches: [TeamMatch] = []
+        for index in 0..<3 {
+            matches.append(TeamMatch(date: day.addingTimeInterval(Double(index) * 604_800), home: "All Inn 8", away: "Delft 8",
+                                     ownSide: .home, fixtureId: nil,
+                                     partijen: [partij(1, "Kees de Vries", won: true), partij(2, "Paul", won: true),
+                                                partij(3, "Jan", won: false), partij(4, "Piet", won: false)]))
+        }
+        let awarder = BadgeAwarder(context: context)
+        XCTAssertGreaterThan(try awarder.syncTeamAwards(matches: matches), 0)
+        let keesAwards = try awards(in: context).filter { $0.cardId == kees.badgeCardId }
+        XCTAssertEqual(keesAwards.filter { $0.badgeKind == .teamPlayer }.count, 1, "bronze at the third partij")
+        // 2-2 with equal games and points: E1 decides, so Kees's E1 decided each of the three
+        XCTAssertEqual(keesAwards.filter { $0.badgeKind == .matchWinner }.count, 3)
+        // Two players called Paul: it cannot be told who, so nobody
+        XCTAssertTrue(try awards(in: context).allSatisfy { $0.cardId == kees.badgeCardId })
+        XCTAssertEqual(try awarder.syncTeamAwards(matches: matches), 0, "never twice")
+
+        // A partij undone: the Teamspeler tier it gave goes again
+        XCTAssertEqual(try awarder.syncTeamAwards(matches: Array(matches.prefix(2))), 0)
+        XCTAssertTrue(try awards(in: context).filter { $0.badgeKind == .teamPlayer }.isEmpty)
+    }
+
     @MainActor
     func testDiscardingAMatchRemovesItsAwards() throws {
         let container = try makeContainer()

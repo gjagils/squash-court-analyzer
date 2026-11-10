@@ -21,9 +21,18 @@ class BackgroundTeamMatchStore(private val directory: URL) : TeamMatchStore {
 
     override suspend fun loadAll(): SwiftArray<TeamMatch> = io { TeamMatchFile.newestFirst(directory = directory) }
 
-    override suspend fun save(match: TeamMatch) = io { TeamMatchFile.upsert(match, directory = directory) }
+    /** Called after every save or delete (the competition badges follow the team matches) */
+    var onChange: (suspend () -> Unit)? = null
 
-    override suspend fun delete(id: UUID) = io { TeamMatchFile.remove(id = id, directory = directory) }
+    override suspend fun save(match: TeamMatch) {
+        io { TeamMatchFile.upsert(match, directory = directory) }
+        onChange?.invoke()
+    }
+
+    override suspend fun delete(id: UUID) {
+        io { TeamMatchFile.remove(id = id, directory = directory) }
+        onChange?.invoke()
+    }
 
     private suspend fun <T> io(block: () -> T): T = lock.withLock { withContext(Dispatchers.IO) { block() } }
 }

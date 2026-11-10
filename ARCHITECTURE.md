@@ -60,6 +60,21 @@ Awards worden opnieuw berekend bij opslaan en undo. Verwijderde awards hebben
 een tombstone: bij samenvoegen wint `deletedAt`, zodat een verwijderde award
 niet terugkomt door een oudere kaart te importeren. Awards gaan mee in back-ups.
 
+**Competitiebadges (4.0, T7, gebouwd 10 november 2026):** categorie Competitie met
+**Teamspeler** (brons 3, zilver 8, goud 15 competitiepartijen, elke trede één keer) en
+**Matchwinnaar** (je won de partij die de teamwedstrijd besliste: had je hem verloren,
+dan had je team niet gewonnen; opnieuw te verdienen). Daarmee 39 families in de collectie,
+76 varianten. Ze komen niet uit `BadgeEngine` maar uit de teamwedstrijden op het toestel
+(`TeamBadges` in Core): alleen besliste partijen van het eigen team, geen walkover, geen
+standaardnaam ("All Inn 8 E1"), vanaf `BadgeSeason`, en één teamwedstrijd per
+SBN-wedstrijd. Een partij hoort bij de speler in Spelers met dezelfde naam (hoofdletters en
+dubbele spaties tellen niet); twee spelers met die naam: niemand. `matchId` is een vast id
+per teamwedstrijd en partij (`TeamBadges.partijId`), dus elk toestel maakt hetzelfde
+award-id. iOS `BadgeAwarder.syncTeamAwards` en Android `BadgeAwardStore.syncTeamAwards`
+draaien bij het starten en terugkomen van de app en na elke wijziging van een
+teamwedstrijd (`didChange`/`onChange` op de teamwedstrijd-opslag). Ze halen alleen awards
+van de eigen installatie weg die niet meer kloppen; awards uit een kaartlink blijven.
+
 **Badgereset bij de productierelease** (`BadgeSeason` in Core, gebouwd 18 oktober
 2026; startdatum vrijdag 23 oktober 2026, 00:00 Nederlandse tijd; op 20 oktober vastgezet na de Play-goedkeuring). `BadgeSeason.start` is een vaste datum, gelijk op elk
 toestel; zolang die `nil` is of nog niet voorbij, verandert er niets. Daarna:

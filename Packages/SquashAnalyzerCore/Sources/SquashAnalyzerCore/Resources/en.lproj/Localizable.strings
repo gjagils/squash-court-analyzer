@@ -407,3 +407,14 @@
 "%@: %@." = "%@: %@.";
 "app" = "app";
 "1 eigen fout, %@ vanaf een stand van 8. Langste reeks verloren punten: %@." = "1 unforced error, %@ from a score of 8. Longest run of points lost: %@.";
+
+/* Competition badges (4.0, T7) */
+"Teamspeler" = "Team player";
+"Matchwinnaar" = "Match winner";
+"Speel %@ competitiepartijen voor je team" = "Play %@ league matches for your team";
+"Win de partij die de teamwedstrijd beslist" = "Win the match that decides the team fixture";
+
+/* Season per teammate (4.0, T2) */
+"In de app: %@, %@ · games %@" = "In the app: %1$@, %2$@ · games %3$@";
+"1 partij" = "1 match";
+"%@ partijen" = "%@ matches";

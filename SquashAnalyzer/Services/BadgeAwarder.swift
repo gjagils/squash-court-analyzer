@@ -126,6 +126,51 @@ struct BadgeAwarder {
         return added
     }
 
+    /// Teamspeler and Matchwinnaar (4.0, T7) from the team matches on this
+    /// device: each award goes to the card of the player in Spelers with the
+    /// partij's name (two players with that name: nobody, it cannot be told).
+    /// Awards this install made that the team matches no longer support go
+    /// (a partij undone or renamed); a deleted one stays deleted, and awards
+    /// from another device (a card link) are left alone. A Teamspeler tier the
+    /// card already has from another partij is not given twice. Saves; returns
+    /// how many were added.
+    @discardableResult
+    func syncTeamAwards(matches: [TeamMatch]) throws -> Int {
+        let awards = TeamBadges.awards(from: matches)
+        var cards: [String: UUID] = [:]
+        var doubled: Set<String> = []
+        for player in try context.fetch(FetchDescriptor<SavedPlayer>()) {
+            let key = TeamBadges.key(player.name)
+            if key.isEmpty { continue }
+            if cards[key] != nil { doubled.insert(key) }
+            cards[key] = player.badgeCardId
+        }
+        var expected: [UUID: (cardId: UUID, award: TeamBadges.Award)] = [:]
+        for award in awards {
+            let key = TeamBadges.key(award.playerName)
+            guard !doubled.contains(key), let cardId = cards[key] else { continue }
+            expected[SavedBadgeAward.awardId(cardId: cardId, badge: award.badge, matchId: award.matchId)] = (cardId, award)
+        }
+        let existing = try context.fetch(FetchDescriptor<SavedBadgeAward>()).filter { $0.badgeKind?.isTeamBadge == true }
+        var changed = false
+        for award in existing where expected[award.id] == nil && award.isActive && award.awardedBy == Self.installId {
+            context.delete(award)
+            changed = true
+        }
+        let existingIds = Set(existing.map(\.id))
+        var added = 0
+        for (id, value) in expected where !existingIds.contains(id) {
+            let onCard = existing.filter { $0.cardId == value.cardId && $0.isShown && $0.badgeKind == value.award.badge }
+            if value.award.badge.isOnce && !onCard.isEmpty { continue }
+            context.insert(SavedBadgeAward(cardId: value.cardId, badge: value.award.badge, matchId: value.award.matchId,
+                                           earnedAt: value.award.earnedAt, opponentName: value.award.opponentName,
+                                           awardedBy: Self.installId))
+            added += 1
+        }
+        if added > 0 || changed { try context.save() }
+        return added
+    }
+
     private func cardId(forPlayer playerId: UUID) throws -> UUID? {
         var descriptor = FetchDescriptor<SavedPlayer>(predicate: #Predicate { $0.id == playerId })
         descriptor.fetchLimit = 1

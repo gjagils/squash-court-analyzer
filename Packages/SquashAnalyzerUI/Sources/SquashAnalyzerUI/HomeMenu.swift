@@ -37,11 +37,26 @@ public struct HomeMenuHeader: View {
     /// gets the full width (Gerd-Jan, 12 October 2026)
     private static let logoSize: CGFloat = 72
 
+    private static var questionURL: URL {
+        #if SKIP
+        let android = true
+        #else
+        let android = false
+        #endif
+        return UserManual.question(android: android, english: AppLanguage.current == AppLanguage.english)
+    }
+
     public var body: some View {
         VStack(spacing: 0) {
             HStack {
                 accountButton
                 Spacer()
+                // "Stel een vraag": the question box at the top of the manual (Gerd-Jan, 11 November 2026)
+                Link(destination: HomeMenuHeader.questionURL) {
+                    AppSymbol("questionmark.bubble", size: 20, color: SharedColors.textSecondary)
+                        .frame(width: 36, height: 36)
+                }
+                .accessibilityLabel(loc("Stel een vraag"))
                 if let onSettings {
                     Button(action: onSettings) {
                         AppSymbol("gearshape", size: 20, color: SharedColors.textSecondary)

@@ -16,6 +16,8 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   ongeveer 130 pt hoogte.
 - **Je foto linksboven (4.0):** linksboven, tegenover het tandwiel: je avatar (of het persoonsicoon zonder
   account) opent Mijn account in een venster.
+- **Spraakballon rechtsboven (Gerd-Jan, 11 november 2026):** naast het tandwiel een ballonnetje met vraagteken; het
+  opent de handleiding van het eigen platform en de eigen taal op `#vraag`, waar het vraagvak meteen klaarstaat.
 - **Stel een vraag bij de handleiding (website):** bovenaan de vier handleidingen (nl/en, iPhone/Android) een vraagvak.
   De website-Worker heeft sinds nu een klein script (`server/website-worker/src/`): `POST /api/vraag` kiest de passende
   stukken handleiding en vraagt Workers AI (`llama-3.3-70b-instruct-fp8-fast`) om een kort antwoord met links. Vragen

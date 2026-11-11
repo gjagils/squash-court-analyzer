@@ -26,6 +26,11 @@
   var input = slot.querySelector('input');
   var button = slot.querySelector('button');
   var out = slot.querySelector('.vraag-answer');
+  // Opened from the speech bubble in the app (…#vraag): straight to the box
+  if (location.hash === '#vraag') {
+    slot.scrollIntoView({ block: 'start' });
+    input.focus();
+  }
   function show(text, links) {
     out.textContent = '';
     var p = document.createElement('p');

@@ -14238,6 +14238,24 @@
           }
         }
       }
+    },
+    "Stel een vraag": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask a question"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stel een vraag"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

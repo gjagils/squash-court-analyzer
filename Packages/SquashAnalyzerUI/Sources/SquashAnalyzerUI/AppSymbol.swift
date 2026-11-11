@@ -3,6 +3,7 @@ import SwiftUI
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Backup
 import androidx.compose.material.icons.outlined.Contrast
@@ -188,6 +189,7 @@ struct AppSymbol: View {
         case "person.2.circle": return Icons.Outlined.Groups
         case "mappin": return Icons.Outlined.Place
         case "sparkles": return Icons.Outlined.AutoAwesome
+        case "questionmark.bubble": return Icons.Outlined.ChatBubbleOutline
         case "chevron.down": return Icons.Outlined.KeyboardArrowDown
         case "chevron.up": return Icons.Outlined.KeyboardArrowUp
         case "chevron.left": return Icons.AutoMirrored.Outlined.KeyboardArrowLeft

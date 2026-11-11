@@ -31,7 +31,12 @@ APP="$DERIVED/Build/Products/Debug-iphonesimulator/SquashAnalyzer.app"
 
 echo "▸ Booting simulator"
 xcrun simctl boot "$UDID" 2>/dev/null || true
-xcrun simctl bootstatus "$UDID" -b >/dev/null
+# bootstatus can hang forever on a simulator that is already booted (11 Nov 2026);
+# wait until it answers instead, at most two minutes
+for _ in $(seq 1 60); do
+  xcrun simctl spawn "$UDID" launchctl print system >/dev/null 2>&1 && break
+  sleep 2
+done
 # Fresh install so the seeded sample data is the only data
 xcrun simctl uninstall "$UDID" "$BUNDLE_ID" 2>/dev/null || true
 xcrun simctl install "$UDID" "$APP"

@@ -234,3 +234,48 @@ struct OutlineIconView: View {
             .frame(width: size, height: size)
     }
 }
+
+/// Wedstrijden: a squash ball with the double dot of a match ball, a history
+/// arrow round it (Gerd-Jan's design, 11 November 2026). Unlike the outline
+/// icons the ball is tinted and the dots filled, and the arrow is a little
+/// thinner than the ball so the ball reads first, also at tile size.
+struct MatchHistoryIconView: View {
+    let color: Color
+    let size: CGFloat
+
+    var body: some View {
+        let g = IconGrid(scale: size / 24)
+        let ballLine = max(1.2, 1.8 * g.scale)
+        let arrowLine = max(1.0, 1.45 * g.scale)
+        ZStack {
+            MatchHistoryIconView.arrow(g)
+                .stroke(color, style: StrokeStyle(lineWidth: arrowLine, lineCap: .round, lineJoin: .round))
+            Path { $0.addEllipse(in: g.rect(6.6, 6.6, 10.8, 10.8)) }
+                .fill(color.opacity(0.16))
+            Path { $0.addEllipse(in: g.rect(6.6, 6.6, 10.8, 10.8)) }
+                .stroke(color, lineWidth: ballLine)
+            MatchHistoryIconView.dots(g)
+                .fill(color)
+        }
+        .frame(width: size, height: size)
+    }
+
+    /// The arrow: almost a full circle (r 9.2) from about half past seven,
+    /// along the bottom, right and top, ending at nine o'clock pointing down
+    private static func arrow(_ g: IconGrid) -> Path {
+        var path = Path()
+        path.addArc(center: g.pt(12, 12), radius: g.len(9.2), startAngle: .degrees(-180), endAngle: .degrees(130), clockwise: false)
+        path.move(to: g.pt(0.9, 10.6))
+        path.addLine(to: g.pt(2.8, 13.3))
+        path.addLine(to: g.pt(4.7, 10.6))
+        return path
+    }
+
+    /// The two dots of a match ball, top right on the ball
+    private static func dots(_ g: IconGrid) -> Path {
+        var path = Path()
+        path.addEllipse(in: g.rect(12.7, 8.4, 1.9, 1.9))
+        path.addEllipse(in: g.rect(14.5, 10.4, 1.9, 1.9))
+        return path
+    }
+}

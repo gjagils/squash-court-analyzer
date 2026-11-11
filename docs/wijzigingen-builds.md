@@ -14,6 +14,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   icoonknoppen: *Wedstrijden*, *Spelers*, *Badges*. Met Mijn team open je Competitie via "Competitie ›" op de kaart;
   zonder teamlink staat er een vierde knop *Competitie* (zeegroen met een stip bij een live teamwedstrijd). Scheelt
   ongeveer 130 pt hoogte.
+- **Nieuw pictogram Wedstrijden (Gerd-Jan, 11 november 2026):** een squashbal met de dubbele stip van een wedstrijdbal
+  en een geschiedenispijl eromheen, in plaats van het klokje met pijl. De app tekent hem zelf
+  (`MatchHistoryIconView` in `OutlineIcons.swift`), dus iOS en Android zijn gelijk; de bal is licht gevuld en de pijl
+  iets dunner, zodat de bal ook klein voorop staat. Ook groot op het lege scherm van Afgeronde wedstrijden.
 - **Je foto linksboven (4.0):** linksboven, tegenover het tandwiel: je avatar (of het persoonsicoon zonder
   account) opent Mijn account in een venster.
 - **Spraakballon rechtsboven (Gerd-Jan, 11 november 2026):** naast het tandwiel een ballonnetje met vraagteken; het

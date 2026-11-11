@@ -681,7 +681,7 @@ struct HomeInboxSheet: View {
 enum HomeTileIcon {
     case coach, referee, history, players, badges, competition, liveFollow
 
-    /// The AppSymbol name; all but history are drawn by the app (`OutlineIcon`)
+    /// The AppSymbol name; history is `MatchHistoryIconView`, the rest `OutlineIcon`
     var symbol: String {
         switch self {
         case .coach: return "list.bullet.clipboard"
@@ -702,8 +702,13 @@ struct HomeTileIconView: View {
     let size: CGFloat
 
     var body: some View {
-        AppSymbol(icon.symbol, size: size, color: color, weight: .medium)
-            .frame(width: size, height: size)
+        if icon == .history {
+            MatchHistoryIconView(color: color, size: size)
+                .accessibilityHidden(true)
+        } else {
+            AppSymbol(icon.symbol, size: size, color: color, weight: .medium)
+                .frame(width: size, height: size)
+        }
     }
 }
 

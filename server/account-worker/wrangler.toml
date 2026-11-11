@@ -1,3 +1,6 @@
+# Mail secrets (src/mail.js, docs/firebase-mailteksten.md §7), per environment:
+# FIREBASE_SERVICE_ACCOUNT, CIRRUX_API_KEY, CIRRUX_MAILBOX. Without them the
+# mail routes answer 503 and the app lets Firebase send the mails.
 # Squash Analyzer 4.0: the player account (docs/voorstel-spelersaccount-4.0.md).
 # The database was created in the EU on 1 November 2026 (the jurisdiction can
 # only be set at creation): npx wrangler d1 create squash-account --jurisdiction eu.
@@ -46,6 +49,8 @@ PENDING_DAYS = "90"
 # Testing with one phone sends many matches in a day
 SUBMISSIONS_PER_DAY = "200"
 DEVICES_PER_HOUR = "20"
+# Mail links send the account page to this Worker (src/mail.js)
+MAIL_SERVER = "test"
 
 [[env.test.d1_databases]]
 binding = "DB"

@@ -446,3 +446,8 @@
 "Hoe meer teamgenoten, hoe makkelijker" = "More teammates, the easier it gets";
 "Jij staat op de baan, dus een ander fluit of coacht jouw partij. Deel de app met je team, dan komen jullie partijen vanzelf bij iedereen binnen." = "You're on court, so someone else referees or coaches your match. Share the app with your team and everyone's matches arrive by themselves.";
 "Ik houd onze competitiewedstrijden bij met SquashAnalyzer. Zet hem ook op je telefoon en maak een account, dan zie je onze teamwedstrijd meteen en komen je partijen vanzelf binnen, met badges." = "I keep track of our league matches with SquashAnalyzer. Get it on your phone too and create an account, then you see our team match right away and your matches arrive by themselves, with badges.";
+
+/* Account mails through the Worker (11 November 2026) */
+"Dit e-mailadres hoort al bij een ander account." = "This email address already belongs to another account.";
+"Dit is al je e-mailadres." = "This is already your email address.";
+"E-mailadres wijzigen lukt nu niet. Probeer het later opnieuw." = "Changing your email address isn't possible right now. Try again later.";

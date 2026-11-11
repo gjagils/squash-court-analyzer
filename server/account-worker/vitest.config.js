@@ -24,6 +24,12 @@ export default defineConfig(async () => {
           TEST_FIREBASE_PRIVATE_KEY: key.privateKey,
           SUBMISSIONS_PER_DAY: '3',
           DEVICES_PER_HOUR: '2',
+          // The mail routes (test/mail.test.js stubs Google and Cirrux)
+          FIREBASE_SERVICE_ACCOUNT: JSON.stringify({
+            client_email: 'test@example.iam.gserviceaccount.com', private_key_id: 'test', private_key: key.privateKey,
+          }),
+          CIRRUX_API_KEY: 'cxk_test',
+          CIRRUX_MAILBOX: 'mailbox-uuid',
         },
       },
     })],

@@ -134,18 +134,42 @@ Wat Cirrux biedt:
   API-call zonder kopie in Verzonden bestaat nog niet (Gerd-Jan wil die wel, als
   Cirrux-wens).
 
-Wat er dan in de app en Worker verandert:
+Gebouwd op 11 november 2026 (account-Worker `src/mail.js`, migratie `0006_mail.sql`):
 
-1. De account-Worker krijgt een Firebase-serviceaccount (secret) en vraagt de actielink op via
-   Identity Toolkit `accounts:sendOobCode` met `returnOobLink: true`. Firebase verstuurt dan
-   zelf niets.
-2. De Worker zet de link om naar `https://www.squashanalyzer.com/account/?mode=…&oobCode=…`
-   (de pagina bestaat al), vult de nl/en-tekst uit sectie 5 in en verstuurt via de Cirrux-API.
-   Secrets: `CIRRUX_API_KEY`, `CIRRUX_MAILBOX`.
-3. De app roept voor *bevestigen* en *wachtwoord vergeten* de Worker aan in plaats van
-   Firebase `sendOobCode`. Ratelimit per adres in de Worker.
-4. *E-mailadres gewijzigd* (recoverEmail) stuurt Firebase zelf bij een adreswijziging; die
-   blijft op de standaardtekst tot de templates wel te bewerken zijn, of we zetten
-   adres wijzigen ook via de Worker.
+- **Bevestigen en wachtwoord vergeten**: de app vraagt de Worker
+  (`POST /api/v1/mail/verify` en `/reset`). De Worker vraagt met het Firebase-serviceaccount
+  de actielink op (`returnOobLink`, Firebase verstuurt dan niets), zet die om naar
+  squashanalyzer.com/account/ en verstuurt de mail via Cirrux, in de taal van de app.
+  Antwoordt de Worker 503 (geen mailsecrets) of 404 (oude Worker), dan laat de app
+  Firebase versturen zoals voorheen.
+- **E-mailadres wijzigen** (nieuw, alleen voor accounts met wachtwoord; Apple en Google
+  houden hun adres): Mijn account → *E-mailadres wijzigen*. De Worker stuurt een link naar
+  het nieuwe adres (24 uur geldig). Tikt de speler erop, dan wijzigt de Worker het adres via
+  de admin-API (Firebase mailt dan niemand) en krijgt het oude adres een mail met
+  *Zet je oude adres terug* (7 dagen geldig). Terugzetten logt elke telefoon uit en stuurt
+  een link voor een nieuw wachtwoord. De app toont "Wacht op bevestiging" en neemt het
+  nieuwe adres over bij de volgende token-verversing.
+- **Limieten**: 3 mails per adres en 10 per IP-adres per uur.
 
-Inschatting: Worker en tests ongeveer een uur werk, app-kant een half uur, plus een testbuild.
+Live zetten (eenmalig, per omgeving; eerst `--env test`, daarna productie):
+
+1. In Cirrux: `noreply@squashanalyzer.com` als alias op een mailbox, en een API-key
+   (`email.read`, `email.write`, `email.send`, alleen die mailbox). De uuid van de mailbox:
+   `curl -H "Authorization: Bearer cxk_…" https://api.cirrux.co/public_api/v1/mailboxes`.
+2. Secrets en database (in `server/account-worker`):
+
+   ```bash
+   npx wrangler secret put FIREBASE_SERVICE_ACCOUNT --env test < ~/.android-keys/firebase-service-account.json
+   npx wrangler secret put CIRRUX_API_KEY --env test
+   npx wrangler secret put CIRRUX_MAILBOX --env test
+   npx wrangler d1 migrations apply squash-account-test --env test --remote
+   npx wrangler deploy --env test
+   ```
+
+   Voor productie dezelfde regels zonder `--env test` en met `squash-account` als database.
+3. Website publiceren (de accountpagina kent nu `changeEmail` en `undoEmail`).
+4. Testen met een `+test`-adres: account maken (bevestigmail), wachtwoord vergeten,
+   adres wijzigen, de link volgen, terugzetten vanuit de mail aan het oude adres.
+
+Nog onbekend: de vorm van het antwoord van Cirrux bij het maken van een concept (de Worker
+leest `uuid`) en of de afzendernaam van de alias meekomt. De eerste testmail laat het zien.

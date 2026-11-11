@@ -14418,6 +14418,78 @@
           }
         }
       }
+    },
+    "Nieuw e-mailadres": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New email address"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuw e-mailadres"
+          }
+        }
+      }
+    },
+    "E-mailadres wijzigen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change email address"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E-mailadres wijzigen"
+          }
+        }
+      }
+    },
+    "Wacht op bevestiging: %@. Tik op de link in die mail.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for confirmation: %@. Tap the link in that email."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wacht op bevestiging: %@. Tik op de link in die mail."
+          }
+        }
+      }
+    },
+    "We hebben een mail gestuurd naar %@. Tik op de link om je nieuwe adres te bevestigen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We've sent an email to %@. Tap the link to confirm your new address."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We hebben een mail gestuurd naar %@. Tik op de link om je nieuwe adres te bevestigen."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

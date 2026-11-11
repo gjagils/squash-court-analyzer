@@ -65,14 +65,18 @@
     <div class="page-foot"><div data-theme-choice-slot></div></div>
   </main>
   <script>
-    // Firebase's custom action handler (Authentication → Templates → Actie-URL aanpassen):
-    // the mail links here with ?mode=…&oobCode=…&apiKey=…&lang=…. The page talks to
-    // Firebase's Identity Toolkit directly; nothing goes to our own servers.
+    // The links in the account mails come here. Confirming the address and a new
+    // password: ?mode=…&oobCode=…&apiKey=…&lang=…, and the page talks to Firebase's
+    // Identity Toolkit directly. A new e-mail address (mode changeEmail) and putting
+    // the old one back (undoEmail): ?mode=…&code=…, and the page asks the account
+    // Worker (server/account-worker/src/mail.js; &server=test for the test Worker).
     (function () {
       var q = new URLSearchParams(location.search);
       var mode = q.get("mode") || "";
       var code = q.get("oobCode") || "";
       var key = q.get("apiKey") || "";
+      var ownCode = q.get("code") || "";
+      var worker = q.get("server") === "test" ? "https://test-account.squashanalyzer.com" : "https://account.squashanalyzer.com";
       var lang = (q.get("lang") || navigator.language || "nl").toLowerCase().indexOf("nl") === 0 ? "nl" : "en";
       // Keep the code out of the address bar, the history and screenshots
       try { history.replaceState(null, "", location.pathname); } catch (e) {}
@@ -86,6 +90,10 @@
           changedText: "Je logt voortaan in met dit adres. Ga terug naar SquashAnalyzer.",
           recoveredTitle: "Je e-mailadres is teruggezet",
           recoveredText: "Je account gebruikt weer <strong>{email}</strong>. Heb je dit niet zelf gewijzigd? Kies dan meteen een nieuw wachtwoord via Wachtwoord vergeten in de app.",
+          changedEmailText: "Je logt voortaan in met <strong>{email}</strong>. Ga terug naar SquashAnalyzer.",
+          undoneText: "Je account gebruikt weer <strong>{email}</strong>. Elke telefoon is uitgelogd. We hebben je een mail gestuurd om een nieuw wachtwoord te kiezen.",
+          takenTitle: "Dit adres is al in gebruik",
+          takenText: "Er is al een ander account met dit e-mailadres. Kies in de app een ander adres.",
           resetTitle: "Kies een nieuw wachtwoord",
           resetText: "Voor het account <strong>{email}</strong>.",
           passwordLabel: "Nieuw wachtwoord", show: "Wachtwoord tonen", save: "Wachtwoord opslaan",
@@ -110,6 +118,10 @@
           changedText: "From now on you sign in with this address. Go back to SquashAnalyzer.",
           recoveredTitle: "Your email address has been restored",
           recoveredText: "Your account uses <strong>{email}</strong> again. Didn't change it yourself? Choose a new password right away with Forgot password in the app.",
+          changedEmailText: "From now on you sign in with <strong>{email}</strong>. Go back to SquashAnalyzer.",
+          undoneText: "Your account uses <strong>{email}</strong> again. Every phone has been signed out. We've emailed you a link to choose a new password.",
+          takenTitle: "This address is already in use",
+          takenText: "Another account already uses this email address. Choose a different one in the app.",
           resetTitle: "Choose a new password",
           resetText: "For the account <strong>{email}</strong>.",
           passwordLabel: "New password", show: "Show password", save: "Save password",
@@ -159,6 +171,24 @@
         else if (/USER_DISABLED|USER_NOT_FOUND/.test(m)) show("!", T.goneTitle, esc(T.goneText));
         else if (/API key|API_KEY|INVALID_ARGUMENT/.test(m)) show("!", T.badTitle, esc(T.badText));
         else show("!", T.errorTitle, esc(T.errorText));
+      }
+
+      if (mode === "changeEmail" || mode === "undoEmail") {
+        if (!/^[A-Z2-9]{32}$/.test(ownCode)) { show("!", T.badTitle, esc(T.badText)); return; }
+        fetch(worker + "/api/v1/mail/confirm", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: ownCode })
+        }).then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (j) {
+            if (r.ok && j.kind === "change") show("✓", T.changedTitle, T.changedEmailText.replace("{email}", esc(j.email || "")));
+            else if (r.ok) show("↺", T.recoveredTitle, T.undoneText.replace("{email}", esc(j.email || "")));
+            else if (r.status === 410) show("!", T.expiredTitle, esc(T.expiredText));
+            else if (r.status === 409) show("!", T.takenTitle, esc(T.takenText));
+            else if (r.status === 404) show("!", T.goneTitle, esc(T.goneText));
+            else if (r.status === 400) show("!", T.badTitle, esc(T.badText));
+            else show("!", T.errorTitle, esc(T.errorText));
+          });
+        }, function () { show("!", T.errorTitle, esc(T.errorText)); });
+        return;
       }
 
       if (!/^[A-Za-z0-9_-]{20,400}$/.test(code) || !/^AIza[0-9A-Za-z_-]{35}$/.test(key)) {

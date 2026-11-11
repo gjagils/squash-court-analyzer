@@ -335,6 +335,66 @@ final class PlayerAccountTests: XCTestCase {
         XCTAssertEqual(transport.ownMatchCalls, 1)
     }
 
+    // MARK: - Account mails through the Worker (11 November 2026)
+
+    @MainActor
+    func testTheWorkerSendsTheMailsAndFirebaseOnlyWhenItCannot() async throws {
+        let transport = FakeAccountTransport()
+        transport.mailStatus = 202
+        let account = PlayerAccount()
+        account.configure(endpoints: endpoints(), transport: transport, secrets: MemoryAccountSecrets())
+        try await account.register(email: "a@b.nl", password: "geheim1")
+        try await account.sendPasswordReset(email: " A@B.nl ")
+        XCTAssertFalse(transport.requests.contains { request in request.url.contains("accounts:sendOobCode") }, "no Firebase mail")
+        XCTAssertTrue(transport.requests.contains { request in request.url.hasSuffix("/api/v1/mail/verify") })
+        let reset = transport.requests.first { request in request.url.hasSuffix("/api/v1/mail/reset") }
+        XCTAssertTrue(reset.map { request in body(request).contains("\"email\":\"a@b.nl\"") } ?? false)
+
+        // A Worker without mail secrets: Firebase sends
+        transport.mailStatus = 503
+        try await account.sendPasswordReset(email: "a@b.nl")
+        XCTAssertTrue(transport.requests.contains { request in request.url.contains("accounts:sendOobCode") })
+    }
+
+    @MainActor
+    func testChangingTheAddressWaitsForTheLinkAndFollowsTheToken() async throws {
+        let transport = FakeAccountTransport()
+        transport.mailStatus = 202
+        let account = PlayerAccount()
+        account.configure(endpoints: endpoints(), transport: transport, secrets: MemoryAccountSecrets())
+        try await account.signIn(email: "a@b.nl", password: "geheim1")
+        XCTAssertTrue(account.canChangeEmail)
+        do {
+            try await account.changeEmail(to: "A@b.nl")
+            XCTFail("the same address")
+        } catch let error as AccountError {
+            XCTAssertEqual(error, AccountError.sameEmail)
+        }
+        try await account.changeEmail(to: " Nieuw@B.nl ")
+        XCTAssertEqual(account.pendingEmail, "nieuw@b.nl")
+        XCTAssertEqual(account.session?.email, "a@b.nl", "nothing changes before the link")
+
+        transport.refreshedEmail = "nieuw@b.nl"
+        try await account.refreshEmail()
+        XCTAssertEqual(account.session?.email, "nieuw@b.nl")
+        XCTAssertNil(account.pendingEmail)
+
+        transport.mailStatus = 409
+        transport.mailError = "email taken"
+        do {
+            try await account.changeEmail(to: "ander@b.nl")
+            XCTFail("taken")
+        } catch let error as AccountError {
+            XCTAssertEqual(error, AccountError.emailInUse)
+        }
+    }
+
+    func testTheEmailClaimOfAnIdToken() {
+        let claims = Data("{\"email\":\"x@y.nl\"}".utf8).base64EncodedString().replacingOccurrences(of: "=", with: "")
+        XCTAssertEqual(AuthSession.emailClaim("a.\(claims).b"), "x@y.nl")
+        XCTAssertNil(AuthSession.emailClaim("id-2"))
+    }
+
     // MARK: - The account
 
     @MainActor
@@ -447,6 +507,11 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
     var meStatus = 0
     /// Accepted matches for GET /me/matches: (match id, decidedAt)
     var accepted: [(String, Int64)] = []
+    /// The Worker's answer to /api/v1/mail/…: 404 is an older Worker (Firebase sends)
+    var mailStatus = 404
+    var mailError = ""
+    /// A refreshed ID token carries this address (a JWT with an email claim)
+    var refreshedEmail: String? = nil
     private var profile: String? = nil
     private var refreshes = 1
 
@@ -460,6 +525,11 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
             }
             if address.contains("/token?") {
                 refreshes += 1
+                if let refreshedEmail {
+                    let claims = Data("{\"sub\":\"uid-1\",\"email\":\"\(refreshedEmail)\"}".utf8).base64EncodedString()
+                        .replacingOccurrences(of: "=", with: "").replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_")
+                    return reply(200, "{\"id_token\":\"h.\(claims).s\",\"refresh_token\":\"r\(refreshes)\",\"expires_in\":\"3600\",\"user_id\":\"uid-1\"}")
+                }
                 return reply(200, "{\"id_token\":\"id-\(refreshes)\",\"refresh_token\":\"r\(refreshes)\",\"expires_in\":\"3600\",\"user_id\":\"uid-1\"}")
             }
             if address.contains("accounts:signUp") || address.contains("accounts:signInWithPassword") {
@@ -468,6 +538,9 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
             return reply(200, "{}")
         }
         let path = url.path
+        if path.hasPrefix("/api/v1/mail/") {
+            return reply(mailStatus, mailError.isEmpty ? "{\"ok\":true}" : "{\"error\":\"\(mailError)\"}")
+        }
         if path == "/api/v1/devices" {
             return reply(201, "{\"deviceId\":\"dev-\(requests.filter { request in request.url.hasSuffix("/devices") }.count)\",\"deviceKey\":\"key-1\"}")
         }

@@ -94,6 +94,18 @@ public struct AuthSession: Codable, Equatable, Sendable {
 
     public static func millis(_ date: Date) -> Int64 { Int64(date.timeIntervalSince1970 * 1000.0) }
 
+    /// The e-mail address in an ID token (it follows a change of address at the
+    /// next refresh); nil when the token cannot be read
+    public static func emailClaim(_ idToken: String) -> String? {
+        let parts = idToken.split(separator: ".")
+        guard parts.count == 3 else { return nil }
+        var text = String(parts[1]).replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+        while text.count % 4 != 0 { text += "=" }
+        guard let data = Data(base64Encoded: text),
+              let claims = try? JSONDecoder().decode(IdTokenEmail.self, from: data) else { return nil }
+        return claims.email
+    }
+
     static func expiry(_ expiresIn: String?, from now: Date) -> Int64 {
         let seconds = Int64(expiresIn ?? "") ?? Int64(3600)
         return millis(now) + seconds * Int64(1000)
@@ -118,6 +130,12 @@ public enum AccountError: Error, Equatable {
     case missingName
     case notFound
     case tooManyRequests
+    /// Changing the address: another account already has the new one
+    case emailInUse
+    /// Changing the address: it is the current one
+    case sameEmail
+    /// The account Worker cannot send mail yet (changing the address)
+    case mailUnavailable
     case invalidResponse
     case server(status: Int)
 
@@ -138,6 +156,9 @@ public enum AccountError: Error, Equatable {
         case .missingName: return L10n.text("Vul je naam in.")
         case .notFound: return L10n.text("Niet gevonden.")
         case .tooManyRequests: return L10n.text("Even te veel tegelijk. Probeer het later opnieuw.")
+        case .emailInUse: return L10n.text("Dit e-mailadres hoort al bij een ander account.")
+        case .sameEmail: return L10n.text("Dit is al je e-mailadres.")
+        case .mailUnavailable: return L10n.text("E-mailadres wijzigen lukt nu niet. Probeer het later opnieuw.")
         case .invalidResponse: return L10n.text("Ongeldig antwoord van server")
         case .server(let status): return L10n.text("Serverfout (code: %@)", "\(status)")
         }
@@ -166,6 +187,10 @@ public enum AccountError: Error, Equatable {
 }
 
 // MARK: - Firebase Authentication (REST)
+
+struct IdTokenEmail: Codable {
+    let email: String?
+}
 
 struct FirebasePasswordRequest: Codable {
     let email: String

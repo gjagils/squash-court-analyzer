@@ -64,6 +64,9 @@ public struct SharedAccountSection: View {
     // Correcting the name
     @State private var editingName = false
     @State private var newName = ""
+    // A new e-mail address (password accounts)
+    @State private var editingEmail = false
+    @State private var newEmail = ""
     #if os(iOS) && !SKIP
     /// The number pad has no return key: "Gereed" above it closes it
     @FocusState private var typingYear: Bool
@@ -248,13 +251,48 @@ public struct SharedAccountSection: View {
                     .foregroundColor(SharedColors.accent)
                 }
             }
-            if let session = account.session, !session.email.isEmpty {
+            emailPart
+            sbnPart(profile)
+            avatarPart(profile)
+        }
+    }
+
+    /// The sign-in address, and changing it (password accounts): a link goes to
+    /// the new address, and the old one gets a mail that can undo it
+    @ViewBuilder
+    private var emailPart: some View {
+        if editingEmail {
+            field(loc("Nieuw e-mailadres"), text: $newEmail)
+                #if os(iOS) || SKIP
+                .keyboardType(.emailAddress)
+                #endif
+            HStack(spacing: 8) {
+                ActionButton(loc("BEWAREN"), style: .filled, color: SharedColors.accent,
+                             disabled: busy || newEmail.trimmingCharacters(in: .whitespaces).isEmpty) { changeEmail() }
+                ActionButton(loc("ANNULEREN"), style: .outlined, color: SharedColors.textSecondary, disabled: busy) {
+                    editingEmail = false
+                }
+            }
+        } else if let session = account.session, !session.email.isEmpty {
+            HStack {
                 Text(session.email)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
+                Spacer()
+                if account.canChangeEmail {
+                    Button(loc("E-mailadres wijzigen")) {
+                        newEmail = ""
+                        editingEmail = true
+                    }
+                    .font(SharedFonts.system(13, weight: .semibold))
+                    .foregroundColor(SharedColors.accent)
+                }
             }
-            sbnPart(profile)
-            avatarPart(profile)
+            if let pending = account.pendingEmail {
+                Text(loc("Wacht op bevestiging: \(pending). Tik op de link in die mail."))
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textMuted)
+            }
         }
     }
 
@@ -368,6 +406,8 @@ public struct SharedAccountSection: View {
         guard account.isConfigured, account.isSignedIn else { return }
         if !force && account.profileChecked && account.profile == nil { return }
         run(nil) {
+            // A new address that waits for its link: a fresh token shows whether it went through
+            if account.pendingEmail != nil { try await account.refreshEmail() }
             if force || !account.profileChecked { try await account.loadProfile() }
             if account.profile != nil {
                 try await account.loadInbox()
@@ -417,6 +457,14 @@ public struct SharedAccountSection: View {
         }
         run(loc("Als er een account met dit adres is, krijg je een mail om een nieuw wachtwoord te kiezen.")) {
             try await account.sendPasswordReset(email: typedEmail)
+        }
+    }
+
+    private func changeEmail() {
+        let typed = newEmail.trimmingCharacters(in: .whitespaces)
+        run(loc("We hebben een mail gestuurd naar \(typed). Tik op de link om je nieuwe adres te bevestigen.")) {
+            try await account.changeEmail(to: typed)
+            editingEmail = false
         }
     }
 

@@ -63,6 +63,14 @@ Het draaiboek staat in `docs/testplan-4.0-koppelen.md`.
    domein) staat in `wrangler.toml`; Cloudflare maakt het DNS-record zelf.
    CI rolt deze Worker niet uit, alleen de tests draaien daar.
 
+## Accountmails (via Cirrux)
+
+Bevestigen, wachtwoord vergeten en e-mailadres wijzigen verstuurt de Worker zelf
+(`src/mail.js`). Daarvoor zijn drie secrets per omgeving nodig:
+`FIREBASE_SERVICE_ACCOUNT`, `CIRRUX_API_KEY` en `CIRRUX_MAILBOX`. Zonder die secrets
+antwoorden de mailroutes 503 en laat de app Firebase versturen. De stappen staan in
+[docs/firebase-mailteksten.md](../../docs/firebase-mailteksten.md), sectie 7.
+
 ## Nog niet gebouwd
 
 - Herinnering na 7 dagen (vraagt push, zoals de livemeldingen).

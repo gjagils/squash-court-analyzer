@@ -547,6 +547,35 @@ public struct AccountClient: Sendable {
         return value.links
     }
 
+    // MARK: Account mails (11 November 2026): sent by the Worker through Cirrux
+
+    /// "Bevestig je e-mailadres" for the signed-in user. False when the Worker
+    /// cannot send mail (no mail secrets yet, or an older Worker): then Firebase sends.
+    public func mailVerify(token: String, lang: String) async throws -> Bool {
+        let body = try JSONEncoder().encode(AccountMailRequest(email: "", lang: lang))
+        let response = try await send("POST", "/api/v1/mail/verify", auth: "Bearer \(token)", body: body)
+        if response.status == 503 || response.status == 404 { return false }
+        try check(response)
+        return true
+    }
+
+    /// "Kies een nieuw wachtwoord"; the same answer whether the address has an account. False: Firebase sends.
+    public func mailReset(email: String, lang: String) async throws -> Bool {
+        let body = try JSONEncoder().encode(AccountMailRequest(email: email, lang: lang))
+        let response = try await send("POST", "/api/v1/mail/reset", auth: nil, body: body)
+        if response.status == 503 || response.status == 404 { return false }
+        try check(response)
+        return true
+    }
+
+    /// A new address: the Worker mails a link to it, and the change follows that link
+    public func mailChange(token: String, email: String, lang: String) async throws {
+        let body = try JSONEncoder().encode(AccountMailRequest(email: email, lang: lang))
+        let response = try await send("POST", "/api/v1/mail/change", auth: "Bearer \(token)", body: body)
+        if response.status == 503 || response.status == 404 { throw AccountError.mailUnavailable }
+        try check(response)
+    }
+
     // MARK: Plumbing
 
     // MARK: Avatars (Gerd-Jan, 10 November 2026)
@@ -639,6 +668,10 @@ public struct AccountClient: Sendable {
     static func error(status: Int, text: String) -> AccountError {
         if status == 401 { return AccountError.signInAgain }
         if status == 403 && text == "too young" { return AccountError.tooYoung }
+        if status == 409 && text == "email taken" { return AccountError.emailInUse }
+        if status == 409 && text == "not password" { return AccountError.mailUnavailable }
+        if status == 400 && text == "same email" { return AccountError.sameEmail }
+        if status == 400 && text == "email" { return AccountError.invalidEmail }
         if status == 409 { return AccountError.sbnPathTaken }
         if status == 400 && text == "consent" { return AccountError.missingConsent }
         if status == 400 && text == "name" { return AccountError.missingName }
@@ -646,6 +679,11 @@ public struct AccountClient: Sendable {
         if status == 429 { return AccountError.tooManyRequests }
         return AccountError.server(status: status)
     }
+}
+
+struct AccountMailRequest: Codable {
+    let email: String
+    let lang: String
 }
 
 struct AccountAvatarUpload: Codable {

@@ -25,8 +25,10 @@
 //   GET    /api/v1/me/team/lives?fixtures=   live team matches of the own team, and of opponents for these matches
 //   PUT    /api/v1/me/team/lives             { fixture, date, teamName, liveId, writeKey, refereeKey?, replaces? }
 //   DELETE /api/v1/me/team/lives?fixture=    the own registration goes
+//   POST   /api/v1/mail/verify|reset|change|confirm   the account mails (src/mail.js)
 
 import { randomText, sameText, sha256, verifyIdToken } from './auth.js';
+import { cors, mailChange, mailConfirm, mailReset, mailVerify } from './mail.js';
 import {
   cleanFixture, cleanText, latestBirthYear, leagueOf, LIMITS, LIVE_ID_PATTERN, LIVE_KEY_PATTERN, readMatch,
 } from './validate.js';
@@ -320,6 +322,7 @@ async function deleteAccount(env, caller) {
     env.DB.prepare('DELETE FROM learned_links WHERE sbn_path = (SELECT sbn_path FROM players WHERE id = ?)').bind(playerId),
     env.DB.prepare('DELETE FROM players WHERE id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM accounts WHERE uid = ?').bind(caller.uid),
+    env.DB.prepare('DELETE FROM email_changes WHERE uid = ?').bind(caller.uid),
   ]);
   return json(204);
 }
@@ -751,6 +754,16 @@ async function handle(request, env) {
   if (path === '/api/v1/avatars' && method === 'GET') return avatarVersions(request, env, url);
   if (path === '/api/v1/avatars/image' && method === 'GET') return avatarImage(request, env, url);
   if (path === '/api/v1/avatars/report' && method === 'POST') return reportAvatar(request, env);
+  if (path === '/api/v1/mail/confirm') {
+    if (method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(request) });
+    if (method === 'POST') return mailConfirm(request, env);
+  }
+  if (path === '/api/v1/mail/reset' && method === 'POST') return mailReset(request, env);
+  if ((path === '/api/v1/mail/verify' || path === '/api/v1/mail/change') && method === 'POST') {
+    const uid = await verifyIdToken(bearer(request), env);
+    if (!uid) return json(401, { error: 'sign in' });
+    return path.endsWith('verify') ? mailVerify(request, env, uid) : mailChange(request, env, uid);
+  }
 
   if (path === '/api/v1/me' || path.startsWith('/api/v1/me/')) {
     const caller = await signedIn(request, env);
@@ -801,6 +814,8 @@ export async function wipeOldRequests(env) {
     env.DB.prepare('DELETE FROM team_lives WHERE expires_at <= ?').bind(deps.now()),
     // "Stel een vraag" (the website Worker writes them): 180 days
     env.DB.prepare('DELETE FROM manual_questions WHERE asked_at < ?').bind(deps.now() - 180 * DAY),
+    env.DB.prepare('DELETE FROM email_changes WHERE expires_at <= ?').bind(deps.now()),
+    env.DB.prepare('DELETE FROM mail_log WHERE sent_at < ?').bind(deps.now() - DAY),
   ]);
   return results.reduce((sum, result) => sum + (result.meta?.changes || 0), 0);
 }

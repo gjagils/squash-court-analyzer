@@ -65,6 +65,8 @@ public final class PlayerAccount {
     public private(set) var ownAvatar: Data? = nil
     /// Picks a photo for the avatar: set by each platform at start; nil hides "Foto kiezen"
     public var avatarSource: (any AccountAvatarSource)? = nil
+    /// A new e-mail address waiting for the link in its mail (this run of the app)
+    public private(set) var pendingEmail: String? = nil
     private var device: AccountDevice? = nil
     private var sending = false
 
@@ -94,8 +96,10 @@ public final class PlayerAccount {
         let auth = try firebase()
         let fresh = try await auth.signUp(email: PlayerAccount.cleanEmail(email), password: password)
         signedIn(fresh)
-        // The verification mail is a courtesy: the account works without it
-        try? await auth.sendEmailVerification(idToken: fresh.idToken)
+        // The verification mail is a courtesy: the account works without it.
+        // Ours through the Worker; Firebase's when the Worker cannot send mail.
+        let sentByWorker = (try? await client().mailVerify(token: fresh.idToken, lang: PlayerAccount.mailLanguage)) ?? false
+        if !sentByWorker { try? await auth.sendEmailVerification(idToken: fresh.idToken) }
         try await loadProfile()
     }
 
@@ -113,7 +117,46 @@ public final class PlayerAccount {
     }
 
     public func sendPasswordReset(email: String) async throws {
-        try await firebase().sendPasswordReset(email: PlayerAccount.cleanEmail(email))
+        let clean = PlayerAccount.cleanEmail(email)
+        if try await client().mailReset(email: clean, lang: PlayerAccount.mailLanguage) { return }
+        try await firebase().sendPasswordReset(email: clean)
+    }
+
+    /// Accounts with a password can change their address (Apple and Google keep theirs)
+    public var canChangeEmail: Bool { session?.provider == "password" }
+
+    /// A link goes to the new address; the address changes once it is tapped,
+    /// and the old address gets a mail that can undo it
+    public func changeEmail(to newEmail: String) async throws {
+        let clean = PlayerAccount.cleanEmail(newEmail)
+        if clean.isEmpty || !clean.contains("@") { throw AccountError.invalidEmail }
+        if clean == session?.email.lowercased() { throw AccountError.sameEmail }
+        let token = try await validToken()
+        try await client().mailChange(token: token, email: clean, lang: PlayerAccount.mailLanguage)
+        pendingEmail = clean
+    }
+
+    /// After a change of address: a fresh ID token carries the new address
+    public func refreshEmail() async throws {
+        guard let current = session else { return }
+        do {
+            let fresh = try await firebase().refresh(current)
+            signedInRefreshed(fresh)
+        } catch let error as AccountError {
+            if error == AccountError.signInAgain { signOut() }
+            throw error
+        }
+        if let pending = pendingEmail, session?.email.lowercased() == pending { pendingEmail = nil }
+    }
+
+    /// The language of the account mails
+    static var mailLanguage: String { AppLanguage.current == AppLanguage.english ? "en" : "nl" }
+
+    private func signedInRefreshed(_ fresh: AuthSession) {
+        var updated = fresh
+        if let email = AuthSession.emailClaim(fresh.idToken), !email.isEmpty { updated.email = email }
+        session = updated
+        storeSecrets()
     }
 
     /// Forgets the session on this phone; the account and its data stay
@@ -125,6 +168,7 @@ public final class PlayerAccount {
         inbox = []
         teamInbox = []
         ownAvatar = nil
+        pendingEmail = nil
         storeSecrets()
     }
 
@@ -135,8 +179,7 @@ public final class PlayerAccount {
         if current.isFresh(at: now) { return current.idToken }
         do {
             let fresh = try await firebase().refresh(current, now: now)
-            session = fresh
-            storeSecrets()
+            signedInRefreshed(fresh)
             return fresh.idToken
         } catch let error as AccountError {
             if error == AccountError.signInAgain { signOut() }

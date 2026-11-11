@@ -1,0 +1,1 @@
+Build 3 van 4.0: je team in één app. Rustiger beginscherm met één rij knoppen, je foto linksboven, Stel een vraag via het ballonnetje (antwoord uit de handleiding), Nieuw in 4.0 in drie pagina's, herinnering na twee weken zonder team of account. AI Coach is uit. Meer: squashanalyzer.com/testen

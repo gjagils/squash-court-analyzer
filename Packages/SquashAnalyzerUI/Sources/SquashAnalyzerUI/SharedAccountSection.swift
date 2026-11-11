@@ -292,6 +292,13 @@ public struct SharedAccountSection: View {
                 Text(loc("Wacht op bevestiging: \(pending). Tik op de link in die mail."))
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textMuted)
+            } else if account.needsEmailVerification {
+                // A reminder, not a block (Gerd-Jan 11 November 2026): the account works anyway
+                note(loc("Je e-mailadres is nog niet bevestigd. Tik op de link in de mail die we je stuurden."))
+                Button(loc("Bevestigmail opnieuw sturen")) { resendVerification(to: session.email) }
+                    .font(SharedFonts.system(13, weight: .semibold))
+                    .foregroundColor(SharedColors.accent)
+                    .disabled(busy)
             }
         }
     }
@@ -402,12 +409,19 @@ public struct SharedAccountSection: View {
         }
     }
 
+    private func resendVerification(to address: String) {
+        run(loc("We hebben de mail opnieuw gestuurd naar \(address).")) {
+            try await account.resendVerification()
+        }
+    }
+
     private func refresh(force: Bool = false) {
         guard account.isConfigured, account.isSignedIn else { return }
         if !force && account.profileChecked && account.profile == nil { return }
         run(nil) {
             // A new address that waits for its link: a fresh token shows whether it went through
-            if account.pendingEmail != nil { try await account.refreshEmail() }
+            // The same for an address that is not confirmed yet
+            if account.pendingEmail != nil || account.needsEmailVerification { try await account.refreshEmail() }
             if force || !account.profileChecked { try await account.loadProfile() }
             if account.profile != nil {
                 try await account.loadInbox()

@@ -97,13 +97,23 @@ public struct AuthSession: Codable, Equatable, Sendable {
     /// The e-mail address in an ID token (it follows a change of address at the
     /// next refresh); nil when the token cannot be read
     public static func emailClaim(_ idToken: String) -> String? {
+        claims(idToken)?.email
+    }
+
+    /// Whether the ID token says the address is confirmed (Firebase sets it
+    /// after the link in the verification mail; the next refresh carries it);
+    /// nil when the token cannot be read
+    public static func emailVerifiedClaim(_ idToken: String) -> Bool? {
+        claims(idToken)?.email_verified
+    }
+
+    static func claims(_ idToken: String) -> IdTokenEmail? {
         let parts = idToken.split(separator: ".")
         guard parts.count == 3 else { return nil }
         var text = String(parts[1]).replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
         while text.count % 4 != 0 { text += "=" }
-        guard let data = Data(base64Encoded: text),
-              let claims = try? JSONDecoder().decode(IdTokenEmail.self, from: data) else { return nil }
-        return claims.email
+        guard let data = Data(base64Encoded: text) else { return nil }
+        return try? JSONDecoder().decode(IdTokenEmail.self, from: data)
     }
 
     static func expiry(_ expiresIn: String?, from now: Date) -> Int64 {
@@ -190,6 +200,7 @@ public enum AccountError: Error, Equatable {
 
 struct IdTokenEmail: Codable {
     let email: String?
+    let email_verified: Bool?
 }
 
 struct FirebasePasswordRequest: Codable {

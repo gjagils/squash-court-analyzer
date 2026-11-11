@@ -14490,6 +14490,60 @@
           }
         }
       }
+    },
+    "Je e-mailadres is nog niet bevestigd. Tik op de link in de mail die we je stuurden.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your email address isn't confirmed yet. Tap the link in the email we sent you."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je e-mailadres is nog niet bevestigd. Tik op de link in de mail die we je stuurden."
+          }
+        }
+      }
+    },
+    "Bevestigmail opnieuw sturen": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send the confirmation email again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bevestigmail opnieuw sturen"
+          }
+        }
+      }
+    },
+    "We hebben de mail opnieuw gestuurd naar %@.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We sent the email again to %@."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We hebben de mail opnieuw gestuurd naar %@."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -389,6 +389,29 @@ final class PlayerAccountTests: XCTestCase {
         }
     }
 
+    @MainActor
+    func testAnUnconfirmedAddressGetsAReminderAndTheMailAgain() async throws {
+        let transport = FakeAccountTransport()
+        let claims = Data("{\"email\":\"a@b.nl\",\"email_verified\":false}".utf8).base64EncodedString().replacingOccurrences(of: "=", with: "")
+        transport.signInToken = "h.\(claims).s"
+        transport.mailStatus = 202
+        let account = PlayerAccount()
+        account.configure(endpoints: endpoints(), transport: transport, secrets: MemoryAccountSecrets())
+        try await account.signIn(email: "a@b.nl", password: "geheim1")
+        XCTAssertTrue(account.needsEmailVerification, "signed in anyway, with a reminder")
+
+        try await account.resendVerification()
+        XCTAssertEqual(transport.requests.filter { request in request.url.hasSuffix("/api/v1/mail/verify") }.count, 1)
+        transport.mailStatus = 503
+        try await account.resendVerification()
+        XCTAssertTrue(transport.requests.contains { request in request.url.contains("accounts:sendOobCode") }, "Firebase when the Worker cannot")
+
+        // After the link: the next token no longer says unconfirmed
+        transport.refreshedEmail = "a@b.nl"
+        try await account.refreshEmail()
+        XCTAssertFalse(account.needsEmailVerification)
+    }
+
     func testTheEmailClaimOfAnIdToken() {
         let claims = Data("{\"email\":\"x@y.nl\"}".utf8).base64EncodedString().replacingOccurrences(of: "=", with: "")
         XCTAssertEqual(AuthSession.emailClaim("a.\(claims).b"), "x@y.nl")
@@ -512,6 +535,8 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
     var mailError = ""
     /// A refreshed ID token carries this address (a JWT with an email claim)
     var refreshedEmail: String? = nil
+    /// Signing in answers with this ID token instead of "id-1"
+    var signInToken: String? = nil
     private var profile: String? = nil
     private var refreshes = 1
 
@@ -533,7 +558,7 @@ final class FakeAccountTransport: LiveTransport, @unchecked Sendable {
                 return reply(200, "{\"id_token\":\"id-\(refreshes)\",\"refresh_token\":\"r\(refreshes)\",\"expires_in\":\"3600\",\"user_id\":\"uid-1\"}")
             }
             if address.contains("accounts:signUp") || address.contains("accounts:signInWithPassword") {
-                return reply(200, "{\"localId\":\"uid-1\",\"email\":\"a@b.nl\",\"idToken\":\"id-1\",\"refreshToken\":\"r1\",\"expiresIn\":\"3600\"}")
+                return reply(200, "{\"localId\":\"uid-1\",\"email\":\"a@b.nl\",\"idToken\":\"\(signInToken ?? "id-1")\",\"refreshToken\":\"r1\",\"expiresIn\":\"3600\"}")
             }
             return reply(200, "{}")
         }

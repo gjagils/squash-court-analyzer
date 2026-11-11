@@ -149,6 +149,21 @@ public final class PlayerAccount {
         if let pending = pendingEmail, session?.email.lowercased() == pending { pendingEmail = nil }
     }
 
+    /// A password account whose address is not confirmed yet. It works anyway;
+    /// Mijn account shows a reminder with a button to send the mail again.
+    public var needsEmailVerification: Bool {
+        guard let current = session, current.provider == "password" else { return false }
+        return AuthSession.emailVerifiedClaim(current.idToken) == false
+    }
+
+    /// The verification mail again: ours through the Worker, Firebase's when
+    /// the Worker cannot send mail
+    public func resendVerification() async throws {
+        let token = try await validToken()
+        if try await client().mailVerify(token: token, lang: PlayerAccount.mailLanguage) { return }
+        try await firebase().sendEmailVerification(idToken: token)
+    }
+
     /// The language of the account mails
     static var mailLanguage: String { AppLanguage.current == AppLanguage.english ? "en" : "nl" }
 

@@ -8,6 +8,7 @@ public struct HomeMenuHeader: View {
     /// Sign in with Apple on iOS, for Mijn account behind the photo top left
     private let accountProviders: [AccountProviderSignIn]
     @State private var showingAccount = false
+    @State private var showingQuestion = false
 
     public init(onSettings: (() -> Void)? = nil, accountProviders: [AccountProviderSignIn] = []) {
         self.onSettings = onSettings
@@ -37,22 +38,14 @@ public struct HomeMenuHeader: View {
     /// gets the full width (Gerd-Jan, 12 October 2026)
     private static let logoSize: CGFloat = 72
 
-    private static var questionURL: URL {
-        #if SKIP
-        let android = true
-        #else
-        let android = false
-        #endif
-        return UserManual.question(android: android, english: AppLanguage.current == AppLanguage.english)
-    }
 
     public var body: some View {
         VStack(spacing: 0) {
             HStack {
                 accountButton
                 Spacer()
-                // "Stel een vraag": the question box at the top of the manual (Gerd-Jan, 11 November 2026)
-                Link(destination: HomeMenuHeader.questionURL) {
+                // "Stel een vraag": a window with an answer from the manual (Gerd-Jan, 11 November 2026)
+                Button { showingQuestion = true } label: {
                     AppSymbol("questionmark.bubble", size: 20, color: SharedColors.textSecondary)
                         .frame(width: 36, height: 36)
                 }
@@ -112,6 +105,9 @@ public struct HomeMenuHeader: View {
         .padding(.horizontal, 24)
         .sheet(isPresented: $showingAccount) {
             WhatsNewAccountSheet(providers: accountProviders) { showingAccount = false }
+        }
+        .sheet(isPresented: $showingQuestion) {
+            ManualQuestionSheet { showingQuestion = false }
         }
     }
 

@@ -78,6 +78,9 @@ public enum WhatsNew {
     public static let accountPage = 1
     public static let sharePage = 2
 
+    /// Under "Account maken": the reassurance, small (Gerd-Jan, 11 November 2026)
+    public static var accountOptional: String { L10n.text("Liever niet? Dan werkt alles zoals je gewend bent.") }
+
     public static func action(onPage page: Int) -> Action {
         if page == accountPage { return Action.account }
         if page == sharePage { return Action.shareWithTeam }
@@ -103,14 +106,14 @@ public enum WhatsNew {
 
     /// The symbols are the home screen's outline icons (AppSymbol names)
     public static var items: [Onboarding.Page] { [
-        Onboarding.Page(symbol: "medal", title: L10n.text("Jouw wedstrijden, jouw badges"),
-                        text: L10n.text("Houdt een teamgenoot of coach jouw partij bij, dan komt die wedstrijd nu bij jou terecht. Hij telt mee voor je eigen badges, je kaart en je vorm.")),
+        Onboarding.Page(symbol: "medal", title: L10n.text("Je wedstrijden komen naar jou"),
+                        text: L10n.text("Houdt een teamgenoot of coach jouw partij bij, dan komt die wedstrijd nu in jouw app binnen. Hij telt mee voor je badges, je kaart en je vorm.")),
         Onboarding.Page(symbol: "person.crop.circle", title: L10n.text("Maak je account"),
-                        text: L10n.text("Het kost een minuut: je e-mailadres en je kiest jezelf uit je SBN-team. Een account is niet verplicht; zonder werkt alles zoals je gewend bent.")),
+                        text: L10n.text("Het kost een minuut: je e-mailadres, en je kiest jezelf uit je SBN-team. Vanaf 16 jaar.")),
         Onboarding.Page(symbol: "person.2", title: L10n.text("Hoe meer teamgenoten, hoe meer badges"),
-                        text: L10n.text("Elke teamgenoot met de app kan jouw partijen fluiten of coachen. Deel de app met je team, dan krijg je na elke competitieavond je eigen wedstrijden.")),
-        Onboarding.Page(symbol: "trophy", title: L10n.text("Teamwedstrijd zonder gedoe"),
-                        text: L10n.text("Maakt iemand uit je team een teamwedstrijd, dan staat hij op je beginscherm. Eén tik en je doet mee, en je krijgt een melding bij elke uitslag.")),
+                        text: L10n.text("Jij staat op de baan, dus een ander fluit of coacht jouw partij. Deel de app met je team, dan komen je partijen vanzelf in jouw app.")),
+        Onboarding.Page(symbol: "trophy", title: L10n.text("Teamwedstrijden nu veel makkelijker"),
+                        text: L10n.text("Start iemand uit je team een teamwedstrijd, dan staat die ook in jouw app en doe je met één tik mee. Daarvoor hebben jullie een account en je team bij Mijn team.")),
     ] }
 }
 
@@ -130,7 +133,7 @@ public enum AppLinks {
     /// What "Deel met je team" sends (Nieuw in 4.0, the account reminder): why
     /// teammates should have the app too, and both stores
     public static var teamShareText: String {
-        L10n.text("Ik houd onze squashwedstrijden bij met Squash Analyzer. Zet hem ook op je telefoon en maak een account: dan tellen de partijen die we van elkaar bijhouden mee voor je eigen badges.") + "\n"
+        L10n.text("Ik houd onze competitiepartijen bij met SquashAnalyzer. Zet hem ook op je telefoon en maak een account, dan krijg je de partijen die ik van jou bijhoud vanzelf binnen, met badges.") + "\n"
             + "Android: \(playStore.absoluteString)\n"
             + "iPhone: \(appStore.absoluteString)"
     }

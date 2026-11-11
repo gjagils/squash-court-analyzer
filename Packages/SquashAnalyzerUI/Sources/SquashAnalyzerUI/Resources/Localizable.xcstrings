@@ -14256,6 +14256,168 @@
           }
         }
       }
+    },
+    "Bijvoorbeeld: Hoe deel ik de stand met mijn team?": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For example: How do I share the score with my team?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bijvoorbeeld: Hoe deel ik de stand met mijn team?"
+          }
+        }
+      }
+    },
+    "VRAAG": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ASK"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VRAAG"
+          }
+        }
+      }
+    },
+    "Even zoeken…": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Looking it up…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Even zoeken…"
+          }
+        }
+      }
+    },
+    "Lees verder: %@": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read more: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lees verder: %@"
+          }
+        }
+      }
+    },
+    "Het antwoord wordt gemaakt met AI (Cloudflare). Je vraag wordt niet bewaard. Twijfel je, kijk dan in de handleiding.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The answer is made with AI (Cloudflare). Your question is not stored. If in doubt, check the manual."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het antwoord wordt gemaakt met AI (Cloudflare). Je vraag wordt niet bewaard. Twijfel je, kijk dan in de handleiding."
+          }
+        }
+      }
+    },
+    "Dat lukte niet. Probeer het zo nog eens.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That didn't work. Try again in a moment."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dat lukte niet. Probeer het zo nog eens."
+          }
+        }
+      }
+    },
+    "Veel vragen net. Probeer het over een minuut weer.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Many questions just now. Try again in a minute."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veel vragen net. Probeer het over een minuut weer."
+          }
+        }
+      }
+    },
+    "Dat lukte niet. Probeer het zo nog eens, of mail info@squashanalyzer.com.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That didn't work. Try again in a moment, or email info@squashanalyzer.com."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dat lukte niet. Probeer het zo nog eens, of mail info@squashanalyzer.com."
+          }
+        }
+      }
+    },
+    "Een vraag over de app? Het antwoord komt uit de handleiding.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A question about the app? The answer comes from the manual."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een vraag over de app? Het antwoord komt uit de handleiding."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

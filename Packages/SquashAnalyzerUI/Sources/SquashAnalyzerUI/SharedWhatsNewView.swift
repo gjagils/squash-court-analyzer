@@ -124,6 +124,10 @@ public struct SharedWhatsNewView: View {
                 ActionButton(loc("ACCOUNT MAKEN"), icon: "person.crop.circle", style: .outlined, color: SharedColors.accent) {
                     showingAccount = true
                 }
+                Text(WhatsNew.accountOptional)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textMuted)
+                    .multilineTextAlignment(.center)
             }
         } else if action == WhatsNew.Action.shareWithTeam {
             ShareLink(item: AppLinks.teamShareText, subject: Text("Squash Analyzer")) {

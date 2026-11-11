@@ -20,8 +20,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   iets dunner, zodat de bal ook klein voorop staat. Ook groot op het lege scherm van Afgeronde wedstrijden.
 - **Je foto linksboven (4.0):** linksboven, tegenover het tandwiel: je avatar (of het persoonsicoon zonder
   account) opent Mijn account in een venster.
-- **Spraakballon rechtsboven (Gerd-Jan, 11 november 2026):** naast het tandwiel een ballonnetje met vraagteken; het
-  opent de handleiding van het eigen platform en de eigen taal op `#vraag`, waar het vraagvak meteen klaarstaat.
+- **Spraakballon rechtsboven (Gerd-Jan, 11 november 2026):** naast het tandwiel een ballonnetje met vraagteken. Het
+  opent *Stel een vraag* als venster in de app (`ManualQuestionSheet`, Core `ManualQuestion`): dezelfde
+  `/api/vraag` als op de website, antwoord met links *Lees verder* naar de handleiding.
+- **Teksten Nieuw in 4.0 herschreven met Gerd-Jan (11 november 2026):** *Je wedstrijden komen naar jou* (komt in jouw
+  app binnen) · *Maak je account* (vanaf 16 jaar; "Liever niet? Dan werkt alles zoals je gewend bent." klein onder de
+  knop) · *Hoe meer teamgenoten, hoe meer badges* ("Jij staat op de baan, dus een ander fluit of coacht jouw partij")
+  · *Teamwedstrijden nu veel makkelijker*. Nieuw deelbericht vanuit de teamgenoot ("Ik houd onze competitiepartijen
+  bij met SquashAnalyzer…").
 - **Stel een vraag bij de handleiding (website):** bovenaan de vier handleidingen (nl/en, iPhone/Android) een vraagvak.
   De website-Worker heeft sinds nu een klein script (`server/website-worker/src/`): `POST /api/vraag` kiest de passende
   stukken handleiding en vraagt Workers AI (`llama-3.3-70b-instruct-fp8-fast`) om een kort antwoord met links. Vragen

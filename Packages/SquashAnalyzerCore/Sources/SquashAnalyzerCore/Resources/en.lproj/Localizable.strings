@@ -362,7 +362,6 @@
 "Zoek je club en tik je team: je stand, je volgende wedstrijd en de stand van je tegenstander op het beginscherm." = "Find your club and tap your team: your standing, your next match and your opponent's standing on the home screen.";
 "Eenvoudig coachen" = "Simple coaching";
 "Geen tijd voor slagen en punttypes? Tik alleen wie het punt maakt en waar op de baan; de analyse laat zien waar punten gewonnen en verloren worden." = "No time for shots and point types? Just tap who won the point and where on the court; the analysis shows where points are won and lost.";
-"Teamwedstrijd zonder gedoe" = "Team matches without the hassle";
 "De partijen van je teamgenoten komen vanzelf binnen, en de uitslag haal je zo nodig op bij SBN, ook van een gespeelde wedstrijd die nog niet in de app stond." = "Your teammates' matches come in by themselves, and you can fetch the result from SBN when needed, also for a played match that was not in the app yet.";
 "Oefenpartij" = "Practice match";
 "Bewaard, maar zonder badges en buiten je spelersprofiel. Je badges blijven over echte wedstrijden gaan." = "Kept, but without badges and outside your player profile. Your badges stay about real matches.";
@@ -421,12 +420,15 @@
 
 // Nieuw in 4.0 (10 November 2026)
 "Nieuw in 4.0" = "What's new in 4.0";
-"Jouw wedstrijden, jouw badges" = "Your matches, your badges";
-"Houdt een teamgenoot of coach jouw partij bij, dan komt die wedstrijd nu bij jou terecht. Hij telt mee voor je eigen badges, je kaart en je vorm." = "When a teammate or coach records your match, it now comes to you. It counts for your own badges, your card and your form.";
 "Maak je account" = "Create your account";
-"Het kost een minuut: je e-mailadres en je kiest jezelf uit je SBN-team. Een account is niet verplicht; zonder werkt alles zoals je gewend bent." = "It takes a minute: your email address, and you pick yourself from your SBN team. An account is optional; without one everything works as before.";
 "Hoe meer teamgenoten, hoe meer badges" = "More teammates, more badges";
-"Elke teamgenoot met de app kan jouw partijen fluiten of coachen. Deel de app met je team, dan krijg je na elke competitieavond je eigen wedstrijden." = "Every teammate with the app can referee or coach your matches. Share the app with your team and you get your own matches after every league night.";
-"Teamwedstrijd zonder gedoe" = "Team matches made easy";
-"Maakt iemand uit je team een teamwedstrijd, dan staat hij op je beginscherm. Eén tik en je doet mee, en je krijgt een melding bij elke uitslag." = "When someone on your team starts a team match, it shows on your home screen. One tap to join, and you get a notification with every result.";
-"Ik houd onze squashwedstrijden bij met Squash Analyzer. Zet hem ook op je telefoon en maak een account: dan tellen de partijen die we van elkaar bijhouden mee voor je eigen badges." = "I keep track of our squash matches with Squash Analyzer. Get it on your phone too and create an account: then the matches we record for each other count for your own badges.";
+
+// Nieuw in 4.0, texts reviewed with Gerd-Jan (11 November 2026)
+"Je wedstrijden komen naar jou" = "Your matches come to you";
+"Houdt een teamgenoot of coach jouw partij bij, dan komt die wedstrijd nu in jouw app binnen. Hij telt mee voor je badges, je kaart en je vorm." = "When a teammate or coach records your match, it now arrives in your app. It counts for your badges, your card and your form.";
+"Het kost een minuut: je e-mailadres, en je kiest jezelf uit je SBN-team. Vanaf 16 jaar." = "It takes a minute: your email address, and you pick yourself from your SBN team. Ages 16 and up.";
+"Liever niet? Dan werkt alles zoals je gewend bent." = "Rather not? Then everything works as before.";
+"Jij staat op de baan, dus een ander fluit of coacht jouw partij. Deel de app met je team, dan komen je partijen vanzelf in jouw app." = "You're on court, so someone else referees or coaches your match. Share the app with your team and your matches arrive in your app by themselves.";
+"Ik houd onze competitiepartijen bij met SquashAnalyzer. Zet hem ook op je telefoon en maak een account, dan krijg je de partijen die ik van jou bijhoud vanzelf binnen, met badges." = "I keep track of our league matches with SquashAnalyzer. Get it on your phone too and create an account, then the matches I record for you arrive by themselves, with badges.";
+"Teamwedstrijden nu veel makkelijker" = "Team matches, much easier";
+"Start iemand uit je team een teamwedstrijd, dan staat die ook in jouw app en doe je met één tik mee. Daarvoor hebben jullie een account en je team bij Mijn team." = "When someone on your team starts a team match, it shows in your app too and you join with one tap. For that you both need an account and your team set in My team.";

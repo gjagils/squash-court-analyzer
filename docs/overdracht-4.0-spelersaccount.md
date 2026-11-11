@@ -74,14 +74,14 @@ Overal waar nu "geen account" staat, moet dat kloppen met 4.0. Stand 8 november:
 | App Store Connect, App Review | Testaccount voor de beoordelaar (Gerd-Jan maakt het, bijv. satest+review@gerdjan.nl) met e-mail en wachtwoord in *Sign-In Information*; in de notities: account is optioneel, verwijderen in Instellingen → Mijn account | Bij indienen |
 | Storeteksten (`release-notes/store-4.0/`, `Android/play/listing-*.json`) | "Gratis, zonder advertenties en zonder account" / "Geen account nodig" wordt "account niet verplicht" | Bij de release van 4.0 |
 | Homepage (nl/en) | "gratis, zonder advertenties en zonder account" in het blok Trakteer | Bij de release van 4.0 |
-| Handleidingen (nl/en) | Onderdeel Mijn account | Bij de release van 4.0 |
+| Handleidingen (nl/en) | Onderdeel Mijn account | Nederlands gepubliceerd 11 november (build 4); Engels nog niet |
 | App, "Nieuw in 4.0" (`WhatsNew`) | Nu nog "Nieuw in 3.2" | Vóór de releasebuild van 4.0 |
 | Badgepagina `website/badges/` (nl/en) en de tellingen "37 badges, 17 in brons, zilver en goud" (homepage, handleidingen, og-tekst) | Categorie Competitie met Teamspeler en Matchwinnaar erbij: 39 badges, 18 met treden (10 november 2026) | Bij de release van 4.0 |
 
 ## Vóór een 4.0-release
 
-- Echte Worker (`account.squashanalyzer.com`) draait nog migratie 0001 en oude code:
-  migratie 0002 en deploy nodig. Dat doet Gerd-Jan.
+- Echte Worker (`account.squashanalyzer.com`): bijgewerkt op 11 november 2026 (migraties t/m 0006,
+  mailsecrets, eigen accountmails via Cirrux). Bij een nieuwe Worker-wijziging: test eerst, dan deploy.
 - Branch `claude/wedstrijd-link-site` (pagina `/wedstrijd` en app-link voor de deellink)
   is niet gepubliceerd en wacht op het akkoord van Gerd-Jan. Hij loopt achter op `main`.
 - Testdata opruimen: `npm run reset-test` en de testlogins in Firebase.

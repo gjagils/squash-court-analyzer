@@ -402,9 +402,16 @@ final class PlayerAccountTests: XCTestCase {
 
         try await account.resendVerification()
         XCTAssertEqual(transport.requests.filter { request in request.url.hasSuffix("/api/v1/mail/verify") }.count, 1)
-        transport.mailStatus = 503
+        transport.mailStatus = 500
         try await account.resendVerification()
-        XCTAssertTrue(transport.requests.contains { request in request.url.contains("accounts:sendOobCode") }, "Firebase when the Worker cannot")
+        XCTAssertTrue(transport.requests.contains { request in request.url.contains("accounts:sendOobCode") }, "Firebase when the Worker fails")
+        transport.mailStatus = 429
+        do {
+            try await account.resendVerification()
+            XCTFail("too many")
+        } catch let error as AccountError {
+            XCTAssertEqual(error, AccountError.tooManyRequests)
+        }
 
         // After the link: the next token no longer says unconfirmed
         transport.refreshedEmail = "a@b.nl"

@@ -160,7 +160,12 @@ public final class PlayerAccount {
     /// the Worker cannot send mail
     public func resendVerification() async throws {
         let token = try await validToken()
-        if try await client().mailVerify(token: token, lang: PlayerAccount.mailLanguage) { return }
+        do {
+            if try await client().mailVerify(token: token, lang: PlayerAccount.mailLanguage) { return }
+        } catch let error as AccountError {
+            // Too many mails is an answer; any other Worker failure: Firebase sends
+            if error == AccountError.tooManyRequests || error == AccountError.noConnection { throw error }
+        }
         try await firebase().sendEmailVerification(idToken: token)
     }
 

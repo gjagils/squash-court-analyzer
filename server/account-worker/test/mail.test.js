@@ -33,6 +33,7 @@ function fakeFetch(url, init = {}) {
       return answer(200, { users: found.filter(Boolean) });
     }
     if (method === 'sendOobCode') {
+      if (firebaseLimited) return answer(400, { error: { message: 'TOO_MANY_ATTEMPTS_TRY_LATER' } });
       if (!Object.values(users).some((u) => u.email === body.email)) return answer(200, { kind: 'identitytoolkit#GetOobConfirmationCodeResponse', email: body.email }); // as Firebase with email enumeration protection
       const mode = body.requestType === 'VERIFY_EMAIL' ? 'verifyEmail' : 'resetPassword';
       return answer(200, { oobLink: `https://squash-analyzer-18fb3.firebaseapp.com/__/auth/action?mode=${mode}&oobCode=OOB${mode}&apiKey=AIzaKEY&lang=nl` });
@@ -57,12 +58,14 @@ function fakeFetch(url, init = {}) {
 }
 
 let refuseNamed = false;
+let firebaseLimited = false;
 
 /** The code from a link in a mail */
 const codeIn = (mail) => /[?&]code=([A-Z2-9]{32})/.exec(mail.markdown)[1];
 
 beforeEach(() => {
   refuseNamed = false;
+  firebaseLimited = false;
   users = {};
   mails = [];
   updates = [];
@@ -96,6 +99,14 @@ describe('account mails', () => {
     expect((await call('POST', '/api/v1/mail/verify', { auth, body: { lang: 'nl' } })).status).toBe(202);
     expect(mails).toHaveLength(1);
     expect(mails[0].from).toBe('noreply@squashanalyzer.com');
+  });
+
+  it('Firebase refusing more links: 429, no mail', async () => {
+    firebaseLimited = true;
+    const { auth, email } = await player();
+    expect((await call('POST', '/api/v1/mail/verify', { auth, body: {} })).status).toBe(429);
+    expect((await call('POST', '/api/v1/mail/reset', { body: { email } })).status).toBe(429);
+    expect(mails).toHaveLength(0);
   });
 
   it('verify needs a signed-in caller', async () => {

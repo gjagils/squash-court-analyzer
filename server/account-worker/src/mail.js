@@ -159,9 +159,13 @@ async function emailInUse(env, email) {
  * Firebase's action link, turned into a link to our own page (same mode,
  * oobCode and apiKey); null when Firebase knows no such user
  */
+/** Firebase refuses more links for this address for a while: the routes answer 429 */
+const LIMITED = 'limited';
+
 async function actionLink(env, requestType, email, language) {
   const answer = await identity(env, 'sendOobCode', { requestType, email, returnOobLink: true });
   if (answer.error === 'EMAIL_NOT_FOUND' || answer.error === 'USER_NOT_FOUND') return null;
+  if (answer.error === 'TOO_MANY_ATTEMPTS_TRY_LATER') return LIMITED;
   if (answer.error) throw new Error(`oob ${answer.error}`);
   // With email enumeration protection Firebase answers 200 without a link for an unknown address
   if (!answer.oobLink) return null;
@@ -261,6 +265,7 @@ export async function mailVerify(request, env, uid) {
   if (!user || !user.email) return json(404, { error: 'not found' });
   if (!(await allowed(env, request, user.email))) return json(429, { error: 'too many mails' });
   const link = await actionLink(env, 'VERIFY_EMAIL', user.email, language);
+  if (link === LIMITED) return json(429, { error: 'too many mails' });
   if (!link) return json(404, { error: 'not found' });
   const text = texts.verify(language, await playerName(env, uid), link);
   await sendMail(env, user.email, text.subject, text.body);
@@ -276,6 +281,7 @@ export async function mailReset(request, env) {
   const language = lang(body.lang);
   if (!(await allowed(env, request, email))) return json(429, { error: 'too many mails' });
   const link = await actionLink(env, 'PASSWORD_RESET', email, language);
+  if (link === LIMITED) return json(429, { error: 'too many mails' });
   if (link) {
     const text = texts.reset(language, '', link, email);
     await sendMail(env, email, text.subject, text.body);
@@ -347,7 +353,7 @@ export async function mailConfirm(request, env) {
   if (result.error) throw new Error(`update ${result.error}`);
   await env.DB.prepare('DELETE FROM email_changes WHERE uid = ?').bind(row.uid).run();
   const link = await actionLink(env, 'PASSWORD_RESET', row.old_email, row.lang);
-  if (link) {
+  if (link && link !== LIMITED) {
     const text = texts.reset(row.lang, await playerName(env, row.uid), link, row.old_email);
     await sendMail(env, row.old_email, text.subject, text.body);
   }

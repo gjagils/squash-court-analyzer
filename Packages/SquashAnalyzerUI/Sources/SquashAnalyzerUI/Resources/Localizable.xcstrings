@@ -14329,24 +14329,6 @@
         }
       }
     },
-    "Het antwoord wordt gemaakt met AI (Cloudflare). Je vraag wordt niet bewaard. Twijfel je, kijk dan in de handleiding.": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The answer is made with AI (Cloudflare). Your question is not stored. If in doubt, check the manual."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Het antwoord wordt gemaakt met AI (Cloudflare). Je vraag wordt niet bewaard. Twijfel je, kijk dan in de handleiding."
-          }
-        }
-      }
-    },
     "Dat lukte niet. Probeer het zo nog eens.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -14415,6 +14397,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Een vraag over de app? Het antwoord komt uit de handleiding."
+          }
+        }
+      }
+    },
+    "Het antwoord wordt gemaakt met AI (Cloudflare). We bewaren je vraag, zonder je naam of IP-adres, om de app en de handleiding te verbeteren. Typ geen persoonlijke gegevens.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The answer is made with AI (Cloudflare). We keep your question, without your name or IP address, to improve the app and the manual. Don't type personal details."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het antwoord wordt gemaakt met AI (Cloudflare). We bewaren je vraag, zonder je naam of IP-adres, om de app en de handleiding te verbeteren. Typ geen persoonlijke gegevens."
           }
         }
       }

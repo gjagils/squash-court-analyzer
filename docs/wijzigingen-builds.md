@@ -23,6 +23,12 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 - **Spraakballon rechtsboven (Gerd-Jan, 11 november 2026):** naast het tandwiel een ballonnetje met vraagteken. Het
   opent *Stel een vraag* als venster in de app (`ManualQuestionSheet`, Core `ManualQuestion`): dezelfde
   `/api/vraag` als op de website, antwoord met links *Lees verder* naar de handleiding.
+- **Vragen bijhouden (Gerd-Jan, 11 november 2026):** elke vraag aan *Stel een vraag* (app en website) staat 180 dagen in
+  de accountdatabase (tabel `manual_questions`, migratie 0005; de website-Worker bindt die database), met datum, taal,
+  platform, app of web en of er een antwoord kwam. Geen IP-adres of account; e-mailadressen en telefoonnummers gaan eruit.
+  Bekijken: `scripts/vraag-stats.py` (sleutel uit `~/.squash-keys/stats-key.txt`, endpoint `GET /api/vraag/stats`). De
+  nachtelijke taak van de account-Worker ruimt oudere vragen op. Teksten in app en site en het privacybeleid zeggen nu
+  dat we de vraag bewaren.
 - **Teksten Nieuw in 4.0 herschreven met Gerd-Jan (11 november 2026):** *Je wedstrijden komen naar jou* (komt in jouw
   app binnen) · *Maak je account* (vanaf 16 jaar; "Liever niet? Dan werkt alles zoals je gewend bent." klein onder de
   knop) · *Hoe meer teamgenoten, hoe meer badges* ("Jij staat op de baan, dus een ander fluit of coacht jouw partij")

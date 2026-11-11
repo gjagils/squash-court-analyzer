@@ -2,7 +2,8 @@ import Foundation
 
 // "Stel een vraag" in the app (Gerd-Jan, 11 November 2026): the same answer as
 // the box at the top of the manual, from the website Worker's /api/vraag
-// (Workers AI, from the manual only). The question is not stored there.
+// (Workers AI, from the manual only). The Worker keeps the question for 180
+// days, without IP address, to improve the app and the manual.
 
 public struct ManualAnswerLink: Codable, Equatable, Sendable {
     public let title: String
@@ -27,6 +28,8 @@ struct ManualQuestionRequest: Codable {
     let question: String
     let lang: String
     let platform: String
+    /// "app": the owner sees where questions come from (11 November 2026)
+    let source: String
 }
 
 public enum ManualQuestion {
@@ -43,7 +46,7 @@ public enum ManualQuestion {
         let text = question.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         guard isAskable(text), let url = URL(string: site + "/api/vraag") else { throw ManualQuestionError.failed }
         let body = try JSONEncoder().encode(ManualQuestionRequest(question: text, lang: english ? "en" : "nl",
-                                                                  platform: android ? "android" : "iphone"))
+                                                                  platform: android ? "android" : "iphone", source: "app"))
         let response: AITransportResponse
         do {
             response = try await transport.send(method: "POST", url: url,

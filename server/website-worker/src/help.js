@@ -93,3 +93,28 @@ export function cleanQuestion(value) {
   const text = value.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
   return text.length >= 3 && text.length <= LIMITS.question ? text : '';
 }
+
+/** E-mail addresses and phone numbers out before a question is stored */
+export function redact(text) {
+  return text.replace(/[^\s@]+@[^\s@]+\.[a-z]{2,}/gi, '[e-mail]')
+    .replace(/(\+?\d[\d\s-]{7,}\d)/g, '[nummer]');
+}
+
+/** The stats for the owner: questions per day and the newest questions */
+export function statsView(rows, days, now) {
+  const perDay = new Map();
+  for (let i = days - 1; i >= 0; i--) perDay.set(new Date(now - i * 86400000).toISOString().slice(0, 10), 0);
+  for (const row of rows) {
+    const day = new Date(row.asked_at).toISOString().slice(0, 10);
+    if (perDay.has(day)) perDay.set(day, perDay.get(day) + 1);
+  }
+  return {
+    total: rows.length,
+    unanswered: rows.filter((row) => !row.answered).length,
+    perDay: [...perDay].map(([day, count]) => ({ day, count })),
+    questions: rows.slice(0, 300).map((row) => ({
+      askedAt: new Date(row.asked_at).toISOString(), lang: row.lang, platform: row.platform,
+      source: row.source, answered: Boolean(row.answered), question: row.question,
+    })),
+  };
+}

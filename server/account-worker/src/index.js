@@ -799,6 +799,8 @@ export async function wipeOldRequests(env) {
     env.DB.prepare('DELETE FROM open_matches WHERE received_at < ?').bind(cutoff),
     env.DB.prepare('DELETE FROM learned_links WHERE created_at < ?').bind(cutoff),
     env.DB.prepare('DELETE FROM team_lives WHERE expires_at <= ?').bind(deps.now()),
+    // "Stel een vraag" (the website Worker writes them): 180 days
+    env.DB.prepare('DELETE FROM manual_questions WHERE asked_at < ?').bind(deps.now() - 180 * DAY),
   ]);
   return results.reduce((sum, result) => sum + (result.meta?.changes || 0), 0);
 }

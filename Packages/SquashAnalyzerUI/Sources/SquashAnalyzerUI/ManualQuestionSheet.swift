@@ -85,7 +85,7 @@ public struct ManualQuestionSheet: View {
                     .background(SharedColors.cardTint)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                Text("Het antwoord wordt gemaakt met AI (Cloudflare). Je vraag wordt niet bewaard. Twijfel je, kijk dan in de handleiding.", bundle: textBundle)
+                Text("Het antwoord wordt gemaakt met AI (Cloudflare). We bewaren je vraag, zonder je naam of IP-adres, om de app en de handleiding te verbeteren. Typ geen persoonlijke gegevens.", bundle: textBundle)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
                     .fixedSize(horizontal: false, vertical: true)

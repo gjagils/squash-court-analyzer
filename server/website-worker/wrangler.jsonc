@@ -30,6 +30,12 @@
     "run_worker_first": ["/api/*"]
   },
   "ai": { "binding": "AI" },
+  // The account database (EU), for the questions of "Stel een vraag" (table
+  // manual_questions, migration 0005 in server/account-worker). The STATS_KEY
+  // secret (wrangler secret put) guards GET /api/vraag/stats.
+  "d1_databases": [
+    { "binding": "DB", "database_name": "squash-account", "database_id": "47df8ba1-503e-41b1-810b-aa57affa8a8b" }
+  ],
   // At most 10 questions a minute per IP address
   "ratelimits": [
     { "name": "VRAAG_LIMIT", "namespace_id": "1010", "simple": { "limit": 10, "period": 60 } }

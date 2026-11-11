@@ -27,6 +27,7 @@ final class ManualQuestionTests: XCTestCase {
         XCTAssertTrue(sent.contains("\"question\":\"Hoe werken badges?\""))
         XCTAssertTrue(sent.contains("\"platform\":\"iphone\""))
         XCTAssertTrue(sent.contains("\"lang\":\"nl\""))
+        XCTAssertTrue(sent.contains("\"source\":\"app\""))
     }
 
     func testBusyAndFailures() async {

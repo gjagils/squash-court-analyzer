@@ -9,12 +9,12 @@
     title: 'Ask a question', hint: 'For example: How do I share a match with a player?', send: 'Ask',
     busy: 'Looking it up…', fail: 'That did not work. Try again in a moment, or email info@squashanalyzer.com.',
     many: 'Many questions just now. Try again in a minute.', read: 'Read more:',
-    note: 'The answer comes from this manual, made by AI (Cloudflare). Questions are not stored. Check the manual if in doubt.'
+    note: 'The answer comes from this manual, made by AI (Cloudflare). We keep your question, without your name or IP address, to improve the app and the manual. Don\'t type personal details.'
   } : {
     title: 'Stel een vraag', hint: 'Bijvoorbeeld: Hoe stuur ik een wedstrijd naar een speler?', send: 'Vraag',
     busy: 'Even zoeken…', fail: 'Dat lukte niet. Probeer het zo nog eens, of mail info@squashanalyzer.com.',
     many: 'Veel vragen net. Probeer het over een minuut weer.', read: 'Lees verder:',
-    note: 'Het antwoord komt uit deze handleiding en wordt gemaakt met AI (Cloudflare). Vragen worden niet bewaard. Twijfel je, kijk dan in de handleiding.'
+    note: 'Het antwoord komt uit deze handleiding en wordt gemaakt met AI (Cloudflare). We bewaren je vraag, zonder je naam of IP-adres, om de app en de handleiding te verbeteren. Typ geen persoonlijke gegevens.'
   };
   slot.className = 'tile vraag';
   slot.innerHTML =
@@ -58,7 +58,7 @@
     show(t.busy);
     fetch('/api/vraag', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: question, lang: en ? 'en' : 'nl', platform: slot.getAttribute('data-platform') })
+      body: JSON.stringify({ question: question, lang: en ? 'en' : 'nl', platform: slot.getAttribute('data-platform'), source: 'web' })
     }).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, body: j }; });
     }).then(function (res) {

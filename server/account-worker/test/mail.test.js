@@ -33,7 +33,7 @@ function fakeFetch(url, init = {}) {
       return answer(200, { users: found.filter(Boolean) });
     }
     if (method === 'sendOobCode') {
-      if (!Object.values(users).some((u) => u.email === body.email)) return answer(400, { error: { message: 'EMAIL_NOT_FOUND' } });
+      if (!Object.values(users).some((u) => u.email === body.email)) return answer(200, { kind: 'identitytoolkit#GetOobConfirmationCodeResponse', email: body.email }); // as Firebase with email enumeration protection
       const mode = body.requestType === 'VERIFY_EMAIL' ? 'verifyEmail' : 'resetPassword';
       return answer(200, { oobLink: `https://squash-analyzer-18fb3.firebaseapp.com/__/auth/action?mode=${mode}&oobCode=OOB${mode}&apiKey=AIzaKEY&lang=nl` });
     }

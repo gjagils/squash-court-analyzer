@@ -162,7 +162,9 @@ async function emailInUse(env, email) {
 async function actionLink(env, requestType, email, language) {
   const answer = await identity(env, 'sendOobCode', { requestType, email, returnOobLink: true });
   if (answer.error === 'EMAIL_NOT_FOUND' || answer.error === 'USER_NOT_FOUND') return null;
-  if (answer.error || !answer.oobLink) throw new Error(`oob ${answer.error || 'no link'}`);
+  if (answer.error) throw new Error(`oob ${answer.error}`);
+  // With email enumeration protection Firebase answers 200 without a link for an unknown address
+  if (!answer.oobLink) return null;
   const firebase = new URL(answer.oobLink);
   const link = new URL(PAGE);
   for (const name of ['mode', 'oobCode', 'apiKey']) link.searchParams.set(name, firebase.searchParams.get(name) || '');

@@ -119,7 +119,7 @@ public struct SharedAccountSection: View {
 
     private var signInPart: some View {
         VStack(alignment: .leading, spacing: 12) {
-            note(loc("Met een account komen wedstrijden die je coach of de scheidsrechter invoert bij jou terecht. Jij kiest per wedstrijd of hij meetelt. Een account is niet nodig om de app te gebruiken."))
+            note(loc("Met een account zie je de teamwedstrijd van je team meteen en doe je met één tik mee. Partijen die een teamgenoot, coach of scheidsrechter van jou bijhoudt, komen bij jou binnen; jij kiest per wedstrijd of hij meetelt voor je badges. Een account is niet nodig om de app te gebruiken."))
             Picker(loc("Account"), selection: $registering) {
                 Text("Inloggen", bundle: textBundle).tag(false)
                 Text("Account maken", bundle: textBundle).tag(true)
@@ -212,7 +212,7 @@ public struct SharedAccountSection: View {
                     .foregroundColor(SharedColors.textPrimary)
             }
             .tint(SharedColors.accent)
-            note(loc("Bewaard worden: je e-mailadres (bij Firebase, van Google), je naam, je geboortejaar en de wedstrijden die je goedkeurt, met per rally wie won, hoe en waar. In de EU, bij Cloudflare. Notities, advies en foto's blijven op de telefoon. Je kunt het account altijd verwijderen; dan is alles meteen weg."))
+            note(loc("Bewaard worden: je e-mailadres (bij Firebase, van Google), je naam, je geboortejaar en de wedstrijden die je goedkeurt, met per rally wie won, hoe en waar. In de EU, bij Cloudflare. Notities, advies en de foto's van je spelers blijven op de telefoon. Je eigen foto staat alleen bij je account als je die zelf kiest. Je kunt het account altijd verwijderen; dan is alles meteen weg."))
             ActionButton(loc("ACCOUNT MAKEN"), style: .filled, color: SharedColors.accent,
                          disabled: busy || !consent || name.isEmpty || birthYear.isEmpty) { makeAccount() }
             Button(loc("Uitloggen")) { signOut() }

@@ -83,6 +83,8 @@ einduitslag als je live volgt. Die zit sinds 3.0 in de live-Worker (`scoreAlert`
 
 ## Later, nog niet gepland
 
+- **AI Coach-code opruimen** (Gerd-Jan, 11 november 2026; hij bepaalt zelf wanneer): de AI Coach staat sinds 11 november uit achter `Features.shared.aiCoach` (geen schermen, geen aanroepen). Op te ruimen: `AICoach.swift` (Core), het AI-deel van `SharedCoachDashboard.swift`, `APIKeyManager`/`KeystoreAPIKeyStore`, `URLSessionAICoachTransport`/`HttpAICoachTransport`, de AI-sectie in de iOS-`SettingsView` en `SharedSettingsView`, de `aiCoach`-parameters door de schermen heen, de vertalingen en `PrivacyInfo.xcprivacy` (OpenAI). Het privacybeleid kan dan ook het stuk over AI-coaching kwijt.
+
 | Punt | Bron |
 |---|---|
 | Vraag om een beoordeling in App Store en Play na een paar wedstrijden ("hoeft niet nu", 7 november 2026) | [persona-backlog](backlog-personas-2026-10-11.md) |

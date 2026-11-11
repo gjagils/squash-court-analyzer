@@ -102,15 +102,18 @@ struct SettingsView: View {
                         SettingsRow(appText("Back-up"), icon: "icloud.and.arrow.up", open: openPart == "backup") { toggle("backup") }
                         if openPart == "backup" { backupSection.padding(.bottom, 16) }
                         SettingsDivider()
-                        SettingsRow(appText("AI Coach"), icon: "brain", open: openPart == "ai") { toggle("ai") }
-                        if openPart == "ai" {
-                            VStack(alignment: .leading, spacing: 20) {
-                                aiCoachSection
-                                infoSection
+                        // AI Coach is off since 11 November 2026 (Features.shared.aiCoach); the code stays
+                        if Features.shared.aiCoach {
+                            SettingsRow(appText("AI Coach"), icon: "brain", open: openPart == "ai") { toggle("ai") }
+                            if openPart == "ai" {
+                                VStack(alignment: .leading, spacing: 20) {
+                                    aiCoachSection
+                                    infoSection
+                                }
+                                .padding(.bottom, 16)
                             }
-                            .padding(.bottom, 16)
+                            SettingsDivider()
                         }
-                        SettingsDivider()
                         AboutAppSection(appVersion: Self.appVersion, manual: UserManual.iPhone, accountProviders: AppleAccountSignIn.providers)
                     }
                     .padding(.horizontal, 24)

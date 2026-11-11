@@ -108,12 +108,12 @@ public enum WhatsNew {
     /// pages since 11 November 2026 (Gerd-Jan): it gets easier, but you need an
     /// account; what the account gives; others keep your matches, so share the app
     public static var items: [Onboarding.Page] { [
-        Onboarding.Page(symbol: "trophy", title: L10n.text("Squashen met je team wordt makkelijker"),
-                        text: L10n.text("In 4.0 komen je wedstrijden vanzelf in jouw app en doe je met één tik mee aan de teamwedstrijd. Daarvoor heb je wel een account nodig.")),
+        Onboarding.Page(symbol: "trophy", title: L10n.text("Je team in één app"),
+                        text: L10n.text("In 4.0 staat de teamwedstrijd van je team meteen op je beginscherm en doe je met één tik mee. Je partijen komen vanzelf in jouw app en tellen mee voor je badges. Daarvoor heb je wel een account nodig.")),
         Onboarding.Page(symbol: "person.crop.circle", title: L10n.text("Met een account"),
-                        text: L10n.text("• Houdt een ander jouw partij bij, dan komt die in jouw app en telt hij mee voor je badges.\n• Start iemand uit je team een teamwedstrijd, dan doe je met één tik mee.\n• Je foto staat bij jou in de app van je teamgenoten.\n\nHet kost een minuut, vanaf 16 jaar.")),
-        Onboarding.Page(symbol: "person.2", title: L10n.text("Hoe meer teamgenoten, hoe meer badges"),
-                        text: L10n.text("Jij staat op de baan, dus een ander fluit of coacht jouw partij. Deel de app met je team, dan komen je partijen vanzelf in jouw app.")),
+                        text: L10n.text("• Start iemand uit je team een teamwedstrijd, dan staat die in jouw app en doe je met één tik mee.\n• Je krijgt een melding als een partij van je team begint en als die beslist is.\n• Houdt een teamgenoot jouw partij bij, dan komt die vanzelf in jouw app.\n• Als bonus tellen die partijen mee voor je badges, en staat je foto bij jou in de app van je teamgenoten.\n\nHet kost een minuut, vanaf 16 jaar.")),
+        Onboarding.Page(symbol: "person.2", title: L10n.text("Hoe meer teamgenoten, hoe makkelijker"),
+                        text: L10n.text("Jij staat op de baan, dus een ander fluit of coacht jouw partij. Deel de app met je team, dan komen jullie partijen vanzelf bij iedereen binnen.")),
     ] }
 }
 
@@ -133,7 +133,7 @@ public enum AppLinks {
     /// What "Deel met je team" sends (Nieuw in 4.0, the account reminder): why
     /// teammates should have the app too, and both stores
     public static var teamShareText: String {
-        L10n.text("Ik houd onze competitiepartijen bij met SquashAnalyzer. Zet hem ook op je telefoon en maak een account, dan krijg je de partijen die ik van jou bijhoud vanzelf binnen, met badges.") + "\n"
+        L10n.text("Ik houd onze competitiewedstrijden bij met SquashAnalyzer. Zet hem ook op je telefoon en maak een account, dan zie je onze teamwedstrijd meteen en komen je partijen vanzelf binnen, met badges.") + "\n"
             + "Android: \(playStore.absoluteString)\n"
             + "iPhone: \(appStore.absoluteString)"
     }

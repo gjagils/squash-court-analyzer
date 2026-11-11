@@ -502,8 +502,10 @@ final class SwiftDataMatchHistoryStore: MatchHistoryStore {
 
 /// The Keychain key and URLSession sender for the shared analysis screen
 enum IOSAICoach {
-    static var context: AICoachContext {
-        AICoachContext(keyStore: APIKeyManager.shared, client: AICoachClient(transport: URLSessionAICoachTransport()))
+    /// Nil while AI Coach is off (`Features.shared.aiCoach`): no AI screens, no calls
+    static var context: AICoachContext? {
+        guard Features.shared.aiCoach else { return nil }
+        return AICoachContext(keyStore: APIKeyManager.shared, client: AICoachClient(transport: URLSessionAICoachTransport()))
     }
 }
 

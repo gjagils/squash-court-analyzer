@@ -174,7 +174,8 @@ class MainActivity : AppCompatActivity() {
         val testDataStore = RoomTestDataStore(coachMatchStore, refereeMatchDataStore, badgeAwardStore, teamMatchStore,
             backupStore, appVersion, java.io.File(filesDir, "Voor opruimen"))
         val playerFiles = ActivityPlayerFiles(this)
-        val aiCoach = AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport()))
+        // AI Coach is off (Features.shared.aiCoach, 11 November 2026): no screens, no calls
+        val aiCoach = if (Features.shared.aiCoach) AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport())) else null
         // 4.0 behind a switch (docs/releaseplan-3x-4.0.md): -PsquashPlayerAccount=true
         Features.shared.playerAccount = BuildConfig.PLAYER_ACCOUNT
         if (Features.shared.playerAccount) {

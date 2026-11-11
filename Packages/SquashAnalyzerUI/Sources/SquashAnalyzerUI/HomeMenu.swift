@@ -614,7 +614,7 @@ struct HomeAccountNudge: View {
                         Text("Maak je account", bundle: textBundle)
                             .font(SharedFonts.system(13, weight: .semibold))
                             .foregroundColor(SharedColors.textPrimary)
-                        Text("Dan tellen de partijen die je team bijhoudt mee voor jouw badges.", bundle: textBundle)
+                        Text("Dan zie je de teamwedstrijd van je team meteen en komen je partijen vanzelf binnen.", bundle: textBundle)
                             .font(SharedFonts.system(11))
                             .foregroundColor(SharedColors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)

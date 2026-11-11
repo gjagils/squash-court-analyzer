@@ -12,6 +12,10 @@ public final class Features: @unchecked Sendable {
     /// build 1: iOS `SQUASH_PLAYER_ACCOUNT = YES` in the project, Android
     /// `squashPlayerAccount` true by default; off here for the package tests.
     public var playerAccount = false
+    /// AI Coach (OpenAI advice on the coach dashboard, the key in Instellingen).
+    /// Off since 11 November 2026 (Gerd-Jan: nice, but nobody will use it); the
+    /// code stays. Off means no screens and no calls.
+    public var aiCoach = false
 
     public init() {}
 

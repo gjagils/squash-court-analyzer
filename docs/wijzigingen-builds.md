@@ -29,6 +29,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   Bekijken: `scripts/vraag-stats.py` (sleutel uit `~/.squash-keys/stats-key.txt`, endpoint `GET /api/vraag/stats`). De
   nachtelijke taak van de account-Worker ruimt oudere vragen op. Teksten in app en site en het privacybeleid zeggen nu
   dat we de vraag bewaren.
+- **Team voorop, badges als bonus (Gerd-Jan, 11 november 2026):** carrousel (*Je team in één app* · *Met een
+  account* met teamwedstrijd, meldingen en partijen eerst en badges en foto als bonus · *Hoe meer teamgenoten, hoe
+  makkelijker*), deelbericht, de herinnering *Maak je account* en de uitleg in Mijn account herschreven. Foutje
+  hersteld: Mijn account zei dat foto's op de telefoon blijven; je eigen foto staat bij je account als je die kiest.
+- **AI Coach uit (Gerd-Jan, 11 november 2026):** `Features.shared.aiCoach` staat uit: geen AI-kaart in het
+  coachdashboard, geen AI-instelling, geen aanroepen naar OpenAI (iOS `IOSAICoach.context` en Android geven nil). De
+  code blijft; opruimen staat op de roadmap. Handleidingen (nl/en) en homepage noemen hem niet meer; het privacybeleid
+  houdt het stuk over OpenAI zolang 3.2 (met AI Coach) in de stores staat.
 - **Nieuw in 4.0 in drie pagina's (Gerd-Jan, 11 november 2026):** *Squashen met je team wordt makkelijker* (maar je
   hebt een account nodig) · *Met een account* (drie punten: je partijen komen in jouw app, met één tik meedoen aan de
   teamwedstrijd, je foto bij je teamgenoten; knop Account maken) · *Hoe meer teamgenoten, hoe meer badges* (Deel met je

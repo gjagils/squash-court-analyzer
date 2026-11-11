@@ -11953,24 +11953,6 @@
         }
       }
     },
-    "Bewaard worden: je e-mailadres (bij Firebase, van Google), je naam, je geboortejaar en de wedstrijden die je goedkeurt, met per rally wie won, hoe en waar. In de EU, bij Cloudflare. Notities, advies en foto's blijven op de telefoon. Je kunt het account altijd verwijderen; dan is alles meteen weg.": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "What is kept: your email address (at Firebase, from Google), your name, your birth year and the matches you approve, with who won each rally, how and where. In the EU, at Cloudflare. Notes, advice and photos stay on the phone. You can delete the account at any time; then everything is gone at once."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bewaard worden: je e-mailadres (bij Firebase, van Google), je naam, je geboortejaar en de wedstrijden die je goedkeurt, met per rally wie won, hoe en waar. In de EU, bij Cloudflare. Notities, advies en foto's blijven op de telefoon. Je kunt het account altijd verwijderen; dan is alles meteen weg."
-          }
-        }
-      }
-    },
     "Blokkeren": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -12291,24 +12273,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je wedstrijden, verzoeken en badges op de server worden meteen gewist. Wat op deze telefoon staat blijft."
-          }
-        }
-      }
-    },
-    "Met een account komen wedstrijden die je coach of de scheidsrechter invoert bij jou terecht. Jij kiest per wedstrijd of hij meetelt. Een account is niet nodig om de app te gebruiken.": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "With an account, matches your coach or the referee enters come to you. You choose per match whether it counts. You do not need an account to use the app."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Met een account komen wedstrijden die je coach of de scheidsrechter invoert bij jou terecht. Jij kiest per wedstrijd of hij meetelt. Een account is niet nodig om de app te gebruiken."
           }
         }
       }
@@ -13933,24 +13897,6 @@
         }
       }
     },
-    "Dan tellen de partijen die je team bijhoudt mee voor jouw badges.": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Then the matches your team records count for your badges."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dan tellen de partijen die je team bijhoudt mee voor jouw badges."
-          }
-        }
-      }
-    },
     "Niet meer tonen": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -14415,6 +14361,60 @@
           "stringUnit": {
             "state": "translated",
             "value": "Het antwoord wordt gemaakt met AI (Cloudflare). We bewaren je vraag, zonder je naam of IP-adres, om de app en de handleiding te verbeteren. Typ geen persoonlijke gegevens."
+          }
+        }
+      }
+    },
+    "Dan zie je de teamwedstrijd van je team meteen en komen je partijen vanzelf binnen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Then you see your team's team match right away and your matches arrive by themselves."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dan zie je de teamwedstrijd van je team meteen en komen je partijen vanzelf binnen."
+          }
+        }
+      }
+    },
+    "Met een account zie je de teamwedstrijd van je team meteen en doe je met één tik mee. Partijen die een teamgenoot, coach of scheidsrechter van jou bijhoudt, komen bij jou binnen; jij kiest per wedstrijd of hij meetelt voor je badges. Een account is niet nodig om de app te gebruiken.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With an account you see your team's team match right away and join with one tap. Matches a teammate, coach or referee records for you arrive with you; you choose per match whether it counts for your badges. You don't need an account to use the app."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Met een account zie je de teamwedstrijd van je team meteen en doe je met één tik mee. Partijen die een teamgenoot, coach of scheidsrechter van jou bijhoudt, komen bij jou binnen; jij kiest per wedstrijd of hij meetelt voor je badges. Een account is niet nodig om de app te gebruiken."
+          }
+        }
+      }
+    },
+    "Bewaard worden: je e-mailadres (bij Firebase, van Google), je naam, je geboortejaar en de wedstrijden die je goedkeurt, met per rally wie won, hoe en waar. In de EU, bij Cloudflare. Notities, advies en de foto's van je spelers blijven op de telefoon. Je eigen foto staat alleen bij je account als je die zelf kiest. Je kunt het account altijd verwijderen; dan is alles meteen weg.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What is kept: your email address (at Firebase, from Google), your name, your birth year and the matches you approve, with who won each rally, how and where. In the EU, at Cloudflare. Notes, advice and your players' photos stay on the phone. Your own photo is only on your account if you choose one. You can delete the account at any time; then everything is gone at once."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewaard worden: je e-mailadres (bij Firebase, van Google), je naam, je geboortejaar en de wedstrijden die je goedkeurt, met per rally wie won, hoe en waar. In de EU, bij Cloudflare. Notities, advies en de foto's van je spelers blijven op de telefoon. Je eigen foto staat alleen bij je account als je die zelf kiest. Je kunt het account altijd verwijderen; dan is alles meteen weg."
           }
         }
       }

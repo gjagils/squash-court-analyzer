@@ -1,0 +1,1 @@
+Build 4 van 4.0: post van SquashAnalyzer. De bevestigmail en de mail voor een nieuw wachtwoord komen nu van noreply@squashanalyzer.com, met je naam en in de taal van je app. Nieuw in Mijn account: E-mailadres wijzigen (met een link naar je nieuwe adres en een mail om het terug te zetten) en een herinnering zolang je adres niet bevestigd is. Meer: squashanalyzer.com/testen

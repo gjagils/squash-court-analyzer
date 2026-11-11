@@ -8,7 +8,21 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 4.0 build 3)
+## Volgende build (na 4.0 build 4)
+
+## 4.0 build 4 (11 november 2026: TestFlight Squashteam, Play internal, alpha, Google Group; website gepubliceerd)
+
+- **Eigen accountmails (Gerd-Jan, 11 november 2026):** bevestigen en wachtwoord vergeten verstuurt de account-Worker
+  zelf via Cirrux (noreply@squashanalyzer.com, afzendernaam SquashAnalyzer), met de naam en in de taal van de app.
+  Firebase levert alleen de link. Kan de Worker niet mailen, dan stuurt Firebase zoals voorheen. Zie
+  [firebase-mailteksten.md](firebase-mailteksten.md), sectie 7.
+- **Bevestigmail na Dit ben ik:** pas na naam en geboortejaar, zodat de naam erin staat en wie te jong is geen mail krijgt.
+- **E-mailadres wijzigen:** in Mijn account (accounts met wachtwoord). Link naar het nieuwe adres (24 uur), daarna een
+  mail aan het oude adres om het 7 dagen terug te zetten (logt elke telefoon uit en stuurt een wachtwoordlink).
+- **Herinnering om te bevestigen:** Mijn account zegt het zolang het adres niet bevestigd is, met *Bevestigmail
+  opnieuw sturen*. Inloggen blijft meteen werken (niet blokkeren, besluit Gerd-Jan).
+- **Worker:** onbekend adres bij wachtwoord vergeten geeft 202; een blokkade van Firebase geeft 429 (te veel pogingen);
+  wrangler 4.160 (4.156 gaf fout 10021 bij elke deploy). Op iPhone getest tegen productie.
 
 ## 4.0 build 3 (11 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 

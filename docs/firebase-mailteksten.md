@@ -175,5 +175,5 @@ Eerste testmail (11 november 2026, test-Worker): komt aan, `uuid` in het antwoor
 en de mail staat in Verzonden van de noreply-mailbox. Als afzender stond de naam van de
 eigenaar van de mailbox ("Gerd-Jan van Gils"); de API-documentatie zegt dat ook. De Worker
 stuurt nu `from: "SquashAnalyzer <noreply@squashanalyzer.com>"` en valt bij een 400 of 422
-terug op het kale adres. Neemt Cirrux de naam niet over, dan is een afzendernaam per
-mailbox of per adres een Cirrux-wens.
+terug op het kale adres. Opgelost: Gerd-Jan heeft de naam in Cirrux op SquashAnalyzer
+gezet (11 november 2026).

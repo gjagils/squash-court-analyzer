@@ -244,16 +244,9 @@ def prepare(device, apk):
         device.tap("Nederlands", seconds=6)
         time.sleep(5)
     device.launch()
-    device.tap("Instellingen", seconds=8)
-    device.tap("Mijn team", seconds=6)
-    device.scroll_to("Teamlink")
-    device.tap("Teamlink", seconds=5)
-    device.type_text(TEAM_LINK)
-    device.back()
-    device.tap("BEWAAR TEAMLINK", seconds=5)
-    time.sleep(6)
-    device.launch()
-    # Team match of today, typed in and not shared: nothing goes to the live server
+    # Team match of today, typed in and not shared: nothing goes to the live server.
+    # Made before Mijn team: since 4.0 build 3 the home screen only has the
+    # Competitie button while no team is set.
     device.tap("Competitie", seconds=10)
     device.tap("Nieuwe teamwedstrijd", seconds=6)
     # Off, and checked: a shared match would land on the live server and a club screen
@@ -263,7 +256,10 @@ def prepare(device, apk):
     time.sleep(1.5)
     if not device.wait("De teamwedstrijd blijft alleen op deze telefoon", seconds=4, exact=False):
         raise SystemExit("Delen staat niet uit: gestopt, er is niets gemaakt.")
-    # Ons team is filled in from Mijn team
+    device.scroll_to("Ons team")
+    device.tap("Ons team", seconds=4)
+    device.type_text("All Inn Squash 7")
+    device.back()
     device.scroll_to("Tegenstander")
     device.tap("Tegenstander", seconds=4)
     device.type_text("Squash Delft 8")
@@ -273,6 +269,16 @@ def prepare(device, apk):
     time.sleep(3)
     if not device.scroll_to("Alleen op deze telefoon", tries=2):
         raise SystemExit("De testwedstrijd is gedeeld: stop hem in de app (Live stoppen).")
+    device.launch()
+    device.tap("Instellingen", seconds=8)
+    device.tap("Mijn team", seconds=6)
+    device.scroll_to("Teamlink")
+    device.tap("Teamlink", seconds=5)
+    device.type_text(TEAM_LINK)
+    device.back()
+    device.tap("BEWAAR TEAMLINK", seconds=5)
+    time.sleep(6)
+    device.launch()
 
 
 # The route: each step leaves a screenshot under this name. A step that fails is
@@ -299,7 +305,7 @@ def step_team_match(device, shot):
 
 
 def step_competition(device, shot):
-    device.tap("Competitie", seconds=8)
+    device.tap("Competitie ›", seconds=8, exact=False)
     time.sleep(2)
     shot("competition", "Competitie: vandaag en komend")
     device.swipe_up()

@@ -29,6 +29,9 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   Bekijken: `scripts/vraag-stats.py` (sleutel uit `~/.squash-keys/stats-key.txt`, endpoint `GET /api/vraag/stats`). De
   nachtelijke taak van de account-Worker ruimt oudere vragen op. Teksten in app en site en het privacybeleid zeggen nu
   dat we de vraag bewaren.
+- **Herinnering na twee weken (Gerd-Jan, 11 november 2026):** heeft iemand 14 dagen na de eerste start van 4.0 nog
+  geen team en geen account, dan komen de kaart *Speel je competitie bij SBN?* en het blok *Maak je account* één keer
+  terug, ook als ze weggetikt waren. Daarna niet meer. Alleen in de app, geen melding (Core `SetupReminder`).
 - **Team voorop, badges als bonus (Gerd-Jan, 11 november 2026):** carrousel (*Je team in één app* · *Met een
   account* met teamwedstrijd, meldingen en partijen eerst en badges en foto als bonus · *Hoe meer teamgenoten, hoe
   makkelijker*), deelbericht, de herinnering *Maak je account* en de uitleg in Mijn account herschreven. Foutje

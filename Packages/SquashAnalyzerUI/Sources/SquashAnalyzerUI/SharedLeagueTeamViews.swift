@@ -171,7 +171,7 @@ public struct SharedLeagueTeamCard: View {
     /// Goes up when a team match is joined with a link: read again at once
     @AppStorage(TeamMatchSupport.revisionKey) private var matchesRevision = 0
     /// The prompt was closed with the cross: it stays away (Instellingen still has the field)
-    @AppStorage("teamPromptDismissed") private var promptDismissed = false
+    @AppStorage(SetupReminder.teamPromptKey) private var promptDismissed = false
     @State private var snapshot: LeagueTeamSnapshot?
     @State private var errorMessage: String?
     @State private var loading = false

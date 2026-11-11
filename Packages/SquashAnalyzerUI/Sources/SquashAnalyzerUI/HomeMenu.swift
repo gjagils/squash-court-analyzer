@@ -172,6 +172,11 @@ public struct HomeMenuTiles: View {
             }
         }
         .padding(.horizontal, 24)
+        // After two weeks without team and account: the SBN card and Maak je account once more
+        .onAppear {
+            let account = PlayerAccount.shared
+            if SetupReminder.check(hasTeam: !teamLink.isEmpty, hasAccount: account.isSignedIn) { accountNudgeHidden = false }
+        }
         .task { await HomeInboxBar.follow() }
     }
 
@@ -594,7 +599,7 @@ struct HomeAccountNudge: View {
 
     @State private var showing = false
 
-    static let hiddenKey = "accountNudgeHidden"
+    static let hiddenKey = SetupReminder.accountNudgeKey
 
     /// Signed out, or signed in without an account (once that is known)
     static func shows(hidden: Bool) -> Bool {

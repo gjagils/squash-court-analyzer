@@ -48,6 +48,7 @@ function fakeFetch(url, init = {}) {
   }
   if (url === 'https://api.cirrux.co/public_api/v1/drafts') {
     expect(init.headers.Authorization).toBe('Bearer cxk_test');
+    if (refuseNamed && body.from.includes('<')) return answer(400, { error: 'invalid from' });
     mails.push({ to: body.to[0].address, subject: body.subject, markdown: body.markdown, from: body.from, mailbox: body.mailbox_uuid });
     return answer(201, { uuid: `draft-${mails.length}` });
   }
@@ -55,10 +56,13 @@ function fakeFetch(url, init = {}) {
   throw new Error(`unexpected fetch ${url}`);
 }
 
+let refuseNamed = false;
+
 /** The code from a link in a mail */
 const codeIn = (mail) => /[?&]code=([A-Z2-9]{32})/.exec(mail.markdown)[1];
 
 beforeEach(() => {
+  refuseNamed = false;
   users = {};
   mails = [];
   updates = [];
@@ -81,9 +85,17 @@ describe('account mails', () => {
     const res = await call('POST', '/api/v1/mail/verify', { auth, body: { lang: 'en' } });
     expect(res.status).toBe(202);
     expect(mails).toHaveLength(1);
-    expect(mails[0]).toMatchObject({ to: email, subject: 'Confirm your email address', from: 'noreply@squashanalyzer.com', mailbox: 'mailbox-uuid' });
+    expect(mails[0]).toMatchObject({ to: email, subject: 'Confirm your email address', from: 'SquashAnalyzer <noreply@squashanalyzer.com>', mailbox: 'mailbox-uuid' });
     expect(mails[0].markdown).toContain('Hi Peter,');
     expect(mails[0].markdown).toContain('https://www.squashanalyzer.com/account/?mode=verifyEmail&oobCode=OOBverifyEmail&apiKey=AIzaKEY&lang=en');
+  });
+
+  it('a refused sender name falls back to the bare address', async () => {
+    refuseNamed = true;
+    const { auth } = await player();
+    expect((await call('POST', '/api/v1/mail/verify', { auth, body: { lang: 'nl' } })).status).toBe(202);
+    expect(mails).toHaveLength(1);
+    expect(mails[0].from).toBe('noreply@squashanalyzer.com');
   });
 
   it('verify needs a signed-in caller', async () => {

@@ -171,5 +171,9 @@ Live zetten (eenmalig, per omgeving; eerst `--env test`, daarna productie):
 4. Testen met een `+test`-adres: account maken (bevestigmail), wachtwoord vergeten,
    adres wijzigen, de link volgen, terugzetten vanuit de mail aan het oude adres.
 
-Nog onbekend: de vorm van het antwoord van Cirrux bij het maken van een concept (de Worker
-leest `uuid`) en of de afzendernaam van de alias meekomt. De eerste testmail laat het zien.
+Eerste testmail (11 november 2026, test-Worker): komt aan, `uuid` in het antwoord klopt,
+en de mail staat in Verzonden van de noreply-mailbox. Als afzender stond de naam van de
+eigenaar van de mailbox ("Gerd-Jan van Gils"); de API-documentatie zegt dat ook. De Worker
+stuurt nu `from: "SquashAnalyzer <noreply@squashanalyzer.com>"` en valt bij een 400 of 422
+terug op het kale adres. Neemt Cirrux de naam niet over, dan is een afzendernaam per
+mailbox of per adres een Cirrux-wens.

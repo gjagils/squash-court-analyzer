@@ -24,6 +24,8 @@ const PAGE = 'https://www.squashanalyzer.com/account/';
 const CIRRUX = 'https://api.cirrux.co/public_api/v1';
 const IDENTITY = 'https://identitytoolkit.googleapis.com/v1';
 const FROM = 'noreply@squashanalyzer.com';
+/** With a display name; Cirrux does not document this form, so a refused draft is retried with FROM. */
+const FROM_NAMED = `SquashAnalyzer <${FROM}>`;
 export const CHANGE_HOURS = 24;
 export const UNDO_DAYS = 7;
 /** Mails per address and per IP address per hour */
@@ -173,13 +175,18 @@ async function actionLink(env, requestType, email, language) {
 /** Sends one mail: a draft, then send. Mail through the API stays in the mailbox's Sent folder. */
 export async function sendMail(env, to, subject, markdown) {
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${env.CIRRUX_API_KEY}` };
-  const draft = await mailDeps.fetch(`${CIRRUX}/drafts`, {
+  const makeDraft = (from) => mailDeps.fetch(`${CIRRUX}/drafts`, {
     method: 'POST',
     headers,
     body: JSON.stringify({
-      mailbox_uuid: env.CIRRUX_MAILBOX, body_format: 'markdown', from: FROM, to: [{ address: to }], subject, markdown,
+      mailbox_uuid: env.CIRRUX_MAILBOX, body_format: 'markdown', from, to: [{ address: to }], subject, markdown,
     }),
   });
+  let draft = await makeDraft(FROM_NAMED);
+  if (draft.status === 400 || draft.status === 422) {
+    console.warn(`cirrux refused a named sender (${draft.status}), retrying with the bare address`);
+    draft = await makeDraft(FROM);
+  }
   if (!draft.ok) throw new Error(`cirrux draft ${draft.status}`);
   const made = await draft.json().catch(() => ({}));
   const uuid = made.uuid || made.draft?.uuid || made.data?.uuid;

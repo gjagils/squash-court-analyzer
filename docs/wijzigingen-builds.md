@@ -8,7 +8,9 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 4.0 build 2)
+## Volgende build (na 4.0 build 3)
+
+## 4.0 build 3 (11 november 2026: TestFlight Squashteam in bètareview, Play internal, alpha, Google Group; website gepubliceerd)
 
 - **Beginscherm variant 2 (Gerd-Jan, 10 november 2026):** de vier regels onder Scheidsrechter en Coach zijn één rij
   icoonknoppen: *Wedstrijden*, *Spelers*, *Badges*. Met Mijn team open je Competitie via "Competitie ›" op de kaart;

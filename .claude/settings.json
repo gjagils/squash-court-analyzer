@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx wrangler deploy)",
+      "Bash(npx wrangler deploy *)",
+      "Bash(npx wrangler d1 migrations apply *)"
+    ]
+  }
+}

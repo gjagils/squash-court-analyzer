@@ -96,10 +96,8 @@ public final class PlayerAccount {
         let auth = try firebase()
         let fresh = try await auth.signUp(email: PlayerAccount.cleanEmail(email), password: password)
         signedIn(fresh)
-        // The verification mail is a courtesy: the account works without it.
-        // Ours through the Worker; Firebase's when the Worker cannot send mail.
-        let sentByWorker = (try? await client().mailVerify(token: fresh.idToken, lang: PlayerAccount.mailLanguage)) ?? false
-        if !sentByWorker { try? await auth.sendEmailVerification(idToken: fresh.idToken) }
+        // The verification mail follows createAccount, so it can greet by name
+        // (and someone under 16 gets none); Mijn account can send it again.
         try await loadProfile()
     }
 
@@ -238,6 +236,8 @@ public final class PlayerAccount {
                                                                                  sbnPath: path, teamKey: AccountSending.ownTeamKey(),
                                                                                  consent: true))
         profileChecked = true
+        // The verification mail is a courtesy: the account works without it
+        if needsEmailVerification { try? await resendVerification() }
     }
 
     /// A typo in the name, or "Dit ben ik" (the SBN player, once) chosen later.

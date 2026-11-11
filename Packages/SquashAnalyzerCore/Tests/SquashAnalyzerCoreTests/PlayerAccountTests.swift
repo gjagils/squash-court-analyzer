@@ -341,9 +341,13 @@ final class PlayerAccountTests: XCTestCase {
     func testTheWorkerSendsTheMailsAndFirebaseOnlyWhenItCannot() async throws {
         let transport = FakeAccountTransport()
         transport.mailStatus = 202
+        let claims = Data("{\"email\":\"a@b.nl\",\"email_verified\":false}".utf8).base64EncodedString().replacingOccurrences(of: "=", with: "")
+        transport.signInToken = "h.\(claims).s"
         let account = PlayerAccount()
         account.configure(endpoints: endpoints(), transport: transport, secrets: MemoryAccountSecrets())
         try await account.register(email: "a@b.nl", password: "geheim1")
+        XCTAssertFalse(transport.requests.contains { request in request.url.hasSuffix("/api/v1/mail/verify") }, "not before the name is known")
+        try await account.createAccount(name: "Gerrie", birthYear: 1990, sbnPath: nil, consent: true)
         try await account.sendPasswordReset(email: " A@B.nl ")
         XCTAssertFalse(transport.requests.contains { request in request.url.contains("accounts:sendOobCode") }, "no Firebase mail")
         XCTAssertTrue(transport.requests.contains { request in request.url.hasSuffix("/api/v1/mail/verify") })
@@ -437,7 +441,7 @@ final class PlayerAccountTests: XCTestCase {
         XCTAssertTrue(account.isSignedIn)
         XCTAssertTrue(account.profileChecked)
         XCTAssertNil(account.profile, "no account made yet")
-        XCTAssertTrue(transport.requests.contains { request in request.url.contains("accounts:sendOobCode") }, "verification mail")
+        XCTAssertFalse(transport.requests.contains { request in request.url.contains("accounts:sendOobCode") }, "the mail waits for the name")
         XCTAssertTrue(body(transport.requests[0]).contains("\"email\":\"a@b.nl\""))
 
         // A restart reads the session back

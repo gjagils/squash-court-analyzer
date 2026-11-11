@@ -29,6 +29,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   Bekijken: `scripts/vraag-stats.py` (sleutel uit `~/.squash-keys/stats-key.txt`, endpoint `GET /api/vraag/stats`). De
   nachtelijke taak van de account-Worker ruimt oudere vragen op. Teksten in app en site en het privacybeleid zeggen nu
   dat we de vraag bewaren.
+- **Nieuw in 4.0 in drie pagina's (Gerd-Jan, 11 november 2026):** *Squashen met je team wordt makkelijker* (maar je
+  hebt een account nodig) · *Met een account* (drie punten: je partijen komen in jouw app, met één tik meedoen aan de
+  teamwedstrijd, je foto bij je teamgenoten; knop Account maken) · *Hoe meer teamgenoten, hoe meer badges* (Deel met je
+  team). De aparte pagina over de teamwedstrijd is opgegaan in pagina 2.
 - **Teksten Nieuw in 4.0 herschreven met Gerd-Jan (11 november 2026):** *Je wedstrijden komen naar jou* (komt in jouw
   app binnen) · *Maak je account* (vanaf 16 jaar; "Liever niet? Dan werkt alles zoals je gewend bent." klein onder de
   knop) · *Hoe meer teamgenoten, hoe meer badges* ("Jij staat op de baan, dus een ander fluit of coacht jouw partij")

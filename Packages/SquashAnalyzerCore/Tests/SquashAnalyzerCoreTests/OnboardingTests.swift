@@ -28,7 +28,7 @@ final class OnboardingTests: XCTestCase {
     func testWhatsNewShowsOnceForEveryone() {
         XCTAssertTrue(WhatsNew.shouldShow(seenVersion: 0), "a new install, a 2.0 user and a tester alike")
         XCTAssertFalse(WhatsNew.shouldShow(seenVersion: WhatsNew.currentVersion))
-        XCTAssertEqual(WhatsNew.items.count, 4)
+        XCTAssertEqual(WhatsNew.items.count, 3)
         for item in WhatsNew.items {
             XCTAssertFalse(item.title.isEmpty)
             XCTAssertFalse(item.text.isEmpty)

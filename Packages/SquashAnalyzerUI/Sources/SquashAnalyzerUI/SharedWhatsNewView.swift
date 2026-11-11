@@ -65,10 +65,11 @@ public struct SharedWhatsNewView: View {
                         .foregroundColor(SharedColors.textPrimary)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
+                    // A list of points (the account page) reads better aligned left
                     Text(current.text)
                         .font(SharedFonts.system(16))
                         .foregroundColor(SharedColors.textSecondary)
-                        .multilineTextAlignment(.center)
+                        .multilineTextAlignment(current.text.hasPrefix("•") ? .leading : .center)
                         .fixedSize(horizontal: false, vertical: true)
                     pageAction
                     if isLast {

@@ -104,16 +104,16 @@ public enum WhatsNew {
         return perBuild && !build.isEmpty && seenBuild != build
     }
 
-    /// The symbols are the home screen's outline icons (AppSymbol names)
+    /// The symbols are the home screen's outline icons (AppSymbol names). Three
+    /// pages since 11 November 2026 (Gerd-Jan): it gets easier, but you need an
+    /// account; what the account gives; others keep your matches, so share the app
     public static var items: [Onboarding.Page] { [
-        Onboarding.Page(symbol: "medal", title: L10n.text("Je wedstrijden komen naar jou"),
-                        text: L10n.text("Houdt een teamgenoot of coach jouw partij bij, dan komt die wedstrijd nu in jouw app binnen. Hij telt mee voor je badges, je kaart en je vorm.")),
-        Onboarding.Page(symbol: "person.crop.circle", title: L10n.text("Maak je account"),
-                        text: L10n.text("Het kost een minuut: je e-mailadres, en je kiest jezelf uit je SBN-team. Vanaf 16 jaar.")),
+        Onboarding.Page(symbol: "trophy", title: L10n.text("Squashen met je team wordt makkelijker"),
+                        text: L10n.text("In 4.0 komen je wedstrijden vanzelf in jouw app en doe je met één tik mee aan de teamwedstrijd. Daarvoor heb je wel een account nodig.")),
+        Onboarding.Page(symbol: "person.crop.circle", title: L10n.text("Met een account"),
+                        text: L10n.text("• Houdt een ander jouw partij bij, dan komt die in jouw app en telt hij mee voor je badges.\n• Start iemand uit je team een teamwedstrijd, dan doe je met één tik mee.\n• Je foto staat bij jou in de app van je teamgenoten.\n\nHet kost een minuut, vanaf 16 jaar.")),
         Onboarding.Page(symbol: "person.2", title: L10n.text("Hoe meer teamgenoten, hoe meer badges"),
                         text: L10n.text("Jij staat op de baan, dus een ander fluit of coacht jouw partij. Deel de app met je team, dan komen je partijen vanzelf in jouw app.")),
-        Onboarding.Page(symbol: "trophy", title: L10n.text("Teamwedstrijden nu veel makkelijker"),
-                        text: L10n.text("Start iemand uit je team een teamwedstrijd, dan staat die ook in jouw app en doe je met één tik mee. Daarvoor hebben jullie een account en je team bij Mijn team.")),
     ] }
 }
 

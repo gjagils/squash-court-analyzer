@@ -108,3 +108,44 @@ Maak in de app een testaccount (bijvoorbeeld `satest+mail@gerdjan.nl`), kijk naa
 en tik op de link: de pagina op squashanalyzer.com/account/ moet "Je e-mailadres is
 bevestigd" tonen. Daarna in de app *Wachtwoord vergeten* en een nieuw wachtwoord kiezen.
 Testaccount verwijderen in de app.
+
+## 7. Alternatief: zelf versturen via Cirrux (antwoord Cirrux, 11 november 2026)
+
+Firebase blijft template-wijzigingen weigeren. Dan versturen we de drie mails zelf. Cirrux
+vindt dat prima: transactionele mail (bevestigen, wachtwoord-reset) is waar het voor bedoeld
+is, nieuwsbrieven en bulk niet.
+
+Wat Cirrux biedt:
+
+- **HTTP-API** (handigst vanuit de account-Worker): in admin.cirrux.co onder *API keys* een
+  key met `email.read`, `email.write` en `email.send`, beperkt tot één mailbox. Versturen gaat
+  in twee calls: een concept maken (`from: noreply@squashanalyzer.com`) en dat concept
+  versturen. `GET /v1/mailboxes` geeft de uuid van de mailbox. Voorbeeld:
+  https://cirrux.co/help/questions/transactional-mail-from-my-app
+- **SMTP**: smtp.cirrux.co, poort 465 (SSL) of 587 (STARTTLS), inloggen met een
+  app-wachtwoord (Cirrux Mail → Instellingen → Mailboxen → Wachtwoorden).
+- **Afzender zonder eigen postvak**: `noreply@squashanalyzer.com` als alias op een bestaande
+  mailbox (admin.cirrux.co → mailbox → *Create address*). Domein moet geverifieerd zijn en
+  DKIM moet kloppen.
+- **Limieten**: 100 per uur en 500 per dag per mailbox; 500 per uur en 2.000 per dag per
+  workspace. Ruim genoeg.
+- **Bounces en antwoorden** komen in de inbox van de mailbox achter de alias; eventueel een
+  filter erop. Via de API staat elke mail ook in *Verzonden*, via SMTP niet. Een send-only
+  API-call zonder kopie in Verzonden bestaat nog niet (Gerd-Jan wil die wel, als
+  Cirrux-wens).
+
+Wat er dan in de app en Worker verandert:
+
+1. De account-Worker krijgt een Firebase-serviceaccount (secret) en vraagt de actielink op via
+   Identity Toolkit `accounts:sendOobCode` met `returnOobLink: true`. Firebase verstuurt dan
+   zelf niets.
+2. De Worker zet de link om naar `https://www.squashanalyzer.com/account/?mode=…&oobCode=…`
+   (de pagina bestaat al), vult de nl/en-tekst uit sectie 5 in en verstuurt via de Cirrux-API.
+   Secrets: `CIRRUX_API_KEY`, `CIRRUX_MAILBOX`.
+3. De app roept voor *bevestigen* en *wachtwoord vergeten* de Worker aan in plaats van
+   Firebase `sendOobCode`. Ratelimit per adres in de Worker.
+4. *E-mailadres gewijzigd* (recoverEmail) stuurt Firebase zelf bij een adreswijziging; die
+   blijft op de standaardtekst tot de templates wel te bewerken zijn, of we zetten
+   adres wijzigen ook via de Worker.
+
+Inschatting: Worker en tests ongeveer een uur werk, app-kant een half uur, plus een testbuild.

@@ -8983,6 +8983,24 @@
         }
       }
     },
+    "Teamgenoten zonder account of met een oudere app doen mee met de uitnodiging.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teammates without an account or on an older app join with the invitation."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teamgenoten zonder account of met een oudere app doen mee met de uitnodiging."
+          }
+        }
+      }
+    },
     "Teamlink": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -12579,6 +12597,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Een teamgenoot heeft deze wedstrijden ingevuld met een naam die nog niet gekoppeld is. Ben jij het, dan telt de wedstrijd voor jou."
+          }
+        }
+      }
+    },
+    "Een teamgenoot houdt deze teamwedstrijd bij. De partij die je kiest komt op dezelfde pagina.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A teammate is keeping this team match. The match you choose goes on the same page."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een teamgenoot houdt deze teamwedstrijd bij. De partij die je kiest komt op dezelfde pagina."
           }
         }
       }

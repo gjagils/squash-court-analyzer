@@ -20,6 +20,8 @@ struct TeamLiveCard: View {
     var refereeSlots: [Int]? = nil
     /// 4.0: Live delen on a team-only live team match (club screen and viewers' link)
     var onGoPublic: () -> Void = {}
+    /// 4.0: the invitation of a team-only live team match, for teammates without an account or on an older app
+    var onInvite: () -> Void = {}
     /// 4.0, owner: a partij moves between "wij fluiten" and "tegenstander fluit"
     var onToggleReferee: (Int) -> Void = { _ in }
     /// "Deel met mijn team" on a team match that is not shared yet
@@ -77,6 +79,20 @@ struct TeamLiveCard: View {
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
+                // Found only with 4.0 and an account: everyone else needs the invitation
+                Text("Teamgenoten zonder account of met een oudere app doen mee met de uitnodiging.", bundle: textBundle)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if canShare {
+                    ActionButton(loc("Nodig teamleden uit"), icon: "square.and.arrow.up", disabled: busy, action: onInvite)
+                }
+                if let id = match.liveId, let key = match.liveKey {
+                    Text("Code om mee te doen: \(TeamInvite(id: id, key: key).code)", bundle: textBundle)
+                        .font(SharedFonts.system(12))
+                        .foregroundColor(SharedColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 if match.isLiveOwner {
                     ActionButton(busy ? loc("Even geduld…") : loc("Live delen"), style: .filled, disabled: busy, action: onGoPublic)
                     if let refereeSlots {

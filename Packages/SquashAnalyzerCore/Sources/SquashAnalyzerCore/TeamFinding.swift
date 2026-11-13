@@ -224,6 +224,72 @@ public enum TeamFinding {
         return match
     }
 
+    // MARK: After a match (Gerd-Jan, 13 November 2026)
+
+    /// The team match to ask about after a coach or referee match ("hoort
+    /// deze wedstrijd erbij?"): the one of today on this phone
+    /// (`TeamMatchSupport.candidate`), and with an account a teammate's live
+    /// team match of today that this phone has not joined yet. That one comes
+    /// back as it would be after joining, not saved:
+    /// `TeamMatchSupport.linkOnMatchDay` stores it once a partij is chosen, so
+    /// "Nee, gewone wedstrijd" joins nothing. Without an account, a
+    /// connection or a find it is the local answer.
+    public static func matchDayCandidate(store: any TeamMatchStore, context: TeamFindingContext? = nil,
+                                         live: TeamLive? = nil, now: Date = Date()) async -> TeamMatch? {
+        let local = await TeamMatchSupport.candidate(store: store, now: now)
+        if let local, local.isLive { return local }
+        let account: TeamFindingContext?
+        if let context {
+            account = context
+        } else {
+            account = await PlayerAccount.shared.teamFindingContext()
+        }
+        guard let account, let lives = try? await account.client.teamLives(token: account.token, fixtures: []) else { return local }
+        let live = live ?? TeamLive.shared
+        let all = (try? await store.loadAll()) ?? []
+        let team = TeamMatchSupport.cachedTeam()
+        let calendar = Calendar.current
+        for listing in lives where listing.own {
+            guard let key = listing.writeKey,
+                  calendar.isDate(Date(timeIntervalSince1970: Double(listing.matchAt) / 1000.0), inSameDayAs: now) else { continue }
+            if let local {
+                // The match of today on this phone is another one: that one is asked about
+                if !sameFixture(local.fixtureId, listing.fixture) { continue }
+            } else {
+                // Joined before or decided here: not asked about again
+                var known = false
+                for match in all where match.liveId == listing.liveId || sameFixture(match.fixtureId, listing.fixture) { known = true }
+                if known { continue }
+            }
+            let state: TeamLiveState
+            do {
+                _ = try await live.verify(id: listing.liveId, key: key)
+                state = try await live.fetch(id: listing.liveId)
+            } catch {
+                continue
+            }
+            let invite = TeamInvite(id: listing.liveId, key: key)
+            var found: TeamMatch
+            if let local {
+                found = local.linked(to: state, invite: invite)
+            } else {
+                var ownSide: TeamSide = TeamMatch.sameTeam(state.team.away, listing.teamName) ? TeamSide.away : TeamSide.home
+                if let team {
+                    if TeamMatch.sameTeam(state.team.home, team.name) { ownSide = TeamSide.home }
+                    if TeamMatch.sameTeam(state.team.away, team.name) { ownSide = TeamSide.away }
+                }
+                found = TeamMatch.joining(state, invite: invite, ownSide: ownSide)
+                found.fixtureId = listing.fixture
+                if let team {
+                    for fixture in team.fixtures where sameFixture(fixture.id, listing.fixture) { found.fixtureId = fixture.id }
+                }
+            }
+            if found.isComplete { continue }
+            return found
+        }
+        return local
+    }
+
     // MARK: Ending
 
     /// The team match leaves the list of the team (stopped or deleted here):

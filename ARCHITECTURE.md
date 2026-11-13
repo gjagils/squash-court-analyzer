@@ -175,6 +175,11 @@ invitation key, referee key; gone after the day after the match day). `TeamFindi
 instead of making a second one, offers running ones in Competitie, and joins the opponent's with the referee key
 (`TeamMatch.refereeSlots`, `mayWriteLive`: only those partijen go up from that phone). Neither server checks that
 an account really plays in the team it names (the team key comes from Mijn team).
+After a coach or referee match the match-day question (`TeamMatchLinkPrompt`) asks `TeamFinding.matchDayCandidate`:
+the team match of today on the phone, and with an account the own team's live team match of today that the phone
+has not joined; that one is stored (joined) only when a partij is chosen (`TeamMatchSupport.linkOnMatchDay`).
+A team-only live team match also shows the invitation (*Nodig teamleden uit* and the code) for teammates
+without an account or on an older app.
 **4.0, T6: notifications for the players** (`TeamAlertFollow` in Core): every live team match on the phone
 (`isProbablyLive`) is registered as an "alerts" follower (`POST /api/team/:id/followers` with `mode: "alerts"`,
 the push token and `device`, the random install id of `LiveDevice`); a match no longer live here (left,

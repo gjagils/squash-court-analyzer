@@ -178,10 +178,19 @@ public enum TeamMatchSupport {
         await link(referee: match, target: target, store: store)
     }
 
-    /// A team match from the fixtures of Mijn team is not saved until a partij is linked
+    /// A team match from the fixtures of Mijn team is not saved until a partij
+    /// is linked; neither is a teammate's live team match found for the
+    /// question (`TeamFinding.matchDayCandidate`): choosing a partij joins it
     @MainActor private static func ensureStored(_ team: TeamMatch, store: any TeamMatchStore) async {
         if let all = try? await store.loadAll() {
-            for stored in all where stored.id == team.id { return }
+            for stored in all where stored.id == team.id {
+                // Our own match of today takes the teammate's live team match; what was filled in here goes up
+                if !stored.isLive && team.isLive {
+                    try? await store.save(team)
+                    await TeamLive.shared.pushAll(team)
+                }
+                return
+            }
         }
         try? await store.save(team)
     }

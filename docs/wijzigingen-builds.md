@@ -10,6 +10,29 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 4)
 
+- **Wedstrijden aan de teamwedstrijd van een teamgenoot koppelen (Gerd-Jan, 13 november 2026, na de competitieavond
+  tegen Sluipers):** Niels had de teamwedstrijd in 4.0 aangemaakt (zichtbaar voor mijn team), de anderen telden met
+  3.2 en kregen hun partij er niet aan. Twee wijzigingen, geen serverwijziging:
+  - **Uitnodigen zonder Live delen.** Het blok DELEN van een teamwedstrijd die alleen voor het team zichtbaar is,
+    heeft nu *Nodig teamleden uit* en de code om mee te doen (zelfde uitnodiging als op het deelscherm), met de
+    regel dat teamgenoten zonder account of met een oudere app zo meedoen. Daarvoor moest je eerst *Live delen*
+    aanzetten, en dan stond de wedstrijd ook op het clubscherm.
+  - **De vraag na afloop vindt de teamwedstrijd van een teamgenoot.** Na een coach- of scheidsrechterwedstrijd vroeg
+    de app alleen naar een teamwedstrijd op de eigen telefoon, of maakte een nieuwe losse uit het programma. Met een
+    account vraagt hij nu eerst de account-Worker of het eigen team vandaag al een live teamwedstrijd heeft
+    (`TeamFinding.matchDayCandidate`). Zo ja, dan gaat de vraag over die teamwedstrijd ("Een teamgenoot houdt deze
+    teamwedstrijd bij…"); een partij kiezen doet mee én koppelt de wedstrijd, *Nee, gewone wedstrijd* doet niet mee
+    (`ensureStored` in `TeamMatchSupport`). Heeft de telefoon zelf al een niet-gedeelde teamwedstrijd voor dezelfde
+    SBN-wedstrijd, dan neemt die de livepagina over (geen tweede). Zonder account, verbinding of vondst blijft het
+    de oude vraag. De wedstrijd wordt nu opgeslagen vóór het zoeken, niet erna. Alleen voor het eigen team, niet
+    voor de teamwedstrijd van de tegenstander; nog niet bij het starten van een wedstrijd.
+  - Core-tests erbij (`TeamFindingTests`). **Geschreven in een cloudsessie zonder Swift: nog niet gecompileerd, geen
+    suite gedraaid, niet op een telefoon geprobeerd.**
+  - Releasenote (nl): *Houdt een teamgenoot de teamwedstrijd al bij? Na je wedstrijd vraagt de app of hij erbij
+    hoort en zet hem op dezelfde pagina. Teamgenoten zonder account nodig je uit vanuit de teamwedstrijd.*
+  - Releasenote (en): *Is a teammate already keeping the team match? After your match the app asks whether it
+    belongs to it and puts it on the same page. Invite teammates without an account from the team match.*
+
 - **Teamwedstrijd waar je aan meedoet op je vergrendelscherm (Gerd-Jan, 13 november 2026):** wie meedoet aan een
   live teamwedstrijd kreeg alleen de meldingen (T6) en kon hem niet op het vergrendelscherm zetten: de app had er
   geen knop voor, en een teamwedstrijd die alleen zichtbaar is voor het team heeft geen kijkerslink om bij

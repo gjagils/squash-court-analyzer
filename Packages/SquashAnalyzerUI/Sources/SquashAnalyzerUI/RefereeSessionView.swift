@@ -157,10 +157,12 @@ public struct RefereeSessionView: View {
             return
         }
         linkAsked = true
+        // Saved first: with an account the question also looks for a teammate's
+        // live team match of today, which takes a moment (or a timeout)
+        persist(value, exit: false)
         Task { @MainActor in
-            if let candidate = await TeamMatchSupport.candidate(store: teamMatchStore),
+            if let candidate = await TeamFinding.matchDayCandidate(store: teamMatchStore),
                candidate.partijLinked(to: value.id.uuidString) == nil {
-                persist(value, exit: false)
                 linkCandidate = candidate
             } else {
                 persist(value, exit: true)

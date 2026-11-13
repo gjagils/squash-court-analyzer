@@ -278,6 +278,61 @@ final class TeamFindingTests: XCTestCase {
         XCTAssertEqual(all.count, 1)
     }
 
+    // MARK: After a match
+
+    @MainActor
+    func testAfterAMatchATeammatesLiveTeamMatchOfTodayIsFoundWithoutJoining() async throws {
+        let transport = FakeFindingTransport()
+        transport.lives = "[" + transport.listing(fixture: stored, liveId: "keeslive2345", writeKey: "K33sK33sK33sK33sK33sK33s", own: true) + "]"
+        transport.roles["K33sK33sK33sK33sK33sK33s"] = "{\"role\":\"writer\"}"
+        let teamStore = store()
+        let found = await TeamFinding.matchDayCandidate(store: teamStore, context: context(transport), live: live(transport), now: day)
+        XCTAssertEqual(found?.liveId, "keeslive2345")
+        XCTAssertEqual(found?.liveKey, "K33sK33sK33sK33sK33sK33s")
+        XCTAssertEqual(found?.ownSide, TeamSide.home)
+        XCTAssertEqual(found?.fixtureId, stored)
+        let saved = try await teamStore.loadAll()
+        XCTAssertEqual(saved.count, 0, "nothing is joined until a partij is chosen")
+
+        // Another day: not asked about
+        let later = await TeamFinding.matchDayCandidate(store: teamStore, context: context(transport), live: live(transport),
+                                                        now: day.addingTimeInterval(3.0 * 24.0 * 3600.0))
+        XCTAssertNil(later)
+
+        // Its live team match is gone: nothing to ask about
+        transport.gone = ["keeslive2345"]
+        let gone = await TeamFinding.matchDayCandidate(store: teamStore, context: context(transport), live: live(transport), now: day)
+        XCTAssertNil(gone)
+    }
+
+    @MainActor
+    func testAfterAMatchTheOwnMatchOfTodayTakesTheTeammatesLiveTeamMatch() async throws {
+        let transport = FakeFindingTransport()
+        transport.lives = "[" + transport.listing(fixture: stored, liveId: "keeslive2345", writeKey: "K33sK33sK33sK33sK33sK33s", own: true) + "]"
+        transport.roles["K33sK33sK33sK33sK33sK33s"] = "{\"role\":\"writer\"}"
+        let teamStore = store()
+        let mine = ownMatch()
+        try await teamStore.save(mine)
+        let found = await TeamFinding.matchDayCandidate(store: teamStore, context: context(transport), live: live(transport), now: day)
+        XCTAssertEqual(found?.id, mine.id, "no second team match")
+        XCTAssertEqual(found?.liveId, "keeslive2345")
+        let saved = try await teamStore.loadAll()
+        XCTAssertNil(saved.first?.liveId, "not joined until a partij is chosen")
+    }
+
+    @MainActor
+    func testAfterAMatchAJoinedTeamMatchIsAskedAboutWithoutTheServer() async throws {
+        let transport = FakeFindingTransport()
+        let teamStore = store()
+        var mine = ownMatch()
+        mine.liveId = "keeslive2345"
+        mine.liveKey = "K33sK33sK33sK33sK33sK33s"
+        try await teamStore.save(mine)
+        let found = await TeamFinding.matchDayCandidate(store: teamStore, context: context(transport), live: live(transport), now: day)
+        XCTAssertEqual(found?.id, mine.id)
+        XCTAssertEqual(transport.count("GET", "/api/v1/me/team/lives"), 0)
+    }
+
     @MainActor
     func testAGoneOfferSaysSo() async {
         let transport = FakeFindingTransport()

@@ -76,6 +76,12 @@ public struct TeamMatchLinkPrompt: View {
                         .font(SharedFonts.system(14))
                         .foregroundColor(SharedColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
+                    if team.isLive && !team.isLiveOwner {
+                        Text("Een teamgenoot houdt deze teamwedstrijd bij. De partij die je kiest komt op dezelfde pagina.", bundle: textBundle)
+                            .font(SharedFonts.system(13))
+                            .foregroundColor(SharedColors.support)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     VStack(spacing: 8) {
                         ForEach(team.partijen, id: \.slot) { partij in
                             Button { slot = partij.slot } label: {
@@ -618,6 +624,7 @@ public struct SharedTeamMatchView: View {
                                  problem: liveProblem,
                                  refereeSlots: refereeSlotsNow,
                                  onGoPublic: { Task { await goPublic() } },
+                                 onInvite: { if let shareText = tools.shareText { shareText(TeamLiveTexts.invite(match)) } },
                                  onToggleReferee: { slot in Task { await toggleReferee(slot) } },
                                  onGoLive: { Task { await goLive() } },
                                  onShare: { sharingTeam = true },

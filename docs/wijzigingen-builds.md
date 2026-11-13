@@ -26,8 +26,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
     SBN-wedstrijd, dan neemt die de livepagina over (geen tweede). Zonder account, verbinding of vondst blijft het
     de oude vraag. De wedstrijd wordt nu opgeslagen vóór het zoeken, niet erna. Alleen voor het eigen team, niet
     voor de teamwedstrijd van de tegenstander; nog niet bij het starten van een wedstrijd.
-  - Core-tests erbij (`TeamFindingTests`). **Geschreven in een cloudsessie zonder Swift: nog niet gecompileerd, geen
-    suite gedraaid, niet op een telefoon geprobeerd.**
+  - Core-tests erbij (`TeamFindingTests`). Gecontroleerd op 13 november 2026: Core met Skip, iOS, Android en Worker
+    groen; geprobeerd op twee iOS-simulators met de lokale accountopstelling (A maakt de teamwedstrijd van vandaag
+    aan, B telt een losse scheidsrechterwedstrijd en tikt op Sluiten: de vraag komt, E2 kiezen zet de partij op de
+    teamwedstrijd van A). **Nog niet op echte telefoons en niet op Android geprobeerd.**
   - Releasenote (nl): *Houdt een teamgenoot de teamwedstrijd al bij? Na je wedstrijd vraagt de app of hij erbij
     hoort en zet hem op dezelfde pagina. Teamgenoten zonder account nodig je uit vanuit de teamwedstrijd.*
   - Releasenote (en): *Is a teammate already keeping the team match? After your match the app asks whether it
@@ -41,8 +43,9 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   teamwedstrijd niet compleet is. Het is dezelfde volger als de knop op de teampagina (`LiveFollow`,
   `TeamLockScreenRow` in `SharedTeamLiveViews.swift`). Krijgt de telefoon al de meldingen van die teamwedstrijd
   (`TeamAlertFollow.isRegistered`), dan meldt de app de kaart aan met `alerts: false`, zodat een besliste partij
-  niet twee keer meldt. Geen serverwijziging. Core-test erbij (`LiveFollowTests`). **Geschreven in een
-  cloudsessie zonder Swift: nog niet gecompileerd, geen suite gedraaid, niet op een telefoon geprobeerd.**
+  niet twee keer meldt. Geen serverwijziging. Core-test erbij (`LiveFollowTests`). Gecontroleerd
+  op 13 november 2026: suites groen; op de iOS-simulator wisselt de knop naar *Stoppen met volgen*. **De kaart zelf
+  en de stille aanmelding zijn nog niet op een echte telefoon gezien** (een simulator krijgt geen pushes).
   - Releasenote (nl): *Doe je mee aan een live teamwedstrijd, dan zet je hem met Volg op vergrendelscherm op je
     vergrendelscherm.*
   - Releasenote (en): *Taking part in a live team match? Put it on your lock screen with Follow on lock screen.*

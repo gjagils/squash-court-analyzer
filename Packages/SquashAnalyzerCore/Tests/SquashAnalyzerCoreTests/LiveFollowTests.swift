@@ -151,12 +151,37 @@ final class LiveFollowTests: XCTestCase {
         XCTAssertNil(LiveFollowLink.parse("squashanalyzer://volg#team/abc"))
     }
 
+    /// A team match this phone takes part in has its plain notifications
+    /// (T6): the card on the lock screen does not notify a second time
+    @MainActor
+    func testATeamMatchWithPlainNotificationsIsFollowedSilently() async throws {
+        let defaults = UserDefaults(suiteName: "live-follow-\(UUID().uuidString)")!
+        let registration = TeamAlertRegistration(teamId: "abcdefgh2345", server: LiveFollowLink.defaultServer, token: "device", lang: "nl")
+        let stored = try JSONEncoder().encode([registration])
+        defaults.set(String(data: stored, encoding: String.Encoding.utf8), forKey: "teamMatchAlertFollows")
+        let transport = FakeFollowTransport()
+        let follow = LiveFollow(transport: transport)
+        follow.presenter = FakeFollowPresenter()
+        follow.teamAlerts = TeamAlertFollow(defaults: defaults)
+        let target = LiveFollowTarget(id: "abcdefgh2345", server: LiveFollowLink.defaultServer, kind: "team")
+        try await follow.follow(target)
+        await follow.tokenChanged("tok1", for: target)
+        XCTAssertTrue(transport.requests.last?.body.contains("\"alerts\":false") == true)
+
+        // Another team match (a supporter's link) keeps its notifications
+        let other = LiveFollowTarget(id: "zyxwvuts2345", server: LiveFollowLink.defaultServer, kind: "team")
+        try await follow.follow(other)
+        await follow.tokenChanged("tok2", for: other)
+        XCTAssertTrue(transport.requests.last?.body.contains("\"alerts\":true") == true)
+    }
+
     @MainActor
     func testFollowsATeamMatchAndSendsTheAlertsSetting() async throws {
         let transport = FakeFollowTransport()
         let presenter = FakeFollowPresenter()
         let follow = LiveFollow(transport: transport)
         follow.presenter = presenter
+        follow.teamAlerts = TeamAlertFollow(defaults: UserDefaults(suiteName: "live-follow-\(UUID().uuidString)")!)
         follow.alerts = false
         let target = LiveFollowTarget(id: "abcdefgh2345", server: LiveFollowLink.defaultServer, kind: "team")
         try await follow.follow(target)

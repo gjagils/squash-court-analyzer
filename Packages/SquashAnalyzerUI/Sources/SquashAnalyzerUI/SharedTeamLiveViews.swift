@@ -120,6 +120,11 @@ struct TeamLiveCard: View {
                     .fixedSize(horizontal: false, vertical: true)
                 ActionButton(busy ? loc("Even geduld…") : loc("Deel met mijn team"), style: .filled, disabled: busy, action: onGoLive)
             }
+            // Whoever takes part gets plain notifications by itself; the card
+            // on the lock screen is a choice, here (a team-only match has no viewers' link to follow)
+            if let liveId = match.liveId, match.isLive, !match.isComplete, LiveFollow.shared.presenter != nil {
+                TeamLockScreenRow(target: LiveFollowTarget(id: liveId, server: TeamLive.shared.baseURL, kind: "team"))
+            }
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -162,6 +167,59 @@ struct TeamLiveCard: View {
         var parts: [String] = []
         for slot in slots.sorted() { parts.append("E\(slot)") }
         return parts.joined(separator: ", ")
+    }
+}
+
+/// "Volg op vergrendelscherm" for a live team match on this phone: the same
+/// follower as the button on the team page (`LiveFollow`), without the link
+struct TeamLockScreenRow: View {
+    let target: LiveFollowTarget
+
+    @State private var busy = false
+    @State private var problem: String? = nil
+
+    private var following: Bool { LiveFollow.shared.isFollowing(target) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if following {
+                Text("Deze teamwedstrijd staat op je vergrendelscherm en gaat na elke rally mee.", bundle: textBundle)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                ActionButton(loc("Stoppen met volgen"), color: SharedColors.textSecondary, disabled: busy) {
+                    Task { await stop() }
+                }
+            } else {
+                ActionButton(busy ? loc("Even geduld…") : loc("Volg op vergrendelscherm"), disabled: busy) {
+                    Task { await start() }
+                }
+            }
+            if let problem {
+                Text(problem)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.error)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func start() async {
+        busy = true
+        problem = nil
+        do {
+            try await LiveFollow.shared.follow(target)
+        } catch {
+            problem = (error as? LiveFollowError)?.message ?? LiveFollowError.noConnection.message
+        }
+        busy = false
+    }
+
+    private func stop() async {
+        busy = true
+        problem = nil
+        await LiveFollow.shared.unfollow(target)
+        busy = false
     }
 }
 

@@ -187,6 +187,9 @@ only "E2 begonnen: …", "E2: Paul wint 3–1" and the result, never per rally; 
 `X-Squash-Device`, and a phone gets no start/decided alert of a slot it wrote (`slotWriters`). The open app
 also hides an alert about a slot it scores (`TeamLive.boundSlots`) or filled in (`shouldShow`). Setting
 `teamMatchAlerts` (Instellingen → Live meekijken), on by default.
+The card on the lock screen is not automatic: *Volg op vergrendelscherm* in the DELEN block of a live team match
+(`TeamLockScreenRow`)  follows it through `LiveFollow`, registered with `alerts: false` when the phone already
+gets these notifications for it (`TeamAlertFollow.isRegistered`).
 Later: SBN comparison, badge category Teamspeler.
 
 ## Android port

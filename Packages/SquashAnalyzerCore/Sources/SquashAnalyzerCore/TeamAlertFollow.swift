@@ -114,6 +114,12 @@ public final class TeamAlertFollow {
         return list
     }
 
+    /// Whether this phone gets the plain notifications of live team match `teamId`
+    public func isRegistered(teamId: String) -> Bool {
+        for registration in registrations where registration.teamId == teamId { return true }
+        return false
+    }
+
     private func save(_ list: [TeamAlertRegistration]) {
         guard let data = try? JSONEncoder().encode(list) else { return }
         defaults.set(String(data: data, encoding: String.Encoding.utf8), forKey: TeamAlertFollow.storageKey)

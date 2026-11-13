@@ -386,6 +386,8 @@ public final class LiveFollow {
 
     public var transport: (any LiveTransport)? = nil
     public var presenter: (any LiveFollowPresenter)? = nil
+    /// Set by tests; otherwise `TeamAlertFollow.shared`
+    public var teamAlerts: TeamAlertFollow? = nil
     public private(set) var following: [LiveFollowTarget] = []
     /// Why the last followed match came off the lock screen again (the server
     /// refused its push token), for the screen that started following it
@@ -453,9 +455,12 @@ public final class LiveFollow {
     public func register(_ token: String, for target: LiveFollowTarget) async throws {
         guard let transport, let presenter else { throw LiveFollowError.noTransport }
         guard let url = URL(string: target.server + target.apiPath + "/followers") else { throw LiveFollowError.notFound }
+        // A team match this phone takes part in has its plain notifications
+        // already (`TeamAlertFollow`): the lock screen card stays silent
+        let quiet = target.isTeam && (teamAlerts ?? TeamAlertFollow.shared).isRegistered(teamId: target.id)
         let registration = LiveFollowerRegistration(platform: presenter.platform, token: token,
                                                     sandbox: presenter.platform == "ios" ? presenter.usesSandbox : nil,
-                                                    alerts: alerts, lang: AppLanguage.current.code)
+                                                    alerts: alerts && !quiet, lang: AppLanguage.current.code)
         let body = try JSONEncoder().encode(registration)
         let response: AITransportResponse
         do {

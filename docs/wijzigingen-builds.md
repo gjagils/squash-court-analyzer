@@ -10,6 +10,20 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 4)
 
+- **Teamwedstrijd waar je aan meedoet op je vergrendelscherm (Gerd-Jan, 13 november 2026):** wie meedoet aan een
+  live teamwedstrijd kreeg alleen de meldingen (T6) en kon hem niet op het vergrendelscherm zetten: de app had er
+  geen knop voor, en een teamwedstrijd die alleen zichtbaar is voor het team heeft geen kijkerslink om bij
+  *Wedstrijd volgen* te plakken. Het blok DELEN van een live teamwedstrijd heeft nu **Volg op vergrendelscherm**
+  (en daarna *Stoppen met volgen*), voor de starter, een teamgenoot en de tegenstander; alleen zolang de
+  teamwedstrijd niet compleet is. Het is dezelfde volger als de knop op de teampagina (`LiveFollow`,
+  `TeamLockScreenRow` in `SharedTeamLiveViews.swift`). Krijgt de telefoon al de meldingen van die teamwedstrijd
+  (`TeamAlertFollow.isRegistered`), dan meldt de app de kaart aan met `alerts: false`, zodat een besliste partij
+  niet twee keer meldt. Geen serverwijziging. Core-test erbij (`LiveFollowTests`). **Geschreven in een
+  cloudsessie zonder Swift: nog niet gecompileerd, geen suite gedraaid, niet op een telefoon geprobeerd.**
+  - Releasenote (nl): *Doe je mee aan een live teamwedstrijd, dan zet je hem met Volg op vergrendelscherm op je
+    vergrendelscherm.*
+  - Releasenote (en): *Taking part in a live team match? Put it on your lock screen with Follow on lock screen.*
+
 ## 4.0 build 4 (11 november 2026: TestFlight Squashteam, Play internal, alpha, Google Group; website gepubliceerd)
 
 - **Eigen accountmails (Gerd-Jan, 11 november 2026):** bevestigen en wachtwoord vergeten verstuurt de account-Worker

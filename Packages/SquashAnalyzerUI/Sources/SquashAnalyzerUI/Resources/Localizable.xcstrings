@@ -10225,6 +10225,24 @@
         }
       }
     },
+    "Volg op vergrendelscherm": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Follow on lock screen"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volg op vergrendelscherm"
+          }
+        }
+      }
+    },
     "Volgende game": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -14019,6 +14037,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deze foto kan niet worden gebruikt."
+          }
+        }
+      }
+    },
+    "Deze teamwedstrijd staat op je vergrendelscherm en gaat na elke rally mee.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This team match is on your lock screen and updates after every rally."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze teamwedstrijd staat op je vergrendelscherm en gaat na elke rally mee."
           }
         }
       }

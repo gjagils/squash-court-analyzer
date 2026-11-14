@@ -130,3 +130,9 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
 - **Een `TimeInterval` met een geheel product (`2 * 60 * 60`) wordt in Kotlin een `Int`** en de
   Kotlin-build faalt met "expected 'Double', actual 'Int'" (iOS merkt niets). Schrijf
   `2.0 * 60.0 * 60.0` (`TeamMatch.liveIdleInterval`, 1 november 2026).
+- **Autofill (Google Wachtwoordmanager) op Android** (14 november 2026): SkipUI 1.60 geeft `.textContentType(...)` door
+  als Compose-`contentType`-semantiek (`Text/TextField.swift`), dus markeren per veld werkt in de code. `SecureField` zet
+  zelf geen `contentType` (alleen `KeyboardType.Password`): geef het wachtwoordveld expliciet `.password` of `.newPassword`.
+  Skip heeft geen `importantForAutofill`; een `.sheet` is op Android waarschijnlijk een eigen venster. **Niet gecontroleerd:**
+  of velden zonder `textContentType` geen wachtwoordblad meer geven; de emulator stond na de eerste start nog in de
+  Google-instelling en er is geen account met bewaard wachtwoord.

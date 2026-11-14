@@ -10,6 +10,12 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 4)
 
+- **Google Wachtwoordmanager op Android (14 november 2026, nog niet op een telefoon gecontroleerd):** een tester kreeg
+  in Teamwedstrijd → Partij E2 het blad "Je opgeslagen wachtwoord gebruiken?". Het e-mailadres- en wachtwoordveld van
+  Mijn account zeggen nu zelf wat ze zijn (`.textContentType(.username)`, `.password`, bij Account maken
+  `.newPassword`), zodat inloggen met een bewaard wachtwoord en het bewaren van een nieuw wachtwoord blijven werken.
+  **Nog open:** of de andere tekstvelden nu echt geen blad meer geven is niet gecontroleerd (zie `docs/skip-valkuilen.md`);
+  Gerd-Jan probeert dat op een echte telefoon met een bij Google bewaard wachtwoord.
 - **Wedstrijden aan de teamwedstrijd van een teamgenoot koppelen (Gerd-Jan, 13 november 2026, na de competitieavond
   tegen Sluipers):** Niels had de teamwedstrijd in 4.0 aangemaakt (zichtbaar voor mijn team), de anderen telden met
   3.2 en kregen hun partij er niet aan. Twee wijzigingen, geen serverwijziging:

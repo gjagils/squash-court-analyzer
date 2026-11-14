@@ -129,6 +129,8 @@ public struct SharedAccountSection: View {
             }
             .pickerStyle(.segmented)
             field(loc("E-mailadres"), text: $email)
+                // Alleen deze twee velden zeggen op Android dat ze inlogvelden zijn (zie docs/skip-valkuilen.md).
+                .textContentType(.username)
                 #if os(iOS) || SKIP
                 .keyboardType(.emailAddress)
                 #endif
@@ -136,6 +138,7 @@ public struct SharedAccountSection: View {
                 .textInputAutocapitalization(.never)
                 #endif
             SecureField(loc("Wachtwoord"), text: $password)
+                .textContentType(registering ? .newPassword : .password)
                 .accessibilityLabel(loc("Wachtwoord"))
                 .foregroundColor(SharedColors.textPrimary)
                 .padding()

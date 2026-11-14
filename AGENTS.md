@@ -20,6 +20,8 @@ commit-uitleg zijn Nederlands, code en commentaar Engels zoals het er al staat.
 - `docs/bewuste-keuzes.md`: **punten die bewust zo zijn en in een
   code-analyse niet opnieuw gemeld moeten worden.** Lees dit vóór elke
   code-analyse of review; een nieuwe bewuste keuze zet je er ook in.
+- `docs/backlog-2026-11-13.md`: wat er na de competitieavond van 13 november openstaat (op telefoons
+  proberen, vervolg op koppelen; de wachtwoordmanager op Android is klaar).
 - `docs/archief/`: afgeronde plannen en instructies (geschiedenis, niet de actuele stand).
 - `docs/competitie-vervolg.md`, `docs/plan-live-teamwedstrijd.md`: de laatste
   feature en de gemaakte keuzes.

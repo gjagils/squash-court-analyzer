@@ -42,6 +42,14 @@ public struct AccountProviderToken {
     }
 }
 
+/// Android: the sign-in form came on screen or left it. Every other text field
+/// is kept out of autofill there (`AutofillGate.kt`), so the password manager
+/// does not offer the account password on a name field. nil on iOS, where a
+/// field without a content type is left alone.
+public enum LoginAutofill {
+    @MainActor public static var onLoginVisible: ((Bool) -> Void)? = nil
+}
+
 public struct SharedAccountSection: View {
     /// Sign in with Apple and Google, from the platform; empty shows only e-mail
     let providers: [AccountProviderSignIn]
@@ -85,6 +93,8 @@ public struct SharedAccountSection: View {
                 note(loc("Inloggen is in deze build niet ingesteld."))
             } else if !account.isSignedIn {
                 signInPart
+                    .onAppear { LoginAutofill.onLoginVisible?(true) }
+                    .onDisappear { LoginAutofill.onLoginVisible?(false) }
             } else if let profile = account.profile {
                 accountPart(profile)
                 SharedAccountInbox()
@@ -129,7 +139,7 @@ public struct SharedAccountSection: View {
             }
             .pickerStyle(.segmented)
             field(loc("E-mailadres"), text: $email)
-                // Alleen deze twee velden zeggen op Android dat ze inlogvelden zijn (zie docs/skip-valkuilen.md).
+                // Only these two fields tell Android autofill what they are (docs/skip-valkuilen.md)
                 .textContentType(.username)
                 #if os(iOS) || SKIP
                 .keyboardType(.emailAddress)

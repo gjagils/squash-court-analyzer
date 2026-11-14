@@ -130,9 +130,20 @@ paar van deze regels. Bij een nieuwe valkuil: voeg hem hier toe.
 - **Een `TimeInterval` met een geheel product (`2 * 60 * 60`) wordt in Kotlin een `Int`** en de
   Kotlin-build faalt met "expected 'Double', actual 'Int'" (iOS merkt niets). Schrijf
   `2.0 * 60.0 * 60.0` (`TeamMatch.liveIdleInterval`, 1 november 2026).
-- **Autofill (Google Wachtwoordmanager) op Android** (14 november 2026): SkipUI 1.60 geeft `.textContentType(...)` door
-  als Compose-`contentType`-semantiek (`Text/TextField.swift`), dus markeren per veld werkt in de code. `SecureField` zet
-  zelf geen `contentType` (alleen `KeyboardType.Password`): geef het wachtwoordveld expliciet `.password` of `.newPassword`.
-  Skip heeft geen `importantForAutofill`; een `.sheet` is op Android waarschijnlijk een eigen venster. **Niet gecontroleerd:**
-  of velden zonder `textContentType` geen wachtwoordblad meer geven; de emulator stond na de eerste start nog in de
-  Google-instelling en er is geen account met bewaard wachtwoord.
+- **Autofill (Google Wachtwoordmanager) op Android** (14 november 2026, SkipUI 1.60, Compose UI 1.11.2): Compose meldt
+  **elk** tekstveld bij Android-autofill, met of zonder `textContentType`, en de Compose-view zegt zelf altijd
+  "belangrijk voor autofill" (`AndroidComposeView.getImportantForAutofill`). Een wachtwoordmanager gokt dan en biedt
+  het accountwachtwoord aan op een naamveld. Alleen een ouder met `IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS`
+  houdt een veld erbuiten, en een `.sheet` is een eigen venster. `AutofillGate.kt` zet dat daarom op de wortel van elk
+  venster van de app (`WindowInspector`, Android 10+; op Android 9 alleen het hoofdvenster) en zet het uit zolang het
+  inlogformulier van Mijn account zichtbaar is (`LoginAutofill.onLoginVisible`). `.textContentType(...)` gaat wel door
+  naar Compose; `SecureField` zet zelf geen type, dus het wachtwoordveld krijgt expliciet `.password` of
+  `.newPassword`. Het e-mailadresveld heeft `.username`, maar Android krijgt de hint `emailAddress` te zien (gemeten).
+  **Gemeten op de emulator (Android 16) met de debug-service `AutofillProbeService`:** zonder de poort ziet autofill
+  beide naamvelden van de wedstrijdopzet en komt het voorstel; met de poort nul velden in de wedstrijdopzet
+  (hoofdvenster) en in Speler toevoegen (blad), en bij het inlogformulier precies e-mailadres en wachtwoord, ook na
+  eerst een naamveld. **Niet gecontroleerd:** de echte Google Wachtwoordmanager met een bewaard wachtwoord (aanbieden
+  bij inloggen, bewaren bij Account maken), en Android 9.
+  Zelf meten: `adb shell settings put secure autofill_service <pakket>/com.squashanalyzer.android.AutofillProbeService`,
+  een veld aantikken, `adb logcat -s AutofillProbe`; daarna de instelling terugzetten
+  (`com.google.android.gms/.autofill.service.AutofillService`).

@@ -11,5 +11,15 @@
                 <action android:name="com.squashanalyzer.android.debug.LIVE_SAMPLE" />
             </intent-filter>
         </receiver>
+        <!-- Debug only: shows which text fields Android autofill gets to see (see AutofillProbeService) -->
+        <service
+            android:name=".AutofillProbeService"
+            android:exported="true"
+            android:label="Autofill probe"
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.autofill.AutofillService" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

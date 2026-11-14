@@ -51,6 +51,7 @@ import squash.analyzer.core.SquashLevelsLinks
 import androidx.compose.foundation.isSystemInDarkTheme
 import squash.analyzer.ui.AICoachContext
 import squash.analyzer.ui.ResultImageSharing
+import squash.analyzer.ui.LoginAutofill
 import squash.analyzer.ui.BackupContext
 import com.squashanalyzer.android.backup.ActivityBackupFiles
 import com.squashanalyzer.android.backup.AutoBackup
@@ -208,6 +209,9 @@ class MainActivity : AppCompatActivity() {
         // The PNG is drawn and written off the main thread; the static hook is
         // cleared in onDestroy so it never keeps an old Activity alive
         ResultImageSharing.share = resultImageShare
+        // No password manager on name fields; only the sign-in form of Mijn account takes part
+        AutofillGate.install(this)
+        LoginAutofill.onLoginVisible = loginAutofillVisible
         setContent {
             val stateHolder = rememberSaveableStateHolder()
             stateHolder.SaveableStateProvider(true) {
@@ -265,6 +269,7 @@ class MainActivity : AppCompatActivity() {
         runCatching { awards.syncTeamAwards(store.loadAll()) }
     }
 
+    private val loginAutofillVisible: (Boolean) -> Unit = { visible -> AutofillGate.setLoginVisible(visible) }
     private val resultImageShare: (ResultCard) -> Unit = { card -> shareOffMainThread { ResultImage.shareIntent(this, card) } }
 
     /** Renders a share picture on Dispatchers.IO, then opens the share sheet */
@@ -277,6 +282,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         if (ResultImageSharing.share === resultImageShare) ResultImageSharing.share = null
+        if (LoginAutofill.onLoginVisible === loginAutofillVisible) LoginAutofill.onLoginVisible = null
+        AutofillGate.uninstall(this)
         val presenter = LiveFollow.shared.presenter as? FcmLiveFollowPresenter
         if (presenter?.requestNotificationPermission === askNotificationPermission) presenter.requestNotificationPermission = null
         val teamAlerts = TeamAlertFollow.shared.platform as? AndroidTeamAlertPlatform

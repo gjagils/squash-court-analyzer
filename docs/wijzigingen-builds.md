@@ -38,7 +38,8 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   - Core-tests erbij (`TeamFindingTests`). Gecontroleerd op 13 november 2026: Core met Skip, iOS, Android en Worker
     groen; geprobeerd op twee iOS-simulators met de lokale accountopstelling (A maakt de teamwedstrijd van vandaag
     aan, B telt een losse scheidsrechterwedstrijd en tikt op Sluiten: de vraag komt, E2 kiezen zet de partij op de
-    teamwedstrijd van A). **Nog niet op echte telefoons en niet op Android geprobeerd.**
+    teamwedstrijd van A). *Nodig teamleden uit* is op 16 november 2026 door Gerd-Jan akkoord bevonden (A2 in
+    `backlog-2026-11-13.md`); **de vraag na afloop (A3) is nog niet op echte telefoons en niet op Android geprobeerd.**
   - Releasenote (nl): *Houdt een teamgenoot de teamwedstrijd al bij? Na je wedstrijd vraagt de app of hij erbij
     hoort en zet hem op dezelfde pagina. Teamgenoten zonder account nodig je uit vanuit de teamwedstrijd.*
   - Releasenote (en): *Is a teammate already keeping the team match? After your match the app asks whether it
@@ -53,8 +54,8 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   `TeamLockScreenRow` in `SharedTeamLiveViews.swift`). Krijgt de telefoon al de meldingen van die teamwedstrijd
   (`TeamAlertFollow.isRegistered`), dan meldt de app de kaart aan met `alerts: false`, zodat een besliste partij
   niet twee keer meldt. Geen serverwijziging. Core-test erbij (`LiveFollowTests`). Gecontroleerd
-  op 13 november 2026: suites groen; op de iOS-simulator wisselt de knop naar *Stoppen met volgen*. **De kaart zelf
-  en de stille aanmelding zijn nog niet op een echte telefoon gezien** (een simulator krijgt geen pushes).
+  op 13 november 2026: suites groen; op de iOS-simulator wisselt de knop naar *Stoppen met volgen*. Op 16 november 2026
+  door Gerd-Jan akkoord bevonden (A1 in `backlog-2026-11-13.md`).
   - Releasenote (nl): *Doe je mee aan een live teamwedstrijd, dan zet je hem met Volg op vergrendelscherm op je
     vergrendelscherm.*
   - Releasenote (en): *Taking part in a live team match? Put it on your lock screen with Follow on lock screen.*

@@ -72,18 +72,18 @@ Overal waar nu "geen account" staat, moet dat kloppen met 4.0. Stand 8 november:
 | Play Console, Gegevensveiligheid | E-mailadres, naam, gebruikers-ID's, app-activiteit (wedstrijden); account met e-mail en wachtwoord; URL account-verwijderen; verwijderen op verzoek | Ingestuurd via de API op 8 november (`Android/play/data-safety.csv`) |
 | App Store Connect, App-privacy | Op de dag van indienen (de labels gelden direct voor de live versie; Apple vraagt alleen wat die versie verzamelt, er is geen concept). Data Types: **Contact Info: Email Address** en **Name**; **User Content: Photos or Videos** (avatar) en **Other User Content** (wedstrijden); **Identifiers: User ID**. Elk: *Used for App Functionality*, **Linked to the user** (ja), **Tracking** (nee). Nu staan Name, Photos, Other User Content als *niet gekoppeld* (3.2). | Bekeken op 11 november, bewust niet gepubliceerd |
 | App Store Connect, App Review | Testaccount voor de beoordelaar (Gerd-Jan maakt het, bijv. satest+review@gerdjan.nl) met e-mail en wachtwoord in *Sign-In Information*; in de notities: account is optioneel, verwijderen in Instellingen → Mijn account | Bij indienen |
-| Storeteksten (`release-notes/store-4.0/`, `Android/play/listing-*.json`) | "Gratis, zonder advertenties en zonder account" / "Geen account nodig" wordt "account niet verplicht" | Bij de release van 4.0 |
-| Homepage (nl/en) | "gratis, zonder advertenties en zonder account" in het blok Trakteer | Bij de release van 4.0 |
-| Handleidingen (nl/en) | Onderdeel Mijn account | Nederlands gepubliceerd 11 november (build 4); Engels nog niet |
-| App, "Nieuw in 4.0" (`WhatsNew`) | Nu nog "Nieuw in 3.2" | Vóór de releasebuild van 4.0 |
-| Badgepagina `website/badges/` (nl/en) en de tellingen "37 badges, 17 in brons, zilver en goud" (homepage, handleidingen, og-tekst) | Categorie Competitie met Teamspeler en Matchwinnaar erbij: 39 badges, 18 met treden (10 november 2026) | Bij de release van 4.0 |
+| Storeteksten (`release-notes/store-4.0/`, `Android/play/listing-*.json`) | "Gratis, zonder advertenties en zonder account" / "Geen account nodig" wordt "account niet verplicht" | In de repo klaar op 18 november (Play-listing ook zonder AI Coach, met 39 badges); publiceren bij de release met `scripts/play_listing.py` en `scripts/asc_version.py` |
+| Homepage (nl/en) | "gratis, zonder advertenties en zonder account" in het blok Trakteer | Aangepast op 18 november ("een account is niet verplicht"); het testblok over 4.0 op de homepage gaat bij de release weg |
+| Handleidingen (nl/en) | Onderdeel Mijn account | Nederlands gepubliceerd 11 november (build 4); Engels en de build-5-onderdelen in de repo op 18 november, nog niet gepubliceerd |
+| App, "Nieuw in 4.0" (`WhatsNew`) | Pagina's voor 4.0 sinds build 3 | Voor de productiebuild `WhatsNew.perBuild` op `false` (staat op `true` voor de testronde) |
+| Badgepagina `website/badges/` (nl/en) en de tellingen "37 badges, 17 in brons, zilver en goud" (homepage, handleidingen, og-tekst) | Categorie Competitie met Teamspeler en Matchwinnaar erbij: 39 badges, 18 met treden (10 november 2026) | In de repo op 18 november (badgepagina met "vanaf versie 4.0"), nog niet gepubliceerd |
 
 ## Vóór een 4.0-release
 
 - Echte Worker (`account.squashanalyzer.com`): bijgewerkt op 11 november 2026 (migraties t/m 0006,
   mailsecrets, eigen accountmails via Cirrux). Bij een nieuwe Worker-wijziging: test eerst, dan deploy.
-- Branch `claude/wedstrijd-link-site` (pagina `/wedstrijd` en app-link voor de deellink)
-  is niet gepubliceerd en wacht op het akkoord van Gerd-Jan. Hij loopt achter op `main`.
+- De pagina `/wedstrijd` en de app-link voor de deellink zijn op 8 november samengevoegd en gepubliceerd
+  (de branch `claude/wedstrijd-link-site` is opgeruimd).
 - Testdata opruimen: `npm run reset-test` en de testlogins in Firebase.
 
 ## Testomgeving

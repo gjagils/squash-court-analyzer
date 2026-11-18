@@ -10,6 +10,16 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 4)
 
+- **Klaar voor 4.0 build 5 en de release (18 november 2026, cloudsessie zonder Mac):** releasenotes
+  `release-notes/4.0-5.md` en `android-4.0-5.md`; `website/testen.html` met de onderdelen van build 5 (datum
+  bovenaan bij de upload nalopen); handleidingen nl/en bijgewerkt (rij icoonknoppen, foto linksboven, ballonnetje,
+  de vraag na afloop met de teamwedstrijd van een teamgenoot, *Nodig teamleden uit* en *Volg op vergrendelscherm* in
+  DELEN; Engels kreeg ook Mijn account); badgepagina met de categorie Competitie en overal 39 badges, 18 met treden;
+  Trakteer op de homepage zegt "een account is niet verplicht"; Play-listing (nl/en) met het blok over team en
+  account, zonder AI Coach en zonder "Geen account nodig"; App Store-teksten Nieuw in 4.0 met de twee punten van
+  build 5. Niets gebouwd, geüpload of gepubliceerd: dat gebeurt op de Mac.
+- **Engels: "League ›" op de teamkaart** in plaats van "Competition ›"; elders heet Competitie al League.
+  *Releasenote:* geen.
 - **Google Wachtwoordmanager op Android (14 november 2026):** een tester kreeg in Teamwedstrijd → Partij E2 het blad
   "Je opgeslagen wachtwoord gebruiken?". Tekstvelden doen op Android niet meer mee met automatisch invullen
   (`AutofillGate.kt`, elk venster van de app, ook een blad). Alleen het inlogformulier van Mijn account doet mee: het

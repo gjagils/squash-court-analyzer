@@ -4,6 +4,8 @@ YOUR TEAM AND YOUR ACCOUNT
 • Create an account to see your team's team match right away and join with one tap.
 • A notification when a match of your team starts and when it is decided.
 • Matches someone else records for you arrive in your app by themselves. You choose whether they count.
+• Is a teammate already keeping the team match? After your match the app asks whether it belongs to it and puts it on the same page.
+• Taking part in a live team match? Put it on your lock screen.
 • Add a photo to your account; your teammates see it with you.
 
 LEAGUE

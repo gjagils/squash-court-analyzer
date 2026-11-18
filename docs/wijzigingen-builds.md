@@ -8,7 +8,11 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 4.0 build 4)
+## Volgende build (na 4.0 build 5)
+
+## 4.0 build 5 (18 november 2026: TestFlight Squashteam, Play internal, alpha, Google Group; website gepubliceerd)
+
+- **Opgeleverd op 18 november 2026 vanaf de Mac:** suites groen (Core met Skip 499 tests, iOS, Android, live-Worker 102, account-Worker 55, Node-reserve 16, lint). Visuele controle (ui-check): iOS-scenario's licht en donker, de teamkaart in het Engels met "League ›" op iOS en Android, en het blok DELEN van een lokale, niet-gedeelde teamwedstrijd op Android. Geen live teamwedstrijd op productie aangemaakt, omdat die op het clubscherm van All Inn zou komen; A1 en A2 had Gerd-Jan al op 16 november op telefoons goedgekeurd. Homepage nl/en: het testblok noemt build 5. TestFlight met `--keep-old` (zonder die optie vervalt ook 3.2 (4)). App Store-screenshots niet opnieuw geüpload en storeteksten niet gepubliceerd (dat gebeurt bij de productierelease).
 
 - **Klaar voor 4.0 build 5 en de release (18 november 2026, cloudsessie zonder Mac):** releasenotes
   `release-notes/4.0-5.md` en `android-4.0-5.md`; `website/testen.html` met de onderdelen van build 5 (datum

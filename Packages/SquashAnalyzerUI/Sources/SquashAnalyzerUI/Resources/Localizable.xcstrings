@@ -14616,6 +14616,186 @@
           }
         }
       }
+    },
+    "TEAMWEDSTRIJD": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TEAM MATCH"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TEAMWEDSTRIJD"
+          }
+        }
+      }
+    },
+    "Teamwedstrijd zoeken…": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Looking for a team match…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teamwedstrijd zoeken…"
+          }
+        }
+      }
+    },
+    "Tel je een partij van deze teamwedstrijd? Tik op de partij.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you scoring a match of this team match? Tap the match."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tel je een partij van deze teamwedstrijd? Tik op de partij."
+          }
+        }
+      }
+    },
+    "wordt geteld": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "being scored"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "wordt geteld"
+          }
+        }
+      }
+    },
+    "Partij %@ · best of 5": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Match %@ · best of 5"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partij %@ · best of 5"
+          }
+        }
+      }
+    },
+    "Wijzig": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wijzig"
+          }
+        }
+      }
+    },
+    "Koppel aan teamwedstrijd": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link to a team match"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koppel aan teamwedstrijd"
+          }
+        }
+      }
+    },
+    "Niet koppelen aan teamwedstrijd": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do not link to a team match"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet koppelen aan teamwedstrijd"
+          }
+        }
+      }
+    },
+    "gekoppeld aan teamwedstrijd": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "linked to a team match"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gekoppeld aan teamwedstrijd"
+          }
+        }
+      }
+    },
+    "Bij de start delen we deze teamwedstrijd met je team: teamgenoten zetten hun partij erbij. Alleen teamnamen, voornamen en de stand gaan naar de server.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When you start, we share this team match with your team: teammates add their own match. Only team names, first names and the score go to the server."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bij de start delen we deze teamwedstrijd met je team: teamgenoten zetten hun partij erbij. Alleen teamnamen, voornamen en de stand gaan naar de server."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -162,8 +162,11 @@ shared write key per team match, invitation `id.key` as a link
 team name plus position. A tracked coach/referee match bound with
 `TeamTarget.bind` is forwarded point by point through `LiveShareSync.send`;
 the team match screen pushes changed partijen on save and pulls/merges
-(`mergeLive`) on open and "Vernieuwen". The setup screen can attach a new
-match to a team match ("Onderdeel van een teamwedstrijd"). The Node server
+(`mergeLive`) on open and "Vernieuwen". The setup screen attaches a new
+match to a team match: while one is going on it first asks which partij is
+being scored (`TeamMatchSupport.startCandidate`, with an account also a
+teammate's live team match of today, since 21 November 2026); another team
+match is linked under Meer opties. The Node server
 `server/live` (NAS reserve) has no team endpoints.
 All participants share the same write key; the server does not enforce ownership per phone or slot.
 **4.0, finding a team match** (behind `Features.shared.playerAccount`, `docs/voorstel-teamwedstrijd-vinden-4.0.md`):

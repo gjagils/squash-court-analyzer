@@ -242,7 +242,9 @@ public struct CoachSessionView: View {
         // Before the first point, so no badge is ever worked out for it
         PracticeMatches.shared.set(choice.isPractice, for: fresh.id)
         match = fresh
-        // Teamwedstrijd chosen in the setup: the team match
+        // "Nee, gewone wedstrijd" at the start: the question after the match is not asked again
+        linkAsked = choice.teamDeclined
+        // A partij chosen at the start (or linked from Meer opties): the team match
         // must exist for the result to be linked, and a live one gets the state
         if let target = choice.teamTarget {
             activeTarget = target
@@ -252,8 +254,17 @@ public struct CoachSessionView: View {
             let teamMatch = choice.teamMatch
             let matchId = fresh.id
             Task { @MainActor in
-                if let teamMatch { try? await teamMatchStore.save(teamMatch) }
+                if let teamMatch { await TeamMatchSupport.storeForStart(teamMatch, store: teamMatchStore) }
                 await TeamMatchSupport.track(target, matchId: matchId, store: teamMatchStore)
+                // From the programme, with an account: now visible for the team, and the points go to its page
+                if choice.teamShareAtStart,
+                   let shared = await TeamFinding.shareAtStart(teamMatchId: target.teamMatchId, store: teamMatchStore) {
+                    let onLive = target.onLive(shared)
+                    if match?.id == matchId {
+                        activeTarget = onLive
+                        onLive.bind(matchId: matchId)
+                    }
+                }
             }
         }
         saver.start { try await store.save(fresh) }

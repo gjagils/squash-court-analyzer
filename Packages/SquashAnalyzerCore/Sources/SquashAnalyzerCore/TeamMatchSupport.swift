@@ -76,6 +76,16 @@ public struct TeamTarget: Equatable {
         return ownIsPlayer1
     }
 
+    /// The same coupling once the team match is live (shared with the team at
+    /// the start of the match): the points go to its page from here on
+    public func onLive(_ team: TeamMatch) -> TeamTarget {
+        TeamTarget(teamMatchId: teamMatchId, slot: slot, ownPlayer: ownPlayer, opponentPlayer: opponentPlayer,
+                   ownIsPlayer1: ownIsPlayer1, ownSide: ownSide,
+                   liveId: team.mayWriteLive(slot) ? team.liveId : nil,
+                   liveKey: team.mayWriteLive(slot) ? team.liveKey : nil,
+                   homeLabel: homeLabel, awayLabel: awayLabel)
+    }
+
     /// Starts forwarding a tracked match to the live page of this team match
     @MainActor public func bind(matchId: UUID) {
         guard let liveId, let liveKey else { return }
@@ -268,6 +278,48 @@ public enum TeamMatchSupport {
             return TeamMatch.from(fixture: fixture, ownTeam: team.name)
         }
         return nil
+    }
+
+    /// The team match to ask about before a coach or referee match starts
+    /// ("welke partij tel je?", Gerd-Jan, 21 November 2026): the one the home
+    /// card shows as going on (`homeMatch`, not decided), else the match of
+    /// today (`candidate`). Only what this phone knows, so it answers at once;
+    /// a teammate's live team match comes from `TeamFinding.matchDayCandidate`.
+    @MainActor public static func startCandidate(store: any TeamMatchStore, now: Date = Date()) async -> TeamMatch? {
+        let all = (try? await store.loadAll()) ?? []
+        if let home = homeMatch(in: all, now: now), !home.isComplete { return home }
+        return await candidate(store: store, now: now)
+    }
+
+    /// Which player of a match about to start is ours, when the partij or
+    /// the players marked "In mijn team" say so: a name of the partij first
+    /// (ours, else the opponent's), then the one player of the two that is in
+    /// the team. Nil when it has to be asked.
+    public static func ownIsPlayer1(partij: TeamPartij, player1Name: String, player2Name: String,
+                                    player1InTeam: Bool, player2InTeam: Bool) -> Bool? {
+        let first = player1Name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let second = player2Name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let own = partij.ownPlayer.trimmingCharacters(in: .whitespacesAndNewlines)
+        let opponent = partij.opponentPlayer.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !own.isEmpty {
+            if !first.isEmpty && samePlayer(first, own) { return true }
+            if !second.isEmpty && samePlayer(second, own) { return false }
+        }
+        if !opponent.isEmpty {
+            if !second.isEmpty && samePlayer(second, opponent) { return true }
+            if !first.isEmpty && samePlayer(first, opponent) { return false }
+        }
+        if player1InTeam && !player2InTeam { return true }
+        if player2InTeam && !player1InTeam { return false }
+        return nil
+    }
+
+    /// The team match a match is started for is on this phone before the
+    /// match is tracked: one from the programme or a teammate's live team
+    /// match (found for the question) is stored now, one that is here already
+    /// is left as it is stored
+    @MainActor public static func storeForStart(_ team: TeamMatch, store: any TeamMatchStore) async {
+        await ensureStored(team, store: store)
     }
 
     /// The team match the home card shows: the one this phone is actively part

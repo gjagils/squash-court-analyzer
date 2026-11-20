@@ -224,6 +224,33 @@ public enum TeamFinding {
         return match
     }
 
+    // MARK: At the start of a match (Gerd-Jan, 21 November 2026)
+
+    /// A team match from the programme that a match was just started for
+    /// becomes visible for the team (`makeVisible`: a teammate's live team
+    /// match for it is joined, else ours is made and registered), so two
+    /// teammates who each start a partij end up on one page without anyone
+    /// making a team match first. Read from the store, so the partij that is
+    /// being tracked stays. Nil when nothing changed: no account or team, not
+    /// a match of the programme, live already, or no connection.
+    public static func shareAtStart(teamMatchId: UUID, store: any TeamMatchStore, context: TeamFindingContext? = nil,
+                                    live: TeamLive? = nil) async -> TeamMatch? {
+        guard let all = try? await store.loadAll() else { return nil }
+        var stored: TeamMatch? = nil
+        for match in all where match.id == teamMatchId { stored = match }
+        guard let stored, !stored.isLive else { return nil }
+        let account: TeamFindingContext?
+        if let context {
+            account = context
+        } else {
+            account = await PlayerAccount.shared.teamFindingContext()
+        }
+        guard let account, canShare(stored, context: account) else { return nil }
+        guard let result = try? await makeVisible(stored, context: account, store: store, live: live) else { return nil }
+        TeamMatchSupport.noteChange()
+        return result.match
+    }
+
     // MARK: After a match (Gerd-Jan, 13 November 2026)
 
     /// The team match to ask about after a coach or referee match ("hoort

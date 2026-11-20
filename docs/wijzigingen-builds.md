@@ -10,6 +10,48 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 5)
 
+- **De vraag vooraf: "welke partij tel je?" (Gerd-Jan, 21 november 2026).** Het opzetscherm van Coach en
+  Scheidsrechter had veel keuzes, en *Teamwedstrijd* stond als derde knop bij *Soort wedstrijd*, nooit
+  voorgeselecteerd. Nu:
+  - **Is er een teamwedstrijd bezig, dan komt eerst de vraag** (`MatchSetupView.teamQuestion`): de teamwedstrijd,
+    de vier partijen E1–E4 (met namen, stand of *wordt geteld*) en *Nee, gewone wedstrijd*. Eén tik op een partij
+    beantwoordt de vraag en kiest de partij. "Bezig" is wat de teamkaart op het beginscherm toont en nog niet
+    beslist is (`TeamMatchSupport.homeMatch`: live, of de laatste 24 uur op deze telefoon gewijzigd), anders de
+    wedstrijd van vandaag (opgeslagen of uit het programma van Mijn team): `TeamMatchSupport.startCandidate`.
+  - **Met een account zoekt de opzet ook de live teamwedstrijd van een teamgenoot van vandaag** (backlog K1,
+    `TeamFinding.matchDayCandidate`, dezelfde zoektocht als de vraag na afloop). Is er op de telefoon niets om naar
+    te vragen, dan wacht de opzet daar hooguit 2 seconden op (*Teamwedstrijd zoeken…*); komt het antwoord later,
+    dan onderbreekt het de opzet niet meer en vangt de vraag na afloop het op. Zonder account of zonder
+    teamwedstrijd verandert er niets en is er geen wachttijd.
+  - **Na een partij de korte opzet:** een blok met de teamwedstrijd en *Partij E2 · best of 5* (met *Wijzig* terug
+    naar de vraag), de namen uit de partij (thuisspeler als Speler 1) en wie serveert. *Soort wedstrijd* staat er dan
+    niet. *Wie is onze speler?* verschijnt alleen als het niet uit de namen van de partij of uit *In mijn team*
+    volgt (`TeamMatchSupport.ownIsPlayer1`).
+  - **Soort wedstrijd is weer Wedstrijd of Oefenpartij.** Een andere teamwedstrijd (inhaalwedstrijd, volgende
+    week) koppel je onder *Meer opties* → *Koppel aan teamwedstrijd*; daar staat het oude blok.
+  - **Na *Nee, gewone wedstrijd* komt de vraag na afloop niet nog eens.**
+  - De teamwedstrijd wordt bij de start opgeslagen via dezelfde route als de vraag na afloop
+    (`TeamMatchSupport.storeForStart`): een teamwedstrijd die al op de telefoon staat wordt niet meer overschreven
+    met de kopie die het opzetscherm eerder las.
+  - **Met een account wordt een teamwedstrijd uit het programma bij de start gedeeld met het team**
+    (`TeamFinding.shareAtStart`, na *Start*, op de achtergrond): bestaat er al een live teamwedstrijd van een
+    teamgenoot voor dezelfde SBN-wedstrijd, dan sluit de telefoon daarbij aan, anders maakt hij er een (alleen voor
+    het team, niet op het clubscherm) en meldt hem aan (`TeamFinding.makeVisible`, dezelfde route als *Deel met
+    mijn team* bij het aanmaken). Zo komen twee teamgenoten die elk een partij starten op één pagina zonder dat
+    iemand eerst een teamwedstrijd aanmaakt, en lopen de punten vanaf dat moment live mee
+    (`TeamTarget.onLive`). Het blok in de opzet zegt het vooraf: *Bij de start delen we deze teamwedstrijd met je
+    team … Alleen teamnamen, voornamen en de stand gaan naar de server.* Niet voor een teamwedstrijd die al op de
+    telefoon stond zonder delen (de maker zette *Deel met mijn team* uit), niet voor een met de hand getypte
+    teamwedstrijd, en niet zonder account of verbinding: dan blijft hij lokaal, zoals eerst.
+  - Geen serverwijziging (bestaande routes), geen schemawijziging. Engelse teksten toegevoegd.
+  - **Nog niet geprobeerd:** het delen bij de start en het aansluiten bij een teamgenoot met twee telefoons en
+    twee accounts (op de simulator is geen account; in Core getest met een nagebootste server). Android alleen
+    gebouwd en de unit-tests gedraaid, niet op de emulator bekeken.
+  - **Nog te doen bij de build:** de handleidingen (iPhone en Android, nl/en) noemen *Teamwedstrijd* nog bij *Soort
+    wedstrijd*; die passen we aan als de build naar testers gaat.
+  *Releasenote:* Loopt er een teamwedstrijd, dan vraagt de app bij Coach en Scheidsrechter meteen welke partij je
+  telt. Eén tik en de namen staan er al.
+
 ## 4.0 build 5 (18 november 2026: TestFlight Squashteam, Play internal, alpha, Google Group; website gepubliceerd)
 
 - **Opgeleverd op 18 november 2026 vanaf de Mac:** suites groen (Core met Skip 499 tests, iOS, Android, live-Worker 102, account-Worker 55, Node-reserve 16, lint). Visuele controle (ui-check): iOS-scenario's licht en donker, de teamkaart in het Engels met "League ›" op iOS en Android, en het blok DELEN van een lokale, niet-gedeelde teamwedstrijd op Android. Geen live teamwedstrijd op productie aangemaakt, omdat die op het clubscherm van All Inn zou komen; A1 en A2 had Gerd-Jan al op 16 november op telefoons goedgekeurd. Homepage nl/en: het testblok noemt build 5. TestFlight met `--keep-old` (zonder die optie vervalt ook 3.2 (4)). App Store-screenshots niet opnieuw geüpload en storeteksten niet gepubliceerd (dat gebeurt bij de productierelease).

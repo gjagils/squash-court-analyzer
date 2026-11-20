@@ -369,4 +369,113 @@ final class TeamFindingTests: XCTestCase {
         let back = transport.requests.filter { request in request.method == "PUT" && request.url.hasSuffix("/api/team/newlive23456") }.last
         XCTAssertTrue(back?.body.contains("\"clubScreen\":false") == true)
     }
+
+    // MARK: Before a match (the question at the start)
+
+    @MainActor
+    func testTheStartAsksAboutTheTeamMatchThatIsGoingOn() async throws {
+        let matches = store()
+        let now = Date()
+        let none = await TeamMatchSupport.startCandidate(store: matches, now: now)
+        XCTAssertNil(none?.home == "Squash City 2" ? none : nil, "nothing stored: nothing of ours to ask about")
+
+        // Changed an hour ago, played on another day: the home card shows it, so the start asks
+        var underWay = ownMatch()
+        underWay.updatedAt = now.addingTimeInterval(-3600.0)
+        try await matches.save(underWay)
+        let asked = await TeamMatchSupport.startCandidate(store: matches, now: now)
+        XCTAssertEqual(asked?.id, underWay.id)
+
+        // Decided: a practice game after the team match is not asked about
+        var partijen: [TeamPartij] = []
+        for slot in 1...4 {
+            var partij = TeamPartij(slot: slot)
+            for _ in 0..<partij.gamesToWin { partij.games.append(TeamGame(own: 11, their: 5)) }
+            partijen.append(partij)
+        }
+        underWay.partijen = partijen
+        try await matches.save(underWay)
+        let after = await TeamMatchSupport.startCandidate(store: matches, now: now)
+        XCTAssertFalse(after?.id == underWay.id)
+    }
+
+    func testOurPlayerFollowsFromThePartijOrTheTeam() {
+        let filled = TeamPartij(slot: 2, ownPlayer: "Jan de Vries", opponentPlayer: "Piet Smit")
+        XCTAssertEqual(TeamMatchSupport.ownIsPlayer1(partij: filled, player1Name: "Jan de Vries", player2Name: "Piet Smit",
+                                                     player1InTeam: false, player2InTeam: false), true)
+        XCTAssertEqual(TeamMatchSupport.ownIsPlayer1(partij: filled, player1Name: "Piet", player2Name: "Jan",
+                                                     player1InTeam: false, player2InTeam: false), false, "a first name is enough")
+        let onlyOpponent = TeamPartij(slot: 2, opponentPlayer: "Piet Smit")
+        XCTAssertEqual(TeamMatchSupport.ownIsPlayer1(partij: onlyOpponent, player1Name: "Piet Smit", player2Name: "",
+                                                     player1InTeam: false, player2InTeam: false), false)
+        let empty = TeamPartij(slot: 2)
+        XCTAssertEqual(TeamMatchSupport.ownIsPlayer1(partij: empty, player1Name: "A", player2Name: "B",
+                                                     player1InTeam: false, player2InTeam: true), false, "the one player marked In mijn team")
+        XCTAssertNil(TeamMatchSupport.ownIsPlayer1(partij: empty, player1Name: "A", player2Name: "B",
+                                                   player1InTeam: true, player2InTeam: true), "both in the team: ask")
+        XCTAssertNil(TeamMatchSupport.ownIsPlayer1(partij: empty, player1Name: "", player2Name: "",
+                                                   player1InTeam: false, player2InTeam: false))
+        XCTAssertNil(TeamMatchSupport.ownIsPlayer1(partij: filled, player1Name: "Kees", player2Name: "Henk",
+                                                   player1InTeam: false, player2InTeam: false), "other names than the partij: ask")
+    }
+
+    @MainActor
+    func testATeamMatchFromTheProgrammeIsStoredAtTheStartAndAStoredOneIsLeftAlone() async throws {
+        let matches = store()
+        var match = ownMatch()
+        await TeamMatchSupport.storeForStart(match, store: matches)
+        var all = try await matches.loadAll()
+        XCTAssertEqual(all.count, 1)
+
+        // Filled in on this phone in the meantime: the copy the setup read earlier does not overwrite it
+        var changed = all[0]
+        changed.update(TeamPartij(slot: 1, ownPlayer: "Jan", opponentPlayer: "Piet"))
+        try await matches.save(changed)
+        match.updatedAt = Date()
+        await TeamMatchSupport.storeForStart(match, store: matches)
+        all = try await matches.loadAll()
+        XCTAssertEqual(all[0].partij(1).ownPlayer, "Jan")
+    }
+
+    @MainActor
+    func testStartingAPartijSharesATeamMatchOfTheProgrammeWithTheTeam() async throws {
+        let transport = FakeFindingTransport()
+        let matches = store()
+        var match = ownMatch()
+        match.startTracking(slot: 2, matchId: "tracked-match", ownIsPlayer1: true, ownPlayer: "", opponentPlayer: "")
+        try await matches.save(match)
+        let shared = await TeamFinding.shareAtStart(teamMatchId: match.id, store: matches, context: context(transport), live: live(transport))
+        XCTAssertEqual(shared?.liveId, "newlive23456")
+        XCTAssertTrue(shared?.isTeamOnly == true, "for the team only, not on the club screen")
+        XCTAssertEqual(shared?.partij(2).trackingMatchId, "tracked-match", "the partij being scored stays coupled")
+        XCTAssertEqual(transport.count("PUT", "/me/team/lives"), 1, "registered for the team")
+        let target = TeamTarget.make(team: match, slot: 2)
+        XCTAssertNil(target.liveId)
+        XCTAssertEqual(target.onLive(shared!).liveId, "newlive23456")
+
+        // Live already: nothing happens a second time
+        let again = await TeamFinding.shareAtStart(teamMatchId: match.id, store: matches, context: context(transport), live: live(transport))
+        XCTAssertNil(again)
+        XCTAssertEqual(transport.count("POST", "/api/team"), 1)
+
+        // Typed in by hand (not of the programme): stays on this phone
+        var typed = ownMatch()
+        typed.fixtureId = nil
+        try await matches.save(typed)
+        let none = await TeamFinding.shareAtStart(teamMatchId: typed.id, store: matches, context: context(transport), live: live(transport))
+        XCTAssertNil(none)
+    }
+
+    @MainActor
+    func testStartingAPartijJoinsATeammatesLiveTeamMatch() async throws {
+        let transport = FakeFindingTransport()
+        transport.lives = "[" + transport.listing(fixture: stored, liveId: "keeslive2345", writeKey: "K33sK33sK33sK33sK33sK33s", own: true) + "]"
+        transport.roles["K33sK33sK33sK33sK33sK33s"] = "{\"role\":\"writer\"}"
+        let matches = store()
+        let match = ownMatch()
+        try await matches.save(match)
+        let shared = await TeamFinding.shareAtStart(teamMatchId: match.id, store: matches, context: context(transport), live: live(transport))
+        XCTAssertEqual(shared?.liveId, "keeslive2345")
+        XCTAssertEqual(transport.count("POST", "/api/team"), 0, "no second live team match")
+    }
 }

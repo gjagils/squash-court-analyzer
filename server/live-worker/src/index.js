@@ -130,9 +130,12 @@ async function teamPage(request, env, config, id, state, lang = 'nl') {
  * 429 full, 201 registered, 204 forgotten. A team match also takes
  * `mode: "alerts"` with `device` (4.0: notifications only, see push.js); the
  * DELETE of such a follower sends the same mode. Counted as follower-team.
+ * With `announce: true` a new alerts follower gets "Je team is begonnen" at
+ * once (the account Worker signs teammates up this way, see TeamSession.announce).
  */
 async function handleFollowers(request, env, config, session, unknownText, count, kind) {
-  const follower = validateFollower(await readJson(request, FOLLOWER_BODY_BYTES));
+  const input = await readJson(request, FOLLOWER_BODY_BYTES);
+  const follower = validateFollower(input);
   // Alerts followers (4.0) are the players of a team match; a single match has none
   if (!follower || (isAlertFollower(follower) && kind !== 'follower-team')) {
     return send(400, { error: 'Ongeldige pushregistratie' });
@@ -144,9 +147,12 @@ async function handleFollowers(request, env, config, session, unknownText, count
   if (!pushAvailability(env)[follower.platform]) {
     return send(503, { error: 'Meldingen op het vergrendelscherm staan op deze server uit' });
   }
+  // Announced once: not again when the same phone is signed up a second time
+  const announce = isAlertFollower(follower) && input.announce === true && !(await session.hasFollower(follower));
   const status = await session.addFollower(follower, baseUrl(request, config));
   if (status === 404) return send(404, { error: unknownText });
   if (status === 429) return send(429, { error: 'Te veel volgers voor deze wedstrijd' });
+  if (announce) await session.announce(follower);
   await count(kind, { platform: follower.platform });
   return send(201, { ok: true });
 }

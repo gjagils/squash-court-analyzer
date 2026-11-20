@@ -21,6 +21,8 @@ PENDING_DAYS = "90"
 # Matches one phone may send per day, and phone keys one address may create per hour
 SUBMISSIONS_PER_DAY = "20"
 DEVICES_PER_HOUR = "5"
+# The live Worker: teammates' phones are signed up there when the team starts (tellTeam)
+LIVE_SERVER = "https://live.squashanalyzer.com"
 
 [[d1_databases]]
 binding = "DB"

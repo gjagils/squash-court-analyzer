@@ -306,6 +306,11 @@ public struct SharedSettingsView: View {
             Text("Doe je mee aan een live teamwedstrijd (zelf gestart of meegedaan), dan krijg je een melding als een teamgenoot aan een partij begint, als een partij beslist is en bij de einduitslag. Niet over je eigen partij.", bundle: textBundle)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
+            if Features.shared.playerAccount {
+                Text("Met een account hoor je het ook als iemand van je team een teamwedstrijd start, ook als je zelf niet speelt. Daarvoor staat het pushtoken van deze telefoon bij je account.", bundle: textBundle)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textMuted)
+            }
             Toggle(isOn: $usageCounting) {
                 Text("Anoniem gebruik tellen", bundle: textBundle)
                     .font(SharedFonts.system(14))

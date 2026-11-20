@@ -538,4 +538,29 @@ describe('alerts followers', () => {
     await pushesDone(id);
     expect(sent).toEqual([]);
   });
+
+  it('announce: a teammate signed up by the account Worker hears once that the team has started', async () => {
+    const { id } = await newTeam();
+    const body = { platform: 'android', token: ANDROID, mode: 'alerts', device: DEVICE_B, lang: 'en', announce: true };
+    expect((await follow(id, body)).status).toBe(201);
+    await pushesDone(id);
+    const [message] = fcmData();
+    expect(message.data).toEqual({
+      kind: 'alert', id, server: BASE, slot: '0', alertTitle: 'Your team has started', alertBody: 'All Inn 8 – Delft 8',
+    });
+    // The flag is not kept with the follower
+    expect(await followers(id)).toEqual([{ platform: 'android', token: ANDROID, sandbox: false, alerts: true, lang: 'en', mode: 'alerts', device: DEVICE_B }]);
+    // Signed up again: no second announcement
+    sent = [];
+    expect((await follow(id, body)).status).toBe(201);
+    await pushesDone(id);
+    expect(sent).toEqual([]);
+    // Dutch by default, on iOS as a plain alert; never for a lock screen follower
+    expect((await follow(id, { platform: 'ios', token: IOS_DEVICE, sandbox: true, mode: 'alerts', announce: true })).status).toBe(201);
+    expect((await follow(id, { platform: 'ios', token: IOS, sandbox: true, announce: true })).status).toBe(201);
+    await pushesDone(id);
+    const requests = apnsRequests();
+    expect(requests.length).toBe(1);
+    expect(JSON.parse(requests[0].body).aps.alert).toEqual({ title: 'Je team is begonnen', body: 'All Inn 8 – Delft 8' });
+  });
 });

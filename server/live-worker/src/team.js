@@ -287,6 +287,22 @@ export class TeamSession extends ViewerSession {
     this.schedulePush({ mode: 'alerts', id: this.id || id || '', server: server || '', items });
   }
 
+  /**
+   * 4.0: "Je team is begonnen" for a teammate the account Worker signed up as
+   * an alerts follower when the team match was made visible for the team
+   * (`announce: true` on POST /followers). Once per follower, to that follower
+   * only, with the team names; the text is made here, never taken from the request.
+   */
+  async announce(follower) {
+    const [team, id, server] = await Promise.all([
+      this.ctx.storage.get('team'), this.ctx.storage.get('id'), this.ctx.storage.get('pushServer'),
+    ]);
+    if (!team) return;
+    const title = cleanLang(follower.lang) === 'en' ? 'Your team has started' : 'Je team is begonnen';
+    const alert = { slot: 0, title, body: `${team.home} – ${team.away}` };
+    await this.schedulePush({ mode: 'alerts', id: this.id || id || '', server: server || '', items: [{ follower, alert }] });
+  }
+
   /** The stand for the end the followers get when the session goes (Live stoppen, idle): gone in a minute */
   async pushContent() {
     const [team, partijen] = await Promise.all([this.ctx.storage.get('team'), this.ctx.storage.get('partijen')]);

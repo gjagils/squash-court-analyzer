@@ -2,6 +2,26 @@
 // format and opaque here; the server only bounds its size and checks the
 // fields it indexes on.
 
+/** A push token as the live Worker takes it (its validateFollower) */
+const IOS_TOKEN = /^[0-9a-f]{32,512}$/;
+const ANDROID_TOKEN = /^[A-Za-z0-9:_\-.]{1,4096}$/;
+const DEVICE_ID = /^[A-Za-z0-9-]{8,64}$/;
+
+/** { platform, token, sandbox, lang, device } of PUT /api/v1/me/push, or null */
+export function readPushToken(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input) || typeof input.token !== 'string') return null;
+  const lang = input.lang === 'en' ? 'en' : 'nl';
+  const device = typeof input.device === 'string' && DEVICE_ID.test(input.device) ? input.device : null;
+  if (input.platform === 'ios') {
+    const token = input.token.toLowerCase();
+    return IOS_TOKEN.test(token) ? { platform: 'ios', token, sandbox: input.sandbox === true, lang, device } : null;
+  }
+  if (input.platform === 'android') {
+    return ANDROID_TOKEN.test(input.token) ? { platform: 'android', token: input.token, sandbox: false, lang, device } : null;
+  }
+  return null;
+}
+
 export const LIMITS = {
   name: 60,
   opponent: 60,

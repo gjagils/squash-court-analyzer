@@ -10,6 +10,37 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 5)
 
+- **Melding "Je team is begonnen" voor teamgenoten met een account (Gerd-Jan, 21 november 2026).** Wie niet speelt
+  kreeg niets zolang de app dicht was. Nu, alleen voor accounts van hetzelfde team:
+  - **App** (`TeamStartAlerts`, Core, iOS en Android): is iemand ingelogd, heeft het account een team en staat
+    *Meldingen van je teamwedstrijd* aan, dan meldt de telefoon zijn pushtoken bij het account
+    (`PUT /api/v1/me/push`: platform, token, taal, installatiecode), bij de start van de app, na inloggen en als het
+    token of de instelling verandert; hooguit één keer per dag opnieuw. Om meldingen wordt één keer gevraagd
+    (dezelfde vraag als bij meedoen aan een teamwedstrijd, dus niet dubbel). Instelling uit, uitloggen of geen team
+    meer: het token gaat weg (`DELETE /api/v1/me/push`).
+  - **Account-Worker** (migratie `0007_push_tokens.sql`): bewaart het token per account (hooguit 5 telefoons, weg
+    met het account, bij uitloggen en na 60 dagen zonder melding van de app). Maakt iemand een teamwedstrijd
+    zichtbaar voor het team (`PUT /me/team/lives`, nieuw voor het team), dan meldt de Worker de telefoons van de
+    andere accounts van dat team aan als meldingenvolger bij die teamwedstrijd op de live-Worker (`tellTeam`,
+    `LIVE_SERVER`). De account-Worker stuurt zelf geen pushberichten en logt geen tokens of namen.
+  - **Live-Worker**: `announce: true` op `POST /api/team/:id/followers` stuurt een nieuwe meldingenvolger één keer
+    *Je team is begonnen* / *Your team has started* met de teamnamen (`TeamSession.announce`); de tekst maakt de
+    server zelf. Daarna krijgt die telefoon de gewone meldingen (partij begonnen, beslist, uitslag).
+  - Instellingen → Live meekijken legt het uit; privacyverklaring nl/en bijgewerkt (nog niet gepubliceerd).
+  - Achterwaarts compatibel: oudere builds sturen geen token en merken niets; zonder uitgerolde account-Worker
+    krijgt de nieuwe app een 404 en probeert het bij de volgende start opnieuw.
+  - **Getest:** Core 511 tests (met Skip), account-Worker 59, live-Worker 103, iOS, Android-unit-tests, lint.
+    **Niet getest:** een echte melding op een telefoon (vraagt twee accounts in één team, de uitgerolde
+    account-Worker en een build met deze code), en of de account-Worker de live-Worker bereikt (een Worker bereikt
+    een andere Worker in dezelfde zone alleen via een eigen domein, niet via een route; na de uitrol te zien in
+    het log `team start {"201": n}`).
+  - **Nog te doen:** account-Worker uitrollen (`npx wrangler d1 migrations apply squash-account --remote`, dan
+    `npx wrangler deploy`, in `server/account-worker`); `LIVE_SERVER` voor de testomgeving kiezen (nu alleen
+    productie); website publiceren voor de privacyverklaring; de teksten bij het account en *Account verwijderen*
+    nalopen op "wat we bewaren".
+  *Releasenote:* Met een account krijg je een melding als iemand van je team een teamwedstrijd start, ook als je
+  zelf niet speelt.
+
 - **De vraag vooraf: "welke partij tel je?" (Gerd-Jan, 21 november 2026).** Het opzetscherm van Coach en
   Scheidsrechter had veel keuzes, en *Teamwedstrijd* stond als derde knop bij *Soort wedstrijd*, nooit
   voorgeselecteerd. Nu:

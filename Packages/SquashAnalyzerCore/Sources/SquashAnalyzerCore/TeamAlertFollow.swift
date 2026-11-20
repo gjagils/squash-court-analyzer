@@ -139,9 +139,9 @@ public final class TeamAlertFollow {
 
     /// Reads the team matches and follows what is live (best effort)
     public func refresh() async {
-        guard let store else { return }
-        guard let matches = try? await store.loadAll() else { return }
-        await sync(matches: matches)
+        if let store, let matches = try? await store.loadAll() { await sync(matches: matches) }
+        // The setting, the token or the start of the app: also what the account knows of this phone
+        await TeamStartAlerts.shared.sync()
     }
 
     /// A team match was saved or deleted (the stores call it): follow anew in the background

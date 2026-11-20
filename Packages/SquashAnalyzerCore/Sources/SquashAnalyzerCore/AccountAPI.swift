@@ -521,6 +521,19 @@ public struct AccountClient: Sendable {
         try check(response)
     }
 
+    /// "Je team is begonnen": this phone's push token, kept with the account
+    public func setPushToken(token: String, _ push: AccountPushToken) async throws {
+        let response = try await send("PUT", "/api/v1/me/push", auth: "Bearer \(token)", body: try JSONEncoder().encode(push))
+        try check(response)
+    }
+
+    /// The setting went off, or the phone signs out
+    public func removePushToken(token: String, pushToken: String) async throws {
+        let response = try await send("DELETE", "/api/v1/me/push", auth: "Bearer \(token)",
+                                      body: try JSONEncoder().encode(["token": pushToken]))
+        try check(response)
+    }
+
     // MARK: Without an account
 
     public func createDevice() async throws -> AccountDevice {

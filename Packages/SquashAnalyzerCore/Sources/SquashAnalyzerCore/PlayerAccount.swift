@@ -180,6 +180,13 @@ public final class PlayerAccount {
     /// Forgets the session on this phone; the account and its data stay
     public func signOut() {
         AccountImports.reset()
+        // "Je team is begonnen" is for whoever is signed in: the token goes from the account (best effort)
+        if let pushToken = TeamStartAlerts.shared.sentToken, let old = session, old.isFresh(at: Date()),
+           let accountClient = try? client() {
+            let auth = old.idToken
+            Task { try? await accountClient.removePushToken(token: auth, pushToken: pushToken) }
+        }
+        TeamStartAlerts.shared.forgetSent()
         session = nil
         profile = nil
         profileChecked = false
@@ -219,6 +226,8 @@ public final class PlayerAccount {
             throw error
         }
         profileChecked = true
+        // Signed in (or the app started): this phone hears when the team starts
+        Task { await TeamStartAlerts.shared.sync() }
     }
 
     /// "Dit ben ik", the birth year and the consent. Under 16 the Worker refuses
@@ -495,6 +504,11 @@ public final class PlayerAccount {
     private func firebase() throws -> FirebaseAuthREST {
         guard let endpoints, let transport else { throw AccountError.notConfigured }
         return FirebaseAuthREST(endpoints: endpoints, transport: transport)
+    }
+
+    /// The client of the account Worker, for the parts of the account in other files
+    func accountClient() throws -> AccountClient {
+        try client()
     }
 
     private func client() throws -> AccountClient {

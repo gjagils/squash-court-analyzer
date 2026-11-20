@@ -301,6 +301,12 @@ struct SettingsView: View {
                 .font(AppFonts.caption(11))
                 .foregroundColor(AppColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
+            if Features.shared.playerAccount {
+                Text(appText("Met een account hoor je het ook als iemand van je team een teamwedstrijd start, ook als je zelf niet speelt. Daarvoor staat het pushtoken van deze telefoon bij je account."))
+                    .font(AppFonts.caption(11))
+                    .foregroundColor(AppColors.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Toggle(isOn: $usageCounting) {
                 Text(appText("Anoniem gebruik tellen"))
                     .font(AppFonts.label(14))

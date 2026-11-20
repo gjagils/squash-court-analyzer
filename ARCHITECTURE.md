@@ -166,7 +166,11 @@ the team match screen pushes changed partijen on save and pulls/merges
 match to a team match: while one is going on it first asks which partij is
 being scored (`TeamMatchSupport.startCandidate`, with an account also a
 teammate's live team match of today, since 21 November 2026); another team
-match is linked under Meer opties. The Node server
+match is linked under Meer opties. With an account a team match of the
+programme is made visible for the team at the start (`TeamFinding.shareAtStart`),
+and the phones of the other accounts of the team hear "Je team is begonnen"
+(`TeamStartAlerts`, the account Worker's `push_tokens` and `tellTeam`, the
+live Worker's `announce`). The Node server
 `server/live` (NAS reserve) has no team endpoints.
 All participants share the same write key; the server does not enforce ownership per phone or slot.
 **4.0, finding a team match** (behind `Features.shared.playerAccount`, `docs/voorstel-teamwedstrijd-vinden-4.0.md`):

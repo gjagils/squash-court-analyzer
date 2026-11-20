@@ -25,19 +25,27 @@
 //   GET    /api/v1/me/team/lives?fixtures=   live team matches of the own team, and of opponents for these matches
 //   PUT    /api/v1/me/team/lives             { fixture, date, teamName, liveId, writeKey, refereeKey?, replaces? }
 //   DELETE /api/v1/me/team/lives?fixture=    the own registration goes
+//   PUT    /api/v1/me/push                   { platform, token, sandbox?, lang?, device? }: hear when the team starts
+//   DELETE /api/v1/me/push                   { token }: this phone no longer
 //   POST   /api/v1/mail/verify|reset|change|confirm   the account mails (src/mail.js)
 
 import { randomText, sameText, sha256, verifyIdToken } from './auth.js';
 import { cors, mailChange, mailConfirm, mailReset, mailVerify } from './mail.js';
 import {
-  cleanFixture, cleanText, latestBirthYear, leagueOf, LIMITS, LIVE_ID_PATTERN, LIVE_KEY_PATTERN, readMatch,
+  cleanFixture, cleanText, latestBirthYear, leagueOf, LIMITS, LIVE_ID_PATTERN, LIVE_KEY_PATTERN, readMatch, readPushToken,
 } from './validate.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 const HOUR = 60 * 60 * 1000;
 
 /** Replaced in tests */
-export const deps = { now: () => Date.now() };
+export const deps = { now: () => Date.now(), fetch: (url, init) => fetch(url, init) };
+
+/** Phones per account that hear when the team starts, and teammates told per team match */
+const PUSH_TOKENS_PER_PLAYER = 5;
+const TEAM_START_PHONES = 60;
+/** A phone that did not come back for this long is forgotten */
+const PUSH_TOKEN_DAYS = 60;
 
 function json(status, body) {
   return new Response(body === undefined ? null : JSON.stringify(body), {
@@ -318,6 +326,7 @@ async function deleteAccount(env, caller) {
     env.DB.prepare('DELETE FROM avatars WHERE player_id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM avatar_reports WHERE player_id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM team_lives WHERE starter_id = ?').bind(playerId),
+    env.DB.prepare('DELETE FROM push_tokens WHERE player_id = ?').bind(playerId),
     // What claims taught other phones about this player goes too
     env.DB.prepare('DELETE FROM learned_links WHERE sbn_path = (SELECT sbn_path FROM players WHERE id = ?)').bind(playerId),
     env.DB.prepare('DELETE FROM players WHERE id = ?').bind(playerId),
@@ -528,6 +537,8 @@ async function registerTeamLive(request, env, playerId) {
   if (!player || !player.team_key) return json(404, { error: 'no team' });
   if (leagueOf(fixture) !== leagueOf(player.team_key)) return json(400, { error: 'league' });
   const replaces = body.replaces == null ? null : cleanText(body.replaces, 12);
+  const before = await env.DB.prepare('SELECT live_id FROM team_lives WHERE team_key = ? AND fixture = ? AND expires_at > ?')
+    .bind(player.team_key, fixture, now).first();
 
   const values = [player.team_key, fixture, teamName, liveId, writeKey, refereeKey, playerId, player.name,
     matchAt, now, teamLiveExpiry(matchAt)];
@@ -547,7 +558,82 @@ async function registerTeamLive(request, env, playerId) {
   const row = await env.DB.prepare('SELECT * FROM team_lives WHERE team_key = ? AND fixture = ?')
     .bind(player.team_key, fixture).first();
   const view = teamLiveView(row, true);
+  // New for the team (not a repeat of the same registration): the teammates hear it
+  if (row.live_id === liveId && (!before || before.live_id !== liveId)) {
+    await tellTeam(env, player.team_key, playerId, liveId);
+  }
   return json(row.live_id === liveId ? 200 : 409, view);
+}
+
+/**
+ * "Je team is begonnen": the phones of the other accounts of this team become
+ * alerts followers of the live team match, and the live Worker tells each of
+ * them once (`announce`). Only teammates with an account whose phone asked
+ * for it (PUT /me/push); this Worker sends no push itself. Best effort: the
+ * registration never fails on it.
+ */
+async function tellTeam(env, teamKey, starterId, liveId) {
+  const server = typeof env.LIVE_SERVER === 'string' ? env.LIVE_SERVER.replace(/\/+$/, '') : '';
+  if (!server) return;
+  try {
+    const { results } = await env.DB.prepare(
+      `SELECT t.platform, t.token, t.sandbox, t.lang, t.device FROM push_tokens t
+       JOIN players p ON p.id = t.player_id
+       WHERE p.team_key = ? AND t.player_id != ? AND t.updated_at > ? LIMIT ?`,
+    ).bind(teamKey, starterId, deps.now() - PUSH_TOKEN_DAYS * DAY, TEAM_START_PHONES).all();
+    if (results.length === 0) return;
+    const answers = {};
+    await Promise.allSettled(results.map(async (row) => {
+      const follower = { platform: row.platform, token: row.token, mode: 'alerts', lang: row.lang, announce: true };
+      if (row.platform === 'ios') follower.sandbox = row.sandbox === 1;
+      if (row.device) follower.device = row.device;
+      let status = 'failed';
+      try {
+        const response = await deps.fetch(`${server}/api/team/${liveId}/followers`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(follower),
+          signal: AbortSignal.timeout(3000),
+        });
+        status = String(response.status);
+      } catch { /* counted as failed */ }
+      answers[status] = (answers[status] || 0) + 1;
+    }));
+    // No tokens or names in the logs: only how the live Worker answered
+    console.log('team start', JSON.stringify(answers));
+  } catch (error) {
+    console.error('team start', error && error.name);
+  }
+}
+
+/** This phone hears when the team starts: its push token, kept with the account */
+async function putPushToken(request, env, playerId) {
+  const push = readPushToken(await readJson(request));
+  if (!push) return json(400, { error: 'push' });
+  const now = deps.now();
+  await env.DB.batch([
+    // A phone belongs to the account that is signed in on it now
+    env.DB.prepare('DELETE FROM push_tokens WHERE token = ? AND player_id != ?').bind(push.token, playerId),
+    env.DB.prepare(
+      `INSERT INTO push_tokens (player_id, token, platform, sandbox, lang, device, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT (player_id, token) DO UPDATE SET platform = excluded.platform, sandbox = excluded.sandbox,
+         lang = excluded.lang, device = excluded.device, updated_at = excluded.updated_at`,
+    ).bind(playerId, push.token, push.platform, push.sandbox ? 1 : 0, push.lang, push.device, now),
+    // The newest few phones of an account
+    env.DB.prepare(
+      `DELETE FROM push_tokens WHERE player_id = ? AND token NOT IN
+         (SELECT token FROM push_tokens WHERE player_id = ? ORDER BY updated_at DESC LIMIT ?)`,
+    ).bind(playerId, playerId, PUSH_TOKENS_PER_PLAYER),
+  ]);
+  return json(204);
+}
+
+/** The setting went off, or the phone signs out */
+async function deletePushToken(request, env, playerId) {
+  const body = await readJson(request);
+  const token = body && typeof body.token === 'string' ? body.token : '';
+  if (!token) return json(400, { error: 'token' });
+  await env.DB.prepare('DELETE FROM push_tokens WHERE player_id = ? AND (token = ? OR token = ?)')
+    .bind(playerId, token, token.toLowerCase()).run();
+  return json(204);
 }
 
 /** The own registration goes (team match removed, or no longer visible); someone else's stays */
@@ -787,6 +873,11 @@ async function handle(request, env) {
       if (method === 'DELETE') return removeTeamLive(env, playerId, url);
       return json(405, { error: 'method' });
     }
+    if (path === '/api/v1/me/push') {
+      if (method === 'PUT') return putPushToken(request, env, playerId);
+      if (method === 'DELETE') return deletePushToken(request, env, playerId);
+      return json(405, { error: 'method' });
+    }
     const teamMatch = /^\/api\/v1\/me\/team\/([A-Za-z0-9-]{8,64})$/.exec(path);
     if (teamMatch && method === 'POST') return claimTeam(request, env, playerId, teamMatch[1]);
     if (path === '/api/v1/me/claim' && method === 'POST') return claimLink(request, env, playerId);
@@ -816,6 +907,7 @@ export async function wipeOldRequests(env) {
     env.DB.prepare('DELETE FROM manual_questions WHERE asked_at < ?').bind(deps.now() - 180 * DAY),
     env.DB.prepare('DELETE FROM email_changes WHERE expires_at <= ?').bind(deps.now()),
     env.DB.prepare('DELETE FROM mail_log WHERE sent_at < ?').bind(deps.now() - DAY),
+    env.DB.prepare('DELETE FROM push_tokens WHERE updated_at < ?').bind(deps.now() - PUSH_TOKEN_DAYS * DAY),
   ]);
   return results.reduce((sum, result) => sum + (result.meta?.changes || 0), 0);
 }

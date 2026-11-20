@@ -1396,6 +1396,23 @@
         }
       }
     },
+    "Met een account hoor je het ook als iemand van je team een teamwedstrijd start, ook als je zelf niet speelt. Daarvoor staat het pushtoken van deze telefoon bij je account." : {
+      "generatesSymbol" : false,
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With an account you also hear it when someone on your team starts a team match, even when you are not playing yourself. For that the push token of this phone is kept with your account."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Met een account hoor je het ook als iemand van je team een teamwedstrijd start, ook als je zelf niet speelt. Daarvoor staat het pushtoken van deze telefoon bij je account."
+          }
+        }
+      }
+    },
     "Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist." : {
       "generatesSymbol" : false,
       "localizations" : {

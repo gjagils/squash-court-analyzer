@@ -131,6 +131,11 @@ export class ViewerSession extends DurableObject {
     return 201;
   }
 
+  /** Whether this push token is registered already (with the same mode) */
+  async hasFollower(follower) {
+    return Boolean(await this.ctx.storage.get(await followerKey(follower)));
+  }
+
   /** Forgets a push token: 404 unknown session, 204 done (also when it was not there) */
   async removeFollower(follower) {
     if (!(await this.ctx.storage.get('key'))) return 404;

@@ -31,6 +31,7 @@ final class FakeFindingTransport: LiveTransport, @unchecked Sendable {
             }
             return reply(204, "")
         }
+        if path == "/api/v1/me/push" { return reply(204, "") }
         if path == "/api/team" && method == "POST" {
             let referee = text.contains("refereeSlots") ? ",\"refereeKey\":\"R3f3r33R3f3r33R3f3r33R3f3r33\"" : ""
             return reply(201, "{\"id\":\"newlive23456\",\"writeKey\":\"N3wK3yN3wK3yN3wK3yN3wK3y\",\"ownerKey\":\"0wn3r0wn3r0wn3r0wn3r0wn3r\",\"url\":\"https://live.test/t/newlive23456\"\(referee)}")

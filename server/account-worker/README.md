@@ -63,6 +63,15 @@ Het draaiboek staat in `docs/testplan-4.0-koppelen.md`.
    domein) staat in `wrangler.toml`; Cloudflare maakt het DNS-record zelf.
    CI rolt deze Worker niet uit, alleen de tests draaien daar.
 
+## "Je team is begonnen" (21 november 2026)
+
+`PUT /api/v1/me/push` bewaart het pushtoken van een ingelogde telefoon (tabel `push_tokens`, migratie 0007);
+`DELETE /api/v1/me/push` haalt het weg. Wordt een teamwedstrijd nieuw aangemeld voor het team
+(`PUT /api/v1/me/team/lives`), dan meldt `tellTeam` de telefoons van de andere accounts van dat team aan als
+meldingenvolger op de live-Worker (`LIVE_SERVER` in `wrangler.toml`, `announce: true`). Deze Worker stuurt zelf
+geen pushberichten. Zonder `LIVE_SERVER` (de testomgeving) gebeurt er niets. In het log staat alleen hoe de
+live-Worker antwoordde: `team start {"201":2}`.
+
 ## Accountmails (via Cirrux)
 
 Bevestigen, wachtwoord vergeten en e-mailadres wijzigen verstuurt de Worker zelf

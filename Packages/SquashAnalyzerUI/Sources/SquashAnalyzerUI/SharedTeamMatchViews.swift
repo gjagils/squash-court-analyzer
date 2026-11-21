@@ -1247,6 +1247,8 @@ public struct SharedTeamMatchView: View {
         }
         do {
             try await store.delete(id: match.id)
+            // The home screen drops it at once, whatever screen it was opened from
+            TeamMatchSupport.noteChange()
             onChange(nil)
             dismiss()
         } catch {

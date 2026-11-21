@@ -9,6 +9,9 @@ public enum TeamLiveSyncResult: Equatable, Sendable {
     case updated, unchanged
     /// The page is gone; the match is left as it is (its screen ends the live state)
     case gone
+    /// The page is gone and this phone only had an empty copy of it (joined,
+    /// nothing filled in): the copy went with it
+    case removed
     case failed
 }
 
@@ -31,7 +34,11 @@ public enum TeamLiveSync {
                     results[match.id] = TeamLiveSyncResult.unchanged
                 }
             } catch let error as TeamLiveError {
-                results[match.id] = error == TeamLiveError.gone ? TeamLiveSyncResult.gone : TeamLiveSyncResult.failed
+                if error == TeamLiveError.gone {
+                    results[match.id] = await dropIfEmptyCopy(match, store: store) ? TeamLiveSyncResult.removed : TeamLiveSyncResult.gone
+                } else {
+                    results[match.id] = TeamLiveSyncResult.failed
+                }
             } catch {
                 results[match.id] = TeamLiveSyncResult.failed
             }
@@ -42,9 +49,23 @@ public enum TeamLiveSync {
         return results
     }
 
+    /// The starter deleted the team match (or its page ran out) and this phone
+    /// only joined it, by itself or with Meedoen, without anything filled in
+    /// here or taken from the page: the copy is deleted too, so it does not
+    /// stay on the home screen for a day (Gerd-Jan, 21 November 2026). A copy
+    /// with a partij in it, and the match of the phone that started the page,
+    /// are left alone.
+    static func dropIfEmptyCopy(_ match: TeamMatch, store: any TeamMatchStore) async -> Bool {
+        if match.isLiveOwner { return false }
+        for partij in match.partijen where partij.hasEntry || partij.isLinked { return false }
+        guard (try? await store.delete(id: match.id)) != nil else { return false }
+        TeamMatchSupport.noteChange()
+        return true
+    }
+
     /// Whether anything on the phone changed
     public static func changed(_ results: [UUID: TeamLiveSyncResult]) -> Bool {
-        for value in results.values where value == TeamLiveSyncResult.updated { return true }
+        for value in results.values where value == TeamLiveSyncResult.updated || value == TeamLiveSyncResult.removed { return true }
         return false
     }
 }

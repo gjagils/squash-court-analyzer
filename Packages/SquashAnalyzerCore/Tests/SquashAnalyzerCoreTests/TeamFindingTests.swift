@@ -340,6 +340,41 @@ final class TeamFindingTests: XCTestCase {
         XCTAssertEqual(TeamFinding.autoJoined(in: defaults), ["keeslive2345"])
     }
 
+    /// The starter deleted the team match: an empty joined copy goes too
+    @MainActor
+    func testAnEmptyJoinedCopyGoesWhenItsPageIsGoneAndOneWithAPartijOrTheOwnersStays() async throws {
+        let teamStore = store()
+        var empty = ownMatch()
+        empty.liveId = "keeslive2345"
+        empty.liveKey = "K33sK33sK33sK33sK33sK33s"
+        try await teamStore.save(empty)
+        let droppedEmpty = await TeamLiveSync.dropIfEmptyCopy(empty, store: teamStore)
+        XCTAssertTrue(droppedEmpty)
+        var all = try await teamStore.loadAll()
+        XCTAssertTrue(all.isEmpty)
+
+        var filled = ownMatch()
+        filled.liveId = "keeslive2345"
+        filled.liveKey = "K33sK33sK33sK33sK33sK33s"
+        var partij = TeamPartij(slot: 1, ownPlayer: "Mo", opponentPlayer: "Piet")
+        XCTAssertTrue(partij.addGame(TeamGame(own: 11, their: 9)))
+        filled.update(partij)
+        try await teamStore.save(filled)
+        let droppedFilled = await TeamLiveSync.dropIfEmptyCopy(filled, store: teamStore)
+        XCTAssertFalse(droppedFilled, "a partij was filled in: kept")
+
+        var owner = ownMatch()
+        owner.liveId = "minelive2345"
+        owner.liveKey = "M1n3M1n3M1n3M1n3M1n3M1n3"
+        owner.liveOwnerKey = "0wn3r0wn3r0wn3r0wn3r0wn3r"
+        try await teamStore.save(owner)
+        let droppedOwner = await TeamLiveSync.dropIfEmptyCopy(owner, store: teamStore)
+        XCTAssertFalse(droppedOwner, "the phone that started the page keeps its match")
+        all = try await teamStore.loadAll()
+        XCTAssertEqual(all.count, 2)
+        XCTAssertTrue(TeamLiveSync.changed([empty.id: TeamLiveSyncResult.removed]))
+    }
+
     // MARK: After a match
 
     @MainActor

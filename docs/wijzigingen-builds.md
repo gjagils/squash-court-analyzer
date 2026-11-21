@@ -52,6 +52,12 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   laden van het profiel de teamlink uit `teamKey`, één keer per login en alleen als de telefoon nog geen team
   heeft; verwijder je de teamlink daarna, dan blijft hij weg. Getest in `PlayerAccountTests`.
   *Releasenote:* Log je in op een nieuwe telefoon, dan staat je team er meteen.
+- **Een verwijderde teamwedstrijd verdwijnt ook bij teamgenoten van het beginscherm (Gerd-Jan, 21 november 2026).**
+  Verwijderde de starter zijn teamwedstrijd, dan bleef de kopie waarmee een teamgenoot meedeed tot een dag als
+  lopende wedstrijd op diens beginscherm staan (de livepagina was weg, de kopie niet). Nu verwijdert
+  `TeamLiveSync.pull` zo'n kopie zodra de pagina weg is, als er op die telefoon niets in is ingevuld of
+  overgenomen; een kopie met een partij erin en de wedstrijd van de starter zelf blijven. Na *Verwijder* ververst
+  het beginscherm direct (`TeamMatchSupport.noteChange`). Getest in `TeamFindingTests`.
 - **Account verwijderen zet ingestuurde wedstrijden terug (21 november 2026, alleen server, staat live).**
   Wedstrijden die een ander voor de SBN-speler instuurde, gaan bij het verwijderen van het account terug naar de
   wachtrij van die SBN-speler (`deleteAccount`), zodat een volgend account ze weer krijgt; ze vervallen 90 dagen

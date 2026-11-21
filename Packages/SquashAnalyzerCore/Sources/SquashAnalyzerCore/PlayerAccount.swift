@@ -187,6 +187,7 @@ public final class PlayerAccount {
             Task { try? await accountClient.removePushToken(token: auth, pushToken: pushToken) }
         }
         TeamStartAlerts.shared.forgetSent()
+        UserDefaults.standard.removeObject(forKey: PlayerAccount.teamAdoptedKey)
         session = nil
         profile = nil
         profileChecked = false
@@ -226,8 +227,25 @@ public final class PlayerAccount {
             throw error
         }
         profileChecked = true
+        PlayerAccount.adoptTeam(profile?.teamKey)
         // Signed in (or the app started): this phone hears when the team starts
         Task { await TeamStartAlerts.shared.sync() }
+    }
+
+    /// Whether the team of the account was looked at since signing in on this phone
+    static let teamAdoptedKey = "accountTeamAdopted"
+
+    /// Signing in on a phone without Mijn team (a new phone, a reinstalled
+    /// app) sets the team of the account there (Gerd-Jan, 21 November 2026:
+    /// the player was linked, the team was not). Once per sign-in, so a team
+    /// link removed on this phone afterwards stays removed; a phone that has a
+    /// team keeps it (the account follows the phone, `followOwnTeam`).
+    static func adoptTeam(_ teamKey: String?, in defaults: UserDefaults = UserDefaults.standard) {
+        guard let key = teamKey, !key.isEmpty, !defaults.bool(forKey: PlayerAccount.teamAdoptedKey) else { return }
+        defaults.set(true, forKey: PlayerAccount.teamAdoptedKey)
+        let link = defaults.string(forKey: LeagueTeamStorage.linkKey) ?? ""
+        guard link.isEmpty, let team = LeagueTeamLink.from(accountKey: key) else { return }
+        defaults.set(team.url.absoluteString, forKey: LeagueTeamStorage.linkKey)
     }
 
     /// "Dit ben ik", the birth year and the consent. Under 16 the Worker refuses

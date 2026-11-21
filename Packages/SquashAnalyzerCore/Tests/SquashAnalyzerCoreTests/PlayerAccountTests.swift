@@ -431,6 +431,30 @@ final class PlayerAccountTests: XCTestCase {
 
     // MARK: - The account
 
+    /// Signing in on a phone without Mijn team sets the team of the account, once
+    @MainActor
+    func testAPhoneWithoutMijnTeamTakesTheTeamOfTheAccountOnce() {
+        let defaults = UserDefaults(suiteName: "adopt-team-\(UUID().uuidString)")!
+        let key = "E035D752-EA4C-446D-82CF-0016EFF20E6C/113"
+        PlayerAccount.adoptTeam(nil, in: defaults)
+        XCTAssertNil(defaults.string(forKey: LeagueTeamStorage.linkKey), "an account without a team sets nothing")
+        PlayerAccount.adoptTeam(key, in: defaults)
+        XCTAssertEqual(defaults.string(forKey: LeagueTeamStorage.linkKey),
+                       "https://sbn.toernooi.nl/league/E035D752-EA4C-446D-82CF-0016EFF20E6C/team/113")
+        XCTAssertEqual(AccountSending.ownTeamKey(in: defaults), key)
+        // Removed on this phone afterwards: it stays removed
+        defaults.removeObject(forKey: LeagueTeamStorage.linkKey)
+        PlayerAccount.adoptTeam(key, in: defaults)
+        XCTAssertNil(defaults.string(forKey: LeagueTeamStorage.linkKey))
+
+        // A phone that has a team keeps it
+        let other = UserDefaults(suiteName: "adopt-team-\(UUID().uuidString)")!
+        let mine = "https://sbn.toernooi.nl/league/E035D752-EA4C-446D-82CF-0016EFF20E6C/team/8"
+        other.set(mine, forKey: LeagueTeamStorage.linkKey)
+        PlayerAccount.adoptTeam(key, in: other)
+        XCTAssertEqual(other.string(forKey: LeagueTeamStorage.linkKey), mine)
+    }
+
     @MainActor
     func testSignInKeepsTheSessionAndRefreshesTheToken() async throws {
         let transport = FakeAccountTransport()

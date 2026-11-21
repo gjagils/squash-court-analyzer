@@ -46,6 +46,12 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   wedstrijden, Competitie, Speciaal), elk met hoeveel er verdiend zijn (2/5), en heeft onderaan een knop
   *Alle badges* naar de uitleg. Niet op een scherm bekeken: alleen gebouwd en getest.
   *Releasenote:* De tegel Badges opent je eigen badges als je bent ingelogd; je badges staan per categorie.
+- **Inloggen op een telefoon zonder Mijn team zet het team van het account erop (Gerd-Jan, 21 november 2026).**
+  Na inloggen met een bestaand account op een lege Android was de speler gekoppeld maar Mijn team niet: het team
+  ging alleen van telefoon naar account (`followOwnTeam`), niet terug. Nu zet `PlayerAccount.adoptTeam` bij het
+  laden van het profiel de teamlink uit `teamKey`, één keer per login en alleen als de telefoon nog geen team
+  heeft; verwijder je de teamlink daarna, dan blijft hij weg. Getest in `PlayerAccountTests`.
+  *Releasenote:* Log je in op een nieuwe telefoon, dan staat je team er meteen.
 - **Account verwijderen zet ingestuurde wedstrijden terug (21 november 2026, alleen server, staat live).**
   Wedstrijden die een ander voor de SBN-speler instuurde, gaan bij het verwijderen van het account terug naar de
   wachtrij van die SBN-speler (`deleteAccount`), zodat een volgend account ze weer krijgt; ze vervallen 90 dagen

@@ -91,6 +91,9 @@ public struct TeamPartij: Codable, Equatable, Sendable {
     /// match picks the coupling up again. Cleared when the result is linked.
     public var trackingMatchId: String?
     public var trackingOwnIsPlayer1: Bool?
+    /// The names came with that match (the partij had none): they go again
+    /// when the match is thrown away without a game
+    public var trackingFilledNames: Bool?
     /// Whether our player was Speler 1 of the linked match, as chosen when it
     /// was linked: "Vernieuwen" must not guess it again from a name that can
     /// be edited in the meantime
@@ -299,6 +302,7 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         linkedOwnIsPlayer1 = ownIsPlayer1
         trackingMatchId = nil
         trackingOwnIsPlayer1 = nil
+        trackingFilledNames = nil
         endedBy = nil
         endedAfter = nil
         self.bestOf = bestOf
@@ -358,6 +362,7 @@ public struct TeamPartij: Codable, Equatable, Sendable {
         linkedOwnIsPlayer1 = nil
         trackingMatchId = nil
         trackingOwnIsPlayer1 = nil
+        trackingFilledNames = nil
     }
 }
 
@@ -693,19 +698,29 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     public mutating func startTracking(slot: Int, matchId: String, ownIsPlayer1: Bool,
                                        ownPlayer: String? = nil, opponentPlayer: String? = nil) {
         var partij = partij(slot)
+        let hadNames = !partij.ownPlayer.isEmpty || !partij.opponentPlayer.isEmpty
         partij.trackingMatchId = matchId
         partij.trackingOwnIsPlayer1 = ownIsPlayer1
         if let ownPlayer, !partij.hasEntry { partij.ownPlayer = ownPlayer }
         if let opponentPlayer, !partij.hasEntry { partij.opponentPlayer = opponentPlayer }
+        // Remembered while the partij was started again; names that were there stay
+        if !hadNames && !partij.hasEntry { partij.trackingFilledNames = true }
         update(partij)
     }
 
     /// The tracked match was thrown away or stopped without a result: it is no
-    /// longer "in progress" for its partij
+    /// longer "in progress" for its partij. A partij that got its names from
+    /// that match and has no game is empty again (Gerd-Jan, 21 November 2026:
+    /// a match started and deleted stayed in the team overview).
     public mutating func stopTracking(matchId: String) {
         for index in 0..<partijen.count where partijen[index].trackingMatchId == matchId {
             partijen[index].trackingMatchId = nil
             partijen[index].trackingOwnIsPlayer1 = nil
+            if partijen[index].trackingFilledNames == true && !partijen[index].hasEntry {
+                partijen[index].ownPlayer = ""
+                partijen[index].opponentPlayer = ""
+            }
+            partijen[index].trackingFilledNames = nil
             updatedAt = Date()
         }
     }

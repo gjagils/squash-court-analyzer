@@ -134,9 +134,13 @@ public enum TeamMatchSupport {
     /// A tracked match was discarded or saved as incomplete: the partij is free again
     @MainActor public static func untrack(matchId: UUID, store: any TeamMatchStore) async {
         guard let all = try? await store.loadAll() else { return }
-        for var team in all where team.partijTracking(matchId: matchId.uuidString) != nil {
+        for var team in all {
+            guard let tracked = team.partijTracking(matchId: matchId.uuidString) else { continue }
             team.stopTracking(matchId: matchId.uuidString)
             try? await store.save(team)
+            // Nothing is being played there any more: off the live page, so
+            // teammates do not keep seeing "inspelen" for it
+            if team.isLive && !team.partij(tracked.slot).hasEntry { _ = await TeamLive.shared.clear(slot: tracked.slot, in: team) }
         }
         TeamLive.shared.unbind(matchId: matchId)
     }

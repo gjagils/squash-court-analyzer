@@ -62,6 +62,11 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
   `TeamLiveSync.pull` zo'n kopie zodra de pagina weg is, als er op die telefoon niets in is ingevuld of
   overgenomen; een kopie met een partij erin en de wedstrijd van de starter zelf blijven. Na *Verwijder* ververst
   het beginscherm direct (`TeamMatchSupport.noteChange`). Getest in `TeamFindingTests`.
+- **Een weggegooide wedstrijd maakt zijn partij weer leeg (Gerd-Jan, 21 november 2026).** Startte je voor een
+  partij een wedstrijd en gooide je die weg zonder game, dan bleven de namen in de partij staan en bleef de
+  livepagina *inspelen* tonen. Nu onthoudt de partij of de namen met die wedstrijd kwamen
+  (`trackingFilledNames`); bij weggooien gaan ze dan weer weg, en de partij gaat van de livepagina
+  (`TeamMatchSupport.untrack`). Een opstelling die er al stond, blijft. Getest in `TeamMatchTests`.
 - **Account verwijderen zet ingestuurde wedstrijden terug (21 november 2026, alleen server, staat live).**
   Wedstrijden die een ander voor de SBN-speler instuurde, gaan bij het verwijderen van het account terug naar de
   wachtrij van die SBN-speler (`deleteAccount`), zodat een volgend account ze weer krijgt; ze vervallen 90 dagen

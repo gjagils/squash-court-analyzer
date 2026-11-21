@@ -270,6 +270,22 @@ final class TeamMatchTests: XCTestCase {
         XCTAssertNil(dropped.partij(3).trackingOwnIsPlayer1)
         XCTAssertNotNil(team.partijTracking(matchId: id.uuidString), "the copy is untouched")
 
+        // The names that came with a match thrown away without a game go again...
+        var emptied = named
+        emptied.stopTracking(matchId: id.uuidString)
+        XCTAssertEqual(emptied.partij(1).ownPlayer, "")
+        XCTAssertNil(emptied.partij(1).trackingFilledNames)
+        // ...a line-up filled in before the match was started stays
+        var lineUp = match([])
+        var first = lineUp.partij(1)
+        first.ownPlayer = "Paul"
+        first.opponentPlayer = "Jan"
+        lineUp.update(first)
+        lineUp.startTracking(slot: 1, matchId: id.uuidString, ownIsPlayer1: true, ownPlayer: "Paul", opponentPlayer: "Jan")
+        lineUp.stopTracking(matchId: id.uuidString)
+        XCTAssertEqual(lineUp.partij(1).ownPlayer, "Paul")
+        XCTAssertEqual(lineUp.partij(1).opponentPlayer, "Jan")
+
         // It survives the file: leaving and resuming later finds the coupling again
         let data = try JSONEncoder().encode(team)
         let back = try JSONDecoder().decode(TeamMatch.self, from: data)

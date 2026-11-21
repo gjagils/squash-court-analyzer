@@ -82,7 +82,7 @@ samengevoegd moest worden. Daarom:
   upload naar testers, `build 4.1` per interne uitlevering; alleen aanpassen
   met `scripts/version.py` (uitleg in `docs/opleveren-en-hosting.md`). Stand
   18 november 2026: in productie staat 3.2 (build 4) op iOS en Android (App
-  Store sinds 8 november); 4.0 build 5 staat sinds 18 november in TestFlight
+  Store sinds 8 november); 4.0 build 6 staat sinds 21 november in TestFlight
   (Squashteam, in bètareview) en de Play-testtracks, met het spelersaccount
   aan. De actuele stand staat
   in `docs/opleveren-en-hosting.md` onder 4.

@@ -8,7 +8,20 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 4.0 build 5)
+## Volgende build (na 4.0 build 6)
+
+## 4.0 build 6 (21 november 2026: TestFlight Squashteam, Play internal, alpha, Google Group; website gepubliceerd)
+
+- **Opgeleverd op 21 november 2026 vanaf de Mac (uit een worktree):** suites groen (Core met Skip 514 tests, iOS,
+  Android, live-Worker 103, account-Worker 59, website-Worker 5, lint). iOS 4.0 (6) geüpload, in groep Squashteam,
+  wacht op de bètareview (`--keep-old`, 3.2 (4) staat in de App Store); Android versionCode 4000600 op internal,
+  alpha en Google Group testers. Website gepubliceerd (testen.html, homepage nl/en, handleidingen nl/en,
+  privacyverklaring nl/en). Account-Worker en live-Worker staan sinds dezelfde dag op productie.
+  **Visueel bekeken:** op de iPhone-simulator (donker) de vraag vooraf, de korte opzet vanaf het beginscherm en
+  vanuit Competitie, het partijscherm, *Serveert eerst?* bij Scheidsrechter en *Wie serveert eerst?* bij Coach.
+  **Niet gedaan:** de volledige ui-check (licht/donker, Android-emulator, grote tekst), nieuwe App
+  Store-schermafbeeldingen en nieuwe plaatjes in de handleiding; een echte melding *Je team is begonnen* en het
+  delen bij de start met twee accounts zijn niet op telefoons gezien.
 
 - **Eerste serveerder nog wisselen vlak voor de start (Gerd-Jan, 21 november 2026).** Wie eerst serveert weet je
   vaak pas na het tossen, als de wedstrijd al klaarstaat. Scheidsrechter: zolang er geen rally gespeeld is, staat

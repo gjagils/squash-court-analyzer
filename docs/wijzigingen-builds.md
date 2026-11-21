@@ -42,6 +42,13 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
     voor de tegenstander; meldingen), testen.html, releasenotes. De privacytekst (nl/en) noemt het starttoken al.
   *Releasenote:* Start een teamgenoot een teamwedstrijd, dan staat de teamstand vanzelf op je vergrendelscherm
   en doe je in de app vanzelf mee.
+- **Android: crash bij een timeroproep van de scheidsrechter opgelost (21 november 2026).** De trilling bij
+  *Half-time*, *15 seconden* en *Time* (`.sensoryFeedback` in `RefereeScoring`, sinds 3 november) gooide op
+  Android een `SecurityException` omdat `android.permission.VIBRATE` niet in het manifest stond; de app sloot
+  dan. Gezien op de A13 om 13:18 tijdens een scheidsrechterwedstrijd. De toestemming staat er nu in (gewone
+  toestemming, er wordt niets gevraagd). De code zit sinds 3 november in de app, dus waarschijnlijk ook in de
+  Play-versies van daarna; niet nagekeken in een Play-build.
+  *Releasenote:* Android: de app sluit niet meer bij een timeroproep van de scheidsrechter.
 - **Delen en live opgeruimd (Gerd-Jan, 21 november 2026; schetsen voor en na op het ontwerpcanvas
   "Opruimen delen en live").** Drie schermen:
   - **Scorekop bij Scheidsrechter en Coach:** de grijze LIVE-pil en het losse deelicoon zijn één deelknop

@@ -8,6 +8,11 @@
          a match) and, on Android 16+, its promotion to a Live Update -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+    <!-- The referee's timer calls ("Half-time", "15 seconden", "Time") vibrate
+         once (.sensoryFeedback in RefereeScoring). Without this permission
+         Android throws a SecurityException and the app closes (seen on the
+         A13, 21 November 2026). A normal permission: nothing is asked. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name=".SquashApplication"

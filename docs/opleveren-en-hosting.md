@@ -97,6 +97,7 @@ Alles draait lokaal op de Mac. Eisen: Xcode, Skip, Android Studio.
 | Worker | `cd server/live-worker && npm test` (21 tests) |
 | Node-reserve | `cd server/live && node --test` |
 | Lint (incl. versiecontrole iOS/Android en `scripts/test_version.py`) | `scripts/lint.sh` |
+| Teamwedstrijd op twee nagebootste telefoons (starten, vanzelf meedoen, tellen, hervatten, weggooien, verwijderen, opnieuw meedoen, herinstallatie), tegen de account- en live-Worker lokaal op de Mac; geen schermen en geen pushbezorging | `scripts/team-scenarios.sh` (start en stopt de Workers zelf; in de gewone `swift test` wordt hij overgeslagen) |
 
 Regels voor tests op toestellen:
 

@@ -42,6 +42,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
     voor de tegenstander; meldingen), testen.html, releasenotes. De privacytekst (nl/en) noemt het starttoken al.
   *Releasenote:* Start een teamgenoot een teamwedstrijd, dan staat de teamstand vanzelf op je vergrendelscherm
   en doe je in de app vanzelf mee.
+- **Scenariotest teamwedstrijd op twee telefoons (21 november 2026).** `scripts/team-scenarios.sh` speelt een
+  teamavond af met twee nagebootste telefoons (elk een eigen account, opslag en instellingen) tegen de account- en
+  live-Worker die lokaal draaien: starten, vanzelf meedoen, een partij tellen, app sluiten en hervatten, een
+  wedstrijd weggooien, verwijderen bij teamgenoot en bij starter, opnieuw meedoen met de uitnodiging, een
+  herinstallatie, en twee teamgenoten die tegelijk starten (`TeamScenarioTests`, vier scenario's). Niet gedekt:
+  de schermen en de bezorging van pushmeldingen. Bevinding: op de telefoon van een teamgenoot komt een partij pas
+  in de partijenlijst na de eerste uitgespeelde game (`TeamPartij.fromLive`); tot dan staat hij op de livepagina
+  en het vergrendelscherm, maar in de app nog als *Nog niet ingevuld*.
 - **Hervatten houdt de koppeling met de teamwedstrijd, en meedoen zet Volgen vanzelf aan (Gerd-Jan, 21 november
   2026).** (1) Een partij die deze telefoon aan het tellen is, werd bij het samenvoegen met de livepagina
   vervangen door de kopie van de pagina (`mergeLive`: de partij had nog geen games), waardoor `trackingMatchId`

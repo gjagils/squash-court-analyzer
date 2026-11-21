@@ -102,6 +102,28 @@ describe('je team is begonnen', () => {
     expect(sent).toEqual([]);
   });
 
+  it('passes on how the lock screen card of a phone can be started, and nothing for a phone that cannot', async () => {
+    const shared = team();
+    const kees = await newPlayer({ name: 'Kees', teamKey: shared });
+    const jan = await newPlayer({ name: 'Jan', teamKey: shared });
+    const piet = await newPlayer({ name: 'Piet', teamKey: shared });
+    const klaas = await newPlayer({ name: 'Klaas', teamKey: shared });
+    const START = 'ef'.repeat(40);
+    await putPush(jan.auth, { platform: 'ios', token: IOS, start: START.toUpperCase() });
+    await putPush(piet.auth, { platform: 'android', token: ANDROID, start: 'fcm' });
+    // Not a token: left out, the phone still hears it
+    await putPush(klaas.auth, { platform: 'ios', token: 'cd'.repeat(32), start: 'fcm' });
+    const first = registration();
+    expect((await call('PUT', '/api/v1/me/team/lives', { auth: kees.auth, body: first })).status).toBe(200);
+    const bodies = sent.map((request) => request.body);
+    expect(bodies).toContainEqual({ platform: 'ios', token: IOS, mode: 'alerts', lang: 'nl', announce: true, sandbox: false, start: START });
+    expect(bodies).toContainEqual({ platform: 'android', token: ANDROID, mode: 'alerts', lang: 'nl', announce: true, start: 'fcm' });
+    expect(bodies).toContainEqual({ platform: 'ios', token: 'cd'.repeat(32), mode: 'alerts', lang: 'nl', announce: true, sandbox: false });
+    // Sent again without: the phone can no longer do it (Live Activities switched off)
+    await putPush(jan.auth, { platform: 'ios', token: IOS });
+    expect((await tokensOf(jan.player.playerId))[0].start).toBeNull();
+  });
+
   it('a live Worker that does not answer never fails the registration; without LIVE_SERVER nothing is sent', async () => {
     const shared = team();
     const kees = await newPlayer({ name: 'Kees', teamKey: shared });

@@ -15,7 +15,7 @@ import { readConfig } from './config.js';
 import { previewLines } from './preview.js';
 import { clubWalls, wallFor } from './club.js';
 import { sameKey } from './viewer-session.js';
-import { cleanDevice, isAlertFollower, partijDecided, partijWinner, pushAvailability, validateFollower } from './push.js';
+import { cleanDevice, followerStart, isAlertFollower, partijDecided, partijWinner, pushAvailability, validateFollower } from './push.js';
 import { cleanParts, clubName, isSampleMatch, isTestTeam, totalsOf } from './stats.js';
 
 export { LiveSession } from './session.js';
@@ -131,7 +131,8 @@ async function teamPage(request, env, config, id, state, lang = 'nl') {
  * `mode: "alerts"` with `device` (4.0: notifications only, see push.js); the
  * DELETE of such a follower sends the same mode. Counted as follower-team.
  * With `announce: true` a new alerts follower gets "Je team is begonnen" at
- * once (the account Worker signs teammates up this way, see TeamSession.announce).
+ * once (the account Worker signs teammates up this way, see TeamSession.announce);
+ * with `start` too, the team stand goes on its lock screen with it (push.js followerStart).
  */
 async function handleFollowers(request, env, config, session, unknownText, count, kind) {
   const input = await readJson(request, FOLLOWER_BODY_BYTES);
@@ -152,7 +153,7 @@ async function handleFollowers(request, env, config, session, unknownText, count
   const status = await session.addFollower(follower, baseUrl(request, config));
   if (status === 404) return send(404, { error: unknownText });
   if (status === 429) return send(429, { error: 'Te veel volgers voor deze wedstrijd' });
-  if (announce) await session.announce(follower);
+  if (announce) await session.announce(follower, followerStart(input, follower));
   await count(kind, { platform: follower.platform });
   return send(201, { ok: true });
 }

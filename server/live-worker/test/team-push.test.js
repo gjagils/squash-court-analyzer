@@ -563,4 +563,79 @@ describe('alerts followers', () => {
     expect(requests.length).toBe(1);
     expect(JSON.parse(requests[0].body).aps.alert).toEqual({ title: 'Je team is begonnen', body: 'All Inn 8 – Delft 8' });
   });
+
+  it('announce with start: the team stand goes on the lock screen of the teammate at once', async () => {
+    const { id, writeKey } = await newTeam();
+    await call('PUT', `/api/team/${id}/partij/1`, playing, writeKey);
+    const START = 'ef'.repeat(40);
+    // iOS: the Live Activity is started with the push-to-start token, with the alert; no plain notification next to it
+    const ios = { platform: 'ios', token: IOS_DEVICE, sandbox: true, mode: 'alerts', device: DEVICE_A, announce: true, start: START.toUpperCase() };
+    expect((await follow(id, ios)).status).toBe(201);
+    await pushesDone(id);
+    const requests = apnsRequests();
+    expect(requests.length).toBe(1);
+    expect(requests[0].url).toBe(`https://api.sandbox.push.apple.com/3/device/${START}`);
+    expect(requests[0].headers['apns-push-type']).toBe('liveactivity');
+    expect(requests[0].headers['apns-topic']).toBe('com.squashanalyzer.app.push-type.liveactivity');
+    const aps = JSON.parse(requests[0].body).aps;
+    expect(aps.event).toBe('start');
+    expect(aps['attributes-type']).toBe('TeamScoreAttributes');
+    expect(aps.attributes).toEqual({ teamId: id, server: BASE });
+    expect(aps['input-push-token']).toBe(1);
+    expect(aps.alert).toEqual({ title: 'Je team is begonnen', body: 'All Inn 8 – Delft 8' });
+    expect(aps['content-state']).toEqual(teamContentState(team, { 1: playing }));
+    // The start token is not kept; the phone is an alerts follower as before
+    expect(await followers(id)).toEqual([
+      { platform: 'ios', token: IOS_DEVICE, sandbox: true, alerts: true, lang: 'nl', mode: 'alerts', device: DEVICE_A },
+    ]);
+
+    // Android: the same token shows the ongoing notification and follows it from here on, silent
+    sent = [];
+    const android = { platform: 'android', token: ANDROID, mode: 'alerts', device: DEVICE_B, lang: 'en', announce: true, start: 'fcm' };
+    expect((await follow(id, android)).status).toBe(201);
+    await pushesDone(id);
+    const [message] = fcmData();
+    expect(message.data.kind).toBe('team');
+    expect(message.data.event).toBe('start');
+    expect(message.data.alertTitle).toBe('Your team has started');
+    expect(JSON.parse(message.data.team)).toEqual(teamContentState(team, { 1: playing }));
+    const stored = await followers(id);
+    expect(stored).toContainEqual({ platform: 'android', token: ANDROID, sandbox: false, alerts: false, lang: 'en' });
+    expect(stored).toContainEqual({ platform: 'android', token: ANDROID, sandbox: false, alerts: true, lang: 'en', mode: 'alerts', device: DEVICE_B });
+    // The next change reaches that phone as a lock screen update without an alert, and as its plain alert
+    sent = [];
+    await call('PUT', `/api/team/${id}/partij/1`, won('Gerd-Jan', 'Thomas', [3, 0], 1), writeKey);
+    await pushesDone(id);
+    const kinds = fcmData().map((m) => `${m.data.kind}:${m.data.alertTitle || ''}`).sort();
+    expect(kinds).toEqual(['alert:E1: Gerd-Jan wins 3–0', 'team:']);
+  });
+
+  it('announce with start: a refused start falls back to the plain notification, a wrong start is ignored', async () => {
+    const { id } = await newTeam();
+    const START = 'ef'.repeat(40);
+    pushDeps.fetch = (url, init) => {
+      if (url.includes(`/3/device/${START}`)) {
+        sent.push({ url, headers: init.headers, body: init.body });
+        return new Response(JSON.stringify({ reason: 'BadDeviceToken' }), { status: 400 });
+      }
+      return fakeFetch(url, init);
+    };
+    expect((await follow(id, { platform: 'ios', token: IOS_DEVICE, sandbox: true, mode: 'alerts', announce: true, start: START })).status).toBe(201);
+    await pushesDone(id);
+    const requests = apnsRequests();
+    expect(requests.map((r) => r.headers['apns-push-type'])).toEqual(['liveactivity', 'alert']);
+    expect(requests[1].url).toBe(`https://api.sandbox.push.apple.com/3/device/${IOS_DEVICE}`);
+    // The phone keeps its plain notifications
+    expect((await followers(id)).length).toBe(1);
+
+    // Not a token, or "fcm" on iOS: the plain announcement
+    sent = [];
+    const other = await newTeam();
+    expect((await follow(other.id, { platform: 'ios', token: IOS_DEVICE, sandbox: true, mode: 'alerts', announce: true, start: 'fcm' })).status).toBe(201);
+    expect((await follow(other.id, { platform: 'android', token: ANDROID, mode: 'alerts', announce: true, start: 'yes' })).status).toBe(201);
+    await pushesDone(other.id);
+    expect(apnsRequests().map((r) => r.headers['apns-push-type'])).toEqual(['alert']);
+    expect(fcmData().map((m) => m.data.kind)).toEqual(['alert']);
+    expect((await followers(other.id)).length).toBe(2);
+  });
 });

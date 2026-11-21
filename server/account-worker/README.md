@@ -65,7 +65,9 @@ Het draaiboek staat in `docs/testplan-4.0-koppelen.md`.
 
 ## "Je team is begonnen" (21 november 2026)
 
-`PUT /api/v1/me/push` bewaart het pushtoken van een ingelogde telefoon (tabel `push_tokens`, migratie 0007);
+`PUT /api/v1/me/push` bewaart het pushtoken van een ingelogde telefoon (tabel `push_tokens`, migratie 0007; sinds
+migratie 0008 ook `start`: hoe de teamstand op het vergrendelscherm van die telefoon gestart wordt, iOS het
+starttoken van de Live Activity, Android `fcm`; het gaat met `announce` mee naar de live-Worker);
 `DELETE /api/v1/me/push` haalt het weg. Wordt een teamwedstrijd nieuw aangemeld voor het team
 (`PUT /api/v1/me/team/lives`), dan meldt `tellTeam` de telefoons van de andere accounts van dat team aan als
 meldingenvolger op de live-Worker (`LIVE_SERVER` in `wrangler.toml`, `announce: true`). Deze Worker stuurt zelf

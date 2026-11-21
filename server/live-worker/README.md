@@ -170,6 +170,13 @@ Teamwedstrijd op het vergrendelscherm (zelfde branch, nog niet in productie):
 
 - `POST` / `DELETE /api/team/:id/followers`: dezelfde body en antwoorden als bij
   een losse wedstrijd (201, 204, 400, 404, 429, 503).
+- **Kaart vanzelf bij de start (21 november 2026)**: stuurt de account-Worker een meldingenvolger met
+  `"announce": true` en ook `"start"`, dan zet de live-Worker de teamstand meteen op het vergrendelscherm, met
+  *Je team is begonnen* als melding erbij. iOS: `start` is het starttoken van de Live Activity (hex); er gaat
+  een APNs-push `event: "start"` heen met `attributes-type: "TeamScoreAttributes"`, `attributes: {teamId,
+  server}` en `input-push-token: 1`, en de app meldt daarna zelf zijn updatetoken aan. Android: `start` is
+  `"fcm"`; hetzelfde FCM-token wordt hier stille kaartvolger (`alerts: false`) en krijgt het teambericht met
+  `event: "start"`. Het startgegeven wordt niet bewaard. Weigert APNs de start, dan gaat de gewone melding.
 - **Alleen meldingen (4.0, T6)**: met `"mode": "alerts"` en `"device": <installatie-id>`
   in die body is de volger een speler van de teamwedstrijd zelf, zonder kaart op het
   vergrendelscherm. iOS stuurt dan een gewoon APNs-apparaattoken (push-type `alert`,

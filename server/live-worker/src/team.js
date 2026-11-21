@@ -292,15 +292,32 @@ export class TeamSession extends ViewerSession {
    * an alerts follower when the team match was made visible for the team
    * (`announce: true` on POST /followers). Once per follower, to that follower
    * only, with the team names; the text is made here, never taken from the request.
+   *
+   * With `start` (push.js followerStart) the team stand goes on the lock
+   * screen with it. iOS: the Live Activity is started and the app registers
+   * its update token itself, as when following by hand. Android: the same FCM
+   * token becomes a lock screen follower here, silent (the phone has its
+   * alerts already as the alerts follower it is).
    */
-  async announce(follower) {
-    const [team, id, server] = await Promise.all([
+  async announce(follower, start = null) {
+    const [team, id, server, partijen] = await Promise.all([
       this.ctx.storage.get('team'), this.ctx.storage.get('id'), this.ctx.storage.get('pushServer'),
+      this.ctx.storage.get('partijen'),
     ]);
     if (!team) return;
     const title = cleanLang(follower.lang) === 'en' ? 'Your team has started' : 'Je team is begonnen';
     const alert = { slot: 0, title, body: `${team.home} – ${team.away}` };
-    await this.schedulePush({ mode: 'alerts', id: this.id || id || '', server: server || '', items: [{ follower, alert }] });
+    const job = { id: this.id || id || '', server: server || '' };
+    if (!start) {
+      await this.schedulePush({ mode: 'alerts', ...job, items: [{ follower, alert }] });
+      return;
+    }
+    if (follower.platform === 'android') {
+      await this.addFollower(
+        { platform: 'android', token: follower.token, sandbox: false, alerts: false, lang: cleanLang(follower.lang) }, server || '',
+      );
+    }
+    await this.schedulePush({ mode: 'start', ...job, follower, start, state: teamContentState(team, partijen || {}), alert });
   }
 
   /** The stand for the end the followers get when the session goes (Live stoppen, idle): gone in a minute */

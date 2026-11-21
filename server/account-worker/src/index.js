@@ -25,7 +25,7 @@
 //   GET    /api/v1/me/team/lives?fixtures=   live team matches of the own team, and of opponents for these matches
 //   PUT    /api/v1/me/team/lives             { fixture, date, teamName, liveId, writeKey, refereeKey?, replaces? }
 //   DELETE /api/v1/me/team/lives?fixture=    the own registration goes
-//   PUT    /api/v1/me/push                   { platform, token, sandbox?, lang?, device? }: hear when the team starts
+//   PUT    /api/v1/me/push                   { platform, token, sandbox?, lang?, device?, start? }: hear when the team starts
 //   DELETE /api/v1/me/push                   { token }: this phone no longer
 //   POST   /api/v1/mail/verify|reset|change|confirm   the account mails (src/mail.js)
 
@@ -593,7 +593,7 @@ async function tellTeam(env, teamKey, starterId, liveId) {
   if (!server) return;
   try {
     const { results } = await env.DB.prepare(
-      `SELECT t.platform, t.token, t.sandbox, t.lang, t.device FROM push_tokens t
+      `SELECT t.platform, t.token, t.sandbox, t.lang, t.device, t.start FROM push_tokens t
        JOIN players p ON p.id = t.player_id
        WHERE p.team_key = ? AND t.player_id != ? AND t.updated_at > ? LIMIT ?`,
     ).bind(teamKey, starterId, deps.now() - PUSH_TOKEN_DAYS * DAY, TEAM_START_PHONES).all();
@@ -603,6 +603,8 @@ async function tellTeam(env, teamKey, starterId, liveId) {
       const follower = { platform: row.platform, token: row.token, mode: 'alerts', lang: row.lang, announce: true };
       if (row.platform === 'ios') follower.sandbox = row.sandbox === 1;
       if (row.device) follower.device = row.device;
+      // The team stand on the lock screen with it, for a phone that can (live Worker: followerStart)
+      if (row.start) follower.start = row.start;
       let status = 'failed';
       try {
         const response = await deps.fetch(`${server}/api/team/${liveId}/followers`, {
@@ -629,10 +631,10 @@ async function putPushToken(request, env, playerId) {
     // A phone belongs to the account that is signed in on it now
     env.DB.prepare('DELETE FROM push_tokens WHERE token = ? AND player_id != ?').bind(push.token, playerId),
     env.DB.prepare(
-      `INSERT INTO push_tokens (player_id, token, platform, sandbox, lang, device, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO push_tokens (player_id, token, platform, sandbox, lang, device, start, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT (player_id, token) DO UPDATE SET platform = excluded.platform, sandbox = excluded.sandbox,
-         lang = excluded.lang, device = excluded.device, updated_at = excluded.updated_at`,
-    ).bind(playerId, push.token, push.platform, push.sandbox ? 1 : 0, push.lang, push.device, now),
+         lang = excluded.lang, device = excluded.device, start = excluded.start, updated_at = excluded.updated_at`,
+    ).bind(playerId, push.token, push.platform, push.sandbox ? 1 : 0, push.lang, push.device, push.start, now),
     // The newest few phones of an account
     env.DB.prepare(
       `DELETE FROM push_tokens WHERE player_id = ? AND token NOT IN

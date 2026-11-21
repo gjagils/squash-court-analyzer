@@ -105,6 +105,22 @@ export function validateFollower(input) {
   return follower;
 }
 
+/**
+ * 4.0, "Teamstand vanzelf op je vergrendelscherm" (Gerd-Jan, 21 November
+ * 2026): how the lock screen card of an announced alerts follower can be
+ * started from here, or null. iOS: the push-to-start token of the team Live
+ * Activity (hex, iOS 17.2+); Android: "fcm", the phone's own FCM token shows
+ * the ongoing notification. Only apps that can do it send `start`.
+ */
+export function followerStart(input, follower) {
+  if (!input || !isAlertFollower(follower) || typeof input.start !== 'string') return null;
+  if (follower.platform === 'ios') {
+    const token = input.start.toLowerCase();
+    return IOS_TOKEN.test(token) ? token : null;
+  }
+  return input.start === 'fcm' ? 'fcm' : null;
+}
+
 /** A follower that only gets notifications (no lock screen card) */
 export const isAlertFollower = (follower) => Boolean(follower) && follower.mode === 'alerts';
 
@@ -448,6 +464,24 @@ export function apnsPayload(snapshot, event, nowMs, alert = null, finished = sna
 }
 
 /**
+ * The APNs body that starts the team Live Activity on a phone that is not
+ * following yet (push-to-start, iOS 17.2+): the stand, the attributes the app
+ * would have given (`TeamScoreAttributes`: teamId, server) and the alert Apple
+ * requires with a start. `input-push-token` (iOS 18) makes the phone hand out
+ * the token for the updates; the app registers it as a lock screen follower.
+ */
+export function apnsStartPayload(state, id, server, alert, nowMs) {
+  return {
+    aps: {
+      timestamp: Math.floor(nowMs / 1000), event: 'start', 'content-state': state,
+      'attributes-type': 'TeamScoreAttributes', attributes: { teamId: id, server },
+      'input-push-token': 1,
+      alert: { title: alert.title, body: alert.body }, sound: 'default',
+    },
+  };
+}
+
+/**
  * The FCM HTTP v1 body: a data message (all values strings); the alert as
  * alertTitle/alertBody. A live match has its stand in `snapshot`, a team match
  * in `team`.
@@ -584,6 +618,7 @@ async function eachLimited(items, limit, task) {
  */
 export async function pushToFollowers(env, job) {
   if (job.mode === 'alerts') return pushAlerts(env, job);
+  if (job.mode === 'start') return pushStart(env, job);
   const { id, server, snapshot, event, followers, alert = null, kind = 'live', finished } = job;
   const apns = apnsSettings(env);
   const fcm = fcmServiceAccount(env);
@@ -647,4 +682,34 @@ export async function pushAlerts(env, { id, server, items }) {
   });
   console.log('push', 'alerts', JSON.stringify(answers), 'forgotten', dead.length);
   return dead;
+}
+
+/**
+ * "Je team is begonnen" with the team stand on the lock screen at once: the
+ * start of the Live Activity (iOS, to the push-to-start token `start`) or of
+ * the ongoing notification (Android, event "start" to the phone's FCM token),
+ * each with the alert. When that does not get through, the plain notification
+ * goes instead, so the teammate hears it either way. Returns the dead
+ * followers, as pushAlerts does.
+ */
+export async function pushStart(env, { id, server, follower, start, state, alert }) {
+  const apns = apnsSettings(env);
+  const fcm = fcmServiceAccount(env);
+  const nowMs = pushDeps.now();
+  let outcome = { result: 'skip', detail: `${follower.platform} off` };
+  try {
+    if (follower.platform === 'ios' && apns) {
+      outcome = await sendApns(apns, { token: start, sandbox: follower.sandbox }, apnsStartPayload(state, id, server, alert, nowMs), nowMs);
+    } else if (follower.platform === 'android' && fcm) {
+      outcome = await sendFcm(fcm, follower, id, server, state, 'start', alert, 'team');
+    }
+  } catch (error) {
+    console.error(`${follower.platform} start error`, error && error.message);
+    outcome = { result: 'error', detail: `${follower.platform} exception` };
+  }
+  console.log('push', 'start', outcome.detail);
+  if (outcome.result === 'ok') return [];
+  // Android: the same token would fail again
+  if (follower.platform === 'android') return outcome.result === 'dead' ? [follower] : [];
+  return pushAlerts(env, { id, server, items: [{ follower, alert }] });
 }

@@ -8,7 +8,9 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 4.0 build 6)
+## Volgende build (na 4.0 build 7)
+
+## 4.0 build 7 (21 november 2026: geüpload naar TestFlight Squashteam en de Play-testtracks)
 
 - **Teamstand vanzelf op je vergrendelscherm en vanzelf meedoen (Gerd-Jan, 21 november 2026).** Na de melding
   *Je team is begonnen* moest een teamgenoot nog de app openen, een minuut wachten en op *Meedoen* tikken, en voor

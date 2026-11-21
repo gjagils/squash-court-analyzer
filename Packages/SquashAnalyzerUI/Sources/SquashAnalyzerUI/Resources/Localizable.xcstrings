@@ -14743,42 +14743,6 @@
         }
       }
     },
-    "Niet koppelen aan teamwedstrijd": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Do not link to a team match"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Niet koppelen aan teamwedstrijd"
-          }
-        }
-      }
-    },
-    "gekoppeld aan teamwedstrijd": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "linked to a team match"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "gekoppeld aan teamwedstrijd"
-          }
-        }
-      }
-    },
     "Bij de start delen we deze teamwedstrijd met je team: teamgenoten zetten hun partij erbij. Alleen teamnamen, voornamen en de stand gaan naar de server.": {
       "extractionState": "manual",
       "generatesSymbol": false,
@@ -14811,6 +14775,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "Met een account hoor je het ook als iemand van je team een teamwedstrijd start, ook als je zelf niet speelt. Daarvoor staat het pushtoken van deze telefoon bij je account."
+          }
+        }
+      }
+    },
+    "Serveert eerst?": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serves first?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serveert eerst?"
           }
         }
       }

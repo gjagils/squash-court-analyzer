@@ -10,13 +10,42 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 5)
 
+- **Eerste serveerder nog wisselen vlak voor de start (Gerd-Jan, 21 november 2026).** Wie eerst serveert weet je
+  vaak pas na het tossen, als de wedstrijd al klaarstaat. Scheidsrechter: zolang er geen rally gespeeld is, staat
+  bij de ontvanger de knop *Serveert eerst?*; een tik geeft hem de service (rechtervak, of zijn voorkeursvak).
+  Coach: boven *START GAME 1* staat *Wie serveert eerst?* met beide spelers, tot de eerste game gestart is.
+  `RefereeMatch.changeFirstServer`, `Match.changeFirstServer`, getest in `FirstServerTests`.
+  *Releasenote:* Wie eerst serveert kun je nog wisselen tot de eerste rally.
+- **Eén scherm voor een wedstrijd bij een partij, langs elke route (Gerd-Jan, 21 november 2026: "het is complex
+  geworden, het begint bij consistentie").** Er waren vier verschillende schermen voor hetzelfde:
+  de korte opzet na de vraag vooraf, het blok onder *Meer opties* (lijst teamwedstrijden, knoppen E1–E4, *Wie is
+  onze speler?*), de opzet vanuit Competitie → partij → Coach/Scheidsrechter (kale namen met "Team E1" ingevuld en
+  nog *Soort wedstrijd* erbij) en de vraag na afloop (eigen partijlijst). Nu:
+  - **Eén korte opzet** (`MatchSetupView`, blok TEAMWEDSTRIJD met partij, teamnaam naast SPELER 1 en 2, de
+    spelersknoppen van beide teams, wie serveert, Meer opties, Start) langs alle drie de routes: na de vraag
+    vooraf, na *Meer opties* → *Koppel aan teamwedstrijd*, en vanuit Competitie (daar zonder *Wijzig*, want de
+    partij ligt vast: `teamMatchId`/`teamSlot`).
+  - **Eén partijlijst** (`TeamPartijRows`: E1–E4 met namen of *nog leeg*, stand of *wordt geteld*) in de vraag
+    vooraf, bij *Koppel aan teamwedstrijd* (met daarboven de teamwedstrijden om uit te kiezen) en in de vraag na
+    afloop. Het oude blok onder Meer opties is weg.
+  - **Eén stel spelersknoppen** (`TeamNameChips`) op het partijscherm van Competitie en in de korte opzet.
+  - ***Wie is onze speler?* wordt alleen nog gevraagd als het echt niet te zien is:** niet meer in de opzet (thuis
+    is Speler 1, en anders zegt de naam het), en na afloop alleen als geen van beide namen in de partij of in Mijn
+    team staat.
+  - Vanuit Competitie staan in de naamvelden geen standaardnamen ("All Inn 8 E1") meer: leeg blijft leeg en de
+    teampagina toont dan vanzelf team en positie.
+  *Releasenote:* Een wedstrijd voor een partij start je overal op dezelfde manier: kies de partij, tik de spelers
+  aan en start.
+
 - **Dezelfde spelerskeuze na de vraag vooraf als onder Competitie (Gerd-Jan, 21 november 2026).** Koos je in de
   vraag vooraf een partij, dan stonden er twee lege naamvelden met *Kies speler*; op het partijscherm van
   Competitie staan de spelers van beide teams als knoppen onder het veld. De korte opzet toont nu dezelfde knoppen
   (`TeamNameChips`, één onderdeel voor beide schermen): onder Speler 1 de spelers van het thuisteam, onder Speler 2
   die van het uitteam. Onze spelers komen uit *In mijn team* en Mijn team (`TeamMatchSupport.rosterNames`), die van
   de tegenstander van SBN (`LeagueOpponentStorage`, een dag bewaard). Een tik vult de naam in en kiest de speler
-  uit de spelerslijst als die er staat; *Wie is onze speler?* verdwijnt zodra een naam van ons team gekozen is.
+  uit de spelerslijst als die er staat. De vraag *Wie is onze speler?* is uit de korte opzet: naast SPELER 1 en
+  SPELER 2 staat de teamnaam (thuis is Speler 1), en staat onze speler toch in het andere vak, dan ziet de app dat
+  aan de naam.
   *Releasenote:* geen (hoort bij de vraag vooraf).
 
 - **Een open wedstrijd die een uur stil ligt is niet meer open (Gerd-Jan, 21 november 2026).** Coach en
@@ -76,8 +105,8 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
     teamwedstrijd verandert er niets en is er geen wachttijd.
   - **Na een partij de korte opzet:** een blok met de teamwedstrijd en *Partij E2 · best of 5* (met *Wijzig* terug
     naar de vraag), de namen uit de partij (thuisspeler als Speler 1) en wie serveert. *Soort wedstrijd* staat er dan
-    niet. *Wie is onze speler?* verschijnt alleen als het niet uit de namen van de partij of uit *In mijn team*
-    volgt (`TeamMatchSupport.ownIsPlayer1`).
+    niet. Wie onze speler is volgt uit de vakken (thuis is Speler 1) en anders uit de naam
+    (`TeamMatchSupport.ownIsPlayer1`); de opzet vraagt het niet.
   - **Soort wedstrijd is weer Wedstrijd of Oefenpartij.** Een andere teamwedstrijd (inhaalwedstrijd, volgende
     week) koppel je onder *Meer opties* → *Koppel aan teamwedstrijd*; daar staat het oude blok.
   - **Na *Nee, gewone wedstrijd* komt de vraag na afloop niet nog eens.**

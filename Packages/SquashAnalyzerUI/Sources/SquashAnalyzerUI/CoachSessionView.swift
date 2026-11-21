@@ -78,9 +78,9 @@ public struct CoachSessionView: View {
                 .disabled(saver.busy || saver.failed)
             } else if showingSetup {
                 MatchSetupView(playerStore: playerStore, mode: .coach, photoStore: photoStore, filePicker: filePicker,
-                               initialPlayer1Name: activeTarget?.player1Name ?? "", initialPlayer2Name: activeTarget?.player2Name ?? "",
-                               teamMatchStore: activeTarget == nil ? teamMatchStore : nil,
+                               teamMatchStore: teamMatchStore,
                                historyStore: historyStore, leagueFetcher: settings?.leagueFetcher,
+                               teamMatchId: activeTarget?.teamMatchId, teamSlot: activeTarget?.slot ?? 1,
                                onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }

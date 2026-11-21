@@ -67,7 +67,11 @@ public struct TeamMatchLinkPrompt: View {
             SharedColors.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    SectionHeader(loc("COMPETITIE VANDAAG"))
+                    HStack(spacing: 8) {
+                        SectionHeader(loc("TEAMWEDSTRIJD"))
+                        Spacer()
+                        TeamShareBadge(isLive: team.isLive)
+                    }
                     Text(team.title)
                         .font(SharedFonts.system(20, weight: .semibold, design: .rounded))
                         .foregroundColor(SharedColors.textPrimary)
@@ -82,31 +86,7 @@ public struct TeamMatchLinkPrompt: View {
                             .foregroundColor(SharedColors.support)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    VStack(spacing: 8) {
-                        ForEach(team.partijen, id: \.slot) { partij in
-                            Button { slot = partij.slot } label: {
-                                HStack(spacing: 12) {
-                                    Text(partij.label)
-                                        .font(SharedFonts.system(12, weight: .bold, design: .rounded))
-                                        .foregroundColor(SharedColors.background)
-                                        .frame(width: 30, height: 30)
-                                        .background(slot == partij.slot ? SharedColors.accent : SharedColors.textMuted)
-                                        .clipShape(Circle())
-                                    Text(partij.hasEntry
-                                         ? "\(team.ownDisplayName(partij)) – \(team.opponentDisplayName(partij)) · \(partij.standText)"
-                                         : loc("nog leeg"))
-                                        .font(SharedFonts.system(14))
-                                        .foregroundColor(partij.hasEntry ? SharedColors.textPrimary : SharedColors.textMuted)
-                                        .lineLimit(1)
-                                    Spacer()
-                                }
-                                .padding(12)
-                                .background(slot == partij.slot ? SharedColors.accent.opacity(0.14) : SharedColors.tint(0.04))
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
+                    TeamPartijRows(team: team, selected: slot) { picked in choose(picked) }
                     if let slot {
                         Text("Wie is onze speler (\(team.ownName))?", bundle: textBundle)
                             .font(SharedFonts.system(14, weight: .semibold))
@@ -123,6 +103,78 @@ public struct TeamMatchLinkPrompt: View {
             }
         }
         .preferredColorScheme(SharedColors.preferredScheme)
+    }
+
+    /// A partij was tapped: linked at once when the names say which player is
+    /// ours (the partij's names, or a player of Mijn team), asked otherwise
+    private func choose(_ picked: Int) {
+        var own: [String] = []
+        if let snapshot = TeamMatchSupport.cachedTeam() {
+            for player in snapshot.players { own.append(player.name) }
+        }
+        func inTeam(_ name: String) -> Bool {
+            for candidate in own where TeamMatchSupport.samePlayer(candidate, name) { return true }
+            return false
+        }
+        if let known = TeamMatchSupport.ownIsPlayer1(partij: team.partij(picked), player1Name: player1Name, player2Name: player2Name,
+                                                     player1InTeam: inTeam(player1Name), player2InTeam: inTeam(player2Name)) {
+            onLink(picked, known)
+        } else {
+            slot = picked
+        }
+    }
+}
+
+/// The four partijen of a team match as rows to tap: E1–E4 with the names
+/// (or "nog leeg") and the stand or "wordt geteld". The same list in the
+/// question before a match and in the one after it.
+struct TeamPartijRows: View {
+    let team: TeamMatch
+    let selected: Int?
+    let onPick: (Int) -> Void
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ForEach(team.partijen, id: \.slot) { partij in
+                Button { onPick(partij.slot) } label: {
+                    HStack(spacing: 12) {
+                        Text(partij.label)
+                            .font(SharedFonts.system(12, weight: .bold, design: .rounded))
+                            .foregroundColor(SharedColors.background)
+                            .frame(width: 30, height: 30)
+                            .background(partij.hasEntry ? SharedColors.textMuted : SharedColors.accent)
+                            .clipShape(Circle())
+                        Text(names(partij))
+                            .font(SharedFonts.system(14))
+                            .foregroundColor(partij.hasEntry ? SharedColors.textMuted : SharedColors.textPrimary)
+                            .lineLimit(1)
+                        Spacer()
+                        Text(state(partij))
+                            .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
+                            .foregroundColor(SharedColors.textMuted)
+                            .lineLimit(1)
+                    }
+                    .padding(12)
+                    .background(selected == partij.slot ? SharedColors.accent.opacity(0.14) : SharedColors.tint(0.04))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(loc("Partij \(partij.label)"))
+            }
+        }
+    }
+
+    /// "Jan – Piet", or "nog leeg" while no name is filled in
+    private func names(_ partij: TeamPartij) -> String {
+        if partij.ownPlayer.isEmpty && partij.opponentPlayer.isEmpty { return loc("nog leeg") }
+        return "\(team.ownDisplayName(partij)) – \(team.opponentDisplayName(partij))"
+    }
+
+    /// The stand of a partij with games, "wordt geteld" for one a match was started for
+    private func state(_ partij: TeamPartij) -> String {
+        if partij.hasEntry { return partij.standText }
+        if partij.trackingMatchId != nil { return loc("wordt geteld") }
+        return ""
     }
 }
 

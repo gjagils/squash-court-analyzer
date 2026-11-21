@@ -81,6 +81,19 @@ public class Match: Identifiable {
 
     // MARK: - Computed Properties
 
+    /// Who serves first is often known only just before the match (the spin of
+    /// the racket): it can still change until the first game is started
+    public var canChangeFirstServer: Bool {
+        currentGameIndex == 0 && games.count == 1 && !currentGame.isStarted && currentGame.points.isEmpty
+    }
+
+    public func changeFirstServer(to player: Player) {
+        guard canChangeFirstServer, player != currentGame.currentServer else { return }
+        matchStartingServer = player
+        currentGame.assignStartingServer(player)
+        updatedAt = Date()
+    }
+
     /// The game being played. Pure: `init` and `startNewGame` make the games, and
     /// `completeResult` never leaves the list empty. Only when `games` was
     /// emptied from outside, a detached empty game is returned (not added).

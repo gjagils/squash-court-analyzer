@@ -360,20 +360,40 @@ public struct RefereeScoringView: View {
                 .frame(height: 36)
                 .padding(.horizontal, 8)
 
-            ServiceSideSelector(
-                side: match.serverSide,
-                preferredSide: match.preferredSide(for: player),
-                color: color,
-                compact: true,
-                disabled: match.isGameOver
-            ) { side in
-                withAnimation(.easeInOut(duration: 0.15)) { match.overrideSide(to: side) }
-                matchChanged()
+            ZStack {
+                ServiceSideSelector(
+                    side: match.serverSide,
+                    preferredSide: match.preferredSide(for: player),
+                    color: color,
+                    compact: true,
+                    disabled: match.isGameOver
+                ) { side in
+                    withAnimation(.easeInOut(duration: 0.15)) { match.overrideSide(to: side) }
+                    matchChanged()
+                }
+                .opacity(isServer ? 1.0 : 0.0)
+                .allowsHitTesting(isServer)
+                // Invisible for the receiver: VoiceOver/TalkBack skip it too
+                .accessibilityHidden(!isServer)
+                // Before the first rally the service can still go to the other player
+                if !isServer && match.canChangeFirstServer {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.15)) { match.changeFirstServer(to: player) }
+                        matchChanged()
+                    } label: {
+                        Text("Serveert eerst?", bundle: textBundle)
+                            .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
+                            .foregroundColor(color)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 7)
+                            .background(color.opacity(0.10))
+                            .clipShape(RoundedRectangle(cornerRadius: 999))
+                            .overlay(RoundedRectangle(cornerRadius: 999).stroke(color.opacity(0.4), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(loc("\(match.name(for: player)) serveert eerst"))
+                }
             }
-            .opacity(isServer ? 1.0 : 0.0)
-            .allowsHitTesting(isServer)
-            // Invisible for the receiver: VoiceOver/TalkBack skip it too
-            .accessibilityHidden(!isServer)
 
             Button(action: {
                 withAnimation(.easeInOut(duration: 0.15)) { match.awardPoint(to: player) }

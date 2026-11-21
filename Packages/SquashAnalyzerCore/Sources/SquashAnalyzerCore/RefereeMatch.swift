@@ -167,6 +167,22 @@ public class RefereeMatch: Identifiable {
         lastDecision = nil
     }
 
+    /// Who serves first is often known only just before the match (the spin of
+    /// the racket): it can still change while no rally has been played
+    public var canChangeFirstServer: Bool {
+        pointHistory.isEmpty && completedGames.isEmpty && player1Score == 0 && player2Score == 0
+    }
+
+    public func changeFirstServer(to player: Player) {
+        guard canChangeFirstServer, player != currentServer else { return }
+        currentServer = player
+        serverSide = preferredSide(for: player) ?? ServerSide.right
+        openingServer = nil
+        openingSide = nil
+        // A box chosen for the other server is not this one's to undo
+        undoStack = []
+    }
+
     public func overrideSide(to side: ServerSide) {
         guard !isGameOver, side != serverSide else { return }
         undoStack.append(.sideOverride(prevSide: serverSide, prevPreferredSide: preferredSide(for: currentServer)))

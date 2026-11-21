@@ -541,6 +541,7 @@ public struct CoachScoringView: View {
             VStack {
                 if !game.isStarted && !game.isGameOver && !match.isMatchOver {
                     Spacer(minLength: 0)
+                    if match.canChangeFirstServer { firstServerPicker }
                     startButton
                 } else if !game.points.isEmpty {
                     // The last three points as a quiet list in the empty middle,
@@ -634,6 +635,48 @@ public struct CoachScoringView: View {
 
     /// A court smaller than this cannot be tapped reliably (9 zones)
     static let minimumCourtHeight: CGFloat = 300
+
+    /// "Wie serveert eerst?" above START GAME 1: the choice of the setup can
+    /// still change here, once the racket has been spun
+    private var firstServerPicker: some View {
+        VStack(spacing: 10) {
+            Text("Wie serveert eerst?", bundle: textBundle)
+                .font(SharedFonts.system(14, weight: .medium, design: .rounded))
+                .foregroundColor(SharedColors.textSecondary)
+            HStack(spacing: 10) {
+                firstServerButton(Player.player1, SharedColors.accent)
+                firstServerButton(Player.player2, SharedColors.steelBlue)
+            }
+        }
+        .padding(.bottom, 14)
+    }
+
+    private func firstServerButton(_ player: Player, _ color: Color) -> some View {
+        let selected = game.currentServer == player
+        let name = match.name(for: player)
+        return Button {
+            match.changeFirstServer(to: player)
+            matchChanged()
+        } label: {
+            HStack(spacing: 8) {
+                Circle()
+                    .stroke(color, lineWidth: 2)
+                    .frame(width: 18, height: 18)
+                    .overlay(Circle().fill(selected ? color : Color.clear).frame(width: 10, height: 10))
+                Text(name)
+                    .font(SharedFonts.system(14, weight: .semibold, design: .rounded))
+                    .lineLimit(1)
+                    .foregroundColor(selected ? color : SharedColors.textPrimary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(color.opacity(selected ? 0.15 : 0.05))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(color.opacity(selected ? 0.6 : 0.15), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(loc("\(name) serveert eerst"))
+    }
 
     /// START at the first serve of a game: from then the rally clock runs, so
     /// the warm-up and the break between games never count as a rally

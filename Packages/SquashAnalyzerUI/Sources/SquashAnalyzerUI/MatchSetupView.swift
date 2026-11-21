@@ -74,6 +74,12 @@ public struct MatchSetupView: View {
     let historyStore: (any MatchHistoryStore)?
     /// Fetches the opponent's players from SBN for the name chips of a partij; nil uses what is saved
     let leagueFetcher: LeagueTeamFetcher?
+    /// Started for a partij from Competitie: that team match and partij are set,
+    /// and the setup looks as after the question (without "Wijzig")
+    let fixedTeamId: UUID?
+    let fixedSlot: Int
+    /// "Koppel aan teamwedstrijd" under Meer opties: the question, with the team matches to choose from
+    @State private var linkingByHand = false
     /// A partij of a team match: our players and the opponent's, to tap instead of typing (as under Competitie)
     @State private var ownRoster: [String] = []
     @State private var opponentRoster: [String] = []
@@ -128,15 +134,17 @@ public struct MatchSetupView: View {
     public init(playerStore: any PlayerProfileStore, mode: MatchSetupMode, photoStore: (any PlayerPhotoStore)? = nil,
                 filePicker: (any PlayerFilePicker)? = nil, initialPlayer1Name: String = "", initialPlayer2Name: String = "",
                 teamMatchStore: (any TeamMatchStore)? = nil, historyStore: (any MatchHistoryStore)? = nil,
-                leagueFetcher: LeagueTeamFetcher? = nil,
+                leagueFetcher: LeagueTeamFetcher? = nil, teamMatchId: UUID? = nil, teamSlot: Int = 1,
                 onCancel: (() -> Void)? = nil,
                 onStart: @escaping (MatchSetupChoice) -> Void) {
         self.leagueFetcher = leagueFetcher
+        self.fixedTeamId = teamMatchId
+        self.fixedSlot = teamSlot
         self.teamMatchStore = teamMatchStore
         self.historyStore = historyStore
         _player1Name = State(initialValue: initialPlayer1Name)
         _player2Name = State(initialValue: initialPlayer2Name)
-        self.prefilled = !initialPlayer1Name.isEmpty || !initialPlayer2Name.isEmpty
+        self.prefilled = teamMatchId != nil || !initialPlayer1Name.isEmpty || !initialPlayer2Name.isEmpty
         self.playerStore = playerStore
         self.photoStore = photoStore
         self.filePicker = filePicker
@@ -177,9 +185,9 @@ public struct MatchSetupView: View {
                     playerRow(label: loc("Speler 2"), name: $player2Name, slot: 2, color: SharedColors.steelBlue, focus: focus(player2Pick, currentName: player2Name))
 
                     serverPicker
-                    if fromQuestion && inTeam {
-                        ownPlayerQuestion
-                    } else {
+                    // A partij of a team match is no kind to choose, and which player is ours
+                    // follows from the fields: the home team's player is Speler 1
+                    if !(fromQuestion && inTeam) {
                         kindPicker
                     }
                     moreOptions
@@ -196,12 +204,18 @@ public struct MatchSetupView: View {
             if let teamMatchStore {
                 // First what this phone knows (at once), then the choices behind Meer opties
                 var ids: [UUID] = []
-                for match in ((try? await teamMatchStore.loadAll()) ?? []) { ids.append(match.id) }
+                let stored = (try? await teamMatchStore.loadAll()) ?? []
+                for match in stored { ids.append(match.id) }
                 storedTeamIds = ids
-                let local = await TeamMatchSupport.startCandidate(store: teamMatchStore)
-                if let local { question = local }
-                teamCandidates = await TeamMatchSupport.candidates(store: teamMatchStore)
-                await findTeammatesMatch(local: local, store: teamMatchStore)
+                if let fixedTeamId {
+                    // From Competitie: no question, the partij is known
+                    for match in stored where match.id == fixedTeamId { answer(match, slot: fixedSlot) }
+                } else {
+                    let local = await TeamMatchSupport.startCandidate(store: teamMatchStore)
+                    if let local { question = local }
+                    teamCandidates = await TeamMatchSupport.candidates(store: teamMatchStore)
+                    await findTeammatesMatch(local: local, store: teamMatchStore)
+                }
             }
             if let historyStore { history = (try? await historyStore.loadHistory()) ?? [] }
         }
@@ -291,10 +305,19 @@ public struct MatchSetupView: View {
 
     private func playerRow(label: String, name: Binding<String>, slot: Int, color: Color, focus: [String]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(label.uppercased())
-                .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
-                .tracking(1)
-                .foregroundColor(color)
+            HStack(spacing: 6) {
+                Text(label.uppercased())
+                    .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
+                    .tracking(1)
+                    .foregroundColor(color)
+                // A partij of a team match: which team this player is of (home is Speler 1)
+                if let side = teamName(slot: slot) {
+                    Text("· \(side)")
+                        .font(SharedFonts.system(11, weight: .medium, design: .rounded))
+                        .foregroundColor(SharedColors.textSecondary)
+                        .lineLimit(1)
+                }
+            }
             HStack(spacing: 8) {
                 TextField(loc("Naam \(label.lowercased())"), text: name)
                     .accessibilityLabel(label)
@@ -385,9 +408,9 @@ public struct MatchSetupView: View {
                 .foregroundColor(SharedColors.textSecondary)
             HStack(spacing: 10) {
                 kindButton(loc("Wedstrijd"), selected: !practice) { practice = false }
-                kindButton(loc("Oefenpartij"), selected: practice) { chooseKind(team: false, isPractice: true) }
+                kindButton(loc("Oefenpartij"), selected: practice) { practice = true }
             }
-            if practice && !inTeam {
+            if practice {
                 Text("Telt niet mee voor badges en het spelersprofiel. Je vindt hem wel terug bij Afgeronde wedstrijden.", bundle: textBundle)
                     .font(SharedFonts.system(11))
                     .foregroundColor(SharedColors.textMuted)
@@ -413,11 +436,6 @@ public struct MatchSetupView: View {
         .buttonStyle(.plain)
     }
 
-    private func chooseKind(team: Bool, isPractice: Bool) {
-        practice = isPractice
-        turnTeamOn(team)
-    }
-
     /// "Meer opties": Best of and Later instappen behind one line that says
     /// what is set ("Best of 3 · start bij game 2"), so the screen stays short
     private var moreOptions: some View {
@@ -439,21 +457,16 @@ public struct MatchSetupView: View {
                     lateStartSection
                 }
                 // A team match that is not the one going on (a catch-up match, one of next week)
-                if !fromQuestion && !teamCandidates.isEmpty {
-                    Button { toggleTeamLink() } label: {
-                        Text(inTeam ? loc("Niet koppelen aan teamwedstrijd") : loc("Koppel aan teamwedstrijd"))
+                if !inTeam && fixedTeamId == nil && !teamCandidates.isEmpty {
+                    Button { linkByHand() } label: {
+                        Text("Koppel aan teamwedstrijd", bundle: textBundle)
                             .font(SharedFonts.system(14, weight: .medium, design: .rounded))
-                            .foregroundColor(inTeam ? SharedColors.accent : SharedColors.textSecondary)
+                            .foregroundColor(SharedColors.textSecondary)
                     }
                     .buttonStyle(.plain)
-                    teamSection
                 }
             }
         }
-    }
-
-    private func toggleTeamLink() {
-        if inTeam { turnTeamOn(false) } else { chooseKind(team: true, isPractice: false) }
     }
 
     /// Folded: "Meer opties · Best of 5", with a head start "… · start bij game 3"
@@ -462,7 +475,6 @@ public struct MatchSetupView: View {
         if showMore { return loc("Minder opties") }
         var parts: [String] = [loc("Meer opties")]
         if !(inTeam && chosenTeam != nil) { parts.append(loc("Best of \(chosenBestOf)")) }
-        if inTeam && !fromQuestion && chosenTeam != nil { parts.append(loc("gekoppeld aan teamwedstrijd")) }
         if hasHeadStart && headStartIsValid { parts.append(loc("start bij game \(1 + gamesBefore1 + gamesBefore2)")) }
         return parts.joined(separator: " · ")
     }
@@ -625,6 +637,28 @@ public struct MatchSetupView: View {
                 Spacer()
                 TeamShareBadge(isLive: team.isLive)
             }
+            // Linked by hand: the team matches it can be, nearest first
+            if linkingByHand && teamCandidates.count > 1 {
+                VStack(spacing: 8) {
+                    ForEach(teamCandidates) { candidate in
+                        Button { question = candidate } label: {
+                            HStack(spacing: 8) {
+                                Text("\(TeamMatchReport.dayText(candidate.date)) · \(candidate.title)")
+                                    .font(SharedFonts.system(13))
+                                    .foregroundColor(candidate.id == team.id ? SharedColors.accent : SharedColors.textSecondary)
+                                    .lineLimit(2)
+                                    .multilineTextAlignment(.leading)
+                                Spacer()
+                                TeamShareBadge(isLive: candidate.isLive)
+                            }
+                            .padding(10)
+                            .background(candidate.id == team.id ? SharedColors.accent.opacity(0.12) : SharedColors.tint(0.04))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
             Text(team.title)
                 .font(SharedFonts.system(20, weight: .semibold, design: .rounded))
                 .foregroundColor(SharedColors.textPrimary)
@@ -639,50 +673,10 @@ public struct MatchSetupView: View {
                     .foregroundColor(SharedColors.support)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            VStack(spacing: 8) {
-                ForEach(team.partijen, id: \.slot) { partij in
-                    Button { answer(team, slot: partij.slot) } label: {
-                        HStack(spacing: 12) {
-                            Text(partij.label)
-                                .font(SharedFonts.system(12, weight: .bold, design: .rounded))
-                                .foregroundColor(SharedColors.background)
-                                .frame(width: 30, height: 30)
-                                .background(partij.hasEntry ? SharedColors.textMuted : SharedColors.accent)
-                                .clipShape(Circle())
-                            Text(partijNames(partij, in: team))
-                                .font(SharedFonts.system(14))
-                                .foregroundColor(partij.hasEntry ? SharedColors.textMuted : SharedColors.textPrimary)
-                                .lineLimit(1)
-                            Spacer()
-                            Text(partijState(partij))
-                                .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
-                                .foregroundColor(SharedColors.textMuted)
-                                .lineLimit(1)
-                        }
-                        .padding(12)
-                        .background(SharedColors.tint(0.04))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(loc("Partij \(partij.label)"))
-                }
-            }
+            TeamPartijRows(team: team, selected: nil) { slot in answer(team, slot: slot) }
             ActionButton(loc("Nee, gewone wedstrijd"), color: SharedColors.textSecondary) { decline() }
                 .padding(.top, 8)
         }
-    }
-
-    /// "Jan – Piet", or "nog leeg" while no name is filled in
-    private func partijNames(_ partij: TeamPartij, in team: TeamMatch) -> String {
-        if partij.ownPlayer.isEmpty && partij.opponentPlayer.isEmpty { return loc("nog leeg") }
-        return "\(team.ownDisplayName(partij)) – \(team.opponentDisplayName(partij))"
-    }
-
-    /// The stand of a partij with games, "wordt geteld" for one a match was started for
-    private func partijState(_ partij: TeamPartij) -> String {
-        if partij.hasEntry { return partij.standText }
-        if partij.trackingMatchId != nil { return loc("wordt geteld") }
-        return ""
     }
 
     /// A partij was tapped: the team match and the partij are set, the names
@@ -718,6 +712,12 @@ public struct MatchSetupView: View {
         return (slot == 1) == ownIsHome ? ownRoster : opponentRoster
     }
 
+    /// "All Inn Squash 7" next to SPELER 1 and the opponent next to SPELER 2, after the question
+    private func teamName(slot: Int) -> String? {
+        guard fromQuestion && inTeam, let team = chosenTeam else { return nil }
+        return slot == 1 ? team.home : team.away
+    }
+
     /// A name chip was tapped: the name, and the player of the list with that name (badges, focus)
     private func pickName(_ name: String, slot: Int) {
         let found = player(named: name)
@@ -750,12 +750,23 @@ public struct MatchSetupView: View {
     private func decline() {
         question = nil
         questionClosed = true
-        declined = true
+        // Only "nee" to the question the app asked itself stops the one after the match
+        if !linkingByHand { declined = true }
+        linkingByHand = false
         fromQuestion = false
         inTeam = false
     }
 
-    /// Which player is ours when the partij or "In mijn team" says so; nil has to be asked
+    /// "Koppel aan teamwedstrijd" under Meer opties: the same question, for
+    /// a team match that is not going on now (a catch-up match, next week's)
+    private func linkByHand() {
+        guard let first = teamCandidates.first else { return }
+        linkingByHand = true
+        question = first
+    }
+
+    /// Which player is ours when the names say so (the partij, "In mijn team",
+    /// our players); nil is the rule of the fields: the home team's player is Speler 1
     private var knownOwnIsPlayer1: Bool? {
         guard let team = chosenTeam else { return nil }
         var first = false
@@ -773,7 +784,8 @@ public struct MatchSetupView: View {
     /// signed in: starting shares it with the team. One that is stored here
     /// without sharing stays as its maker left it ("Deel met mijn team" off).
     private var sharesAtStart: Bool {
-        guard fromQuestion, let team = chosenTeam, !team.isLive, team.fixtureId != nil else { return false }
+        guard fromQuestion, !linkingByHand, fixedTeamId == nil,
+              let team = chosenTeam, !team.isLive, team.fixtureId != nil else { return false }
         if storedTeamIds.contains(team.id) { return false }
         return Features.shared.playerAccount && PlayerAccount.shared.isSignedIn
     }
@@ -807,10 +819,12 @@ public struct MatchSetupView: View {
                         .font(SharedFonts.system(13))
                         .foregroundColor(SharedColors.textSecondary)
                     Spacer()
-                    Button(loc("Wijzig")) { question = team }
-                        .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
-                        .foregroundColor(SharedColors.accent)
-                        .buttonStyle(.plain)
+                    if fixedTeamId == nil {
+                        Button(loc("Wijzig")) { question = team }
+                            .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
+                            .foregroundColor(SharedColors.accent)
+                            .buttonStyle(.plain)
+                    }
                 }
                 if sharesAtStart {
                     Text("Bij de start delen we deze teamwedstrijd met je team: teamgenoten zetten hun partij erbij. Alleen teamnamen, voornamen en de stand gaan naar de server.", bundle: textBundle)
@@ -826,128 +840,6 @@ public struct MatchSetupView: View {
         }
     }
 
-    /// "Wie is onze speler?", only when the partij and "In mijn team" do not say it
-    @ViewBuilder
-    private var ownPlayerQuestion: some View {
-        if knownOwnIsPlayer1 == nil {
-            VStack(spacing: 10) {
-                Text("Wie is onze speler?", bundle: textBundle)
-                    .font(SharedFonts.system(14, weight: .medium, design: .rounded))
-                    .foregroundColor(SharedColors.textSecondary)
-                HStack(spacing: 8) {
-                    ownChoice(shownName1, isPlayer1: true, color: SharedColors.accent)
-                    ownChoice(shownName2, isPlayer1: false, color: SharedColors.steelBlue)
-                }
-            }
-        }
-    }
-
-    /// Linked from Meer opties: pick the team match, the partij and which player is ours
-    @ViewBuilder
-    private var teamSection: some View {
-        if inTeam, let team = chosenTeam {
-            VStack(alignment: .leading, spacing: 10) {
-                VStack(alignment: .leading, spacing: 10) {
-                    if teamCandidates.count > 1 {
-                        ForEach(teamCandidates) { candidate in
-                            Button { pickedTeam = candidate.id; teamSlot = freeSlot(candidate) } label: {
-                                HStack(spacing: 8) {
-                                    Text("\(TeamMatchReport.dayText(candidate.date)) · \(candidate.title)")
-                                        .font(SharedFonts.system(12))
-                                        .foregroundColor(candidate.id == team.id ? SharedColors.accent : SharedColors.textSecondary)
-                                        .lineLimit(2)
-                                        .multilineTextAlignment(.leading)
-                                    Spacer()
-                                    TeamShareBadge(isLive: candidate.isLive)
-                                }
-                                .padding(10)
-                                .background(candidate.id == team.id ? SharedColors.accent.opacity(0.12) : SharedColors.tint(0.04))
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    } else {
-                        HStack(spacing: 8) {
-                            Text("\(TeamMatchReport.dayText(team.date)) · \(team.title)")
-                                .font(SharedFonts.system(12))
-                                .foregroundColor(SharedColors.textSecondary)
-                            Spacer()
-                            TeamShareBadge(isLive: team.isLive)
-                        }
-                    }
-                    Text("PARTIJ", bundle: textBundle)
-                        .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
-                        .tracking(1)
-                        .foregroundColor(SharedColors.textMuted)
-                    HStack(spacing: 8) {
-                        ForEach(1..<5, id: \.self) { slot in
-                            Button { teamSlot = slot } label: {
-                                Text("E\(slot)")
-                                    .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
-                                    .foregroundColor(teamSlot == slot ? SharedColors.background : (team.partij(slot).hasEntry ? SharedColors.textMuted : SharedColors.accent))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 9)
-                                    .background(teamSlot == slot ? SharedColors.accent : SharedColors.tint(0.06))
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    Text("WIE IS ONZE SPELER?", bundle: textBundle)
-                        .font(SharedFonts.system(11, weight: .semibold, design: .rounded))
-                        .tracking(1)
-                        .foregroundColor(SharedColors.textMuted)
-                    HStack(spacing: 8) {
-                        ownChoice(shownName1, isPlayer1: true, color: SharedColors.accent)
-                        ownChoice(shownName2, isPlayer1: false, color: SharedColors.steelBlue)
-                    }
-                    Text("Het resultaat komt na afloop vanzelf in de partij en, als de teamwedstrijd live is, gaat de stand mee naar de teampagina.", bundle: textBundle)
-                        .font(SharedFonts.system(11))
-                        .foregroundColor(SharedColors.textMuted)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            .padding(14)
-            .background(SharedColors.tint(0.04))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-    }
-
-    private func ownChoice(_ name: String, isPlayer1: Bool, color: Color) -> some View {
-        let selected = teamOwnIsPlayer1 == isPlayer1
-        return Button { teamOwnIsPlayer1 = isPlayer1 } label: {
-            Text(name)
-                .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
-                .foregroundColor(selected ? SharedColors.background : color)
-                .lineLimit(1)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(selected ? color : color.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-        }
-        .buttonStyle(.plain)
-    }
-
-    /// The first partij without games (E1 when all are filled)
-    private func freeSlot(_ team: TeamMatch) -> Int {
-        for slot in 1..<5 where !team.partij(slot).hasEntry { return slot }
-        return 1
-    }
-
-    /// Turning it on picks the nearest team match and a free partij; our player is the one in "In mijn team"
-    private func turnTeamOn(_ on: Bool) {
-        inTeam = on
-        guard on, let first = teamCandidates.first else { return }
-        let team = chosenTeam ?? first
-        pickedTeam = team.id
-        teamSlot = freeSlot(team)
-        var ours1 = false
-        var ours2 = false
-        if let pick = player1Pick { ours1 = TeamRoster.contains(pick.id, in: rosterRaw) }
-        if let pick = player2Pick { ours2 = TeamRoster.contains(pick.id, in: rosterRaw) }
-        teamOwnIsPlayer1 = !(ours2 && !ours1)
-    }
-
     private func start() {
         let late = headStartIsValid
         let team = chosenTeam
@@ -958,7 +850,7 @@ public struct MatchSetupView: View {
             player1GamesBefore: late ? gamesBefore1 : 0, player2GamesBefore: late ? gamesBefore2 : 0,
             player1Focus: focus(player1Pick, currentName: player1Name), player2Focus: focus(player2Pick, currentName: player2Name),
             teamMatch: team, teamSlot: teamSlot,
-            teamOwnIsPlayer1: fromQuestion ? (knownOwnIsPlayer1 ?? teamOwnIsPlayer1) : teamOwnIsPlayer1
+            teamOwnIsPlayer1: knownOwnIsPlayer1 ?? teamOwnIsPlayer1
         )
         choice.isPractice = practice && team == nil && !prefilled
         choice.teamDeclined = declined && team == nil

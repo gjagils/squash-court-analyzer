@@ -295,8 +295,8 @@ public struct SharedTeamMatchesView: View {
 
     /// 4.0: what teammates and the opponent made that this phone can join.
     /// A teammate's team match is joined by itself (Gerd-Jan, 21 November
-    /// 2026: "iedereen doet vanzelf mee"); Meedoen is left for the opponent's
-    /// and for one that was deleted here or could not be joined.
+    /// 2026: "iedereen doet vanzelf mee") and never offered; Meedoen is left
+    /// for the opponent's team match only.
     private func loadOffers() async {
         guard let context = await PlayerAccount.shared.teamFindingContext() else {
             offers = []
@@ -1244,9 +1244,11 @@ public struct SharedTeamMatchView: View {
         // longer find it. Also a page shared with Live delen (Gerd-Jan, 21
         // November 2026): left running it was found again as a team match of
         // the own team and came back on the home screen.
-        if match.isLiveOwner {
-            await TeamLive.shared.stop(match)
-            if let context = await PlayerAccount.shared.teamFindingContext() { await TeamFinding.forget(match, context: context) }
+        if match.isLiveOwner { await TeamLive.shared.stop(match) }
+        // The registration with the team goes when this account made it, also
+        // from a phone that only has a copy (a new phone, a reinstalled app)
+        if match.isLive, let context = await PlayerAccount.shared.teamFindingContext() {
+            await TeamFinding.forget(match, context: context)
         }
         // Deleted here: never joined by itself again, whoever started it
         if let liveId = match.liveId { TeamFinding.noteJoined(liveId) }

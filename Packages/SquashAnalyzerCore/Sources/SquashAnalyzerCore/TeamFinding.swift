@@ -34,7 +34,7 @@ public enum TeamFindingError: Error, Equatable {
 }
 
 /// What `TeamFinding.joinOwn` did: the team matches joined by itself, and the
-/// offers that still need Meedoen
+/// offers that still need Meedoen (the opponent's only)
 public struct TeamAutoJoin: Sendable {
     public let joined: [TeamMatch]
     public let offers: [TeamLiveListing]
@@ -260,30 +260,33 @@ public enum TeamFinding {
     }
 
     /// "Iedereen doet vanzelf mee": the own team's live team matches among
-    /// `offers` are joined without asking, once each. One that was joined by
-    /// itself before and is offered again (deleted on this phone since, or it
-    /// could not be joined because the match is live elsewhere here) stays an
-    /// offer with Meedoen, so deleting a team match is not undone a minute
-    /// later; so do the opponent's (the referee key). Without a connection
-    /// nothing is noted and the next round tries again.
+    /// `offers` are joined without asking, once each, and never offered with
+    /// Meedoen (Gerd-Jan, 21 November 2026: Meedoen no longer applies to
+    /// teammates). One that was joined by itself before or deleted on this
+    /// phone is left out altogether, so deleting a team match is not undone a
+    /// minute later; it can still be joined with the invitation. What comes
+    /// back as `offers` is the opponent's (the referee key), which keeps
+    /// Meedoen. Without a connection nothing is noted and the next round
+    /// tries again.
     public static func joinOwn(_ offers: [TeamLiveListing], ownTeamName: String, fixtures: [LeagueFixture],
                                store: any TeamMatchStore, live: TeamLive? = nil,
                                defaults: UserDefaults = UserDefaults.standard) async -> TeamAutoJoin {
         var joined: [TeamMatch] = []
         var left: [TeamLiveListing] = []
         for listing in offers {
-            if !listing.own || autoJoined(in: defaults).contains(listing.liveId) {
+            if !listing.own {
                 left.append(listing)
                 continue
             }
+            if autoJoined(in: defaults).contains(listing.liveId) { continue }
             do {
                 let match = try await join(listing, ownTeamName: ownTeamName, fixtures: fixtures, store: store, live: live)
                 joined.append(match)
             } catch TeamFindingError.gone {
-                // Gone, or no connection: not offered, tried again next time
+                // Gone, or no connection: tried again next time
                 continue
             } catch {
-                left.append(listing)
+                // Not possible here (the match is live on another page on this phone): not tried again
             }
             noteJoined(listing.liveId, in: defaults)
         }
@@ -387,9 +390,14 @@ public enum TeamFinding {
     // MARK: Ending
 
     /// The team match leaves the list of the team (stopped or deleted here):
-    /// only the own registration goes; best effort
+    /// only the own registration goes; best effort. Asked for every live team
+    /// match of the own team, not only on the phone that holds the owner key
+    /// (Gerd-Jan, 21 November 2026: after a reinstall the starter's own team
+    /// match came back as an offer with Meedoen and deleting it changed
+    /// nothing): the account Worker only removes a registration the signed-in
+    /// player made, so a teammate's stays.
     public static func forget(_ match: TeamMatch, context: TeamFindingContext) async {
-        guard match.isLiveOwner, let fixture = normalizedFixture(match.fixtureId) else { return }
+        guard match.isLive, !match.isOpponentCopy, let fixture = normalizedFixture(match.fixtureId) else { return }
         try? await context.client.removeTeamLive(token: context.token, fixture: fixture)
     }
 

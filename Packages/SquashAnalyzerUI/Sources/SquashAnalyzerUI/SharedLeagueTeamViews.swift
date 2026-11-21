@@ -235,7 +235,7 @@ public struct SharedLeagueTeamCard: View {
     /// server for today and tomorrow, so most of the week it asks nothing).
     /// A teammate's team match is joined by itself (21 November 2026) and
     /// shows as the running match; the bar with Meedoen is left for the
-    /// opponent's and for one that was deleted here.
+    /// opponent's team match only.
     /// Every minute since 10 November 2026: with five minutes a teammate's new
     /// team match was found sooner under Competitie than on the home screen.
     private func followOffers() async {

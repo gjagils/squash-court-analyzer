@@ -301,12 +301,12 @@ final class TeamFindingTests: XCTestCase {
         var all = try await teamStore.loadAll()
         XCTAssertEqual(all.count, 1)
 
-        // Deleted on this phone and offered again: not joined a second time, Meedoen is still there
+        // Deleted on this phone and listed again: not joined a second time, and no Meedoen for a teammate's
         try await teamStore.delete(id: all[0].id)
         let second = await TeamFinding.joinOwn([own], ownTeamName: "Squash City 2", fixtures: [], store: teamStore,
                                                live: teamLive, defaults: defaults)
         XCTAssertTrue(second.joined.isEmpty)
-        XCTAssertEqual(second.offers.map { offer in offer.liveId }, ["keeslive2345"])
+        XCTAssertTrue(second.offers.isEmpty)
         all = try await teamStore.loadAll()
         XCTAssertTrue(all.isEmpty)
 
@@ -318,7 +318,7 @@ final class TeamFindingTests: XCTestCase {
         let third = await TeamFinding.joinOwn([own], ownTeamName: "Squash City 2", fixtures: [], store: teamStore,
                                               live: teamLive, defaults: fresh)
         XCTAssertTrue(third.joined.isEmpty)
-        XCTAssertEqual(third.offers.count, 1)
+        XCTAssertTrue(third.offers.isEmpty)
     }
 
     @MainActor
@@ -337,7 +337,7 @@ final class TeamFindingTests: XCTestCase {
         XCTAssertTrue(failed.offers.isEmpty)
         XCTAssertTrue(TeamFinding.autoJoined(in: defaults).isEmpty, "nothing noted: the next round tries again")
 
-        // This phone has the match live on another page: an offer, so Competitie can explain it
+        // This phone has the match live on another page: left alone, and not tried every minute
         transport.gone = []
         var mine = ownMatch()
         mine.liveId = "minelive2345"
@@ -346,7 +346,7 @@ final class TeamFindingTests: XCTestCase {
         let elsewhere = await TeamFinding.joinOwn([own], ownTeamName: "Squash City 2", fixtures: [], store: teamStore,
                                                   live: teamLive, defaults: defaults)
         XCTAssertTrue(elsewhere.joined.isEmpty)
-        XCTAssertEqual(elsewhere.offers.map { offer in offer.liveId }, ["keeslive2345"])
+        XCTAssertTrue(elsewhere.offers.isEmpty)
         XCTAssertEqual(TeamFinding.autoJoined(in: defaults), ["keeslive2345"])
     }
 
@@ -383,6 +383,22 @@ final class TeamFindingTests: XCTestCase {
         all = try await teamStore.loadAll()
         XCTAssertEqual(all.count, 2)
         XCTAssertTrue(TeamLiveSync.changed([empty.id: TeamLiveSyncResult.removed]))
+    }
+
+    /// Deleting a joined copy also asks the account to drop the registration (it only drops the caller's own)
+    @MainActor
+    func testForgettingAsksForEveryLiveTeamMatchOfTheOwnTeamButNotAsTheOpponent() async {
+        let transport = FakeFindingTransport()
+        var copy = ownMatch()
+        copy.liveId = "keeslive2345"
+        copy.liveKey = "K33sK33sK33sK33sK33sK33s"
+        await TeamFinding.forget(copy, context: context(transport))
+        XCTAssertEqual(transport.count("DELETE", "/api/v1/me/team/lives?fixture="), 1)
+        var opponent = copy
+        opponent.refereeSlots = [2, 3]
+        await TeamFinding.forget(opponent, context: context(transport))
+        await TeamFinding.forget(ownMatch(), context: context(transport))
+        XCTAssertEqual(transport.count("DELETE", "/api/v1/me/team/lives?fixture="), 1, "not as the opponent, not for a match that is not live")
     }
 
     // MARK: After a match

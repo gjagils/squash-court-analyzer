@@ -23,9 +23,13 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
     *Meldingen van je teamwedstrijd* (standaard aan); staan Live-activiteiten (iPhone) of meldingen uit, dan komt
     alleen de gewone melding of niets. Lukt de start op de iPhone niet, dan stuurt de server de gewone melding.
   - **Vanzelf meedoen.** Een live teamwedstrijd van je eigen team komt zonder tik op je telefoon
-    (`TeamFinding.joinOwn`, beginscherm en Competitie), één keer per teamwedstrijd: verwijder je hem daarna, dan
-    komt hij niet vanzelf terug maar staat *Meedoen* er weer. *Meedoen* blijft ook voor de wedstrijd die de
-    tegenstander bijhoudt. Vanzelf meedoen gebeurt alleen terwijl de app open is of opengaat.
+    (`TeamFinding.joinOwn`, beginscherm en Competitie), één keer per teamwedstrijd. *Meedoen* geldt niet meer voor
+    teamgenoten: verwijder je de teamwedstrijd op je telefoon, dan komt hij niet vanzelf terug en wordt hij ook
+    niet meer aangeboden (meedoen kan dan nog met de uitnodiging). *Meedoen* blijft alleen voor de wedstrijd die
+    de tegenstander bijhoudt. Vanzelf meedoen gebeurt alleen terwijl de app open is of opengaat.
+  - **Verwijderen ruimt alles op.** De telefoon die de livepagina startte stopt hem bij *Verwijder* altijd (ook
+    na *Live delen*), en de aanmelding bij het team gaat weg als jouw account hem maakte, ook vanaf een telefoon
+    die alleen een kopie heeft (nieuwe telefoon, app opnieuw geïnstalleerd; `TeamFinding.forget`).
   - **Meteen zoeken.** Komt de app naar voren of komt *Je team is begonnen* binnen terwijl hij open is, dan zoekt
     het beginscherm direct (was: binnen een minuut).
   - Servers: live-Worker (`followerStart`, `apnsStartPayload`, `pushStart`, `TeamSession.announce`) en

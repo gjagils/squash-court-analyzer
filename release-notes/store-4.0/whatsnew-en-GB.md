@@ -1,7 +1,7 @@
 New in 4.0: your team in one app
 
 YOUR TEAM AND YOUR ACCOUNT
-• Create an account to see your team's team match right away and join with one tap.
+• Create an account and your team's team match appears in your app by itself, with the team score on your lock screen.
 • A notification when a match of your team starts and when it is decided.
 • Matches someone else records for you arrive in your app by themselves. You choose whether they count.
 • Is a teammate already keeping the team match? After your match the app asks whether it belongs to it and puts it on the same page.

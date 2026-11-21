@@ -1,7 +1,7 @@
 Squash Analyzer helpt je squashwedstrijden bij te houden als coach of scheidsrechter. Houd de score bij, zie patronen en deel de uitslag. Gratis en zonder advertenties. Een account is niet verplicht, maar maakt het met je team een stuk makkelijker.
 
 JE TEAM EN JE ACCOUNT (NIEUW IN 4.0)
-• Start iemand uit je team een teamwedstrijd, dan staat die meteen in jouw app en doe je met één tik mee.
+• Start iemand uit je team een teamwedstrijd, dan staat die vanzelf in jouw app en de teamstand op je vergrendelscherm.
 • Je krijgt een melding als een partij van je team begint en als die beslist is.
 • Houdt een teamgenoot, coach of scheidsrechter jouw partij bij, dan komt die vanzelf in jouw app. Jij kiest of hij meetelt.
 • Als bonus tellen die partijen mee voor je badges, ook op een nieuwe telefoon, en staat je foto bij jou in de app van je teamgenoten.

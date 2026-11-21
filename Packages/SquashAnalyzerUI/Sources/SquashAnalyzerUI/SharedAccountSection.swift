@@ -132,7 +132,7 @@ public struct SharedAccountSection: View {
 
     private var signInPart: some View {
         VStack(alignment: .leading, spacing: 12) {
-            note(loc("Met een account zie je de teamwedstrijd van je team meteen en doe je met één tik mee. Partijen die een teamgenoot, coach of scheidsrechter van jou bijhoudt, komen bij jou binnen; jij kiest per wedstrijd of hij meetelt voor je badges. Een account is niet nodig om de app te gebruiken."))
+            note(loc("Met een account staat de teamwedstrijd van je team vanzelf in je app en de teamstand op je vergrendelscherm. Partijen die een teamgenoot, coach of scheidsrechter van jou bijhoudt, komen bij jou binnen; jij kiest per wedstrijd of hij meetelt voor je badges. Een account is niet nodig om de app te gebruiken."))
             Picker(loc("Account"), selection: $registering) {
                 Text("Inloggen", bundle: textBundle).tag(false)
                 Text("Account maken", bundle: textBundle).tag(true)

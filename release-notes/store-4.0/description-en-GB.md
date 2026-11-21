@@ -1,7 +1,7 @@
 Squash Analyzer helps you keep track of squash matches as a coach or referee. Record the score, spot patterns and share the result. Free and without ads. An account is optional, but makes things much easier with your team.
 
 YOUR TEAM AND YOUR ACCOUNT (NEW IN 4.0)
-• When someone on your team starts a team match, it shows in your app right away and you join with one tap.
+• When someone on your team starts a team match, it appears in your app by itself and the team score on your lock screen.
 • You get a notification when a match of your team starts and when it is decided.
 • When a teammate, coach or referee records your match, it arrives in your app by itself. You choose whether it counts.
 • As a bonus those matches count for your badges, also on a new phone, and your photo shows with you in your teammates' app.

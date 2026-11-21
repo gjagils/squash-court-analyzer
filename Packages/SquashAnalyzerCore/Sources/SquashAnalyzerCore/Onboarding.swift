@@ -49,7 +49,7 @@ public enum Onboarding {
         Page(symbol: "trophy", title: L10n.text("Competitie"),
              text: L10n.text("Speel je bij SBN? Zoek je club en kies je team, dan zie je je programma en de stand. Op de wedstrijdavond houd je de teamwedstrijd bij, van E1 tot E4.")),
         Page(symbol: "square.and.arrow.up", title: L10n.text("Delen"),
-             text: L10n.text("Houd je teamgenoten en supporters op de hoogte van de wedstrijden en de competitie. Met LIVE kijken ze mee via een link of op hun vergrendelscherm. Alles staat op je eigen telefoon: maak af en toe een back-up in Instellingen.")),
+             text: L10n.text("Houd je teamgenoten en supporters op de hoogte van de wedstrijden en de competitie. Met de deelknop stuur je een live link; ze kijken mee in de browser of op hun vergrendelscherm. Alles staat op je eigen telefoon: maak af en toe een back-up in Instellingen.")),
     ] }
 }
 
@@ -109,9 +109,9 @@ public enum WhatsNew {
     /// account; what the account gives; others keep your matches, so share the app
     public static var items: [Onboarding.Page] { [
         Onboarding.Page(symbol: "trophy", title: L10n.text("Je team in één app"),
-                        text: L10n.text("In 4.0 staat de teamwedstrijd van je team meteen op je beginscherm en doe je met één tik mee. Je partijen komen vanzelf in jouw app en tellen mee voor je badges. Daarvoor heb je wel een account nodig.")),
+                        text: L10n.text("In 4.0 staat de teamwedstrijd van je team vanzelf in je app, en de teamstand op je vergrendelscherm. Je partijen komen vanzelf in jouw app en tellen mee voor je badges. Daarvoor heb je wel een account nodig.")),
         Onboarding.Page(symbol: "person.crop.circle", title: L10n.text("Met een account"),
-                        text: L10n.text("• Start iemand uit je team een teamwedstrijd, dan staat die in jouw app en doe je met één tik mee.\n• Je krijgt een melding als een partij van je team begint en als die beslist is.\n• Houdt een teamgenoot jouw partij bij, dan komt die vanzelf in jouw app.\n• Als bonus tellen die partijen mee voor je badges, en staat je foto bij jou in de app van je teamgenoten.\n\nHet kost een minuut, vanaf 16 jaar.")),
+                        text: L10n.text("• Start iemand uit je team een teamwedstrijd, dan staat die vanzelf in jouw app.\n• De teamstand komt op je vergrendelscherm, met een melding als een partij begint of beslist is.\n• Houdt een teamgenoot jouw partij bij, dan komt die vanzelf in jouw app.\n• Als bonus tellen die partijen mee voor je badges, en staat je foto bij jou in de app van je teamgenoten.\n\nHet kost een minuut, vanaf 16 jaar.")),
         Onboarding.Page(symbol: "person.2", title: L10n.text("Hoe meer teamgenoten, hoe makkelijker"),
                         text: L10n.text("Jij staat op de baan, dus een ander fluit of coacht jouw partij. Deel de app met je team, dan komen jullie partijen vanzelf bij iedereen binnen.")),
     ] }

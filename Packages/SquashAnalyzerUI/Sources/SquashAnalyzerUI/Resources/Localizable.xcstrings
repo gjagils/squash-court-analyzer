@@ -15588,6 +15588,24 @@
           }
         }
       }
+    },
+    "Met een account staat de teamwedstrijd van je team vanzelf in je app en de teamstand op je vergrendelscherm. Partijen die een teamgenoot, coach of scheidsrechter van jou bijhoudt, komen bij jou binnen; jij kiest per wedstrijd of hij meetelt voor je badges. Een account is niet nodig om de app te gebruiken.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With an account your team's team match appears in your app by itself and the team score on your lock screen. Matches a teammate, coach or referee records for you arrive with you; you choose per match whether it counts for your badges. You do not need an account to use the app."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Met een account staat de teamwedstrijd van je team vanzelf in je app en de teamstand op je vergrendelscherm. Partijen die een teamgenoot, coach of scheidsrechter van jou bijhoudt, komen bij jou binnen; jij kiest per wedstrijd of hij meetelt voor je badges. Een account is niet nodig om de app te gebruiken."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

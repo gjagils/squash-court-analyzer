@@ -12,6 +12,18 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## 4.0 build 7 (21 november 2026: geüpload naar TestFlight Squashteam en de Play-testtracks)
 
+- **Opgeleverd op 21 november 2026 vanaf de Mac (uit een worktree):** suites groen (Core met Skip 527 tests, de vier
+  scenario's op twee nagebootste telefoons, iOS, Android, live-Worker 105, account-Worker 62, lint). iOS 4.0 (7)
+  geüpload, in groep Squashteam, wacht op de bètareview (`--keep-old`); Android versionCode 4000700 op internal,
+  alpha en Google Group testers. Website gepubliceerd (testen.html, homepage nl/en, handleidingen nl/en,
+  privacyverklaring nl/en met het starttoken). Account-Worker (migratie 0008) en live-Worker staan sinds dezelfde
+  dag op productie. `WhatsNew.perBuild` staat nog aan: dit is een testbuild, niet de productiebuild.
+  **Op telefoons gezien (Gerd-Jan, A13 en iPhone 16 Pro, debugbuilds van dezelfde dag):** de teamstand start op
+  afstand op de iPhone en loopt daarna mee (de start kwam uit een handmatige proef rechtstreeks via APNs).
+  **Niet gezien of gedaan:** of de live-Worker de start bij *Je team is begonnen* zelf goed verstuurt; de
+  opgeruimde schermen op een scherm bekeken door Claude; nieuwe App Store-schermafbeeldingen en plaatjes in de
+  handleiding; de toestellentest (alleen vóór productie).
+
 - **Teamstand vanzelf op je vergrendelscherm en vanzelf meedoen (Gerd-Jan, 21 november 2026).** Na de melding
   *Je team is begonnen* moest een teamgenoot nog de app openen, een minuut wachten en op *Meedoen* tikken, en voor
   de stand op het vergrendelscherm zelf op *Volgen* tikken. Nu:

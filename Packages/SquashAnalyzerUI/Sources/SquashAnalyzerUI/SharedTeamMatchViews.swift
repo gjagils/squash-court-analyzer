@@ -1240,11 +1240,16 @@ public struct SharedTeamMatchView: View {
     }
 
     private func remove() async {
-        // 4.0: a team-only live team match nobody else started goes with it
-        if match.isTeamOnly && match.isLiveOwner {
+        // The live page this phone started goes with it, and teammates no
+        // longer find it. Also a page shared with Live delen (Gerd-Jan, 21
+        // November 2026): left running it was found again as a team match of
+        // the own team and came back on the home screen.
+        if match.isLiveOwner {
             await TeamLive.shared.stop(match)
             if let context = await PlayerAccount.shared.teamFindingContext() { await TeamFinding.forget(match, context: context) }
         }
+        // Deleted here: never joined by itself again, whoever started it
+        if let liveId = match.liveId { TeamFinding.noteJoined(liveId) }
         do {
             try await store.delete(id: match.id)
             // The home screen drops it at once, whatever screen it was opened from

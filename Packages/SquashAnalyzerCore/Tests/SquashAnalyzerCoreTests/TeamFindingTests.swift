@@ -309,6 +309,16 @@ final class TeamFindingTests: XCTestCase {
         XCTAssertEqual(second.offers.map { offer in offer.liveId }, ["keeslive2345"])
         all = try await teamStore.loadAll()
         XCTAssertTrue(all.isEmpty)
+
+        // A team match deleted on this phone (started here, or joined with Meedoen) is not joined by itself either
+        let fresh = UserDefaults(suiteName: "auto-join-\(UUID().uuidString)")!
+        TeamFinding.noteJoined("keeslive2345", in: fresh)
+        TeamFinding.noteJoined("keeslive2345", in: fresh)
+        XCTAssertEqual(TeamFinding.autoJoined(in: fresh), ["keeslive2345"])
+        let third = await TeamFinding.joinOwn([own], ownTeamName: "Squash City 2", fixtures: [], store: teamStore,
+                                              live: teamLive, defaults: fresh)
+        XCTAssertTrue(third.joined.isEmpty)
+        XCTAssertEqual(third.offers.count, 1)
     }
 
     @MainActor

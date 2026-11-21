@@ -248,6 +248,17 @@ public enum TeamFinding {
         return ids
     }
 
+    /// This live team match is never joined by itself (again): it was joined
+    /// by itself, or the team match was deleted on this phone (also one this
+    /// phone started or joined with Meedoen)
+    public static func noteJoined(_ liveId: String, in defaults: UserDefaults = UserDefaults.standard) {
+        var tried = autoJoined(in: defaults)
+        if tried.contains(liveId) { return }
+        tried.append(liveId)
+        while tried.count > 40 { tried.remove(at: 0) }
+        defaults.set(tried.joined(separator: " "), forKey: autoJoinedKey)
+    }
+
     /// "Iedereen doet vanzelf mee": the own team's live team matches among
     /// `offers` are joined without asking, once each. One that was joined by
     /// itself before and is offered again (deleted on this phone since, or it
@@ -261,8 +272,7 @@ public enum TeamFinding {
         var joined: [TeamMatch] = []
         var left: [TeamLiveListing] = []
         for listing in offers {
-            var tried = autoJoined(in: defaults)
-            if !listing.own || tried.contains(listing.liveId) {
+            if !listing.own || autoJoined(in: defaults).contains(listing.liveId) {
                 left.append(listing)
                 continue
             }
@@ -275,9 +285,7 @@ public enum TeamFinding {
             } catch {
                 left.append(listing)
             }
-            tried.append(listing.liveId)
-            while tried.count > 40 { tried.remove(at: 0) }
-            defaults.set(tried.joined(separator: " "), forKey: autoJoinedKey)
+            noteJoined(listing.liveId, in: defaults)
         }
         if !joined.isEmpty { TeamMatchSupport.noteChange() }
         return TeamAutoJoin(joined: joined, offers: left)

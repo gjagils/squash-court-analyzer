@@ -282,6 +282,74 @@ final class TeamLiveTests: XCTestCase {
         XCTAssertNil(match.partij(4).fromLive)
     }
 
+    /// A teammate sees a partij the moment it starts on another phone, with
+    /// the game under way; it counts for nothing until a game is finished
+    func testAPartijBeingPlayedOnAnotherPhoneIsThereFromTheWarmUp() {
+        let json = """
+        {"team":{"home":"All Inn Squash 8","away":"Squash Delft 8","date":1793181600000},"partijen":{},"updatedAt":1793181700000}
+        """
+        var state = try! JSONDecoder().decode(TeamLiveState.self, from: json.data(using: String.Encoding.utf8)!)
+        let invite = TeamInvite(id: "abcdefghjkmn", key: "K3yK3yK3yK3yK3yK3yK3y_-9")
+        var match = TeamMatch.joining(state, invite: invite, ownSide: .away)
+        XCTAssertFalse(match.partij(2).isRunning)
+
+        // Warm-up: the names are there, nothing counts
+        state.partijen["2"] = TeamLivePartij(p1: "Piet", p2: "Jan", bestOf: 5, games: [], score: [0, 0], gamesWon: [0, 0],
+                                             server: 1, side: "R", status: LiveStatus.warmup)
+        XCTAssertTrue(match.mergeLive(state))
+        XCTAssertEqual(match.partij(2).ownPlayer, "Jan")
+        XCTAssertEqual(match.partij(2).opponentPlayer, "Piet")
+        XCTAssertTrue(match.partij(2).isRunning)
+        XCTAssertEqual(match.partij(2).runningText, "0-0")
+        XCTAssertFalse(match.partij(2).hasEntry)
+        XCTAssertEqual(match.teammatePartijen, 0)
+
+        // Playing: our points first (we are away)
+        state.partijen["2"] = TeamLivePartij(p1: "Piet", p2: "Jan", bestOf: 5, games: [], score: [7, 5], gamesWon: [0, 0],
+                                             server: 1, side: "R", status: LiveStatus.playing)
+        XCTAssertTrue(match.mergeLive(state))
+        XCTAssertEqual(match.partij(2).runningText, "5-7")
+        XCTAssertFalse(match.mergeLive(state), "nothing new the second time")
+
+        // Between games: the game is in, nothing under way
+        state.partijen["2"] = TeamLivePartij(p1: "Piet", p2: "Jan", bestOf: 5, games: [[11, 5]], score: [0, 0], gamesWon: [1, 0],
+                                             server: 1, side: "R", status: LiveStatus.between)
+        XCTAssertTrue(match.mergeLive(state))
+        XCTAssertEqual(match.partij(2).gamesText, "5-11")
+        XCTAssertFalse(match.partij(2).isRunning)
+
+        // The next game under way, next to the one that is in
+        state.partijen["2"] = TeamLivePartij(p1: "Piet", p2: "Jan", bestOf: 5, games: [[11, 5]], score: [2, 3], gamesWon: [1, 0],
+                                             server: 1, side: "R", status: LiveStatus.playing)
+        XCTAssertTrue(match.mergeLive(state))
+        XCTAssertEqual(match.partij(2).standText, "0-1")
+        XCTAssertEqual(match.partij(2).runningText, "3-2")
+
+        // Editing it here makes it ours: no game under way any more
+        match.update(match.partij(2))
+        XCTAssertFalse(match.partij(2).isRunning)
+        XCTAssertNil(match.partij(2).liveOwnPoints)
+
+        // A match thrown away without a game leaves the page: the row empties
+        state.partijen["3"] = TeamLivePartij(p1: "Kees", p2: "Mo", bestOf: 5, games: [], score: [1, 0], gamesWon: [0, 0],
+                                             server: 1, side: "R", status: LiveStatus.playing)
+        XCTAssertTrue(match.mergeLive(state))
+        XCTAssertTrue(match.partij(3).isRunning)
+        state.partijen["3"] = nil
+        XCTAssertTrue(match.mergeLive(state))
+        XCTAssertFalse(match.partij(3).isRunning)
+        XCTAssertEqual(match.partij(3).ownPlayer, "")
+
+        // Live ends: a partij that was only under way holds nothing any more
+        state.partijen["4"] = TeamLivePartij(p1: "Ab", p2: "Bo", bestOf: 5, games: [], score: [4, 4], gamesWon: [0, 0],
+                                             server: 1, side: "R", status: LiveStatus.playing)
+        XCTAssertTrue(match.mergeLive(state))
+        XCTAssertTrue(match.partij(4).isRunning)
+        match.clearLiveState()
+        XCTAssertFalse(match.partij(4).isRunning)
+        XCTAssertEqual(match.partij(4).ownPlayer, "")
+    }
+
     func testTakingBackAnEndingFromThePageRemovesOnlyTheEndingsGames() {
         // At home: a head start won (no score), 8-11, then the opponent gave up at 5-3
         var original = TeamPartij(slot: 2, ownPlayer: "Wij", opponentPlayer: "Zij")

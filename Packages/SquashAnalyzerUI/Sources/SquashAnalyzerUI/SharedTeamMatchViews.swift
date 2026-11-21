@@ -142,7 +142,7 @@ struct TeamPartijRows: View {
                             .font(SharedFonts.system(12, weight: .bold, design: .rounded))
                             .foregroundColor(SharedColors.background)
                             .frame(width: 30, height: 30)
-                            .background(partij.hasEntry ? SharedColors.textMuted : SharedColors.accent)
+                            .background(running(partij) ? SharedColors.support : (partij.hasEntry ? SharedColors.textMuted : SharedColors.accent))
                             .clipShape(Circle())
                         Text(names(partij))
                             .font(SharedFonts.system(14))
@@ -151,7 +151,7 @@ struct TeamPartijRows: View {
                         Spacer()
                         Text(state(partij))
                             .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
-                            .foregroundColor(SharedColors.textMuted)
+                            .foregroundColor(running(partij) ? SharedColors.support : SharedColors.textMuted)
                             .lineLimit(1)
                     }
                     .padding(12)
@@ -170,8 +170,15 @@ struct TeamPartijRows: View {
         return "\(team.ownDisplayName(partij)) – \(team.opponentDisplayName(partij))"
     }
 
-    /// The stand of a partij with games, "wordt geteld" for one a match was started for
+    /// A teammate is scoring it on another phone right now
+    private func running(_ partij: TeamPartij) -> Bool { team.isLive && partij.isRunning }
+
+    /// The stand of a partij with games (with the game under way on another
+    /// phone), "wordt geteld" for one a match was started for here
     private func state(_ partij: TeamPartij) -> String {
+        if running(partij) {
+            return partij.hasEntry ? "\(partij.standText) · \(partij.runningText)" : "\(loc("bezig")) \(partij.runningText)"
+        }
         if partij.hasEntry { return partij.standText }
         if partij.trackingMatchId != nil { return loc("wordt geteld") }
         return ""
@@ -1059,13 +1066,16 @@ public struct SharedTeamMatchView: View {
     }
 
     private func partijRow(_ partij: TeamPartij) -> some View {
-        Button { editing = partij } label: {
+        // A teammate is scoring it on another phone right now: the row is
+        // there from the warm-up on, with the game under way in sea green
+        let running = match.isLive && partij.isRunning
+        return Button { editing = partij } label: {
             HStack(alignment: .top, spacing: 12) {
                 Text(partij.label)
                     .font(SharedFonts.system(12, weight: .bold, design: .rounded))
                     .foregroundColor(SharedColors.background)
                     .frame(width: 30, height: 30)
-                    .background(partij.hasEntry ? SharedColors.accent : SharedColors.textMuted)
+                    .background(running ? SharedColors.support : (partij.hasEntry ? SharedColors.accent : SharedColors.textMuted))
                     .clipShape(Circle())
                 VStack(alignment: .leading, spacing: 4) {
                     // Nobody filled in: the circle says E1 and the card the teams; "All Inn
@@ -1095,7 +1105,10 @@ public struct SharedTeamMatchView: View {
                             if partij.isLinked {
                                 AppSymbol("arrow.right", size: 10, color: SharedColors.textMuted)
                             }
+                            if running { runningLabel(partij) }
                         }
+                    } else if running {
+                        runningLabel(partij)
                     } else {
                         Text("Nog niet ingevuld", bundle: textBundle)
                             .font(SharedFonts.system(12))
@@ -1118,6 +1131,19 @@ public struct SharedTeamMatchView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(loc("Partij \(partij.label)"))
+    }
+
+    /// "● bezig 7-5": the game under way on a teammate's phone
+    private func runningLabel(_ partij: TeamPartij) -> some View {
+        HStack(spacing: 5) {
+            Circle()
+                .fill(SharedColors.support)
+                .frame(width: 7, height: 7)
+            Text("\(loc("bezig")) \(partij.runningText)")
+                .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
+                .foregroundColor(SharedColors.support)
+                .lineLimit(1)
+        }
     }
 
     private func save(_ changed: TeamMatch) async {

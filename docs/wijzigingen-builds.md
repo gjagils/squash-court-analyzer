@@ -10,6 +10,18 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 7)
 
+- **Vergrendelscherm vanzelf bevestigd (Gerd-Jan, 21 november 2026):** de teamstand start op de telefoons vanzelf
+  bij *Je team is begonnen*, verstuurd door de live-Worker zelf.
+- **Een partij staat bij een teamgenoot in de lijst zodra hij begint.** Tot nu toe pas na de eerste uitgespeelde
+  game, terwijl het vergrendelscherm en de webpagina hem al toonden. De app neemt nu van de livepagina ook de
+  partij zonder games over (namen, vanaf het inspelen) en de lopende game: `TeamPartij.liveOwnPoints` /
+  `liveTheirPoints`, gezet door `TeamPartij.seenLive` in `mergeLive`. De rij toont in zeegroen "bezig 7-5", ook
+  achter de games die al binnen zijn; de vraag "welke partij tel je?" en de kaart op het beginscherm (0-0 in
+  zeegroen) doen mee. De lopende game zit niet in `games` en telt dus nergens mee. Hij verdwijnt bij een eigen
+  bewerking, als de wedstrijd zonder game is weggegooid (de pagina heeft de partij niet meer) en als live stopt.
+  Alleen de app; de server is niet gewijzigd. Getest in `TeamLiveTests`; iOS en Android bouwen, niet op een
+  scherm bekeken.
+
 ## 4.0 build 7 (21 november 2026: geüpload naar TestFlight Squashteam en de Play-testtracks)
 
 - **Opgeleverd op 21 november 2026 vanaf de Mac (uit een worktree):** suites groen (Core met Skip 527 tests, de vier

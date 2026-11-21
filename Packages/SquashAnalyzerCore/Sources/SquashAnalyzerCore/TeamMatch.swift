@@ -104,6 +104,12 @@ public struct TeamPartij: Codable, Equatable, Sendable {
     public var endedBy: TeamPartijEnd?
     /// How many games were there before the ending added its own, so it can be undone
     public var endedAfter: Int?
+    /// The game under way on another phone, as the live page has it (with
+    /// `fromLive`): a teammate sees the partij the moment it starts, not only
+    /// after its first finished game (Gerd-Jan, 21 November 2026). Never part
+    /// of `games`, so no count, report or stand looks at it.
+    public var liveOwnPoints: Int?
+    public var liveTheirPoints: Int?
 
     public init(slot: Int, ownPlayer: String = "", opponentPlayer: String = "", games: [TeamGame] = [],
                 playOrder: Int? = nil, linkedMatchId: String? = nil, linkedKind: String? = nil, bestOf: Int = 5) {
@@ -148,6 +154,13 @@ public struct TeamPartij: Codable, Equatable, Sendable {
     }
 
     public var hasEntry: Bool { !games.isEmpty }
+    /// Being played on another phone right now
+    public var isRunning: Bool { fromLive == true && liveOwnPoints != nil && liveTheirPoints != nil && !isOver }
+    /// "7-5": the game under way, ours first; empty when none is
+    public var runningText: String {
+        guard isRunning, let own = liveOwnPoints, let their = liveTheirPoints else { return "" }
+        return "\(own)-\(their)"
+    }
     public var isLinked: Bool { linkedMatchId != nil }
     public var isOver: Bool { ownGames >= gamesToWin || theirGames >= gamesToWin }
 
@@ -602,6 +615,8 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
     public mutating func update(_ partij: TeamPartij) {
         var ours = cleaned(partij)
         ours.fromLive = nil
+        ours.liveOwnPoints = nil
+        ours.liveTheirPoints = nil
         var replaced = false
         for index in 0..<partijen.count where partijen[index].slot == ours.slot {
             partijen[index] = ours
@@ -683,6 +698,15 @@ public struct TeamMatch: Codable, Equatable, Identifiable, Sendable {
         liveTeamOnly = nil
         liveRefereeKey = nil
         refereeSlots = nil
+        // Nobody tells this copy how a game under way went on
+        for index in 0..<partijen.count where partijen[index].liveOwnPoints != nil || partijen[index].liveTheirPoints != nil {
+            partijen[index].liveOwnPoints = nil
+            partijen[index].liveTheirPoints = nil
+            // A partij that was only a game under way holds nothing any more
+            if partijen[index].fromLive == true && !partijen[index].hasEntry {
+                partijen[index] = TeamPartij(slot: partijen[index].slot, playOrder: partijen[index].playOrder)
+            }
+        }
     }
 
     /// The partij a coach or referee match in progress was started for, if any

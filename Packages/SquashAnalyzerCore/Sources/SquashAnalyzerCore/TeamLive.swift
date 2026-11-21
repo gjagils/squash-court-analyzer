@@ -356,6 +356,28 @@ public extension TeamPartij {
         }
         return partij
     }
+
+    /// A partij as a teammate's phone shows it: the finished games of
+    /// `fromLive`, and the game under way while it is being scored on another
+    /// phone. A partij without a finished game is there with its names from
+    /// the warm-up on; nil when the page holds nothing for it.
+    static func seenLive(_ live: TeamLivePartij, slot: Int, ownIsHome: Bool) -> TeamPartij? {
+        let underWay = (live.status == LiveStatus.warmup || live.status == LiveStatus.playing) && live.score.count >= 2
+        var seen = TeamPartij.fromLive(live, slot: slot, ownIsHome: ownIsHome)
+        if seen == nil && underWay {
+            let bestOf = live.bestOf >= 1 && live.bestOf <= 7 ? live.bestOf : 5
+            var started = TeamPartij(slot: slot, ownPlayer: ownIsHome ? live.p1 : live.p2,
+                                     opponentPlayer: ownIsHome ? live.p2 : live.p1, bestOf: bestOf)
+            started.fromLive = true
+            seen = started
+        }
+        guard var partij = seen else { return nil }
+        if underWay && !partij.isOver {
+            partij.liveOwnPoints = max(0, ownIsHome ? live.score[0] : live.score[1])
+            partij.liveTheirPoints = max(0, ownIsHome ? live.score[1] : live.score[0])
+        }
+        return partij
+    }
 }
 
 public extension TeamMatch {
@@ -381,8 +403,19 @@ public extension TeamMatch {
             // after the app was closed would no longer reach the live page
             // (Gerd-Jan, 21 November 2026: "de link lijkt verloren")
             if current.trackingMatchId != nil { continue }
-            guard let live = state.partijen[String(current.slot)],
-                  var incoming = TeamPartij.fromLive(live, slot: current.slot, ownIsHome: ownSide == TeamSide.home) else { continue }
+            var seen: TeamPartij? = nil
+            if let live = state.partijen[String(current.slot)] {
+                seen = TeamPartij.seenLive(live, slot: current.slot, ownIsHome: ownSide == TeamSide.home)
+            }
+            guard var incoming = seen else {
+                // The match it was scored in was thrown away without a game:
+                // the page holds nothing for it any more, and neither do we
+                if current.fromLive == true && !current.hasEntry {
+                    partijen[index] = TeamPartij(slot: current.slot, playOrder: current.playOrder)
+                    changed = true
+                }
+                continue
+            }
             incoming.playOrder = current.playOrder
             if incoming != current {
                 partijen[index] = incoming

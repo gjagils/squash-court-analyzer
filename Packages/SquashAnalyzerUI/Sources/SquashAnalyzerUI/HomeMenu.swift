@@ -448,14 +448,17 @@ struct HomeTeamMatchBar: View {
 
     /// "E1 3-1", won in the support colour; "–" when nothing is entered yet
     private func partijChip(_ partij: TeamPartij) -> some View {
-        let color: Color = partij.ownWon == true ? SharedColors.support
+        // Being played on a teammate's phone: the games so far ("0-0" from the
+        // warm-up on) in sea green
+        let running = match.isLive && partij.isRunning
+        let color: Color = partij.ownWon == true || running ? SharedColors.support
             : partij.ownWon == false ? SharedColors.textSecondary
             : partij.hasEntry ? SharedColors.textPrimary : SharedColors.textMuted
         return HStack(spacing: 5) {
             Text(partij.label)
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textSecondary)
-            Text(partij.hasEntry ? partij.standText : "–")
+            Text(partij.hasEntry || running ? partij.standText : "–")
                 .font(SharedFonts.system(12, weight: .semibold, design: .rounded))
                 .foregroundColor(color)
         }

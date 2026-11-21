@@ -290,7 +290,8 @@ public struct MatchSetupView: View {
                     Button(action: onCancel) {
                         HStack(spacing: 4) {
                             AppSymbol("chevron.left", size: 14, color: SharedColors.textSecondary)
-                            Text("Home")
+                            // From a partij under Competitie the way back is that team match, not Home
+                            Text(fixedTeamId == nil ? "Home" : loc("Terug"))
                                 .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                                 .foregroundColor(SharedColors.textSecondary)
                         }

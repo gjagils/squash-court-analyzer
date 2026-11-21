@@ -55,7 +55,7 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
     het log `team start {"201": n}`).
   - **Uitgerold op 21 november 2026:** de account-Worker op productie (migratie 0007 toegepast, `wrangler deploy`
     vanaf de Mac; `/health` 200, `PUT /api/v1/me/push` zonder login 401) en de live-Worker via CI. Interne build
-    4.0 (5.1) met deze code staat op de iPhone 16 Pro van Gerd-Jan (Debug, productieservers, APNs-sandbox).
+    4.0 (5.2, met ook de twee punten hierboven) staat op de iPhone 16 Pro van Gerd-Jan (Debug, productieservers, APNs-sandbox).
   - **Nog te doen:** `LIVE_SERVER` voor de testomgeving kiezen (nu alleen productie); website publiceren voor de privacyverklaring; de teksten bij het account en *Account verwijderen*
     nalopen op "wat we bewaren".
   *Releasenote:* Met een account krijg je een melding als iemand van je team een teamwedstrijd start, ook als je

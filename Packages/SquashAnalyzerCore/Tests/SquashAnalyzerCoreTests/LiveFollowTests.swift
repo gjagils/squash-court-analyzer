@@ -175,6 +175,28 @@ final class LiveFollowTests: XCTestCase {
         XCTAssertTrue(transport.requests.last?.body.contains("\"alerts\":true") == true)
     }
 
+    /// "Je team is begonnen" started the card from the server: the phone has
+    /// its plain notifications as the alerts follower the account made it
+    @MainActor
+    func testACardTheServerStartedIsFollowedSilentlyUntilItIsForgotten() async throws {
+        let transport = FakeFollowTransport()
+        let follow = LiveFollow(transport: transport)
+        follow.presenter = FakeFollowPresenter()
+        follow.teamAlerts = TeamAlertFollow(defaults: UserDefaults(suiteName: "live-follow-\(UUID().uuidString)")!)
+        let target = LiveFollowTarget(id: "abcdefgh2345", server: LiveFollowLink.defaultServer, kind: "team")
+        follow.restore(target, title: "All Inn 8 – Delft 8", quiet: true)
+        XCTAssertTrue(follow.isFollowing(target))
+        await follow.tokenChanged("tok1", for: target)
+        XCTAssertTrue(transport.requests.last?.url.hasSuffix("/api/team/abcdefgh2345/followers") == true)
+        XCTAssertTrue(transport.requests.last?.body.contains("\"alerts\":false") == true)
+
+        // Forgotten, then followed by hand: with its notifications again
+        follow.forget(target)
+        follow.restore(target)
+        await follow.tokenChanged("tok2", for: target)
+        XCTAssertTrue(transport.requests.last?.body.contains("\"alerts\":true") == true)
+    }
+
     @MainActor
     func testFollowsATeamMatchAndSendsTheAlertsSetting() async throws {
         let transport = FakeFollowTransport()

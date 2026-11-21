@@ -207,6 +207,30 @@ public final class AccountSync {
         return false
     }
 
+    /// The player in Spelers that is linked to the SBN player of the account
+    static func linkedPlayer(_ profile: AccountProfile, known: [PlayerProfile], in defaults: UserDefaults) -> PlayerProfile? {
+        guard let path = profile.sbnPath else { return nil }
+        for (id, linked) in PlayerSBNLinks.all(in: defaults) where linked == path {
+            for player in known where player.id.lowercased() == id.lowercased() { return player }
+        }
+        return nil
+    }
+
+    /// You in Spelers while signed in, for the Badges tile on the home screen
+    /// (Gerd-Jan, 21 November 2026: signed in, it opens your own badges): the
+    /// player with your account name, else the one linked to your SBN player.
+    /// Looks only, never makes a player or a link; nil when signed out, the
+    /// profile is not read yet or there is no such player (the tile then
+    /// opens all badges, as before).
+    public static func ownPlayer(store: any PlayerProfileStore, profile: AccountProfile? = nil,
+                                 in defaults: UserDefaults = UserDefaults.standard) async -> PlayerProfile? {
+        var account = profile
+        if account == nil, Features.shared.playerAccount, PlayerAccount.shared.isSignedIn { account = PlayerAccount.shared.profile }
+        guard let account, let known = try? await store.loadPlayers() else { return nil }
+        for player in known where TeamMatch.sameTeam(player.name, account.name) { return player }
+        return linkedPlayer(account, known: known, in: defaults)
+    }
+
     /// You in Spelers: the player with your account name, else the one linked to
     /// your SBN player, else a new player with that name (linked from now on).
     /// The name goes first (Gerd-Jan, 4 November 2026): a nickname on this phone
@@ -221,11 +245,7 @@ public final class AccountSync {
             }
             return player.id
         }
-        if let path = profile.sbnPath {
-            for (id, linked) in links where linked == path {
-                if known.contains(where: { player in player.id.lowercased() == id.lowercased() }) { return id }
-            }
-        }
+        if let found = linkedPlayer(profile, known: known, in: defaults) { return found.id }
         let made = PlayerProfile(name: profile.name)
         guard (try? await store.savePlayer(made)) != nil else { return nil }
         if let path = profile.sbnPath { PlayerSBNLinks.set(path, for: made.id, in: defaults) }

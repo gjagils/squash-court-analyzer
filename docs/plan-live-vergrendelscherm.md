@@ -247,6 +247,23 @@ op het canvas.
   pauze, uitslag met vier en vijf games, sessie wissen (melding en foto's weg),
   en de Live Update met avatars (blijft uitgelicht).
 
+### Teamstand vanzelf bij de start (21 november 2026)
+
+Gerd-Jan: na *Je team is begonnen* wil je de teamstand meteen op je vergrendelscherm, zonder de app te openen.
+De account-Worker geeft bij de start van een teamwedstrijd per teamgenoot door hoe diens kaart gestart wordt
+(`push_tokens.start`), de live-Worker start hem (`TeamSession.announce`, `pushStart` in push.js):
+
+- **iPhone (iOS 17.2+)**: `Activity<TeamScoreAttributes>.pushToStartTokenUpdates` geeft het starttoken; het gaat
+  via `TeamStartAlerts` naar het account, alleen zolang Live-activiteiten aan staan. De server stuurt een
+  start-push; iOS zet de kaart neer en start de app op de achtergrond, die via `Activity.activityUpdates` de
+  kaart overneemt (`adopt`): updatetoken naar de live-server, foto's ophalen. Zo'n kaart is stil
+  (`LiveFollow.restore(quiet: true)`): de telefoon is al meldingenvolger.
+- **Android**: het FCM-token is hetzelfde; de server maakt het stille kaartvolger en stuurt het teambericht met
+  `event: "start"`. `LiveFollowMessagingService` zet de teamwedstrijd bij de gevolgde wedstrijden en toont de
+  doorlopende melding; staat *Meldingen van je teamwedstrijd* uit, dan meldt de telefoon zich weer af.
+- Niet op telefoons gezien (alleen nagebootste APNs/FCM in de tests). Te controleren: komt het updatetoken
+  binnen als de app helemaal gesloten was, en blijft de kaart bijgewerkt.
+
 ## Nog open
 
 - **Android, meldingen groeperen (16 oktober)**: Android bundelt meldingen

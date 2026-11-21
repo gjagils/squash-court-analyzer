@@ -13,6 +13,11 @@ import SquashAnalyzerUI
 /// - A followed team match: the same, with the four partijen on one card.
 /// - The match this phone is scoring ("Stand op vergrendelscherm" in
 ///   Instellingen): no pushes, updated from `LiveShareSync` after every rally.
+/// - "Teamstand vanzelf op je vergrendelscherm" (Gerd-Jan, 21 November 2026):
+///   the live server starts the team card itself when a teammate makes a team
+///   match visible (push-to-start, iOS 17.2+). The app hands its start token
+///   to the account (`TeamStartAlerts`) and, when such a card appears, follows
+///   it like one started by hand, without notifications of its own.
 @MainActor
 final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
     static let shared = ActivityKitLiveFollowPresenter()
@@ -30,6 +35,15 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
     private var ownFinished: Set<String> = []
     /// Own matches whose photos are in the App Group already
     private var ownPhotosStored: Set<String> = []
+
+    /// The push-to-start token of the team Live Activity (hex), kept so it is
+    /// there at once after a restart; nil before iOS 17.2 or the first token
+    private static let teamStartTokenKey = "teamStartActivityToken"
+    private(set) var teamStartToken: String? = UserDefaults.standard.string(forKey: ActivityKitLiveFollowPresenter.teamStartTokenKey)
+    /// The team matches whose card was started on this phone ("Volgen"): every
+    /// other team card was started by the live server
+    private static let localTeamsKey = "liveFollowLocalTeams"
+    private var localTeams: [String] = UserDefaults.standard.stringArray(forKey: ActivityKitLiveFollowPresenter.localTeamsKey) ?? []
 
     private init() {}
 
@@ -52,6 +66,7 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
         restoreRunning()
         removeUnusedPhotos()
         refreshTeamPhotos()
+        watchTeamStarts()
         // Pushes carry no photos: a followed team match gets the partij photos
         // added since it was followed whenever the app comes to the front
         NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil,
@@ -99,6 +114,7 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
                 cancelObservers(activity.id)
             }
             TeamScorePhotoStore.remove(teamId: target.id)
+            setLocalTeam(target.id, false)
             return
         }
         for activity in Activity<LiveScoreAttributes>.activities where Self.target(of: activity) == target {
@@ -216,12 +232,74 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
             LiveFollow.shared.restore(target, title: state.p1 + " – " + state.p2)
             observe(activity, target: target) { LiveScorePhotoStore.remove(matchId: target.id) }
         }
+        var running: [String] = []
         for activity in Activity<TeamScoreAttributes>.activities where activity.activityState == .active {
-            let target = Self.target(of: activity)
-            let state = activity.content.state
-            LiveFollow.shared.restore(target, title: state.home + " – " + state.away)
-            observe(activity, target: target) { TeamScorePhotoStore.remove(teamId: target.id) }
+            running.append(activity.attributes.teamId)
+            adopt(activity)
         }
+        // Cards that are gone were not started here any more either
+        let kept = localTeams.filter { id in running.contains(id) }
+        if kept != localTeams {
+            localTeams = kept
+            UserDefaults.standard.set(kept, forKey: Self.localTeamsKey)
+        }
+    }
+
+    // MARK: - Team cards the live server starts
+
+    /// How the live server starts the team card on this phone, for the
+    /// account (`AccountPushToken.start`): the push-to-start token, only while
+    /// Live Activities are allowed (otherwise the plain notification comes)
+    func lockScreenStart() -> String? {
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return nil }
+        return teamStartToken
+    }
+
+    /// The start token (and every new one) goes to the account, and a team
+    /// card that appears without this app asking for it is followed. The
+    /// system starts the app in the background for both.
+    private func watchTeamStarts() {
+        if #available(iOS 17.2, *) {
+            Task { @MainActor in
+                for await data in Activity<TeamScoreAttributes>.pushToStartTokenUpdates {
+                    let token = data.map { byte in String(format: "%02x", byte) }.joined()
+                    guard token != self.teamStartToken else { continue }
+                    self.teamStartToken = token
+                    UserDefaults.standard.set(token, forKey: Self.teamStartTokenKey)
+                    await TeamStartAlerts.shared.sync()
+                }
+            }
+        }
+        Task { @MainActor in
+            for await activity in Activity<TeamScoreAttributes>.activityUpdates {
+                self.adopt(activity)
+            }
+        }
+    }
+
+    /// A running team card is followed: its push token goes to the live
+    /// server and its photos are fetched. One the server started stays silent
+    /// (the phone has its notifications as a teammate already). Only cards of
+    /// our own live servers, and each once.
+    private func adopt(_ activity: Activity<TeamScoreAttributes>) {
+        guard activity.activityState == .active, observers[activity.id] == nil else { return }
+        let target = Self.target(of: activity)
+        guard LiveFollowLink.isValidId(target.id), target.server.hasPrefix("https://"),
+              LiveFollowLink.isAllowedHost(LiveFollowLink.host(of: target.server)) else { return }
+        let state = activity.content.state
+        LiveFollow.shared.restore(target, title: state.home + " – " + state.away, quiet: !localTeams.contains(target.id))
+        observe(activity, target: target) { TeamScorePhotoStore.remove(teamId: target.id) }
+        Task {
+            guard await Self.downloadTeamPhotos(target) else { return }
+            await activity.update(activity.content)
+        }
+    }
+
+    private func setLocalTeam(_ id: String, _ local: Bool) {
+        var list = localTeams.filter { other in other != id }
+        if local { list.append(id) }
+        localTeams = list
+        UserDefaults.standard.set(list, forKey: Self.localTeamsKey)
     }
 
     // MARK: - Followed team matches
@@ -240,10 +318,13 @@ final class ActivityKitLiveFollowPresenter: LiveFollowPresenter {
         let downloaded = await Self.finished(photos, within: 3)
         let attributes = TeamScoreAttributes(teamId: target.id, server: target.server)
         let activity: Activity<TeamScoreAttributes>
+        // Started here: with its own notifications ("Melding bij elke game")
+        setLocalTeam(target.id, true)
         do {
             activity = try Activity.request(attributes: attributes, content: content, pushType: .token)
         } catch {
             TeamScorePhotoStore.remove(teamId: target.id)
+            setLocalTeam(target.id, false)
             throw LiveFollowError.notAllowed
         }
         observe(activity, target: target) { TeamScorePhotoStore.remove(teamId: target.id) }

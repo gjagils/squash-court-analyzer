@@ -38,6 +38,9 @@ Gebaseerd op de code van `main` op 6 november (commit `1bd7933`).
 - Een `TeamSession` komt **altijd** op het clubscherm van een club met een
   scherm: `reportToClubs` zoekt de schermen op teamnaam (`wallsOfTeam` in
   `club.js`). Er is geen manier om dat per wedstrijd uit te zetten.
+- **Bijgewerkt op 21 november 2026:** een teamwedstrijd van het eigen team wordt sindsdien vanzelf gevonden én
+  vanzelf op de telefoon gezet (`TeamFinding.joinOwn`); de vraag *Meedoen?* hieronder geldt alleen nog voor de
+  wedstrijd die de tegenstander bijhoudt en voor een teamwedstrijd die je zelf weer verwijderde.
 - Meedoen kan alleen met de uitnodiging (`TeamInvite`: `id.key` als link of
   code). Wie zelf "dezelfde" wedstrijd aanmaakt, krijgt een tweede, losse
   teamwedstrijd.

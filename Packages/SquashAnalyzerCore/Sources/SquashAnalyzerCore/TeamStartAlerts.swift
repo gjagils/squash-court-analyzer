@@ -9,6 +9,11 @@ import Foundation
 // result). Only for accounts of the same team, only while "Meldingen van je
 // teamwedstrijd" is on; the token goes when the setting goes off, on signing
 // out and with the account.
+//
+// "Teamstand vanzelf op je vergrendelscherm" (Gerd-Jan, 21 November 2026): a
+// phone that can also says how its lock screen card is started (`start`), and
+// the live Worker then starts the team stand there together with the
+// notification: nobody has to open the app and tap Volgen.
 
 /// The push token of this phone as the account Worker keeps it
 public struct AccountPushToken: Codable, Equatable, Sendable {
@@ -20,13 +25,17 @@ public struct AccountPushToken: Codable, Equatable, Sendable {
     public let lang: String
     /// The phone's install id for the live server (`LiveDevice`)
     public let device: String?
+    /// How the team stand is put on the lock screen when the team starts
+    /// (`TeamAlertPlatform.lockScreenStart`); nil: the notification only
+    public let start: String?
 
-    public init(platform: String, token: String, sandbox: Bool?, lang: String, device: String?) {
+    public init(platform: String, token: String, sandbox: Bool?, lang: String, device: String?, start: String? = nil) {
         self.platform = platform
         self.token = token
         self.sandbox = sandbox
         self.lang = lang
         self.device = device
+        self.start = start
     }
 }
 
@@ -41,8 +50,9 @@ public protocol TeamStartAccount: AnyObject {
 
 @MainActor
 public final class TeamStartAlerts {
-    /// What was sent last: "<token>|<lang>|<day>". Sent again once a day, so
-    /// the server knows the phone is still there (it forgets one after 60 days).
+    /// What was sent last: "<token>|<lang>|<day>|<start>". Sent again once a
+    /// day, so the server knows the phone is still there (it forgets one after
+    /// 60 days), and when the way to start the lock screen card changed.
     static let sentKey = "teamStartPushSent"
     public static let shared = TeamStartAlerts()
 
@@ -92,13 +102,14 @@ public final class TeamStartAlerts {
         guard allowed, let token = await platform.pushToken(), !token.isEmpty else { return }
         let lang = AppLanguage.current.code
         let day = Int(now.timeIntervalSince1970 / 86400.0)
-        let key = "\(token)|\(lang)|\(day)"
+        let start = await platform.lockScreenStart()
+        let key = "\(token)|\(lang)|\(day)|\(start ?? "")"
         if defaults.string(forKey: TeamStartAlerts.sentKey) == key { return }
         // A new token: the old one goes first
         if let previous, previous != token { _ = await account.deleteTeamStartPush(token: previous) }
         let push = AccountPushToken(platform: platform.platform, token: token,
                                     sandbox: platform.platform == "ios" ? platform.usesSandbox : nil,
-                                    lang: lang, device: LiveDevice.id(in: defaults))
+                                    lang: lang, device: LiveDevice.id(in: defaults), start: start)
         if await account.putTeamStartPush(push) { defaults.set(key, forKey: TeamStartAlerts.sentKey) }
     }
 }

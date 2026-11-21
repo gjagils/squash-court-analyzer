@@ -60,6 +60,12 @@ final class IOSTeamAlertPlatform: TeamAlertPlatform {
         }
     }
 
+    /// The team stand on the lock screen when the team starts: the start
+    /// token of the team Live Activity (`ActivityKitLiveFollowPresenter`)
+    func lockScreenStart() async -> String? {
+        ActivityKitLiveFollowPresenter.shared.lockScreenStart()
+    }
+
     /// From the app delegate: the device token (nil when registering failed)
     func received(_ deviceToken: Data?) {
         guard let deviceToken else {
@@ -105,6 +111,8 @@ final class SquashAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificati
         let info = notification.request.content.userInfo
         guard info["kind"] as? String == "team", let id = info["id"] as? String else { return [.banner, .list, .sound] }
         let slot = (info["slot"] as? Int) ?? (info["slot"] as? NSNumber)?.intValue ?? 0
+        // "Je team is begonnen" with the app open: the home screen looks for the team match at once
+        if slot == 0 { TeamMatchSupport.noteChange() }
         let show = await MainActor.run { TeamAlertFollow.shared.shouldShow(teamId: id, slot: slot) }
         return show ? [.banner, .list, .sound] : []
     }

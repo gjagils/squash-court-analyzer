@@ -70,6 +70,11 @@ public protocol TeamAlertPlatform: AnyObject {
     /// The token for plain notifications, nil when there is none (no network,
     /// no Google Play services, a simulator)
     func pushToken() async -> String?
+    /// How the live server can put the team stand on this phone's lock screen
+    /// when the team starts (`AccountPushToken.start`): iOS the push-to-start
+    /// token of the team Live Activity, Android "fcm"; nil when the phone
+    /// cannot or does not allow it (it gets the plain notification then)
+    func lockScreenStart() async -> String?
 }
 
 /// The live team matches this phone follows with notifications

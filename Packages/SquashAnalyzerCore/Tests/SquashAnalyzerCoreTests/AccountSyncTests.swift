@@ -139,6 +139,29 @@ final class AccountSyncTests: XCTestCase {
         XCTAssertEqual(viaLink, nickname.id)
     }
 
+    /// The Badges tile: you in Spelers, found without making a player or a link
+    @MainActor
+    func testTheBadgesTileFindsYouInSpelersWithoutMakingAnything() async throws {
+        let store = defaults()
+        let path = "/league/x/player/940"
+        let nickname = PlayerProfile(id: "8F1E2C9A-0000-4000-8000-000000000002", name: "Gerd Lasso")
+        let own = PlayerProfile(id: "8F1E2C9A-0000-4000-8000-000000000003", name: "Gerd-Jan van Gils")
+        let profile = AccountProfile(playerId: "p", name: "Gerd-Jan van Gils", code: "X", sbnPath: path,
+                                     teamKey: nil, birthYear: 1990, createdAt: 1)
+        let byName = await AccountSync.ownPlayer(store: SyncPlayerStore([nickname, own]), profile: profile, in: store)
+        XCTAssertEqual(byName?.id, own.id)
+        XCTAssertNil(PlayerSBNLinks.path(for: own.id, in: store), "looking makes no link")
+        // Not by that name and not linked: nobody, and nobody is added
+        let players = SyncPlayerStore([nickname])
+        let nobody = await AccountSync.ownPlayer(store: players, profile: profile, in: store)
+        XCTAssertNil(nobody)
+        XCTAssertEqual(players.players.count, 1)
+        // The nickname linked to your SBN player is you
+        PlayerSBNLinks.set(path, for: nickname.id, in: store)
+        let viaLink = await AccountSync.ownPlayer(store: players, profile: profile, in: store)
+        XCTAssertEqual(viaLink?.id, nickname.id)
+    }
+
     @MainActor
     func testWithoutYouInSpelersYouAreAddedAndLinked() async throws {
         let store = defaults()

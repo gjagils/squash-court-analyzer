@@ -10,6 +10,47 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 6)
 
+- **Teamstand vanzelf op je vergrendelscherm en vanzelf meedoen (Gerd-Jan, 21 november 2026).** Na de melding
+  *Je team is begonnen* moest een teamgenoot nog de app openen, een minuut wachten en op *Meedoen* tikken, en voor
+  de stand op het vergrendelscherm zelf op *Volgen* tikken. Nu:
+  - **Vergrendelscherm vanzelf.** Start een teamgenoot een teamwedstrijd, dan zet de live-Worker de teamstand
+    meteen op het vergrendelscherm van de teamgenoten met een account, samen met de melding. iPhone: de Live
+    Activity start op afstand (push-to-start, iOS 17.2 en hoger; `ActivityKitLiveFollowPresenter.watchTeamStarts`);
+    de app laat daarvoor zijn starttoken bij het account achter (`AccountPushToken.start`, migratie 0008 van de
+    account-Worker) en meldt, als de kaart er staat, zijn updatetoken aan zoals na *Volgen*. Android: de
+    doorlopende teammelding komt met hetzelfde FCM-token (`LiveFollowMessagingService`, event `start`). De kaart
+    geeft zelf geen meldingen: de telefoon krijgt die al als teamgenoot, dus niets komt dubbel. Hangt aan
+    *Meldingen van je teamwedstrijd* (standaard aan); staan Live-activiteiten (iPhone) of meldingen uit, dan komt
+    alleen de gewone melding of niets. Lukt de start op de iPhone niet, dan stuurt de server de gewone melding.
+  - **Vanzelf meedoen.** Een live teamwedstrijd van je eigen team komt zonder tik op je telefoon
+    (`TeamFinding.joinOwn`, beginscherm en Competitie), één keer per teamwedstrijd: verwijder je hem daarna, dan
+    komt hij niet vanzelf terug maar staat *Meedoen* er weer. *Meedoen* blijft ook voor de wedstrijd die de
+    tegenstander bijhoudt. Vanzelf meedoen gebeurt alleen terwijl de app open is of opengaat.
+  - **Meteen zoeken.** Komt de app naar voren of komt *Je team is begonnen* binnen terwijl hij open is, dan zoekt
+    het beginscherm direct (was: binnen een minuut).
+  - Servers: live-Worker (`followerStart`, `apnsStartPayload`, `pushStart`, `TeamSession.announce`) en
+    account-Worker (`start` bij `PUT /me/push`, doorgegeven in `tellTeam`). Getest: live-Worker 105,
+    account-Worker 62 (incl. de wedstrijden terug in de wachtrij bij account verwijderen, zie hieronder),
+    Core met Skip 518.
+  - **Niet op een telefoon gezien:** de start op afstand zelf (iPhone en Android) is alleen met nagebootste
+    APNs/FCM getest. Te proberen met twee accounts van één team zodra beide telefoons deze build hebben geopend.
+  - **Bij de oplevering bijwerken:** handleiding nl/en (kaart Mijn team: de balk met *Meedoen* is er alleen nog
+    voor de tegenstander; meldingen), testen.html, releasenotes. De privacytekst (nl/en) noemt het starttoken al.
+  *Releasenote:* Start een teamgenoot een teamwedstrijd, dan staat de teamstand vanzelf op je vergrendelscherm
+  en doe je in de app vanzelf mee.
+- **Badges-tegel opent je eigen badges, en de badgepagina is per categorie ingedeeld (Gerd-Jan, 21 november 2026).**
+  Ben je ingelogd en sta je in Spelers (op je accountnaam, anders via je SBN-koppeling), dan opent de tegel
+  *Badges* op het beginscherm je eigen badgepagina (`AccountSync.ownPlayer`, zoekt alleen en maakt niets aan);
+  anders opent hij *Alle badges* zoals het was. De badgepagina van een speler (`SharedPlayerBadgesView`, iPhone en
+  Android) toont de badges nu onder dezelfde koppen als *Alle badges* (In één game, In één wedstrijd, Over al je
+  wedstrijden, Competitie, Speciaal), elk met hoeveel er verdiend zijn (2/5), en heeft onderaan een knop
+  *Alle badges* naar de uitleg. Niet op een scherm bekeken: alleen gebouwd en getest.
+  *Releasenote:* De tegel Badges opent je eigen badges als je bent ingelogd; je badges staan per categorie.
+- **Account verwijderen zet ingestuurde wedstrijden terug (21 november 2026, alleen server, staat live).**
+  Wedstrijden die een ander voor de SBN-speler instuurde, gaan bij het verwijderen van het account terug naar de
+  wachtrij van die SBN-speler (`deleteAccount`), zodat een volgend account ze weer krijgt; ze vervallen 90 dagen
+  na het insturen. Privacytekst en verwijderpagina (nl/en) zijn aangepast en gepubliceerd.
+
 ## 4.0 build 6 (21 november 2026: TestFlight Squashteam, Play internal, alpha, Google Group; website gepubliceerd)
 
 - **Opgeleverd op 21 november 2026 vanaf de Mac (uit een worktree):** suites groen (Core met Skip 514 tests, iOS,

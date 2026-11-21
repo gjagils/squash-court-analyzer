@@ -65,6 +65,7 @@ import com.squashanalyzer.android.live.LiveAlerts
 import com.squashanalyzer.android.live.FirebaseConfig
 import com.squashanalyzer.android.live.AndroidTeamAlertPlatform
 import squash.analyzer.core.TeamAlertFollow
+import squash.analyzer.core.TeamMatchSupport
 import squash.analyzer.core.LiveFollow
 import squash.analyzer.core.LiveFollowError
 import squash.analyzer.core.LiveFollowLink
@@ -258,6 +259,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         lifecycleScope.launch { AppUsage.shared.appOpened() }
+        // A teammate's new team match is looked for (and joined) at once, not within a minute
+        TeamMatchSupport.noteChange()
         // Pionier after the badge reset, also for a card from before it imported since
         badges?.let { store -> lifecycleScope.launch { runCatching { store.grantPioneers() } } }
     }

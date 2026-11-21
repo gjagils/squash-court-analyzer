@@ -396,6 +396,10 @@ public final class LiveFollow {
     private var tokens: [String: String] = [:]
     /// "Jan – Piet" per match id, for the list of followed matches
     private var titles: [String: String] = [:]
+    /// Team matches whose card the live server started when the team started
+    /// (`TeamStartAlerts`): the phone has its plain notifications already as
+    /// the alerts follower the account made it, so the card stays silent
+    private var quiet: [String] = []
 
     public init(transport: (any LiveTransport)? = nil) {
         self.transport = transport
@@ -457,7 +461,8 @@ public final class LiveFollow {
         guard let url = URL(string: target.server + target.apiPath + "/followers") else { throw LiveFollowError.notFound }
         // A team match this phone takes part in has its plain notifications
         // already (`TeamAlertFollow`): the lock screen card stays silent
-        let quiet = target.isTeam && (teamAlerts ?? TeamAlertFollow.shared).isRegistered(teamId: target.id)
+        let quiet = target.isTeam
+            && (self.quiet.contains(target.id) || (teamAlerts ?? TeamAlertFollow.shared).isRegistered(teamId: target.id))
         let registration = LiveFollowerRegistration(platform: presenter.platform, token: token,
                                                     sandbox: presenter.platform == "ios" ? presenter.usesSandbox : nil,
                                                     alerts: alerts && !quiet, lang: AppLanguage.current.code)
@@ -514,8 +519,10 @@ public final class LiveFollow {
     /// A match the platform still shows on the lock screen after a restart of
     /// the app (iOS: a running Live Activity): followed again without asking
     /// the server; its token comes back through `tokenChanged`
-    public func restore(_ target: LiveFollowTarget, title: String? = nil) {
+    /// `quiet`: the server started it with "Je team is begonnen" (no alerts with the card).
+    public func restore(_ target: LiveFollowTarget, title: String? = nil, quiet: Bool = false) {
         if let title { titles[target.id] = title }
+        if quiet && !self.quiet.contains(target.id) { self.quiet.append(target.id) }
         if !following.contains(target) { following.append(target) }
     }
 
@@ -524,6 +531,7 @@ public final class LiveFollow {
         following.removeAll { item in item == target }
         tokens[target.id] = nil
         titles[target.id] = nil
+        quiet.removeAll { id in id == target.id }
     }
 
     private func stopFollowing(_ target: LiveFollowTarget) async {

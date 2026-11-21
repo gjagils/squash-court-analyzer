@@ -7,6 +7,7 @@ import com.squashanalyzer.android.BuildConfig
 import kotlinx.coroutines.launch
 import squash.analyzer.core.LiveFollow
 import squash.analyzer.core.TeamAlertFollow
+import squash.analyzer.core.TeamMatchSupport
 
 /**
  * The live server's pushes: `data = { kind: "live", id, server, event:
@@ -17,6 +18,12 @@ import squash.analyzer.core.TeamAlertFollow
  * removes the notification when there is none) and forgets the match.
  * `{ kind: "alert", id, server, slot, alertTitle, alertBody }` (4.0, T6) is a
  * team match this phone takes part in: only the alert, no ongoing notification.
+ *
+ * "Teamstand vanzelf op je vergrendelscherm" (21 November 2026): a team push
+ * with `event: "start"` is the live server putting the team match of the
+ * account's team on the lock screen as it starts ("Je team is begonnen"). The
+ * phone follows it from then on, as after "Volgen": the server registered this
+ * FCM token as a follower already.
  */
 class LiveFollowMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
@@ -43,17 +50,22 @@ class LiveFollowMessagingService : FirebaseMessagingService() {
             if (kind != "live" && kind != FollowedMatch.TEAM) return
             val match = FollowedMatch.validated(data["id"], data["server"], kind) ?: return
             val followed = FollowedMatches(context)
+            // The server starts the team match of the account's team on this phone
+            val started = data["event"] == "start"
+            if (started && !startTeam(context, match, followed)) return
             // A push for a match this phone stopped following (the server may not know yet)
             if (!followed.contains(match)) return
             val notifier = LiveScoreNotifier(context)
             val ended = data["event"] == "end"
             // "Melding bij elke game": a game (partij) won or the result, as a separate heads-up
-            val alert = LiveAlerts.from(data, LiveAlerts.isOn(context))
+            // "Je team is begonnen" comes with a start whatever that setting says
+            val alert = LiveAlerts.from(data, started || LiveAlerts.isOn(context))
             if (match.isTeam) {
                 val stand = TeamScore.parse(data["team"] ?: return, context) ?: return
                 // Ended before all four partijen were decided (stopped, or the alarm): nothing to show any more
                 if (ended && !TeamScoreCard(stand, context).isFinished) notifier.cancel(match)
                 else notifier.showTeam(match, stand, quiet = alert != null)
+                if (started) notifier.fetchTeamPhotos(match, TeamScoreCard(stand, context).slots)
             } else {
                 val score = LiveScoreJson.parse(data["snapshot"] ?: return) ?: return
                 // Ended without a result (the scorer stopped sharing): nothing to show any more
@@ -67,6 +79,34 @@ class LiveFollowMessagingService : FirebaseMessagingService() {
                 LivePhotos.delete(context, match)
                 FcmLiveFollowPresenter.scope.launch { LiveFollow.shared.forget(match.toTarget()) }
             }
+        }
+
+        /**
+         * The server starts following a team match for this phone: only a team
+         * match, only while "Meldingen van je teamwedstrijd" is on and the
+         * phone shows notifications. Otherwise the server is told to forget
+         * the token again and nothing shows. True when the match is followed now.
+         */
+        private fun startTeam(context: Context, match: FollowedMatch, followed: FollowedMatches): Boolean {
+            if (followed.contains(match)) return true
+            val appContext = context.applicationContext
+            if (!match.isTeam || !TeamAlertFollow.shared.isEnabled || !LiveScoreNotifier(appContext).canNotify()) {
+                FcmLiveFollowPresenter.scope.launch {
+                    // The DELETE needs the token the server used
+                    FirebaseConfig.token()?.let { token -> followed.token = token }
+                    FcmLiveFollowPresenter.stopFollowing(appContext, match)
+                }
+                return false
+            }
+            followed.add(match)
+            FcmLiveFollowPresenter.scope.launch {
+                // "Stoppen" needs the token after a restart; the photos come once, as after Volgen
+                FirebaseConfig.token()?.let { token -> followed.token = token }
+                LiveFollow.shared.restore(match.toTarget(), quiet = true)
+                // With the app open: the home screen looks for the team match at once
+                TeamMatchSupport.noteChange()
+            }
+            return true
         }
     }
 }

@@ -53,6 +53,27 @@ final class TeamStartAlertsTests: XCTestCase {
         XCTAssertEqual(platform.askedWith, [true, false, false], "asked only once")
     }
 
+    /// "Teamstand vanzelf op je vergrendelscherm": how the card is started goes with the token
+    func testHowTheLockScreenCardIsStartedGoesWithTheTokenAndAgainWhenItChanges() async {
+        let platform = FakeAlertPlatform()
+        platform.start = "ee55ff66"
+        let (alerts, follow, account, _) = fixture(platform)
+        await alerts.sync(alerts: follow, account: account, now: day)
+        XCTAssertEqual(account.puts.last?.start, "ee55ff66")
+        await alerts.sync(alerts: follow, account: account, now: day)
+        XCTAssertEqual(account.puts.count, 1, "unchanged: not again")
+        // Live Activities switched off: the account hears it the same day
+        platform.start = nil
+        await alerts.sync(alerts: follow, account: account, now: day)
+        XCTAssertEqual(account.puts.count, 2)
+        XCTAssertNil(account.puts.last?.start)
+        XCTAssertTrue(account.deletes.isEmpty, "the same push token: nothing taken away")
+        XCTAssertEqual(alerts.sentToken, "aa11bb22")
+        // Not in the body at all without one
+        let body = String(data: (try? JSONEncoder().encode(account.puts[1])) ?? Data(), encoding: String.Encoding.utf8) ?? ""
+        XCTAssertFalse(body.contains("start"), body)
+    }
+
     func testANewTokenReplacesTheOldOneAndAndroidSendsNoSandbox() async {
         let platform = FakeAlertPlatform(platform: "android")
         let (alerts, follow, account, _) = fixture(platform)

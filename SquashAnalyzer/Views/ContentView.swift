@@ -159,6 +159,8 @@ struct ContentView: View {
             }
             // A link that arrived during a cold start, before there was a window
             if phase == .active {
+                // A teammate's new team match is looked for (and joined) at once, not within a minute
+                TeamMatchSupport.noteChange()
                 // Also for a card from before the badge reset imported since
                 _ = try? BadgeAwarder(context: modelContext).grantPioneers()
                 presentPendingCard()

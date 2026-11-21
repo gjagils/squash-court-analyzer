@@ -307,7 +307,7 @@ public struct SharedSettingsView: View {
                 .font(SharedFonts.system(12))
                 .foregroundColor(SharedColors.textMuted)
             if Features.shared.playerAccount {
-                Text("Met een account hoor je het ook als iemand van je team een teamwedstrijd start, ook als je zelf niet speelt. Daarvoor staat het pushtoken van deze telefoon bij je account.", bundle: textBundle)
+                Text("Met een account hoor je het ook als iemand van je team een teamwedstrijd start, ook als je zelf niet speelt. De teamstand komt dan vanzelf op je vergrendelscherm en de teamwedstrijd staat in de app voor je klaar. Daarvoor staat het pushtoken van deze telefoon bij je account.", bundle: textBundle)
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textMuted)
             }

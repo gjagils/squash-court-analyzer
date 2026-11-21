@@ -279,6 +279,67 @@ final class TeamFindingTests: XCTestCase {
         XCTAssertEqual(all.count, 1)
     }
 
+    // MARK: Joining by itself
+
+    @MainActor
+    func testATeammatesLiveTeamMatchIsJoinedByItselfOnceAndTheOpponentsStaysAnOffer() async throws {
+        let transport = FakeFindingTransport()
+        transport.roles["K33sK33sK33sK33sK33sK33s"] = "{\"role\":\"writer\"}"
+        let defaults = UserDefaults(suiteName: "auto-join-\(UUID().uuidString)")!
+        let teamStore = store()
+        let teamLive = live(transport)
+        let own = TeamLiveListing(fixture: stored, teamName: "Squash City 2", liveId: "keeslive2345", writeKey: "K33sK33sK33sK33sK33sK33s",
+                                  refereeKey: nil, starterName: "Kees", matchAt: 1_793_181_600_000, own: true)
+        let opponent = TeamLiveListing(fixture: "/league/\(league.uppercased())/team-match/9002", teamName: "Bevo 3", liveId: "bevolive2345",
+                                       writeKey: nil, refereeKey: "R3f3r33R3f3r33R3f3r33R3f3r33", starterName: "Jan",
+                                       matchAt: 1_793_181_600_000, own: false)
+        let first = await TeamFinding.joinOwn([own, opponent], ownTeamName: "Squash City 2", fixtures: [], store: teamStore,
+                                              live: teamLive, defaults: defaults)
+        XCTAssertEqual(first.joined.map { match in match.liveId }, ["keeslive2345"])
+        XCTAssertEqual(first.offers.map { offer in offer.liveId }, ["bevolive2345"], "the opponent's still needs Meedoen")
+        XCTAssertEqual(TeamFinding.autoJoined(in: defaults), ["keeslive2345"])
+        var all = try await teamStore.loadAll()
+        XCTAssertEqual(all.count, 1)
+
+        // Deleted on this phone and offered again: not joined a second time, Meedoen is still there
+        try await teamStore.delete(id: all[0].id)
+        let second = await TeamFinding.joinOwn([own], ownTeamName: "Squash City 2", fixtures: [], store: teamStore,
+                                               live: teamLive, defaults: defaults)
+        XCTAssertTrue(second.joined.isEmpty)
+        XCTAssertEqual(second.offers.map { offer in offer.liveId }, ["keeslive2345"])
+        all = try await teamStore.loadAll()
+        XCTAssertTrue(all.isEmpty)
+    }
+
+    @MainActor
+    func testJoiningByItselfTriesAgainAfterNoConnectionAndLeavesAMatchThatIsLiveElsewhere() async throws {
+        let transport = FakeFindingTransport()
+        transport.roles["K33sK33sK33sK33sK33sK33s"] = "{\"role\":\"writer\"}"
+        transport.gone = ["keeslive2345"]
+        let defaults = UserDefaults(suiteName: "auto-join-\(UUID().uuidString)")!
+        let teamStore = store()
+        let teamLive = live(transport)
+        let own = TeamLiveListing(fixture: stored, teamName: "Squash City 2", liveId: "keeslive2345", writeKey: "K33sK33sK33sK33sK33sK33s",
+                                  refereeKey: nil, starterName: "Kees", matchAt: 1_793_181_600_000, own: true)
+        let failed = await TeamFinding.joinOwn([own], ownTeamName: "Squash City 2", fixtures: [], store: teamStore,
+                                               live: teamLive, defaults: defaults)
+        XCTAssertTrue(failed.joined.isEmpty)
+        XCTAssertTrue(failed.offers.isEmpty)
+        XCTAssertTrue(TeamFinding.autoJoined(in: defaults).isEmpty, "nothing noted: the next round tries again")
+
+        // This phone has the match live on another page: an offer, so Competitie can explain it
+        transport.gone = []
+        var mine = ownMatch()
+        mine.liveId = "minelive2345"
+        mine.liveKey = "M1n3M1n3M1n3M1n3M1n3M1n3"
+        try await teamStore.save(mine)
+        let elsewhere = await TeamFinding.joinOwn([own], ownTeamName: "Squash City 2", fixtures: [], store: teamStore,
+                                                  live: teamLive, defaults: defaults)
+        XCTAssertTrue(elsewhere.joined.isEmpty)
+        XCTAssertEqual(elsewhere.offers.map { offer in offer.liveId }, ["keeslive2345"])
+        XCTAssertEqual(TeamFinding.autoJoined(in: defaults), ["keeslive2345"])
+    }
+
     // MARK: After a match
 
     @MainActor

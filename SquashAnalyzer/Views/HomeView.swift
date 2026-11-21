@@ -20,12 +20,30 @@ struct HomeView: View {
 
     @State private var showingPlayerManagement = false
     @State private var showingBadgeCatalog = false
+    /// Signed in: the Badges tile opens your own badges (you in Spelers)
+    @State private var ownBadgesPlayer: PlayerProfile?
+    @State private var ownBadgesPhoto: Data?
+    @State private var ownBadgesInbox = CardInbox()
     @State private var showingCompetition = false
     /// A live team match of the own team is running (LIVE on the Competitie row)
     @State private var competitionLive = false
     /// Opened from the bar on the Mijn team card
     @State private var openedTeamMatch: TeamMatch?
     @Environment(\.modelContext) private var modelContext
+
+    /// The Badges tile (Gerd-Jan, 21 November 2026): signed in, your own
+    /// badges; otherwise (or when you are not in Spelers yet) all badges
+    private func openBadges() {
+        Task {
+            let store = SwiftDataPlayerStore(context: modelContext)
+            guard let player = await AccountSync.ownPlayer(store: store) else {
+                showingBadgeCatalog = true
+                return
+            }
+            ownBadgesPhoto = ((try? await store.photos()) ?? [:])[player.id]
+            ownBadgesPlayer = player
+        }
+    }
 
     private var teamMatchTools: TeamMatchTools {
         let players = SwiftDataPlayerStore(context: modelContext)
@@ -62,7 +80,7 @@ struct HomeView: View {
                         onReferee: onReferee,
                         onHistory: onViewHistory,
                         onPlayers: { showingPlayerManagement = true },
-                        onBadges: { showingBadgeCatalog = true },
+                        onBadges: { openBadges() },
                         onCompetition: { showingCompetition = true },
                         competitionLive: competitionLive,
                         accountProviders: AppleAccountSignIn.providers
@@ -86,6 +104,19 @@ struct HomeView: View {
                 SharedBadgeCatalogView()
                     .toolbar {
                         CloseToolbarItem { showingBadgeCatalog = false }
+                    }
+            }
+        }
+        .sheet(item: $ownBadgesPlayer) { player in
+            NavigationStack {
+                SharedPlayerBadgesView(playerId: player.id, playerName: player.name, photo: ownBadgesPhoto,
+                                       badgeStore: SwiftDataBadgeSummaryStore(context: modelContext),
+                                       shareText: { IOSShare.text($0) },
+                                       shareCard: { snapshot, text in IOSShare.card(snapshot, text: text) },
+                                       cardInbox: ownBadgesInbox,
+                                       historyStore: SwiftDataMatchHistoryStore(context: modelContext))
+                    .toolbar {
+                        CloseToolbarItem { ownBadgesPlayer = nil }
                     }
             }
         }

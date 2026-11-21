@@ -4,6 +4,7 @@ import android.content.Context
 import kotlinx.coroutines.launch
 import squash.analyzer.core.TeamAlertFollow
 import squash.analyzer.core.TeamAlertPlatform
+import squash.analyzer.core.TeamMatchSupport
 
 /**
  * 4.0, T6: Android's half of Core's `TeamAlertFollow`. Whoever takes part in
@@ -30,6 +31,15 @@ class AndroidTeamAlertPlatform(private val context: Context) : TeamAlertPlatform
 
     override suspend fun pushToken(): String? = FirebaseConfig.token()
 
+    /**
+     * "Teamstand vanzelf op je vergrendelscherm": the live server may start
+     * the ongoing team notification with this phone's FCM token when the team
+     * starts (`LiveFollowMessagingService`, event "start"), while the phone
+     * shows notifications of the app.
+     */
+    override suspend fun lockScreenStart(): String? =
+        if (FirebaseConfig.isAvailable && LiveScoreNotifier(context).canNotify()) "fcm" else null
+
     companion object {
         /**
          * The alert of a team match this phone takes part in. Not shown when
@@ -42,6 +52,8 @@ class AndroidTeamAlertPlatform(private val context: Context) : TeamAlertPlatform
             val slot = data["slot"]?.toIntOrNull() ?: 0
             val appContext = context.applicationContext
             FcmLiveFollowPresenter.scope.launch {
+                // "Je team is begonnen" with the app open: the home screen looks for the team match at once
+                if (slot == 0) TeamMatchSupport.noteChange()
                 if (!TeamAlertFollow.shared.shouldShow(teamId = match.id, slot = slot)) return@launch
                 LiveScoreNotifier(appContext).alert(match, alert)
             }

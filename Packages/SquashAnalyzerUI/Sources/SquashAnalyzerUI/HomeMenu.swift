@@ -723,6 +723,9 @@ public struct AndroidHomeView: View {
     @State private var showingCoach = false
     @State private var showingReferee = false
     @State private var showingBadges = false
+    /// Signed in: the Badges tile opens your own badges (you in Spelers)
+    @State private var ownBadgesPlayer: PlayerProfile? = nil
+    @State private var ownBadgesPhoto: Data? = nil
     @State private var showingHistory = false
     /// A coach match opened for its analysis from Afgeronde wedstrijden
     @State private var analysedMatch: Match? = nil
@@ -804,6 +807,19 @@ public struct AndroidHomeView: View {
         self.refereeMatchStore = refereeMatchStore
     }
 
+    /// The Badges tile (Gerd-Jan, 21 November 2026): signed in, your own
+    /// badges; otherwise (or when you are not in Spelers yet) all badges
+    private func openBadges() {
+        Task {
+            guard let player = await AccountSync.ownPlayer(store: playerStore) else {
+                showingBadges = true
+                return
+            }
+            if let photoStore { ownBadgesPhoto = ((try? await photoStore.photos()) ?? [:])[player.id] }
+            ownBadgesPlayer = player
+        }
+    }
+
     public var body: some View {
         NavigationStack {
             homeContent
@@ -836,6 +852,12 @@ public struct AndroidHomeView: View {
                 }
                 .navigationDestination(isPresented: $showingBadges) {
                     SharedBadgeCatalogView()
+                }
+                .navigationDestination(isPresented: Binding(get: { ownBadgesPlayer != nil }, set: { shown in if !shown { ownBadgesPlayer = nil } })) {
+                    if let player = ownBadgesPlayer {
+                        SharedPlayerBadgesView(playerId: player.id, playerName: player.name, photo: ownBadgesPhoto, badgeStore: badgeStore,
+                                               shareText: shareText, shareCard: shareCard, cardInbox: cardInbox, historyStore: historyStore)
+                    }
                 }
                 .navigationDestination(isPresented: $showingHistory) {
                     SharedMatchHistoryView(store: historyStore, aiCoach: aiCoach, shareText: shareText) { match in
@@ -984,7 +1006,7 @@ public struct AndroidHomeView: View {
                             onReferee: { showingReferee = true },
                             onHistory: { showingHistory = true },
                             onPlayers: { showingPlayers = true },
-                            onBadges: { showingBadges = true },
+                            onBadges: { openBadges() },
                             onCompetition: teamMatchStore == nil ? nil : { showingCompetition = true }
                         )
                     }

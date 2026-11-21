@@ -33,6 +33,18 @@ public enum TeamFindingError: Error, Equatable {
     case noKey
 }
 
+/// What `TeamFinding.joinOwn` did: the team matches joined by itself, and the
+/// offers that still need Meedoen
+public struct TeamAutoJoin: Sendable {
+    public let joined: [TeamMatch]
+    public let offers: [TeamLiveListing]
+
+    public init(joined: [TeamMatch], offers: [TeamLiveListing]) {
+        self.joined = joined
+        self.offers = offers
+    }
+}
+
 /// What making a team match visible did
 public enum TeamFindingOutcome: Equatable, Sendable {
     /// Our live team match, registered for the team
@@ -222,6 +234,53 @@ public enum TeamFinding {
         match.refereeSlots = slots
         try await store.save(match)
         return match
+    }
+
+    // MARK: Joining by itself (Gerd-Jan, 21 November 2026)
+
+    /// The live team matches this phone joined by itself before, newest last
+    static let autoJoinedKey = "teamAutoJoined"
+
+    public static func autoJoined(in defaults: UserDefaults = UserDefaults.standard) -> [String] {
+        // One string, ids (letters and digits) with a space between: Skip has no stringArray
+        var ids: [String] = []
+        for id in (defaults.string(forKey: autoJoinedKey) ?? "").components(separatedBy: " ") where !id.isEmpty { ids.append(id) }
+        return ids
+    }
+
+    /// "Iedereen doet vanzelf mee": the own team's live team matches among
+    /// `offers` are joined without asking, once each. One that was joined by
+    /// itself before and is offered again (deleted on this phone since, or it
+    /// could not be joined because the match is live elsewhere here) stays an
+    /// offer with Meedoen, so deleting a team match is not undone a minute
+    /// later; so do the opponent's (the referee key). Without a connection
+    /// nothing is noted and the next round tries again.
+    public static func joinOwn(_ offers: [TeamLiveListing], ownTeamName: String, fixtures: [LeagueFixture],
+                               store: any TeamMatchStore, live: TeamLive? = nil,
+                               defaults: UserDefaults = UserDefaults.standard) async -> TeamAutoJoin {
+        var joined: [TeamMatch] = []
+        var left: [TeamLiveListing] = []
+        for listing in offers {
+            var tried = autoJoined(in: defaults)
+            if !listing.own || tried.contains(listing.liveId) {
+                left.append(listing)
+                continue
+            }
+            do {
+                let match = try await join(listing, ownTeamName: ownTeamName, fixtures: fixtures, store: store, live: live)
+                joined.append(match)
+            } catch TeamFindingError.gone {
+                // Gone, or no connection: not offered, tried again next time
+                continue
+            } catch {
+                left.append(listing)
+            }
+            tried.append(listing.liveId)
+            while tried.count > 40 { tried.remove(at: 0) }
+            defaults.set(tried.joined(separator: " "), forKey: autoJoinedKey)
+        }
+        if !joined.isEmpty { TeamMatchSupport.noteChange() }
+        return TeamAutoJoin(joined: joined, offers: left)
     }
 
     // MARK: At the start of a match (Gerd-Jan, 21 November 2026)

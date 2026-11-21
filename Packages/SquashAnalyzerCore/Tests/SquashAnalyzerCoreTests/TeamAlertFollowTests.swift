@@ -43,6 +43,9 @@ final class FakeAlertPlatform: TeamAlertPlatform {
     }
 
     func pushToken() async -> String? { token }
+
+    var start: String? = nil
+    func lockScreenStart() async -> String? { start }
 }
 
 /// 4.0, T6: following the live team matches on this phone with notifications

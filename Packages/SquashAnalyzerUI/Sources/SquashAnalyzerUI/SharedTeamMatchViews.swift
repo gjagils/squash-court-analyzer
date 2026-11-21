@@ -293,13 +293,19 @@ public struct SharedTeamMatchesView: View {
         isLoading = false
     }
 
-    /// 4.0: what teammates and the opponent made that this phone can join
+    /// 4.0: what teammates and the opponent made that this phone can join.
+    /// A teammate's team match is joined by itself (Gerd-Jan, 21 November
+    /// 2026: "iedereen doet vanzelf mee"); Meedoen is left for the opponent's
+    /// and for one that was deleted here or could not be joined.
     private func loadOffers() async {
         guard let context = await PlayerAccount.shared.teamFindingContext() else {
             offers = []
             return
         }
-        offers = await TeamFinding.offers(context: context, fixtures: team?.fixtures ?? [], matches: matches)
+        let found = await TeamFinding.offers(context: context, fixtures: team?.fixtures ?? [], matches: matches)
+        let result = await TeamFinding.joinOwn(found, ownTeamName: team?.name ?? "", fixtures: team?.fixtures ?? [], store: store)
+        if !result.joined.isEmpty { await load() }
+        offers = result.offers
     }
 
     /// "Kees heeft … aangemaakt" or "Squash City 2 houdt deze wedstrijd bij", with Meedoen

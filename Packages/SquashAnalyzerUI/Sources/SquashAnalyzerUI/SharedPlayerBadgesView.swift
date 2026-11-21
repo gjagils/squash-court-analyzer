@@ -131,13 +131,39 @@ public struct SharedPlayerBadgesView: View {
                             .accessibilityLabel(loc("Bekijk \(playerName) op SquashLevels, opent de browser"))
                         }
                         section(loc("BADGES · \(earnedFamilies) VAN \(BadgeKind.collection.count)")) {
-                            // Rows of three, not a LazyVGrid: on Android that becomes a
-                            // scroll area of its own inside the page
-                            VStack(spacing: 18) {
-                                ForEach(0..<rowCount, id: \.self) { row in
-                                    badgeRow(row)
+                            // Per category, with the headings of Alle badges (Gerd-Jan, 21
+                            // November 2026: as structured as the overview). Rows of three,
+                            // not a LazyVGrid: on Android that becomes a scroll area of its
+                            // own inside the page
+                            VStack(alignment: .leading, spacing: 24) {
+                                ForEach(shownCategories, id: \.self) { category in
+                                    VStack(alignment: .leading, spacing: 14) {
+                                        categoryHeader(category)
+                                        VStack(spacing: 18) {
+                                            ForEach(0..<rowCount(category), id: \.self) { row in
+                                                badgeRow(category, row)
+                                            }
+                                        }
+                                    }
                                 }
                             }
+                            NavigationLink {
+                                SharedBadgeCatalogView()
+                            } label: {
+                                HStack(spacing: 10) {
+                                    AppSymbol("medal", size: 16, color: SharedColors.accent)
+                                    Text("Alle badges", bundle: textBundle)
+                                        .font(ActionButton.font)
+                                        .foregroundColor(SharedColors.accent)
+                                    Spacer(minLength: 0)
+                                    AppSymbol("chevron.right", size: 14, color: SharedColors.textMuted)
+                                }
+                                .padding(14)
+                                .background(SharedColors.cardTint)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.top, 6)
                         }
                         section(loc("DELEN")) {
                             ActionButton(loc("DEEL KAART"), icon: "square.and.arrow.up", style: .filled, color: SharedColors.accent) {
@@ -165,19 +191,49 @@ public struct SharedPlayerBadgesView: View {
         BadgeKind.families.filter { family in !family.isSpecial || familyCount(family) > 0 }
     }
 
-    private var rowCount: Int { (gridFamilies.count + 2) / 3 }
+    /// The badges of one category, in catalogue order
+    private func families(in category: BadgeKind.Category) -> [BadgeKind] {
+        gridFamilies.filter { family in family.category == category }
+    }
 
-    private func badgeRow(_ row: Int) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            gridCell(row * 3)
-            gridCell(row * 3 + 1)
-            gridCell(row * 3 + 2)
+    /// The categories that have a badge to show, in the order of Alle badges
+    private var shownCategories: [BadgeKind.Category] {
+        BadgeKind.Category.allCases.filter { category in !families(in: category).isEmpty }
+    }
+
+    private func rowCount(_ category: BadgeKind.Category) -> Int { (families(in: category).count + 2) / 3 }
+
+    /// "IN ÉÉN GAME" as in Alle badges, with how many of them are earned
+    private func categoryHeader(_ category: BadgeKind.Category) -> some View {
+        let list = families(in: category)
+        var earned = 0
+        for family in list where familyCount(family) > 0 { earned += 1 }
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Text(category.title.uppercased())
+                    .font(SharedFonts.system(11, weight: .semibold))
+                    .tracking(1.5)
+                    .foregroundColor(SharedColors.gold)
+                Spacer(minLength: 0)
+                Text("\(earned)/\(list.count)")
+                    .font(SharedFonts.system(11, weight: .semibold))
+                    .foregroundColor(SharedColors.textMuted)
+            }
+            Rectangle().fill(SharedColors.line(0.15)).frame(height: 1)
+        }
+    }
+
+    private func badgeRow(_ category: BadgeKind.Category, _ row: Int) -> some View {
+        let list = families(in: category)
+        return HStack(alignment: .top, spacing: 8) {
+            gridCell(list, row * 3)
+            gridCell(list, row * 3 + 1)
+            gridCell(list, row * 3 + 2)
         }
     }
 
     @ViewBuilder
-    private func gridCell(_ index: Int) -> some View {
-        let families = gridFamilies
+    private func gridCell(_ families: [BadgeKind], _ index: Int) -> some View {
         if index < families.count {
             let family = families[index]
             NavigationLink {

@@ -180,11 +180,6 @@ public struct RefereeScoringView: View {
             }
             .foregroundColor(SharedColors.textSecondary)
             .fixedSize()
-            if !match.isMatchOver {
-                LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot },
-                                photos: { [photo(Player.player1), photo(Player.player2)] }, share: shareText)
-                    .fixedSize()
-            }
             Spacer(minLength: 4)
             Text("Scheidsrechter", bundle: textBundle)
                 .font(PageTitleStyle.font)
@@ -192,13 +187,13 @@ public struct RefereeScoringView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
             Spacer(minLength: 4)
+            // One share control (21 November 2026): where the score goes now
+            // (TEAM or LIVE) and "Delen" with live for viewers and the score
             if shareText != nil {
-                Button { sharingNow = true } label: {
-                    AppSymbol("square.and.arrow.up", size: 20, color: SharedColors.accent)
-                        .frame(width: 36, height: 32)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(loc("Deel de stand"))
+                LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot },
+                                photos: { [photo(Player.player1), photo(Player.player2)] }, share: shareText,
+                                canGoLive: !match.isMatchOver, onShareScore: { sharingNow = true })
+                    .fixedSize()
             }
             if let onSettings {
                 Button(action: onSettings) {

@@ -453,11 +453,12 @@ public struct CoachScoringView: View {
                     .font(SharedFonts.system(14, weight: .medium, design: .rounded))
                     .foregroundColor(SharedColors.textSecondary)
                 }
+                Spacer()
+                // The share control on the right, as on the referee screen
                 if !match.isMatchOver {
                     LiveShareButton(matchId: match.id, snapshot: { match.liveSnapshot() },
                                     photos: { [photo(Player.player1), photo(Player.player2)] }, share: shareText)
                 }
-                Spacer()
                 // The previous game's analysis while playing, from game 2 on (as on iOS)
                 if match.currentGameIndex > 0 && !game.isGameOver && !match.isMatchOver {
                     Button {

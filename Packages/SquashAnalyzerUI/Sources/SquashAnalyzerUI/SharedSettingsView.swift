@@ -99,11 +99,6 @@ public struct SharedSettingsView: View {
     @AppStorage(LeagueTeamStorage.linkKey) private var teamURL = ""
     @AppStorage(CourtLayout.storageKey) private var courtLayout = CourtLayout.six.rawValue
     @AppStorage(CoachInputMode.storageKey) private var coachInput = CoachInputMode.detailed.rawValue
-    @AppStorage(LiveShare.enabledKey) private var liveSharing = true
-    @AppStorage(AppUsage.enabledKey) private var usageCounting = true
-    @AppStorage(LiveShare.photosKey) private var livePhotos = true
-    @AppStorage(LiveFollow.alertsKey) private var liveAlerts = true
-    @AppStorage(TeamAlertFollow.enabledKey) private var teamAlerts = true
     @State private var draft = ""
     @State private var message: String?
     @State private var messageIsError = false
@@ -134,7 +129,6 @@ public struct SharedSettingsView: View {
 
     /// The part that is open; one at a time (Mijn team when opened from "Zoek je club")
     @State private var openPart: String?
-    @State private var showingLiveFollow = false
 
     private func toggle(_ part: String) {
         withAnimation(.easeInOut(duration: 0.2)) { openPart = openPart == part ? nil : part }
@@ -176,17 +170,10 @@ public struct SharedSettingsView: View {
                     SettingsRow(loc("Baanindeling"), icon: "square.grid.3x3", open: openPart == "court") { toggle("court") }
                     if openPart == "court" { courtSection.padding(.bottom, 16) }
                     SettingsDivider()
-                    SettingsRow(loc("Live meekijken"), icon: "dot.radiowaves.left.and.right", open: openPart == "live") { toggle("live") }
+                    // "Wedstrijd volgen" sits inside it since 21 November 2026 (fewer rows)
+                    SettingsRow(loc("Delen en meldingen"), icon: "dot.radiowaves.left.and.right", open: openPart == "live") { toggle("live") }
                     if openPart == "live" { liveSection.padding(.bottom, 16) }
                     SettingsDivider()
-                    // Moved here from the home screen (Gerd-Jan, 7 November 2026)
-                    if LiveFollow.shared.presenter != nil {
-                        SettingsRow(loc("Wedstrijd volgen"), icon: "lock.iphone") { showingLiveFollow = true }
-                            .sheet(isPresented: $showingLiveFollow) {
-                                SharedLiveFollowView { showingLiveFollow = false }
-                            }
-                        SettingsDivider()
-                    }
                     if backup != nil {
                         SettingsRow(loc("Back-up"), icon: "icloud.and.arrow.up", open: openPart == "backup") { toggle("backup") }
                         if openPart == "backup" { backupSection.padding(.bottom, 16) }
@@ -262,65 +249,9 @@ public struct SharedSettingsView: View {
         }
     }
 
+    /// Delen en meldingen: the shared section (ShareSettingsSection), as on the iPhone
     private var liveSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Toggle(isOn: $liveSharing) {
-                Text("Knop LIVE bij Scheidsrechter en Coach", bundle: textBundle)
-                    .font(SharedFonts.system(14))
-                    .foregroundColor(SharedColors.textPrimary)
-            }
-            .tint(SharedColors.accent)
-            Toggle(isOn: $livePhotos) {
-                Text("Foto's van de spelers meesturen", bundle: textBundle)
-                    .font(SharedFonts.system(14))
-                    .foregroundColor(liveSharing ? SharedColors.textPrimary : SharedColors.textMuted)
-            }
-            .tint(SharedColors.accent)
-            .disabled(!liveSharing)
-            Text("Met LIVE deel je een link, bijvoorbeeld in de WhatsApp-groep; wie erop tikt ziet de stand live in de browser. Alleen voornamen, de stand en (als je dat aan laat) een kleine foto van de spelers; 2 uur na de wedstrijd wordt alles gewist.", bundle: textBundle)
-                .font(SharedFonts.system(12))
-                .foregroundColor(SharedColors.textMuted)
-            Toggle(isOn: Binding(get: { liveAlerts }, set: { on in
-                liveAlerts = on
-                // The server keeps the choice per followed match: tell it for the ones followed now
-                Task { await LiveFollow.shared.setAlerts(on) }
-            })) {
-                Text("Melding bij elke game", bundle: textBundle)
-                    .font(SharedFonts.system(14))
-                    .foregroundColor(SharedColors.textPrimary)
-            }
-            .tint(SharedColors.accent)
-            Text("Bij een gevolgde wedstrijd: een melding met geluid als er een game is uitgespeeld en bij de uitslag. Bij een teamwedstrijd: per partij en bij de einduitslag.", bundle: textBundle)
-                .font(SharedFonts.system(12))
-                .foregroundColor(SharedColors.textMuted)
-            Toggle(isOn: Binding(get: { teamAlerts }, set: { on in
-                teamAlerts = on
-                // 4.0, T6: (un)register the live team matches on this phone at once
-                Task { await TeamAlertFollow.shared.refresh() }
-            })) {
-                Text("Meldingen van je teamwedstrijd", bundle: textBundle)
-                    .font(SharedFonts.system(14))
-                    .foregroundColor(SharedColors.textPrimary)
-            }
-            .tint(SharedColors.accent)
-            Text("Doe je mee aan een live teamwedstrijd (zelf gestart of meegedaan), dan krijg je een melding als een teamgenoot aan een partij begint, als een partij beslist is en bij de einduitslag. Niet over je eigen partij.", bundle: textBundle)
-                .font(SharedFonts.system(12))
-                .foregroundColor(SharedColors.textMuted)
-            if Features.shared.playerAccount {
-                Text("Met een account hoor je het ook als iemand van je team een teamwedstrijd start, ook als je zelf niet speelt. De teamstand komt dan vanzelf op je vergrendelscherm en de teamwedstrijd staat in de app voor je klaar. Daarvoor staat het pushtoken van deze telefoon bij je account.", bundle: textBundle)
-                    .font(SharedFonts.system(12))
-                    .foregroundColor(SharedColors.textMuted)
-            }
-            Toggle(isOn: $usageCounting) {
-                Text("Anoniem gebruik tellen", bundle: textBundle)
-                    .font(SharedFonts.system(14))
-                    .foregroundColor(SharedColors.textPrimary)
-            }
-            .tint(SharedColors.accent)
-            Text("Eén keer per dag meldt de app dat hij gebruikt is: platform, versie, taal en welk deel. Zonder naam of apparaat-ID.", bundle: textBundle)
-                .font(SharedFonts.system(12))
-                .foregroundColor(SharedColors.textMuted)
-        }
+        ShareSettingsSection()
     }
 
     private var courtSection: some View {

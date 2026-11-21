@@ -1,20 +1,30 @@
 import SwiftUI
 import SquashAnalyzerCore
 
-/// "LIVE" in the header of the coach and referee screens (iOS and Android).
-/// Not live: tap to start live sharing and share the link (WhatsApp). Live: a
-/// red ● LIVE; tap to share the link again or stop. The state itself is sent
-/// by `LiveShareSync` after every rally; see docs/archief/plan-live-meekijken.md.
-/// Grey until a link is made, red once the match is live. Only shown when
-/// "Live meekijken" is on in Instellingen (on by default), or
-/// while this match is live so it can always be stopped. Brings its own
-/// leading gap, so a hidden button leaves none.
+/// The share control in the header of the coach and referee screens (iOS and
+/// Android). One button since 21 November 2026 (Gerd-Jan: a grey LIVE next to
+/// a separate share icon was confusing, above all for a partij that already
+/// goes to the team live): a share icon that opens "Delen", with next to it
+/// where the score goes now:
+/// - `TEAM` (sea green outline): the match is a partij of a live team match,
+///   the team sees it in the app;
+/// - `LIVE` (sea green, filled): viewers follow it with the link.
+/// "Delen" offers Live voor kijkers (start and share the link; only with
+/// "Live aanbieden bij het scoren" on in Instellingen), Deel de stand (text
+/// or picture, when the screen has it), and while live the link again or
+/// stop. The state itself is sent by `LiveShareSync` after every rally; see
+/// docs/archief/plan-live-meekijken.md. Brings its own leading gap, so a
+/// hidden control leaves none.
 public struct LiveShareButton: View {
     let matchId: UUID
     let snapshot: () -> LiveSnapshot
     let share: ((String) -> Void)?
     /// Both players' photos (as stored); sent as thumbnails when "Foto's meesturen" is on
     let photos: (() -> [Data?])?
+    /// "Deel de stand": the score as text or picture (the referee screen)
+    let onShareScore: (() -> Void)?
+    /// False once the match is over: live can no longer start
+    let canGoLive: Bool
 
     @State private var busy = false
     @State private var showingMenu = false
@@ -22,18 +32,23 @@ public struct LiveShareButton: View {
     @AppStorage(LiveShare.enabledKey) private var enabled = true
     @AppStorage(LiveShare.photosKey) private var sendPhotos = true
 
-    public init(matchId: UUID, snapshot: @escaping () -> LiveSnapshot, photos: (() -> [Data?])? = nil, share: ((String) -> Void)?) {
+    public init(matchId: UUID, snapshot: @escaping () -> LiveSnapshot, photos: (() -> [Data?])? = nil, share: ((String) -> Void)?,
+                canGoLive: Bool = true, onShareScore: (() -> Void)? = nil) {
         self.matchId = matchId
         self.snapshot = snapshot
         self.photos = photos
         self.share = share
+        self.canGoLive = canGoLive
+        self.onShareScore = onShareScore
     }
 
     private var live: LiveShare { LiveShare.shared }
+    /// Live can be started from here
+    private var offersLive: Bool { enabled && canGoLive && share != nil }
 
     public var body: some View {
         let isLive = live.isLive(matchId)
-        if enabled || isLive {
+        if offersLive || isLive || onShareScore != nil {
             button(isLive: isLive)
                 .padding(.leading, 8.0)
         }
@@ -42,39 +57,41 @@ public struct LiveShareButton: View {
     private func button(isLive: Bool) -> some View {
         let newLink = isLive && live.linkChanged
         // Live is the support colour, sea green (since 1 November 2026; red is
-        // for errors). Not live yet: grey, so green always means viewers can follow along
-        let liveColor = SharedColors.support
-        let onLive = SharedColors.onAccent
-        let grey = SharedColors.textSecondary
+        // for errors): green always means someone can follow along
+        let green = SharedColors.support
+        let inTeam = TeamLive.shared.isBound(matchId)
         return Button(action: tap) {
-            HStack(spacing: 5) {
-                Circle()
-                    .fill(isLive ? onLive : grey)
-                    .frame(width: 7, height: 7)
-                Text(busy ? "…" : (newLink ? loc("NIEUWE LINK") : "LIVE"))
-                    .font(SharedFonts.system(11, weight: .bold, design: .rounded))
-                    .tracking(1)
-                    .foregroundColor(isLive ? onLive : grey)
+            HStack(spacing: 6) {
+                if isLive {
+                    status(busy ? "…" : (newLink ? loc("NIEUWE LINK") : "LIVE"), text: SharedColors.onAccent, fill: green, line: green.opacity(0.6))
+                        .opacity(live.offline ? 0.6 : 1.0)
+                } else if inTeam {
+                    status("TEAM", text: green, fill: green.opacity(0.10), line: green.opacity(0.8))
+                }
+                AppSymbol("square.and.arrow.up", size: 20, color: SharedColors.accent)
+                    .frame(width: 36, height: 32)
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            // .background(colour) + clipShape: filled shapes behind text misbehave on Android
-            .background(isLive ? liveColor : grey.opacity(0.10))
-            .clipShape(Capsule())
-            .overlay(Capsule().stroke(isLive ? liveColor.opacity(0.6) : grey.opacity(0.5), lineWidth: 1))
-            .opacity(live.offline && isLive ? 0.6 : 1.0)
         }
         .buttonStyle(.plain)
         .disabled(busy)
-        .accessibilityLabel(isLive ? loc("Live: link delen of stoppen") : loc("Live delen"))
-        .alert(loc("Live meekijken"), isPresented: $showingMenu) {
-            Button(loc("Link opnieuw delen")) { shareLink() }
-            Button(loc("Live stoppen"), role: .destructive) {
-                Task { await live.stop() }
+        .accessibilityLabel(isLive ? loc("Delen, live voor kijkers") : (inTeam ? loc("Delen, je team ziet deze partij") : loc("Delen")))
+        .alert(loc("Delen"), isPresented: $showingMenu) {
+            if isLive {
+                Button(loc("Link opnieuw delen")) { shareLink() }
+            } else if offersLive {
+                Button(loc("Live voor kijkers")) { startLive() }
+            }
+            if let onShareScore {
+                Button(loc("Deel de stand")) { onShareScore() }
+            }
+            if isLive {
+                Button(loc("Live stoppen"), role: .destructive) {
+                    Task { await live.stop() }
+                }
             }
             Button(loc("Annuleren"), role: .cancel) {}
         } message: {
-            Text(live.offline ? loc("Geen verbinding: de stand gaat weer mee zodra er netwerk is.") : loc("Kijkers volgen de stand via de link. 2 uur na de wedstrijd wordt alles gewist (ook de foto's); Live stoppen wist het meteen."))
+            Text(menuText(isLive: isLive, inTeam: inTeam))
         }
         .alert(loc("Live delen lukte niet"), isPresented: $failed) {
             // No .cancel role: with only a cancel button Skip adds its own "OK" (two OKs on Android)
@@ -84,15 +101,49 @@ public struct LiveShareButton: View {
         }
     }
 
+    /// `● LIVE` or `● TEAM`: where the score goes now
+    private func status(_ title: String, text: Color, fill: Color, line: Color) -> some View {
+        HStack(spacing: 5) {
+            Circle()
+                .fill(text)
+                .frame(width: 7, height: 7)
+            Text(title)
+                .font(SharedFonts.system(11, weight: .bold, design: .rounded))
+                .tracking(1)
+                .foregroundColor(text)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        // .background(colour) + clipShape: filled shapes behind text misbehave on Android
+        .background(fill)
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(line, lineWidth: 1))
+    }
+
+    private func menuText(isLive: Bool, inTeam: Bool) -> String {
+        if isLive {
+            return live.offline ? loc("Geen verbinding: de stand gaat weer mee zodra er netwerk is.")
+                : loc("Kijkers volgen de stand via de link. 2 uur na de wedstrijd wordt alles gewist (ook de foto's); Live stoppen wist het meteen.")
+        }
+        if inTeam { return loc("Je team ziet deze partij al in de app. Live is voor kijkers met de link.") }
+        return loc("Met Live deel je een link; wie erop tikt ziet de stand in de browser.")
+    }
+
     private func tap() {
-        if live.isLive(matchId) {
-            if live.linkChanged {
-                shareLink()
-            } else {
-                showingMenu = true
-            }
+        // A new link (the old one expired) is shared at once
+        if live.isLive(matchId) && live.linkChanged {
+            shareLink()
             return
         }
+        // Nothing to choose: only the score can be shared
+        if !live.isLive(matchId) && !offersLive, let onShareScore {
+            onShareScore()
+            return
+        }
+        showingMenu = true
+    }
+
+    private func startLive() {
         busy = true
         let state = snapshot()
         let stored = sendPhotos ? photos?() : nil

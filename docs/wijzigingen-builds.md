@@ -42,6 +42,22 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
     voor de tegenstander; meldingen), testen.html, releasenotes. De privacytekst (nl/en) noemt het starttoken al.
   *Releasenote:* Start een teamgenoot een teamwedstrijd, dan staat de teamstand vanzelf op je vergrendelscherm
   en doe je in de app vanzelf mee.
+- **Delen en live opgeruimd (Gerd-Jan, 21 november 2026; schetsen voor en na op het ontwerpcanvas
+  "Opruimen delen en live").** Drie schermen:
+  - **Scorekop bij Scheidsrechter en Coach:** de grijze LIVE-pil en het losse deelicoon zijn één deelknop
+    (`LiveShareButton`). Ernaast staat waar de stand nu heen gaat: `TEAM` (de partij hoort bij een live
+    teamwedstrijd) of `LIVE` (kijkers met de link). De knop opent *Delen* met *Live voor kijkers*, *Deel de stand*
+    en, terwijl live, de link opnieuw of stoppen.
+  - **Teamwedstrijd:** de banner en het blok DELEN (tot veertien onderdelen tegelijk) zijn één statusregel met
+    *Delen* (`TeamShareStatusRow`). Het blad (`TeamShareOptionsSheet`) heeft drie rijen, Team, Live en Volgen, en
+    onder *Meer* de uitnodiging zonder account met de code, *Tegenstander fluit*, *Vernieuwen* en *Stoppen met
+    delen*. Het oude blad *Deel met team* is weg.
+  - **Instellingen:** *Live meekijken* heet *Delen en meldingen* (`ShareSettingsSection`, gedeeld door iPhone en
+    Android): schakelaars in groepjes met één regel uitleg, *Volg een andere wedstrijd* erin (de losse rij
+    *Wedstrijd volgen* is weg) en de lange teksten achter *Uitleg*. De schakelaars blijven oranje.
+  Niet op een telefoon bekeken; iOS-tests, Android-build en lint groen. **Bij de oplevering bijwerken:**
+  handleiding nl/en (deze drie schermen), testen.html en de schermafbeeldingen.
+  *Releasenote:* Delen is overzichtelijker: één deelknop bij het scoren, één blad Delen bij de teamwedstrijd.
 - **Badges-tegel opent je eigen badges, en de badgepagina is per categorie ingedeeld (Gerd-Jan, 21 november 2026).**
   Ben je ingelogd en sta je in Spelers (op je accountnaam, anders via je SBN-koppeling), dan opent de tegel
   *Badges* op het beginscherm je eigen badgepagina (`AccountSync.ownPlayer`, zoekt alleen en maakt niets aan);

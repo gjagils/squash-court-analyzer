@@ -3,157 +3,210 @@ import SquashAnalyzerCore
 
 // MARK: - Live teamwedstrijd (docs/plan-live-teamwedstrijd.md)
 //
-// The live card on the team match screen, and the screen to join a live team
-// match with a link or code. The logic (create, push, stop, read the page)
+// The "Delen" sheet of the team match screen, and the screen to join a live
+// team match with a link or code. The logic (create, push, stop, read the page)
 // is in Core's `TeamLive`; the screens only call it.
 
-/// "LIVE" on a team match: start it, share the viewers' link, invite fellow
-/// coaches, refresh from the page, stop. Only presentation; the team match
-/// screen does the work.
-struct TeamLiveCard: View {
+/// E1–E4 as items and as text, for the team match screens
+enum TeamLiveCard {
+    static let slotItems: [TeamSlotItem] = [TeamSlotItem(slot: 1), TeamSlotItem(slot: 2), TeamSlotItem(slot: 3), TeamSlotItem(slot: 4)]
+
+    /// "E2, E3"
+    static func labels(_ slots: [Int]) -> String {
+        var parts: [String] = []
+        for slot in slots.sorted() { parts.append("E\(slot)") }
+        return parts.joined(separator: ", ")
+    }
+}
+
+/// "Delen" of a team match (Gerd-Jan, 21 November 2026: the banner and the
+/// DELEN block showed up to fourteen controls at once). Three rows say who
+/// sees the team match, each with its one action:
+/// - **Team**: the team (and the opponent) in the app;
+/// - **Live**: viewers with the link, and the club screen;
+/// - **Volgen**: the team stand on this phone's lock screen.
+/// Under "Meer": the invitation for a teammate without an account, which
+/// partijen the opponent referees, refresh, and stop. Only presentation; the
+/// team match screen does the work.
+struct TeamShareOptionsSheet: View {
     let match: TeamMatch
     let busy: Bool
     let canShare: Bool
     /// What is wrong with sending (a refused key, no connection), or nil
     var problem: String? = nil
-    /// 4.0, owner of a team-only live team match: the partijen the opponent referees now (nil: unknown)
+    /// Owner of a team-only live team match: the partijen the opponent referees now (nil: unknown)
     var refereeSlots: [Int]? = nil
-    /// 4.0: Live delen on a team-only live team match (club screen and viewers' link)
-    var onGoPublic: () -> Void = {}
-    /// 4.0: the invitation of a team-only live team match, for teammates without an account or on an older app
-    var onInvite: () -> Void = {}
-    /// 4.0, owner: a partij moves between "wij fluiten" and "tegenstander fluit"
-    var onToggleReferee: (Int) -> Void = { _ in }
     /// "Deel met mijn team" on a team match that is not shared yet
     let onGoLive: () -> Void
-    /// Opens the share screen (viewers' link and invitation)
-    let onShare: () -> Void
+    /// Live on a team-only live team match (club screen and viewers' link)
+    let onGoPublic: () -> Void
+    /// Shares the viewers' link of a public live team match
+    let onShareViewers: () -> Void
+    /// The invitation, for teammates without an account or on an older app
+    let onInvite: () -> Void
+    /// Owner: a partij moves between "wij fluiten" and "tegenstander fluit"
+    let onToggleReferee: (Int) -> Void
     let onRefresh: () -> Void
     let onStop: () -> Void
+    let onClose: () -> Void
+
+    private var isPublic: Bool { match.isLive && !match.isTeamOnly && !match.isOpponentCopy }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                SectionHeader(loc("DELEN"))
-                if match.isTeamOnly {
-                    Text(loc("TEAM"))
-                        .font(SharedFonts.system(10, weight: .bold, design: .rounded))
-                        .tracking(1)
-                        .foregroundColor(SharedColors.background)
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 4)
-                        .background(SharedColors.support)
-                        .clipShape(Capsule())
-                } else if match.isLive {
-                    HStack(spacing: 5) {
-                        Circle().fill(Color.white).frame(width: 7, height: 7)
-                        Text("LIVE")
-                            .font(SharedFonts.system(10, weight: .bold, design: .rounded))
-                            .tracking(1)
-                            .foregroundColor(Color.white)
+        NavigationStack {
+            ZStack {
+                SharedColors.background.ignoresSafeArea()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        VStack(spacing: 0) {
+                            teamRow
+                            if !match.isOpponentCopy {
+                                divider
+                                liveRow
+                            }
+                            if let liveId = match.liveId, match.isLive, !match.isComplete, LiveFollow.shared.presenter != nil {
+                                divider
+                                TeamLockScreenRow(target: LiveFollowTarget(id: liveId, server: TeamLive.shared.baseURL, kind: "team"))
+                                    .padding(14)
+                            }
+                        }
+                        .background(SharedColors.tint(0.04))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        if let problem {
+                            Text(problem)
+                                .font(SharedFonts.system(12))
+                                .foregroundColor(SharedColors.error)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        if match.isLive { more }
+                        Text(isPublic ? loc("2 uur na de laatste update wordt alles van de livepagina gewist. Alleen teamnamen, voornamen en de stand gaan mee.")
+                             : loc("Alleen teamnamen, voornamen en de stand gaan mee."))
+                            .font(SharedFonts.system(11))
+                            .foregroundColor(SharedColors.textMuted)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 4)
-                    .background(SharedColors.warmRed)
-                    .clipShape(Capsule())
+                    .padding(24)
                 }
-                Spacer()
             }
-            if match.isOpponentCopy {
-                Text("Je ziet alle partijen van deze teamwedstrijd. De partijen die jullie fluiten zet je erop door ze bij te houden of in te vullen.", bundle: textBundle)
-                    .font(SharedFonts.system(12))
-                    .foregroundColor(SharedColors.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                if let problem {
-                    Text(problem)
-                        .font(SharedFonts.system(12))
-                        .foregroundColor(SharedColors.error)
-                        .fixedSize(horizontal: false, vertical: true)
+            .pageTitle(loc("Delen"))
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    CloseButton(title: loc("Sluiten"), action: onClose)
                 }
-                HStack(spacing: 10) {
-                    ActionButton(loc("Vernieuwen"), icon: "arrow.counterclockwise", disabled: busy, action: onRefresh)
-                    ActionButton(loc("Live verlaten"), color: SharedColors.textSecondary, disabled: busy, action: onStop)
+            }
+        }
+        .preferredColorScheme(SharedColors.preferredScheme)
+    }
+
+    private var divider: some View {
+        Rectangle().fill(SharedColors.line(0.12)).frame(height: 1).padding(.leading, 14)
+    }
+
+    private func labels(_ title: String, _ detail: String) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(title)
+                .font(SharedFonts.system(16, weight: .semibold))
+                .foregroundColor(SharedColors.textPrimary)
+            Text(detail)
+                .font(SharedFonts.system(13))
+                .foregroundColor(SharedColors.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// "● Aan" in the live colour
+    private var onMark: some View {
+        HStack(spacing: 6) {
+            Circle().fill(SharedColors.support).frame(width: 8, height: 8)
+            Text("Aan", bundle: textBundle)
+                .font(SharedFonts.system(13, weight: .semibold))
+                .foregroundColor(SharedColors.support)
+        }
+    }
+
+    private var teamRow: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                labels(loc("Team"), match.isOpponentCopy
+                       ? loc("Je kijkt mee en vult in wat jullie fluiten")
+                       : loc("Je team en de tegenstander zien dit in de app"))
+                if match.isLive { onMark }
+            }
+            if !match.isLive {
+                ActionButton(busy ? loc("Even geduld…") : loc("Deel met mijn team"), style: .filled, disabled: busy, action: onGoLive)
+            }
+        }
+        .padding(14)
+    }
+
+    private var liveRow: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                labels(loc("Live"), loc("Kijklink voor supporters en het clubscherm"))
+                if isPublic { onMark }
+            }
+            if isPublic {
+                if canShare {
+                    ActionButton(loc("Deel kijkerslink"), icon: "square.and.arrow.up", style: .filled, disabled: busy, action: onShareViewers)
                 }
             } else if match.isTeamOnly {
-                Text("Je team en de tegenstander zien deze teamwedstrijd in de app. Niet op het clubscherm en zonder kijkerslink, tot je Live delen aanzet.", bundle: textBundle)
-                    .font(SharedFonts.system(12))
-                    .foregroundColor(SharedColors.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                // Found only with 4.0 and an account: everyone else needs the invitation
-                Text("Teamgenoten zonder account of met een oudere app doen mee met de uitnodiging.", bundle: textBundle)
-                    .font(SharedFonts.system(12))
-                    .foregroundColor(SharedColors.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                if canShare {
-                    ActionButton(loc("Nodig teamleden uit"), icon: "square.and.arrow.up", disabled: busy, action: onInvite)
-                }
-                if let id = match.liveId, let key = match.liveKey {
-                    Text("Code om mee te doen: \(TeamInvite(id: id, key: key).code)", bundle: textBundle)
-                        .font(SharedFonts.system(12))
-                        .foregroundColor(SharedColors.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
                 if match.isLiveOwner {
-                    ActionButton(busy ? loc("Even geduld…") : loc("Live delen"), style: .filled, disabled: busy, action: onGoPublic)
-                    if let refereeSlots {
-                        refereeRow(refereeSlots)
+                    ActionButton(busy ? loc("Even geduld…") : loc("Zet Live aan"), disabled: busy, action: onGoPublic)
+                } else {
+                    Text("Wie de teamwedstrijd startte, zet dit aan.", bundle: textBundle)
+                        .font(SharedFonts.system(12))
+                        .foregroundColor(SharedColors.textMuted)
+                }
+            } else {
+                Text("Deel eerst met je team.", bundle: textBundle)
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textMuted)
+            }
+        }
+        .padding(14)
+    }
+
+    private var more: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader(loc("MEER"))
+            VStack(alignment: .leading, spacing: 14) {
+                if !match.isOpponentCopy {
+                    VStack(alignment: .leading, spacing: 8) {
+                        labels(loc("Uitnodigen zonder account"), loc("Een link of code voor een teamgenoot zonder account of met een oudere app"))
+                        if canShare {
+                            ActionButton(loc("Nodig teamleden uit"), icon: "square.and.arrow.up", disabled: busy, action: onInvite)
+                        }
+                        if let id = match.liveId, let key = match.liveKey {
+                            // Also readable when nothing can be shared: the code teammates paste at Deelnemen
+                            Text("Code om mee te doen: \(TeamInvite(id: id, key: key).code)", bundle: textBundle)
+                                .font(SharedFonts.system(12))
+                                .foregroundColor(SharedColors.textMuted)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
                 }
-                if let problem {
-                    Text(problem)
-                        .font(SharedFonts.system(12))
-                        .foregroundColor(SharedColors.error)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                HStack(spacing: 10) {
-                    ActionButton(loc("Vernieuwen"), icon: "arrow.counterclockwise", disabled: busy, action: onRefresh)
-                    ActionButton(match.isLiveOwner ? loc("Live stoppen") : loc("Live verlaten"), color: SharedColors.textSecondary,
-                                 disabled: busy, action: onStop)
-                }
-            } else if match.isLive {
-                Text("Kijkers volgen de hele teamavond op één pagina. Teamgenoten die de uitnodiging openen, zetten hun eigen partij erop. 2 uur na de laatste update wordt alles gewist.", bundle: textBundle)
-                    .font(SharedFonts.system(12))
-                    .foregroundColor(SharedColors.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                // The share screen also shows the code (readable when nothing can be shared)
-                ActionButton(loc("Deel met team en supporters"), icon: canShare ? "square.and.arrow.up" : nil, style: .filled, disabled: busy, action: onShare)
-                if let problem {
-                    Text(problem)
-                        .font(SharedFonts.system(12))
-                        .foregroundColor(SharedColors.error)
-                        .fixedSize(horizontal: false, vertical: true)
+                if match.isLiveOwner, match.isTeamOnly, let refereeSlots {
+                    refereeRow(refereeSlots)
                 }
                 HStack(spacing: 10) {
                     ActionButton(loc("Vernieuwen"), icon: "arrow.counterclockwise", disabled: busy, action: onRefresh)
                     // Only the phone that started the live page can end it for everyone
-                    ActionButton(match.isLiveOwner ? loc("Live stoppen") : loc("Live verlaten"), color: SharedColors.textSecondary,
+                    ActionButton(match.isLiveOwner ? loc("Stoppen met delen") : loc("Niet meer meedoen"), color: SharedColors.textSecondary,
                                  disabled: busy, action: onStop)
                 }
-            } else {
-                Text("Deel deze teamwedstrijd met je team: teamgenoten zetten hun eigen partij erop en supporters volgen de stand van de hele avond, per partij ook punt voor punt. Alleen teamnamen, voornamen en de stand gaan mee.", bundle: textBundle)
-                    .font(SharedFonts.system(12))
-                    .foregroundColor(SharedColors.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                ActionButton(busy ? loc("Even geduld…") : loc("Deel met mijn team"), style: .filled, disabled: busy, action: onGoLive)
             }
-            // Whoever takes part gets plain notifications by itself; the card
-            // on the lock screen is a choice, here (a team-only match has no viewers' link to follow)
-            if let liveId = match.liveId, match.isLive, !match.isComplete, LiveFollow.shared.presenter != nil {
-                TeamLockScreenRow(target: LiveFollowTarget(id: liveId, server: TeamLive.shared.baseURL, kind: "team"))
-            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(SharedColors.tint(0.04))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(SharedColors.tint(0.04))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     /// "Tegenstander fluit": E1–E4, a tap moves a partij between us and them
     private func refereeRow(_ slots: [Int]) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Tegenstander fluit en vult in:", bundle: textBundle)
-                .font(SharedFonts.system(12, weight: .semibold))
-                .foregroundColor(SharedColors.textPrimary)
+        VStack(alignment: .leading, spacing: 8) {
+            labels(loc("Tegenstander fluit"), loc("Tik op de partijen die de tegenstander fluit en invult"))
             HStack(spacing: 8) {
                 ForEach(TeamLiveCard.slotItems) { item in
                     refereeChip(item.slot, selected: slots.contains(item.slot))
@@ -168,26 +221,18 @@ struct TeamLiveCard: View {
                 .font(SharedFonts.system(13, weight: .semibold, design: .rounded))
                 .foregroundColor(selected ? SharedColors.background : SharedColors.accent)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
+                .padding(.vertical, 10)
                 .background(selected ? SharedColors.accent : SharedColors.accent.opacity(0.12))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
         .disabled(busy)
     }
-
-    static let slotItems: [TeamSlotItem] = [TeamSlotItem(slot: 1), TeamSlotItem(slot: 2), TeamSlotItem(slot: 3), TeamSlotItem(slot: 4)]
-
-    /// "E2, E3"
-    static func labels(_ slots: [Int]) -> String {
-        var parts: [String] = []
-        for slot in slots.sorted() { parts.append("E\(slot)") }
-        return parts.joined(separator: ", ")
-    }
 }
 
-/// "Volg op vergrendelscherm" for a live team match on this phone: the same
-/// follower as the button on the team page (`LiveFollow`), without the link
+/// "Volgen" for a live team match on this phone: the team stand on the lock
+/// screen, a switch (the same follower as the button on the team page,
+/// `LiveFollow`, without the link)
 struct TeamLockScreenRow: View {
     let target: LiveFollowTarget
 
@@ -198,19 +243,22 @@ struct TeamLockScreenRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if following {
-                Text("Deze teamwedstrijd staat op je vergrendelscherm en gaat na elke rally mee.", bundle: textBundle)
-                    .font(SharedFonts.system(12))
-                    .foregroundColor(SharedColors.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                ActionButton(loc("Stoppen met volgen"), color: SharedColors.textSecondary, disabled: busy) {
-                    Task { await stop() }
+            Toggle(isOn: Binding(get: { following }, set: { on in
+                Task {
+                    if on { await start() } else { await stop() }
                 }
-            } else {
-                ActionButton(busy ? loc("Even geduld…") : loc("Volg op vergrendelscherm"), disabled: busy) {
-                    Task { await start() }
+            })) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Volgen", bundle: textBundle)
+                        .font(SharedFonts.system(16, weight: .semibold))
+                        .foregroundColor(SharedColors.textPrimary)
+                    Text("De teamstand op je vergrendelscherm", bundle: textBundle)
+                        .font(SharedFonts.system(13))
+                        .foregroundColor(SharedColors.textSecondary)
                 }
             }
+            .tint(SharedColors.accent)
+            .disabled(busy)
             if let problem {
                 Text(problem)
                     .font(SharedFonts.system(12))

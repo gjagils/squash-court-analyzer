@@ -626,7 +626,8 @@ public struct SharedTeamMatchView: View {
     @State private var message: String? = nil
     @State private var sharing = false
     /// The share screen ("Deel met team en supporters")
-    @State private var sharingTeam = false
+    /// "Delen": the sheet with Team, Live and Volgen (TeamShareOptionsSheet)
+    @State private var sharingOptions = false
     /// Open the share screen once this screen is up (right after "Deel met mijn team" at creating)
     private let openShare: Bool
     @State private var liveBusy = false
@@ -664,7 +665,7 @@ public struct SharedTeamMatchView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     header
-                    TeamShareBanner(match: match)
+                    TeamShareStatusRow(match: match, problem: liveProblem) { sharingOptions = true }
                     partijenList
                     opponentScouting
                     if sbnFixture != nil && (!match.isComplete || match.hasUnknownPoints) {
@@ -678,16 +679,6 @@ public struct SharedTeamMatchView: View {
                         Text(sbnMessage).font(SharedFonts.system(12)).foregroundColor(SharedColors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    TeamLiveCard(match: match, busy: liveBusy, canShare: tools.shareText != nil,
-                                 problem: liveProblem,
-                                 refereeSlots: refereeSlotsNow,
-                                 onGoPublic: { Task { await goPublic() } },
-                                 onInvite: { if let shareText = tools.shareText { shareText(TeamLiveTexts.invite(match)) } },
-                                 onToggleReferee: { slot in Task { await toggleReferee(slot) } },
-                                 onGoLive: { Task { await goLive() } },
-                                 onShare: { sharingTeam = true },
-                                 onRefresh: { Task { await refreshLive() } },
-                                 onStop: { confirmStopLive = true })
                     if let message {
                         Text(message).font(SharedFonts.system(12)).foregroundColor(SharedColors.error)
                     }
@@ -716,7 +707,7 @@ public struct SharedTeamMatchView: View {
             }
             if openShare {
                 if match.isLive {
-                    sharingTeam = true
+                    sharingOptions = true
                 } else {
                     message = loc("Delen lukte niet. Controleer de internetverbinding en tik op Deel met mijn team om het opnieuw te proberen.")
                 }
@@ -749,8 +740,28 @@ public struct SharedTeamMatchView: View {
                 } onCancel: { self.editing = nil }
             }
         }
-        .sheet(isPresented: $sharingTeam) {
-            TeamShareSheet(match: match, baseURL: TeamLive.shared.baseURL, shareText: tools.shareText) { sharingTeam = false }
+        // "Delen": who sees this team match (team, viewers, the lock screen), and the rest under Meer
+        .sheet(isPresented: $sharingOptions) {
+            TeamShareOptionsSheet(match: match, busy: liveBusy, canShare: tools.shareText != nil,
+                                  problem: liveProblem ?? message,
+                                  refereeSlots: refereeSlotsNow,
+                                  onGoLive: { Task { await goLive() } },
+                                  onGoPublic: { Task { await goPublic() } },
+                                  onShareViewers: {
+                                      if let shareText = tools.shareText { shareText(TeamLiveTexts.viewers(match, baseURL: TeamLive.shared.baseURL)) }
+                                  },
+                                  onInvite: { if let shareText = tools.shareText { shareText(TeamLiveTexts.invite(match)) } },
+                                  onToggleReferee: { slot in Task { await toggleReferee(slot) } },
+                                  onRefresh: { Task { await refreshLive() } },
+                                  onStop: {
+                                      // The question shows on the screen underneath: close the sheet first
+                                      sharingOptions = false
+                                      Task {
+                                          try? await Task.sleep(nanoseconds: 500_000_000)
+                                          confirmStopLive = true
+                                      }
+                                  },
+                                  onClose: { sharingOptions = false })
         }
         .sheet(isPresented: $sharing) {
             if let shareText = tools.shareText {
@@ -1140,7 +1151,7 @@ public struct SharedTeamMatchView: View {
             match = changed
             onChange(changed)
             message = nil
-            sharingTeam = true
+            sharingOptions = true
         } catch {
             message = loc("Delen lukte niet. Controleer de internetverbinding en probeer het opnieuw.")
         }
@@ -1174,7 +1185,7 @@ public struct SharedTeamMatchView: View {
         match = changed
         onChange(changed)
         message = nil
-        sharingTeam = true
+        sharingOptions = true
     }
 
     /// 4.0, owner: a partij moves between "wij fluiten" and "tegenstander fluit"

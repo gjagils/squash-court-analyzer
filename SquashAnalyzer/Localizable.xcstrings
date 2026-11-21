@@ -2535,6 +2535,23 @@
           }
         }
       }
+    },
+    "Delen en meldingen": {
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sharing and notifications"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delen en meldingen"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

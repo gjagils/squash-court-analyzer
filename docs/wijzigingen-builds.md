@@ -34,9 +34,10 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
     account-Worker en een build met deze code), en of de account-Worker de live-Worker bereikt (een Worker bereikt
     een andere Worker in dezelfde zone alleen via een eigen domein, niet via een route; na de uitrol te zien in
     het log `team start {"201": n}`).
-  - **Nog te doen:** account-Worker uitrollen (`npx wrangler d1 migrations apply squash-account --remote`, dan
-    `npx wrangler deploy`, in `server/account-worker`); `LIVE_SERVER` voor de testomgeving kiezen (nu alleen
-    productie); website publiceren voor de privacyverklaring; de teksten bij het account en *Account verwijderen*
+  - **Uitgerold op 21 november 2026:** de account-Worker op productie (migratie 0007 toegepast, `wrangler deploy`
+    vanaf de Mac; `/health` 200, `PUT /api/v1/me/push` zonder login 401) en de live-Worker via CI. Interne build
+    4.0 (5.1) met deze code staat op de iPhone 16 Pro van Gerd-Jan (Debug, productieservers, APNs-sandbox).
+  - **Nog te doen:** `LIVE_SERVER` voor de testomgeving kiezen (nu alleen productie); website publiceren voor de privacyverklaring; de teksten bij het account en *Account verwijderen*
     nalopen op "wat we bewaren".
   *Releasenote:* Met een account krijg je een melding als iemand van je team een teamwedstrijd start, ook als je
   zelf niet speelt.

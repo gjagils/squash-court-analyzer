@@ -441,6 +441,27 @@ public final class LiveFollow {
         if !following.contains(target) { following.append(target) }
     }
 
+    /// Taking part in a live team match puts its stand on the lock screen by
+    /// itself, whichever way this phone joined (Gerd-Jan, 21 November 2026:
+    /// through the invitation it stayed off, through the push it was on).
+    /// Only while "Je teamwedstrijd" is on in Instellingen, the phone can show
+    /// it and the match is still going; silent, because the phone gets its
+    /// plain notifications as a player. Best effort: a refusal (Live
+    /// Activities or notifications off) just leaves it off.
+    public func followJoined(_ match: TeamMatch, alerts: TeamAlertFollow? = nil, server: String? = nil) async {
+        guard let id = match.liveId, match.isLive, !match.isComplete, presenter != nil, transport != nil,
+              (alerts ?? teamAlerts ?? TeamAlertFollow.shared).isEnabled else { return }
+        let target = LiveFollowTarget(id: id, server: server ?? TeamLive.shared.baseURL, kind: "team")
+        if isFollowing(target) { return }
+        let wasQuiet = quiet.contains(id)
+        if !wasQuiet { quiet.append(id) }
+        do {
+            try await follow(target)
+        } catch {
+            if !wasQuiet { quiet.removeAll { other in other == id } }
+        }
+    }
+
     /// The platform has a (new) push token for this match: tell the server.
     /// A refused registration takes the match off the lock screen again.
     public func tokenChanged(_ token: String, for target: LiveFollowTarget) async {

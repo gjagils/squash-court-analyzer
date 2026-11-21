@@ -42,6 +42,14 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
     voor de tegenstander; meldingen), testen.html, releasenotes. De privacytekst (nl/en) noemt het starttoken al.
   *Releasenote:* Start een teamgenoot een teamwedstrijd, dan staat de teamstand vanzelf op je vergrendelscherm
   en doe je in de app vanzelf mee.
+- **Hervatten houdt de koppeling met de teamwedstrijd, en meedoen zet Volgen vanzelf aan (Gerd-Jan, 21 november
+  2026).** (1) Een partij die deze telefoon aan het tellen is, werd bij het samenvoegen met de livepagina
+  vervangen door de kopie van de pagina (`mergeLive`: de partij had nog geen games), waardoor `trackingMatchId`
+  verdween; na het sluiten van de app vond *Hervatten* de partij niet meer en ging de stand niet meer naar de
+  teampagina. Zo'n partij wordt nu overgeslagen. (2) Wie meedoet aan een lopende teamwedstrijd, langs welke weg
+  ook (vanzelf, de uitnodiging, *Meedoen* als tegenstander), krijgt de teamstand op het vergrendelscherm zolang
+  *Je teamwedstrijd* aan staat (`LiveFollow.followJoined`), stil, net als na de push. Getest in `TeamLiveTests`
+  en `LiveFollowTests`; Core met Skip 523.
 - **Android: crash bij een timeroproep van de scheidsrechter opgelost (21 november 2026).** De trilling bij
   *Half-time*, *15 seconden* en *Time* (`.sensoryFeedback` in `RefereeScoring`, sinds 3 november) gooide op
   Android een `SecurityException` omdat `android.permission.VIBRATE` niet in het manifest stond; de app sloot

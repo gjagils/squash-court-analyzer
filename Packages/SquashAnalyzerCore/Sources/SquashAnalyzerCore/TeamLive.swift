@@ -376,6 +376,11 @@ public extension TeamMatch {
         for index in 0..<partijen.count {
             let current = partijen[index]
             guard !current.hasEntry || current.fromLive == true else { continue }
+            // A partij this phone is scoring right now is ours: taking the
+            // page's copy would drop the coupling, and resuming the match
+            // after the app was closed would no longer reach the live page
+            // (Gerd-Jan, 21 November 2026: "de link lijkt verloren")
+            if current.trackingMatchId != nil { continue }
             guard let live = state.partijen[String(current.slot)],
                   var incoming = TeamPartij.fromLive(live, slot: current.slot, ownIsHome: ownSide == TeamSide.home) else { continue }
             incoming.playOrder = current.playOrder

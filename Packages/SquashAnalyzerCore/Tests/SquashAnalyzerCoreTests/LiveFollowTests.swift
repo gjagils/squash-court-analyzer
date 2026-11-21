@@ -197,6 +197,42 @@ final class LiveFollowTests: XCTestCase {
         XCTAssertTrue(transport.requests.last?.body.contains("\"alerts\":true") == true)
     }
 
+    /// Taking part in a live team match follows it on the lock screen, silently, while the setting is on
+    @MainActor
+    func testJoiningALiveTeamMatchFollowsItSilentlyUnlessTheSettingIsOff() async throws {
+        let defaults = UserDefaults(suiteName: "live-follow-\(UUID().uuidString)")!
+        let transport = FakeFollowTransport()
+        let presenter = FakeFollowPresenter()
+        let follow = LiveFollow(transport: transport)
+        follow.presenter = presenter
+        let alerts = TeamAlertFollow(defaults: defaults)
+        var match = TeamMatch(date: Date(), home: "All Inn 8", away: "Delft 8", ownSide: TeamSide.home)
+        match.liveId = "abcdefgh2345"
+        match.liveKey = "K33sK33sK33sK33sK33sK33s"
+        let target = LiveFollowTarget(id: "abcdefgh2345", server: LiveFollowLink.defaultServer, kind: "team")
+
+        // Not live: nothing
+        let own = TeamMatch(date: Date(), home: "All Inn 8", away: "Delft 8", ownSide: TeamSide.home)
+        await follow.followJoined(own, alerts: alerts, server: LiveFollowLink.defaultServer)
+        XCTAssertTrue(transport.requests.isEmpty)
+
+        // The setting off: nothing
+        defaults.set(false, forKey: TeamAlertFollow.enabledKey)
+        await follow.followJoined(match, alerts: alerts, server: LiveFollowLink.defaultServer)
+        XCTAssertFalse(follow.isFollowing(target))
+
+        defaults.set(true, forKey: TeamAlertFollow.enabledKey)
+        await follow.followJoined(match, alerts: alerts, server: LiveFollowLink.defaultServer)
+        XCTAssertTrue(follow.isFollowing(target))
+        XCTAssertEqual(presenter.teams.count, 1)
+        await follow.tokenChanged("tok1", for: target)
+        XCTAssertTrue(transport.requests.last?.body.contains("\"alerts\":false") == true, "the phone has its notifications as a player")
+
+        // Already followed: not started a second time
+        await follow.followJoined(match, alerts: alerts, server: LiveFollowLink.defaultServer)
+        XCTAssertEqual(presenter.teams.count, 1)
+    }
+
     @MainActor
     func testFollowsATeamMatchAndSendsTheAlertsSetting() async throws {
         let transport = FakeFollowTransport()

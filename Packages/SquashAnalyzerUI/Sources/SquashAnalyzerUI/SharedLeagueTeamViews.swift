@@ -251,6 +251,8 @@ public struct SharedLeagueTeamCard: View {
                 let found = await TeamFinding.offers(context: context, fixtures: team.fixtures, matches: matches)
                 // Joining notes the change, which starts this task and the running match bar anew
                 let result = await TeamFinding.joinOwn(found, ownTeamName: team.name, fixtures: team.fixtures, store: store)
+                // Taking part puts the team stand on the lock screen (while "Je teamwedstrijd" is on)
+                for joined in result.joined { await LiveFollow.shared.followJoined(joined) }
                 if offer != result.offers.first { offer = result.offers.first }
             } else if offer != nil {
                 offer = nil
@@ -281,6 +283,7 @@ public struct SharedLeagueTeamCard: View {
             offer = nil
             joiningOffer = false
             TeamMatchSupport.noteChange()
+            await LiveFollow.shared.followJoined(joined)
             onTeamMatch(joined)
         } catch {
             // Gone or not possible: Competitie explains it; the card just drops the offer

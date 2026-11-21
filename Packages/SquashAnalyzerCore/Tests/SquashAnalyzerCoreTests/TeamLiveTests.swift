@@ -271,6 +271,15 @@ final class TeamLiveTests: XCTestCase {
                                              server: 1, side: "R", status: LiveStatus.between)
         XCTAssertFalse(match.mergeLive(moved))
         XCTAssertEqual(match.partij(2).ownPlayer, "Eigen")
+        // A partij this phone is scoring (no games in it yet) keeps its coupling:
+        // the page's copy of our own points must not replace it, or resuming
+        // the match after the app was closed loses the live page
+        match.startTracking(slot: 4, matchId: "tracked-on-this-phone", ownIsPlayer1: true, ownPlayer: "Mo", opponentPlayer: "Piet")
+        moved.partijen["4"] = TeamLivePartij(p1: "Piet", p2: "Mo", bestOf: 5, games: [], score: [3, 2], gamesWon: [0, 0],
+                                             server: 1, side: "R", status: LiveStatus.playing)
+        XCTAssertFalse(match.mergeLive(moved))
+        XCTAssertEqual(match.partijTracking(matchId: "tracked-on-this-phone")?.slot, 4)
+        XCTAssertNil(match.partij(4).fromLive)
     }
 
     func testTakingBackAnEndingFromThePageRemovesOnlyTheEndingsGames() {

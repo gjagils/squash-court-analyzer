@@ -304,6 +304,7 @@ public struct SharedTeamMatchesView: View {
         }
         let found = await TeamFinding.offers(context: context, fixtures: team?.fixtures ?? [], matches: matches)
         let result = await TeamFinding.joinOwn(found, ownTeamName: team?.name ?? "", fixtures: team?.fixtures ?? [], store: store)
+        for joined in result.joined { await LiveFollow.shared.followJoined(joined) }
         if !result.joined.isEmpty { await load() }
         offers = result.offers
     }
@@ -363,6 +364,7 @@ public struct SharedTeamMatchesView: View {
         do {
             let joined = try await TeamFinding.join(offer, ownTeamName: team?.name ?? "", fixtures: team?.fixtures ?? [], store: store)
             await load()
+            await LiveFollow.shared.followJoined(joined)
             offers = offers.filter { other in other.id != offer.id }
             shareOnOpen = false
             opened = joined

@@ -480,6 +480,8 @@ public struct SharedTeamJoinView: View {
     /// (on iOS the join sheet closes onto the home screen, 7 November 2026)
     private func finishJoin(_ match: TeamMatch) {
         TeamMatchSupport.noteChange()
+        // Taking part puts the team stand on the lock screen, as after "Je team is begonnen"
+        Task { await LiveFollow.shared.followJoined(match) }
         onJoined(match)
     }
 

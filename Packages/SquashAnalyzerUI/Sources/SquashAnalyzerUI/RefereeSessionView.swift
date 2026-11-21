@@ -72,7 +72,7 @@ public struct RefereeSessionView: View {
                 MatchSetupView(playerStore: playerStore, mode: .referee, photoStore: photoStore, filePicker: filePicker,
                                initialPlayer1Name: activeTarget?.player1Name ?? "", initialPlayer2Name: activeTarget?.player2Name ?? "",
                                teamMatchStore: activeTarget == nil ? teamMatchStore : nil,
-                               historyStore: historyStore,
+                               historyStore: historyStore, leagueFetcher: settings?.leagueFetcher,
                                onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }
@@ -186,6 +186,7 @@ public struct RefereeSessionView: View {
     private func resume(_ saved: RefereeMatch) {
         match = saved
         pending = nil
+        MatchIdle.touch(saved.id, kind: MatchIdle.referee)
         guard activeTarget == nil, let teamMatchStore else { return }
         Task { @MainActor in
             if let target = await TeamMatchSupport.target(forMatchId: saved.id, store: teamMatchStore) {
@@ -197,8 +198,18 @@ public struct RefereeSessionView: View {
 
     private func load() async {
         await saver.perform {
-            if let saved = try await store.loadInProgress() { pending = saved }
-            else { showingSetup = true }
+            if let saved = try await store.loadInProgress() {
+                if MatchIdle.isIdle(saved.id, kind: MatchIdle.referee) {
+                    // Not touched for an hour: kept as incomplete, straight to a new match
+                    try await store.abandon(saved)
+                    if let teamMatchStore { await TeamMatchSupport.untrack(matchId: saved.id, store: teamMatchStore) }
+                    showingSetup = true
+                } else {
+                    pending = saved
+                }
+            } else {
+                showingSetup = true
+            }
         }
     }
 
@@ -237,6 +248,7 @@ public struct RefereeSessionView: View {
                 }
             }
         }
+        MatchIdle.touch(fresh.id, kind: MatchIdle.referee)
         saver.start { try await store.save(fresh) }
     }
 
@@ -245,6 +257,7 @@ public struct RefereeSessionView: View {
     /// Saves `value` in the background; a change during a save is saved right
     /// after it with the latest state (SessionSaver)
     private func persist(_ value: RefereeMatch, exit: Bool) {
+        MatchIdle.touch(value.id, kind: MatchIdle.referee)
         saver.save(exit: exit) { try await store.save(value) }
     }
 

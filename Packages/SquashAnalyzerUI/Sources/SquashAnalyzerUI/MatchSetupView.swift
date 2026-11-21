@@ -72,6 +72,11 @@ public struct MatchSetupView: View {
     let teamMatchStore: (any TeamMatchStore)?
     /// The finished matches, for the head-to-head at Kies speler ("3-1 tegen Bas"); nil shows none
     let historyStore: (any MatchHistoryStore)?
+    /// Fetches the opponent's players from SBN for the name chips of a partij; nil uses what is saved
+    let leagueFetcher: LeagueTeamFetcher?
+    /// A partij of a team match: our players and the opponent's, to tap instead of typing (as under Competitie)
+    @State private var ownRoster: [String] = []
+    @State private var opponentRoster: [String] = []
     @State private var history: [MatchHistorySummary] = []
     /// Scouting (3.2): the profile of a picked player, opened from below their name
     @State private var scouting: PlayerProfile? = nil
@@ -123,8 +128,10 @@ public struct MatchSetupView: View {
     public init(playerStore: any PlayerProfileStore, mode: MatchSetupMode, photoStore: (any PlayerPhotoStore)? = nil,
                 filePicker: (any PlayerFilePicker)? = nil, initialPlayer1Name: String = "", initialPlayer2Name: String = "",
                 teamMatchStore: (any TeamMatchStore)? = nil, historyStore: (any MatchHistoryStore)? = nil,
+                leagueFetcher: LeagueTeamFetcher? = nil,
                 onCancel: (() -> Void)? = nil,
                 onStart: @escaping (MatchSetupChoice) -> Void) {
+        self.leagueFetcher = leagueFetcher
         self.teamMatchStore = teamMatchStore
         self.historyStore = historyStore
         _player1Name = State(initialValue: initialPlayer1Name)
@@ -299,6 +306,12 @@ public struct MatchSetupView: View {
                     .foregroundColor(SharedColors.textPrimary)
                 Button(loc("Kies speler")) { pickingSlot = slot }
                     .foregroundColor(color)
+            }
+            // A partij of a team match: the players of that team to tap, as under Competitie
+            if fromQuestion && inTeam {
+                TeamNameChips(names: rosterNames(slot: slot), selected: name.wrappedValue.trimmingCharacters(in: CharacterSet.whitespaces), color: color) { picked in
+                    pickName(picked, slot: slot)
+                }
             }
             // Scouting (3.2): the profile of the picked player before the match
             if historyStore != nil, let picked = slot == 1 ? player1Pick : player2Pick,
@@ -694,6 +707,43 @@ public struct MatchSetupView: View {
             player2Pick = nil
             pickPrefilledPlayers()
         }
+        Task { @MainActor in await loadRosters(for: team) }
+    }
+
+    /// The home team's players go under Speler 1 and the away team's under
+    /// Speler 2, as the names of the partij are filled in (home first)
+    private func rosterNames(slot: Int) -> [String] {
+        guard let team = chosenTeam else { return [] }
+        let ownIsHome = team.ownSide == TeamSide.home
+        return (slot == 1) == ownIsHome ? ownRoster : opponentRoster
+    }
+
+    /// A name chip was tapped: the name, and the player of the list with that name (badges, focus)
+    private func pickName(_ name: String, slot: Int) {
+        let found = player(named: name)
+        if slot == 1 {
+            player1Name = found?.name ?? name
+            player1Pick = found
+        } else {
+            player2Name = found?.name ?? name
+            player2Pick = found
+        }
+    }
+
+    /// Our players (marked "In mijn team", then Mijn team from SBN) and the
+    /// opponent's from SBN, as the partij screen of Competitie offers them
+    private func loadRosters(for team: TeamMatch) async {
+        let snapshot = TeamMatchSupport.cachedTeam()
+        ownRoster = TeamMatchSupport.rosterNames(players: players, team: snapshot, rosterRaw: rosterRaw)
+        var opponents: [String] = []
+        if let link = LeagueOpponent.link(for: team, in: snapshot) {
+            if let leagueFetcher {
+                opponents = await LeagueOpponentStorage.names(for: link, fetcher: leagueFetcher)
+            } else if let saved = LeagueOpponentStorage.roster(for: link) {
+                opponents = saved.names
+            }
+        }
+        opponentRoster = opponents
     }
 
     /// "Nee, gewone wedstrijd": the ordinary setup, and no question after the match
@@ -712,6 +762,9 @@ public struct MatchSetupView: View {
         var second = false
         if let pick = player1Pick, pickedId(pick, currentName: player1Name) != nil { first = TeamRoster.contains(pick.id, in: rosterRaw) }
         if let pick = player2Pick, pickedId(pick, currentName: player2Name) != nil { second = TeamRoster.contains(pick.id, in: rosterRaw) }
+        // A name of our team (tapped below the field, or typed) says it too
+        if !first { first = inOwnRoster(player1Name) }
+        if !second { second = inOwnRoster(player2Name) }
         return TeamMatchSupport.ownIsPlayer1(partij: team.partij(teamSlot), player1Name: player1Name, player2Name: player2Name,
                                              player1InTeam: first, player2InTeam: second)
     }
@@ -723,6 +776,13 @@ public struct MatchSetupView: View {
         guard fromQuestion, let team = chosenTeam, !team.isLive, team.fixtureId != nil else { return false }
         if storedTeamIds.contains(team.id) { return false }
         return Features.shared.playerAccount && PlayerAccount.shared.isSignedIn
+    }
+
+    private func inOwnRoster(_ name: String) -> Bool {
+        let wanted = name.trimmingCharacters(in: .whitespaces)
+        if wanted.isEmpty { return false }
+        for candidate in ownRoster where TeamMatchSupport.plainName(candidate) == TeamMatchSupport.plainName(wanted) { return true }
+        return false
     }
 
     /// After the question: the team match and the partij in one block, with "Wijzig" back to the question

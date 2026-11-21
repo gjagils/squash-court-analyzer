@@ -55,9 +55,12 @@ struct ContentView: View {
 
     /// The gear in the coach and referee headers opens the same Instellingen as the home screen
     private var iosSettings: SettingsContext {
-        SettingsContext(aiCoach: IOSAICoach.context, backup: nil, ownScreen: { close in
+        var context = SettingsContext(aiCoach: IOSAICoach.context, backup: nil, ownScreen: { close in
             AnyView(SettingsView(isPresented: Binding(get: { true }, set: { if !$0 { close() } })))
         })
+        // The opponent's players for the name chips of a partij (the setup of Coach and Scheidsrechter)
+        context.leagueFetcher = LeagueTeamService.shared
+        return context
     }
 
     var body: some View {

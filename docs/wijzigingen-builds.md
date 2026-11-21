@@ -10,6 +10,25 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 ## Volgende build (na 4.0 build 5)
 
+- **Dezelfde spelerskeuze na de vraag vooraf als onder Competitie (Gerd-Jan, 21 november 2026).** Koos je in de
+  vraag vooraf een partij, dan stonden er twee lege naamvelden met *Kies speler*; op het partijscherm van
+  Competitie staan de spelers van beide teams als knoppen onder het veld. De korte opzet toont nu dezelfde knoppen
+  (`TeamNameChips`, één onderdeel voor beide schermen): onder Speler 1 de spelers van het thuisteam, onder Speler 2
+  die van het uitteam. Onze spelers komen uit *In mijn team* en Mijn team (`TeamMatchSupport.rosterNames`), die van
+  de tegenstander van SBN (`LeagueOpponentStorage`, een dag bewaard). Een tik vult de naam in en kiest de speler
+  uit de spelerslijst als die er staat; *Wie is onze speler?* verdwijnt zodra een naam van ons team gekozen is.
+  *Releasenote:* geen (hoort bij de vraag vooraf).
+
+- **Een open wedstrijd die een uur stil ligt is niet meer open (Gerd-Jan, 21 november 2026).** Coach en
+  Scheidsrechter vroegen bij een onafgemaakte wedstrijd altijd eerst *Wedstrijd hervatten?*, ook dagen later. Is de
+  wedstrijd langer dan een uur niet aangeraakt (`MatchIdle`, de sessie noteert elke opslag), dan gaat hij vanzelf
+  als incompleet naar Afgeronde wedstrijden (een lege verdwijnt, zoals bij *Nieuwe wedstrijd*), komt een gekoppelde
+  partij van een teamwedstrijd weer vrij, en opent meteen de opzet (met de vraag vooraf als er een teamwedstrijd
+  bezig is). Afmaken kan nog met *Uitslag aanvullen*. Binnen het uur blijft de vraag zoals hij was. Een open
+  wedstrijd uit een oudere build heeft geen notitie en wordt nog één keer gevraagd.
+  *Releasenote:* Een wedstrijd die je een uur niet hebt aangeraakt, staat niet meer in de weg: de app begint meteen
+  een nieuwe en bewaart de oude als incompleet.
+
 - **Melding "Je team is begonnen" voor teamgenoten met een account (Gerd-Jan, 21 november 2026).** Wie niet speelt
   kreeg niets zolang de app dicht was. Nu, alleen voor accounts van hetzelfde team:
   - **App** (`TeamStartAlerts`, Core, iOS en Android): is iemand ingelogd, heeft het account een team en staat

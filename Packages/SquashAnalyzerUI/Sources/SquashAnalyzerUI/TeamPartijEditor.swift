@@ -125,27 +125,8 @@ struct TeamPartijEditor: View {
     }
 
     /// Names to tap instead of typing: our players, or the opponent's from SBN
-    @ViewBuilder
     private func nameChips(_ names: [String], selection: Binding<String>) -> some View {
-        if !names.isEmpty {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(names, id: \.self) { name in
-                        Button { selection.wrappedValue = name } label: {
-                            Text(name)
-                                .font(SharedFonts.system(12, weight: .medium))
-                                .foregroundColor(selection.wrappedValue == name ? SharedColors.background : SharedColors.accent)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                                .background(selection.wrappedValue == name ? SharedColors.accent : SharedColors.accent.opacity(0.12))
-                                .clipShape(RoundedRectangle(cornerRadius: 999))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-            .padding(.top, 2)
-        }
+        TeamNameChips(names: names, selected: selection.wrappedValue) { name in selection.wrappedValue = name }
     }
 
     private var linkSection: some View {
@@ -451,6 +432,38 @@ struct TeamPartijEditor: View {
 }
 
 /// Coach and referee matches on this phone, the ones of the match day on top
+/// The players of a team as chips to tap instead of typing a name: under the
+/// names of a partij (Competitie) and under the names of a match started for a
+/// partij (the setup of Coach and Scheidsrechter), so both look the same
+struct TeamNameChips: View {
+    let names: [String]
+    let selected: String
+    var color: Color = SharedColors.accent
+    let onPick: (String) -> Void
+
+    var body: some View {
+        if !names.isEmpty {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(names, id: \.self) { name in
+                        Button { onPick(name) } label: {
+                            Text(name)
+                                .font(SharedFonts.system(12, weight: .medium))
+                                .foregroundColor(selected == name ? SharedColors.background : color)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(selected == name ? color : color.opacity(0.12))
+                                .clipShape(RoundedRectangle(cornerRadius: 999))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .padding(.top, 2)
+        }
+    }
+}
+
 struct TrackedMatchPicker: View {
     let entries: [MatchHistorySummary]
     let loaded: Bool

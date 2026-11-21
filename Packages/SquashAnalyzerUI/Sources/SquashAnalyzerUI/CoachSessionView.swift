@@ -80,7 +80,7 @@ public struct CoachSessionView: View {
                 MatchSetupView(playerStore: playerStore, mode: .coach, photoStore: photoStore, filePicker: filePicker,
                                initialPlayer1Name: activeTarget?.player1Name ?? "", initialPlayer2Name: activeTarget?.player2Name ?? "",
                                teamMatchStore: activeTarget == nil ? teamMatchStore : nil,
-                               historyStore: historyStore,
+                               historyStore: historyStore, leagueFetcher: settings?.leagueFetcher,
                                onCancel: { close() }) { choice in
                     startNewMatch(choice)
                 }
@@ -212,6 +212,7 @@ public struct CoachSessionView: View {
     private func resume(_ saved: Match) {
         match = saved
         pending = nil
+        MatchIdle.touch(saved.id, kind: MatchIdle.coach)
         guard activeTarget == nil, let teamMatchStore else { return }
         Task { @MainActor in
             if let target = await TeamMatchSupport.target(forMatchId: saved.id, store: teamMatchStore) {
@@ -223,8 +224,18 @@ public struct CoachSessionView: View {
 
     private func load() async {
         await saver.perform {
-            if let saved = try await store.loadInProgress() { pending = saved }
-            else { showingSetup = true }
+            if let saved = try await store.loadInProgress() {
+                if MatchIdle.isIdle(saved.id, kind: MatchIdle.coach) {
+                    // Not touched for an hour: kept as incomplete, straight to a new match
+                    try await store.abandon(saved)
+                    if let teamMatchStore { await TeamMatchSupport.untrack(matchId: saved.id, store: teamMatchStore) }
+                    showingSetup = true
+                } else {
+                    pending = saved
+                }
+            } else {
+                showingSetup = true
+            }
         }
     }
 
@@ -267,6 +278,7 @@ public struct CoachSessionView: View {
                 }
             }
         }
+        MatchIdle.touch(fresh.id, kind: MatchIdle.coach)
         saver.start { try await store.save(fresh) }
     }
 
@@ -300,6 +312,7 @@ public struct CoachSessionView: View {
     /// Saves `value` in the background; a change during a save is saved right
     /// after it with the latest state (SessionSaver)
     private func persist(_ value: Match, exit: Bool) {
+        MatchIdle.touch(value.id, kind: MatchIdle.coach)
         saver.save(exit: exit) { try await store.save(value) }
     }
 

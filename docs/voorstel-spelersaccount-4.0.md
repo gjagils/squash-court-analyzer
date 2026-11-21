@@ -267,6 +267,12 @@ maildienst nodig. Dat raad ik af.
   allebei.
   - Alles gaat direct weg: wedstrijden, verzoeken, awards en de
     verwijdermarkeringen (`deletedAt`) daarvan.
+  - Uitzondering (21 november 2026): wedstrijden die een ander voor de
+    SBN-speler instuurde (gebruikt of nog in het postvak) gaan terug naar
+    de wachtrij van die SBN-speler, met hun oude datum, zodat een volgend
+    account van dezelfde speler ze weer krijgt. Ze vervallen na 90 dagen.
+    Eigen wedstrijden, wedstrijden van een geblokkeerde afzender en alles
+    van een account zonder SBN-speler gaan gewoon weg.
   - Het Apple-token wordt ingetrokken.
   - In de back-up blijft het nog hoogstens 30 dagen staan. Dat zetten we in
     de privacytekst.

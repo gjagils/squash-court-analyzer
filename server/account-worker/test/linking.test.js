@@ -136,6 +136,43 @@ describe('the account', () => {
     expect((await call('GET', '/api/v1/devices/links', { auth: coach })).json.links).toHaveLength(0);
   });
 
+  it('deleting puts matches others sent back in line for the SBN player', async () => {
+    const path = aPath();
+    const coach = await newDevice();
+    const blocked = await newDevice();
+    const waiting = aMatch();
+    const used = aMatch();
+    const refused = aMatch();
+    const own = aMatch();
+    await send(coach, waiting, { sbnPath: path });
+    await send(coach, used, { sbnPath: path });
+    await send(blocked, refused, { sbnPath: path });
+    const first = await newPlayer({ sbnPath: path });
+    await call('POST', `/api/v1/me/inbox/${used.matchId}`, { auth: first.auth, body: { use: true } });
+    await call('POST', `/api/v1/me/inbox/${refused.matchId}`, { auth: first.auth, body: { use: false, block: true } });
+    await call('POST', '/api/v1/me/matches', { auth: first.auth, body: { matches: [own] } });
+    expect((await call('DELETE', '/api/v1/me', { auth: first.auth })).status).toBe(204);
+    const { results } = await env.DB.prepare('SELECT id FROM open_matches WHERE target = ? ORDER BY id').bind(`sbn:${path}`).all();
+    // Not the refused one, not the player's own match
+    expect(results.map((row) => row.id)).toEqual([waiting.matchId, used.matchId].sort());
+    const left = await env.DB.prepare('SELECT COUNT(*) AS n FROM matches WHERE player_id = ?').bind(first.player.playerId).first();
+    expect(left.n).toBe(0);
+    // The next account of the same SBN player gets both to answer again
+    const second = await newPlayer({ sbnPath: path });
+    const inbox = await call('GET', '/api/v1/me/inbox', { auth: second.auth });
+    expect(inbox.json.matches.map((m) => m.matchId).sort()).toEqual([waiting.matchId, used.matchId].sort());
+  });
+
+  it('deleting an account without an SBN player leaves nothing waiting', async () => {
+    const { auth, player } = await newPlayer();
+    const device = await newDevice();
+    const match = aMatch();
+    await send(device, match, { code: player.code });
+    await call('DELETE', '/api/v1/me', { auth });
+    const left = await env.DB.prepare('SELECT COUNT(*) AS n FROM open_matches WHERE id = ?').bind(match.matchId).first();
+    expect(left.n).toBe(0);
+  });
+
   it('waiting matches older than PENDING_DAYS are wiped too', async () => {
     const device = await newDevice();
     await send(device, aMatch(), { team: aTeam(), name: 'Oud' });

@@ -315,11 +315,27 @@ async function updateAccount(request, env, caller) {
   return me(env, caller);
 }
 
-/** Everything of the player, at once. The Apple token is revoked by the app before it calls this. */
+/**
+ * Everything of the player, at once. The Apple token is revoked by the app before it calls this.
+ * Matches someone else sent for the SBN player go back to waiting for that
+ * player (as before the account existed), so a next account of the same SBN
+ * player finds them again; they keep their date, so wipeOldRequests still
+ * removes them after PENDING_DAYS. Own matches, and matches of a player
+ * without an SBN player, are simply deleted.
+ */
 async function deleteAccount(env, caller) {
   if (!caller.account) return json(204);
   const playerId = caller.account.player_id;
   await env.DB.batch([
+    env.DB.prepare(
+      `INSERT OR IGNORE INTO open_matches
+         (id, target, name, device_id, sender_name, played_at, received_at, team_key, opponent, summary, rallies)
+       SELECT m.id, 'sbn:' || p.sbn_path, '', m.device_id, m.sender_name, m.played_at, m.received_at,
+              m.team_key, m.opponent, m.summary, m.rallies
+         FROM matches m JOIN players p ON p.id = m.player_id
+        WHERE m.player_id = ? AND m.device_id IS NOT NULL AND p.sbn_path IS NOT NULL
+          AND m.device_id NOT IN (SELECT device_id FROM blocks WHERE player_id = ?)`,
+    ).bind(playerId, playerId),
     env.DB.prepare('DELETE FROM matches WHERE player_id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM awards WHERE player_id = ?').bind(playerId),
     env.DB.prepare('DELETE FROM blocks WHERE player_id = ?').bind(playerId),

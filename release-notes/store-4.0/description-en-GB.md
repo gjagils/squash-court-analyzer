@@ -36,7 +36,7 @@ MY TEAM
 LIVE SHARING AND LOCK SCREEN
 • Let others follow a match live through a browser link, with player photos if you like.
 • Follow a match or team match on your lock screen, even with the app closed, with a notification for every game and the result.
-• Live data is stored in the EU only and deleted 2 hours after the last score update.
+• Live data is stored in the EU only and deleted 2 hours after the last update (24 hours for team matches).
 
 PLAYERS AND BADGES
 • Save players with a photo and coaching notes and pick them for a new match.

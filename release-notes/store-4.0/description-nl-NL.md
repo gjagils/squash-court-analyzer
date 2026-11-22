@@ -33,12 +33,13 @@ MIJN TEAM
 • Je teamgenoten staan klaar bij Spelers en de spelers van de tegenstander kies je met één tik.
 
 LIVE MEEKIJKEN EN VERGRENDELSCHERM
-• Laat anderen een wedstrijd live volgen via een link in de browser, met spelersfoto's als je wilt.
+• Laat anderen een wedstrijd live volgen via een link in de browser, desgewenst met spelersfoto's.
 • Volg een wedstrijd of teamwedstrijd op je vergrendelscherm, ook met de app dicht, met een melding bij elke game en de uitslag.
+• Livegegevens staan alleen in de EU en gaan na 2 uur (teamwedstrijd: 24 uur) weg.
 
 SPELERS EN BADGES
 • Bewaar spelers met een foto en aandachtspunten en kies ze bij een nieuwe wedstrijd.
-• Bekijk het profiel van je tegenstander, zie de onderlinge stand bij Kies speler en open met een SquashLevels-link de ranglijst.
+• Bekijk het profiel van je tegenstander, de onderlinge stand en via SquashLevels de ranglijst.
 • Verdien badges met bewaarde spelers: 39 badges, achttien ervan in brons, zilver en goud, met nieuw Teamspeler en Matchwinnaar voor de competitie. Zie wanneer ze verdiend zijn en deel een spelerskaart.
 
 DELEN EN BEWAREN

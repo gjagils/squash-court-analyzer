@@ -237,7 +237,7 @@ Volgorde bij een externe build:
 8. **Nieuw in … (carrousel, `WhatsNew` in `Onboarding.swift`):** tijdens een testronde komt hij bij elke
    nieuwe build één keer terug (`WhatsNew.perBuild = true`; Gerd-Jan, 10 november 2026). Kijk vóór elke
    upload of de pagina's nog kloppen. **Voor de build die naar productie gaat** zet je `perBuild` op
-   `false`: dan zien gebruikers hem één keer per versie, zoals Nieuw in 3.2. Bij een nieuwe versie
+   `false` (staat sinds 22 november 2026 op `false`): dan zien gebruikers hem één keer per versie, zoals Nieuw in 3.2. Bij een nieuwe versie
    `currentVersion` ophogen en de pagina's vervangen.
 9. `docs/wijzigingen-builds.md`: het blok "Volgende build" krijgt de kop met
    het nummer (bijvoorbeeld "3.0 build 1") en "(geüpload)".

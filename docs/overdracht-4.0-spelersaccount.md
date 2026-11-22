@@ -75,7 +75,7 @@ Overal waar nu "geen account" staat, moet dat kloppen met 4.0. Stand 8 november:
 | Storeteksten (`release-notes/store-4.0/`, `Android/play/listing-*.json`) | "Gratis, zonder advertenties en zonder account" / "Geen account nodig" wordt "account niet verplicht" | In de repo klaar op 18 november (Play-listing ook zonder AI Coach, met 39 badges); publiceren bij de release met `scripts/play_listing.py` en `scripts/asc_version.py` |
 | Homepage (nl/en) | "gratis, zonder advertenties en zonder account" in het blok Trakteer | Aangepast op 18 november ("een account is niet verplicht"); het testblok over 4.0 op de homepage gaat bij de release weg |
 | Handleidingen (nl/en) | Onderdeel Mijn account | Nederlands gepubliceerd 11 november (build 4); Engels en de build-5-onderdelen in de repo op 18 november, nog niet gepubliceerd |
-| App, "Nieuw in 4.0" (`WhatsNew`) | Pagina's voor 4.0 sinds build 3 | Voor de productiebuild `WhatsNew.perBuild` op `false` (staat op `true` voor de testronde) |
+| App, "Nieuw in 4.0" (`WhatsNew`) | Pagina's voor 4.0 sinds build 3 | `WhatsNew.perBuild` staat sinds 22 november 2026 op `false` (productiebuild); voor een nieuwe testronde weer `true` |
 | Badgepagina `website/badges/` (nl/en) en de tellingen "37 badges, 17 in brons, zilver en goud" (homepage, handleidingen, og-tekst) | Categorie Competitie met Teamspeler en Matchwinnaar erbij: 39 badges, 18 met treden (10 november 2026) | In de repo op 18 november (badgepagina met "vanaf versie 4.0"), nog niet gepubliceerd |
 
 ## Vóór een 4.0-release

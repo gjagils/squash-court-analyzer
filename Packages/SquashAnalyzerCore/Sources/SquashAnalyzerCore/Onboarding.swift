@@ -92,10 +92,11 @@ public enum WhatsNew {
     }
 
     /// During a test round the carousel comes back once with every new build,
-    /// so testers see what it says (Gerd-Jan, 10 November 2026). Set to false
-    /// for the build that goes to production: then it shows once per version,
-    /// like "Nieuw in 3.2". Check the pages before every release.
-    public static let perBuild = true
+    /// so testers see what it says (Gerd-Jan, 10 November 2026). False since
+    /// 22 November 2026 for the production build: it shows once per version,
+    /// like "Nieuw in 3.2". Set it to true again for a new test round and check
+    /// the pages before every release.
+    public static let perBuild = false
     /// The build (app version text) the carousel was last seen in
     public static let buildStorageKey = "whatsNewBuild"
 

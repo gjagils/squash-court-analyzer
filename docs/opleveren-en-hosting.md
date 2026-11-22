@@ -200,10 +200,10 @@ Volgorde bij een externe build:
    bijvoorbeeld `3.0-1.md`, geen emoji, App Store Connect weigert ze) en
    `release-notes/android-<versie>-<build>.md` (maximaal 500 tekens). De tekst staat voorbereid in `docs/wijzigingen-builds.md`,
    inclusief het stuk over de nieuwe hosting.
-4. iOS: `xcodebuild archive` (Release, `-allowProvisioningUpdates` met de
-   App Store Connect API-sleutel), `xcodebuild -exportArchive` met een
-   ExportOptions.plist (`method app-store-connect`, `destination upload`,
-   `signingStyle automatic`, `manageAppVersionAndBuildNumber false`), daarna
+4. iOS: `scripts/ios_archive.py` (archiveert Release met de Firebase-sleutel uit
+   `~/.android-keys/google-services.json` op de xcodebuild-regel en weigert door te gaan als de sleutel
+   niet in het archief zit; zonder argument uploadt het niets, met `--upload` exporteert het naar
+   App Store Connect met `destination upload`), daarna
    `scripts/testflight_distribute.py --notes release-notes/X-N.md`
    (zet de notities, voegt toe aan groep Squashteam, dient in voor
    bèta-review en laat oude builds vervallen; draai

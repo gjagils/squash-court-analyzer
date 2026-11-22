@@ -361,6 +361,8 @@ struct ContentView: View {
             screenshotCoach = ScreenshotScenario.makeCoachGameOverMatch()
         case .badges:
             screenshotCoach = ScreenshotScenario.makeCoachBadgesMatch(context: modelContext)
+        case .teamMatch:
+            break   // HomeView opens the team match itself (it owns the sheet)
         case .history:
             _ = ScreenshotScenario.seededSampleMatch(context: modelContext)
             showingHistory = true

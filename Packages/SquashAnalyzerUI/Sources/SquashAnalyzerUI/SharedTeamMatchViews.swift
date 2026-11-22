@@ -1247,7 +1247,7 @@ public struct SharedTeamMatchView: View {
 
     /// Takes in what teammates put on the live page; a page that is gone ends the live state here
     private func syncFromLive(showGone: Bool) async {
-        guard let id = match.liveId else { return }
+        guard let id = match.liveId, !TeamLive.shared.isFrozen else { return }
         do {
             let state = try await TeamLive.shared.fetch(id: id)
             var changed = match

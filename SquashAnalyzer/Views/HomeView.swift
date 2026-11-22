@@ -131,6 +131,14 @@ struct HomeView: View {
                     }
             }
         }
+        #if DEBUG
+        .task {
+            if ScreenshotScenario.current == .teamMatch {
+                TeamLive.shared.isFrozen = true
+                openedTeamMatch = ScreenshotScenario.makeTeamMatch()
+            }
+        }
+        #endif
         .sheet(isPresented: Binding(get: { openedTeamMatch != nil }, set: { if !$0 { openedTeamMatch = nil } })) {
             if let match = openedTeamMatch {
                 NavigationStack {

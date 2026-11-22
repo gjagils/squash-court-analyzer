@@ -12,7 +12,7 @@ DEVICE_NAME="iPhone 17 Pro Max"
 BUNDLE_ID="com.squashanalyzer.app"
 OUT="${1:-screenshots/nl-NL}"
 DERIVED="build/DerivedData-screenshots"
-SCENARIOS=(home coach-match coach-zone coach-gameover referee history dashboard)
+SCENARIOS=(home team-match coach-match coach-zone coach-gameover referee history dashboard)
 
 UDID=$(xcrun simctl list devices available -j | python3 -c '
 import json, sys
@@ -48,6 +48,8 @@ xcrun simctl launch "$UDID" "$BUNDLE_ID" -screenshot setup >/dev/null
 sleep 8
 
 mkdir -p "$OUT"
+# Numbers shift when a scenario is added: old files would end up in the upload
+rm -f "$OUT"/[0-9][0-9]-*.png
 i=1
 for scenario in "${SCENARIOS[@]}"; do
   file="$OUT/$(printf '%02d' $i)-$scenario.png"

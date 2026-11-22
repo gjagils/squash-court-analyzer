@@ -17,6 +17,8 @@ enum ScreenshotScenario: String, CaseIterable {
     case history
     case dashboard
     case badges
+    /// 4.0: a team match shared with the team, one partij running
+    case teamMatch = "team-match"
 
     /// The scenario requested at launch, if any
     static let current: ScreenshotScenario? = {
@@ -97,6 +99,28 @@ enum ScreenshotScenario: String, CaseIterable {
         match.status = .completed
         try? SwiftDataMatchRepository(context: context).upsert(match)
         return match
+    }
+
+    // MARK: - Team match
+
+    /// A team match of Mijn team, shared with the team (4.0): E1 won, E2 lost,
+    /// E3 running at 7-5 in game 2 (a teammate's phone), E4 not started.
+    /// Its live page is invented, so `TeamLive.isFrozen` keeps the screen off the network.
+    static func makeTeamMatch() -> TeamMatch {
+        var e1 = TeamPartij(slot: 1, ownPlayer: "Gerard", opponentPlayer: "Jeroen", playOrder: 1)
+        e1.games = [TeamGame(own: 11, their: 7), TeamGame(own: 9, their: 11), TeamGame(own: 11, their: 8), TeamGame(own: 11, their: 6)]
+        var e2 = TeamPartij(slot: 2, ownPlayer: "Thé", opponentPlayer: "Mark", playOrder: 2)
+        e2.games = [TeamGame(own: 8, their: 11), TeamGame(own: 11, their: 9), TeamGame(own: 6, their: 11), TeamGame(own: 7, their: 11)]
+        e2.fromLive = true
+        var e3 = TeamPartij(slot: 3, ownPlayer: "Niels", opponentPlayer: "Sander", playOrder: 3)
+        e3.games = [TeamGame(own: 11, their: 8)]
+        e3.fromLive = true
+        e3.liveOwnPoints = 7
+        e3.liveTheirPoints = 5
+        let e4 = TeamPartij(slot: 4, ownPlayer: "Paul", opponentPlayer: "Bram")
+        return TeamMatch(date: Date(), home: "All Inn Squash 7", away: "Funzone Dronten 1", ownSide: .home,
+                         partijen: [e1, e2, e3, e4], updatedAt: Date(),
+                         liveId: "screenshot", liveKey: "screenshot", liveOwnerKey: "screenshot", liveTeamOnly: true)
     }
 
     // MARK: - Referee

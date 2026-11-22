@@ -542,6 +542,11 @@ public final class TeamLive {
         set { customBaseURL = newValue }
     }
 
+    /// App Store screenshots only (ScreenshotScenario): the team match on screen
+    /// has an invented live page, so nothing may be read from the server (a
+    /// "gone" answer would end its live state)
+    public var isFrozen = false
+
     /// A send failed (no network); the next point tries again
     public private(set) var offline = false
     /// Live team matches whose key the server refused (401) at the last send:

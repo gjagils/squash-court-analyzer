@@ -8,7 +8,11 @@ Documentatiereview 6 oktober: [overzicht van recente wijzigingen, branches
 en verouderde passages](stand-van-zaken-2026-10-06.md). De nieuwe
 SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
-## Volgende build (na 4.0 build 7)
+## 4.0 build 8 (22 november 2026, productiebuild, ingediend bij Apple en Google)
+
+Geen nieuwe functies sinds build 7 behalve: een partij staat bij een teamgenoot in de lijst zodra hij begint ("bezig 7-5"), `WhatsNew.perBuild` uit, `scripts/ios_archive.py` (archief met Firebase-sleutel en controle), schermafbeeldingsscenario `team-match`, toestellentest-route voor 4.0.
+
+## Volgende build (na 4.0 build 8)
 
 - **Vergrendelscherm vanzelf bevestigd (Gerd-Jan, 21 november 2026):** de teamstand start op de telefoons vanzelf
   bij *Je team is begonnen*, verstuurd door de live-Worker zelf.

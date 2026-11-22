@@ -326,17 +326,29 @@ def step_settings(device, shot):
     device.tap("Instellingen", seconds=8)
     time.sleep(1)
     shot("settings", "Instellingen")
-    device.scroll_to("Wedstrijd volgen")
-    device.tap("Wedstrijd volgen", seconds=4)
+    # "Wedstrijd volgen" sits inside "Delen en meldingen" since 21 November 2026
+    device.scroll_to("Delen en meldingen")
+    device.tap("Delen en meldingen", seconds=4)
+    time.sleep(1)
+    # The row is called "Volg een andere wedstrijd" (subtitle "Plak een live link"); its screen is "Wedstrijd volgen"
+    device.scroll_to("Volg een andere wedstrijd")
+    device.tap("Volg een andere wedstrijd", seconds=4)
     time.sleep(2)
     shot("live-follow", "Wedstrijd volgen")
     device.back()
     device.back()
 
 
+def skip_team_question(device):
+    """Since 4.0 build 6 Coach and Scheidsrechter first ask which partij of today's team match you count"""
+    if device.tap("Nee, gewone wedstrijd", seconds=4, required=False):
+        time.sleep(2)
+
+
 def open_coach_match(device):
     device.tap("Coach", seconds=8)
     time.sleep(2)
+    skip_team_question(device)
     if device.find("Uitgebreid"):
         device.tap("Uitgebreid", seconds=2)
     if device.tap("Hervatten", seconds=3, required=False):
@@ -377,6 +389,7 @@ def step_coach(device, shot):
 def step_referee(device, shot):
     device.tap("Scheidsrechter", seconds=8)
     time.sleep(2)
+    skip_team_question(device)
     if device.tap("Hervatten", seconds=3, required=False):
         time.sleep(2)
     else:

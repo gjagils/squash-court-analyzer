@@ -1,6 +1,7 @@
 # Instagram-planning @squashanalyzer
 
-Twee posts per week, dinsdag en zaterdag. Posten in de app (reels kunnen niet
+Op 23 november 2026 is de planning leeggemaakt (Gerd-Jan: alles mag weg); de reels van
+vóór 4.0 zijn vervallen en hun geplande taken verwijderd. Eerder was het twee posts per week, dinsdag en zaterdag. Posten in de app (reels kunnen niet
 via de website gepland worden); per post staan hier het bestand, het
 onderschrift, de eerste reactie en een tip.
 
@@ -11,25 +12,9 @@ Hashtags: Instagram telt er maximaal 5 per post, zet ze onderaan het onderschrif
 | zo 25 okt | Carousel, release 3.0 (geplaatst) | `release-3.0/png/` |
 | di 27 okt | Carousel, Competitie-vrijdag (geplaatst, verhaal in de app) | `competitie-vrijdag/slide-1..3.png`, `story-1..3.png` |
 | vr 30 okt | Carousel, je teamgenoot coachen (geplaatst, verhaal in de app) | `teamcoach/slide-1..5.png`, `story-1..5.png` |
-| za 31 okt | Reel, scheidsen (klaargezet, niet gedeeld; nu za 21 nov) | `reel-scheidsen/reel-scheidsen.mp4` |
 | di 3 nov | Carousel, Coachkaart (geplaatst) | `carousel-coachkaart/slide-1..7.png` |
-| za 7 nov | Reel, live-stand op het vergrendelscherm (klaargezet, niet gedeeld; nu di 17 nov) | `reel-live/reel-live.mp4` |
 | ma 9 nov | Carousel, release 3.2 (geplaatst, verhaal in de app) | `release-3.2/slide-1..7.png`, `story-1..7.png` |
-| di 10 nov | Carousel, 5 dingen voor de scheids | `carousel-scheids5/slide-1..7.png` |
-| za 14 nov | Reel, coachen en Analyse | `reel-coachen/reel-coachen.mp4` |
-| di 17 nov | Reel, live-stand op het vergrendelscherm | `reel-live/reel-live.mp4` |
-| za 21 nov | Reel, scheidsen | `reel-scheidsen/reel-scheidsen.mp4` |
-| di 24 nov | Reel, Team Scheids of Team Coach | `team-scheids-coach/reel-team-scheids-coach.mp4` |
-| za 28 nov | Reel, Team Licht of Team Donker (eerst opnieuw opnemen: toont nog het beginscherm en Instellingen van 3.0) | `team-licht-donker/reel-team-licht-donker.mp4` |
-| di 1 dec | Reel, Team Nederlands or Team English (eerst opnieuw opnemen, zelfde reden) | `team-taal/reel-team-taal.mp4` |
-
-Van de drie reels bestaat ook een lichte versie (`reel-*-licht.mp4`, de app in
-Licht; scheidsen en live met Bob en Wim). Gebruik die later als herhaling, of
-in een verhaal. De lichte live-reel heeft geen stuk "doortellen" (dat deel van
-de opname was gedimd).
-
-Bij de Team-posts: zet in je verhaal een poll-sticker met de twee teams (kan
-alleen in de app).
+| nog te plaatsen | Reel, 3 hoogtepunten van 4.0 (klaar, wacht op akkoord van Gerd-Jan) | `reel-release40/reel-release40.mp4` |
 
 ## di 27 okt · Carousel: Competitie-vrijdag (geplaatst)
 
@@ -99,102 +84,25 @@ Update in de App Store of Google Play, of download hem gratis via de link in de 
 Eerste reactie: `Welke probeer jij als eerste? 👇`
 Verhaal (in de app): `story-1..7.png`, op slide 7 een linksticker "Download de app" naar squashanalyzer.com op de oranje tekst onderin.
 
-## di 10 nov · Carousel: 5 dingen voor de scheids
+## Reel: 3 hoogtepunten van 4.0 (klaar, niet gedeeld)
+
+4.0 staat sinds 23 november 2026 in de App Store en Google Play. De reel (23 s) toont drie
+dingen: de teamwedstrijd van je team in de app, een account maken, en de nieuwe badges
+Teamspeler en Matchwinnaar. Opgenomen op iPhone 17 Pro Max met de schermen uit
+`-screenshot team-match` en `-screenshot home` (de teamstand op het vergrendelscherm is
+niet te simuleren zonder echte pushmeldingen, die zit er dus niet in).
 
 ```
-5 dingen die je als scheids niet meer hoeft te onthouden ✅
+4.0 is er: je team in één app 🏆
 
-Wie serveert, uit welk vak, wie elke rally won, de stand in games en hoe lang het al duurt. Jij let op de rally.
+Maak een account (niet verplicht) en de teamwedstrijd van je team staat vanzelf in je app, met de teamstand op je vergrendelscherm. Partijen die een ander voor je bijhoudt komen vanzelf binnen, en nieuw zijn de badges Teamspeler en Matchwinnaar.
 
-Bewaar deze post voor je volgende wedstrijd.
-
-#squash #squashreferee #squashscheidsrechter #squashnederland #squashlife
-```
-
-Eerste reactie: `Welke vergeet jij het vaakst, 1 tot en met 5? 👇`
-
-## za 14 nov · Reel: coachen en Analyse
-
-```
-‘Speel meer lengte’ is geen coachadvies 🎯
-
-Leg per rally vast wie scoort, hoe, waar en met welke slag. Na de game zie je de heatmap en het tactisch advies, tussen de games laat je de Coachkaart zien.
-
-#squash #squashcoach #squashcoaching #squashtraining #squashapp
-```
-
-Eerste reactie: `Coach jij op gevoel of op cijfers? 👇`
-
-## di 17 nov · Reel: live-stand op het vergrendelscherm (klaargezet op 7 nov, niet gedeeld)
-
-```
-Telefoon even weggelegd? De stand staat gewoon op je vergrendelscherm 🔒
-
-Tel je als scheids op je iPhone, dan komt elke rally meteen in beeld. Deel de link en je team volgt mee, in de browser of op hun eigen vergrendelscherm.
+Gratis voor iPhone en Android, link in de bio.
 
 #squash #squashnederland #squashcompetitie #squashteam #squashapp
 ```
 
-Eerste reactie: `Wie uit je team moet dit zien? Tag ze 👇`
-
-## za 21 nov · Reel: scheidsen (klaargezet op 31 okt, niet gedeeld)
-
-```
-Welk vak serveert ze nu ook alweer? 🤔
-
-Met Squash Analyzer tik je alleen op wie het punt wint. Servicevak, let, stroke en de stand per game houdt de app bij.
-
-Serveert iemand liever van links? Eén keer aanpassen en de app onthoudt het voor de rest van de wedstrijd.
-
-Gratis voor iPhone en Android, link in de bio.
-
-#squash #squashnederland #squashreferee #squashscheidsrechter #squashapp
-```
-
-Eerste reactie: `Wat vind jij het lastigst als scheids: het servicevak of let en stroke? 👇`
-Omslag: het eerste beeld (de vraag staat er al in).
-
-## di 24 nov · Reel: Team Scheids of Team Coach
-
-```
-Team Scheids of Team Coach?
-
-Links tel je de wedstrijd, rechts leg je elke rally vast. Twee modi, één gratis app.
-
-Sta jij op de stoel of langs de baan? 👇
-
-#squash #squashnederland #squashreferee #squashcoach #squashapp
-```
-
-Eerste reactie: `Scheids of coach, wat doe jij het liefst? 👇`
-
-## za 28 nov · Reel: Team Licht of Team Donker
-
-```
-Team Licht of Team Donker? 🌞🌙
-
-Squash Analyzer kan allebei: Instellingen → Weergave, één tik en de hele app wisselt mee.
-
-Welke ben jij? Zet het in de reacties 👇
-
-#squash #squashnederland #squashlife #squashapp #squashtime
-```
-
-Eerste reactie: `Ik ben Team … 👇`
-
-## di 1 dec · Reel: Team Nederlands or Team English
-
-```
-Team Nederlands or Team English? 🇳🇱🇬🇧
-
-De app spreekt ook Engels: Instellingen → Taal, en alles is meteen om. Handig voor je internationale teamgenoten.
-
-Welke ben jij? Which one are you? 👇
-
-#squash #squashnederland #squashlife #squashapp #squashplayer
-```
-
-Eerste reactie: `Tag je teamgenoot die liever Engels heeft 👇`
+Eerste reactie: `Welke badge wil jij als eerste? Teamspeler of Matchwinnaar? 👇`
 
 ## Opnieuw maken
 

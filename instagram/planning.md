@@ -86,10 +86,10 @@ Verhaal (in de app): `story-1..7.png`, op slide 7 een linksticker "Download de a
 
 ## Reel: 3 hoogtepunten van 4.0 (klaar, niet gedeeld)
 
-4.0 staat sinds 23 november 2026 in de App Store en Google Play. De reel (24 s) toont,
+4.0 staat sinds 23 november 2026 in de App Store en Google Play. De reel (25 s) toont,
 op aanwijzing van Gerd-Jan (24 november): 1) een account maken, niet verplicht maar de
 grootste verandering; 2) met een account komen je wedstrijden vanzelf in je app (de
-teamwedstrijd) en eindelijk je eigen badges; 3) makkelijker meedoen aan een teamwedstrijd
+teamwedstrijd) en eindelijk je eigen badges; 3) makkelijker meedoen aan een teamwedstrijd (titel: "Meedoen aan een teamwedstrijd is makkelijker")
 als scheidsrechter en coach (de vraag "Tel je een partij van deze teamwedstrijd? Tik op de
 partij" en de spelers staan al ingevuld). Opgenomen op iPhone 17 Pro Max met de schermen uit
 `-screenshot team-match` (die slaat de teamwedstrijd nu ook op, zodat de setup de vraag stelt)

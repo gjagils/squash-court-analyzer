@@ -14,7 +14,7 @@ Hashtags: Instagram telt er maximaal 5 per post, zet ze onderaan het onderschrif
 | vr 30 okt | Carousel, je teamgenoot coachen (geplaatst, verhaal in de app) | `teamcoach/slide-1..5.png`, `story-1..5.png` |
 | di 3 nov | Carousel, Coachkaart (geplaatst) | `carousel-coachkaart/slide-1..7.png` |
 | ma 9 nov | Carousel, release 3.2 (geplaatst, verhaal in de app) | `release-3.2/slide-1..7.png`, `story-1..7.png` |
-| nog te plaatsen | Reel, 3 hoogtepunten van 4.0 (klaar, wacht op akkoord van Gerd-Jan) | `reel-release40/reel-release40.mp4` |
+| nog te plaatsen | Reel, 3 hoogtepunten van 4.0 (account, vanzelf in je app, meedoen; klaar, wacht op akkoord van Gerd-Jan) | `reel-release40/reel-release40.mp4` |
 
 ## di 27 okt · Carousel: Competitie-vrijdag (geplaatst)
 
@@ -86,16 +86,22 @@ Verhaal (in de app): `story-1..7.png`, op slide 7 een linksticker "Download de a
 
 ## Reel: 3 hoogtepunten van 4.0 (klaar, niet gedeeld)
 
-4.0 staat sinds 23 november 2026 in de App Store en Google Play. De reel (23 s) toont drie
-dingen: de teamwedstrijd van je team in de app, een account maken, en de nieuwe badges
-Teamspeler en Matchwinnaar. Opgenomen op iPhone 17 Pro Max met de schermen uit
-`-screenshot team-match` en `-screenshot home` (de teamstand op het vergrendelscherm is
-niet te simuleren zonder echte pushmeldingen, die zit er dus niet in).
+4.0 staat sinds 23 november 2026 in de App Store en Google Play. De reel (24 s) toont,
+op aanwijzing van Gerd-Jan (24 november): 1) een account maken, niet verplicht maar de
+grootste verandering; 2) met een account komen je wedstrijden vanzelf in je app (de
+teamwedstrijd) en eindelijk je eigen badges; 3) makkelijker meedoen aan een teamwedstrijd
+als scheidsrechter en coach (de vraag "Tel je een partij van deze teamwedstrijd? Tik op de
+partij" en de spelers staan al ingevuld). Opgenomen op iPhone 17 Pro Max met de schermen uit
+`-screenshot team-match` (die slaat de teamwedstrijd nu ook op, zodat de setup de vraag stelt)
+en `-screenshot home`. De teamstand op het vergrendelscherm is niet te simuleren zonder echte
+pushmeldingen, die zit er dus niet in.
 
 ```
-4.0 is er: je team in één app 🏆
+4.0 is er 🏆
 
-Maak een account (niet verplicht) en de teamwedstrijd van je team staat vanzelf in je app, met de teamstand op je vergrendelscherm. Partijen die een ander voor je bijhoudt komen vanzelf binnen, en nieuw zijn de badges Teamspeler en Matchwinnaar.
+Maak een account (niet verplicht, wel de grootste verandering) en je wedstrijden komen vanzelf in je app, met de teamstand op je vergrendelscherm. Eindelijk je eigen badges!
+
+En meedoen aan een teamwedstrijd als scheidsrechter of coach gaat nu met één tik op de partij.
 
 Gratis voor iPhone en Android, link in de bio.
 

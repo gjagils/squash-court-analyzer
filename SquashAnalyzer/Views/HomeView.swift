@@ -135,7 +135,10 @@ struct HomeView: View {
         .task {
             if ScreenshotScenario.current == .teamMatch {
                 TeamLive.shared.isFrozen = true
-                openedTeamMatch = ScreenshotScenario.makeTeamMatch()
+                let match = ScreenshotScenario.makeTeamMatch()
+                // Saved too, so the coach and referee setup ask which partij they count
+                try? await TeamMatchStorage.store.save(match)
+                openedTeamMatch = match
             }
         }
         #endif

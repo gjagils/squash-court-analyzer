@@ -137,13 +137,16 @@ public struct SharedWhatsNewView: View {
                     .foregroundColor(SharedColors.support)
                     .multilineTextAlignment(.center)
             } else if leagueFetcher != nil {
+                // The steps first, then the button for step 1 (Gerd-Jan, 25 November 2026)
+                Text(loc("Speel je competitie? Zo regel je het:\n1. Zoek je club en kies je team\n2. Maak een account\n3. Kies je eigen naam, dan weet de app welke SBN-speler jij bent"))
+                    .font(SharedFonts.system(14))
+                    .foregroundColor(SharedColors.textSecondary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 ActionButton(loc("ZOEK JE CLUB"), icon: "magnifyingglass", style: .outlined, color: SharedColors.accent) {
                     showingTeamLink = true
                 }
-                Text(loc("Je hebt nog geen team gekoppeld. Zoek eerst je club, kies dan je team. Daarna kies je bij je account jezelf."))
-                    .font(SharedFonts.system(12))
-                    .foregroundColor(SharedColors.textMuted)
-                    .multilineTextAlignment(.center)
             }
         } else if action == WhatsNew.Action.account {
             if PlayerAccount.shared.profile != nil {

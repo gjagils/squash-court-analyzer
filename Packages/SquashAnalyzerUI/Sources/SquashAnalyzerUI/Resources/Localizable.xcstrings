@@ -55,38 +55,38 @@
         }
       }
     },
-    "Je hebt nog geen team gekoppeld. Zoek eerst je club, kies dan je team. Daarna kies je bij je account jezelf.": {
+    "Speel je competitie? Zo regel je het:\n1. Zoek je club en kies je team\n2. Maak een account\n3. Kies je eigen naam, dan weet de app welke SBN-speler jij bent": {
       "extractionState": "manual",
       "generatesSymbol": false,
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You have not linked a team yet. Find your club first, then pick your team. After that you pick yourself in your account."
+            "value": "Do you play in the league? This is how to set it up:\n1. Find your club and pick your team\n2. Create an account\n3. Pick your own name, so the app knows which SBN player you are"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je hebt nog geen team gekoppeld. Zoek eerst je club, kies dan je team. Daarna kies je bij je account jezelf."
+            "value": "Speel je competitie? Zo regel je het:\n1. Zoek je club en kies je team\n2. Maak een account\n3. Kies je eigen naam, dan weet de app welke SBN-speler jij bent"
           }
         }
       }
     },
-    "Je hebt nog geen team gekoppeld. Zoek eerst je club, kies dan je team. Daarna kun je hier jezelf kiezen.": {
+    "Speel je competitie? Zoek eerst je club en kies je team. Daarna kies je hier je eigen naam, dan weet de app welke SBN-speler jij bent.": {
       "extractionState": "manual",
       "generatesSymbol": false,
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You have not linked a team yet. Find your club first, then pick your team. After that you can pick yourself here."
+            "value": "Do you play in the league? Find your club first and pick your team. Then pick your own name here, so the app knows which SBN player you are."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je hebt nog geen team gekoppeld. Zoek eerst je club, kies dan je team. Daarna kun je hier jezelf kiezen."
+            "value": "Speel je competitie? Zoek eerst je club en kies je team. Daarna kies je hier je eigen naam, dan weet de app welke SBN-speler jij bent."
           }
         }
       }

@@ -12,7 +12,24 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 Geen nieuwe functies sinds build 7 behalve: een partij staat bij een teamgenoot in de lijst zodra hij begint ("bezig 7-5"), `WhatsNew.perBuild` uit, `scripts/ios_archive.py` (archief met Firebase-sleutel en controle), schermafbeeldingsscenario `team-match`, toestellentest-route voor 4.0.
 
-## Volgende build (na 4.0 build 8)
+## Volgende build (na 4.1 build 1)
+
+Nog niets.
+
+## 4.1 build 1 (25 november 2026, geüpload naar TestFlight en de Play-testtracks)
+
+- **Eerst je team, dan het account (Minnie via Gerd-Jan, 25 november 2026).** Een nieuwe gebruiker kon bij zijn
+  account zichzelf niet kiezen, omdat Mijn team nog niet gekoppeld was; "Zoek je club" zat alleen in de
+  rondleiding. De eerste pagina van Nieuw in 4.0 toont nu, zonder gekoppeld team, een kader met drie stappen
+  (club en team, account, je eigen naam) en de knop ZOEK JE CLUB. Die opent `SharedTeamLinkSheet` over de
+  carrousel: de teamlink wordt bewaard en de spelers meteen opgehaald, zodat Mijn account ze kan aanbieden.
+  Mijn account heeft dezelfde knop als er geen team is. Ingelogd met een gekoppeld team slaat de app Nieuw in
+  over, alleen bij het opstarten (`WhatsNew.alreadySetUp`). `WhatsNew.currentVersion` blijft 4: wie de
+  carrousel al zag, ziet hem niet opnieuw. Op iOS bekeken als nieuwe gebruiker; Android en het kiezen van je
+  naam na inloggen niet op een scherm bekeken.
+- Gerd-Jan: na de competitieronde van vrijdag 27 november naar productie.
+
+## Eerder klaargezet (zat al in 4.0 build 8)
 
 - **Vergrendelscherm vanzelf bevestigd (Gerd-Jan, 21 november 2026):** de teamstand start op de telefoons vanzelf
   bij *Je team is begonnen*, verstuurd door de live-Worker zelf.

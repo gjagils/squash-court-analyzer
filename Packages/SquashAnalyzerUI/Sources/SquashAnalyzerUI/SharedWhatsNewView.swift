@@ -137,16 +137,23 @@ public struct SharedWhatsNewView: View {
                     .foregroundColor(SharedColors.support)
                     .multilineTextAlignment(.center)
             } else if leagueFetcher != nil {
-                // The steps first, then the button for step 1 (Gerd-Jan, 25 November 2026)
-                Text(loc("Speel je competitie? Zo regel je het:\n1. Zoek je club en kies je team\n2. Maak een account\n3. Kies je eigen naam, dan weet de app welke SBN-speler jij bent"))
-                    .font(SharedFonts.system(14))
-                    .foregroundColor(SharedColors.textSecondary)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                ActionButton(loc("ZOEK JE CLUB"), icon: "magnifyingglass", style: .outlined, color: SharedColors.accent) {
-                    showingTeamLink = true
+                // The steps and the button for step 1 in one frame: the list
+                // reads aligned left, the page stays centred (Gerd-Jan, 25 November 2026)
+                VStack(alignment: .leading, spacing: 14) {
+                    Text(loc("Speel je competitie? Zo regel je het:\n1. Zoek je club en kies je team\n2. Maak een account\n3. Kies je eigen naam, dan weet de app welke SBN-speler jij bent"))
+                        .font(SharedFonts.system(14))
+                        .foregroundColor(SharedColors.textSecondary)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    ActionButton(loc("ZOEK JE CLUB"), icon: "magnifyingglass", style: .outlined, color: SharedColors.accent) {
+                        showingTeamLink = true
+                    }
                 }
+                .padding(16)
+                .background(SharedColors.cardTint)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(SharedColors.line(0.15), lineWidth: 1))
             }
         } else if action == WhatsNew.Action.account {
             if PlayerAccount.shared.profile != nil {

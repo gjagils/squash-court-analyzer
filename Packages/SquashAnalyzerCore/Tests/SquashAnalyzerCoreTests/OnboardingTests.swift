@@ -36,7 +36,11 @@ final class OnboardingTests: XCTestCase {
     }
 
     func testWhatsNewAsksForAnAccountAndTheTeam() {
-        XCTAssertEqual(WhatsNew.action(onPage: 0), WhatsNew.Action.none)
+        XCTAssertEqual(WhatsNew.action(onPage: 0), WhatsNew.Action.findClub, "the team first, then the account")
+        XCTAssertTrue(WhatsNew.teamPage < WhatsNew.accountPage)
+        XCTAssertTrue(WhatsNew.alreadySetUp(signedIn: true, teamLinked: true))
+        XCTAssertFalse(WhatsNew.alreadySetUp(signedIn: true, teamLinked: false))
+        XCTAssertFalse(WhatsNew.alreadySetUp(signedIn: false, teamLinked: true))
         XCTAssertEqual(WhatsNew.action(onPage: WhatsNew.accountPage), WhatsNew.Action.account)
         XCTAssertEqual(WhatsNew.action(onPage: WhatsNew.sharePage), WhatsNew.Action.shareWithTeam)
         XCTAssertEqual(WhatsNew.action(onPage: 3), WhatsNew.Action.none)

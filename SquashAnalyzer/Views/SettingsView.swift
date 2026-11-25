@@ -52,7 +52,8 @@ struct SettingsView: View {
                         if Features.shared.playerAccount {
                             SettingsRow(appText("Mijn account"), icon: "person.crop.circle", open: openPart == "account") { toggle("account") }
                             if openPart == "account" {
-                                SharedAccountSection(providers: AppleAccountSignIn.providers, appleReauthorize: AppleAccountSignIn.reauthorize)
+                                SharedAccountSection(providers: AppleAccountSignIn.providers, appleReauthorize: AppleAccountSignIn.reauthorize,
+                                                     leagueFetcher: LeagueTeamService.shared)
                                     .padding(.bottom, 16)
                             }
                             SettingsDivider()

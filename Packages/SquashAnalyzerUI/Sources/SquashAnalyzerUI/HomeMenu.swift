@@ -909,7 +909,7 @@ public struct AndroidHomeView: View {
                     welcomeSeen()
                     settingsOpensTeam = true
                     showingSettings = true
-                }) { welcomeSeen() }
+                }, leagueFetcher: leagueTeamFetcher) { welcomeSeen() }
             } else {
                 SharedOnboardingView(manual: UserManual.android, onTeamLink: {
                     welcomeSeen()
@@ -934,7 +934,10 @@ public struct AndroidHomeView: View {
                 }
             }
         }
-        .task { await offerTestDataCleanup() }
+        .task {
+            skipWhatsNewWhenSetUp()
+            await offerTestDataCleanup()
+        }
         .sheet(isPresented: Binding(get: { cardInbox.pending != nil },
                                     set: { if !$0 { cardInbox.pending = nil } })) {
             if let snapshot = cardInbox.pending {
@@ -977,6 +980,15 @@ public struct AndroidHomeView: View {
     /// "Nieuw in 4.0" once per test build: the version text holds the build ("Android 4.0 (2)")
     private var whatsNewNeeded: Bool {
         WhatsNew.shouldShow(seenVersion: whatsNewSeen, seenBuild: whatsNewBuildSeen, build: backup?.appVersion ?? "")
+    }
+
+    /// At the start only (not while the carousel is up and you are making the
+    /// account): signed in with Mijn team linked, "Nieuw in" has nothing to ask
+    private func skipWhatsNewWhenSetUp() {
+        guard whatsNewNeeded,
+              WhatsNew.alreadySetUp(signedIn: PlayerAccount.shared.isSignedIn, teamLinked: TeamMatchSupport.cachedTeam() != nil)
+        else { return }
+        welcomeSeen()
     }
 
     /// Both seen, whether the tour was chosen or skipped: neither comes back by itself

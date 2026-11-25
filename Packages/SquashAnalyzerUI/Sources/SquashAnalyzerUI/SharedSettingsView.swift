@@ -146,7 +146,7 @@ public struct SharedSettingsView: View {
                     // 4.0, behind the switch: nothing of it in a 3.x build
                     if Features.shared.playerAccount {
                         SettingsRow(loc("Mijn account"), icon: "person.crop.circle", open: openPart == "account") { toggle("account") }
-                        if openPart == "account" { SharedAccountSection().padding(.bottom, 16) }
+                        if openPart == "account" { SharedAccountSection(leagueFetcher: leagueFetcher).padding(.bottom, 16) }
                         SettingsDivider()
                     }
                     SettingsRow(loc("Mijn team"), icon: "person.2", open: openPart == "team") { toggle("team") }

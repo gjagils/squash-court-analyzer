@@ -1,6 +1,96 @@
 {
   "sourceLanguage": "nl",
   "strings": {
+    "Team ophalen…": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fetching team…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Team ophalen…"
+          }
+        }
+      }
+    },
+    "Mijn team is %@. Mooi!": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My team is %@. Nice!"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn team is %@. Mooi!"
+          }
+        }
+      }
+    },
+    "Je team is gekoppeld. Mooi!": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your team is linked. Nice!"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je team is gekoppeld. Mooi!"
+          }
+        }
+      }
+    },
+    "Eerst je team, dan kun je bij je account jezelf kiezen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First your team, then you can pick yourself in your account."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eerst je team, dan kun je bij je account jezelf kiezen."
+          }
+        }
+      }
+    },
+    "Speel je in een SBN-team? Zoek eerst je club, dan kun je hier jezelf kiezen.": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do you play in an SBN team? Find your club first, then you can pick yourself here."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speel je in een SBN-team? Zoek eerst je club, dan kun je hier jezelf kiezen."
+          }
+        }
+      }
+    },
     " · incompleet": {
       "extractionState": "manual",
       "generatesSymbol": false,

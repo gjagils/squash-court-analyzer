@@ -106,7 +106,8 @@ struct ContentView: View {
                                               set: { if !$0 { welcomeSeen() } })) {
             if whatsNewNeeded {
                 SharedWhatsNewView(manual: UserManual.iPhone, onTeamLink: openTeamLinkFromTour,
-                                   accountProviders: AppleAccountSignIn.providers) { welcomeSeen() }
+                                   accountProviders: AppleAccountSignIn.providers,
+                                   leagueFetcher: LeagueTeamService.shared) { welcomeSeen() }
             } else {
                 SharedOnboardingView(manual: UserManual.iPhone, onTeamLink: openTeamLinkFromTour) { welcomeSeen() }
             }
@@ -145,6 +146,7 @@ struct ContentView: View {
                 return
             }
             #endif
+            skipWhatsNewWhenSetUp()
             // A cold start may already be active before the scene phase changes
             Task { await AppUsage.shared.appOpened() }
             _ = try? BadgeAwarder(context: modelContext).grantPioneers()
@@ -295,6 +297,15 @@ struct ContentView: View {
 
     private var whatsNewNeeded: Bool {
         WhatsNew.shouldShow(seenVersion: whatsNewSeen, seenBuild: whatsNewBuildSeen, build: Self.appBuild)
+    }
+
+    /// At the start only (not while the carousel is up and you are making the
+    /// account): signed in with Mijn team linked, "Nieuw in" has nothing to ask
+    private func skipWhatsNewWhenSetUp() {
+        guard whatsNewNeeded,
+              WhatsNew.alreadySetUp(signedIn: PlayerAccount.shared.isSignedIn, teamLinked: TeamMatchSupport.cachedTeam() != nil)
+        else { return }
+        welcomeSeen()
     }
 
     /// Both seen, whether the tour was chosen or skipped: neither comes back by itself

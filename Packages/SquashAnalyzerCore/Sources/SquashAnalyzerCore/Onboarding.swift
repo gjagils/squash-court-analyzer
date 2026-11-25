@@ -68,20 +68,33 @@ public enum WhatsNew {
     /// What a page's button does
     public enum Action: Equatable, Sendable {
         case none
+        /// Zoek je club: links Mijn team, so the account can choose who you are
+        case findClub
         /// Opens Mijn account (signing in or making the account)
         case account
         /// Shares the app with the team (`AppLinks.teamShareText`)
         case shareWithTeam
     }
 
-    /// The page with "Account maken" and the one with "Deel met je team"
+    /// The page with "Zoek je club", the one with "Account maken" and the one
+    /// with "Deel met je team". The team comes first: the account lets you
+    /// choose yourself from Mijn team, so without a team there is nobody to
+    /// choose (Minnie via Gerd-Jan, 25 November 2026)
+    public static let teamPage = 0
     public static let accountPage = 1
     public static let sharePage = 2
+
+    /// Signed in and Mijn team linked: the steps are done, the carousel need
+    /// not show (Gerd-Jan, 25 November 2026)
+    public static func alreadySetUp(signedIn: Bool, teamLinked: Bool) -> Bool {
+        signedIn && teamLinked
+    }
 
     /// Under "Account maken": the reassurance, small (Gerd-Jan, 11 November 2026)
     public static var accountOptional: String { L10n.text("Liever niet? Dan werkt alles zoals je gewend bent.") }
 
     public static func action(onPage page: Int) -> Action {
+        if page == teamPage { return Action.findClub }
         if page == accountPage { return Action.account }
         if page == sharePage { return Action.shareWithTeam }
         return Action.none

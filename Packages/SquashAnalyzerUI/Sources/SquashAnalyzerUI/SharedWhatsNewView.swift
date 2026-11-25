@@ -13,17 +13,23 @@ public struct SharedWhatsNewView: View {
     let onTeamLink: (() -> Void)?
     /// Sign in with Apple on iOS; empty shows only e-mail
     let accountProviders: [AccountProviderSignIn]
+    /// "Zoek je club" on the first page and in Mijn account; nil hides it
+    let leagueFetcher: LeagueTeamFetcher?
     let onDone: () -> Void
 
     @State private var showingTour = false
     @State private var showingAccount = false
+    @State private var showingTeamLink = false
+    /// Read again when the team sheet closes
+    @State private var teamLinked = mijnTeamLinked()
     @State private var page = 0
 
     public init(manual: URL, onTeamLink: (() -> Void)? = nil, accountProviders: [AccountProviderSignIn] = [],
-                onDone: @escaping () -> Void) {
+                leagueFetcher: LeagueTeamFetcher? = nil, onDone: @escaping () -> Void) {
         self.manual = manual
         self.onTeamLink = onTeamLink
         self.accountProviders = accountProviders
+        self.leagueFetcher = leagueFetcher
         self.onDone = onDone
     }
 
@@ -107,16 +113,39 @@ public struct SharedWhatsNewView: View {
                 }
         )
         .sheet(isPresented: $showingAccount) {
-            WhatsNewAccountSheet(providers: accountProviders) { showingAccount = false }
+            WhatsNewAccountSheet(providers: accountProviders, leagueFetcher: leagueFetcher) { showingAccount = false }
+        }
+        .sheet(isPresented: $showingTeamLink, onDismiss: { teamLinked = mijnTeamLinked() }) {
+            if let leagueFetcher {
+                SharedTeamLinkSheet(fetcher: leagueFetcher) {
+                    showingTeamLink = false
+                    teamLinked = mijnTeamLinked()
+                }
+            }
         }
         .preferredColorScheme(SharedColors.preferredScheme)
     }
 
-    /// "Account maken" or "Deel met je team" under the page's text
+    /// "Zoek je club", "Account maken" or "Deel met je team" under the page's text
     @ViewBuilder
     private var pageAction: some View {
         let action = WhatsNew.action(onPage: page)
-        if action == WhatsNew.Action.account {
+        if action == WhatsNew.Action.findClub {
+            if teamLinked {
+                Text(teamLinkedText)
+                    .font(SharedFonts.system(15, weight: .semibold))
+                    .foregroundColor(SharedColors.support)
+                    .multilineTextAlignment(.center)
+            } else if leagueFetcher != nil {
+                ActionButton(loc("ZOEK JE CLUB"), icon: "magnifyingglass", style: .outlined, color: SharedColors.accent) {
+                    showingTeamLink = true
+                }
+                Text(loc("Eerst je team, dan kun je bij je account jezelf kiezen."))
+                    .font(SharedFonts.system(12))
+                    .foregroundColor(SharedColors.textMuted)
+                    .multilineTextAlignment(.center)
+            }
+        } else if action == WhatsNew.Action.account {
             if PlayerAccount.shared.profile != nil {
                 Text("Je hebt al een account. Mooi!", bundle: textBundle)
                     .font(SharedFonts.system(15, weight: .semibold))
@@ -137,6 +166,12 @@ public struct SharedWhatsNewView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(loc("Deel de app met je team"))
         }
+    }
+
+    /// The first page once Mijn team is linked
+    private var teamLinkedText: String {
+        if let name = mijnTeamName() { return loc("Mijn team is \(name). Mooi!") }
+        return loc("Je team is gekoppeld. Mooi!")
     }
 
     /// A page's symbol in the round brand badge, as in the tour
@@ -187,6 +222,7 @@ struct ShareButtonLabel: View {
 /// account, then Klaar brings you back
 struct WhatsNewAccountSheet: View {
     let providers: [AccountProviderSignIn]
+    var leagueFetcher: LeagueTeamFetcher? = nil
     let onClose: () -> Void
 
     var body: some View {
@@ -201,7 +237,7 @@ struct WhatsNewAccountSheet: View {
                         .font(SharedFonts.system(14, weight: .semibold))
                         .foregroundColor(SharedColors.accent)
                 }
-                SharedAccountSection(providers: providers)
+                SharedAccountSection(providers: providers, leagueFetcher: leagueFetcher)
             }
             .padding(20)
         }

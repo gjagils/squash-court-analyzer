@@ -69,6 +69,10 @@ public struct SharedAccountSection: View {
     @State private var consent = false
     @State private var confirmDelete = false
     @State private var confirmAvatar = false
+    // "Zoek je club" when Mijn team is not linked yet
+    @State private var showingTeamLink = false
+    /// Raised when the team sheet closes, so the team's players are read again
+    @State private var teamRefresh = 0
     // Correcting the name
     @State private var editingName = false
     @State private var newName = ""
@@ -82,9 +86,14 @@ public struct SharedAccountSection: View {
 
     private var account: PlayerAccount { PlayerAccount.shared }
 
-    public init(providers: [AccountProviderSignIn] = [], appleReauthorize: AccountProviderSignIn? = nil) {
+    /// "Zoek je club" when Mijn team is not linked; nil keeps the note alone
+    let leagueFetcher: LeagueTeamFetcher?
+
+    public init(providers: [AccountProviderSignIn] = [], appleReauthorize: AccountProviderSignIn? = nil,
+                leagueFetcher: LeagueTeamFetcher? = nil) {
         self.providers = providers
         self.appleReauthorize = appleReauthorize
+        self.leagueFetcher = leagueFetcher
     }
 
     public var body: some View {
@@ -114,6 +123,14 @@ public struct SharedAccountSection: View {
             }
         }
         .onAppear { refresh() }
+        .sheet(isPresented: $showingTeamLink) {
+            if let leagueFetcher {
+                SharedTeamLinkSheet(fetcher: leagueFetcher) {
+                    showingTeamLink = false
+                    teamRefresh += 1
+                }
+            }
+        }
         .alert(loc("Je foto delen?"), isPresented: $confirmAvatar) {
             Button(loc("Foto kiezen")) { pickAvatar() }
             Button(loc("Annuleren"), role: .cancel) { }
@@ -171,7 +188,23 @@ public struct SharedAccountSection: View {
 
     // MARK: Signed in, no account yet
 
-    private var teamPlayers: [LeaguePlayer] { PlayerAccount.mijnTeamPlayers() }
+    private var teamPlayers: [LeaguePlayer] {
+        _ = teamRefresh
+        return PlayerAccount.mijnTeamPlayers()
+    }
+
+    /// Without Mijn team there is nobody to choose: link the team here first
+    @ViewBuilder
+    private var findClubPart: some View {
+        if leagueFetcher != nil {
+            note(loc("Speel je in een SBN-team? Zoek eerst je club, dan kun je hier jezelf kiezen."))
+            ActionButton(loc("ZOEK JE CLUB"), icon: "magnifyingglass", style: .outlined, color: SharedColors.accent) {
+                showingTeamLink = true
+            }
+        } else {
+            note(loc("Speel je in een SBN-team? Kies je team bij Mijn team; dan kun je hier zeggen wie je bent."))
+        }
+    }
 
     private var makeAccountPart: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -198,6 +231,8 @@ public struct SharedAccountSection: View {
                     .buttonStyle(.plain)
                 }
                 note(loc("Of vul alleen je naam in:"))
+            } else {
+                findClubPart
             }
             field(loc("Je naam"), text: Binding(get: { name }, set: { value in
                 name = value
@@ -369,7 +404,7 @@ public struct SharedAccountSection: View {
                     .disabled(busy)
                 }
             } else {
-                note(loc("Speel je in een SBN-team? Kies je team bij Mijn team; dan kun je hier zeggen wie je bent."))
+                findClubPart
             }
         }
         .padding(.top, 6)

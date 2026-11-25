@@ -140,7 +140,7 @@ public struct SharedWhatsNewView: View {
                 ActionButton(loc("ZOEK JE CLUB"), icon: "magnifyingglass", style: .outlined, color: SharedColors.accent) {
                     showingTeamLink = true
                 }
-                Text(loc("Eerst je team, dan kun je bij je account jezelf kiezen."))
+                Text(loc("Je hebt nog geen team gekoppeld. Zoek eerst je club, kies dan je team. Daarna kies je bij je account jezelf."))
                     .font(SharedFonts.system(12))
                     .foregroundColor(SharedColors.textMuted)
                     .multilineTextAlignment(.center)

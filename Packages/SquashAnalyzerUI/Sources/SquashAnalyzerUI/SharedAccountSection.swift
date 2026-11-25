@@ -197,7 +197,7 @@ public struct SharedAccountSection: View {
     @ViewBuilder
     private var findClubPart: some View {
         if leagueFetcher != nil {
-            note(loc("Speel je in een SBN-team? Zoek eerst je club, dan kun je hier jezelf kiezen."))
+            note(loc("Je hebt nog geen team gekoppeld. Zoek eerst je club, kies dan je team. Daarna kun je hier jezelf kiezen."))
             ActionButton(loc("ZOEK JE CLUB"), icon: "magnifyingglass", style: .outlined, color: SharedColors.accent) {
                 showingTeamLink = true
             }

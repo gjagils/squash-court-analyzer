@@ -84,7 +84,7 @@ Update in de App Store of Google Play, of download hem gratis via de link in de 
 Eerste reactie: `Welke probeer jij als eerste? 👇`
 Verhaal (in de app): `story-1..7.png`, op slide 7 een linksticker "Download de app" naar squashanalyzer.com op de oranje tekst onderin.
 
-## Reel: 3 hoogtepunten van 4.0 (geplaatst 25 november 2026, eerste reactie nog niet)
+## Reel: 3 hoogtepunten van 4.0 (geplaatst 25 november 2026, https://www.instagram.com/reel/DgLJNxQBezw/)
 
 4.0 staat sinds 23 november 2026 in de App Store en Google Play. De reel (25 s) toont,
 op aanwijzing van Gerd-Jan (24 november): 1) een account maken, niet verplicht maar de
@@ -108,7 +108,7 @@ Gratis voor iPhone en Android, link in de bio.
 #squash #squashnederland #squashcompetitie #squashteam #squashapp
 ```
 
-Eerste reactie: `Welke badge wil jij als eerste? Teamspeler of Matchwinnaar? 👇`
+Eerste reactie (geplaatst): `Heb jij al een account gemaakt? 👇`
 
 ## Opnieuw maken
 

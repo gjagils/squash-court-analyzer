@@ -14,7 +14,7 @@ Hashtags: Instagram telt er maximaal 5 per post, zet ze onderaan het onderschrif
 | vr 30 okt | Carousel, je teamgenoot coachen (geplaatst, verhaal in de app) | `teamcoach/slide-1..5.png`, `story-1..5.png` |
 | di 3 nov | Carousel, Coachkaart (geplaatst) | `carousel-coachkaart/slide-1..7.png` |
 | ma 9 nov | Carousel, release 3.2 (geplaatst, verhaal in de app) | `release-3.2/slide-1..7.png`, `story-1..7.png` |
-| nog te plaatsen | Reel, 3 hoogtepunten van 4.0 (account, vanzelf in je app, meedoen; klaar, wacht op akkoord van Gerd-Jan) | `reel-release40/reel-release40.mp4` |
+| 25 nov 2026, geplaatst | Reel, 3 hoogtepunten van 4.0 (account, vanzelf in je app, meedoen) | `reel-release40/reel-release40.mp4` |
 
 ## di 27 okt · Carousel: Competitie-vrijdag (geplaatst)
 
@@ -84,7 +84,7 @@ Update in de App Store of Google Play, of download hem gratis via de link in de 
 Eerste reactie: `Welke probeer jij als eerste? 👇`
 Verhaal (in de app): `story-1..7.png`, op slide 7 een linksticker "Download de app" naar squashanalyzer.com op de oranje tekst onderin.
 
-## Reel: 3 hoogtepunten van 4.0 (klaar, niet gedeeld)
+## Reel: 3 hoogtepunten van 4.0 (geplaatst 25 november 2026, eerste reactie nog niet)
 
 4.0 staat sinds 23 november 2026 in de App Store en Google Play. De reel (25 s) toont,
 op aanwijzing van Gerd-Jan (24 november): 1) een account maken, niet verplicht maar de

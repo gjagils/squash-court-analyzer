@@ -15,6 +15,9 @@ Bronnen:
   (app-per-dag.json), Nederland apart van keurders en testtoestellen elders.
 - Accounts (4.0): aantal per dag uit de D1-database van de account-Worker, met een
   alleen-lezen query via wrangler (ingelogd op deze Mac) (accounts-per-dag.json).
+- Andere apps (Hoeveel is het?, Pibbles): App Store uit hetzelfde verkooprapport, het gebruik
+  uit hun eigen D1-databases (alleen lezen), Play over 28 dagen van de beginpagina van de
+  Play Console (--play-apps) (andere-apps-per-dag.json, play-apps-28-dagen.json).
 - Per week (zaterdag t/m vrijdag): de bronnen hierboven naast elkaar, voor de
   weekvergelijking op het dashboard (per-week.json).
 - Google Play en de opt-in-sessies van App Analytics: alleen in de browser te lezen,
@@ -30,6 +33,8 @@ hoeft niet opnieuw opgehaald, en de Play-cijfers groeien per run aan.
 play.json:  {"installaties": {"2026-10-28": 0, ...}, "nieuwe_apparaten": {...},
              "actieve_gebruikers": {...}, "geinstalleerd": {...},
              "samenvatting": {"installaties": 18, "eerst_geopend": 16, "maandelijks_actief": 6}}
+play-apps.json: {"squashanalyzer": {"status": "Productie", "installaties": 13, "eerst_geopend": 8,
+                 "maandelijks_actief": 11}, "hoeveelishet": {...}, "pibbles": {...}}  (null waar Play "-" toont)
 optin.json: {"sessies": {"2026-10-27": 1, ...}, "apparaten": {"2026-10-27": 1, ...}}
 Dagen zonder rij in Play zijn 0 zolang Play voor die dag al een installatiebasis geeft.
 """
@@ -57,6 +62,8 @@ FIRST_MONTH = "2026-03"           # eerste maand met App Store-downloads
 PLAY_START = dt.date(2026, 10, 2)  # eerste dag op Google Play
 LIVE_START = dt.date(2026, 10, 23)  # sinds de deploy van de teller
 APP_START = dt.date(2026, 10, 31)   # eerste dagmelding van de app (3.1)
+OTHER_APPS = {"6830735763": "hoeveelishet", "6838275317": "pibbles"}  # Apple-id: kolomnaam
+OTHER_START = dt.date(2026, 11, 4)    # Hoeveel is het? 1.0 in de App Store; tot dan alleen Squash Analyzer
 ACCOUNTS_START = dt.date(2026, 11, 1)  # accountdatabase aangemaakt (4.0)
 ACCOUNTS_DB = "squash-account"        # D1-database van de account-Worker, alleen gelezen
 REPO = pathlib.Path(os.environ.get("SQUASH_REPO", pathlib.Path.home() / "Github" / "squash-court-analyzer"))
@@ -95,7 +102,8 @@ def days_between(first, last):
 # ---------------------------------------------------------------- App Store
 
 def sales_report(frequency, date):
-    """Units per product type for one report, {} when Apple had no sales, None when not ready yet."""
+    """Units per app and product type for one report ({app id: {type: n}}), {} when Apple had
+    no sales, None when not ready yet. The vendor's report holds all apps of the account."""
     url = (f"{asc_api.BASE_URL}/v1/salesReports?filter[frequency]={frequency}&filter[reportType]=SALES"
            f"&filter[reportSubType]=SUMMARY&filter[vendorNumber]={VENDOR}&filter[reportDate]={date}"
            f"&filter[version]={'1_1' if frequency == 'DAILY' else '1_0'}")
@@ -112,24 +120,35 @@ def sales_report(frequency, date):
         raise
     units = {}
     for row in csv.DictReader(io.StringIO(text), delimiter="\t"):
+        app = units.setdefault(row["Apple Identifier"], {})
         kind = row["Product Type Identifier"].rstrip("F")
-        units[kind] = units.get(kind, 0) + int(row["Units"])
+        app[kind] = app.get(kind, 0) + int(row["Units"])
     return units
 
 
+def per_app_state(name, old_name, before):
+    """The reports per app; the first time made from the old Squash-only state, without what may hold other apps."""
+    stored = load(name, None)
+    if stored is None:
+        stored = {key: {APP_ID: units} for key, units in load(old_name, {}).items() if key < before}
+    return stored
+
+
 def appstore(out, today, optin):
-    daily = load("sales-daily.json", {})
+    every = per_app_state("sales-daily-apps.json", "sales-daily.json", OTHER_START.isoformat())
     first = today - dt.timedelta(days=APPSTORE_DAYS + 5)
     for day in days_between(first, today - dt.timedelta(days=1)):
         key = day.isoformat()
-        if key not in daily:
+        if key not in every:
             units = sales_report("DAILY", key)
             if units is None:
                 break  # later days are not ready either
-            daily[key] = units
+            every[key] = units
+    save("sales-daily-apps.json", every)
+    daily = {key: apps.get(APP_ID, {}) for key, apps in every.items()}
     save("sales-daily.json", daily)
 
-    monthly = load("sales-monthly.json", {})
+    all_monthly = per_app_state("sales-monthly-apps.json", "sales-monthly.json", OTHER_START.strftime("%Y-%m"))
     month = dt.date.fromisoformat(FIRST_MONTH + "-01")
     this_month = today.replace(day=1)
 
@@ -138,13 +157,15 @@ def appstore(out, today, optin):
 
     while month < this_month:
         key = month.strftime("%Y-%m")
-        if key not in monthly:
+        if key not in all_monthly:
             units = sales_report("MONTHLY", key)
             # Apple says "no sales" until the month report exists; the days show whether that is true
-            if units is None or (not units and any(days_of(key))):
+            if units is None or (not units and any(a for day, a in every.items() if day.startswith(key))):
                 break
-            monthly[key] = units
+            all_monthly[key] = units
         month = (month + dt.timedelta(days=32)).replace(day=1)
+    save("sales-monthly-apps.json", all_monthly)
+    monthly = {key: apps.get(APP_ID, {}) for key, apps in all_monthly.items()}
     save("sales-monthly.json", monthly)
 
     months = []
@@ -290,20 +311,68 @@ def wrangler():
         else ["npx", "--yes", "wrangler@4.156.0"]
 
 
-def accounts(out, today):
-    """Accounts made per day, read from the account database with a read-only query."""
-    sql = "SELECT date(created_at / 1000, 'unixepoch') AS dag, COUNT(*) AS n FROM accounts GROUP BY dag"
-    result = subprocess.run([*wrangler(), "d1", "execute", ACCOUNTS_DB, "--remote", "--json", "--command", sql],
+def d1(database, sql):
+    """The rows of a read-only query on a D1 database of this Cloudflare account."""
+    result = subprocess.run([*wrangler(), "d1", "execute", database, "--remote", "--json", "--command", sql],
                             cwd=STATE.parent, capture_output=True, text=True, timeout=180)
     if result.returncode:
         raise RuntimeError((result.stderr or result.stdout).strip()[-300:])
     text = result.stdout
-    made = {row["dag"]: row["n"] for row in json.loads(text[text.index("["):])[0]["results"]}
+    return json.loads(text[text.index("["):])[0]["results"]
+
+
+def accounts(out, today):
+    """Accounts made per day, read from the account database with a read-only query."""
+    sql = "SELECT date(created_at / 1000, 'unixepoch') AS dag, COUNT(*) AS n FROM accounts GROUP BY dag"
+    made = {row["dag"]: row["n"] for row in d1(ACCOUNTS_DB, sql)}
     rows, total = [], sum(n for day, n in made.items() if day < ACCOUNTS_START.isoformat())
     for day in days_between(ACCOUNTS_START, today):
         total += made.get(day.isoformat(), 0)
         rows.append({"dag": day.isoformat(), "nieuw": made.get(day.isoformat(), 0), "totaal": total})
     write(out, "accounts-per-dag.json", rows)
+    return today.isoformat()
+
+
+# ---------------------------------------------------------------- Other apps
+
+def other_apps(out, today, fresh_play):
+    """Hoeveel is het? and Pibbles side by side per day: App Store, and the use their own servers log."""
+    every = load("sales-daily-apps.json", {})
+    days = {day.isoformat(): {"dag": day.isoformat()} for day in days_between(OTHER_START, today)}
+    for key, row in days.items():
+        for app, name in OTHER_APPS.items():
+            units = every.get(key, {}).get(app, {}) if key in every else None
+            for col, kind in (("nieuw", "1"), ("opnieuw", "3"), ("updates", "7")):
+                row[f"{name}_{col}"] = units.get(kind, 0) if units is not None else None  # None: no report yet
+        row.update(hoeveelishet_hockey=0, hoeveelishet_voetbal=0, hoeveelishet_kijkers=0, hoeveelishet_volgers=0,
+                   pibbles_puzzels=0, pibbles_spelers=0)
+    # Hoeveel is het?: the usage events of its Worker ("at" in seconds)
+    sql = ("SELECT date(at, 'unixepoch') AS dag, name, sport, COUNT(*) AS n FROM events "
+           "WHERE name IN ('session_started', 'viewer_joined', 'follower_added') GROUP BY dag, name, sport")
+    for row in d1("hoeveelishet", sql):
+        day = days.get(row["dag"])
+        if not day:
+            continue
+        if row["name"] == "session_started" and row["sport"] in ("hockey", "voetbal"):
+            day[f"hoeveelishet_{row['sport']}"] += row["n"]
+        elif row["name"] == "viewer_joined":
+            day["hoeveelishet_kijkers"] += row["n"]
+        elif row["name"] == "follower_added":
+            day["hoeveelishet_volgers"] += row["n"]
+    # Pibbles: solved puzzles sent to the day's scoreboard, and from how many phones
+    sql = "SELECT date, COUNT(*) AS n, COUNT(DISTINCT device_id) AS spelers FROM scores GROUP BY date"
+    for row in d1("pibbles", sql):
+        day = days.get(row["date"])
+        if day:
+            day.update(pibbles_puzzels=row["n"], pibbles_spelers=row["spelers"])
+    write(out, "andere-apps-per-dag.json", [days[key] for key in sorted(days)])
+    # Google Play, 28 days per app, as the home page of the Play Console shows them
+    play28 = load("play-apps.json", {})
+    if fresh_play:
+        play28 = fresh_play
+        save("play-apps.json", play28)
+    names = {"squashanalyzer": "Squash Analyzer", "hoeveelishet": "Hoeveel is het?", "pibbles": "Pibbles"}
+    write(out, "play-apps-28-dagen.json", [{"app": names.get(name, name), **values} for name, values in play28.items()])
     return today.isoformat()
 
 
@@ -370,6 +439,7 @@ def main():
     parser.add_argument("--out", required=True, help="map voor de JSON-bestanden")
     parser.add_argument("--play", help="Play Console-cijfers uit de browser (JSON)")
     parser.add_argument("--optin", help="App Analytics opt-in-sessies uit de browser (JSON)")
+    parser.add_argument("--play-apps", help="28-dagencijfers per app van de Play Console-beginpagina (JSON)")
     args = parser.parse_args()
     out = pathlib.Path(os.path.expanduser(args.out))
     out.mkdir(parents=True, exist_ok=True)
@@ -387,6 +457,8 @@ def main():
                        ("live", lambda: live(out, today)),
                        ("play", lambda: play(out, json.loads(pathlib.Path(args.play).read_text()) if args.play else None)),
                        ("accounts", lambda: accounts(out, today)),
+                       ("andere_apps", lambda: other_apps(out, today, json.loads(pathlib.Path(args.play_apps).read_text())
+                                                          if args.play_apps else None)),
                        ("weken", lambda: weeks(out, today))]:
         try:
             report[name] = {"ok": True, "laatste_dag": step()}

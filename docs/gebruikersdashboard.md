@@ -23,6 +23,10 @@ gevraagd: elke dag om 8:00 bijwerken.
 | Live meekijken | `GET /api/stats` van de live-Worker | `STATS_KEY` uit `~/.squash-keys/stats-key.txt` |
 | App-gebruik (3.1 en later) | Dagmelding van de app via `GET /api/stats` (`appRows`), `app-per-dag.json` | Script; Nederland apart van keurders en testtoestellen elders |
 | Accounts (4.0) | D1-database `squash-account` van de account-Worker | Script, alleen-lezen query via wrangler (ingelogd op de Mac); de testdatabase telt niet mee |
+| Andere apps: App Store | Hetzelfde verkooprapport; het script splitst per app (Apple-id) | Script. Tot 26 november telde Squash Analyzer Hoeveel is het? mee |
+| Hoeveel is het?: gebruik | Tabel `events` in D1 `hoeveelishet` (gestarte wedstrijden, kijkpagina, volgers) | Script, alleen-lezen query via wrangler |
+| Pibbles: gebruik | Tabel `scores` in D1 `pibbles` (opgeloste puzzels, toestellen) | Script, alleen-lezen query via wrangler |
+| Google Play per app | Beginpagina van de Play Console, 28 dagen | Chrome, de taak geeft ze mee met `--play-apps` |
 | Week op week | De bronnen hierboven per week (za t/m vr), `per-week.json` | Script; een bron telt alleen in weken waarvan alle dagen binnen zijn |
 | Wat valt op | Drie tot zes zinnen over de verschillen, `wat-valt-op.json` | De geplande taak schrijft ze elke ochtend zelf, na het script |
 

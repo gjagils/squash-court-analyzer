@@ -12,9 +12,16 @@ SquashLevels-profielknop staat hieronder op de backlog, nog niet in een build.
 
 Geen nieuwe functies sinds build 7 behalve: een partij staat bij een teamgenoot in de lijst zodra hij begint ("bezig 7-5"), `WhatsNew.perBuild` uit, `scripts/ios_archive.py` (archief met Firebase-sleutel en controle), schermafbeeldingsscenario `team-match`, toestellentest-route voor 4.0.
 
-## Volgende build (na 4.1 build 1)
+## Volgende build (na 4.1 build 2)
 
 Nog niets.
+
+## 4.1 build 2 (26 november 2026, geüpload naar TestFlight en de Play-testtracks)
+
+- **Nieuw in 4.0 nog één keer voor wie geen team of geen account heeft (Gerd-Jan, 26 november 2026).**
+  `WhatsNew.currentVersion` gaat naar 5 (= 4.1), zodat ook wie de carrousel in 4.0 zag hem opnieuw krijgt, nu
+  met "Zoek je club". Ingelogd met een gekoppeld team slaat de app hem bij het opstarten over
+  (`WhatsNew.alreadySetUp`). De titel blijft "Nieuw in 4.0". Niet op een scherm bekeken.
 
 ## 4.1 build 1 (25 november 2026, geüpload naar TestFlight en de Play-testtracks)
 

@@ -1,0 +1,1 @@
+Build 2 voor de competitieronde van vrijdag. Heb je nog geen team of nog geen account, dan zie je Nieuw in 4.0 nog één keer, met drie stappen en de knop Zoek je club: eerst je club en je team, dan een account, dan je eigen naam kiezen. Ben je ingelogd met een team, dan slaat de app het over. Probeer vrijdag: lukt het een teamgenoot zonder hulp?

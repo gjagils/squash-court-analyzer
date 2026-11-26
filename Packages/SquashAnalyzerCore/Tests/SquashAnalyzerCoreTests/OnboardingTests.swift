@@ -45,6 +45,7 @@ final class OnboardingTests: XCTestCase {
         XCTAssertEqual(WhatsNew.action(onPage: WhatsNew.sharePage), WhatsNew.Action.shareWithTeam)
         XCTAssertEqual(WhatsNew.action(onPage: 3), WhatsNew.Action.none)
         XCTAssertTrue(WhatsNew.shouldShow(seenVersion: 3), "a 3.2 user sees it once")
+        XCTAssertTrue(WhatsNew.shouldShow(seenVersion: 4), "4.1: who saw it in 4.0 gets it once more, unless team and account are there")
     }
 
     func testWhatsNewComesBackWithEveryTestBuild() {

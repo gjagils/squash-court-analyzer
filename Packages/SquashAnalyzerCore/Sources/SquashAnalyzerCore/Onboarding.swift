@@ -61,8 +61,11 @@ public enum Onboarding {
 public enum WhatsNew {
     /// The what's-new version this device has seen (0 = none)
     public static let storageKey = "whatsNewVersion"
-    /// 1 = 3.0, 2 = 3.1, 3 = 3.2, 4 = 4.0; raise it with new pages for a later version
-    public static let currentVersion = 4
+    /// 1 = 3.0, 2 = 3.1, 3 = 3.2, 4 = 4.0, 5 = 4.1; raise it with new pages for a later version.
+    /// 4.1 shows the 4.0 carousel once more, now with "Zoek je club", to
+    /// everyone without a team or an account; who has both skips it at the
+    /// start (`alreadySetUp`; Gerd-Jan, 26 November 2026)
+    public static let currentVersion = 5
     public static var title: String { L10n.text("Nieuw in 4.0") }
 
     /// What a page's button does

@@ -14,7 +14,21 @@ Geen nieuwe functies sinds build 7 behalve: een partij staat bij een teamgenoot 
 
 ## Volgende build (na 4.1 build 2)
 
-Nog niets.
+Nog niets gebouwd. Open bevindingen uit de competitieronde van 27 november 2026, die Gerd-Jan op 28 november
+verwerkt voor 4.1:
+
+- **Teamwedstrijd van vandaag vanzelf aanmaken (Gerd-Jan, 27 november 2026).** Gerd-Jan verwachtte dat de app op
+  de wedstrijddag de wedstrijd uit het programma vanzelf als teamwedstrijd actief zou maken. Nu zet de app een
+  teamwedstrijd alleen vanzelf op de telefoon als een teamgenoot hem al heeft aangemaakt
+  (`TeamFinding.joinOwn`, elke minuut in `followOffers` in `SharedLeagueTeamViews.swift`); aanmaken gebeurt
+  alleen met de hand (`TeamFinding.makeVisible`, vanuit Competitie). Op 27 november stond er op de
+  accountserver geen enkele teamwedstrijd (`team_lives` leeg), terwijl het team 7 accounts heeft (team 113).
+  Voorstel: op de dag van een wedstrijd uit het programma maakt de eerste telefoon met een account en
+  Mijn team, die geen eigen teamwedstrijd voor die wedstrijd heeft en op de server geen teamgenoot vindt,
+  hem vanzelf aan met `makeVisible`; de anderen doen vanzelf mee. Twee telefoons tegelijk vangt de server al
+  op (`wasThereFirst`: de tweede doet mee en stopt de eigen). Nog te kiezen: vanaf wanneer (bij openen op de
+  wedstrijddag of pas een paar uur voor aanvang), niet opnieuw aanmaken als iemand hem bewust verwijderde
+  (net als `autoJoined`), en hoe de telefoon laat zien dat hij hem net heeft aangemaakt.
 
 ## 4.1 build 2 (26 november 2026, geüpload naar TestFlight en de Play-testtracks)
 

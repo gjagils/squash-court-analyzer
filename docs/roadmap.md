@@ -62,6 +62,7 @@ einduitslag als je live volgt. Die zit sinds 3.0 in de live-Worker (`scoreAlert`
 |---|---|
 | Spelersprofiel: twee spelers vergelijken, en AI Coach-advies over de trend (gekozen op 7 november 2026, naar 4.1 op 10 november 2026) | [wijzigingen](wijzigingen-builds.md) |
 | Vinkje Linkshandig bij een speler, zodat de focus Backhand en Voorhand de juiste kant van de baan toont (gekozen op 4 november 2026, naar 4.1 op 10 november 2026) | [bewuste keuzes](bewuste-keuzes.md) |
+| Teamwedstrijd van vandaag vanzelf aanmaken op de wedstrijddag, zodat het team er vanzelf aan meedoet (bevinding Gerd-Jan, 27 november 2026) | [wijzigingen](wijzigingen-builds.md) |
 
 ## Na 4.0
 

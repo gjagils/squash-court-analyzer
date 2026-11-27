@@ -75,7 +75,8 @@ object TeamScoreViews {
             return views
         }
         when {
-            pause -> showPause(views, card.pauseText)
+            // The stand the game ended on stays, under the heading "E3 · pauze" (27 November 2026)
+            pause && card.pausePoints(partij) == null -> showPause(views, card.pauseText)
             live -> {
                 views.setTextViewText(R.id.focus_points1, partij.score.first.toString())
                 views.setTextViewText(R.id.focus_points2, partij.score.second.toString())

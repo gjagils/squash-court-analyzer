@@ -80,8 +80,10 @@ struct TeamScorePartij: Codable, Hashable {
 enum TeamScoreRowMiddle: Equatable {
     /// "● 7–5": the points of the game under way
     case live(String)
-    /// "pauze": between two games
-    case pause
+    /// "pauze": between two games, with the points the last game ended on
+    /// ("9–11") while the push still has them (Gerd-Jan, 27 November 2026: the
+    /// stand should stay in view); nil once they are 0–0 again
+    case pause(String?)
     /// Decided: only the games boxes, or "w.o." / "opgave" between them
     case decided(String?)
     /// "–": not started, or no partij yet
@@ -182,7 +184,7 @@ extension TeamScoreAttributes.ContentState {
     func middle(_ slot: Int) -> TeamScoreRowMiddle {
         guard let partij = partij(slot) else { return .none }
         if partij.isDecided { return .decided(Self.endText(partij)) }
-        if partij.isPause { return .pause }
+        if partij.isPause { return .pause(pausePoints(partij)) }
         if partij.isLive { return .live(pointsText(partij)) }
         return .none
     }
@@ -220,6 +222,13 @@ extension TeamScoreAttributes.ContentState {
 
     /// "7–5"
     func pointsText(_ partij: TeamScorePartij) -> String { "\(partij.points(1))–\(partij.points(2))" }
+
+    /// In a pause: the points the last game ended on ("9–11"), nil when the
+    /// push has 0–0 (the next game set up, or a partij typed in by hand)
+    func pausePoints(_ partij: TeamScorePartij) -> String? {
+        guard partij.isPause, partij.points(1) + partij.points(2) > 0 else { return nil }
+        return pointsText(partij)
+    }
 
     /// The heading of the partij at the top: "E3 · bezig", "E3 · pauze", "E3 · inspelen", "Volgende partij · E3"
     func focusHeading(_ slot: Int) -> String {

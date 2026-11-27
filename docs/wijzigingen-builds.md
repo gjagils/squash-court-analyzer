@@ -14,29 +14,31 @@ Geen nieuwe functies sinds build 7 behalve: een partij staat bij een teamgenoot 
 
 ## Volgende build (na 4.1 build 2)
 
-Nog niets gebouwd. Open bevindingen uit de competitieronde van 27 november 2026, die Gerd-Jan op 28 november
-verwerkt voor 4.1:
+Bevindingen uit de competitieronde van 27 november 2026, op verzoek van Gerd-Jan dezelfde avond gebouwd:
 
 - **Teamwedstrijd van vandaag vanzelf aanmaken (Gerd-Jan, 27 november 2026).** Gerd-Jan verwachtte dat de app op
-  de wedstrijddag de wedstrijd uit het programma vanzelf als teamwedstrijd actief zou maken. Nu zet de app een
-  teamwedstrijd alleen vanzelf op de telefoon als een teamgenoot hem al heeft aangemaakt
-  (`TeamFinding.joinOwn`, elke minuut in `followOffers` in `SharedLeagueTeamViews.swift`); aanmaken gebeurt
-  alleen met de hand (`TeamFinding.makeVisible`, vanuit Competitie). Op 27 november stond er op de
-  accountserver geen enkele teamwedstrijd (`team_lives` leeg), terwijl het team 7 accounts heeft (team 113).
-  Voorstel: op de dag van een wedstrijd uit het programma maakt de eerste telefoon met een account en
-  Mijn team, die geen eigen teamwedstrijd voor die wedstrijd heeft en op de server geen teamgenoot vindt,
-  hem vanzelf aan met `makeVisible`; de anderen doen vanzelf mee. Twee telefoons tegelijk vangt de server al
-  op (`wasThereFirst`: de tweede doet mee en stopt de eigen). Nog te kiezen: vanaf wanneer (bij openen op de
-  wedstrijddag of pas een paar uur voor aanvang), niet opnieuw aanmaken als iemand hem bewust verwijderde
-  (net als `autoJoined`), en hoe de telefoon laat zien dat hij hem net heeft aangemaakt.
-- **Vergrendelscherm: bij pauze de gamestand blijven tonen (Gerd-Jan, 27 november 2026).** Valt het laatste punt
-  van een game, dan springt de teamstand op het vergrendelscherm meteen naar "pauze" en is de stand waarmee de
-  game eindigde niet meer te zien. In `TeamScoreActivityWidget.swift` vervangt "pauze" de punten: `centre`
-  (de lopende partij bovenaan) en `.pause` in de partijrij (`state.middle`, uit `TeamScoreAttributes.swift`).
-  Gerd-Jan ziet liever de stand, met "pauze" erboven of ernaast. Voorstel: in de pauze de eindstand van de
-  laatste game tonen (de laatste in `games`, bijvoorbeeld 11-7) met "pauze" klein erboven; de kop
-  ("E3 · pauze") blijft. Ook nakijken of de losse wedstrijd (`LiveScoreActivityWidget.swift`) en Android
-  hetzelfde doen.
+  de wedstrijddag de wedstrijd uit het programma vanzelf als teamwedstrijd actief zou maken; tot nu toe deed
+  de app alleen vanzelf mee als een teamgenoot hem al had aangemaakt (`TeamFinding.joinOwn`). Nu maakt
+  `TeamFinding.startToday` hem: van 2 uur vóór tot 3 uur na de aanvang (`autoStartBefore`/`autoStartAfter`),
+  zonder uitslag, met account en Mijn team, als deze telefoon nog geen teamwedstrijd voor die wedstrijd
+  heeft. Het gaat via `makeVisible`: heeft een teamgenoot er al een, dan doet de telefoon daaraan mee;
+  twee telefoons tegelijk vangt `wasThereFirst` op. Alleen voor het team (niet op het clubscherm), en de
+  teamstand gaat op het vergrendelscherm (`followJoined`). Hij draait in dezelfde ronde van elke minuut als
+  het vanzelf meedoen (beginscherm, `followOffers`) en bij het openen van Competitie (`loadOffers`), na
+  `joinOwn`. Eén keer per SBN-wedstrijd (`teamAutoStarted` in de instellingen): wie de teamwedstrijd
+  verwijdert, krijgt hem niet terug, en een eigen teamwedstrijd die al op de telefoon stond (ook een die
+  alleen voor jezelf is) blijft zoals hij is. Hoe je het merkt: de lopende teamwedstrijd staat op het
+  beginscherm en de stand op je vergrendelscherm; een aparte melding is er niet. Tests in
+  `TeamFindingTests` (drie nieuwe); niet op een telefoon geprobeerd.
+- **Vergrendelscherm: bij pauze de gamestand blijven tonen (Gerd-Jan, 27 november 2026).** Valt het laatste
+  punt van een game, dan sprong de teamstand op het vergrendelscherm naar "pauze" en was de stand weg. Nu
+  blijft de stand waarmee de game eindigde staan (bijvoorbeeld 9–11) zolang de push die heeft:
+  - iOS (`TeamScoreActivityWidget.swift`): bovenaan "pauze" klein boven de punten, in de partijrij "pauze"
+    boven de punten (`TeamScoreRowMiddle.pause(String?)`, `pausePoints` in `TeamScoreAttributes.swift`);
+  - Android (`TeamScore.kt`, `TeamScoreViews.kt`): bovenaan de punten onder de kop "E3 · pauze", in de
+    partijrij de punten in grijs.
+  Staat de volgende game al klaar (0–0), dan blijft het "pauze" zoals voorheen. De losse wedstrijd op het
+  vergrendelscherm hield de stand al in beeld (alleen een PAUZE-label). Niet op een telefoon bekeken.
 
 ## 4.1 build 2 (26 november 2026, geüpload naar TestFlight en de Play-testtracks)
 

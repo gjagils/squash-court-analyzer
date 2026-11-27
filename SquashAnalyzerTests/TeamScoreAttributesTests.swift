@@ -123,10 +123,16 @@ final class TeamScoreAttributesTests: XCTestCase {
     func testAPauseShowsPauzeAndNoServeDot() {
         let state = State(home: "A", away: "B", partijen: [partij(3, [1, 1], [9, 11], "between", server: 1)])
         XCTAssertEqual(state.focusHeading(3), "E3 · pauze")
-        XCTAssertEqual(state.middle(3), .pause)
+        XCTAssertEqual(state.middle(3), .pause("9–11"), "the stand the game ended on stays in view")
+        XCTAssertEqual(state.pausePoints(state.partij(3)!), "9–11")
         XCTAssertEqual(state.partij(3)?.isServing(1), false)
         XCTAssertEqual(state.islandStatus, "E3 pauze")
         XCTAssertEqual(state.tile(3), .live)
+
+        // The next game set up (0–0): only "pauze"
+        let next = State(home: "A", away: "B", partijen: [partij(3, [1, 2], [0, 0], "between")])
+        XCTAssertEqual(next.middle(3), .pause(nil))
+        XCTAssertNil(next.pausePoints(next.partij(3)!))
     }
 
     func testTwoCourtsAtOnce() {

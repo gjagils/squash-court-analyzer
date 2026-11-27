@@ -601,4 +601,84 @@ final class TeamFindingTests: XCTestCase {
         XCTAssertEqual(shared?.liveId, "keeslive2345")
         XCTAssertEqual(transport.count("POST", "/api/team"), 0, "no second live team match")
     }
+
+    // MARK: Made by itself on the match day (27 November 2026)
+
+    private func programme(score: String? = nil) -> [LeagueFixture] {
+        [LeagueFixture(id: fixture, date: day, home: "Squash City 2", away: "Bevo 3", score: score,
+                       url: URL(string: "https://www.squashbondnederland.nl\(fixture)")!)]
+    }
+
+    @MainActor
+    func testOnTheMatchEveningTheTeamMatchIsMadeByItselfOnce() async throws {
+        let transport = FakeFindingTransport()
+        let matches = store()
+        let defaults = UserDefaults(suiteName: "auto-start-\(UUID().uuidString)")!
+        let started = await TeamFinding.startToday(context: context(transport), fixtures: programme(), ownTeamName: "Squash City 2",
+                                                   store: matches, live: live(transport), defaults: defaults,
+                                                   now: day.addingTimeInterval(-3600.0))
+        XCTAssertEqual(started?.outcome, TeamFindingOutcome.started)
+        XCTAssertEqual(started?.match.liveId, "newlive23456")
+        XCTAssertTrue(started?.match.isTeamOnly == true, "for the team only, not on the club screen")
+        XCTAssertEqual(transport.count("PUT", "/me/team/lives"), 1, "registered, so teammates join it")
+        XCTAssertEqual(TeamFinding.autoStarted(in: defaults), [stored])
+        let saved = try await matches.loadAll()
+        XCTAssertEqual(saved.count, 1)
+        XCTAssertEqual(saved.first?.fixtureId, fixture)
+
+        // A minute later: not a second one
+        let again = await TeamFinding.startToday(context: context(transport), fixtures: programme(), ownTeamName: "Squash City 2",
+                                                 store: matches, live: live(transport), defaults: defaults, now: day)
+        XCTAssertNil(again)
+        XCTAssertEqual(transport.count("POST", "/api/team"), 1)
+
+        // Deleted here: not made again
+        try await matches.delete(id: saved[0].id)
+        let deleted = await TeamFinding.startToday(context: context(transport), fixtures: programme(), ownTeamName: "Squash City 2",
+                                                   store: matches, live: live(transport), defaults: defaults, now: day)
+        XCTAssertNil(deleted)
+        XCTAssertEqual(transport.count("POST", "/api/team"), 1)
+    }
+
+    @MainActor
+    func testATeamMatchIsOnlyMadeByItselfOnTheEveningWithoutAResultOrOneOnThisPhone() async throws {
+        let transport = FakeFindingTransport()
+        let defaults = UserDefaults(suiteName: "auto-start-\(UUID().uuidString)")!
+        let early = await TeamFinding.startToday(context: context(transport), fixtures: programme(), ownTeamName: "Squash City 2",
+                                                 store: store(), live: live(transport), defaults: defaults,
+                                                 now: day.addingTimeInterval(-3.0 * 3600.0))
+        XCTAssertNil(early, "three hours before the start: not yet")
+        let late = await TeamFinding.startToday(context: context(transport), fixtures: programme(), ownTeamName: "Squash City 2",
+                                                store: store(), live: live(transport), defaults: defaults,
+                                                now: day.addingTimeInterval(4.0 * 3600.0))
+        XCTAssertNil(late, "the evening is over")
+        let played = await TeamFinding.startToday(context: context(transport), fixtures: programme(score: "3-1"), ownTeamName: "Squash City 2",
+                                                  store: store(), live: live(transport), defaults: defaults, now: day)
+        XCTAssertNil(played, "a result is in")
+        XCTAssertEqual(transport.count("POST", "/api/team"), 0)
+        XCTAssertTrue(TeamFinding.autoStarted(in: defaults).isEmpty)
+
+        // An own team match on this phone (kept to itself): left alone and noted
+        let matches = store()
+        try await matches.save(ownMatch())
+        let own = await TeamFinding.startToday(context: context(transport), fixtures: programme(), ownTeamName: "Squash City 2",
+                                               store: matches, live: live(transport), defaults: defaults, now: day)
+        XCTAssertNil(own)
+        XCTAssertEqual(transport.count("POST", "/api/team"), 0)
+        XCTAssertEqual(TeamFinding.autoStarted(in: defaults), [stored], "deleting it later is not undone")
+    }
+
+    @MainActor
+    func testOnTheMatchEveningATeammatesTeamMatchIsJoinedInsteadOfMakingOne() async throws {
+        let transport = FakeFindingTransport()
+        transport.lives = "[" + transport.listing(fixture: stored, liveId: "keeslive2345", writeKey: "K33sK33sK33sK33sK33sK33s", own: true) + "]"
+        transport.roles["K33sK33sK33sK33sK33sK33s"] = "{\"role\":\"writer\"}"
+        let defaults = UserDefaults(suiteName: "auto-start-\(UUID().uuidString)")!
+        let started = await TeamFinding.startToday(context: context(transport), fixtures: programme(), ownTeamName: "Squash City 2",
+                                                   store: store(), live: live(transport), defaults: defaults, now: day)
+        XCTAssertEqual(started?.outcome, TeamFindingOutcome.joined("Kees"))
+        XCTAssertEqual(started?.match.liveId, "keeslive2345")
+        XCTAssertEqual(transport.count("POST", "/api/team"), 0, "no second live team match")
+        XCTAssertTrue(TeamFinding.autoJoined(in: defaults).contains("keeslive2345"))
+    }
 }

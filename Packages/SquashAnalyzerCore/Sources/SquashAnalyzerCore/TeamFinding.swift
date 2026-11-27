@@ -294,6 +294,81 @@ public enum TeamFinding {
         return TeamAutoJoin(joined: joined, offers: left)
     }
 
+    // MARK: Made by itself on the match day (Gerd-Jan, 27 November 2026)
+
+    /// The SBN matches (normalized fixtures) this phone made a team match for
+    /// by itself, had one for, or deleted one of, newest last: never made by
+    /// itself (again)
+    static let autoStartedKey = "teamAutoStarted"
+
+    /// From how long before the start until how long after it a team match is
+    /// made by itself: the evening, with time to arrive and warm up
+    public static let autoStartBefore: TimeInterval = 2.0 * 3600.0
+    public static let autoStartAfter: TimeInterval = 3.0 * 3600.0
+
+    public static func autoStarted(in defaults: UserDefaults = UserDefaults.standard) -> [String] {
+        var fixtures: [String] = []
+        for fixture in (defaults.string(forKey: autoStartedKey) ?? "").components(separatedBy: " ") where !fixture.isEmpty {
+            fixtures.append(fixture)
+        }
+        return fixtures
+    }
+
+    /// This SBN match never gets a team match by itself (again)
+    public static func noteStarted(_ fixtureId: String?, in defaults: UserDefaults = UserDefaults.standard) {
+        guard let fixture = normalizedFixture(fixtureId) else { return }
+        var noted = autoStarted(in: defaults)
+        if noted.contains(fixture) { return }
+        noted.append(fixture)
+        while noted.count > 40 { noted.remove(at: 0) }
+        defaults.set(noted.joined(separator: " "), forKey: autoStartedKey)
+    }
+
+    /// The match of the programme that gets a team match by itself now: in the
+    /// own league, no result yet, from `autoStartBefore` before its start to
+    /// `autoStartAfter` after it, not noted before and without a team match
+    /// on this phone. A match that has one is noted, so deleting that team
+    /// match later is not undone.
+    static func autoStartFixture(fixtures: [LeagueFixture], matches: [TeamMatch], context: TeamFindingContext,
+                                 defaults: UserDefaults, now: Date) -> LeagueFixture? {
+        let noted = autoStarted(in: defaults)
+        for fixture in fixtures {
+            guard let normalized = normalizedFixture(fixture.id), fixture.score == nil,
+                  league(of: normalized) == league(of: context.teamKey) else { continue }
+            let fromStart = now.timeIntervalSince(fixture.date)
+            if fromStart < -autoStartBefore || fromStart > autoStartAfter { continue }
+            if noted.contains(normalized) { continue }
+            if CompetitionOverview.match(for: fixture, in: matches, among: fixtures) != nil {
+                noteStarted(fixture.id, in: defaults)
+                continue
+            }
+            return fixture
+        }
+        return nil
+    }
+
+    /// "De teamwedstrijd van vandaag staat vanzelf klaar": on the evening of a
+    /// match of the programme the first phone of the team with an account
+    /// makes the team match (`makeVisible`, for the team only) when no
+    /// teammate has one; a teammate's is joined instead, and two phones at
+    /// the same moment end up on one (`wasThereFirst`). The other phones join
+    /// it by themselves (`joinOwn`). Once per SBN match: deleted here, it is
+    /// not made again. Nil when nothing was made or joined; without a
+    /// connection nothing is noted and the next round tries again.
+    public static func startToday(context: TeamFindingContext, fixtures: [LeagueFixture], ownTeamName: String,
+                                  store: any TeamMatchStore, live: TeamLive? = nil,
+                                  defaults: UserDefaults = UserDefaults.standard, now: Date = Date()) async -> TeamFindingResult? {
+        guard let all = try? await store.loadAll(),
+              let fixture = autoStartFixture(fixtures: fixtures, matches: all, context: context, defaults: defaults, now: now)
+        else { return nil }
+        let match = TeamMatch.from(fixture: fixture, ownTeam: ownTeamName)
+        guard let result = try? await makeVisible(match, context: context, store: store, live: live) else { return nil }
+        noteStarted(fixture.id, in: defaults)
+        if let liveId = result.match.liveId { noteJoined(liveId, in: defaults) }
+        TeamMatchSupport.noteChange()
+        return result
+    }
+
     // MARK: At the start of a match (Gerd-Jan, 21 November 2026)
 
     /// A team match from the programme that a match was just started for

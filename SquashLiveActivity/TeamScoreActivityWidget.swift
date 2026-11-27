@@ -271,7 +271,20 @@ struct TeamScoreFocusView: View {
 
     @ViewBuilder
     private var centre: some View {
-        if let partij, partij.isPause {
+        if let partij, partij.isPause, let points = state.pausePoints(partij) {
+            // The stand the game ended on stays, "pauze" small above it (Gerd-Jan, 27 November 2026)
+            VStack(spacing: 0) {
+                Text(widgetText("pauze"))
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundColor(LiveScoreColors.textSecondary)
+                Text(points)
+                    .font(.system(size: 34, weight: .heavy, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(LiveScoreColors.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+        } else if let partij, partij.isPause {
             Text(widgetText("pauze"))
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .foregroundColor(LiveScoreColors.textSecondary)
@@ -525,11 +538,26 @@ struct TeamScoreRow: View {
                 .foregroundColor(LiveScoreColors.textPrimary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-        case .pause:
-            Text(widgetText("pauze"))
-                .font(.system(size: boxSize - 1, weight: .semibold, design: .rounded))
-                .foregroundColor(LiveScoreColors.textSecondary)
-                .lineLimit(1)
+        case .pause(let points):
+            if let points {
+                VStack(spacing: 0) {
+                    Text(widgetText("pauze"))
+                        .font(.system(size: max(9, boxSize * 0.55), weight: .semibold, design: .rounded))
+                        .foregroundColor(LiveScoreColors.textSecondary)
+                        .lineLimit(1)
+                    Text(points)
+                        .font(.system(size: pointsSize ?? boxSize, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(LiveScoreColors.textPrimary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+            } else {
+                Text(widgetText("pauze"))
+                    .font(.system(size: boxSize - 1, weight: .semibold, design: .rounded))
+                    .foregroundColor(LiveScoreColors.textSecondary)
+                    .lineLimit(1)
+            }
         case .decided(let end):
             Text(end ?? "–")
                 .font(.system(size: boxSize - 1, weight: end == nil ? .bold : .semibold, design: .rounded))

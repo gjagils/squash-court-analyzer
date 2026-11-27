@@ -312,6 +312,12 @@ public struct SharedTeamMatchesView: View {
         let found = await TeamFinding.offers(context: context, fixtures: team?.fixtures ?? [], matches: matches)
         let result = await TeamFinding.joinOwn(found, ownTeamName: team?.name ?? "", fixtures: team?.fixtures ?? [], store: store)
         for joined in result.joined { await LiveFollow.shared.followJoined(joined) }
+        // On the match evening the team match is made by itself when nobody has one (27 November 2026)
+        if result.joined.isEmpty, let team,
+           let started = await TeamFinding.startToday(context: context, fixtures: team.fixtures, ownTeamName: team.name, store: store) {
+            await LiveFollow.shared.followJoined(started.match)
+            await load()
+        }
         if !result.joined.isEmpty { await load() }
         offers = result.offers
     }
@@ -1291,6 +1297,8 @@ public struct SharedTeamMatchView: View {
         }
         // Deleted here: never joined by itself again, whoever started it
         if let liveId = match.liveId { TeamFinding.noteJoined(liveId) }
+        // ...and its SBN match never gets a team match by itself again (27 November 2026)
+        TeamFinding.noteStarted(match.fixtureId)
         do {
             try await store.delete(id: match.id)
             // The home screen drops it at once, whatever screen it was opened from

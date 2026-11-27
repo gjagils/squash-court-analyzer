@@ -78,7 +78,8 @@ class TeamScoreCardTest {
         )))
         assertEquals("E1 pauze: Paul – Mark (1–1) (+1) · games 1–1", card.text)
         assertEquals("E1 pauze · E2 bezig 3–4 · 0 van 4 klaar", card.compactText)
-        assertEquals("pauze", card.rows[0].middle)
+        assertEquals("the stand the game ended on stays in view", "9–11", card.rows[0].middle)
+        assertTrue(card.rows[0].isPause)
         assertEquals("● E1", card.rows[0].label)
     }
 
@@ -158,7 +159,14 @@ class TeamScoreCardTest {
         val card = cardOf(TeamScore("A", "B", listOf(paused)))
         assertEquals("E3 · pauze", card.focusHeading(3))
         assertFalse(paused.isServing(1))
-        assertEquals("pauze", card.rows[2].middle)
+        assertEquals("9–11", card.rows[2].middle)
+        assertEquals("9–11", card.pausePoints(paused))
+
+        // The next game set up (0–0): only "pauze"
+        val next = TeamPartij(3, "Bas", "Tim", 5, 1 to 2, 0 to 0, "between")
+        val nextCard = cardOf(TeamScore("A", "B", listOf(next)))
+        assertEquals("pauze", nextCard.rows[2].middle)
+        assertNull(nextCard.pausePoints(next))
     }
 
     @Test fun twoCourtsAtOnceAreTwoRows() {

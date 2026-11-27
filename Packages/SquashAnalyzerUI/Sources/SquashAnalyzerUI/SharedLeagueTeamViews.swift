@@ -253,6 +253,12 @@ public struct SharedLeagueTeamCard: View {
                 let result = await TeamFinding.joinOwn(found, ownTeamName: team.name, fixtures: team.fixtures, store: store)
                 // Taking part puts the team stand on the lock screen (while "Je teamwedstrijd" is on)
                 for joined in result.joined { await LiveFollow.shared.followJoined(joined) }
+                // On the match evening the team match is made by itself when nobody of the
+                // team has one (Gerd-Jan, 27 November 2026); it shows as the running match
+                if result.joined.isEmpty,
+                   let started = await TeamFinding.startToday(context: context, fixtures: team.fixtures, ownTeamName: team.name, store: store) {
+                    await LiveFollow.shared.followJoined(started.match)
+                }
                 if offer != result.offers.first { offer = result.offers.first }
             } else if offer != nil {
                 offer = nil

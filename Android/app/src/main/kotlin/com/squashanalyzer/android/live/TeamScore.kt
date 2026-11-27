@@ -149,7 +149,7 @@ class TeamScoreCard(val score: TeamScore, context: Context) {
         val isLive: Boolean,
         /** 1 or 2 when decided with a winner: that box in the winner's colour */
         val winner: Int,
-        /** Between two games: `middle` says "pauze", grey */
+        /** Between two games: `middle` is the points the game ended on, or "pauze", grey */
         val isPause: Boolean = false,
     )
 
@@ -267,6 +267,14 @@ class TeamScoreCard(val score: TeamScore, context: Context) {
     /** "7–5" */
     fun pointsText(partij: TeamPartij): String = "${partij.score.first}–${partij.score.second}"
 
+    /**
+     * In a pause: the points the last game ended on ("9–11"), so the stand stays in
+     * view (Gerd-Jan, 27 November 2026); null when the push has 0–0 again (the next
+     * game set up, or a partij typed in by hand)
+     */
+    fun pausePoints(partij: TeamPartij): String? =
+        if (partij.isPause && partij.score.first + partij.score.second > 0) pointsText(partij) else null
+
     /** One of the four boxes E1-E4: `kind` 1 home won, 2 away won, 3 decided without winner, 4 under way, 0 not started */
     data class Tile(val slot: Int, val kind: Int, val text: String)
 
@@ -330,7 +338,7 @@ class TeamScoreCard(val score: TeamScore, context: Context) {
                 // Decided: the games boxes say it, so only "w.o." or "opgave" between them
                 val middle = when {
                     partij.isDecided -> endText(partij) ?: "–"
-                    partij.isPause -> pauseText
+                    partij.isPause -> pausePoints(partij) ?: pauseText
                     partij.isLive -> pointsText(partij)
                     else -> "–"
                 }

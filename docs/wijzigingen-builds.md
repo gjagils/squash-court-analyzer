@@ -29,6 +29,14 @@ verwerkt voor 4.1:
   op (`wasThereFirst`: de tweede doet mee en stopt de eigen). Nog te kiezen: vanaf wanneer (bij openen op de
   wedstrijddag of pas een paar uur voor aanvang), niet opnieuw aanmaken als iemand hem bewust verwijderde
   (net als `autoJoined`), en hoe de telefoon laat zien dat hij hem net heeft aangemaakt.
+- **Vergrendelscherm: bij pauze de gamestand blijven tonen (Gerd-Jan, 27 november 2026).** Valt het laatste punt
+  van een game, dan springt de teamstand op het vergrendelscherm meteen naar "pauze" en is de stand waarmee de
+  game eindigde niet meer te zien. In `TeamScoreActivityWidget.swift` vervangt "pauze" de punten: `centre`
+  (de lopende partij bovenaan) en `.pause` in de partijrij (`state.middle`, uit `TeamScoreAttributes.swift`).
+  Gerd-Jan ziet liever de stand, met "pauze" erboven of ernaast. Voorstel: in de pauze de eindstand van de
+  laatste game tonen (de laatste in `games`, bijvoorbeeld 11-7) met "pauze" klein erboven; de kop
+  ("E3 · pauze") blijft. Ook nakijken of de losse wedstrijd (`LiveScoreActivityWidget.swift`) en Android
+  hetzelfde doen.
 
 ## 4.1 build 2 (26 november 2026, geüpload naar TestFlight en de Play-testtracks)
 

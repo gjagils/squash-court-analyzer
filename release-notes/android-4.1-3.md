@@ -1,0 +1,1 @@
+Build 3, met twee bevindingen van vrijdag. Op de avond van een wedstrijd uit je programma maakt de app de teamwedstrijd zelf aan, vanaf twee uur voor de aanvang; de rest van het team doet vanzelf mee. Verwijder je hem, dan komt hij niet terug. Op je vergrendelscherm blijft na een game de stand staan (bijvoorbeeld 9-11) in plaats van alleen pauze.

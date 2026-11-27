@@ -638,6 +638,13 @@ final class TeamFindingTests: XCTestCase {
                                                    store: matches, live: live(transport), defaults: defaults, now: day)
         XCTAssertNil(deleted)
         XCTAssertEqual(transport.count("POST", "/api/team"), 1)
+
+        // A tester clears the list: made again
+        TeamFinding.clearAutoStarted(in: defaults)
+        let cleared = await TeamFinding.startToday(context: context(transport), fixtures: programme(), ownTeamName: "Squash City 2",
+                                                   store: matches, live: live(transport), defaults: defaults, now: day)
+        XCTAssertNotNil(cleared)
+        XCTAssertEqual(transport.count("POST", "/api/team"), 2)
     }
 
     @MainActor

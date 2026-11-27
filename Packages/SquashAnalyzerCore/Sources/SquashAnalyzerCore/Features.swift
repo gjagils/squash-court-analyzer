@@ -16,6 +16,10 @@ public final class Features: @unchecked Sendable {
     /// Off since 11 November 2026 (Gerd-Jan: nice, but nobody will use it); the
     /// code stays. Off means no screens and no calls.
     public var aiCoach = false
+    /// Tools for testing in Instellingen (Gerd-Jan, 27 November 2026): on in
+    /// debug builds and TestFlight builds (iOS) and debug builds (Android),
+    /// never in a store build
+    public var testerTools = false
 
     public init() {}
 

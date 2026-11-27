@@ -15,6 +15,8 @@ public struct ShareSettingsSection: View {
     @AppStorage(AppUsage.enabledKey) private var usageCounting = true
     @State private var showingInfo = false
     @State private var showingFollow = false
+    /// "Opnieuw vanzelf aanmaken" was tapped (testers)
+    @State private var autoStartCleared = false
     /// "Je eigen wedstrijd": the iPhone shows the match being scored on the lock screen
     private let showsOwnMatch: Bool
 
@@ -63,6 +65,26 @@ public struct ShareSettingsSection: View {
             SettingsDivider()
             group(loc("GEBRUIK"))
             row(loc("Anoniem gebruik tellen"), loc("Eén keer per dag, zonder naam of apparaat-ID"), isOn: $usageCounting)
+
+            if Features.shared.testerTools && Features.shared.playerAccount {
+                SettingsDivider()
+                group(loc("VOOR TESTERS"))
+                Button {
+                    TeamFinding.clearAutoStarted()
+                    autoStartCleared = true
+                } label: {
+                    HStack(spacing: 10) {
+                        labels(loc("Teamwedstrijd opnieuw vanzelf aanmaken"),
+                               autoStartCleared ? loc("Gewist: de app maakt hem weer vanzelf aan")
+                                   : loc("Ook voor wedstrijden waarvan je hem verwijderde"), enabled: true)
+                        Spacer(minLength: 0)
+                        AppSymbol(autoStartCleared ? "checkmark" : "arrow.counterclockwise", size: 14,
+                                  color: autoStartCleared ? SharedColors.support : SharedColors.accent)
+                    }
+                    .frame(minHeight: 44)
+                }
+                .buttonStyle(.plain)
+            }
 
             SettingsDivider()
             Button { showingInfo.toggle() } label: {

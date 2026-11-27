@@ -324,6 +324,12 @@ public enum TeamFinding {
         defaults.set(noted.joined(separator: " "), forKey: autoStartedKey)
     }
 
+    /// For testers (Instellingen, only with `Features.testerTools`): every SBN
+    /// match may get a team match by itself again
+    public static func clearAutoStarted(in defaults: UserDefaults = UserDefaults.standard) {
+        defaults.removeObject(forKey: autoStartedKey)
+    }
+
     /// The match of the programme that gets a team match by itself now: in the
     /// own league, no result yet, from `autoStartBefore` before its start to
     /// `autoStartAfter` after it, not noted before and without a team match

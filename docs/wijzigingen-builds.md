@@ -39,6 +39,11 @@ Bevindingen uit de competitieronde van 27 november 2026, op verzoek van Gerd-Jan
     partijrij de punten in grijs.
   Staat de volgende game al klaar (0–0), dan blijft het "pauze" zoals voorheen. De losse wedstrijd op het
   vergrendelscherm hield de stand al in beeld (alleen een PAUZE-label). Niet op een telefoon bekeken.
+- **Voor testers: vanzelf aanmaken opnieuw toestaan (Gerd-Jan, 27 november 2026, na build 3).** Gerd-Jan
+  verwijdert teamwedstrijden steeds om te testen. In Instellingen → Delen en meldingen staat onder VOOR TESTERS
+  de knop "Teamwedstrijd opnieuw vanzelf aanmaken" (`TeamFinding.clearAutoStarted`). Alleen met
+  `Features.testerTools`: iOS debug- en TestFlight-builds (sandbox-ontvangstbewijs), Android debug-builds;
+  nooit in de App Store of een Play-build. Nog in geen build.
 
 ## 4.1 build 2 (26 november 2026, geüpload naar TestFlight en de Play-testtracks)
 

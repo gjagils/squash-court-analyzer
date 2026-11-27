@@ -17,6 +17,12 @@ struct SquashAnalyzerApp: App {
         // the project since 4.0 build 1, which Info.plist passes on; an archive also needs
         // SQUASH_FIREBASE_API_KEY on the xcodebuild line (never in git)
         Features.shared.playerAccount = Features.isOn(Bundle.main.infoDictionary?["SquashPlayerAccount"] as? String)
+        // Tools for testers in Instellingen: debug and TestFlight builds, never the App Store
+        #if DEBUG
+        Features.shared.testerTools = true
+        #else
+        Features.shared.testerTools = Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        #endif
         if Features.shared.playerAccount {
             // The player account: its outgoing matches next to the team matches, the
             // refresh token and device key in the Keychain

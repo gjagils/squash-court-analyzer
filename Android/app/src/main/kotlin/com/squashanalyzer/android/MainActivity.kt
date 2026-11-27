@@ -180,6 +180,8 @@ class MainActivity : AppCompatActivity() {
         val aiCoach = if (Features.shared.aiCoach) AICoachContext(keyStore = KeystoreAPIKeyStore(this), client = AICoachClient(transport = HttpAICoachTransport())) else null
         // 4.0 behind a switch (docs/releaseplan-3x-4.0.md): -PsquashPlayerAccount=true
         Features.shared.playerAccount = BuildConfig.PLAYER_ACCOUNT
+        // Tools for testers in Instellingen: debug builds only, never a Play build
+        Features.shared.testerTools = BuildConfig.DEBUG
         if (Features.shared.playerAccount) {
             // The player account: its outgoing matches next to the team matches, the
             // refresh token and device key sealed with the Keystore

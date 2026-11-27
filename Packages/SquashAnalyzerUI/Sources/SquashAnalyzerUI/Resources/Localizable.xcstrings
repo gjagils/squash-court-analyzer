@@ -15714,6 +15714,78 @@
           }
         }
       }
+    },
+    "VOOR TESTERS": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FOR TESTERS"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VOOR TESTERS"
+          }
+        }
+      }
+    },
+    "Teamwedstrijd opnieuw vanzelf aanmaken": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create team match automatically again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teamwedstrijd opnieuw vanzelf aanmaken"
+          }
+        }
+      }
+    },
+    "Gewist: de app maakt hem weer vanzelf aan": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cleared: the app creates it automatically again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewist: de app maakt hem weer vanzelf aan"
+          }
+        }
+      }
+    },
+    "Ook voor wedstrijden waarvan je hem verwijderde": {
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also for matches where you deleted it"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ook voor wedstrijden waarvan je hem verwijderde"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

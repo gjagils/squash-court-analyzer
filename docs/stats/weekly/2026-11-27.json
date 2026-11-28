@@ -1,0 +1,38 @@
+{
+  "week_end": "2026-11-27",
+  "site": {
+    "requests": 20369,
+    "pageViews": 1152,
+    "uniques": 1600,
+    "days": 7
+  },
+  "live": {
+    "live": 8,
+    "team": 5,
+    "viewer-live": 4,
+    "viewer-team": 2,
+    "follower-live": 0,
+    "follower-team": 46,
+    "team-only": 7
+  },
+  "live_test": {
+    "live": 0,
+    "team": 0,
+    "viewer-live": 0,
+    "viewer-team": 0,
+    "follower-live": 0,
+    "follower-team": 0,
+    "team-only": 0
+  },
+  "app": {
+    "opens": 55,
+    "per_day": 7.9,
+    "first": 36,
+    "parts": {
+      "app-coach": 23,
+      "app-referee": 27,
+      "app-analysis": 24,
+      "app-competition": 19
+    }
+  }
+}
